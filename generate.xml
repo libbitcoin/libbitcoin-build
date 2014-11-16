@@ -1,0 +1,128 @@
+<?xml version = "1.0" ?>
+<generate script="generate.gsl" language="en-us">
+
+  <repository 
+    name="libbitcoin" 
+    nickname="bitcoin" 
+    namespace="bc" 
+    package="libbitcoin"
+    libraries="bitcoin"
+    flags="std=c++11"
+    version="2.7.0"
+    email="genjix@riseup.net"
+    description="Bitcoin Software Development Toolkit"
+    url="https://github.com/libbitcoin/libbitcoin" >
+    
+    <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+    <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+    <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+    <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
+    <option type="enable" name="shared" default="yes" inherited="true" define="BOOST_TEST_DYN_LINK" />
+    
+    <dependency name="boost" version="1.54" system="linux" />
+    <dependency name="boost" version="1.49" system="darwin" />
+    <dependency name="boost_date_time" />
+    <dependency name="boost_filesystem" />
+    <dependency name="boost_regex" />
+    <dependency name="boost_system" />
+    <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
+    <dependency name="rt" function="clock_gettime" system="linux" />
+    <dependency name="gmp" function="__gmpz_init" header="gmp.h" system="linux" />
+    <dependency name="gmp" function="__gmpz_init" header="gmp.h" libs="/opt/local/lib" includes="/opt/local/include" system="darwin" />
+    <dependency name="secp256k1" version="0.0.1" />
+    
+    <flag name="Wall" comment="Warn on all stuff." />
+    <flag name="Wextra" comment="Warn on extra stuff." />
+    <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
+    <flag name="Wno-missing-braces" comment="Conform to style." />
+    <flag name="Wno-deprecated-register" comment="Clean up Boost 1.54 headers (clang)." />
+    <flag name="Wno-unused-local-typedefs" comment="Clean up Boost 1.49 headers (gcc)." />
+    <flag name="Wno-unknown-warning-option" comment="Clean up on OSX (clang)." />
+    <flag name="fstack-protector" link="true" comment="Protect stack." />
+    <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
+    <flag name="fvisibility-inlines-hidden" comment="Hide inlines from extrnal libs." />
+    <flag name="fvisibility=internal" alternate="fvisibility=hidden" comment="Set visibility to internal or hidden." />
+
+    <template name="Makefile.am" />
+    <template name="libbitcoin.pc" />
+  </repository>
+  
+  <repository 
+    name="libbitcoin-blockchain" 
+    nickname="blockchain"
+    namespace="chain"
+    package="libbitcoin-blockchain"
+    libraries="bitcoin-blockchain"
+    flags="std=c++11"
+    version="2.0.0"
+    email="genjix@riseup.net"
+    description="Bitcoin Blockchain Implementation"
+    url="https://github.com/libbitcoin/libbitcoin-blockchain" >
+  </repository>
+  
+  <repository
+    name="libbitcoin-explorer"
+    nickname="explorer"
+    namespace="bx"
+    package="libbitcoin-explorer"
+    libraries="bitcoin-explorer"
+    flags="std=c++11"
+    version="2.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin Client Protocol Implementation"
+    url="https://github.com/libbitcoin/libbitcoin-explorer" >
+  </repository>
+  
+  <repository
+    name="libbitcoin-client"
+    nickname="client"
+    namespace="client"
+    package="libbitcoin-client"
+    libraries="bitcoin-client"
+    flags="std=c++11"
+    version="2.0.0"
+    email="mienkphi@gmail.com"
+    description="Bitcoin Command Line Tool"
+    url="https://github.com/libbitcoin/libbitcoin-client" >
+  </repository>
+  
+  <repository
+    name="libbitcoin-node"
+    nickname="node"
+    namespace="node"
+    package="libbitcoin-node"
+    libraries="bitcoin-node"
+    flags="std=c++11"
+    version="2.0.0"
+    email="mienkphi@gmail.com"
+    description="Bitcoin Full Node"
+    url="https://github.com/libbitcoin/libbitcoin-node" >
+  </repository>
+  
+  <repository
+    name="libbitcoin-protocol"
+    nickname="protocol"
+    namespace="protocol"
+    package="libbitcoin-protocol"
+    libraries="bitcoin-protocol"
+    flags="std=c++11"
+    version="2.0.0"
+    email="mienkphi@gmail.com"
+    description="Bitcoin Blockchain Query Privacy Protocol"
+    url="https://github.com/libbitcoin/libbitcoin-protocol" >
+  </repository>
+  
+  <repository
+    name="libbitcoin-server"
+    nickname="server"
+    namespace="server"
+    package="libbitcoin-server"
+    libraries="bitcoin-server"
+    flags="std=c++11"
+    version="3.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin Server Protocol Implementation"
+    url="https://github.com/libbitcoin/libbitcoin-server" >
+  </repository>
+  
+</generate>

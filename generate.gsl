@@ -1,0 +1,431 @@
+.#  Generate C++ libbitcoin installations (install, configure, pc).
+.#
+.#  This is a code generator built using the iMatix GSL code generation
+.#  language. See https://github.com/imatix/gsl for details.
+.#
+.##############################################################################
+.# Define common functions.
+.#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+.
+.function global.if_else(antecedent, consequent, alternate)
+.   return my.antecedent ?? my.consequent ? my.alternate
+.endfunction
+.
+.function global.if_else_empty(antecedent, consequent)
+.   return if_else(my.antecedent, my.consequent, "")
+.endfunction
+.
+.function global.is_empty(value)
+.   return ((my.value ? "") = "")
+.endfunction
+.
+.function global.is_true(value)
+.   return ((my.value ? "false") = "true")
+.endfunction
+.
+.function global.starts_with(text, prefix)
+.   return string.prefixed(my.text, my.prefix)
+.endfunction
+.
+.function global.trim_left(text)
+.   extracted = ""
+.   regexp.match("^ +(.*)$", my.text, extracted)
+.   return extracted ? ""
+.endfunction
+.
+.function global.show_define(define)
+.   return if_else_empty(!is_empty(my.define), " and define $(my.DEFINE:c)")
+.endfunction
+.
+.function global.show_output(name, function)
+.   return if_else_empty(!is_empty(my.function), " and output ${$(my.name:c)_LIBS}")
+.endfunction
+.
+.function global.show_system(system)
+.   return if_else_empty(!is_empty(my.system), " if on $(my.system:)")
+.endfunction
+.
+.function global.system_pattern(system)
+.   return if_else(is_empty(my.system), "*", "*$(my.system:)*")
+.endfunction
+.
+.# Define macros.
+.#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+.macro copyleft(name)
+# Copyright (c) 2011-2014 $(my.name:) developers (see COPYING).
+#
+#********* GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY ***********
+#
+.endmacro copyleft
+.
+.macro global.boilerplate()
+# Declare the required version of autoconf.
+AC_PREREQ([2.65])
+
+# Process command-line arguments and perform initialization and verification.
+AC_INIT([$(repository.package)], [$(repository.version)], [$(repository.email)])
+
+# Do compilation tests.
+AC_LANG(C++)
+
+# Specify the temporary directory for build tools.
+AC_CONFIG_AUX_DIR([build-aux])
+
+# Specify the directory of additional local Autoconf macros.
+AC_CONFIG_MACRO_DIR([m4])
+
+# Run macros for operation of generated Makefiles, enable non-recursive make.
+AM_INIT_AUTOMAKE([subdir-objects])
+
+# Enable C and Posix extensions that may be disabled on certain platforms.
+AC_USE_SYSTEM_EXTENSIONS
+
+# Enable the archiver.
+AM_PROG_AR
+
+# Initialize libtool.
+LT_INIT
+
+# Determine C++ compiler to use.
+AC_PROG_CXX
+
+# Enable shared libraries if available, and static if they don't conflict.
+AC_PROG_LIBTOOL
+
+# Declare using the GNU C library (glibc).
+AC_GNU_SOURCE
+
+# Compute the canonical host-system type variable host, including host_os.
+AC_CANONICAL_HOST
+
+# Check for baseline language coverage in the compiler for the C++11 standard.
+AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
+
+# Enable silent rules option.
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
+# Check for pkg-config.
+PKG_PROG_PKG_CONFIG
+
+# Declare environment variables that affect the build.
+#------------------------------------------------------------------------------
+AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
+AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
+AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
+
+.endmacro # global.boilerplate
+.
+.macro global.with(name, default, unprefixed, description, example,\
+    substitute, conditional)
+.   value = if_else_empty(!is_empty(my.example), "=$(my.example:)")
+.   symbol = if_else(is_true(my.unprefixed), "$(name:)", "with_$(name:)")
+.   out = if_else_empty(is_true(my.substitute), " and output ${$(my.name:c)}")
+.   cond = if_else_empty(is_true(my.conditional), " and declare $(SYMBOL:c)")
+# Implement --with-$(my.name:)$(out:)$(cond:).
+#------------------------------------------------------------------------------
+AC_MSG_CHECKING(--with-$(my.name:) option)
+AC_ARG_WITH([$(my.name:)],
+    AS_HELP_STRING([--with-$(my.name:)$(value:)],
+        [$(my.description:)]),
+    [$(symbol:c)=$withval],
+    [$(symbol:c)=$(my.default:)])
+AC_MSG_RESULT([$$(symbol:c)])
+.   if (is_true(substitute))
+AC_SUBST([$(symbol:c)])
+.   endif
+.   if (is_true(my.conditional))
+AM_CONDITIONAL([$(SYMBOL:c)], [test x$$(symbol:c) != xno])
+.   endif
+
+.endmacro # global.with
+.
+.macro global.enable(name, default, unprefixed, description, define, inherited)
+.implement = if_else(is_true(inherited), "Inherit", "Implement")
+# $(implement:) --enable-$(my.name:) option$(show_define(my.define)).
+#------------------------------------------------------------------------------
+.   if ((my.default <> "yes") & (my.default <> "no"))
+.       abort "Invalid repository.option.enable value: $(my.default:)."
+.   endif
+.   symbol = if_else(is_true(my.unprefixed), "$(name:)", "enable_$(name:)")
+.   if (!is_true(my.inherited))
+AC_MSG_CHECKING(--enable-$(my.name:) option)
+AC_ARG_ENABLE([$(my.name:)],
+    AS_HELP_STRING([--enable-$(my.name:)],
+        [$(my.description:)]),
+    [$(symbol:c)=$enableval],
+    [$(symbol:c)=$(my.default:)])
+AC_MSG_RESULT([$$(symbol:c)])
+.   endif
+.   if (!is_empty(my.define))
+AS_IF([test x$$(symbol:c) != xno], AC_DEFINE([$(my.DEFINE:c)]))
+.   endif
+
+.endmacro # global.enable
+.
+.macro global.check_package(name, version)
+# Require $(my.name:) of at least version $(my.version:) and output ${$(my.name:)}.
+#------------------------------------------------------------------------------
+PKG_CHECK_MODULES([$(my.name:)], [lib$(my.name:) >= $(my.version:)])
+
+.endmacro # global.check_package
+.
+.macro global.check_boost(version, system)
+# Require Boost of at least version $(my.version:)$(show_system(my.system)).
+#------------------------------------------------------------------------------
+AS_CASE([${host_os}], [$(system_pattern(my.system))],
+    AX_BOOST_BASE([$(my.version:)], [], [AC_MSG_ERROR(
+        [Boost $(my.version:) or later is required but was not found.])]))
+
+.endmacro # global.check_boost
+.
+.macro global.check_boost_lib(name, with, enable)
+.test = if_else(is_empty(my.with), if_else_empty(!is_empty(my.enable),\
+    "enable_$(my.enable:)"), "with_$(my.with:)")
+.if (is_empty(test))
+AX_$(my.NAME:c)
+.else
+AS_IF([test x$$(test:) != xno], [AX_$(my.NAME:c)])
+.endif
+
+.endmacro # global.check_boost_lib
+.
+.macro global.check_lib(name, header, function, libs, includes, system)
+# Require $(my.name:c)$(show_system(my.system))$(show_output(my.name, my.function)).
+#------------------------------------------------------------------------------
+.pattern = "$(system_pattern(my.system))"
+.
+.   if (!is_empty(my.includes))
+AS_CASE([${host_os}], [$(pattern)], 
+    [CPPFLAGS="$CPPFLAGS -I/$(my.includes:)"])
+.   endif
+.
+.   if (!is_empty(my.header))
+AS_CASE([${host_os}], [$(pattern)], 
+    AC_CHECK_HEADER([$(my.header:)], [],
+        [AC_MSG_ERROR([$(my.name:) header is required but was not found.])],-)
+.   endif
+.
+.   if (!is_empty(my.libs))
+AS_CASE([${host_os}], [$(pattern)], 
+    [LDFLAGS="$LDFLAGS -L$(my.libs:)"])
+.   endif
+.
+.   if (!is_empty(my.function))
+AS_CASE([${host_os}], [$(pattern)], 
+    AC_CHECK_LIB([$(my.name:)],[$(my.function:)],
+        [AC_SUBST([$(my.name:c)_LIBS], [-l$(my.name:)])],
+        [AC_SUBST([$(my.name:c)_LIBS], [])
+            AC_MSG_ERROR([$(my.name:) library is required but was not found.])])
+.   endif
+
+.endmacro # global.check_lib
+.
+.macro global.flag(name, comment, alternate, link)
+# $(my.comment:)
+#------------------------------------------------------------------------------
+.   if (is_empty(my.alternate) & !is_true(my.link))
+AX_CHECK_COMPILE_FLAG([-$(my.name:)],
+    [CXXFLAGS="$CXXFLAGS -$(my.name:)"])
+
+.   endif
+.
+.   if (!is_empty(my.alternate) & !is_true(my.link))
+AX_CHECK_COMPILE_FLAG([-$(my.name:)],
+    [CXXFLAGS="$CXXFLAGS -$(my.name:)"],
+    AX_CHECK_COMPILE_FLAG([-$(my.alternate:)],
+        [CXXFLAGS="$CXXFLAGS -$(my.alternate:)"]))
+
+.   endif
+.
+.   if (is_empty(my.alternate) & is_true(my.link))
+AX_CHECK_COMPILE_FLAG([-$(my.name:)],
+    [AX_CHECK_LINK_FLAG([-$(my.name:)],
+        [CXXFLAGS="$CXXFLAGS -$(my.name:)])])
+
+.   endif
+.
+.   if (!is_empty(my.alternate) & is_true(my.link))
+.       abort "Invalid repository.flag attribute combination: alternate + link."
+.   endif
+.endmacro # global.flag
+.
+.macro global.output_value(name, value)
+# Output ${$(my.name:)}
+#------------------------------------------------------------------------------
+AC_SUBST([$(my.name:)], [$(trim_left(my.value))])
+
+.endmacro # global.output_value
+.
+.macro global.output_files(files)
+AC_CONFIG_FILES([$(trim_left(my.files))])
+AC_OUTPUT
+.endmacro # global.output_files
+.#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+.# Generate files.
+.##############################################################################
+.for repository by nickname
+.echo "Generating $(repository.name:)/configure.ac..."
+.output "$(repository.name:)/configure.ac"
+.copyleft(repository.name)
+
+# Standard declarations.
+#==============================================================================
+.boilerplate()
+.
+# Process options.
+#==============================================================================
+.for repository.option
+.   if (option.type = "with")
+.       with(option.name, option.default, option.unprefixed,\
+            option.description, option.example, option.substitute,\
+            option.conditional)
+.   elsif (option.type = "enable")
+.       enable(option.name, option.default, option.unprefixed,\
+            option.description, option.define, option.inherited)
+.   else
+.       abort "Invalid repository.option type attribute value: $(option.type:)."
+.   endif
+.endfor option
+.
+# Check dependencies.
+#==============================================================================
+.boost_libs=""
+.for repository.dependency
+.   if (dependency.name = "boost")
+.       check_boost(dependency.version, dependency.system)
+.   elsif (starts_with(dependency.name, "boost_"))
+.       check_boost_lib(dependency.name, dependency.with, dependency.enable)
+.       if (!is_true(dependency.unpublished))
+.           boost_libs="$(boost_libs:) -l$(dependency.name:c)"
+.       endif
+.   elsif (!is_empty(dependency.version))
+.       check_package(dependency.name, dependency.version)
+.   else
+.       check_lib(dependency.name, dependency.header, dependency.function,\
+            dependency.libs, dependency.includes, dependency.system)
+.   endif
+.endfor dependency
+.
+.if (!is_empty(boost_libs))
+.   output_value("boost_LIBS", boost_libs)
+.endif
+.
+# Set flags.
+#==============================================================================
+.for repository.flag
+.   flag(flag.name, flag.comment,flag. alternate, flag.link)
+.endfor flag
+.
+# Process templates.
+#==============================================================================
+.files=""
+.for repository.template
+.   files="$(files:) $(name:)"
+.endfor template
+.output_files(files)
+.
+.endfor repository
+.##############################################################################
+.for repository by nickname
+.echo "Generating $(repository.name:)/install-$(repository.nickname:).sh..."
+.output "$(repository.name:)/install-$(repository.nickname:).sh"
+#!/bin/bash
+.copyleft(repository.name)
+.
+# Script to build and install $(repository.name).
+#
+# Script options:
+.if (is_true(repository.gmp))
+# --build-gmp              Builds GMP library.
+.endif
+.if (is_true(repository.boost))
+# --build-boost            Builds Boost libraries.
+.endif
+# --build-dir=<path>       Location of downloaded and intermediate files.
+# --prefix=<absolute-path> Library install location (defaults to /usr/local).
+# --disable-shared         Disables shared library builds.
+# --disable-static         Disables static library builds.
+#
+# Verified on Ubuntu 14.04, requires gcc-4.8 or newer.
+# Verified on OSX 10.10, using MacPorts and Homebrew repositories, requires
+# Apple LLVM version 6.0 (clang-600.0.54) (based on LLVM 3.5svn) or newer.
+# This script does not like spaces in the --prefix or --build-dir, sorry.
+# Values (e.g. yes|no) in the boolean options are not supported by the script.
+# All command line options are passed to 'configure' of each repository, with
+# the exception of the --build-<item> options, which are for the script only.
+# Depending on the caller's permission to the --prefix or --build-dir
+# directory, the script may need to be sudo'd.
+.endfor repository
+.##############################################################################
+.for repository by nickname
+.echo "Generating $(repository.name:)/$(repository.package:).pc.in..."
+.output "$(repository.name:)/$(repository.package:).pc.in"
+.copyleft(repository.name)
+.
+.function global.split(tokens, delimiter)
+.   return my.tokens
+.endfunction
+.
+.function global.format_all(tokens, specification)
+.# TODO: split tokens into array, format each, concatenate to string.
+.   return my.tokens
+.endfunction
+.
+.cflags = format_all(repository.flags, "-%1")
+.libs = format_all(repository.libraries, "-l%1")
+.
+.# versioned dependencies not boost, from ac generator
+.pkgs = format_all("secp256k1 >= 0.0.1", "lib%1")
+.
+.# _LIBS defined by ac generator
+.subs = format_all("boost_LIBS gmp_LIBS rt_LIBS", "@%1@")
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: $(repository.package:)
+Description: $(repository.description:)
+URL: $(repository.url:)
+Version: @PACKAGE_VERSION@
+
+# Our dependencies that publish package configuration.
+Requires: $(pkgs:)
+
+# Our own include directory and any other compiler flags we require.
+Cflags: -I${includedir} $(cflags:)
+
+# Our own lib and any we require that do not publish package configuration.
+Libs: -L${libdir} $(libs:) $(subs:)
+.endfor repository
+.##############################################################################
+.for repository by nickname
+.echo "Generating $(repository.name:)/travis.yml..."
+.output "$(repository.name:)/travis.yml"
+.copyleft(repository.name)
+
+language:
+    - cpp
+
+compiler:
+    - gcc
+
+before_install:
+
+    # Set package repository.
+    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+    # Update the system.
+    - sudo apt-get -qq update
+
+    # Install GCC 4.8 (for C++11 support).
+    - sudo apt-get -qq install g++-4.8
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
+
+script:
+
+    # Download and build all dependencies and libbitcoin.
+    - sudo ./install-$(repository.nickname:c).sh CXXFLAGS="-Os -s" --disable-shared --enable-static --build-gmp --build-boost
+.endfor repository
+.##############################################################################
