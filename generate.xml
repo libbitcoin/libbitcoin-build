@@ -1,17 +1,12 @@
 <?xml version = "1.0" ?>
 <generate script="generate.gsl" language="en-us">
 
-  <repository 
-    name="libbitcoin" 
-    nickname="bitcoin" 
-    namespace="bc" 
-    package="libbitcoin"
-    libraries="bitcoin"
-    flags="std=c++11"
-    version="2.7.0"
-    email="genjix@riseup.net"
-    description="Bitcoin Software Development Toolkit"
-    url="https://github.com/libbitcoin/libbitcoin" >
+  <repository name="libbitcoin" version="2.7.0" email="genjix@riseup.net" >
+
+    <package name="libbitcoin" description="Bitcoin Software Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
+      <cflag value="std=c++11" />
+      <output name="bitcoin" />
+    </package>
     
     <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
     <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
@@ -42,12 +37,10 @@
     <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
     <flag name="fvisibility-inlines-hidden" comment="Hide inlines from extrnal libs." />
     <flag name="fvisibility=internal" alternate="fvisibility=hidden" comment="Set visibility to internal or hidden." />
-
-    <template name="Makefile.am" />
-    <template name="libbitcoin.pc" />
+    
   </repository>
   
-  <repository 
+  <repositoryX 
     name="libbitcoin-blockchain" 
     nickname="blockchain"
     namespace="chain"
@@ -58,9 +51,9 @@
     email="genjix@riseup.net"
     description="Bitcoin Blockchain Implementation"
     url="https://github.com/libbitcoin/libbitcoin-blockchain" >
-  </repository>
+  </repositoryX>
   
-  <repository
+  <repositoryX
     name="libbitcoin-explorer"
     nickname="explorer"
     namespace="bx"
@@ -71,9 +64,9 @@
     email="eric@voskuil.org"
     description="Bitcoin Client Protocol Implementation"
     url="https://github.com/libbitcoin/libbitcoin-explorer" >
-  </repository>
+  </repositoryX>
   
-  <repository
+  <repositoryX
     name="libbitcoin-client"
     nickname="client"
     namespace="client"
@@ -84,9 +77,9 @@
     email="mienkphi@gmail.com"
     description="Bitcoin Command Line Tool"
     url="https://github.com/libbitcoin/libbitcoin-client" >
-  </repository>
+  </repositoryX>
   
-  <repository
+  <repositoryX
     name="libbitcoin-node"
     nickname="node"
     namespace="node"
@@ -97,9 +90,9 @@
     email="mienkphi@gmail.com"
     description="Bitcoin Full Node"
     url="https://github.com/libbitcoin/libbitcoin-node" >
-  </repository>
+  </repositoryX>
   
-  <repository
+  <repositoryX
     name="libbitcoin-protocol"
     nickname="protocol"
     namespace="protocol"
@@ -110,9 +103,9 @@
     email="mienkphi@gmail.com"
     description="Bitcoin Blockchain Query Privacy Protocol"
     url="https://github.com/libbitcoin/libbitcoin-protocol" >
-  </repository>
+  </repositoryX>
   
-  <repository
+  <repositoryX
     name="libbitcoin-server"
     nickname="server"
     namespace="server"
@@ -123,6 +116,6 @@
     email="eric@voskuil.org"
     description="Bitcoin Server Protocol Implementation"
     url="https://github.com/libbitcoin/libbitcoin-server" >
-  </repository>
+  </repositoryX>
   
 </generate>

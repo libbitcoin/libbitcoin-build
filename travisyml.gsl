@@ -1,0 +1,39 @@
+.##############################################################################
+.#
+.#  GSL generate libbitcoin travis.yml.
+.#
+.#  This is a code generator built using the iMatix GSL code generation
+.#  language. See https://github.com/imatix/gsl for details.
+.#
+.##############################################################################
+.# Generation
+.##############################################################################
+.for repository by name as repo
+.echo "Generating $(repo.name:)/travis.yml..."
+.output "$(repo.name:)/travis.yml"
+.copyleft(repo.name)
+
+language:
+    - cpp
+
+compiler:
+    - gcc
+
+before_install:
+
+    # Set package repository.
+    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+    # Update the system.
+    - sudo apt-get -qq update
+
+    # Install GCC 4.8 (for C++11 support).
+    - sudo apt-get -qq install g++-4.8
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
+
+script:
+
+    # Download and build $(repo.name:) and all dependencies.
+    - sudo ./install.sh CXXFLAGS="-Os -s" --disable-shared --enable-static --build-gmp --build-boost
+.endfor repo
+.##############################################################################

@@ -1,0 +1,86 @@
+.##############################################################################
+.#
+.#  GSL generate libbitcoin.pc.in.
+.#
+.#  This is a code generator built using the iMatix GSL code generation
+.#  language. See https://github.com/imatix/gsl for details.
+.#
+.##############################################################################
+.# Functions
+.##############################################################################
+.template 0
+
+function format_boost_libs()
+    return defined(repo->dependency(is_boost_lib(name))) ?? "@boost_LIBS@" ? ""
+endfunction
+
+function format_compiler_flags()
+    define compiler_flags = ""
+    for repo->package.cflag as C
+        compiler_flags = "$(compiler_flags:) -$(C.value:)"
+    endfor C
+    return trim_left(compiler_flags)
+endfunction
+
+function format_output_libs()
+    define output_libs = ""
+    for repo->package.output as O
+        output_libs = "$(output_libs:) -l$(O.name:)"
+    endfor O
+    return trim_left(output_libs)
+endfunction
+
+function format_packages()
+    define packages = ""
+    for repo.dependency as D where is_package_lib(D.name, D.version)
+        packages = "$(packages:) lib$(D.name:) >= $(D.version:)"
+    endfor D
+    return trim_left(packages)
+endfunction
+
+function format_unpackaged_libs()
+    define unpackaged_lib = ""
+    define unpackaged_libs = ""
+    define last_unpackaged_lib = ""
+    for repo.dependency as D where is_unpackaged_lib(D.name, D.function)
+        unpackaged_lib = "@$(D.name:)_LIBS@"
+        # GSL Bug? locate() and locate_last() appear to be broken.
+        #if (!string.locate(unpackaged_libs, unpackaged_lib))
+        # HACK, only works if siblings are adjacent!
+        if (last_unpackaged_lib <> unpackaged_lib)
+            last_unpackaged_lib = unpackaged_lib
+            unpackaged_libs = "$(unpackaged_libs:) $(unpackaged_lib:)"
+        endif
+    endfor D
+    return trim_left(unpackaged_libs)
+endfunction
+
+.endtemplate
+.##############################################################################
+.# Generation
+.##############################################################################
+.for repository by name as repo
+.echo "Generating $(repo.name:)/$(repo->package.name:).pc.in..."
+.output "$(repo.name:)/$(repo->package.name:).pc.in"
+.copyleft(repo.name)
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: $(repo->package.name:)
+Description: $(repo->package.description:)
+URL: $(repo->package.url:)
+Version: @PACKAGE_VERSION@
+
+# Our dependencies that publish package configuration.
+Requires: $(format_packages())
+
+# Our own include directory and any other compiler flags we require.
+Cflags: -I${includedir} $(format_compiler_flags())
+
+# Our own lib and any we require that do not publish package configuration.
+Libs: -L${libdir} $(format_output_libs()) $(format_boost_libs()) $(format_unpackaged_libs())
+.endfor repo
+.##############################################################################
