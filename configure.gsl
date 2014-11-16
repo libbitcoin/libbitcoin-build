@@ -1,9 +1,9 @@
 .##############################################################################
-.#  Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
-.#  GSL generate libbitcoin configure.ac.
+.# Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
+.# GSL generate libbitcoin configure.ac.
 .#
-.#  This is a code generator built using the iMatix GSL code generation
-.#  language. See https://github.com/imatix/gsl for details.
+.# This is a code generator built using the iMatix GSL code generation
+.# language. See https://github.com/imatix/gsl for details.
 .##############################################################################
 .# Functions
 .##############################################################################
@@ -110,15 +110,17 @@ AM_CONDITIONAL([$(SYMBOL:c)], [test x$$(symbol:c) != xno])
 
 .endmacro # with
 .
-.macro enable(name, default, unprefixed, description, define, inherited)
+.macro enable(name, default, unprefixed, description, define, inherited,\
+    conditional)
 .   if ((my.default <> "yes") & (my.default <> "no"))
 .       abort "Invalid repository.option.enable value: $(my.default:)."
 .   endif
+.   define symbol = is_true(my.unprefixed) ?? "$(name:)" ? "enable_$(name:)"
 .   define implement = is_true(inherited) ?? "Inherit" ? "Implement"
 .   define defines = is_empty(my.define) ?? "" ? " and define $(my.DEFINE:c)"
-# $(implement:) --enable-$(my.name:) option$(defines:).
+.   define cond = is_true(my.conditional) ?? " and declare $(SYMBOL:c)" ? ""
+# $(implement:) --enable-$(my.name:) option$(defines:)$(cond:).
 #------------------------------------------------------------------------------
-.   define symbol = is_true(my.unprefixed) ?? "$(name:)" ? "enable_$(name:)"
 .   if (!is_true(my.inherited))
 AC_MSG_CHECKING(--enable-$(my.name:) option)
 AC_ARG_ENABLE([$(my.name:)],
@@ -130,6 +132,9 @@ AC_MSG_RESULT([$$(symbol:c)])
 .   endif
 .   if (!is_empty(my.define))
 AS_IF([test x$$(symbol:c) != xno], AC_DEFINE([$(my.DEFINE:c)]))
+.   endif
+.   if (is_true(my.conditional))
+AM_CONDITIONAL([$(SYMBOL:c)], [test x$$(symbol:c) != xno])
 .   endif
 
 .endmacro # enable
@@ -259,7 +264,7 @@ AC_OUTPUT
             O.substitute, O.conditional)
 .   elsif (O.type = "enable")
 .       enable(O.name, O.default, O.unprefixed, O.description, O.define,\
-            O.inherited)
+            O.inherited, O.conditional)
 .   else
 .       abort "Invalid repository.option type attribute value: $(O.type:)."
 .   endif

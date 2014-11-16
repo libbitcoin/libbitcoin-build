@@ -12,7 +12,7 @@
     <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
     <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
     <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
-    <option type="enable" name="shared" default="yes" inherited="true" define="BOOST_TEST_DYN_LINK" />
+    <option type="enable" name="shared" default="yes" conditional="true" inherited="true" />
     
     <dependency name="boost" version="1.54" system="linux" />
     <dependency name="boost" version="1.49" system="darwin" />
