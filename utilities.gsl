@@ -10,12 +10,16 @@
 .##############################################################################
 .template 0
 
-function is_boost_lib(name, unpublished)
-    return starts_with(my.name, "boost_") & !is_true(my.unpublished)
+function is_boost_headers(name)
+    return my.name = "boost"
+endfunction
+
+function is_boost_lib(name)
+    return starts_with(my.name, "boost_")
 endfunction
 
 function is_boost_dependency(name)
-    return (my.name = "boost") | is_boost_lib(my.name)
+    return is_boost_headers(my.name) | is_boost_lib(my.name)
 endfunction
 
 function is_package_lib(name, version)

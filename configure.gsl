@@ -11,7 +11,8 @@
 
 function format_boost_libraries()
     define boost_libraries = ""
-    for repo.dependency as D where is_boost_lib(D.name, D.unpublished)
+    for repo.dependency as D where is_boost_lib(D.name) &\
+        !is_true(D.unpublished)
         boost_libraries = "$(boost_libraries:) -l$(D.name:)"
     endfor D
     return trim_left(boost_libraries)
@@ -171,7 +172,7 @@ AS_IF([test x$$(symbol:) != xno], [AX_$(my.NAME:c)])
 
 .endmacro # check_boost_lib
 .
-.macro check_lib(name, header, function, libs, includes, system)
+.macro check_dependency(name, header, function, libs, includes, system)
 .   define show_system = is_empty(my.system) ?? "" ? " if on $(my.system:)"
 .   define out = is_empty(my.function) ?? "" ? " and output ${$(my.name:c)_LIBS}"
 # Require $(my.name:c)$(show_system:)$(out:).
@@ -273,14 +274,15 @@ AC_OUTPUT
 # Check dependencies.
 #==============================================================================
 .for repo.dependency as D
-.   if (D.name = "boost")
+.   if (is_boost_headers(D.name))
 .       check_boost(D.version, D.system)
-.   elsif (starts_with(D.name, "boost_"))
+.   elsif (is_boost_lib(D.name))
 .       check_boost_lib(D.name, D.with, D.enable)
-.   elsif (!is_empty(D.version))
+.   elsif (is_package_lib(D.name, D.version))
 .       check_package(D.name, D.version)
 .   else
-.       check_lib(D.name, D.header, D.function, D.libs, D.includes, D.system)
+.       check_dependency(D.name, D.header, D.function, D.libs, D.includes,\
+            D.system)
 .   endif
 .endfor D
 .
