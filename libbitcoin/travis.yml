@@ -1,21 +1,9 @@
-.template 0
 ###############################################################################
 # Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
 #
-# GSL generate libbitcoin travis.yml.
+#         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
-# This is a code generator built using the iMatix GSL code generation
-# language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-# Generation
-###############################################################################
-.endtemplate
-.template 1
-.for repository by name as repo
-.   define output_file = "$(repo.name:)/travis.yml"
-.   notify(output_file)
-.   output(output_file)
-.   copyleft(repo.name)
 
 language:
     - cpp
@@ -37,7 +25,5 @@ before_install:
 
 script:
 
-    # Download and build $(repo.name:) and all dependencies.
+    # Download and build libbitcoin and all dependencies.
     - sudo ./install.sh CXXFLAGS="-Os -s" --disable-shared --enable-static --build-gmp --build-boost
-.   endfor repo
-.endtemplate

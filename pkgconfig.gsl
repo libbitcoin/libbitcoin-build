@@ -1,13 +1,14 @@
-.##############################################################################
-.# Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
-.# GSL generate libbitcoin.pc.in.
-.#
-.# This is a code generator built using the iMatix GSL code generation
-.# language. See https://github.com/imatix/gsl for details.
-.##############################################################################
-.# Functions
-.##############################################################################
 .template 0
+###############################################################################
+# Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin.pc.in.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
 
 function format_boost_libs()
     return defined(repo->dependency(is_boost_lib(name))) ?? "@boost_LIBS@" ? ""
@@ -54,14 +55,16 @@ function format_unpackaged_libs()
     return trim_left(unpackaged_libs)
 endfunction
 
+###############################################################################
+# Generation
+###############################################################################
 .endtemplate
-.##############################################################################
-.# Generation
-.##############################################################################
+.template 1
 .for repository by name as repo
-.echo "Generating $(repo.name:)/$(repo->package.name:).pc.in..."
-.output "$(repo.name:)/$(repo->package.name:).pc.in"
-.copyleft(repo.name)
+.   define output_file = "$(repo.name:)/$(repo->package.name:).pc.in"
+.   notify(output_file)
+.   output(output_file)
+.   copyleft(repo.name)
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
@@ -81,5 +84,5 @@ Cflags: -I${includedir} $(format_compiler_flags())
 
 # Our own lib and any we require that do not publish package configuration.
 Libs: -L${libdir} $(format_output_libs()) $(format_boost_libs()) $(format_unpackaged_libs())
-.endfor repo
-.##############################################################################
+.   endfor repo
+.endtemplate

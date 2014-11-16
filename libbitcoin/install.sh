@@ -1,44 +1,13 @@
-.template 0
+#!/bin/bash
 ###############################################################################
 # Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
 #
-# GSL generate install-libbitcoin*.sh.
+#         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
-# This is a code generator built using the iMatix GSL code generation
-# language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-# Functions
-###############################################################################
-
-# TODO
-
-###############################################################################
-# Macros
-###############################################################################
-
-# TODO
-
-###############################################################################
-# Generation
-###############################################################################
-.endtemplate
-.template 1
-.for repository by name as repo
-.   define output_file = "$(repo.name:)/install.sh"
-.   notify(output_file)
-.   output(output_file)
-#!/bin/bash
-.   copyleft(repo.name)
-.
-# Script to build and install $(repo.name).
+# Script to build and install libbitcoin.
 #
 # Script options:
-.   if (is_true(repo.gmp))
-# --build-gmp              Builds GMP library.
-.   endif
-.   if (is_true(repo.boost))
-# --build-boost            Builds Boost libraries.
-.   endif
 # --build-dir=<path>       Location of downloaded and intermediate files.
 # --prefix=<absolute-path> Library install location (defaults to /usr/local).
 # --disable-shared         Disables shared library builds.
@@ -56,5 +25,3 @@
 
 # TODO
 
-.   endfor repo
-.endtemplate

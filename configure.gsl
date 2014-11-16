@@ -1,13 +1,14 @@
-.##############################################################################
-.# Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
-.# GSL generate libbitcoin configure.ac.
-.#
-.# This is a code generator built using the iMatix GSL code generation
-.# language. See https://github.com/imatix/gsl for details.
-.##############################################################################
-.# Functions
-.##############################################################################
 .template 0
+###############################################################################
+# Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin configure.ac.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
 
 function format_boost_libraries()
     define boost_libraries = ""
@@ -26,10 +27,11 @@ function format_template_files()
     return trim_left(template_files)
 endfunction
 
+###############################################################################
+# Macros
+###############################################################################
 .endtemplate
-.##############################################################################
-.# Macros
-.##############################################################################
+.template 1
 .macro configure()
 # Declare the required version of autoconf.
 AC_PREREQ([2.65])
@@ -79,22 +81,20 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # Check for pkg-config.
 PKG_PROG_PKG_CONFIG
 
-# Declare environment variables that affect the build.
-#------------------------------------------------------------------------------
+.heading2("Declare environment variables that affect the build.")
 AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
 AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
 AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 
 .endmacro # boilerplate
 .
-.macro with(name, default, unprefixed, description, example,\
-    substitute, conditional)
+.macro with(name, default, unprefixed, description, conditional, example,\
+    substitute)
 .   define value = is_empty(my.example) ?? "" ? "=$(my.example:)"
 .   define symbol = is_true(my.unprefixed) ?? "$(name:)" ? "with_$(name:)"
 .   define out = is_true(my.substitute) ?? " and output ${$(my.name:c)}" ? ""
 .   define cond = is_true(my.conditional) ?? " and declare $(SYMBOL:c)" ? ""
-# Implement --with-$(my.name:)$(out:)$(cond:).
-#------------------------------------------------------------------------------
+.   heading2("Implement --with-$(my.name:)$(out:)$(cond:).")
 AC_MSG_CHECKING(--with-$(my.name:) option)
 AC_ARG_WITH([$(my.name:)],
     AS_HELP_STRING([--with-$(my.name:)$(value:)],
@@ -111,8 +111,8 @@ AM_CONDITIONAL([$(SYMBOL:c)], [test x$$(symbol:c) != xno])
 
 .endmacro # with
 .
-.macro enable(name, default, unprefixed, description, define, inherited,\
-    conditional)
+.macro enable(name, default, unprefixed, description, conditional, define,\
+    inherited)
 .   if ((my.default <> "yes") & (my.default <> "no"))
 .       abort "Invalid repository.option.enable value: $(my.default:)."
 .   endif
@@ -120,8 +120,7 @@ AM_CONDITIONAL([$(SYMBOL:c)], [test x$$(symbol:c) != xno])
 .   define implement = is_true(inherited) ?? "Inherit" ? "Implement"
 .   define defines = is_empty(my.define) ?? "" ? " and define $(my.DEFINE:c)"
 .   define cond = is_true(my.conditional) ?? " and declare $(SYMBOL:c)" ? ""
-# $(implement:) --enable-$(my.name:) option$(defines:)$(cond:).
-#------------------------------------------------------------------------------
+.   heading2("$(implement:) --enable-$(my.name:) option$(defines:)$(cond:).")
 .   if (!is_true(my.inherited))
 AC_MSG_CHECKING(--enable-$(my.name:) option)
 AC_ARG_ENABLE([$(my.name:)],
@@ -141,16 +140,15 @@ AM_CONDITIONAL([$(SYMBOL:c)], [test x$$(symbol:c) != xno])
 .endmacro # enable
 .
 .macro check_package(name, version)
-# Require $(my.name:) of at least version $(my.version:) and output ${$(my.name:)}.
-#------------------------------------------------------------------------------
+.   heading2("Require $(my.name:) of at least version $(my.version:) and \
+output ${$(my.name:)}.")
 PKG_CHECK_MODULES([$(my.name:)], [lib$(my.name:) >= $(my.version:)])
 
 .endmacro # check_package
 .
 .macro check_boost(version, system)
 .   define show_system = is_empty(my.system) ?? "" ? " if on $(my.system:)"
-# Require Boost of at least version $(my.version:)$(show_system:).
-#------------------------------------------------------------------------------
+.   heading2("Require Boost of at least version $(my.version:)$(show_system:).")
 .   define system_pattern = is_empty(my.system) ?? "*" ? "*$(my.system:)*"
 AS_CASE([${host_os}], [$(system_pattern:)],
     AX_BOOST_BASE([$(my.version:)], [], [AC_MSG_ERROR(
@@ -175,8 +173,7 @@ AS_IF([test x$$(symbol:) != xno], [AX_$(my.NAME:c)])
 .macro check_dependency(name, header, function, libs, includes, system)
 .   define show_system = is_empty(my.system) ?? "" ? " if on $(my.system:)"
 .   define out = is_empty(my.function) ?? "" ? " and output ${$(my.name:c)_LIBS}"
-# Require $(my.name:c)$(show_system:)$(out:).
-#------------------------------------------------------------------------------
+.   heading2("Require $(my.name:c)$(show_system:)$(out:).")
 .   define system_pattern = is_empty(my.system) ?? "*" ? "*$(my.system:)*"
 .
 .   if (!is_empty(my.includes))
@@ -206,8 +203,7 @@ AS_CASE([${host_os}], [$(system_pattern)],
 .endmacro # check_lib
 .
 .macro flag(name, comment, alternate, link)
-# $(my.comment:)
-#------------------------------------------------------------------------------
+.   heading2("$(my.comment:)")
 .   if (is_empty(my.alternate) & !is_true(my.link))
 AX_CHECK_COMPILE_FLAG([-$(my.name:)],
     [CXXFLAGS="$CXXFLAGS -$(my.name:)"])
@@ -235,8 +231,7 @@ AX_CHECK_COMPILE_FLAG([-$(my.name:)],
 .endmacro # flag
 .
 .macro output_value(name, value)
-# Output ${$(my.name:)}
-#------------------------------------------------------------------------------
+.   heading2("Output ${$(my.name:)}")
 AC_SUBST([$(my.name:)], [$(my.value:)])
 
 .endmacro # output_value
@@ -245,58 +240,57 @@ AC_SUBST([$(my.name:)], [$(my.value:)])
 AC_CONFIG_FILES([$(my.files:)])
 AC_OUTPUT
 .endmacro # compile
-.##############################################################################
-.# Generation
-.##############################################################################
-.for repository by name as repo
-.echo "Generating $(repo.name:)/configure.ac..."
-.output "$(repo.name:)/configure.ac"
-.copyleft(repo.name)
+.endtemplate
+.template 0
+###############################################################################
+# Generation
+###############################################################################
 
-# Standard declarations.
-#==============================================================================
-.configure()
-.
-# Process options.
-#==============================================================================
-.for repo.option as O
-.   if (O.type = "with")
-.       with(O.name, O.default, O.unprefixed, O.description, O.example,\
-            O.substitute, O.conditional)
-.   elsif (O.type = "enable")
-.       enable(O.name, O.default, O.unprefixed, O.description, O.define,\
-            O.inherited, O.conditional)
-.   else
-.       abort "Invalid repository.option type attribute value: $(O.type:)."
-.   endif
-.endfor O
-.
-# Check dependencies.
-#==============================================================================
-.for repo.dependency as D
-.   if (is_boost_headers(D.name))
-.       check_boost(D.version, D.system)
-.   elsif (is_boost_lib(D.name))
-.       check_boost_lib(D.name, D.with, D.enable)
-.   elsif (is_package_lib(D.name, D.version))
-.       check_package(D.name, D.version)
-.   else
-.       check_dependency(D.name, D.header, D.function, D.libs, D.includes,\
-            D.system)
-.   endif
-.endfor D
-.
-.output_value("boost_LIBS", format_boost_libraries())
-.
-# Set flags.
-#==============================================================================
-.for repo.flag as F
-.   flag(F.name, F.comment, F.alternate, F.link)
-.endfor F
-.
-# Process outputs into templates with access to declared conditionals.
-#==============================================================================
-.compile("Makefile.am $(repo->package.name:).pc $(format_template_files())")
-.
-.endfor repo
-.##############################################################################
+for repository by name as repo
+
+    define output_file = "$(repo.name:)/configure.ac"
+    notify(output_file)
+    output(output_file)
+    
+    copyleft(repo.name)
+    
+    heading1("Standard declarations.")
+    configure()
+
+    heading1("Process options.")
+    for repo.option as O
+        if (O.type = "with")
+            with(O.name, O.default, O.unprefixed, O.description,\
+                O.conditional, O.example, O.substitute)
+        elsif (O.type = "enable")
+            enable(O.name, O.default, O.unprefixed, O.description,\
+                O.conditional, O.define, O.inherited)
+        else
+            abort "Invalid repository.option type attribute value: $(O.type:)."
+        endif
+    endfor O
+
+    heading1("Check dependencies.")
+    for repo.dependency as D
+        if (is_boost_headers(D.name))
+            check_boost(D.version, D.system)
+        elsif (is_boost_lib(D.name))
+            check_boost_lib(D.name, D.with, D.enable)
+        elsif (is_package_lib(D.name, D.version))
+            check_package(D.name, D.version)
+        else
+            check_dependency(D.name, D.header, D.function, D.libs, D.includes, D.system)
+        endif
+    endfor D
+    output_value("boost_LIBS", format_boost_libraries())
+
+    heading1("Set flags.")
+    for repo.flag as F
+        flag(F.name, F.comment, F.alternate, F.link)
+    endfor F
+    
+    heading1("Process outputs into templates with access to declared conditionals.")
+    compile("Makefile.am $(repo->package.name:).pc $(format_template_files())")
+    
+endfor repo
+.endtemplate

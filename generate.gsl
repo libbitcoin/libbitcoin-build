@@ -1,16 +1,20 @@
-.##############################################################################
-.#
-.#  GSL generate libbitcoin build and installation files.
-.#
-.#  This is a code generator built using the iMatix GSL code generation
-.#  language. See https://github.com/imatix/gsl for details.
-.#
-.##############################################################################
-.# Imports
-.##############################################################################
-.gsl from "utilities.gsl"
-.gsl from "configure.gsl"
-.gsl from "installer.gsl"
-.gsl from "pkgconfig.gsl"
-.gsl from "travisyml.gsl"
-.##############################################################################
+.template 0
+###############################################################################
+# Copyright (c) 2011-2014 $(my.name:) developers (see COPYING).
+#
+# GSL generate libbitcoin build and installation files.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Imports
+###############################################################################
+
+gsl from "utilities.gsl"
+gsl from "configure.gsl"
+gsl from "installer.gsl"
+gsl from "pkgconfig.gsl"
+gsl from "travisyml.gsl"
+
+###############################################################################
+.endtemplate

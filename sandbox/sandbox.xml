@@ -1,0 +1,17 @@
+<?xml version = "1.0" ?>
+<generate script="sandbox.gsl" language="en-us">
+
+  <sandbox name="conflict" >
+  
+    <toy name="shovel" />
+    <toy name="pail" />
+    <toy name="car" />
+    <toy name="truck" />
+
+    <toy>
+      <!-- Watch out for scope naming conflicts. Reading toy.name will pick up sandbox.name unless explicitly qualified as sandbox.toy.name (or comparable alias). -->
+    </toy>
+    
+  </sandbox>
+
+</generate>
