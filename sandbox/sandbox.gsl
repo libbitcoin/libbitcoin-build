@@ -9,10 +9,79 @@
 ###############################################################################
 
 function hello_world()
-  echo "Hello World!"
+    echo "Hello World!"
+endfunction
+#hello_world()
+
+function echo_twice(text)
+    echo my.text
+    echo echo_twice.text
+endfunction
+#echo_twice("Hello World!")
+
+function increment(value)
+    return my.value + 1
+endfunction
+#echo increment(0)
+
+function recursive (N)
+    my.localvar = my.N - 1
+    if (my.localvar > 0)
+        echo my.N
+        recursive (my.localvar)
+    endif
+    echo my.localvar
+endfunction
+#recursive(5)
+
+# Simulate a case where a scope predicate may not return a node.
+function defined_if_positive(value)
+    if (my.value > 0)
+        return my.value
+    endif
 endfunction
 
-hello_world()
+function test_undefined()
+    define test1 = 1
+    if (defined(test1))
+        echo "test1: $(test1)"
+    endif
+    
+    if (!defined(test2))
+        echo "test2: undefined"
+    endif
+    
+    if (defined(defined_if_positive(0)))
+        echo "test3: $(defined_if_positive(0))"
+    else
+        echo "test3: undefined"
+    endif
+    
+    if (defined(defined_if_positive(1)))
+        echo "test4: $(defined_if_positive(1))"
+    else
+        echo "test4: undefined"
+    endif
+    
+    # Test4 is the resolution to the break in this idiom,
+    # but as a result the function must be executed twice.
+    test5 = defined_if_positive(0)
+    if (defined(test5))
+        echo "test5: $(test5)"
+    else
+        echo "test5: undefined"
+    endif
+endfunction
+
+#test_undefined()
+
+#test1: 1
+#test2: undefined
+#test3: undefined
+#test4: 1
+#(sandbox.gsl 70) Undefined expression: defined_if_positive(...)
 
 ###############################################################################
 .endtemplate
+
+
