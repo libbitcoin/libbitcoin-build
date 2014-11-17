@@ -10,20 +10,22 @@
 # Functions
 ###############################################################################
 
-function format_boost_libraries()
+function format_boost_libraries(configure)
+    define node = format_boost_libraries.configure
     define boost_libraries = ""
-    for repo.dependency as D where is_boost_lib(D.name) &\
-        !is_true(D.unpublished)
-        boost_libraries = "$(boost_libraries:) -l$(D.name:)"
-    endfor D
+    for node.dependency as Dependency where is_boost_lib(Dependency) &\
+        !is_true(Dependency.unpublished)
+        boost_libraries = "$(boost_libraries:) -l$(Dependency.name:)"
+    endfor Dependency
     return trim_left(boost_libraries)
 endfunction
 
-function format_template_files()
+function format_template_files(configure)
+    define node = format_template_files.configure
     define template_files = ""
-    for repo.template as T
-        template_files = "$(template_files:) $(T.name:)"
-    endfor T
+    for node.template as Template
+        template_files = "$(template_files:) $(Template.name:)"
+    endfor Template
     return trim_left(template_files)
 endfunction
 
@@ -32,7 +34,8 @@ endfunction
 ###############################################################################
 .endtemplate
 .template 1
-.macro configure()
+.macro initialize(repository)
+.   define repo = initialize.repository
 # Declare the required version of autoconf.
 AC_PREREQ([2.65])
 
@@ -88,144 +91,148 @@ AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 
 .endmacro # boilerplate
 .
-.macro with(name, default, unprefixed, description, conditional, example,\
-    substitute)
-.   define value = is_empty(my.example) ?? "" ? "=$(my.example:)"
-.   define symbol = is_true(my.unprefixed) ?? "$(name:)" ? "with_$(name:)"
-.   define out = is_true(my.substitute) ?? " and output ${$(my.name:c)}" ? ""
-.   define cond = is_true(my.conditional) ?? " and declare $(SYMBOL:c)" ? ""
-.   heading2("Implement --with-$(my.name:)$(out:)$(cond:).")
-AC_MSG_CHECKING(--with-$(my.name:) option)
-AC_ARG_WITH([$(my.name:)],
-    AS_HELP_STRING([--with-$(my.name:)$(value:)],
-        [$(my.description:)]),
+.macro with(option)
+.   define node = with.option
+.   define value = is_empty(node.example) ?? "" ? "=$(node.example:)"
+.   define symbol = is_true(node.unprefixed) ?? "$(name:)" ? "with_$(name:)"
+.   define output = is_true(node.substitute) ?? " and output ${$(node.name:c)}" ? ""
+.   define cond = is_true(node.conditional) ?? " and declare $(SYMBOL:c)" ? ""
+.   heading2("Implement --with-$(node.name:)$(output:)$(cond:).")
+AC_MSG_CHECKING(--with-$(node.name:) option)
+AC_ARG_WITH([$(node.name:)],
+    AS_HELP_STRING([--with-$(node.name:)$(value:)],
+        [$(node.description:)]),
     [$(symbol:c)=$withval],
-    [$(symbol:c)=$(my.default:)])
+    [$(symbol:c)=$(node.default:)])
 AC_MSG_RESULT([$$(symbol:c)])
 .   if (is_true(substitute))
 AC_SUBST([$(symbol:c)])
 .   endif
-.   if (is_true(my.conditional))
+.   if (is_true(node.conditional))
 AM_CONDITIONAL([$(SYMBOL:c)], [test x$$(symbol:c) != xno])
 .   endif
 
 .endmacro # with
 .
-.macro enable(name, default, unprefixed, description, conditional, define,\
-    inherited)
-.   if ((my.default <> "yes") & (my.default <> "no"))
-.       abort "Invalid repository.option.enable value: $(my.default:)."
+.macro enable(option)
+.   define node = enable.option
+.   if ((node.default <> "yes") & (node.default <> "no"))
+.       abort "Invalid repository.option.enable value: $(node.default:)."
 .   endif
-.   define symbol = is_true(my.unprefixed) ?? "$(name:)" ? "enable_$(name:)"
+.   define symbol = is_true(node.unprefixed) ?? "$(name:)" ? "enable_$(name:)"
 .   define implement = is_true(inherited) ?? "Inherit" ? "Implement"
-.   define defines = is_empty(my.define) ?? "" ? " and define $(my.DEFINE:c)"
-.   define cond = is_true(my.conditional) ?? " and declare $(SYMBOL:c)" ? ""
-.   heading2("$(implement:) --enable-$(my.name:) option$(defines:)$(cond:).")
-.   if (!is_true(my.inherited))
-AC_MSG_CHECKING(--enable-$(my.name:) option)
-AC_ARG_ENABLE([$(my.name:)],
-    AS_HELP_STRING([--enable-$(my.name:)],
-        [$(my.description:)]),
+.   define defines = is_empty(node.define) ?? "" ? " and define $(node.DEFINE:c)"
+.   define cond = is_true(node.conditional) ?? " and declare $(SYMBOL:c)" ? ""
+.   heading2("$(implement:) --enable-$(node.name:) option$(defines:)$(cond:).")
+.   if (!is_true(node.inherited))
+AC_MSG_CHECKING(--enable-$(node.name:) option)
+AC_ARG_ENABLE([$(node.name:)],
+    AS_HELP_STRING([--enable-$(node.name:)],
+        [$(node.description:)]),
     [$(symbol:c)=$enableval],
-    [$(symbol:c)=$(my.default:)])
+    [$(symbol:c)=$(node.default:)])
 AC_MSG_RESULT([$$(symbol:c)])
 .   endif
-.   if (!is_empty(my.define))
-AS_IF([test x$$(symbol:c) != xno], AC_DEFINE([$(my.DEFINE:c)]))
+.   if (!is_empty(node.define))
+AS_IF([test x$$(symbol:c) != xno], AC_DEFINE([$(node.DEFINE:c)]))
 .   endif
-.   if (is_true(my.conditional))
+.   if (is_true(node.conditional))
 AM_CONDITIONAL([$(SYMBOL:c)], [test x$$(symbol:c) != xno])
 .   endif
 
 .endmacro # enable
 .
-.macro check_package(name, version)
-.   heading2("Require $(my.name:) of at least version $(my.version:) and \
-output ${$(my.name:)}.")
-PKG_CHECK_MODULES([$(my.name:)], [lib$(my.name:) >= $(my.version:)])
+.macro check_package(dependency)
+.   define node = check_package.dependency
+.   heading2("Require $(node.name:) of at least version $(node.version:) and output ${$(node.name:)}.")
+PKG_CHECK_MODULES([$(node.name:)], [lib$(node.name:) >= $(node.version:)])
 
 .endmacro # check_package
 .
-.macro check_boost(version, system)
-.   define show_system = is_empty(my.system) ?? "" ? " if on $(my.system:)"
-.   heading2("Require Boost of at least version $(my.version:)$(show_system:).")
-.   define system_pattern = is_empty(my.system) ?? "*" ? "*$(my.system:)*"
+.macro check_boost(dependency)
+.   define node = check_boost.dependency
+.   define show_system = is_empty(node.system) ?? "" ? " if on $(node.system:)"
+.   heading2("Require Boost of at least version $(node.version:)$(show_system:).")
+.   define system_pattern = is_empty(node.system) ?? "*" ? "*$(node.system:)*"
 AS_CASE([${host_os}], [$(system_pattern:)],
-    AX_BOOST_BASE([$(my.version:)], [], [AC_MSG_ERROR(
-        [Boost $(my.version:) or later is required but was not found.])]))
+    AX_BOOST_BASE([$(node.version:)], [], [AC_MSG_ERROR(
+        [Boost $(node.version:) or later is required but was not found.])]))
 
 .endmacro # check_boost
 .
-.macro check_boost_lib(name, with, enable)
-.   if (!is_empty(my.with) & !is_empty(my.enable))
-.       abort "Conflicting repository.dependency attributes: enable + with."
+.macro check_boost_lib(dependency)
+.   define node = check_boost_lib.dependency
+.   if (!is_empty(node.with) & !is_empty(node.enable))
+.       abort "Conflicting configure.dependency attributes: enable + with."
 .   endif
-.   define symbol = !is_empty(my.with) ?? "with_$(my.with:)" ?\
-        (is_empty(my.enable) ?? "" ? "enable_$(my.enable:)")
+.   define symbol = !is_empty(node.with) ?? "with_$(node.with:)" ?\
+        (is_empty(node.enable) ?? "" ? "enable_$(node.enable:)")
 .   if (is_empty(symbol))
-AX_$(my.NAME:c)
+AX_$(node.NAME:c)
 .   else
-AS_IF([test x$$(symbol:) != xno], [AX_$(my.NAME:c)])
+AS_IF([test x$$(symbol:) != xno], [AX_$(node.NAME:c)])
 .   endif
 
 .endmacro # check_boost_lib
 .
-.macro check_dependency(name, header, function, libs, includes, system)
-.   define show_system = is_empty(my.system) ?? "" ? " if on $(my.system:)"
-.   define out = is_empty(my.function) ?? "" ? " and output ${$(my.name:c)_LIBS}"
-.   heading2("Require $(my.name:c)$(show_system:)$(out:).")
-.   define system_pattern = is_empty(my.system) ?? "*" ? "*$(my.system:)*"
+.macro check_dependency(dependency)
+.   define node = check_dependency.dependency
+.   define show_system = is_empty(node.system) ?? "" ? " if on $(node.system:)"
+.   define out = is_empty(node.function) ?? "" ? " and output ${$(node.name:c)_LIBS}"
+.   heading2("Require $(node.name:c)$(show_system:)$(out:).")
+.   define system_pattern = is_empty(node.system) ?? "*" ? "*$(node.system:)*"
 .
-.   if (!is_empty(my.includes))
+.   if (!is_empty(node.includes))
 AS_CASE([${host_os}], [$(system_pattern)], 
-    [CPPFLAGS="$CPPFLAGS -I/$(my.includes:)"])
+    [CPPFLAGS="$CPPFLAGS -I/$(node.includes:)"])
 .   endif
 .
-.   if (!is_empty(my.header))
+.   if (!is_empty(node.header))
 AS_CASE([${host_os}], [$(system_pattern)], 
-    AC_CHECK_HEADER([$(my.header:)], [],
-        [AC_MSG_ERROR([$(my.name:) header is required but was not found.])],-)
+    AC_CHECK_HEADER([$(node.header:)], [],
+        [AC_MSG_ERROR([$(node.name:) header is required but was not found.])],-)
 .   endif
 .
-.   if (!is_empty(my.libs))
+.   if (!is_empty(node.libs))
 AS_CASE([${host_os}], [$(system_pattern)], 
-    [LDFLAGS="$LDFLAGS -L$(my.libs:)"])
+    [LDFLAGS="$LDFLAGS -L$(node.libs:)"])
 .   endif
 .
-.   if (!is_empty(my.function))
+.   if (!is_empty(node.function))
 AS_CASE([${host_os}], [$(system_pattern)], 
-    AC_CHECK_LIB([$(my.name:)],[$(my.function:)],
-        [AC_SUBST([$(my.name:c)_LIBS], [-l$(my.name:)])],
-        [AC_SUBST([$(my.name:c)_LIBS], [])
-            AC_MSG_ERROR([$(my.name:) library is required but was not found.])])
+    AC_CHECK_LIB([$(node.name:)],[$(node.function:)],
+        [AC_SUBST([$(node.name:c)_LIBS], [-l$(node.name:)])],
+        [AC_SUBST([$(node.name:c)_LIBS], [])
+            AC_MSG_ERROR([$(node.name:) library is required but was not found.])])
 .   endif
 
 .endmacro # check_lib
 .
-.macro flag(name, comment, alternate, link)
-.   heading2("$(my.comment:)")
-.   if (is_empty(my.alternate) & !is_true(my.link))
-AX_CHECK_COMPILE_FLAG([-$(my.name:)],
-    [CXXFLAGS="$CXXFLAGS -$(my.name:)"])
+.macro flag(dependency)
+.   define node = flag.dependency
+.   heading2("$(node.comment:)")
+.   if (is_empty(node.alternate) & !is_true(node.link))
+AX_CHECK_COMPILE_FLAG([-$(node.name:)],
+    [CXXFLAGS="$CXXFLAGS -$(node.name:)"])
 
 .   endif
 .
-.   if (!is_empty(my.alternate) & !is_true(my.link))
-AX_CHECK_COMPILE_FLAG([-$(my.name:)],
-    [CXXFLAGS="$CXXFLAGS -$(my.name:)"],
-    AX_CHECK_COMPILE_FLAG([-$(my.alternate:)],
-        [CXXFLAGS="$CXXFLAGS -$(my.alternate:)"]))
+.   if (!is_empty(node.alternate) & !is_true(node.link))
+AX_CHECK_COMPILE_FLAG([-$(node.name:)],
+    [CXXFLAGS="$CXXFLAGS -$(node.name:)"],
+    AX_CHECK_COMPILE_FLAG([-$(node.alternate:)],
+        [CXXFLAGS="$CXXFLAGS -$(node.alternate:)"]))
 
 .   endif
 .
-.   if (is_empty(my.alternate) & is_true(my.link))
-AX_CHECK_COMPILE_FLAG([-$(my.name:)],
-    [AX_CHECK_LINK_FLAG([-$(my.name:)],
-        [CXXFLAGS="$CXXFLAGS -$(my.name:)])])
+.   if (is_empty(node.alternate) & is_true(node.link))
+AX_CHECK_COMPILE_FLAG([-$(node.name:)],
+    [AX_CHECK_LINK_FLAG([-$(node.name:)],
+        [CXXFLAGS="$CXXFLAGS -$(node.name:)])])
 
 .   endif
 .
-.   if (!is_empty(my.alternate) & is_true(my.link))
+.   if (!is_empty(node.alternate) & is_true(node.link))
 .       abort "Conflicting repository.flag attributes: alternate + link."
 .   endif
 .endmacro # flag
@@ -246,52 +253,50 @@ AC_OUTPUT
 # Generation
 ###############################################################################
 
-for repository by name as repo
+for repository by name as Repository
 
-    define output_file = "$(repo.name:)/configure.ac"
-    notify(output_file)
-    output(output_file)
-    
-    copyleft(repo.name)
+    define out_file = "$(Repository.name:)/configure.ac"
+    notify(out_file)
+    output(out_file)
+
+    copyleft(Repository.name)
+    define configure = Repository->configure
     
     heading1("Standard declarations.")
-    configure()
+    initialize(Repository)
 
     heading1("Process options.")
-    for repo.option as O
-        if (O.type = "with")
-            with(O.name, O.default, O.unprefixed, O.description,\
-                O.conditional, O.example, O.substitute)
-        elsif (O.type = "enable")
-            enable(O.name, O.default, O.unprefixed, O.description,\
-                O.conditional, O.define, O.inherited)
+    for configure.option as Option
+        if (Option.type = "with")
+            with(Option)
+        elsif (Option.type = "enable")
+            enable(Option)
         else
-            abort "Invalid repository.option type attribute value: $(O.type:)."
+            abort "Invalid repository.option.type value: $(Option.type:)."
         endif
-    endfor O
+    endfor Option
 
     heading1("Check dependencies.")
-    for repo.dependency as D
-        if (is_boost_headers(D.name))
-            check_boost(D.version, D.system)
-        elsif (is_boost_lib(D.name))
-            check_boost_lib(D.name, D.with, D.enable)
-        elsif (is_package_lib(D.name, D.version))
-            check_package(D.name, D.version)
+    for configure.dependency as Dependency
+        if (is_boost(Dependency))
+            check_boost(Dependency)
+        elsif (is_boost_lib(Dependency))
+            check_boost_lib(Dependency)
+        elsif (is_package(Dependency))
+            check_package(Dependency)
         else
-            check_dependency(D.name, D.header, D.function, D.libs, D.includes,\
-                D.system)
+            check_dependency(Dependency)
         endif
-    endfor D
-    output_value("boost_LIBS", format_boost_libraries())
+    endfor Dependency
+    output_value("boost_LIBS", format_boost_libraries(configure))
 
     heading1("Set flags.")
-    for repo.flag as F
-        flag(F.name, F.comment, F.alternate, F.link)
-    endfor F
+    for configure.flag as Flag1
+        flag(Flag1)
+    endfor Flag1
     
-    heading1("Process outputs into templates with access to declared conditionals.")
-    compile("Makefile.am $(repo->package.name:).pc $(format_template_files())")
+    heading1("Process outputs into templates.")
+    compile("Makefile.am $(Repository->package.name:).pc $(format_template_files(configure))")
     
-endfor repo
+endfor Repository
 .endtemplate

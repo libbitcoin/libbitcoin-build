@@ -42,26 +42,31 @@ function make_version(major, minor, build, delimit)
     return "$(my.major:)$(my.delimit:)$(my.minor:)$(my.delimit:)$(my.build:)"
 endfunction
 
-# Autotools utilities.
+# Configure and pkgconfig utilities.
 
-function global.is_boost_headers(name)
-    return my.name = "boost"
+function global.is_boost(dependency)
+    define node = is_boost.dependency
+    return node.name = "boost"
 endfunction
 
-function global.is_boost_lib(name)
-    return starts_with(my.name, "boost_")
+function global.is_boost_lib(dependency)
+    define node = is_boost_lib.dependency
+    return starts_with(node.name, "boost_")
 endfunction
 
-function global.is_boost_dependency(name)
-    return is_boost_headers(my.name) | is_boost_lib(my.name)
+function global.is_boost_dependency(dependency)
+    define node = is_boost_dependency.dependency
+    return is_boost(node) | is_boost_lib(node)
 endfunction
 
-function global.is_package_lib(name, version)
-    return !is_empty(my.version) & !is_boost_dependency(my.name)
+function global.is_package(dependency)
+    define node = is_package.dependency
+    return !is_empty(node.version) & !is_boost_dependency(node)
 endfunction
 
-function global.is_unpackaged_lib(name, function)
-    return !is_empty(my.function) & !is_boost_dependency(my.name)
+function global.is_unpackaged_lib(dependency)
+    define node = is_unpackaged_lib.dependency
+    return !is_empty(node.function) & !is_boost_dependency(node)
 endfunction
 
 ###############################################################################

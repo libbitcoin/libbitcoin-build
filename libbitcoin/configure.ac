@@ -115,17 +115,17 @@ AM_CONDITIONAL([ENABLE_SHARED], [test x$enable_shared != xno])
 
 # Check dependencies.
 #==============================================================================
-# Require Boost of at least version 1.54 if on linux.
+# Require Boost of at least version 1.49.0 if on linux.
 #------------------------------------------------------------------------------
 AS_CASE([${host_os}], [*linux*],
-    AX_BOOST_BASE([1.54], [], [AC_MSG_ERROR(
-        [Boost 1.54 or later is required but was not found.])]))
+    AX_BOOST_BASE([1.49.0], [], [AC_MSG_ERROR(
+        [Boost 1.49.0 or later is required but was not found.])]))
 
-# Require Boost of at least version 1.49 if on darwin.
+# Require Boost of at least version 1.54.0 if on darwin.
 #------------------------------------------------------------------------------
 AS_CASE([${host_os}], [*darwin*],
-    AX_BOOST_BASE([1.49], [], [AC_MSG_ERROR(
-        [Boost 1.49 or later is required but was not found.])]))
+    AX_BOOST_BASE([1.54.0], [], [AC_MSG_ERROR(
+        [Boost 1.54.0 or later is required but was not found.])]))
 
 AX_BOOST_DATE_TIME
 
@@ -244,7 +244,7 @@ AX_CHECK_COMPILE_FLAG([-fvisibility=internal],
         [CXXFLAGS="$CXXFLAGS -fvisibility=hidden"]))
 
 
-# Process outputs into templates with access to declared conditionals.
+# Process outputs into templates.
 #==============================================================================
 AC_CONFIG_FILES([Makefile.am libbitcoin.pc ])
 AC_OUTPUT

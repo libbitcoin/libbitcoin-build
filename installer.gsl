@@ -9,58 +9,61 @@
 ###############################################################################
 # Functions
 ###############################################################################  
- 
-function is_system_match(dependency, name, system)
-    define node = is_system_match.dependency
-    return defined(my.system) & defined(node.system) & (node.name = my.name) &\
-        (node.system = my.system)
+
+function have_build(install, name)
+    define node = have_build.install
+    return defined(node->build(build.name = my.name))
 endfunction
 
-function get_archive_version(repository, name, system)
-    define repo = get_archive_version.repository
+function is_archive_match(build, name, system)
+    define node = is_archive_match.build
+    return defined(node.version) & (node.name = my.name) & \
+        (!defined(my.system) | (node.system = my.system))
+endfunction
+
+function get_archive_version(install, name, system)
+    define node = get_archive_version.install
     # GSL can't assign an undefined value to a variable :/
-    if (defined(repo->dependency(\
-        is_system_match(dependency, my.name, my.system))))
-        return repo->dependency(\
-            is_system_match(dependency, my.name, my.system)).archive
+    if (defined(node->build(is_archive_match(build, my.name, my.system))))
+        return node->build(is_archive_match(build, my.name, my.system)).version
     endif
     # GSL can't assign an undefined value to a variable :/
     return ""
 endfunction
 
-function get_boost_file(repository, system)
-    define repo = get_boost_file.repository
-    define version = get_archive_version(repo, "boost", my.system)
-    if (!defined(version))
-        return
+function get_boost_file(install, system)
+    define node = get_boost_file.install
+    define version = get_archive_version(node, "boost", my.system)
+    if (is_empty(version))
+        return ""
     endif
     define underscore_version = string.convch(version, ".", "_")
     return "boost_$(underscore_version:).tar.bz2"
 endfunction
 
-function get_boost_url(repository, system)
-    define repo = get_boost_url.repository
-    define version = get_archive_version(repo, "boost", my.system)
-    if (!defined(version))
-        return
+function get_boost_url(install, system)
+    define node = get_boost_url.install
+    define version = get_archive_version(node, "boost", my.system)
+    if (is_empty(version))
+        return ""
     endif
-    define archive = get_boost_file(repo, my.system)
+    define archive = get_boost_file(node, my.system)
     define base_url = "http\://sourceforge.net/projects/boost/files/boost"
     return "$(base_url:)/$(version:)/$(archive:)/download"
 endfunction
 
-function get_gmp_file(repository, system)
-    define repo = get_gmp_file.repository
-    define dot_version = get_archive_version(repo, "gmp", my.system)
-    if (!defined(version))
-        return
+function get_gmp_file(install, system)
+    define node = get_gmp_file.install
+    define dot_version = get_archive_version(node, "gmp", my.system)
+    if (is_empty(version))
+        return ""
     endif
     return "gmp-$(dot_version:).tar.bz2"
 endfunction
 
-function get_gmp_url(repository, system)
-    define repo = get_gmp_url.repository
-    define archive = get_gmp_file(repo, my.system)
+function get_gmp_url(install, system)
+    define node = get_gmp_url.install
+    define archive = get_gmp_file(node, my.system)
     define base_url = "https\://ftp.gnu.org/gnu/gmp"
     return "$(base_url:)/$(archive:)"
 endfunction
@@ -71,18 +74,19 @@ endfunction
 .endtemplate
 .template 1
 .
-.macro declare_language(interpreter)
+.macro language(interpreter)
 #!/bin/$(my.interpreter:)
-.endmacro # declare_language
+.endmacro # language
 .
-.macro documentation()
+.macro documentation(repository)
+.define repo = documentation.repository
 # Script to build and install $(repo.name).
 #
 # Script options:
-.   if (defined(have_gmp))
+.   if (have_build(repo->install, "gmp"))
 # --build-gmp              Builds GMP library.
 .   endif
-.   if (defined(have_boost))
+.   if (have_build(repo->install, "boost"))
 # --build-boost            Builds Boost libraries.
 .   endif
 # --build-dir=<path>       Location of downloaded and intermediate files.
@@ -101,54 +105,71 @@ endfunction
 # directory, the script may need to be sudo'd.
 .endmacro documentation
 .
-.macro define_build_directory(repo)
-BUILD_DIR="$(define_build_directory.repo.name:)-build"
+.macro define_build_directory(repository)
+.define repo = define_build_directory.repository
+.heading2("The default build directory.")
+BUILD_DIR="$(repo.name:)-build"
 
 .endmacro # define_build_directory
 .
-.macro define_boost(repo, system)
-.   if (defined(get_boost_url(define_boost.repo, my.system)))
-BOOST_URL_$(my.SYSTEM)="$(get_boost_url(define_boost.repo, my.system))"
-BOOST_ARCHIVE_$(my.SYSTEM)="$(get_boost_file(define_boost.repo, my.system))"
+.macro define_boost(install, system)
+.define node = define_boost.install
+.   if (defined(get_boost_url(node, my.system)))
+.   heading2("Boost archives for $(my.system:).")
+BOOST_URL_$(my.SYSTEM)="$(get_boost_url(node, my.system))"
+BOOST_ARCHIVE_$(my.SYSTEM)="$(get_boost_file(node, my.system))"
 
 .   endif
 .endmacro # define_boost
 .
-.macro define_gmp(repo, system)
-.   if (defined(get_gmp_url(define_gmp.repo, my.system)))
-GMP_URL_$(my.SYSTEM)="$(get_gmp_url(define_gmp.repo, my.system))"
-GMP_ARCHIVE_$(my.SYSTEM)="$(get_gmp_file(define_gmp.repo, my.system))"
+.macro define_gmp(install, system)
+.define node = define_gmp.install
+.   if (defined(get_gmp_url(node, my.system)))
+.   heading2("GMP archives for $(my.system:).")
+GMP_URL_$(my.SYSTEM)="$(get_gmp_url(node, my.system))"
+GMP_ARCHIVE_$(my.SYSTEM)="$(get_gmp_file(node, my.system))"
 
 .   endif
 .endmacro # define_gmp
 .
+.macro define_build_options(build)
+.   define node = define_build_options.build
+.   define system_name = is_empty(node.system) ?? "" ? "_$(node.SYSTEM)"
+.   define show_system = is_empty(node.system) ?? "" ? " for $(node.system:)"
+.   heading2("Set $(node.name:) options$(show_system:).")
+$(node.NAME)_OPTIONS$(system_name:)=\\
+.   for node.option as Option
+"$(Option.value:)"$(!last() ?? "\\")
+.   endfor Option
+
+.endmacro # define_build_options
 .endtemplate
 .template 0
 ###############################################################################
 # Generation
 ###############################################################################
-for repository by name as repo
-    define output_file = "$(repo.name:)/install.sh"
-    notify(output_file)
-    output(output_file)
+for repository by name as Repository
+    define out_file = "$(Repository.name:)/install.sh"
+    notify(out_file)
+    output(out_file)
     
-    declare_language("bash")
-    copyleft(repo.name)
-
-    heading1("Declare common values.")
-
-    heading2("The default build directory.")
-    define_build_directory(repo)
-
-    heading2("Boost archives.")
-    define_boost(repo, "linux")
-    define_boost(repo, "darwin")
-
-    heading2("GMP archives.")
-    define_gmp(repo, "linux")
-    define_gmp(repo, "darwin")
-
-    endfor repo
+    language("bash")
+    define install = Repository->install
+    copyleft(Repository.name)
+    documentation(Repository)
+    
+    heading1("Define common values.")
+    define_build_directory(Repository)
+    #define_boost(install, "linux")
+    #define_boost(install, "darwin")
+    #define_gmp(install)
+    
+    heading1("Define build options.")
+    for install.build as Build where count(Build.option) > 0
+         define_build_options(Build)
+    endfor Build
+    
+endfor Repository
 .endtemplate
 
 

@@ -11,11 +11,11 @@
 ###############################################################################
 .endtemplate
 .template 1
-.for repository by name as repo
-.   define output_file = "$(repo.name:)/travis.yml"
-.   notify(output_file)
-.   output(output_file)
-.   copyleft(repo.name)
+.for repository by name as Repository
+.   define out_file = "$(Repository.name:)/travis.yml"
+.   notify(out_file)
+.   output(out_file)
+.   copyleft(Repository.name)
 
 language:
     - cpp
@@ -37,7 +37,7 @@ before_install:
 
 script:
 
-    # Download and build $(repo.name:) and all dependencies.
+    # Download and build $(Repository.name:) and all dependencies.
     - sudo ./install.sh CXXFLAGS="-Os -s" --disable-shared --enable-static --build-gmp --build-boost
-.   endfor repo
+.   endfor Repository
 .endtemplate

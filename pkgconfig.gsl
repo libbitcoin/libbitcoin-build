@@ -10,40 +10,47 @@
 # Functions
 ###############################################################################
 
-function format_boost_libs()
-    return defined(repo->dependency(is_boost_lib(name))) ?? "@boost_LIBS@" ? ""
+function format_boost_libs(configure)
+    define item = format_boost_libs.configure
+    return defined(item->dependency(is_boost_lib(dependency))) ??\
+        "@boost_LIBS@" ? ""
 endfunction
 
-function format_compiler_flags()
+function format_compiler_flags(package)
+    define item = format_compiler_flags.package
     define compiler_flags = ""
-    for repo->package.cflag as C
-        compiler_flags = "$(compiler_flags:) -$(C.value:)"
-    endfor C
+    for item.cflag as Cflag
+        compiler_flags = "$(compiler_flags:) -$(Cflag.value:)"
+    endfor Cflag
     return trim_left(compiler_flags)
 endfunction
 
-function format_output_libs()
+function format_output_libs(package)
+    define item = format_output_libs.package
     define output_libs = ""
-    for repo->package.output as O
-        output_libs = "$(output_libs:) -l$(O.name:)"
-    endfor O
+    for item.output as Output
+        output_libs = "$(output_libs:) -l$(Output.name:)"
+    endfor Output
     return trim_left(output_libs)
 endfunction
 
-function format_packages()
+function format_packages(configure)
+    define item = format_packages.configure
     define packages = ""
-    for repo.dependency as D where is_package_lib(D.name, D.version)
-        packages = "$(packages:) lib$(D.name:) >= $(D.version:)"
-    endfor D
+    for item.dependency as Dependency where is_package(Dependency)
+        packages = \
+            "$(packages:) lib$(Dependency.name:) >= $(Dependency.version:)"
+    endfor Dependency
     return trim_left(packages)
 endfunction
 
-function format_unpackaged_libs()
+function format_unpackaged_libs(configure)
+    define item = format_unpackaged_libs.configure
     define unpackaged_lib = ""
     define unpackaged_libs = ""
     define last_unpackaged_lib = ""
-    for repo.dependency as D where is_unpackaged_lib(D.name, D.function)
-        unpackaged_lib = "@$(D.name:)_LIBS@"
+    for item.dependency as Dependency where is_unpackaged_lib(Dependency)
+        unpackaged_lib = "@$(Dependency.name:)_LIBS@"
         # GSL Bug? locate() and locate_last() appear to be broken.
         #if (!string.locate(unpackaged_libs, unpackaged_lib))
         # HACK, only works if siblings are adjacent!
@@ -51,7 +58,7 @@ function format_unpackaged_libs()
             last_unpackaged_lib = unpackaged_lib
             unpackaged_libs = "$(unpackaged_libs:) $(unpackaged_lib:)"
         endif
-    endfor D
+    endfor Dependency
     return trim_left(unpackaged_libs)
 endfunction
 
@@ -60,29 +67,31 @@ endfunction
 ###############################################################################
 .endtemplate
 .template 1
-.for repository by name as repo
-.   define output_file = "$(repo.name:)/$(repo->package.name:).pc.in"
-.   notify(output_file)
-.   output(output_file)
-.   copyleft(repo.name)
+.for repository by name as Repository
+.   define out_file = "$(Repository.name:)/$(Repository->package.name:).pc.in"
+.   notify(out_file)
+.   output(out_file)
+.   copyleft(Repository.name)
+.   define configure = Repository->configure
+.   define package = Repository->package
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: $(repo->package.name:)
-Description: $(repo->package.description:)
-URL: $(repo->package.url:)
+Name: $(Repository->package.name:)
+Description: $(Repository->package.description:)
+URL: $(Repository->package.url:)
 Version: @PACKAGE_VERSION@
 
 # Our dependencies that publish package configuration.
-Requires: $(format_packages())
+Requires: $(format_packages(configure))
 
 # Our own include directory and any other compiler flags we require.
-Cflags: -I${includedir} $(format_compiler_flags())
+Cflags: -I${includedir} $(format_compiler_flags(package))
 
 # Our own lib and any we require that do not publish package configuration.
-Libs: -L${libdir} $(format_output_libs()) $(format_boost_libs()) $(format_unpackaged_libs())
-.   endfor repo
+Libs: -L${libdir} $(format_output_libs(package)) $(format_boost_libs(configure)) $(format_unpackaged_libs(configure))
+.   endfor Repository
 .endtemplate
