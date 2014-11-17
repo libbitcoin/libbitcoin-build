@@ -14,16 +14,16 @@
     <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
     <option type="enable" name="shared" default="yes" conditional="true" inherited="true" />
     
-    <dependency name="boost" version="1.54" system="linux" />
-    <dependency name="boost" version="1.49" system="darwin" />
+    <dependency name="boost" version="1.49.0" system="linux" archive="1.49.0" />
+    <dependency name="boost" version="1.54.0" system="darwin" archive="1.54.0" />
     <dependency name="boost_date_time" />
     <dependency name="boost_filesystem" />
     <dependency name="boost_regex" />
     <dependency name="boost_system" />
     <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
     <dependency name="rt" function="clock_gettime" system="linux" />
-    <dependency name="gmp" function="__gmpz_init" header="gmp.h" system="linux" />
-    <dependency name="gmp" function="__gmpz_init" header="gmp.h" libs="/opt/local/lib" includes="/opt/local/include" system="darwin" />
+    <dependency name="gmp" function="__gmpz_init" header="gmp.h" system="linux" archive="6.0.0a" />
+    <dependency name="gmp" function="__gmpz_init" header="gmp.h" system="darwin" archive="6.0.0a" libs="/opt/local/lib" includes="/opt/local/include" />
     <dependency name="secp256k1" version="0.0.1" />
     
     <flag name="Wall" comment="Warn on all stuff." />

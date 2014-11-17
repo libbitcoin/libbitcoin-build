@@ -38,6 +38,10 @@ function global.trim_both(text)
     return trim_left(string.trim(my.text))
 endfunction
 
+function make_version(major, minor, build, delimit)
+    return "$(my.major:)$(my.delimit:)$(my.minor:)$(my.delimit:)$(my.build:)"
+endfunction
+
 # Autotools utilities.
 
 function global.is_boost_headers(name)

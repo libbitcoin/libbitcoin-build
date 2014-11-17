@@ -279,7 +279,8 @@ for repository by name as repo
         elsif (is_package_lib(D.name, D.version))
             check_package(D.name, D.version)
         else
-            check_dependency(D.name, D.header, D.function, D.libs, D.includes, D.system)
+            check_dependency(D.name, D.header, D.function, D.libs, D.includes,\
+                D.system)
         endif
     endfor D
     output_value("boost_LIBS", format_boost_libraries())

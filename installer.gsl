@@ -8,35 +8,81 @@
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
 # Functions
-###############################################################################
+###############################################################################  
+ 
+function is_system_match(dependency, name, system)
+    define node = is_system_match.dependency
+    return defined(my.system) & defined(node.system) & (node.name = my.name) &\
+        (node.system = my.system)
+endfunction
 
-# TODO
+function get_archive_version(repository, name, system)
+    define repo = get_archive_version.repository
+    # GSL can't assign an undefined value to a variable :/
+    if (defined(repo->dependency(\
+        is_system_match(dependency, my.name, my.system))))
+        return repo->dependency(\
+            is_system_match(dependency, my.name, my.system)).archive
+    endif
+    # GSL can't assign an undefined value to a variable :/
+    return ""
+endfunction
+
+function get_boost_file(repository, system)
+    define repo = get_boost_file.repository
+    define version = get_archive_version(repo, "boost", my.system)
+    if (!defined(version))
+        return
+    endif
+    define underscore_version = string.convch(version, ".", "_")
+    return "boost_$(underscore_version:).tar.bz2"
+endfunction
+
+function get_boost_url(repository, system)
+    define repo = get_boost_url.repository
+    define version = get_archive_version(repo, "boost", my.system)
+    if (!defined(version))
+        return
+    endif
+    define archive = get_boost_file(repo, my.system)
+    define base_url = "http\://sourceforge.net/projects/boost/files/boost"
+    return "$(base_url:)/$(version:)/$(archive:)/download"
+endfunction
+
+function get_gmp_file(repository, system)
+    define repo = get_gmp_file.repository
+    define dot_version = get_archive_version(repo, "gmp", my.system)
+    if (!defined(version))
+        return
+    endif
+    return "gmp-$(dot_version:).tar.bz2"
+endfunction
+
+function get_gmp_url(repository, system)
+    define repo = get_gmp_url.repository
+    define archive = get_gmp_file(repo, my.system)
+    define base_url = "https\://ftp.gnu.org/gnu/gmp"
+    return "$(base_url:)/$(archive:)"
+endfunction
 
 ###############################################################################
 # Macros
 ###############################################################################
-
-# TODO
-
-###############################################################################
-# Generation
-###############################################################################
 .endtemplate
 .template 1
-.for repository by name as repo
-.   define output_file = "$(repo.name:)/install.sh"
-.   notify(output_file)
-.   output(output_file)
-#!/bin/bash
-.   copyleft(repo.name)
 .
+.macro declare_language(interpreter)
+#!/bin/$(my.interpreter:)
+.endmacro # declare_language
+.
+.macro documentation()
 # Script to build and install $(repo.name).
 #
 # Script options:
-.   if (is_true(repo.gmp))
+.   if (defined(have_gmp))
 # --build-gmp              Builds GMP library.
 .   endif
-.   if (is_true(repo.boost))
+.   if (defined(have_boost))
 # --build-boost            Builds Boost libraries.
 .   endif
 # --build-dir=<path>       Location of downloaded and intermediate files.
@@ -53,8 +99,58 @@
 # the exception of the --build-<item> options, which are for the script only.
 # Depending on the caller's permission to the --prefix or --build-dir
 # directory, the script may need to be sudo'd.
+.endmacro documentation
+.
+.macro define_build_directory(repo)
+BUILD_DIR="$(define_build_directory.repo.name:)-build"
 
-# TODO
+.endmacro # define_build_directory
+.
+.macro define_boost(repo, system)
+.   if (defined(get_boost_url(define_boost.repo, my.system)))
+BOOST_URL_$(my.SYSTEM)="$(get_boost_url(define_boost.repo, my.system))"
+BOOST_ARCHIVE_$(my.SYSTEM)="$(get_boost_file(define_boost.repo, my.system))"
 
-.   endfor repo
+.   endif
+.endmacro # define_boost
+.
+.macro define_gmp(repo, system)
+.   if (defined(get_gmp_url(define_gmp.repo, my.system)))
+GMP_URL_$(my.SYSTEM)="$(get_gmp_url(define_gmp.repo, my.system))"
+GMP_ARCHIVE_$(my.SYSTEM)="$(get_gmp_file(define_gmp.repo, my.system))"
+
+.   endif
+.endmacro # define_gmp
+.
 .endtemplate
+.template 0
+###############################################################################
+# Generation
+###############################################################################
+for repository by name as repo
+    define output_file = "$(repo.name:)/install.sh"
+    notify(output_file)
+    output(output_file)
+    
+    declare_language("bash")
+    copyleft(repo.name)
+
+    heading1("Declare common values.")
+
+    heading2("The default build directory.")
+    define_build_directory(repo)
+
+    heading2("Boost archives.")
+    define_boost(repo, "linux")
+    define_boost(repo, "darwin")
+
+    heading2("GMP archives.")
+    define_gmp(repo, "linux")
+    define_gmp(repo, "darwin")
+
+    endfor repo
+.endtemplate
+
+
+
+
