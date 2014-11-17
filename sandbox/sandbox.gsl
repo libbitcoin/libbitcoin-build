@@ -17,7 +17,7 @@ function echo_twice(text)
     echo my.text
     echo echo_twice.text
 endfunction
-#echo_twice("Hello World!")
+echo_twice("Hello World!")
 
 function increment(value)
     return my.value + 1
@@ -25,14 +25,21 @@ endfunction
 #echo increment(0)
 
 function recursive (N)
+    echo my.N
     my.localvar = my.N - 1
     if (my.localvar > 0)
-        echo my.N
         recursive (my.localvar)
     endif
     echo my.localvar
 endfunction
-#recursive(5)
+#recursive(3)
+
+function decrementbyref(n)
+    $(my.n) = $(my.n) - 1
+endfunction
+#global.counter=5
+#decrementbyref("counter")
+#echo global.counter
 
 # Simulate a case where a scope predicate may not return a node.
 function defined_if_positive(value)
@@ -40,7 +47,6 @@ function defined_if_positive(value)
         return my.value
     endif
 endfunction
-
 function test_undefined()
     define test1 = 1
     if (defined(test1))
@@ -72,9 +78,7 @@ function test_undefined()
         echo "test5: undefined"
     endif
 endfunction
-
 #test_undefined()
-
 #test1: 1
 #test2: undefined
 #test3: undefined
