@@ -23,6 +23,7 @@ mkdir libbitcoin-server
 REM Generate build artifacts.
 gsl -q generate.xml
 
+REM Copy outputs to all repositories.
 copy /b /y libbitcoin\*             ..\libbitcoin\
 copy /b /y libbitcoin-blockchain\*  ..\libbitcoin-blockchain\
 copy /b /y libbitcoin-client\*      ..\libbitcoin-client\
