@@ -8,6 +8,78 @@
 #
 ###############################################################################
 
+function test_assignment_ambiguity()
+    test_value = "123"
+    return test_value = "should not be this"
+endfunction
+#echo test_assignment_ambiguity()
+#echo test_value
+
+function test_variable_case_sensitivity()
+
+    # Variables are **always** case insensitive.
+    define foo = "Case-sensitive variables!"
+    define Foo = "Case-INsensitive variables!"
+    
+    echo "[gsl].ignorecase = <default>"
+    echo "foo"
+    echo "default: $(foo)"
+    echo "colon:   $(foo:)"
+    echo "upper:   $(foo:upper)"
+    echo "UPPER:   $(foo:UPPER)"
+    echo "lower:   $(foo:lower)"
+    echo "LOWER:   $(foo:LOWER)"
+    echo "FOO"
+    echo "default: $(FOO:)"
+    echo "default: $(FOO)"
+    
+    # This changes only the last test (case mismatch disables default formatting).
+    [gsl].ignorecase = 0
+    echo "[gsl].ignorecase = 0"
+    echo "foo"
+    echo "default: $(foo)"
+    echo "colon:   $(foo:)"
+    echo "upper:   $(foo:upper)"
+    echo "UPPER:   $(foo:UPPER)"
+    echo "lower:   $(foo:lower)"
+    echo "LOWER:   $(foo:LOWER)"
+    echo "FOO"
+    echo "default: $(FOO:)"
+    echo "default: $(FOO)"
+    
+endfunction
+test_variable_case_sensitivity()
+
+function undefined_assignment()
+    if (defined(string.locate("haystack", "hay")))
+        echo string.locate("haystack", "hay")
+    endif
+    if (!defined(string.locate("haystack", "needle")))
+        echo -1
+    endif
+    
+    # This is how you do it - a terminating '?'.
+    echo string.locate("haystack", "dog")
+    #echo defined(defaulted) ?? defaulted ? -1
+endfunction
+#undefined_assignment()
+
+function case_sensitive_compare()
+    if ("abc" = "abc")
+        echo "match same lower"
+    endif
+    if ("ABC" = "ABC")
+        echo "match same upper"
+    endif
+    if ("AbC" = "AbC")
+        echo "match same mixed"
+    endif
+    if ("aBc" = "AbC")
+        echo "match opposite"
+    endif
+endfunction
+#case_sensitive_compare()
+
 function hello_world()
     echo "Hello World!"
 endfunction
@@ -17,7 +89,7 @@ function echo_twice(text)
     echo my.text
     echo echo_twice.text
 endfunction
-echo_twice("Hello World!")
+#echo_twice("Hello World!")
 
 function increment(value)
     return my.value + 1
