@@ -13,7 +13,7 @@
 .template 1
 .macro generate_travisyml()
 .for generate.repository by name as _repository
-.   define my.out_file = "$(_repository.name)/travis.yml"
+.   define my.out_file = "$(_repository.name)/.travis.yml"
 .   notify(my.out_file)
 .   output(my.out_file)
 .   copyleft(_repository.name)

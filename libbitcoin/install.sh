@@ -52,53 +52,52 @@ GMP_ARCHIVE="gmp-6.0.0a.tar.bz2"
 # Define boost options for linux.
 #------------------------------------------------------------------------------
 BOOST_OPTIONS_LINUX=\
-"threading=single"\
-"variant=release"\
-"--disable-icu"\
-"--with-date_time"\
-"--with-filesystem"\
-"--with-regex"\
-"--with-system"\
-"--with-test"\
-"-d0"\
-"-q"
+"threading=single "\
+"variant=release "\
+"--disable-icu "\
+"--with-date_time "\
+"--with-filesystem "\
+"--with-regex "\
+"--with-system "\
+"--with-test "\
+"-d0 "\
+"-q "
 
 # Define boost options for darwin.
 #------------------------------------------------------------------------------
 BOOST_OPTIONS_DARWIN=\
-"toolset=clang"\
-"cxxflags=-stdlib=libc++"\
-"linkflags=-stdlib=libc++"\
-"threading=single"\
-"variant=release"\
-"--disable-icu"\
-"--with-date_time"\
-"--with-filesystem"\
-"--with-regex"\
-"--with-system"\
-"--with-test"\
-"-d0"\
-"-q"
+"toolset=clang "\
+"cxxflags=-stdlib=libc++ "\
+"linkflags=-stdlib=libc++ "\
+"threading=single "\
+"variant=release "\
+"--disable-icu "\
+"--with-date_time "\
+"--with-filesystem "\
+"--with-regex "\
+"--with-system "\
+"--with-test "\
+"-d0 "\
+"-q "
 
 # Define gmp options.
 #------------------------------------------------------------------------------
 GMP_OPTIONS=\
-"CPPFLAGS=-w"
+"CPPFLAGS=-w "
 
 # Define secp256k1 options.
 #------------------------------------------------------------------------------
 SECP256K1_OPTIONS=\
-"CPPFLAGS=-w"\
-"--with-bignum=gmp"\
-"--with-field=gmp"\
-"--enable-benchmark=no"\
-"--enable-tests=no"\
-"--enable-endomorphism=no"
+"--with-bignum=gmp "\
+"--with-field=gmp "\
+"--enable-benchmark=no "\
+"--enable-tests=no "\
+"--enable-endomorphism=no "
 
 # Define bitcoin options.
 #------------------------------------------------------------------------------
 BITCOIN_OPTIONS=\
-"--enable-silent-rules"
+"--enable-silent-rules "
 
 # Define option to build without compiling tests.
 #------------------------------------------------------------------------------
@@ -143,7 +142,7 @@ if [[ $OS == "Darwin" ]]; then
     BOOST_URL="$BOOST_URL_DARWIN"
     BOOST_ARCHIVE="$BOOST_ARCHIVE_DARWIN"
     BOOST_OPTIONS="$BOOST_OPTIONS_DARWIN"
-elif
+else
     BOOST_URL="$BOOST_URL_LINUX"
     BOOST_ARCHIVE="$BOOST_ARCHIVE_LINUX"
     BOOST_OPTIONS="$BOOST_OPTIONS_LINUX"

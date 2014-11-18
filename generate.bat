@@ -22,4 +22,13 @@ mkdir libbitcoin-server
 
 REM Generate build artifacts.
 gsl -q generate.xml
+
+copy /b /y libbitcoin\*             ..\libbitcoin\
+copy /b /y libbitcoin-blockchain\*  ..\libbitcoin-blockchain\
+copy /b /y libbitcoin-client\*      ..\libbitcoin-client\
+copy /b /y libbitcoin-explorer\*    ..\libbitcoin-explorer\
+copy /b /y libbitcoin-node\*        ..\libbitcoin-node\
+copy /b /y libbitcoin-protocol\*    ..\libbitcoin-protocol\
+copy /b /y libbitcoin-server\*      ..\libbitcoin-server\
+
 PAUSE

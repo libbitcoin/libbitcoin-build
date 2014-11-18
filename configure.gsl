@@ -228,7 +228,7 @@ AX_CHECK_COMPILE_FLAG([-$(my.dependency.name)],
 .   if (!defined(my.dependency.alternate) & is_true(my.dependency.link))
 AX_CHECK_COMPILE_FLAG([-$(my.dependency.name)],
     [AX_CHECK_LINK_FLAG([-$(my.dependency.name)],
-        [CXXFLAGS="$CXXFLAGS -$(my.dependency.name)])])
+        [CXXFLAGS="$CXXFLAGS -$(my.dependency.name)"])])
 
 .   endif
 .
@@ -296,7 +296,7 @@ for generate.repository by name as _repository
     endfor Flag1
     
     heading1("Process outputs into templates.")
-    compile("Makefile.am $(_repository->package.name).pc $(format_template_files(my.configure))")
+    compile("Makefile $(_repository->package.name).pc $(format_template_files(my.configure))")
     
     close
 endfor _repository

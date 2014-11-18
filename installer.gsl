@@ -167,7 +167,7 @@ GMP_ARCHIVE$(my.upper_system)="$(get_gmp_file(my.install, my.system))"
 .   heading2("Define $(my.build.name) options$(my.show_system).")
 $(my.build.name:upper)_OPTIONS$(my.system_name)=\\
 .   for my.build.option as _option
-"$(_option.value)"$(!last() ?? "\\")
+"$(_option.value) "$(!last() ?? "\\")
 .   endfor _option
 
 .endmacro # define_build_options
@@ -213,7 +213,7 @@ if [[ $OS == "Darwin" ]]; then
     BOOST_URL="$BOOST_URL_DARWIN"
     BOOST_ARCHIVE="$BOOST_ARCHIVE_DARWIN"
     BOOST_OPTIONS="$BOOST_OPTIONS_DARWIN"
-elif
+else
     BOOST_URL="$BOOST_URL_LINUX"
     BOOST_ARCHIVE="$BOOST_ARCHIVE_LINUX"
     BOOST_OPTIONS="$BOOST_OPTIONS_LINUX"
