@@ -11,55 +11,50 @@
 ###############################################################################
 
 function format_boost_libs(configure)
-    define item = format_boost_libs.configure
-    return defined(item->dependency(is_boost_lib(dependency))) ??\
+    define my.configure = format_boost_libs.configure
+    return defined(my.configure->dependency(is_boost_lib(dependency))) ??\
         "@boost_LIBS@" ? ""
 endfunction
 
 function format_compiler_flags(package)
-    define item = format_compiler_flags.package
-    define compiler_flags = ""
-    for item.cflag as Cflag
-        compiler_flags = "$(compiler_flags:) -$(Cflag.value:)"
-    endfor Cflag
-    return trim_left(compiler_flags)
+    define my.package = format_compiler_flags.package
+    define my.compiler_flags = ""
+    for my.package.cflag as _cflag
+        my.compiler_flags = "$(my.compiler_flags) -$(_cflag.value)"
+    endfor _cflag
+    return trim_left(my.compiler_flags)
 endfunction
 
 function format_output_libs(package)
-    define item = format_output_libs.package
-    define output_libs = ""
-    for item.output as Output
-        output_libs = "$(output_libs:) -l$(Output.name:)"
-    endfor Output
-    return trim_left(output_libs)
+    define my.package = format_output_libs.package
+    define my.output_libs = ""
+    for my.package.output as _output
+        my.output_libs = "$(my.output_libs) -l$(_output.name)"
+    endfor _output
+    return trim_left(my.output_libs)
 endfunction
 
 function format_packages(configure)
-    define item = format_packages.configure
-    define packages = ""
-    for item.dependency as Dependency where is_package(Dependency)
-        packages = \
-            "$(packages:) lib$(Dependency.name:) >= $(Dependency.version:)"
-    endfor Dependency
-    return trim_left(packages)
+    define my.configure = format_packages.configure
+    define my.packages = ""
+    for my.configure.dependency as _dependency where is_package(_dependency)
+        my.packages = \
+            "$(my.packages) lib$(_dependency.name) >= $(_dependency.version)"
+    endfor _dependency
+    return trim_left(my.packages)
 endfunction
 
 function format_unpackaged_libs(configure)
-    define item = format_unpackaged_libs.configure
-    define unpackaged_lib = ""
-    define unpackaged_libs = ""
-    define last_unpackaged_lib = ""
-    for item.dependency as Dependency where is_unpackaged_lib(Dependency)
-        unpackaged_lib = "@$(Dependency.name:)_LIBS@"
-        # GSL Bug? locate() and locate_last() appear to be broken.
-        #if (!string.locate(unpackaged_libs, unpackaged_lib))
-        # HACK, only works if siblings are adjacent!
-        if (last_unpackaged_lib <> unpackaged_lib)
-            last_unpackaged_lib = unpackaged_lib
-            unpackaged_libs = "$(unpackaged_libs:) $(unpackaged_lib:)"
+    define my.configure = format_unpackaged_libs.configure
+    define my.unpackaged_lib = ""
+    define my.unpackaged_libs = ""
+    for my.configure.dependency as _dependency where is_unpackaged_lib(_dependency)
+        my.unpackaged_lib = "@$(_dependency.name)_LIBS@"
+        if (substring(my.unpackaged_libs, my.unpackaged_lib))
+            my.unpackaged_libs = "$(my.unpackaged_libs) $(my.unpackaged_lib)"
         endif
-    endfor Dependency
-    return trim_left(unpackaged_libs)
+    endfor _dependency
+    return trim_left(my.unpackaged_libs)
 endfunction
 
 ###############################################################################
@@ -67,31 +62,33 @@ endfunction
 ###############################################################################
 .endtemplate
 .template 1
-.for repository by name as Repository
-.   define out_file = "$(Repository.name:)/$(Repository->package.name:).pc.in"
-.   notify(out_file)
-.   output(out_file)
-.   copyleft(Repository.name)
-.   define configure = Repository->configure
-.   define package = Repository->package
-
+.macro generate_pkgconfig()
+.for generate.repository by name as _dependency
+.   define my.out_file = "$(_dependency.name)/$(_dependency->package.name).pc.in"
+.   notify(my.out_file)
+.   output(my.out_file)
+.   copyleft(_dependency.name)
+.   define my.configure = _dependency->configure
+.   define my.package = _dependency->package
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: $(Repository->package.name:)
-Description: $(Repository->package.description:)
-URL: $(Repository->package.url:)
+Name: $(_dependency->package.name)
+Description: $(_dependency->package.description)
+URL: $(_dependency->package.url)
 Version: @PACKAGE_VERSION@
 
 # Our dependencies that publish package configuration.
-Requires: $(format_packages(configure))
+Requires: $(format_packages(my.configure))
 
 # Our own include directory and any other compiler flags we require.
-Cflags: -I${includedir} $(format_compiler_flags(package))
+Cflags: -I${includedir} $(format_compiler_flags(my.package))
 
 # Our own lib and any we require that do not publish package configuration.
-Libs: -L${libdir} $(format_output_libs(package)) $(format_boost_libs(configure)) $(format_unpackaged_libs(configure))
-.   endfor Repository
+Libs: -L${libdir} $(format_output_libs(my.package)) $(format_boost_libs(my.configure)) $(format_unpackaged_libs(my.configure))
+.   close
+.endfor _dependency
+.endmacro # generate_pkgconfig
 .endtemplate

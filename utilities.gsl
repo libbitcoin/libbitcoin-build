@@ -25,9 +25,10 @@ function global.starts_with(text, prefix)
 endfunction
 
 function global.trim_left(text)
-    define extracted = ""
-    regexp.match("^ +(.*)$", my.text, extracted)
-    return extracted ? ""
+    define my.extracted = ""
+    # How is 'extracted' passed out by reference?
+    regexp.match("^ +(.*)$", my.text, my.extracted)
+    return my.extracted ? ""
 endfunction
 
 function global.trim_right(text)
@@ -38,35 +39,51 @@ function global.trim_both(text)
     return trim_left(string.trim(my.text))
 endfunction
 
-function make_version(major, minor, build, delimit)
-    return "$(my.major:)$(my.delimit:)$(my.minor:)$(my.delimit:)$(my.build:)"
-endfunction
-
 # Configure and pkgconfig utilities.
 
 function global.is_boost(dependency)
-    define node = is_boost.dependency
-    return node.name = "boost"
+    define my.dependency = is_boost.dependency
+    return my.dependency.name = "boost"
 endfunction
 
 function global.is_boost_lib(dependency)
-    define node = is_boost_lib.dependency
-    return starts_with(node.name, "boost_")
+    define my.dependency = is_boost_lib.dependency
+    return starts_with(my.dependency.name, "boost_")
 endfunction
 
 function global.is_boost_dependency(dependency)
-    define node = is_boost_dependency.dependency
-    return is_boost(node) | is_boost_lib(node)
+    define my.dependency = is_boost_dependency.dependency
+    return is_boost(my.dependency) | is_boost_lib(my.dependency)
 endfunction
 
 function global.is_package(dependency)
-    define node = is_package.dependency
-    return !is_empty(node.version) & !is_boost_dependency(node)
+    define my.dependency = is_package.dependency
+    return defined(my.dependency.version) & !is_boost_dependency(my.dependency)
 endfunction
 
 function global.is_unpackaged_lib(dependency)
-    define node = is_unpackaged_lib.dependency
-    return !is_empty(node.function) & !is_boost_dependency(node)
+    define my.dependency = is_unpackaged_lib.dependency
+    return defined(my.dependency.function) & !is_boost_dependency(my.dependency)
+endfunction
+
+# Debugging utilities.
+
+function global.trace1(text)
+    trace(my.text, 1)
+endfunction
+
+function global.trace2(text)
+    trace(my.text, 2)
+endfunction
+
+function global.trace3(text)
+    trace(my.text, 3)
+endfunction
+
+function global.trace(text, context)
+    if ((global.trace ? 0) = my.context ? 1)
+        echo "---> $(my.text)"
+    endif
 endfunction
 
 ###############################################################################
@@ -76,23 +93,23 @@ endfunction
 .template 1
 .
 .macro global.notify(filename)
-.   echo "Generating $(my.filename:)..."
+.   echo "Generating $(my.filename)..."
 .endmacro
 .
 .macro global.heading1(text)
 
-# $(my.text:)
+# $(my.text)
 #==============================================================================
 .endmacro heading1
 .
 .macro global.heading2(text)
-# $(my.text:)
+# $(my.text)
 #------------------------------------------------------------------------------
 .endmacro heading2
 .
 .macro global.copyleft(name)
 ###############################################################################
-# Copyright (c) 2011-2014 $(my.name:) developers (see COPYING).
+# Copyright (c) 2011-2014 $(my.name) developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
