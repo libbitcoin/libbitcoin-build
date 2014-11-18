@@ -19,13 +19,13 @@ endfunction
 
 function is_archive_match(build, name, system)
     define my.build = is_archive_match.build
-    trace1("is_archive_match($(my.name), $(my.system)) : $(my.build.name)")
+    trace1("is_archive_match($(my.name), $(my.system ? 0)) : $(my.build.name)")
     return defined(my.build.version) & (my.build.name = my.name) & \
         (!defined(my.system) | (my.build.system = my.system))
 endfunction
 
 function get_archive_version(install, name, system)
-    trace1("get_archive_version($(my.name), $(my.system))")
+    trace1("get_archive_version($(my.name), $(my.system ? 0))")
     define my.install = get_archive_version.install
     define my.build = my.install->build(is_archive_match(build, my.name,\
         my.system))?
@@ -38,7 +38,7 @@ function get_boost_file(install, system)
     define my.install = get_boost_file.install
     define my.version = get_archive_version(my.install, "boost", my.system)?
     if (!defined(my.version))
-        #trace1("get_boost_file:get_archive_version($(my.system)) = []")
+        trace1("get_boost_file:get_archive_version($(my.system ? 0)) = []")
         return
     endif
     define my.underscore_version = string.convch(my.version, ".", "_")
@@ -49,7 +49,7 @@ function get_gmp_file(install, system)
     define my.install = get_gmp_file.install
     define my.version = get_archive_version(my.install, "gmp", my.system)?
     if (!defined(my.version))    
-        #trace1("get_gmp_file:get_archive_version($(my.system)) = []")
+        trace1("get_gmp_file:get_archive_version($(my.system ? 0)) = []")
         return
     endif
     return "gmp-$(my.version).tar.bz2"
@@ -60,7 +60,7 @@ function get_boost_url(install, system)
     define my.install = get_boost_url.install
     define my.version = get_archive_version(my.install, "boost", my.system)?
     if (!defined(my.version))
-        #trace1("get_boost_url:get_archive_version($(my.system)) = []")
+        trace1("get_boost_url:get_archive_version($(my.system ? 0)) = []")
         return
     endif
     define my.archive = get_boost_file(my.install, my.system)?
@@ -79,7 +79,7 @@ function get_gmp_url(install, system)
     define my.base_url = "https\://ftp.gnu.org/gnu/gmp"
     define my.archive = get_gmp_file(my.install, my.system)?
     if (!defined(my.archive))
-        #trace1("get_gmp_url:get_gmp_file($(my.system)) = []")
+        trace1("get_gmp_url:get_gmp_file($(my.system ? 0)) = []")
         return
     endif
     define my.url = "$(my.base_url)/$(my.archive)"
@@ -132,34 +132,37 @@ BUILD_DIR="$(my.repo.name)-build"
 .endmacro # define_build_directory
 .
 .macro define_boost(install, system)
-.   trace1("define_boost($(my.system))")
+.   trace1("define_boost($(my.system ? 0))")
 .   define my.install = define_boost.install
 .   define my.url = get_boost_url(my.install, my.system)?
 .   if (defined(my.url))
-.       heading2("Boost archives for $(my.system).")
-BOOST_URL_$(my.SYSTEM)="$(my.url)"
-BOOST_ARCHIVE_$(my.SYSTEM)="$(get_boost_file(my.install, my.system))"
+.       define my.show_system = defined(my.system) ?? " for $(my.system)" ? ""
+.       define my.upper_system = defined(my.system) ?? "_$(my.system:upper,c)" ? ""
+.       heading2("Boost archives$(my.show_system).")
+BOOST_URL$(my.upper_system)="$(my.url)"
+BOOST_ARCHIVE$(my.upper_system)="$(get_boost_file(my.install, my.system))"
 
 .   endif
 .endmacro # define_boost
 .
 .macro define_gmp(install, system)
+.   trace1("define_gmp($(my.system ? 0))")
 .   define my.install = define_gmp.install
 .   define my.url = get_gmp_url(my.install, my.system)?
 .   if (defined(my.url))
-.       heading2("GMP archives for $(my.system).")
-GMP_URL_$(my.system:upper,c)="$(my.url)"
-GMP_ARCHIVE_$(my.system:upper,c)="$(get_gmp_file(my.install, my.system))"
+.       define my.show_system = defined(my.system) ?? " for $(my.system)" ? ""
+.       define my.upper_system = defined(my.system) ?? "_$(my.system:upper,c)" ? ""
+.       heading2("GMP archives$(my.show_system).")
+GMP_URL$(my.upper_system)="$(my.url)"
+GMP_ARCHIVE$(my.upper_system)="$(get_gmp_file(my.install, my.system))"
 
 .   endif
 .endmacro # define_gmp
 .
 .macro define_build_options(build)
 .   define my.build = define_build_options.build
-.   define my.system_name = defined(my.build.system) ??\
-        "_$(my.build.SYSTEM)" ? ""
-.   define my.show_system = defined(my.build.system) ??\
-        " for $(my.build.system)" ? ""
+.   define my.system_name = defined(my.build.system) ?? "_$(my.build.SYSTEM)" ? ""
+.   define my.show_system = defined(my.build.system) ?? " for $(my.build.system)" ? ""
 .   heading2("Set $(my.build.name) options$(my.show_system).")
 $(my.build.name:upper)_OPTIONS$(my.system_name)=\\
 .   for my.build.option as _option
@@ -173,20 +176,20 @@ $(my.build.name:upper)_OPTIONS$(my.system_name)=\\
 # Generation
 ###############################################################################
 function generate_installer()
-for generate.repository by name as _dependency
-    define my.out_file = "$(_dependency.name)/install.sh"
+for generate.repository by name as _repository
+    define my.out_file = "$(_repository.name)/install.sh"
     notify(my.out_file)
     output(my.out_file)
     
     language("bash")
-    define my.install = _dependency->install
-    copyleft(_dependency.name)
-    documentation(_dependency)
+    define my.install = _repository->install
+    copyleft(_repository.name)
+    documentation(_repository)
     
     heading1("Define common values.")
-    define_build_directory(_dependency)
-    #define_boost(my.install, "linux")
-    #define_boost(my.install, "darwin")
+    define_build_directory(_repository)
+    define_boost(my.install, "linux")
+    define_boost(my.install, "darwin")
     define_gmp(my.install)
     
     heading1("Define build options.")
@@ -195,7 +198,7 @@ for generate.repository by name as _dependency
     endfor Build
     
     close
-endfor _dependency
+endfor _repository
 endfunction # generate_installer
 .endtemplate
 

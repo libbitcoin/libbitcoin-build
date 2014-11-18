@@ -12,11 +12,11 @@
 .endtemplate
 .template 1
 .macro generate_travisyml()
-.for generate.repository by name as _dependency
-.   define my.out_file = "$(_dependency.name)/travis.yml"
+.for generate.repository by name as _repository
+.   define my.out_file = "$(_repository.name)/travis.yml"
 .   notify(my.out_file)
 .   output(my.out_file)
-.   copyleft(_dependency.name)
+.   copyleft(_repository.name)
 
 language:
     - cpp
@@ -38,11 +38,11 @@ before_install:
 
 script:
 
-    # Download and build $(_dependency.name) and all dependencies.
+    # Download and build $(_repository.name) and all dependencies.
     - sudo ./install.sh CXXFLAGS="-Os -s" --disable-shared --enable-static --build-gmp --build-boost
     
 
 .   close
-.endfor _dependency
+.endfor _repository
 .endmacro # generate_travisyml
 .endtemplate

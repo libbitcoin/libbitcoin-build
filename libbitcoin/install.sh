@@ -31,3 +31,72 @@
 #------------------------------------------------------------------------------
 BUILD_DIR="libbitcoin-build"
 
+# Boost archives for linux.
+#------------------------------------------------------------------------------
+BOOST_URL_LINUX="http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2/download"
+BOOST_ARCHIVE_LINUX="boost_1_49_0.tar.bz2"
+
+# Boost archives for darwin.
+#------------------------------------------------------------------------------
+BOOST_URL_DARWIN="http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.bz2/download"
+BOOST_ARCHIVE_DARWIN="boost_1_54_0.tar.bz2"
+
+# GMP archives.
+#------------------------------------------------------------------------------
+GMP_URL="https://ftp.gnu.org/gnu/gmp/gmp-6.0.0a.tar.bz2"
+GMP_ARCHIVE="gmp-6.0.0a.tar.bz2"
+
+
+# Define build options.
+#==============================================================================
+# Set boost options for linux.
+#------------------------------------------------------------------------------
+BOOST_OPTIONS=\
+"threading=single"\
+"variant=release"\
+"--disable-icu"\
+"--with-date_time"\
+"--with-filesystem"\
+"--with-regex"\
+"--with-system"\
+"--with-test"\
+"-d0"\
+"-q"
+
+# Set boost options for darwin.
+#------------------------------------------------------------------------------
+BOOST_OPTIONS=\
+"toolset=clang"\
+"cxxflags=-stdlib=libc++"\
+"linkflags=-stdlib=libc++"\
+"threading=single"\
+"variant=release"\
+"--disable-icu"\
+"--with-date_time"\
+"--with-filesystem"\
+"--with-regex"\
+"--with-system"\
+"--with-test"\
+"-d0"\
+"-q"
+
+# Set gmp options.
+#------------------------------------------------------------------------------
+GMP_OPTIONS=\
+"CPPFLAGS=-w"
+
+# Set secp256k1 options.
+#------------------------------------------------------------------------------
+SECP256K1_OPTIONS=\
+"CPPFLAGS=-w"\
+"--with-bignum=gmp"\
+"--with-field=gmp"\
+"--enable-benchmark=no"\
+"--enable-tests=no"\
+"--enable-endomorphism=no"
+
+# Set bitcoin options.
+#------------------------------------------------------------------------------
+BITCOIN_OPTIONS=\
+"--enable-silent-rules"
+

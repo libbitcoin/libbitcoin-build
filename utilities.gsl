@@ -58,12 +58,14 @@ endfunction
 
 function global.is_package(dependency)
     define my.dependency = is_package.dependency
-    return defined(my.dependency.version) & !is_boost_dependency(my.dependency)
+    return defined(my.dependency.version) &\
+    !is_boost_dependency(my.dependency)
 endfunction
 
 function global.is_unpackaged_lib(dependency)
     define my.dependency = is_unpackaged_lib.dependency
-    return defined(my.dependency.function) & !is_boost_dependency(my.dependency)
+    return defined(my.dependency.function) &\
+    !is_boost_dependency(my.dependency)
 endfunction
 
 # Debugging utilities.
@@ -82,7 +84,7 @@ endfunction
 
 function global.trace(text, context)
     if ((global.trace ? 0) = my.context ? 1)
-        echo "---> $(my.text)"
+        echo defined(my.text) ?? "---> $(my.text)" ? "undefined trace"
     endif
 endfunction
 

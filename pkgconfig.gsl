@@ -50,7 +50,7 @@ function format_unpackaged_libs(configure)
     define my.unpackaged_libs = ""
     for my.configure.dependency as _dependency where is_unpackaged_lib(_dependency)
         my.unpackaged_lib = "@$(_dependency.name)_LIBS@"
-        if (substring(my.unpackaged_libs, my.unpackaged_lib))
+        if (!defined(string.locate(my.unpackaged_libs, my.unpackaged_lib)))
             my.unpackaged_libs = "$(my.unpackaged_libs) $(my.unpackaged_lib)"
         endif
     endfor _dependency
@@ -63,21 +63,22 @@ endfunction
 .endtemplate
 .template 1
 .macro generate_pkgconfig()
-.for generate.repository by name as _dependency
-.   define my.out_file = "$(_dependency.name)/$(_dependency->package.name).pc.in"
+.for generate.repository by name as _repository
+.   define my.out_file = "$(_repository.name)/$(_repository->package.name).pc.in"
 .   notify(my.out_file)
 .   output(my.out_file)
-.   copyleft(_dependency.name)
-.   define my.configure = _dependency->configure
-.   define my.package = _dependency->package
+.   copyleft(_repository.name)
+.   define my.configure = _repository->configure
+.   define my.package = _repository->package
+
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: $(_dependency->package.name)
-Description: $(_dependency->package.description)
-URL: $(_dependency->package.url)
+Name: $(_repository->package.name)
+Description: $(_repository->package.description)
+URL: $(_repository->package.url)
 Version: @PACKAGE_VERSION@
 
 # Our dependencies that publish package configuration.
@@ -89,6 +90,6 @@ Cflags: -I${includedir} $(format_compiler_flags(my.package))
 # Our own lib and any we require that do not publish package configuration.
 Libs: -L${libdir} $(format_output_libs(my.package)) $(format_boost_libs(my.configure)) $(format_unpackaged_libs(my.configure))
 .   close
-.endfor _dependency
+.endfor _repository
 .endmacro # generate_pkgconfig
 .endtemplate

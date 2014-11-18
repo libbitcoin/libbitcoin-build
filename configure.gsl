@@ -13,8 +13,8 @@
 function format_boost_libraries(configure)
     define my.configure = format_boost_libraries.configure
     define my.boost_libraries = ""
-    for my.configure.dependency as _dependency where is_boost_lib(_dependency) &\
-        !is_true(_dependency.unpublished)
+    for my.configure.dependency as _dependency\
+        where is_boost_lib(_dependency) & !is_true(_dependency.unpublished)
         my.boost_libraries = "$(my.boost_libraries) -l$(_dependency.name)"
     endfor _dependency
     return trim_left(my.boost_libraries)
@@ -152,8 +152,8 @@ PKG_CHECK_MODULES([$(my.dependency.name)], [lib$(my.dependency.name) >= $(my.dep
 .macro check_boost(dependency)
 .   define my.dependency = check_boost.dependency
 .   define my.show_system = is_empty(my.dependency.system) ?? "" ? " if on $(my.dependency.system)"
-.   heading2("Require Boost of at least version $(my.dependency.version)$(my.show_system).")
 .   define my.system_pattern = is_empty(my.dependency.system) ?? "*" ? "*$(my.dependency.system)*"
+.   heading2("Require Boost of at least version $(my.dependency.version)$(my.show_system).")
 AS_CASE([${host_os}], [$(my.system_pattern)],
     AX_BOOST_BASE([$(my.dependency.version)], [], [AC_MSG_ERROR(
         [Boost $(my.dependency.version) or later is required but was not found.])]))
@@ -179,8 +179,8 @@ AS_IF([test x$$(my.symbol) != xno], [AX_$(my.dependency.name:upper,c)])
 .   define my.dependency = check_dependency.dependency
 .   define my.show_system = is_empty(my.dependency.system) ?? "" ? " if on $(my.dependency.system)"
 .   define my.output = is_empty(my.dependency.function) ?? "" ? " and output ${$(my.dependency.name:c)_LIBS}"
-.   heading2("Require $(my.dependency.name:c)$(my.show_system)$(my.output).")
 .   define my.system_pattern = is_empty(my.dependency.system) ?? "*" ? "*$(my.dependency.system)*"
+.   heading2("Require $(my.dependency.name:c)$(my.show_system)$(my.output).")
 .
 .   if (!is_empty(my.dependency.includes))
 AS_CASE([${host_os}], [$(my.system_pattern)], 
@@ -253,17 +253,17 @@ AC_OUTPUT
 # Generation
 ###############################################################################
 function generate_configure()
-for generate.repository by name as _dependency
+for generate.repository by name as _repository
 
-    define my.out_file = "$(_dependency.name)/configure.ac"
+    define my.out_file = "$(_repository.name)/configure.ac"
     notify(my.out_file)
     output(my.out_file)
 
-    copyleft(_dependency.name)
-    define my.configure = _dependency->configure
+    copyleft(_repository.name)
+    define my.configure = _repository->configure
     
     heading1("Standard declarations.")
-    initialize(_dependency)
+    initialize(_repository)
 
     heading1("Process options.")
     for my.configure.option as _option
@@ -296,9 +296,9 @@ for generate.repository by name as _dependency
     endfor Flag1
     
     heading1("Process outputs into templates.")
-    compile("Makefile.am $(_dependency->package.name).pc $(format_template_files(my.configure))")
+    compile("Makefile.am $(_repository->package.name).pc $(format_template_files(my.configure))")
     
     close
-endfor _dependency
+endfor _repository
 endfunction # generate_configure
 .endtemplate
