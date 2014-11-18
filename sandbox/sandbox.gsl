@@ -12,8 +12,8 @@ function test_assignment_ambiguity()
     test_value = "123"
     return test_value = "should not be this"
 endfunction
-echo test_assignment_ambiguity()
-echo test_value
+#echo test_assignment_ambiguity()
+#echo test_value
 
 function test_variable_case_sensitivity()
 
@@ -48,7 +48,7 @@ function test_variable_case_sensitivity()
     echo "default: $(FOO)"
     
 endfunction
-#test_variable_case_sensitivity()
+test_variable_case_sensitivity()
 
 function undefined_assignment()
     if (defined(string.locate("haystack", "hay")))

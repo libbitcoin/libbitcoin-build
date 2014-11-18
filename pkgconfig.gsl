@@ -12,8 +12,7 @@
 
 function format_boost_libs(configure)
     define my.configure = format_boost_libs.configure
-    return defined(my.configure->dependency(is_boost_lib(dependency))) ??\
-        "@boost_LIBS@" ? ""
+    return defined(my.configure->dependency(is_boost_lib(dependency))) ?? "@boost_LIBS@" ? ""
 endfunction
 
 function format_compiler_flags(package)
@@ -38,8 +37,7 @@ function format_packages(configure)
     define my.configure = format_packages.configure
     define my.packages = ""
     for my.configure.dependency as _dependency where is_package(_dependency)
-        my.packages = \
-            "$(my.packages) lib$(_dependency.name) >= $(_dependency.version)"
+        my.packages = "$(my.packages) lib$(_dependency.name) >= $(_dependency.version)"
     endfor _dependency
     return trim_left(my.packages)
 endfunction
@@ -50,6 +48,7 @@ function format_unpackaged_libs(configure)
     define my.unpackaged_libs = ""
     for my.configure.dependency as _dependency where is_unpackaged_lib(_dependency)
         my.unpackaged_lib = "@$(_dependency.name)_LIBS@"
+        # Prevent duplicates, as would be the case with system variants.
         if (!defined(string.locate(my.unpackaged_libs, my.unpackaged_lib)))
             my.unpackaged_libs = "$(my.unpackaged_libs) $(my.unpackaged_lib)"
         endif

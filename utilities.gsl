@@ -26,7 +26,6 @@ endfunction
 
 function global.trim_left(text)
     define my.extracted = ""
-    # How is 'extracted' passed out by reference?
     regexp.match("^ +(.*)$", my.text, my.extracted)
     return my.extracted ? ""
 endfunction

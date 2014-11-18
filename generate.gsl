@@ -10,7 +10,7 @@
 # Imports
 ###############################################################################
 
-[global].trace = 1
+[global].trace = 0
 [gsl].ignorecase = 0
 
 gsl from "utilities.gsl"
@@ -19,9 +19,9 @@ gsl from "installer.gsl"
 gsl from "pkgconfig.gsl"
 gsl from "travisyml.gsl"
 
-#generate_configure()
-#generate_pkgconfig()
-#generate_travisyml()
+generate_configure()
+generate_pkgconfig()
+generate_travisyml()
 generate_installer()
 
 ###############################################################################
