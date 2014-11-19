@@ -155,8 +155,8 @@ PKG_CHECK_MODULES([$(my.dependency.name)], [lib$(my.dependency.name) >= $(my.dep
 .   define my.system_pattern = is_empty(my.dependency.system) ?? "*" ? "*$(my.dependency.system)*"
 .   heading2("Require Boost of at least version $(my.dependency.version)$(my.show_system).")
 AS_CASE([${host_os}], [$(my.system_pattern)],
-    AX_BOOST_BASE([$(my.dependency.version)], [], [AC_MSG_ERROR(
-        [Boost $(my.dependency.version) or later is required but was not found.])]))
+    [AX_BOOST_BASE([$(my.dependency.version)], [], [AC_MSG_ERROR(
+        [Boost $(my.dependency.version) or later is required but was not found.])])])
 
 .endmacro # check_boost
 .
@@ -189,8 +189,8 @@ AS_CASE([${host_os}], [$(my.system_pattern)],
 .
 .   if (!is_empty(my.dependency.header))
 AS_CASE([${host_os}], [$(my.system_pattern)], 
-    AC_CHECK_HEADER([$(my.dependency.header)], [],
-        [AC_MSG_ERROR([$(my.dependency.name) header is required but was not found.])],-)
+    [AC_CHECK_HEADER([$(my.dependency.header)], [],
+        [AC_MSG_ERROR([$(my.dependency.name) header is required but was not found.])],-)])
 .   endif
 .
 .   if (!is_empty(my.dependency.libs))
@@ -200,10 +200,10 @@ AS_CASE([${host_os}], [$(my.system_pattern)],
 .
 .   if (!is_empty(my.dependency.function))
 AS_CASE([${host_os}], [$(my.system_pattern)], 
-    AC_CHECK_LIB([$(my.dependency.name)],[$(my.dependency.function)],
+    [AC_CHECK_LIB([$(my.dependency.name)],[$(my.dependency.function)],
         [AC_SUBST([$(my.dependency.name:c)_LIBS], [-l$(my.dependency.name)])],
         [AC_SUBST([$(my.dependency.name:c)_LIBS], [])
-            AC_MSG_ERROR([$(my.dependency.name) library is required but was not found.])])
+            AC_MSG_ERROR([$(my.dependency.name) library is required but was not found.])])])
 .   endif
 
 .endmacro # check_lib
@@ -220,8 +220,8 @@ AX_CHECK_COMPILE_FLAG([-$(my.dependency.name)],
 .   if (defined(my.dependency.alternate) & !is_true(my.dependency.link))
 AX_CHECK_COMPILE_FLAG([-$(my.dependency.name)],
     [CXXFLAGS="$CXXFLAGS -$(my.dependency.name)"],
-    AX_CHECK_COMPILE_FLAG([-$(my.dependency.alternate)],
-        [CXXFLAGS="$CXXFLAGS -$(my.dependency.alternate)"]))
+    [AX_CHECK_COMPILE_FLAG([-$(my.dependency.alternate)],
+        [CXXFLAGS="$CXXFLAGS -$(my.dependency.alternate)"])])
 
 .   endif
 .
