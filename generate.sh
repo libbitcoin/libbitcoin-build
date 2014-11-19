@@ -21,6 +21,8 @@ copy_to_repository()
       if [ -e "$REPO_PATH/install.sh" ]; then
         chmod +x "$REPO_PATH/install.sh"
       fi
+
+      echo "$REPO_PATH updated."
     fi
   else
     echo "$REPO_PATH not found, unable to update."
