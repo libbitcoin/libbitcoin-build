@@ -17,6 +17,7 @@ copy_to_repository()
 
     if [ "$CONTENTS" ]; then
       cp -r $CONTENT_PATH/* $REPO_PATH/
+      cp -r $CONTENT_PATH/.travis.yml $REPO_PATH/
 
       if [ -e "$REPO_PATH/install.sh" ]; then
         chmod +x "$REPO_PATH/install.sh"
