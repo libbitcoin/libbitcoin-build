@@ -38,7 +38,9 @@ function format_packages(configure)
     define my.configure = format_packages.configure
     define my.packages = ""
     for my.configure.dependency as _dependency where is_package(_dependency)
-        my.packages = "$(my.packages) lib$(_dependency.name) >= $(_dependency.version)"
+        define my.prefix = is_true(_dependency.unprefixed) ?? "" ? "lib"
+        define my.package = "$(my.prefix)$(_dependency.name)"
+        my.packages = "$(my.packages) $(my.package) >= $(_dependency.version)"
     endfor _dependency
     return trim_left(my.packages)
 endfunction
@@ -48,7 +50,7 @@ function format_unpackaged_libs(configure)
     define my.unpackaged_lib = ""
     define my.unpackaged_libs = ""
     for my.configure.dependency as _dependency where is_unpackaged_lib(_dependency)
-        my.unpackaged_lib = "@$(_dependency.name)_LIBS@"
+        my.unpackaged_lib = "@$(_dependency.name:c)_LIBS@"
         # Prevent duplicates, as would be the case with system variants.
         if (!defined(string.locate(my.unpackaged_libs, my.unpackaged_lib)))
             my.unpackaged_libs = "$(my.unpackaged_libs) $(my.unpackaged_lib)"
