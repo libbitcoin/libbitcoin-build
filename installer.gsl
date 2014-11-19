@@ -173,10 +173,6 @@ $(my.build.name:upper)_OPTIONS$(my.system_name)=\\
 .endmacro # define_build_options
 .
 .macro static_installer()
-.   heading2("Define option to build without compiling tests.")
-WITHOUT_TESTS=\\
-"--without-tests"
-
 .   heading1("Initialize values conditioned on build environment.")
 .   heading2("Exit this script on the first build error.")
 .
