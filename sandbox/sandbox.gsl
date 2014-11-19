@@ -8,6 +8,11 @@
 #
 ###############################################################################
 
+function test_normalize(value)
+    echo "$(my.value:upper,c)"
+endfunction
+test_normalize("czmq++")
+
 function test_assignment_ambiguity()
     test_value = "123"
     return test_value = "should not be this"
@@ -48,7 +53,7 @@ function test_variable_case_sensitivity()
     echo "default: $(FOO)"
     
 endfunction
-test_variable_case_sensitivity()
+#est_variable_case_sensitivity()
 
 function undefined_assignment()
     if (defined(string.locate("haystack", "hay")))

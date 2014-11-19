@@ -144,8 +144,9 @@ AM_CONDITIONAL([$(my.symbol:upper,c)], [test x$$(my.symbol:c) != xno])
 .
 .macro check_package(dependency)
 .   define my.dependency = check_package.dependency
+.   define my.prefix = is_true(my.dependency.unprefixed) ?? "" ? "lib"
 .   heading2("Require $(my.dependency.name) of at least version $(my.dependency.version) and output ${$(my.dependency.name)}.")
-PKG_CHECK_MODULES([$(my.dependency.name)], [lib$(my.dependency.name) >= $(my.dependency.version)])
+PKG_CHECK_MODULES([$(my.dependency.name:c)], [$(my.prefix)$(my.dependency.name) >= $(my.dependency.version)])
 
 .endmacro # check_package
 .
