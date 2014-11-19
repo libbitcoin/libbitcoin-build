@@ -12,7 +12,8 @@
 
 function format_boost_libs(configure)
     define my.configure = format_boost_libs.configure
-    return defined(my.configure->dependency(is_boost_lib(dependency))) ?? "@boost_LIBS@" ? ""
+    return defined(my.configure->dependency(is_boost_lib(dependency) &\
+        !is_true(_dependency.unpublished))) ?? "@boost_LIBS@" ? ""
 endfunction
 
 function format_compiler_flags(package)
