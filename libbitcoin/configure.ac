@@ -115,26 +115,6 @@ AM_CONDITIONAL([ENABLE_SHARED], [test x$enable_shared != xno])
 
 # Check dependencies.
 #==============================================================================
-# Require Boost of at least version 1.49.0 if on linux.
-#------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*linux*],
-    [AX_BOOST_BASE([1.49.0], [], [AC_MSG_ERROR(
-        [Boost 1.49.0 or later is required but was not found.])])])
-
-# Require Boost of at least version 1.54.0 if on darwin.
-#------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*darwin*],
-    [AX_BOOST_BASE([1.54.0], [], [AC_MSG_ERROR(
-        [Boost 1.54.0 or later is required but was not found.])])])
-
-AX_BOOST_DATE_TIME
-
-AX_BOOST_FILESYSTEM
-
-AX_BOOST_REGEX
-
-AX_BOOST_SYSTEM
-
 AS_IF([test x$with_tests != xno], [AX_BOOST_UNIT_TEST_FRAMEWORK])
 
 # Require rt if on linux and output ${rt_LIBS}.
@@ -174,10 +154,6 @@ AS_CASE([${host_os}], [*darwin*],
 # Require secp256k1 of at least version 0.0.1 and output ${secp256k1}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
-
-# Output ${boost_LIBS}
-#------------------------------------------------------------------------------
-AC_SUBST([boost_LIBS], ["-lboost_date_time -lboost_filesystem -lboost_regex -lboost_system"])
 
 
 # Set flags.
