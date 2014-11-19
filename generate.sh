@@ -11,16 +11,25 @@
 set -e
 
 # Make directories for generated build artifacts.
-mkdir -p libbitcoin
-mkdir -p libbitcoin-blockchain
-mkdir -p libbitcoin-client
-mkdir -p libbitcoin-explorer
-mkdir -p libbitcoin-node
-mkdir -p libbitcoin-protocol
-mkdir -p libbitcoin-server
+mkdir libbitcoin
+mkdir libbitcoin-blockchain
+mkdir libbitcoin-client
+mkdir libbitcoin-explorer
+mkdir libbitcoin-node
+mkdir libbitcoin-protocol
+mkdir libbitcoin-server
 
 # Generate build artifacts.
 gsl -q generate.xml
+
+# Make directories for sibling repositories.
+mkdir ../libbitcoin
+mkdir ../libbitcoin-blockchain
+mkdir ../libbitcoin-client
+mkdir ../libbitcoin-explorer
+mkdir ../libbitcoin-node
+mkdir ../libbitcoin-protocol
+mkdir ../libbitcoin-server
 
 # Copy outputs to all repositories.
 cp libbitcoin/*             ../libbitcoin/
