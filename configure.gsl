@@ -17,7 +17,7 @@ function format_boost_libraries(configure)
         where is_boost_lib(_dependency) & !is_true(_dependency.unpublished)
         my.boost_libraries = "$(my.boost_libraries) -l$(_dependency.name)"
     endfor _dependency
-    return !is_empty(my.boost_libraries) ?? '"$(trim_left(my.boost_libraries))"'
+    return '"$(trim_left(my.boost_libraries))"'
 endfunction
 
 function format_template_files(configure)
@@ -239,7 +239,7 @@ AX_CHECK_COMPILE_FLAG([-$(my.dependency.name)],
 .endmacro # flag
 .
 .macro output_value(name, value)
-.   if (defined(value))
+.   if (defined(my.value))
 .       heading2("Output ${$(my.name)}")
 AC_SUBST([$(my.name)], [$(my.value)])
 
