@@ -17,7 +17,8 @@ function format_boost_libraries(configure)
         where is_boost_lib(_dependency) & !is_true(_dependency.unpublished)
         my.boost_libraries = "$(my.boost_libraries) -l$(_dependency.name)"
     endfor _dependency
-    return '"$(trim_left(my.boost_libraries))"'
+    return !is_empty(my.boost_libraries) ??\
+        '"$(trim_left(my.boost_libraries))"'
 endfunction
 
 function format_template_files(configure)
