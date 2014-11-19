@@ -7,43 +7,47 @@
 # See https://github.com/imatix/gsl for details.
 ###############################################################################
 
+copy_to_repository()
+{
+  CONTENT_PATH="$1"
+  REPO_PATH="$2"
+
+  if [ -d "$REPO_PATH" ]; then
+    CONTENTS=$(ls -A $CONTENT_PATH)
+
+    if [ "$CONTENTS" ]; then
+      cp -r $CONTENT_PATH/* $REPO_PATH/
+
+      if [ -e "$REPO_PATH/install.sh" ]; then
+        chmod +x "$REPO_PATH/install.sh"
+      fi
+    fi
+  else
+    echo "$REPO_PATH not found, unable to update."
+  fi
+}
+
 # Exit this script on the first build error.
 set -e
 
 # Make directories for generated build artifacts.
-mkdir libbitcoin
-mkdir libbitcoin-blockchain
-mkdir libbitcoin-client
-mkdir libbitcoin-explorer
-mkdir libbitcoin-node
-mkdir libbitcoin-protocol
-mkdir libbitcoin-server
+mkdir -p libbitcoin
+mkdir -p libbitcoin-blockchain
+mkdir -p libbitcoin-client
+mkdir -p libbitcoin-explorer
+mkdir -p libbitcoin-node
+mkdir -p libbitcoin-protocol
+mkdir -p libbitcoin-server
 
 # Generate build artifacts.
 gsl -q generate.xml
 
-# Make directories for sibling repositories.
-mkdir ../libbitcoin
-mkdir ../libbitcoin-blockchain
-mkdir ../libbitcoin-client
-mkdir ../libbitcoin-explorer
-mkdir ../libbitcoin-node
-mkdir ../libbitcoin-protocol
-mkdir ../libbitcoin-server
-
 # Copy outputs to all repositories.
-cp libbitcoin/*             ../libbitcoin/
-cp libbitcoin-blockchain/*  ../libbitcoin-blockchain/
-cp libbitcoin-client/*      ../libbitcoin-client/
-cp libbitcoin-explorer/*    ../libbitcoin-explorer/
-cp libbitcoin-node/*        ../libbitcoin-node/
-cp libbitcoin-protocol/*    ../libbitcoin-protocol/
-cp libbitcoin-server/*      ../libbitcoin-server/
+copy_to_repository libbitcoin             ../libbitcoin
+copy_to_repository libbitcoin-blockchain  ../libbitcoin-blockchain
+copy_to_repository libbitcoin-client      ../libbitcoin-client
+copy_to_repository libbitcoin-explorer    ../libbitcoin-explorer
+copy_to_repository libbitcoin-node        ../libbitcoin-node
+copy_to_repository libbitcoin-protocol    ../libbitcoin-protocol
+copy_to_repository libbitcoin-server      ../libbitcoin-server
 
-chmod +x ../libbitcoin/install.sh
-chmod +x ../libbitcoin-blockchain/install.sh
-chmod +x ../libbitcoin-client/install.sh
-chmod +x ../libbitcoin-explorer/install.sh
-chmod +x ../libbitcoin-node/install.sh
-chmod +x ../libbitcoin-protocol/install.sh
-chmod +x ../libbitcoin-server/install.sh
