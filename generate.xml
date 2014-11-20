@@ -87,59 +87,43 @@
     
   </repository>
   
-  <repositoryX 
-    name="libbitcoin-blockchain" 
-    nickname="blockchain"
-    namespace="chain"
-    package="libbitcoin-blockchain"
-    libraries="bitcoin-blockchain"
-    flags="std=c++11"
-    version="2.0.0"
-    email="genjix@riseup.net"
-    description="Bitcoin Blockchain Implementation"
-    url="https://github.com/libbitcoin/libbitcoin-blockchain" >
+  <repositoryX name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
+
+    <package name="libbitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" >
+      <cflag value="std=c++11" />
+      <output name="bitcoin-blockchain" />
+    </package>
+
   </repositoryX>
   
-  <repositoryX
-    name="libbitcoin-explorer"
-    nickname="explorer"
-    namespace="bx"
-    package="libbitcoin-explorer"
-    libraries="bitcoin-explorer"
-    flags="std=c++11"
-    version="2.0.0"
-    email="eric@voskuil.org"
-    description="Bitcoin Client Protocol Implementation"
-    url="https://github.com/libbitcoin/libbitcoin-explorer" >
+  <repositoryX name="libbitcoin-explorer" version="2.0.0" email="eric@voskuil.org">
+
+    <package name="libbitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" >
+      <cflag value="std=c++11" />
+      <output name="bitcoin-explorer" />
+    </package>
+
   </repositoryX>
   
-  <repositoryX
-    name="libbitcoin-client"
-    nickname="client"
-    namespace="client"
-    package="libbitcoin-client"
-    libraries="bitcoin-client"
-    flags="std=c++11"
-    version="2.0.0"
-    email="mienkphi@gmail.com"
-    description="Bitcoin Command Line Tool"
-    url="https://github.com/libbitcoin/libbitcoin-client" >
+  <repositoryX name="libbitcoin-client" version="2.0.0" email="mienkphi@gmail.com" >
+    
+    <package name="libbitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" >
+      <cflag value="std=c++11" />
+      <output name="bitcoin-client" />
+    </package>
+    
   </repositoryX>
   
-  <repositoryX
-    name="libbitcoin-node"
-    nickname="node"
-    namespace="node"
-    package="libbitcoin-node"
-    libraries="bitcoin-node"
-    flags="std=c++11"
-    version="2.0.0"
-    email="mienkphi@gmail.com"
-    description="Bitcoin Full Node"
-    url="https://github.com/libbitcoin/libbitcoin-node" >
+  <repositoryX name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
+
+    <package name="libbitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" >
+      <cflag value="std=c++11" />
+      <output name="bitcoin-node" />
+    </package>
+
   </repositoryX>
-  
-  <repository name="libbitcoin-protocol" version="2.0.0" email="mienkphi@gmail.com">
+
+  <repositoryX name="libbitcoin-protocol" version="2.0.0" email="mienkphi@gmail.com">
 
     <package name="libbitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" >
       <cflag value="std=c++11" />
@@ -234,19 +218,14 @@
       </build>
     </install>
     
-  </repository>
-  
-  <repositoryX
-    name="libbitcoin-server"
-    nickname="server"
-    namespace="server"
-    package="libbitcoin-server"
-    libraries="bitcoin-server"
-    flags="std=c++11"
-    version="3.0.0"
-    email="eric@voskuil.org"
-    description="Bitcoin Server Protocol Implementation"
-    url="https://github.com/libbitcoin/libbitcoin-server" >
   </repositoryX>
   
+  <repositoryX name="libbitcoin-server" version="2.0.0" email="genjix@riseup.net">
+
+    <package name="libbitcoin-server" description="Bitcoin Server Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-server" >
+      <cflag value="std=c++11" />
+      <output name="bitcoin-server" />
+    </package>
+  </repositoryX>
+
 </generate>

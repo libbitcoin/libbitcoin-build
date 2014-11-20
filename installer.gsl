@@ -497,14 +497,33 @@ build_from_travis()
 
 .endmacro # define_build_functions
 .
+.macro define_build(build)
+.   define my.build = define_build.build
+
+    
+    # TODO: build $(my.build.name) $(my.build.system ? "-") $(my.build.version ? "-") $(my.build.parallel ? "false")
+.endmacro # define_build
+.
 .macro define_build_all(install)
 .   define my.install = define_build_all.install
 build_all()
 {
-    build_from_tarball_gmp $GMP_URL $GMP_ARCHIVE gmp $PARALLEL "$@" $GMP_OPTIONS
-    build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
-    build_from_github bitcoin secp256k1 master $PARALLEL "$@" $SECP256K1_OPTIONS
-    build_from_travis libbitcoin libbitcoin version2 $PARALLEL "$@" $BITCOIN_OPTIONS
+.#  build_from_tarball_gmp $GMP_URL $GMP_ARCHIVE gmp $PARALLEL "$@" $GMP_OPTIONS
+.#  build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
+.#  build_from_github bitcoin secp256k1 master $PARALLEL "$@" $SECP256K1_OPTIONS
+.#  build_from_travis libbitcoin libbitcoin version2 $PARALLEL "$@" $BITCOIN_OPTIONS
+.
+.   for my.install.build as _build where count(_build.option) > 0
+.       if (is_boost_build(_build))
+.           check_boost(_dependency)
+.       elsif (is_boost_lib(_dependency))
+.           check_boost_lib(_dependency)
+.       elsif (is_package(_dependency))
+.           check_package(_dependency)
+.       else
+.           check_dependency(_dependency)
+.       endif
+.   endfor _build    
 }
 
 .endmacro # static_installer
