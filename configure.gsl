@@ -13,8 +13,8 @@
 function format_boost_libraries(configure)
     define my.configure = format_boost_libraries.configure
     define my.boost_libraries = ""
-    for my.configure.dependency as _dependency\
-        where is_boost_lib(_dependency) & !is_true(_dependency.unpublished)
+    for my.configure.dependency as _dependency where is_boost_lib(_dependency)\
+        & is_published(_dependency)
         my.boost_libraries = "$(my.boost_libraries) -l$(_dependency.name)"
     endfor _dependency
     return !is_empty(my.boost_libraries) ??\

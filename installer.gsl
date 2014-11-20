@@ -165,7 +165,7 @@ GMP_ARCHIVE$(my.upper_system)="$(get_gmp_file(my.install, my.system))"
 .   define my.show_system = defined(my.build.system) ?? " for $(my.build.system)" ? ""
 .   define my.system_name = defined(my.build.system) ?? "_$(my.build.system:upper,c)" ? ""
 .   heading2("Define $(my.build.name) options$(my.show_system).")
-$(my.build.name:upper)_OPTIONS$(my.system_name)=\\
+$(my.build.name:upper,c)_OPTIONS$(my.system_name)=\\
 .   for my.build.option as _option
 "$(_option.value) "$(!last() ?? "\\")
 .   endfor _option

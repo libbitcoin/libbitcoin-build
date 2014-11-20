@@ -45,6 +45,11 @@ function global.is_boost(dependency)
     return my.dependency.name = "boost"
 endfunction
 
+function global.is_published(dependency)
+    define my.dependency = is_published.dependency
+    return !is_true(my.dependency.unpublished)
+endfunction
+
 function global.is_boost_lib(dependency)
     define my.dependency = is_boost_lib.dependency
     return starts_with(my.dependency.name, "boost_")
