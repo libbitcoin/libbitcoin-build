@@ -174,6 +174,112 @@
       <cflag value="std=c++11" />
       <output name="bitcoin-explorer" />
     </package>
+    
+    <configure>
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
+      
+      <!-- TODO: instead of conditional="true" use define="BOOST_TEST_DYN_LINK". -->
+      <option type="enable" name="shared" default="yes" conditional="true" inherited="true" />
+      
+      <!-- TODO: implement unconditional defines. -->
+      <define name="BOOST_NO_EXCEPTIONS" />
+      <define name="BOOST_EXCEPTION_DISABLE" />
+      
+      <dependency name="boost" system="linux" version="1.49.0" />
+      <dependency name="boost" system="darwin" version="1.54.0" />
+      <dependency name="boost_chrono" />
+      <dependency name="boost_program_options" />
+      <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
+      <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
+      <dependency name="bitcoin-client" version="2.0.0" />
+      
+      <flag name="Wall" comment="Warn on all stuff." />
+      <flag name="Wextra" comment="Warn on extra stuff." />
+      <!-- Wpedantic causes lots of boost 1.49 property_tree included header warnings, so leave off. -->
+      <!--<flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />-->
+      <flag name="Wno-missing-braces" comment="Conform to style." />
+      <flag name="Wno-deprecated-register" comment="Clean up Boost 1.54 headers (clang)." />
+      <flag name="Wno-unused-local-typedefs" comment="Clean up Boost 1.49 headers (gcc)." />
+      <flag name="Wno-unknown-warning-option" comment="Clean up on OSX (clang)." />
+      <flag name="Wno-maybe-uninitialized" comment="This cleans up for boost property_tree headers (boost exceptions off)." />
+      <flag name="Wno-return-type" comment="This cleans up for boost property_tree headers (boost exceptions off)." />
+      <flag name="Wno-sign-compare" comment="This cleans up for protobuf headers." />
+      <flag name="Wno-nested-anon-types" comment="This cleans up for protobuf headers." />
+      <flag name="Wno-unused-parameter" comment="This cleans up for protobuf headers." />
+      <flag name="fstack-protector" link="true" comment="Protect stack." />
+      <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
+      <!--<flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />-->
+      <!--<flag name="fvisibility=internal" alternate="fvisibility=hidden" comment="Set visibility to internal or hidden." />-->
+    </configure>
+    
+    <install>
+      <build name="boost" system="linux" version="1.49.0" parallel="true" >
+        <option value="threading=single" />
+        <option value="variant=release" />
+        <option value="--disable-icu" />
+        <option value="--with-chrono" />
+        <option value="--with-date_time" />
+        <option value="--with-filesystem" />
+        <option value="--with-program_options" />
+        <option value="--with-regex" />
+        <option value="--with-system" />
+        <option value="--with-test" />
+        <option value="-d0" />
+        <option value="-q" />
+      </build>
+      <build name="boost" system="darwin" version="1.54.0" parallel="true" >
+        <option value="toolset=clang" />
+        <option value="cxxflags=-stdlib=libc++" />
+        <option value="linkflags=-stdlib=libc++" />
+        <option value="threading=single" />
+        <option value="variant=release" />
+        <option value="--disable-icu" />
+        <option value="--with-chrono" />
+        <option value="--with-date_time" />
+        <option value="--with-filesystem" />
+        <option value="--with-program_options" />
+        <option value="--with-regex" />
+        <option value="--with-system" />
+        <option value="--with-test" />
+        <option value="-d0" />
+        <option value="-q" />
+      </build>
+      <build name="gmp" version="6.0.0a" parallel="true" >
+        <option value="CPPFLAGS=-w" />
+      </build>
+      <build name="secp256k1" github="bitcoin" repository="secp256k1" branch="master" parallel="true" >
+        <option value="--with-bignum=gmp" />
+        <option value="--with-field=gmp" />
+        <option value="--enable-benchmark=no" />
+        <option value="--enable-tests=no" />
+        <option value="--enable-endomorphism=no" />
+      </build>
+      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
+        <option value="--enable-silent-rules" />
+      </build>
+      <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" />
+      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
+        <option value="--with-libsodium" />
+      </build>
+      <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
+        <option value="--without-makecert" />
+      </build>
+      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" />
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
+        <option value="--enable-silent-rules" />
+        <option value="--without-tests" />
+      </build>
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
+        <option value="--enable-silent-rules" />
+        <option value="--without-tests" />
+      </build>
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
+        <option value="--enable-silent-rules" />
+      </build>
+    </install>
 
   </repositoryX>
   
@@ -267,7 +373,7 @@
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version2" parallel="true" >
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
       </build>
     </install>
