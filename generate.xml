@@ -197,17 +197,16 @@
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
       </build>
-      <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
-      </build>
+      <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" />
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
         <option value="--with-libsodium" />
       </build>
       <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
         <option value="--without-makecert" />
       </build>
-      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
-      </build>
+      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" />
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
+        <option value="--enable-silent-rules" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />

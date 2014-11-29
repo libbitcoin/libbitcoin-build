@@ -48,16 +48,16 @@ endfunction
 
 function format_unpackaged_libs(configure)
     define my.configure = format_unpackaged_libs.configure
-    define my.unpackaged_lib = ""
-    define my.unpackaged_libs = ""
-    for my.configure.dependency as _dependency where is_unpackaged_lib(_dependency)
-        my.unpackaged_lib = "@$(_dependency.name:c)_LIBS@"
-        # Prevent duplicates, as would be the case with system variants.
-        if (!defined(string.locate(my.unpackaged_libs, my.unpackaged_lib)))
-            my.unpackaged_libs = "$(my.unpackaged_libs) $(my.unpackaged_lib)"
+    define my.free_libs = ""
+    for my.configure.dependency as _dependency\
+        where is_unpackaged_lib(_dependency)
+        # Unique by dependency.name
+        if !defined(my.lib_$(_dependency.name:c))
+            define my.lib_$(_dependency.name:c) = 0
+            my.free_libs = "$(my.free_libs) @$(_dependency.name:c)_LIBS@"
         endif
     endfor _dependency
-    return trim_left(my.unpackaged_libs)
+    return trim_left(my.free_libs)
 endfunction
 
 ###############################################################################
