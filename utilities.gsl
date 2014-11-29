@@ -83,9 +83,19 @@ endfunction
 
 # Build Utilities.
 
+function global.is_gmp_build(build)
+    define my.build = is_gmp_build.build
+    return my.build.name = "gmp"
+endfunction
+
 function global.is_boost_build(build)
     define my.build = is_boost_build.build
     return my.build.name = "boost"
+endfunction
+
+function global.is_github_build(build)
+    define my.build = is_github_build.build
+    return !is_empty(my.build.github)
 endfunction
 
 

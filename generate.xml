@@ -43,6 +43,9 @@
     </configure>
     
     <install>
+      <build name="gmp" version="6.0.0a" parallel="true" >
+        <option value="CPPFLAGS=-w" />
+      </build>
       <build name="boost" system="linux" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
@@ -69,9 +72,6 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
-      </build>
-      <build name="gmp" version="6.0.0a" parallel="true" >
-        <option value="CPPFLAGS=-w" />
       </build>
       <build name="secp256k1" github="bitcoin" repository="secp256k1" branch="master" parallel="true" >
         <option value="--with-bignum=gmp" />
@@ -123,7 +123,7 @@
 
   </repositoryX>
 
-  <repositoryX name="libbitcoin-protocol" version="2.0.0" email="mienkphi@gmail.com">
+  <repository name="libbitcoin-protocol" version="2.0.0" email="mienkphi@gmail.com">
 
     <package name="libbitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" >
       <cflag value="std=c++11" />
@@ -197,10 +197,6 @@
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
-        <option value="--without-tests" />
-      </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
       </build>
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
@@ -213,12 +209,16 @@
       </build>
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin-protocol" repository="libbitcoin-protocol" branch="version2" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
+        <option value="--enable-silent-rules" />
+        <option value="--without-tests" />
+      </build>
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
       </build>
     </install>
     
-  </repositoryX>
+  </repository>
   
   <repositoryX name="libbitcoin-server" version="2.0.0" email="genjix@riseup.net">
 
