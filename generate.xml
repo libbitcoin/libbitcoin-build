@@ -214,9 +214,9 @@
       <dependency name="boost" system="linux" version="1.49.0" />
       <dependency name="boost" system="darwin" version="1.54.0" />
       <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
-      <dependency name="bitcoin" version="2.7.0" />
       <dependency name="protobuf" version="2.6.0" unprefixed="true" />
       <dependency name="czmq++" version="0.4.1" />
+      <dependency name="bitcoin" version="2.7.0" />
       
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
@@ -271,6 +271,9 @@
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
       </build>
+      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
+        <option value="--enable-silent-rules" />
+      </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" />
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
         <option value="--with-libsodium" />
@@ -279,9 +282,6 @@
         <option value="--without-makecert" />
       </build>
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" />
-      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
-        <option value="--enable-silent-rules" />
-      </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />
