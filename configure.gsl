@@ -147,6 +147,9 @@ AM_CONDITIONAL([$(my.symbol:upper,c)], [test x$$(my.symbol:c) != xno])
 .   define my.dependency = check_package.dependency
 .   define my.prefix = is_true(my.dependency.unprefixed) ?? "" ? "lib"
 .   heading2("Require $(my.dependency.name) of at least version $(my.dependency.version) and output ${$(my.dependency.name)}.")
+.   if (!is_empty(my.dependency.comment))
+.       heading3("$(my.dependency.comment)")
+.   endif
 PKG_CHECK_MODULES([$(my.dependency.name:c)], [$(my.prefix)$(my.dependency.name) >= $(my.dependency.version)])
 
 .endmacro # check_package
@@ -156,6 +159,9 @@ PKG_CHECK_MODULES([$(my.dependency.name:c)], [$(my.prefix)$(my.dependency.name) 
 .   define my.show_system = is_empty(my.dependency.system) ?? "" ? " if on $(my.dependency.system)"
 .   define my.system_pattern = is_empty(my.dependency.system) ?? "*" ? "*$(my.dependency.system)*"
 .   heading2("Require Boost of at least version $(my.dependency.version)$(my.show_system).")
+.   if (!is_empty(my.dependency.comment))
+.       heading3("$(my.dependency.comment)")
+.   endif
 AS_CASE([${host_os}], [$(my.system_pattern)],
     [AX_BOOST_BASE([$(my.dependency.version)], [], [AC_MSG_ERROR(
         [Boost $(my.dependency.version) or later is required but was not found.])])])
@@ -169,6 +175,9 @@ AS_CASE([${host_os}], [$(my.system_pattern)],
 .   endif
 .   define my.symbol = defined(my.dependency.with) ?? "with_$(my.dependency.with)" ?\
         (defined(my.dependency.enable) ?? "enable_$(my.dependency.enable)" ? "")
+.   if (!is_empty(my.dependency.comment))
+.       heading3("$(my.dependency.comment)")
+.   endif        
 .   if (is_empty(my.symbol))
 AX_$(my.dependency.name:upper,c)
 .   else
@@ -183,6 +192,9 @@ AS_IF([test x$$(my.symbol) != xno], [AX_$(my.dependency.name:upper,c)])
 .   define my.output = is_empty(my.dependency.function) ?? "" ? " and output ${$(my.dependency.name:c)_LIBS}"
 .   define my.system_pattern = is_empty(my.dependency.system) ?? "*" ? "*$(my.dependency.system)*"
 .   heading2("Require $(my.dependency.name:c)$(my.show_system)$(my.output).")
+.   if (!is_empty(my.dependency.comment))
+.       heading3("$(my.dependency.comment)")
+.   endif
 .
 .   if (!is_empty(my.dependency.includes))
 AS_CASE([${host_os}], [$(my.system_pattern)], 
