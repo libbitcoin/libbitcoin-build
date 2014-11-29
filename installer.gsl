@@ -172,7 +172,7 @@ $(my.build.name:upper,c)_OPTIONS$(my.system_name)=\\
 
 .endmacro # define_build_options
 .
-.macro static_installer()
+.macro core_installer()
 .   heading1("Initialize values conditioned on build environment.")
 .   heading2("Exit this script on the first build error.")
 .
@@ -343,12 +343,12 @@ make_silent()
 {
     JOBS=$1
     TARGET=$2
-    
+
     # Avoid setting -j1 (causes problems on Travis).
     if [[ $JOBS -gt $SEQUENTIAL ]]; then
         make --silent -j$JOBS $TARGET
     else
-        make --silent
+        make --silent $TARGET
     fi
 }
 
@@ -497,14 +497,53 @@ build_from_travis()
 
 .endmacro # define_build_functions
 .
+.macro build_gmp()
+    build_from_tarball_gmp $GMP_URL $GMP_ARCHIVE gmp $PARALLEL "$@" $GMP_OPTIONS
+.endmacro # build_gmp
+.
+.macro build_boost()
+    build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
+.endmacro # build_boost
+.
+.macro build_github(build)
+.   define my.build = build_github.build
+.   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
+.   define my.options = "$$(my.build.name:upper,c)_OPTIONS"
+    build_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) $(my.parallel) "$@" $(my.options)
+.endmacro # build_github
+.
+.macro build_travis(build)
+.   define my.build = build_travis.build
+.   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
+.   define my.options = "$$(my.build.name:upper,c)_OPTIONS"
+    build_from_travis $(my.build.github) $(my.build.repository) $(my.build.branch) $(my.parallel) "$@" $(my.options)
+.endmacro # build_travis
+.
 .macro define_build_all(install)
 .   define my.install = define_build_all.install
 build_all()
 {
-    build_from_tarball_gmp $GMP_URL $GMP_ARCHIVE gmp $PARALLEL "$@" $GMP_OPTIONS
-    build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
-    build_from_github bitcoin secp256k1 master $PARALLEL "$@" $SECP256K1_OPTIONS
-    build_from_travis libbitcoin libbitcoin version2 $PARALLEL "$@" $BITCOIN_OPTIONS
+.   for my.install.build as _build
+.       # Unique by build.name
+.       if !defined(my.build_$(_build.name:c))
+.           define my.build_$(_build.name:c) = 0
+.
+.           if (is_gmp_build(_build))
+.               build_gmp()
+.           elsif (is_boost_build(_build))
+.               build_boost()
+.           elsif (is_github_build(_build))
+.               if (!last())
+.                   build_github(_build)
+.               else
+.                   build_travis(_build)
+.               endif
+.           else
+.               abort "Invalid build type: $(_build.name)."
+.           endif
+.
+.       endif
+.   endfor _build    
 }
 
 .endmacro # static_installer
@@ -545,7 +584,7 @@ for generate.repository by name as _repository
     endfor _build
 
     # This is the bulk of the build script and is completely static.
-    static_installer()
+    core_installer()
         
     heading1("The master build function.")
     define_build_all(my.install)

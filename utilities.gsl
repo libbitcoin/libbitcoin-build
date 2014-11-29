@@ -38,18 +38,25 @@ function global.trim_both(text)
     return trim_left(string.trim(my.text))
 endfunction
 
-# Configure and pkgconfig utilities.
+# Dependency Utilities.
 
+# TODO: need to use function names as a form of namespace identification
+# so that the called can see the parameter as "dependency". This will allow
+# room for other similarly-named functions over differently-typed arguments.
+
+# is_boost_dependency
 function global.is_boost(dependency)
     define my.dependency = is_boost.dependency
     return my.dependency.name = "boost"
 endfunction
 
+# is_published_dependency
 function global.is_published(dependency)
     define my.dependency = is_published.dependency
     return !is_true(my.dependency.unpublished)
 endfunction
 
+# is_boost_lib_dependency
 function global.is_boost_lib(dependency)
     define my.dependency = is_boost_lib.dependency
     return starts_with(my.dependency.name, "boost_")
@@ -60,17 +67,37 @@ function global.is_boost_dependency(dependency)
     return is_boost(my.dependency) | is_boost_lib(my.dependency)
 endfunction
 
+# is_package_dependency
 function global.is_package(dependency)
     define my.dependency = is_package.dependency
     return defined(my.dependency.version) &\
     !is_boost_dependency(my.dependency)
 endfunction
 
+# is_unpackaged_lib_dependency
 function global.is_unpackaged_lib(dependency)
     define my.dependency = is_unpackaged_lib.dependency
     return defined(my.dependency.function) &\
     !is_boost_dependency(my.dependency)
 endfunction
+
+# Build Utilities.
+
+function global.is_gmp_build(build)
+    define my.build = is_gmp_build.build
+    return my.build.name = "gmp"
+endfunction
+
+function global.is_boost_build(build)
+    define my.build = is_boost_build.build
+    return my.build.name = "boost"
+endfunction
+
+function global.is_github_build(build)
+    define my.build = is_github_build.build
+    return !is_empty(my.build.github)
+endfunction
+
 
 # Debugging utilities.
 
