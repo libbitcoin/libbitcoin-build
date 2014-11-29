@@ -87,47 +87,11 @@
     
   </repository>
   
-  <repositoryX name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
 
     <package name="libbitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" >
       <cflag value="std=c++11" />
       <output name="bitcoin-blockchain" />
-    </package>
-
-  </repositoryX>
-  
-  <repositoryX name="libbitcoin-explorer" version="2.0.0" email="eric@voskuil.org">
-
-    <package name="libbitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" >
-      <cflag value="std=c++11" />
-      <output name="bitcoin-explorer" />
-    </package>
-
-  </repositoryX>
-  
-  <repositoryX name="libbitcoin-client" version="2.0.0" email="mienkphi@gmail.com" >
-    
-    <package name="libbitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" >
-      <cflag value="std=c++11" />
-      <output name="bitcoin-client" />
-    </package>
-    
-  </repositoryX>
-  
-  <repositoryX name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
-
-    <package name="libbitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" >
-      <cflag value="std=c++11" />
-      <output name="bitcoin-node" />
-    </package>
-
-  </repositoryX>
-
-  <repository name="libbitcoin-protocol" version="2.0.0" email="mienkphi@gmail.com">
-
-    <package name="libbitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" >
-      <cflag value="std=c++11" />
-      <output name="bitcoin-protocol" />
     </package>
     
     <configure>
@@ -141,8 +105,6 @@
       <dependency name="boost" system="darwin" version="1.54.0" />
       <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
       <dependency name="bitcoin" version="2.7.0" />
-      <dependency name="protobuf" version="2.6.0" unprefixed="true" />
-      <dependency name="czmq++" version="0.4.1" />
       
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
@@ -197,6 +159,121 @@
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
       </build>
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
+        <option value="--enable-silent-rules" />
+        <option value="--without-tests" />
+      </build>
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
+        <option value="--enable-silent-rules" />
+      </build>
+    </install>
+
+  </repository>
+  
+  <repositoryX name="libbitcoin-explorer" version="2.0.0" email="eric@voskuil.org">
+
+    <package name="libbitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" >
+      <cflag value="std=c++11" />
+      <output name="bitcoin-explorer" />
+    </package>
+
+  </repositoryX>
+  
+  <repositoryX name="libbitcoin-client" version="2.0.0" email="mienkphi@gmail.com" >
+    
+    <package name="libbitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" >
+      <cflag value="std=c++11" />
+      <output name="bitcoin-client" />
+    </package>
+    
+  </repositoryX>
+  
+  <repositoryX name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
+
+    <package name="libbitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" >
+      <cflag value="std=c++11" />
+      <output name="bitcoin-node" />
+    </package>
+
+  </repositoryX>
+
+  <repository name="libbitcoin-protocol" version="2.0.0" email="mienkphi@gmail.com">
+
+    <package name="libbitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" >
+      <cflag value="std=c++11" />
+      <output name="bitcoin-protocol" />
+    </package>
+    
+    <configure>
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
+      <option type="enable" name="shared" default="yes" conditional="true" inherited="true" />
+      
+      <dependency name="boost" system="linux" version="1.49.0" />
+      <dependency name="boost" system="darwin" version="1.54.0" />
+      <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
+      <dependency name="protobuf" version="2.6.0" unprefixed="true" />
+      <dependency name="czmq++" version="0.4.1" />
+      <dependency name="bitcoin" version="2.7.0" />
+      
+      <flag name="Wall" comment="Warn on all stuff." />
+      <flag name="Wextra" comment="Warn on extra stuff." />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
+      <flag name="Wno-missing-braces" comment="Conform to style." />
+      <flag name="Wno-deprecated-register" comment="Clean up Boost 1.54 headers (clang)." />
+      <flag name="Wno-unused-local-typedefs" comment="Clean up Boost 1.49 headers (gcc)." />
+      <flag name="Wno-unknown-warning-option" comment="Clean up on OSX (clang)." />
+      <flag name="fstack-protector" link="true" comment="Protect stack." />
+      <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
+      <!--<flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />-->
+      <!--<flag name="fvisibility=internal" alternate="fvisibility=hidden" comment="Set visibility to internal or hidden." />-->
+      
+      <!-- <template name="CompileMe.am" /> -->
+    </configure>
+    
+    <install>
+      <build name="boost" system="linux" version="1.49.0" parallel="true" >
+        <option value="threading=single" />
+        <option value="variant=release" />
+        <option value="--disable-icu" />
+        <option value="--with-date_time" />
+        <option value="--with-filesystem" />
+        <option value="--with-regex" />
+        <option value="--with-system" />
+        <option value="--with-test" />
+        <option value="-d0" />
+        <option value="-q" />
+      </build>
+      <build name="boost" system="darwin" version="1.54.0" parallel="true" >
+        <option value="toolset=clang" />
+        <option value="cxxflags=-stdlib=libc++" />
+        <option value="linkflags=-stdlib=libc++" />
+        <option value="threading=single" />
+        <option value="variant=release" />
+        <option value="--disable-icu" />
+        <option value="--with-date_time" />
+        <option value="--with-filesystem" />
+        <option value="--with-regex" />
+        <option value="--with-system" />
+        <option value="--with-test" />
+        <option value="-d0" />
+        <option value="-q" />
+      </build>
+      <build name="gmp" version="6.0.0a" parallel="true" >
+        <option value="CPPFLAGS=-w" />
+      </build>
+      <build name="secp256k1" github="bitcoin" repository="secp256k1" branch="master" parallel="true" >
+        <option value="--with-bignum=gmp" />
+        <option value="--with-field=gmp" />
+        <option value="--enable-benchmark=no" />
+        <option value="--enable-tests=no" />
+        <option value="--enable-endomorphism=no" />
+      </build>
+      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
+        <option value="--enable-silent-rules" />
+      </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" />
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
         <option value="--with-libsodium" />
@@ -205,9 +282,6 @@
         <option value="--without-makecert" />
       </build>
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" />
-      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
-        <option value="--enable-silent-rules" />
-      </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />

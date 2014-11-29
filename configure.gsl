@@ -90,7 +90,7 @@ AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
 AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
 AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 
-.endmacro # boilerplate
+.endmacro # initialize
 .
 .macro with(option)
 .   define my.option = with.option
@@ -251,6 +251,7 @@ AC_SUBST([$(my.name)], [$(my.value)])
 AC_CONFIG_FILES([$(my.files)])
 AC_OUTPUT
 .endmacro # compile
+.
 .endtemplate
 .template 0
 ###############################################################################
