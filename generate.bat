@@ -20,6 +20,14 @@ mkdir libbitcoin-node
 mkdir libbitcoin-protocol
 mkdir libbitcoin-server
 
+del /q libbitcoin\*
+del /q libbitcoin-blockchain\*
+del /q libbitcoin-client\*
+del /q libbitcoin-explorer\*
+del /q libbitcoin-node\*
+del /q libbitcoin-protocol\*
+del /q libbitcoin-server\*
+
 REM Generate build artifacts.
 gsl -q generate.xml
 
