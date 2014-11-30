@@ -10,7 +10,7 @@
     </package>
     
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
@@ -102,7 +102,7 @@
     </package>
     
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
@@ -191,7 +191,8 @@
     </package>
     
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <!--<option type="with" name="bash-completion-dir" default="yes" example="[=PATH]" unprefixed="true" substitute="true" description="Path to bash completion directory." />-->
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
@@ -295,6 +296,10 @@
       </build>
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
+        <option value="--without-tests" />
+      </build>
+      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version2" parallel="true" >
+        <option value="--enable-silent-rules" />
       </build>
     </install>
 
@@ -308,7 +313,7 @@
     </package>
     
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
@@ -410,7 +415,7 @@
     </package>
 
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
@@ -502,7 +507,7 @@
     </package>
     
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
