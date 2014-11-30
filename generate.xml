@@ -6,7 +6,7 @@
     <package name="libbitcoin" description="Bitcoin Software Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
       <cflag value="std=c++11" />
       <library name="bitcoin" />
-      <!--<library name="pthread" />-->
+      <library name="pthread" />
     </package>
     
     <configure>
@@ -121,6 +121,7 @@
     </configure>
     
     <install>
+      <get name="libleveldb-dev" comment="Test dependency." />
       <build name="boost" system="linux" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
