@@ -197,9 +197,8 @@
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" />
       
-      <!-- TODO: implement unconditional defines. -->
-      <define name="BOOST_NO_EXCEPTIONS" />
-      <define name="BOOST_EXCEPTION_DISABLE" />
+      <define name="BOOST_NO_EXCEPTIONS" comment="Capture exceptional conditions in callback function." />
+      <define name="BOOST_EXCEPTION_DISABLE" comment="Disable boost exception augmentation." />
       
       <dependency name="boost" system="linux" version="1.49.0" />
       <dependency name="boost" system="darwin" version="1.54.0" />

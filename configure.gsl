@@ -145,6 +145,16 @@ AM_CONDITIONAL([$(my.symbol:upper,c)], [test x$$(my.symbol:c) != xno])
 
 .endmacro # enable
 .
+.macro definition(item)
+.   define my.define = definition.item
+.   heading2("Unconditionally define the preprocessor symbol $(my.define.name:upper,c).")
+.   if (!is_empty(my.define.comment))
+.       heading3(my.define.comment)
+.   endif
+AC_DEFINE([$(my.define.name:upper,c)])
+
+.endmacro # definition
+.
 .macro check_package(dependency)
 .   define my.dependency = check_package.dependency
 .   define my.prefix = is_true(my.dependency.unprefixed) ?? "" ? "lib"
@@ -294,7 +304,14 @@ for generate.repository by name as _repository
             abort "Invalid repository.option.type value: $(_option.type)."
         endif
     endfor _option
-
+    
+    if (count(my.configure.define) > 0)
+        heading1("Set unconditional preprocessor defines.")
+        for my.configure.define as _define
+            definition(_define)
+        endfor _define
+    endif
+    
     heading1("Check dependencies.")
     for my.configure.dependency as _dependency
         if (is_boost(_dependency))
