@@ -35,12 +35,18 @@ before_install:
     # Install GCC 4.8 (for C++11 support).
     - sudo apt-get -qq install g++-4.8
     - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
+    
+.   for _repository->install.get as _get
+.       if (!is_empty(_get.comment))
+    # $(_get.comment)
+.       endif
+    - sudo apt-get -qq install $(_get.name)
+.   endfor _get
 
 script:
 
     # Download and build $(_repository.name) and all dependencies.
     - sudo ./install.sh CXXFLAGS="-Os -s" --disable-shared --enable-static --build-gmp --build-boost
-    
 
 .   close
 .endfor _repository
