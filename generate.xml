@@ -44,11 +44,12 @@
     </configure>
     
     <install>
-      <option value='CXXFLAGS="-Os -s"' />
-      <option value="--disable-shared" />
-      <option value="--enable-static" />
+      <option value="CXXFLAGS='-Os -s'" />
+      <!--<option value="--disable-shared" />
+      <option value="--enable-static" />-->
       <option value="--build-gmp" />
       <option value="--build-boost" />
+      
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
       </build>
@@ -126,7 +127,14 @@
     </configure>
     
     <install>
+      <option value="CXXFLAGS='-Os -s'" />
+      <option value="--disable-shared" />
+      <option value="--enable-static" />
+      <option value="--build-gmp" />
+      <option value="--build-boost" />
+      
       <get name="libleveldb-dev" comment="Test dependency." />
+      
       <build name="boost" system="linux" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
@@ -220,6 +228,12 @@
     </configure>
     
     <install>
+      <option value="CXXFLAGS='-Os -s'" />
+      <option value="--disable-shared" />
+      <option value="--enable-static" />
+      <option value="--build-gmp" />
+      <option value="--build-boost" />
+      
       <build name="boost" system="linux" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
@@ -320,6 +334,12 @@
     </configure>
     
     <install>
+      <option value="CXXFLAGS='-Os -s'" />
+      <option value="--disable-shared" />
+      <option value="--enable-static" />
+      <option value="--build-gmp" />
+      <option value="--build-boost" />
+      
       <build name="boost" system="linux" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
@@ -417,6 +437,12 @@
     </configure>
 
     <install>
+      <option value="CXXFLAGS='-Os -s'" />
+      <option value="--disable-shared" />
+      <option value="--enable-static" />
+      <option value="--build-gmp" />
+      <option value="--build-boost" />
+      
       <build name="boost" system="linux" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
@@ -505,6 +531,12 @@
     </configure>
     
     <install>
+      <option value="CXXFLAGS='-Os -s'" />
+      <option value="--disable-shared" />
+      <option value="--enable-static" />
+      <option value="--build-gmp" />
+      <option value="--build-boost" />
+      
       <build name="boost" system="linux" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
@@ -570,6 +602,7 @@
       <cflag value="std=c++11" />
       <library name="bitcoin-server" />
     </package>
+    
   </repositoryX>
 
 </generate>
