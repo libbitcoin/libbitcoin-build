@@ -5,7 +5,8 @@
 
     <package name="libbitcoin" description="Bitcoin Software Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
       <cflag value="std=c++11" />
-      <output name="bitcoin" />
+      <library name="bitcoin" />
+      <!--<library name="pthread" />-->
     </package>
     
     <configure>
@@ -91,7 +92,7 @@
 
     <package name="libbitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" >
       <cflag value="std=c++11" />
-      <output name="bitcoin-blockchain" />
+      <library name="bitcoin-blockchain" />
     </package>
     
     <configure>
@@ -172,7 +173,7 @@
 
     <package name="libbitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" >
       <cflag value="std=c++11" />
-      <output name="bitcoin-explorer" />
+      <library name="bitcoin-explorer" />
     </package>
     
     <configure>
@@ -193,7 +194,6 @@
       <dependency name="boost_chrono" />
       <dependency name="boost_program_options" />
       <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
-      <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="bitcoin-client" version="2.0.0" />
       
       <flag name="Wall" comment="Warn on all stuff." />
@@ -287,7 +287,7 @@
     
     <package name="libbitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" >
       <cflag value="std=c++11" />
-      <output name="bitcoin-client" />
+      <library name="bitcoin-client" />
     </package>
     
     <configure>
@@ -300,7 +300,6 @@
       <dependency name="boost" system="linux" version="1.49.0" />
       <dependency name="boost" system="darwin" version="1.54.0" />
       <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
-      <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="bitcoin-protocol" version="2.0.0" />
       
       <flag name="Wall" comment="Warn on all stuff." />
@@ -384,7 +383,7 @@
 
     <package name="libbitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" >
       <cflag value="std=c++11" />
-      <output name="bitcoin-node" />
+      <library name="bitcoin-node" />
     </package>
 
     <configure>
@@ -470,7 +469,7 @@
 
     <package name="libbitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" >
       <cflag value="std=c++11" />
-      <output name="bitcoin-protocol" />
+      <library name="bitcoin-protocol" />
     </package>
     
     <configure>
@@ -565,7 +564,7 @@
 
     <package name="libbitcoin-server" description="Bitcoin Server Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-server" >
       <cflag value="std=c++11" />
-      <output name="bitcoin-server" />
+      <library name="bitcoin-server" />
     </package>
   </repositoryX>
 
