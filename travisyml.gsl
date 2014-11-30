@@ -7,6 +7,38 @@
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
+# Functions
+###############################################################################
+
+function format_install_options(install)
+    my.install = format_install_options.install
+    define my.install_options = ""
+    for my.install.option as _option
+        my.install_options = "$(my.install_options) $(_option.value)"
+    endfor _option
+    return trim_left(my.install_options)
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro install_apt_gets(install)
+.   my.install = install_apt_gets.install
+.   for my.install.get as _get
+.       if (!is_empty(_get.comment))
+    # $(_get.comment)
+.       endif
+    - sudo apt-get -qq install $(_get.name)
+
+.   endfor _get
+.endmacro
+.
+.endtemplate
+.template 0
+###############################################################################
 # Generation
 ###############################################################################
 .endtemplate
@@ -35,12 +67,12 @@ before_install:
     # Install GCC 4.8 (for C++11 support).
     - sudo apt-get -qq install g++-4.8
     - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
-
+    
+.   install_apt_gets(_repository->install)
 script:
 
     # Download and build $(_repository.name) and all dependencies.
-    - sudo ./install.sh CXXFLAGS="-Os -s" --disable-shared --enable-static --build-gmp --build-boost
-    
+    - sudo ./install.sh $(format_install_options(_repository->install))
 
 .   close
 .endfor _repository

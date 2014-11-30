@@ -26,13 +26,13 @@ function format_compiler_flags(package)
     return trim_left(my.compiler_flags)
 endfunction
 
-function format_output_libs(package)
-    define my.package = format_output_libs.package
-    define my.output_libs = ""
-    for my.package.output as _output
-        my.output_libs = "$(my.output_libs) -l$(_output.name)"
-    endfor _output
-    return trim_left(my.output_libs)
+function format_libs(package)
+    define my.package = format_libs.package
+    define my.libs = ""
+    for my.package.library as _library
+        my.libs = "$(my.libs) -l$(_library.name)"
+    endfor _library
+    return trim_left(my.libs)
 endfunction
 
 function format_packages(configure)
@@ -91,7 +91,7 @@ Requires: $(format_packages(my.configure))
 Cflags: -I${includedir} $(format_compiler_flags(my.package))
 
 # Our own lib and any we require that do not publish package configuration.
-Libs: -L${libdir} $(format_output_libs(my.package)) $(format_boost_libs(my.configure)) $(format_unpackaged_libs(my.configure))
+Libs: -L${libdir} $(format_libs(my.package)) $(format_boost_libs(my.configure)) $(format_unpackaged_libs(my.configure))
 .   close
 .endfor _repository
 .endmacro # generate_pkgconfig
