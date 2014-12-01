@@ -44,41 +44,35 @@ endfunction
 # so that the called can see the parameter as "dependency". This will allow
 # room for other similarly-named functions over differently-typed arguments.
 
-# is_boost_dependency
-function global.is_boost(dependency)
-    define my.dependency = is_boost.dependency
+function global.is_boost_dependency(dependency)
+    define my.dependency = is_boost_dependency.dependency
     return my.dependency.name = "boost"
 endfunction
 
-# is_published_dependency
-function global.is_published(dependency)
-    define my.dependency = is_published.dependency
-    return !is_true(my.dependency.unpublished)
-endfunction
-
-# is_boost_lib_dependency
-function global.is_boost_lib(dependency)
-    define my.dependency = is_boost_lib.dependency
+function global.is_boost_lib_dependency(dependency)
+    define my.dependency = is_boost_lib_dependency.dependency
     return starts_with(my.dependency.name, "boost_")
-endfunction
-
-function global.is_boost_dependency(dependency)
-    define my.dependency = is_boost_dependency.dependency
-    return is_boost(my.dependency) | is_boost_lib(my.dependency)
 endfunction
 
 # is_package_dependency
 function global.is_package(dependency)
     define my.dependency = is_package.dependency
     return defined(my.dependency.version) &\
-    !is_boost_dependency(my.dependency)
+        !is_boost_dependency(my.dependency) &\
+        !is_boost_lib_dependency(my.dependency)
 endfunction
 
 # is_unpackaged_lib_dependency
 function global.is_unpackaged_lib(dependency)
     define my.dependency = is_unpackaged_lib.dependency
     return defined(my.dependency.function) &\
-    !is_boost_dependency(my.dependency)
+        !is_boost_dependency(my.dependency) &\
+        !is_boost_lib_dependency(my.dependency)
+endfunction
+
+function global.is_optional_dependency(dependency)
+    define my.dependency = is_optional_dependency.dependency
+    return defined(my.dependency.option)
 endfunction
 
 # Build Utilities.
