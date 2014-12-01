@@ -64,6 +64,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="boost" system="darwin" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
@@ -79,6 +81,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="secp256k1" github="bitcoin" repository="secp256k1" branch="master" parallel="true" >
         <option value="--with-bignum=gmp" />
@@ -86,9 +90,14 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
+        <option value="${prefix_flags}" />
+        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
+        <option value="${prefix_flags}" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
     </install>
     
@@ -146,6 +155,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="boost" system="darwin" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
@@ -161,6 +172,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
@@ -171,13 +184,20 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
+        <option value="${prefix_flags}" />
+        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />
+        <option value="${prefix_flags}" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
@@ -234,6 +254,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="boost" system="darwin" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
@@ -249,6 +271,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
@@ -259,6 +283,8 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
+        <option value="${prefix_flags}" />
+        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
@@ -269,18 +295,28 @@
       </build>
       <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
         <option value="--without-makecert" />
+        <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" />
+      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
+        <option value="${with_pkgconfigdir}" />
+      </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />
+        <option value="${prefix_flags}" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
     </install>
     
@@ -295,7 +331,7 @@
     
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
-      <option type="with" name="bash-completion-dir" default="yes" example="[=PATH]" unprefixed="true" substitute="true" conditional="true" description="Path to bash completion directory." />
+      <option type="with" name="bash-completion-dir" default="no" example="[=PATH]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
@@ -351,6 +387,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="boost" system="darwin" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
@@ -368,6 +406,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
@@ -378,6 +418,8 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
+        <option value="${prefix_flags}" />
+        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
@@ -385,25 +427,39 @@
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" />
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
         <option value="--with-libsodium" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
         <option value="--without-makecert" />
+        <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" />
+      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
+        <option value="${with_pkgconfigdir}" />
+      </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />
+        <option value="${prefix_flags}" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
+        <option value="${prefix_flags}" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
@@ -460,6 +516,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="boost" system="darwin" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
@@ -475,6 +533,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
@@ -485,17 +545,26 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
+        <option value="${prefix_flags}" />
+        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />
+        <option value="${prefix_flags}" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
@@ -555,6 +624,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="boost" system="darwin" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
@@ -570,6 +641,8 @@
         <option value="--with-test" />
         <option value="-d0" />
         <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${link}" />
       </build>
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
@@ -580,6 +653,8 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
+        <option value="${prefix_flags}" />
+        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
@@ -587,17 +662,26 @@
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" />
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
         <option value="--with-libsodium" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
         <option value="--without-makecert" />
+        <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" />
+      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
+        <option value="${with_pkgconfigdir}" />
+      </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
         <option value="--without-tests" />
+        <option value="${prefix_flags}" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--enable-silent-rules" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
       </build>
     </install>
     
