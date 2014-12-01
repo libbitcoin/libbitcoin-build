@@ -181,7 +181,7 @@ AC_DEFINE([$(my.define.name:upper,c)])
 .   define my.configure = check_package.configure
 .   define my.prefix = is_true(my.dependency.unprefixed) ?? "" ? "lib"
 .   define my.symbol = find_option_symbol(my.dependency, my.configure)?
-.   heading2("Require $(my.dependency.name) of at least version $(my.dependency.version) and output ${$(my.dependency.name)}.")
+.   heading2("Require $(my.dependency.name) of at least version $(my.dependency.version) and output ${$(my.dependency.name:c)_CFLAGS} and ${$(my.dependency.name:c)_LIBS}.")
 .   if (!is_empty(my.dependency.comment))
 .       heading3("$(my.dependency.comment)")
 .   endif
@@ -192,9 +192,9 @@ AS_IF([test x$$(my.symbol) = xyes],
     PKG_CHECK_MODULES([$(my.dependency.name:c)], [$(my.prefix)$(my.dependency.name) >= $(my.dependency.version)]))
 .   else
 AS_IF([test x$$(my.symbol) = xyes],
-    PKG_CHECK_MODULES([$(my.dependency.name:c)], [$(my.prefix)$(my.dependency.name) >= $(my.dependency.version)],
+    [PKG_CHECK_MODULES([$(my.dependency.name:c)], [$(my.prefix)$(my.dependency.name) >= $(my.dependency.version)],
     [$(my.symbol)="`pkg-config --variable=$(my.dependency.extract) $(my.dependency.name)`"],
-    [$(my.symbol)="$(defined(my.dependency.default) ?? my.dependency.default)"]))
+    [$(my.symbol)="$(defined(my.dependency.default) ?? my.dependency.default)"])])
 .   endif
 
 .endmacro # check_package
