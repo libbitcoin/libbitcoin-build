@@ -22,7 +22,7 @@
       <dependency name="boost_filesystem" />
       <dependency name="boost_regex" />
       <dependency name="boost_system" />
-      <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
+      <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="rt" function="clock_gettime" system="linux" />
       <dependency name="gmp" system="linux" function="__gmpz_init" header="gmp.h" />
       <dependency name="gmp" system="darwin" function="__gmpz_init" header="gmp.h" libs="/opt/local/lib" includes="/opt/local/include" />
@@ -110,7 +110,7 @@
       
       <dependency name="boost" system="linux" version="1.49.0" />
       <dependency name="boost" system="darwin" version="1.54.0" />
-      <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
+      <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="2.7.0" />
       
       <flag name="Wall" comment="Warn on all stuff." />
@@ -199,7 +199,7 @@
       
       <dependency name="boost" system="linux" version="1.49.0" />
       <dependency name="boost" system="darwin" version="1.54.0" />
-      <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
+      <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-protocol" version="2.0.0" />
       
       <flag name="Wall" comment="Warn on all stuff." />
@@ -293,8 +293,8 @@
     </package>
     
     <configure>
-      <!--<option type="with" name="bash-completion-dir" default="yes" example="[=PATH]" unprefixed="true" substitute="true" description="Path to bash completion directory." />-->
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="bash-completion-dir" default="yes" example="[=PATH]" unprefixed="true" substitute="true" conditional="true" description="Path to bash completion directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
@@ -307,7 +307,8 @@
       <dependency name="boost" system="darwin" version="1.54.0" />
       <dependency name="boost_chrono" />
       <dependency name="boost_program_options" />
-      <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
+      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="bash-completion" version="2.0.0" option="bash-completion-dir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="2.0.0" />
       
       <flag name="Wall" comment="Warn on all stuff." />
@@ -423,7 +424,7 @@
       
       <dependency name="boost" system="linux" version="1.49.0" />
       <dependency name="boost" system="darwin" version="1.54.0" />
-      <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
+      <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="2.7.0" />
       <dependency name="bitcoin-blockchain" version="2.0.0" />
       
@@ -515,7 +516,7 @@
       
       <dependency name="boost" system="linux" version="1.49.0" />
       <dependency name="boost" system="darwin" version="1.54.0" />
-      <dependency name="boost_unit_test_framework" unpublished="true" with="tests" />
+      <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="protobuf" version="2.6.0" unprefixed="true" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="0.4.1" />
