@@ -13,7 +13,8 @@
 function format_boost_libs(configure)
     define my.configure = format_boost_libs.configure
     define my.published_boost = my.configure->dependency(\
-        is_boost_lib(dependency) & is_published(dependency))?
+        is_boost_lib_dependency(dependency) &\
+        !is_optional_dependency(dependency))?
     return defined(my.published_boost) ?? "@boost_LIBS@" ? ""
 endfunction
 
@@ -38,7 +39,8 @@ endfunction
 function format_packages(configure)
     define my.configure = format_packages.configure
     define my.packages = ""
-    for my.configure.dependency as _dependency where is_package(_dependency)
+    for my.configure.dependency as _dependency where is_package(_dependency) &\
+        !is_optional_dependency(_dependency)
         define my.prefix = is_true(_dependency.unprefixed) ?? "" ? "lib"
         define my.package = "$(my.prefix)$(_dependency.name)"
         my.packages = "$(my.packages) $(my.package) >= $(_dependency.version)"
