@@ -137,7 +137,8 @@ BUILD_DIR="$(my.repo.name)-build"
 .   define my.upper_system = defined(my.system) ?? "_$(my.system:upper,c)" ? ""
 .   define my.url = get_boost_url(my.install, my.system)?
 .   if (!defined(my.url))
-.       abort "A version of boost$(my.show_system) is not defined."
+.       #abort "A version of boost$(my.show_system) is not defined."
+.       return
 .   endif
 .   heading2("Boost archives$(my.show_system).")
 BOOST_URL$(my.upper_system)="$(my.url)"
@@ -153,7 +154,8 @@ BOOST_ARCHIVE$(my.upper_system)="$(get_boost_file(my.install, my.system))"
 .   heading2("GMP archives$(my.show_system).")
 .   define my.url = get_gmp_url(my.install, my.system)?
 .   if (!defined(my.url))
-.       abort "A version of gmp$(my.show_system) is not defined."
+.       #abort "A version of gmp$(my.show_system) is not defined."
+.       return
 .   endif
 GMP_URL$(my.upper_system)="$(my.url)"
 GMP_ARCHIVE$(my.upper_system)="$(get_gmp_file(my.install, my.system))"
