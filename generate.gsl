@@ -7,17 +7,19 @@
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-# Imports
-###############################################################################
 
 [global].trace = 0
 [gsl].ignorecase = 0
 
 gsl from "utilities.gsl"
-gsl from "configure.gsl"
-gsl from "installer.gsl"
-gsl from "pkgconfig.gsl"
-gsl from "travisyml.gsl"
+
+# Templates retain their natural extensions to enable editor association, and
+# are therefore prefixed with 'gsl' for sorting and template identification.
+
+gsl from "templates/gsl.configure.ac"
+gsl from "templates/gsl.install.sh"
+gsl from "templates/gsl.libbitcoin.pc.in"
+gsl from "templates/gsl.travis.yml"
 
 generate_configure()
 generate_pkgconfig()
