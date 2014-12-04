@@ -10,13 +10,65 @@
 # Functions
 ###############################################################################
 
-function format_install_options(install)
-    my.install = format_install_options.install
-    define my.install_options = ""
-    for my.install.option as _option
-        my.install_options = "$(my.install_options) $(_option.value)"
+function apt_get(name, system)
+    define my.get = ""
+    if (my.system = "osx")
+        my.get = "brew install $(my.name)"
+    elsif (my.system = "linux")
+        my.get = "sudo apt-get -qq install $(my.name)"
+    else
+        abort "Invalid system type for get package: $(my.name)."
+    endif
+    return my.get
+endfunction
+
+function job_title(job)
+    define my.job = job_title.job
+    return "$(my.job.system)/$(my.job.compiler)/$(my.job.link)"
+endfunction
+
+function job_options(job)
+    define my.job = job_options.job
+    define my.job_options = ""
+    for my.job.option as _option
+        my.job_options = "$(my.job_options) $(_option.value)"
     endfor _option
-    return trim_left(my.install_options)
+    return trim_left(my.job_options)
+endfunction
+
+function job_install(job)
+    define my.job = job_install.job
+    define my.sudo = is_true(my.job.sudo) ?? "sudo " ? ""
+    return "$(my.sudo)CXX=$CXX CC=$CC ./install.sh $(job_options(my.job))"
+endfunction
+
+function job_predicate_link(job)
+    define my.job = job_predicate_link.job
+    return "$$(my.job.link:upper,c%-7s)"
+endfunction
+
+function job_predicate_system(job)
+    define my.job = job_predicate.job
+    return "$$(my.job.system:upper,c%-5s)"
+endfunction
+
+function job_predicate_compiler(job)
+    define my.job = job_predicate_compiler.job
+    return "$$(my.job.compiler:upper,c%-5s)"
+endfunction
+
+function job_predicate_platform(job)
+    define my.job = job_predicate_platform.job
+    return "$(job_predicate_system(my.job)) && $(job_predicate_compiler(my.job))"
+endfunction
+
+function job_predicate(job)
+    define my.job = job_predicate.job
+    return "$(job_predicate_platform(my.job)) && $(job_predicate_link(my.job))"
+endfunction
+
+function condition(predicate)
+    return "if [[ $(my.predicate) ]]; then"
 endfunction
 
 ###############################################################################
@@ -25,16 +77,135 @@ endfunction
 .endtemplate
 .template 1
 .
-.macro install_apt_gets(install)
-.   my.install = install_apt_gets.install
-.   for my.install.get as _get
-.       if (!is_empty(_get.comment))
-    # $(_get.comment)
-.       endif
-    - sudo apt-get -qq install $(_get.name)
+.macro initialize_matrix(matrix)
+.   my.matrix = initialize_matrix.matrix
+os:
+.   # TODO: enumerate from matrixes.
+    - osx
+    - linux
+    
+compiler:
+.   # TODO: enumerate from matrixes.
+    - clang
+    - gcc
+    
+env:
+.   # TODO: enumerate from matrixes.
+    - LINK=static
+    - LINK=dynamic
 
-.   endfor _get
-.endmacro
+.   # TODO: enumerate from matrixes.
+matrix:
+    exclude:
+        - os: osx
+          compiler: gcc
+    allow_failures:
+        - os: linux
+          compiler: clang
+    fast_finish:
+        - true
+
+.endmacro #initialize_matrix
+.
+.macro set_aliases(matrix)
+.   my.matrix = set_aliases.matrix
+    # Set aliases for readability.
+.   # TODO: enumerate from matrixes.
+    - $(condition("$CC == gcc  ")) GCC=true; fi
+    - $(condition("$CC == clang")) CLANG=true; fi
+    - $(condition("$LINK == static ")) STATIC=true; fi
+    - $(condition("$LINK == dynamic")) DYNAMIC=true; fi
+    - $(condition("$TRAVIS_OS_NAME == osx  ")) OSX=true; fi
+    - $(condition("$TRAVIS_OS_NAME == linux")) LINUX=true; fi
+
+.endmacro #set_aliases
+.
+.macro set_repositories(matrix)
+.   my.matrix = set_repositories.matrix
+.   my.linux       = condition("$LINUX")
+.   my.linux_gcc   = condition("$LINUX && $GCC  ")
+.   my.linux_clang = condition("$LINUX && $CLANG")
+.
+    # Set package repository.
+    - $(my.linux_gcc) sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+    - $(my.linux_clang) sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
+
+    # Update the system.
+    - $(my.linux) sudo apt-get -qq update; fi
+
+.endmacro #set_repositories
+.
+.macro install_compilers(matrix)
+.   my.matrix = install_compilers.matrix
+.   my.linux_gcc   = condition("$LINUX && $GCC  ")
+.   my.linux_clang = condition("$LINUX && $CLANG")
+.
+    # Install g++ 4.8
+    - $(my.linux_gcc) sudo apt-get install -qq g++-4.8 --allow-unauthenticated; fi
+    - $(my.linux_gcc) sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50; fi
+    - $(my.linux_gcc) sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50; fi
+
+    # Install clang++ 3.4
+    - $(my.linux_clang) sudo apt-get install -qq clang-3.4 --allow-unauthenticated; fi
+    - $(my.linux_clang) sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.4 50; fi
+    - $(my.linux_clang) sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.4 50; fi
+
+.endmacro #install_compilers
+.
+.macro install_libc(matrix)
+.   my.matrix = install_libc.matrix
+.   my.linux_clang = condition("$LINUX && $CLANG")
+.
+    # Install libc++ for linux/clang.
+    - $(my.linux_clang) svn co --quiet http://llvm.org/svn/llvm-project/libcxx/trunk libcxx; fi
+    
+    - $(my.linux_clang) pushd libcxx/lib/; fi
+    - $(my.linux_clang) bash buildit; fi
+    - $(my.linux_clang) sudo cp ./libc++.so.1.0 /usr/lib/; fi
+    - $(my.linux_clang) sudo mkdir -p /usr/include/c++/v1; fi
+    - $(my.linux_clang) sudo cp -r ../include/* /usr/include/c++/v1/; fi
+    - $(my.linux_clang) popd; fi
+    
+    - $(my.linux_clang) pushd /usr/lib/; fi
+    - $(my.linux_clang) sudo ln -sf libc++.so.1.0 libc++.so; fi
+    - $(my.linux_clang) sudo ln -sf libc++.so.1.0 libc++.so.1; fi
+    - $(my.linux_clang) popd; fi
+    
+    # Install libc++abi for linux/clang.
+    - $(my.linux_clang) svn co --quiet http://llvm.org/svn/llvm-project/libcxxabi/trunk libcxxabi; fi
+    
+    - $(my.linux_clang) pushd libcxxabi/lib/; fi
+    - $(my.linux_clang) bash buildit; fi
+    - $(my.linux_clang) sudo cp ./libc++abi.so.1.0 /usr/lib/; fi
+    - $(my.linux_clang) sudo mkdir -p /usr/include/c++/v1; fi
+    - $(my.linux_clang) sudo cp -r ../include/* /usr/include/c++/v1/; fi
+    - $(my.linux_clang) popd; fi
+    
+    - $(my.linux_clang) pushd /usr/lib/; fi
+    - $(my.linux_clang) sudo ln -sf libc++abi.so.1.0 libc++abi.so; fi
+    - $(my.linux_clang) sudo ln -sf libc++abi.so.1.0 libc++.so.1; fi
+    - $(my.linux_clang) popd; fi
+
+.endmacro #install_libc
+.
+.macro install_packages(matrix, system)
+.   my.matrix = install_packages.matrix
+.   for my.matrix.job as _job where count(_job.get) > 0
+    # Download and install packages for $(job_title(_job)).
+.       for _job.get as _get
+    - $(condition(job_predicate(_job))) $(apt_get(_get.name, system)); fi
+.       endfor _get
+
+.   endfor _job
+.endmacro #install_packages
+.
+.macro run_script(matrix)
+.   my.matrix = run_script.matrix
+    # Download and build $(_repository.name) and all dependencies.
+.   for my.matrix.job as _job
+    - $(condition(job_predicate(_job))) $(job_install(_job)); fi
+.   endfor _job
+.endmacro #run_script
 .
 .endtemplate
 .template 0
@@ -49,30 +220,24 @@ endfunction
 .   notify(my.out_file)
 .   output(my.out_file)
 .   copyleft(_repository.name)
+.   my.matrix = _repository->matrix
 
 language:
     - cpp
 
-compiler:
-    - gcc
-
+.   initialize_matrix(my.matrix)
 before_install:
 
-    # Set package repository.
-    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+.   set_aliases(my.matrix)
+.   set_repositories(my.matrix)
+install:
 
-    # Update the system.
-    - sudo apt-get -qq update
-
-    # Install GCC 4.8 (for C++11 support).
-    - sudo apt-get -qq install g++-4.8
-    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
-    
-.   install_apt_gets(_repository->install)
+.   install_compilers(my.matrix)
+.   install_libc(my.matrix)
+.   install_packages(my.matrix)
 script:
 
-    # Download and build $(_repository.name) and all dependencies.
-    - sudo ./install.sh $(format_install_options(_repository->install))
+.   run_script(my.matrix)
 .
 .   close
 .endfor _repository

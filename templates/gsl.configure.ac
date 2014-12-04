@@ -201,13 +201,13 @@ AS_IF([test x$$(my.symbol) = xyes],
 .
 .macro check_boost(dependency)
 .   define my.dependency = check_boost.dependency
-.   define my.show_system = is_empty(my.dependency.system) ?? "" ? " if on $(my.dependency.system)"
-.   define my.system_pattern = is_empty(my.dependency.system) ?? "*" ? "*$(my.dependency.system)*"
-.   heading2("Require Boost of at least version $(my.dependency.version)$(my.show_system).")
+.   define my.show_compiler = is_empty(my.dependency.compiler) ?? "" ? " if on $(my.dependency.compiler)"
+.   define my.compiler_pattern = is_empty(my.dependency.compiler) ?? "*" ? "*$(my.dependency.compiler)*"
+.   heading2("Require Boost of at least version $(my.dependency.version)$(my.show_compiler).")
 .   if (!is_empty(my.dependency.comment))
 .       heading3("$(my.dependency.comment)")
 .   endif
-AS_CASE([${host_os}], [$(my.system_pattern)],
+AS_CASE([${CC}], [$(my.compiler_pattern)],
     [AX_BOOST_BASE([$(my.dependency.version)], [], [AC_MSG_ERROR(
         [Boost $(my.dependency.version) or later is required but was not found.])])])
 
@@ -240,18 +240,18 @@ AS_IF([test x$$(my.symbol) = xyes], [AX_$(my.dependency.name:upper,c)])
 .
 .   if (!is_empty(my.dependency.includes))
 AS_CASE([${host_os}], [$(my.system_pattern)], 
-    [CPPFLAGS="$CPPFLAGS -I/$(my.dependency.includes)"])
+    [CPPFLAGS="$CPPFLAGS -I$(my.dependency.includes)"])
+.   endif
+.
+.   if (!is_empty(my.dependency.libs))
+AS_CASE([${host_os}], [$(my.system_pattern)], 
+    [LDFLAGS="$LDFLAGS -L$(my.dependency.libs)"])
 .   endif
 .
 .   if (!is_empty(my.dependency.header))
 AS_CASE([${host_os}], [$(my.system_pattern)], 
     [AC_CHECK_HEADER([$(my.dependency.header)], [],
         [AC_MSG_ERROR([$(my.dependency.name) header is required but was not found.])],-)])
-.   endif
-.
-.   if (!is_empty(my.dependency.libs))
-AS_CASE([${host_os}], [$(my.system_pattern)], 
-    [LDFLAGS="$LDFLAGS -L$(my.dependency.libs)"])
 .   endif
 .
 .   if (!is_empty(my.dependency.function))

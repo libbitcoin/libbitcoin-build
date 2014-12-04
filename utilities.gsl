@@ -30,6 +30,18 @@ function global.trim_left(text)
     return my.extracted ? ""
 endfunction
 
+function global.left(text, length)
+    define my.text_length = string.length(my.text)
+    my.length = my.length > text_length ?? text_length ? my.length
+    return substr(my.text, 0, my.length)
+endfunction
+
+function global.right(text, length)
+    define my.text_length = string.length(my.text)
+    my.length = my.length > text_length ?? text_length ? my.length
+    return substr(my.text, my.text_length - my.length, my.length)
+endfunction
+
 function global.trim_right(text)
     return string.trim(my.text)
 endfunction
