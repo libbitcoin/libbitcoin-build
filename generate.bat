@@ -12,13 +12,13 @@ REM  Extract gsl.exe from package using NuGet's File > Export
 REM ###########################################################################
 
 REM Make directories for generated build artifacts.
-mkdir libbitcoin
-mkdir libbitcoin-blockchain
-mkdir libbitcoin-client
-mkdir libbitcoin-explorer
-mkdir libbitcoin-node
-mkdir libbitcoin-protocol
-mkdir libbitcoin-server
+if not exist libbitcoin             mkdir libbitcoin
+if not exist libbitcoin-blockchain  mkdir libbitcoin-blockchain
+if not exist libbitcoin-client      mkdir libbitcoin-client
+if not exist libbitcoin-explorer    mkdir libbitcoin-explorer
+if not exist libbitcoin-node        mkdir libbitcoin-node
+if not exist libbitcoin-protocol    mkdir libbitcoin-protocol
+if not exist libbitcoin-server      mkdir libbitcoin-server
 
 del /q libbitcoin\*
 del /q libbitcoin-blockchain\*

@@ -30,12 +30,34 @@ function global.trim_left(text)
     return my.extracted ? ""
 endfunction
 
+function global.left(text, length)
+    define my.text_length = string.length(my.text)
+    my.length = my.length > text_length ?? text_length ? my.length
+    return substr(my.text, 0, my.length)
+endfunction
+
+function global.right(text, length)
+    define my.text_length = string.length(my.text)
+    my.length = my.length > text_length ?? text_length ? my.length
+    return substr(my.text, my.text_length - my.length, my.length)
+endfunction
+
 function global.trim_right(text)
     return string.trim(my.text)
 endfunction
 
 function global.trim_both(text)
     return trim_left(string.trim(my.text))
+endfunction
+
+function global.require(node, context, attribute)
+    if (!defined(require.node))
+        abort "Required node undefined for $(my.context).$(my.attribute)."
+    endif
+    define my.node = require.node
+    if (!defined(my.node.$(my.attribute)))
+        abort "Required attribute missing: $(my.context).$(my.attribute)"
+    endif
 endfunction
 
 # Dependency Utilities.

@@ -17,54 +17,54 @@ function have_build(install, name)
     return defined(my.install->build(build.name = my.name))
 endfunction
 
-function is_archive_match(build, name, system)
+function is_archive_match(build, name, compiler)
     define my.build = is_archive_match.build
-    trace1("is_archive_match($(my.name), $(my.system ? 0)) : $(my.build.name)")
+    trace1("is_archive_match($(my.name), $(my.compiler ? 0)) : $(my.build.name)")
     return defined(my.build.version) & (my.build.name = my.name) & \
-        (!defined(my.system) | (my.build.system = my.system))
+        (!defined(my.compiler) | (my.build.compiler = my.compiler))
 endfunction
 
-function get_archive_version(install, name, system)
-    trace1("get_archive_version($(my.name), $(my.system ? 0))")
+function get_archive_version(install, name, compiler)
+    trace1("get_archive_version($(my.name), $(my.compiler ? 0))")
     define my.install = get_archive_version.install
-    define my.build = my.install->build(is_archive_match(build, my.name, my.system))?
+    define my.build = my.install->build(is_archive_match(build, my.name, my.compiler))?
     return defined(my.build) ?? my.build.version
 endfunction
 
 # Functions with specific knowledge of archive file name and URL structure.
 
-function get_boost_file(install, system)
+function get_boost_file(install, compiler)
     define my.install = get_boost_file.install
-    define my.version = get_archive_version(my.install, "boost", my.system)?
+    define my.version = get_archive_version(my.install, "boost", my.compiler)?
     if (!defined(my.version))
-        trace1("get_boost_file:get_archive_version($(my.system ? 0)) = []")
+        trace1("get_boost_file:get_archive_version($(my.compiler ? 0)) = []")
         return
     endif
     define my.underscore_version = string.convch(my.version, ".", "_")
     return "boost_$(my.underscore_version).tar.bz2"
 endfunction
 
-function get_gmp_file(install, system)
+function get_gmp_file(install, compiler)
     define my.install = get_gmp_file.install
-    define my.version = get_archive_version(my.install, "gmp", my.system)?
+    define my.version = get_archive_version(my.install, "gmp", my.compiler)?
     if (!defined(my.version))    
-        trace1("get_gmp_file:get_archive_version($(my.system ? 0)) = []")
+        trace1("get_gmp_file:get_archive_version($(my.compiler ? 0)) = []")
         return
     endif
     return "gmp-$(my.version).tar.bz2"
 endfunction
 
-function get_boost_url(install, system)
-    trace1("get_boost_url($(my.system) ? 0)")
+function get_boost_url(install, compiler)
+    trace1("get_boost_url($(my.compiler) ? 0)")
     define my.install = get_boost_url.install
-    define my.version = get_archive_version(my.install, "boost", my.system)?
+    define my.version = get_archive_version(my.install, "boost", my.compiler)?
     if (!defined(my.version))
-        trace1("get_boost_url:get_archive_version($(my.system ? 0)) = []")
+        trace1("get_boost_url:get_archive_version($(my.compiler ? 0)) = []")
         return
     endif
-    define my.archive = get_boost_file(my.install, my.system)?
+    define my.archive = get_boost_file(my.install, my.compiler)?
     if (!defined(my.archive))
-        trace1("get_boost_url:get_boost_file($(my.system ? 0)) = []")
+        trace1("get_boost_url:get_boost_file($(my.compiler ? 0)) = []")
         return
     endif        
     define my.base_url = "http\://sourceforge.net/projects/boost/files/boost"
@@ -73,12 +73,12 @@ function get_boost_url(install, system)
     return my.url
 endfunction
 
-function get_gmp_url(install, system)
+function get_gmp_url(install, compiler)
     define my.install = get_gmp_url.install
     define my.base_url = "https\://ftp.gnu.org/gnu/gmp"
-    define my.archive = get_gmp_file(my.install, my.system)?
+    define my.archive = get_gmp_file(my.install, my.compiler)?
     if (!defined(my.archive))
-        trace1("get_gmp_url:get_gmp_file($(my.system ? 0)) = []")
+        trace1("get_gmp_url:get_gmp_file($(my.compiler ? 0)) = []")
         return
     endif
     define my.url = "$(my.base_url)/$(my.archive)"
@@ -126,37 +126,39 @@ endfunction
 .macro define_build_directory(repository)
 .   define my.repo = define_build_directory.repository
 .   heading2("The default build directory.")
-BUILD_DIR="$(my.repo.name)-build"
+BUILD_DIR="build-$(my.repo.name)"
 
 .endmacro # define_build_directory
 .
-.macro define_boost(install, system)
-.   trace1("define_boost($(my.system ? 0))")
+.macro define_boost(install, compiler)
+.   trace1("define_boost($(my.compiler ? 0))")
 .   define my.install = define_boost.install
-.   define my.show_system = defined(my.system) ?? " for $(my.system)" ? ""
-.   define my.upper_system = defined(my.system) ?? "_$(my.system:upper,c)" ? ""
-.   define my.url = get_boost_url(my.install, my.system)?
+.   define my.show_compiler = defined(my.compiler) ?? " for $(my.compiler)" ? ""
+.   define my.upper_compiler = defined(my.compiler) ?? "_$(my.compiler:upper,c)" ? ""
+.   define my.url = get_boost_url(my.install, my.compiler)?
 .   if (!defined(my.url))
-.       abort "A version of boost$(my.show_system) is not defined."
+.       #abort "A version of boost$(my.show_compiler) is not defined."
+.       return
 .   endif
-.   heading2("Boost archives$(my.show_system).")
-BOOST_URL$(my.upper_system)="$(my.url)"
-BOOST_ARCHIVE$(my.upper_system)="$(get_boost_file(my.install, my.system))"
+.   heading2("Boost archives$(my.show_compiler).")
+BOOST_URL$(my.upper_compiler)="$(my.url)"
+BOOST_ARCHIVE$(my.upper_compiler)="$(get_boost_file(my.install, my.compiler))"
 
 .endmacro # define_boost
 .
-.macro define_gmp(install, system)
-.   trace1("define_gmp($(my.system ? 0))")
+.macro define_gmp(install, compiler)
+.   trace1("define_gmp($(my.compiler ? 0))")
 .   define my.install = define_gmp.install
-.   define my.show_system = defined(my.system) ?? " for $(my.system)" ? ""
-.   define my.upper_system = defined(my.system) ?? "_$(my.system:upper,c)" ? ""
-.   heading2("GMP archives$(my.show_system).")
-.   define my.url = get_gmp_url(my.install, my.system)?
+.   define my.show_compiler = defined(my.compiler) ?? " for $(my.compiler)" ? ""
+.   define my.upper_compiler = defined(my.compiler) ?? "_$(my.compiler:upper,c)" ? ""
+.   heading2("GMP archives$(my.show_compiler).")
+.   define my.url = get_gmp_url(my.install, my.compiler)?
 .   if (!defined(my.url))
-.       abort "A version of gmp$(my.show_system) is not defined."
+.       #abort "A version of gmp$(my.show_compiler) is not defined."
+.       return
 .   endif
-GMP_URL$(my.upper_system)="$(my.url)"
-GMP_ARCHIVE$(my.upper_system)="$(get_gmp_file(my.install, my.system))"
+GMP_URL$(my.upper_compiler)="$(my.url)"
+GMP_ARCHIVE$(my.upper_compiler)="$(get_gmp_file(my.install, my.compiler))"
 
 .endmacro # define_gmp
 .
@@ -167,18 +169,31 @@ set -e
 .   heading2("Configure build parallelism.")
 SEQUENTIAL=1
 OS=`uname -s`
-if [[ $TRAVIS = "true" ]]; then
+if [[ $TRAVIS == true ]]; then
     PARALLEL=$SEQUENTIAL
-elif [[ $OS = "Linux" ]]; then
+elif [[ $OS == Linux ]]; then
     PARALLEL=`nproc`
-elif [[ $OS = "Darwin" ]]; then
+elif [[ $OS == Darwin ]]; then
     PARALLEL=2 #TODO
 else
     echo "Unsupported system: $OS"
     exit 1
 fi
-echo "Making for system: $OS"
-echo "Allocated jobs: $PARALLEL"
+echo "Make jobs: $PARALLEL"
+echo "Make for system: $OS"
+
+.   heading2("Define operating system settings.")
+if [[ $OS == Darwin ]]; then
+
+    # Always require CLang, common lib linking will otherwise fail.
+    export CC="clang"
+    export CXX="clang++"
+    
+    # Always initialize prefix on OSX so default is consistent.
+    PREFIX="/usr/local"
+fi
+echo "Make with cc: $CC"
+echo "Make with cxx: $CXX"
 
 .   heading2("Parse command line options that are handled by this script.")
 for OPTION in "$@"; do
@@ -203,16 +218,14 @@ for CUSTOM_OPTION in "${CUSTOM_OPTIONS[@]}"; do
     CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/$CUSTOM_OPTION}" )
 done
 
-.   heading2("Map standard libtool options to Boost link option.")
-BOOST_LINK="static,shared"
-if [[ $DISABLE_STATIC ]]; then
-    BOOST_LINK="shared"
-elif [[ $DISABLE_SHARED ]]; then
-    BOOST_LINK="static"
+.   heading2("Set public boost_link variable (to translate libtool link to Boost build).")
+if [[ $DISABLE_STATIC == yes ]]; then
+    boost_link="link=shared"
+elif [[ $DISABLE_SHARED == yes ]]; then
+    boost_link="link=static"
+else
+    boost_link="link=static,shared"
 fi
-
-# Set public link variable (to translate the link type to the Boost build)
-link="link=$BOOST_LINK"
 
 .   heading2("Incorporate the prefix.")
 if [[ $PREFIX ]]; then
@@ -233,12 +246,12 @@ if [[ $PREFIX ]]; then
     # Otherwise the standard paths suffice for Linux, Homebrew and MacPorts.
 
     # Set public with_boost variable (because Boost has no pkg-config).
-    if [[ $BUILD_BOOST ]]; then
+    if [[ $BUILD_BOOST == yes ]]; then
         with_boost="--with-boost=$PREFIX"
     fi
     
     # Set public prefix_flags variable (because GMP has no pkg-config).
-    if [[ $BUILD_GMP ]]; then    
+    if [[ $BUILD_GMP == yes ]]; then
         prefix_flags="CPPFLAGS=-I$PREFIX/include LDFLAGS=-L$PREFIX/lib"
     fi
     
@@ -246,9 +259,9 @@ if [[ $PREFIX ]]; then
     prefix="--prefix=$PREFIX"
 fi
 
-.   heading2("Echo build options.")
+.   heading2("Echo published dynamic build options.")
 echo "Published dynamic options:"
-echo "  link: $link"
+echo "  boost_link: $boost_link"
 echo "  prefix: $prefix"
 echo "  prefix_flags: $prefix_flags"
 echo "  with_boost: $with_boost"
@@ -258,37 +271,28 @@ echo "  with_pkgconfigdir: $with_pkgconfigdir"
 .
 .macro define_build_options(build)
 .   define my.build = define_build_options.build
-.   define my.show_system = defined(my.build.system) ?? " for $(my.build.system)" ? ""
-.   define my.system_name = defined(my.build.system) ?? "_$(my.build.system:upper,c)" ? ""
-.   heading2("Define $(my.build.name) options$(my.show_system).")
-$(my.build.name:upper,c)_OPTIONS$(my.system_name)=\\
+.   define my.show_compiler = defined(my.build.compiler) ?? " for $(my.build.compiler)" ? ""
+.   define my.compiler_name = defined(my.build.compiler) ?? "_$(my.build.compiler:upper,c)" ? ""
+.   heading2("Define $(my.build.name) options$(my.show_compiler).")
+$(my.build.name:upper,c)_OPTIONS$(my.compiler_name)=\\
 .   for my.build.option as _option
 "$(_option.value) "$(!last() ?? "\\")
 .   endfor _option
 
 .endmacro # define_build_options
 .
-.macro define_os_settings()
-.
-if [[ $OS == "Darwin" ]]; then
-
-    # Always require CLang, common lib linking will otherwise fail.
-    export CC="clang"
-    export CXX="clang++"
-    
-    # Always initialize prefix on OSX so default is consistent.
-    PREFIX="/usr/local"
-    
-    BOOST_URL="$BOOST_URL_DARWIN"
-    BOOST_ARCHIVE="$BOOST_ARCHIVE_DARWIN"
-    BOOST_OPTIONS="$BOOST_OPTIONS_DARWIN"
-else
-    BOOST_URL="$BOOST_URL_LINUX"
-    BOOST_ARCHIVE="$BOOST_ARCHIVE_LINUX"
-    BOOST_OPTIONS="$BOOST_OPTIONS_LINUX"
+.macro define_compiler_settings()
+if [[ $CXX == "clang++" ]]; then
+    BOOST_URL="$BOOST_URL_CLANG"
+    BOOST_ARCHIVE="$BOOST_ARCHIVE_CLANG"
+    BOOST_OPTIONS="$BOOST_OPTIONS_CLANG"
+else # g++
+    BOOST_URL="$BOOST_URL_GCC"
+    BOOST_ARCHIVE="$BOOST_ARCHIVE_GCC"
+    BOOST_OPTIONS="$BOOST_OPTIONS_GCC"
 fi
 
-.endmacro # define_os_settings
+.endmacro # define_compiler_settings
 .
 .macro define_utility_functions()
 .
@@ -311,7 +315,7 @@ display_linkage()
     local LIBRARY="$1"
     
     # Display shared library links.
-    if [[ $OS == "Darwin" ]]; then
+    if [[ $OS == Darwin ]]; then
         otool -L "$LIBRARY"
     else
         ldd --verbose "$LIBRARY"
@@ -340,25 +344,25 @@ make_current_directory()
 
     ./autogen.sh
     configure_options "$@"
-    make_silent $JOBS
+    make_jobs $JOBS
     make install
 
     # Use ldconfig only in case of non --prefix installation on Linux.    
-    if [[ ($OS == "Linux") && !($PREFIX)]]; then
+    if [[ ($OS == Linux) && !($PREFIX)]]; then
         ldconfig
     fi
 }
 
-make_silent()
+make_jobs()
 {
     local JOBS=$1
     local TARGET=$2
 
     # Avoid setting -j1 (causes problems on Travis).
-    if [[ $JOBS -gt $SEQUENTIAL ]]; then
-        make --silent -j$JOBS $TARGET
+    if [[ $JOBS > $SEQUENTIAL ]]; then
+        make -j$JOBS $TARGET
     else
-        make --silent $TARGET
+        make $TARGET
     fi
 }
 
@@ -367,7 +371,7 @@ make_tests()
     local JOBS=$1
 
     # Build and run unit tests relative to the primary directory.
-    make_silent $JOBS check
+    make_jobs $JOBS check
 }
 
 pop_directory()
@@ -392,7 +396,7 @@ build_from_tarball_boost()
     local JOBS=$4
     shift 4
 
-    if [[ !($BUILD_BOOST) ]]; then
+    if [[ $BUILD_BOOST != yes ]]; then
         display_message "Boost build not enabled"
         return
     fi
@@ -424,7 +428,7 @@ build_from_tarball_gmp()
     local JOBS=$4
     shift 4
 
-    if [[ !($BUILD_GMP) ]]; then
+    if [[ $BUILD_GMP != yes ]]; then
         display_message "GMP build not enabled"
         return
     fi
@@ -444,7 +448,7 @@ build_from_tarball_gmp()
 
     # GMP does not honor noise reduction.
     echo "Making all..."
-    make_silent $JOBS >/dev/null
+    make_jobs $JOBS >/dev/null
     echo "Installing all..."
     make install >/dev/null
 
@@ -492,11 +496,13 @@ build_from_travis()
     shift 4
 
     # The primary build is not downloaded if we are running in Travis.
-    if [[ $TRAVIS == "true" ]]; then
-        cd ..
+    if [[ $TRAVIS == true ]]; then
+        # TODO: enable so build-dir in travis can be absolute or multi-segment.
+        # push_directory "$TRAVIS_BUILD_DIR"
+        push_directory ".."
         build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "$@"
         make_tests $JOBS
-        cd "$BUILD_DIR"
+        pop_directory
     else
         build_from_github $ACCOUNT $REPO $BRANCH $JOBS "$@"
         push_directory $REPO
@@ -584,8 +590,8 @@ for generate.repository by name as _repository
     
     heading1("Define common constants.")
     define_build_directory(_repository)
-    define_boost(my.install, "linux")
-    define_boost(my.install, "darwin")
+    define_boost(my.install, "gcc")
+    define_boost(my.install, "clang")
     define_gmp(my.install)
     
     heading1("Initialize the build environment.")
@@ -596,8 +602,8 @@ for generate.repository by name as _repository
          define_build_options(_build)
     endfor _build
 
-    heading1("Define operating system settings.")
-    define_os_settings()
+    heading1("Define compiler settings.")
+    define_compiler_settings()
 
     heading1("Define utility functions.")
     define_utility_functions()
