@@ -26,6 +26,7 @@ function format_template_files(configure)
     define my.configure = format_template_files.configure
     define my.template_files = ""
     for my.configure.template as _template
+        require(_template, "template", "name")
         my.template_files = "$(my.template_files) $(_template.name)"
     endfor _template
     return trim_left(my.template_files)
@@ -34,6 +35,8 @@ endfunction
 function get_option_symbol(option)
     define my.option = get_option_symbol.option
     if (defined(my.option))
+        require(my.option, "option", "type")
+        require(my.option, "option", "name")
         define my.prefix = is_true(my.option.unprefixed) ?? "" ?\
             "$(my.option.type:c)_"
         return "$(my.prefix)$(my.option.name:c)"
@@ -55,12 +58,16 @@ endfunction
 .endtemplate
 .template 1
 .macro initialize(repository)
-.   define my.repo = initialize.repository
+.   define my.repository = initialize.repository
+.   require(my.repository, "repository", "email")
+.   require(my.repository, "repository", "name")
+.   require(my.repository, "repository", "version")
+.
 # Declare the required version of autoconf.
 AC_PREREQ([2.65])
 
 # Process command-line arguments and perform initialization and verification.
-AC_INIT([$(my.repo.name)], [$(my.repo.version)], [$(my.repo.email)])
+AC_INIT([$(my.repository.name)], [$(my.repository.version)], [$(my.repository.email)])
 
 # Do compilation tests.
 AC_LANG(C++)
@@ -91,9 +98,9 @@ AC_PROG_CXX
 # Enable shared libraries if available, and static if they don't conflict.
 AC_PROG_LIBTOOL
 
-# Declare using the GNU C library (glibc).
-AC_GNU_SOURCE
-
+.# Declare using the GNU C library (glibc).
+.#AC_GNU_SOURCE
+.
 # Compute the canonical host-system type variable host, including host_os.
 AC_CANONICAL_HOST
 
@@ -115,6 +122,8 @@ AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 .
 .macro with(option)
 .   define my.option = with.option
+.   require(my.option, "option", "description")
+.   require(my.option, "option", "name")
 .   define my.value = defined(my.option.example) ?? "$(my.option.example)" ? ""
 .   define my.symbol = get_option_symbol(my.option)
 .   define my.output = is_true(my.option.substitute) ?? " and output ${$(my.option.name:c)}" ? ""
@@ -139,6 +148,9 @@ AM_CONDITIONAL([$(my.symbol:upper)], [test x$$(my.symbol) != xno])
 .
 .macro enable(option)
 .   define my.option = enable.option
+.   require(my.option, "option", "default")
+.   require(my.option, "option", "description")
+.   require(my.option, "option", "name")
 .   if ((my.option.default <> "yes") & (my.option.default <> "no"))
 .       abort "Invalid repository.option.enable value: $(my.option.default)."
 .   endif
@@ -168,6 +180,7 @@ AM_CONDITIONAL([$(my.symbol:upper)], [test x$$(my.symbol) != xno])
 .
 .macro definition(item)
 .   define my.define = definition.item
+.   require(my.define, "define", "name")
 .   heading2("Unconditionally define the preprocessor symbol $(my.define.name:upper,c).")
 .   if (!is_empty(my.define.comment))
 .       heading3(my.define.comment)
@@ -178,6 +191,8 @@ AC_DEFINE([$(my.define.name:upper,c)])
 .
 .macro check_package(dependency, configure)
 .   define my.dependency = check_package.dependency
+.   require(my.dependency, "dependency", "name")
+.   require(my.dependency, "dependency", "version")
 .   define my.configure = check_package.configure
 .   define my.prefix = is_true(my.dependency.unprefixed) ?? "" ? "lib"
 .   define my.symbol = find_option_symbol(my.dependency, my.configure)?
@@ -201,7 +216,8 @@ AS_IF([test x$$(my.symbol) = xyes],
 .
 .macro check_boost(dependency)
 .   define my.dependency = check_boost.dependency
-.   define my.show_compiler = is_empty(my.dependency.compiler) ?? "" ? " if on $(my.dependency.compiler)"
+.   require(my.dependency, "dependency", "version")
+.   define my.show_compiler = is_empty(my.dependency.compiler) ?? "" ? " if in $(my.dependency.compiler)"
 .   define my.compiler_pattern = is_empty(my.dependency.compiler) ?? "*" ? "*$(my.dependency.compiler)*"
 .   heading2("Require Boost of at least version $(my.dependency.version)$(my.show_compiler).")
 .   if (!is_empty(my.dependency.comment))
@@ -230,6 +246,7 @@ AS_IF([test x$$(my.symbol) = xyes], [AX_$(my.dependency.name:upper,c)])
 .
 .macro check_dependency(dependency)
 .   define my.dependency = check_dependency.dependency
+.   require(my.dependency, "dependency", "name")
 .   define my.show_system = is_empty(my.dependency.system) ?? "" ? " if on $(my.dependency.system)"
 .   define my.output = is_empty(my.dependency.function) ?? "" ? " and output ${$(my.dependency.name:c)_LIBS}"
 .   define my.system_pattern = is_empty(my.dependency.system) ?? "*" ? "*$(my.dependency.system)*"
@@ -264,31 +281,39 @@ AS_CASE([${host_os}], [$(my.system_pattern)],
 
 .endmacro # check_lib
 .
-.macro flag(dependency)
-.   define my.dependency = flag.dependency
-.   heading2("$(my.dependency.comment)")
-.   if (!defined(my.dependency.alternate) & !is_true(my.dependency.link))
-AX_CHECK_COMPILE_FLAG([-$(my.dependency.name)],
-    [CXXFLAGS="$CXXFLAGS -$(my.dependency.name)"])
+.macro flag(flag)
+.   define my.flag = flag.flag
+.   require(my.flag, "flag", "name")
+.   require(my.flag, "flag", "comment")
+.   define my.show_disabled = is_empty(my.flag.compiler) | (my.flag.compiler = "disabled")
+.   define my.show_compiler = my.show_disabled ?? "" ? " Enabled in $(my.flag.compiler) only."
+.   define my.compiler_pattern = is_empty(my.flag.compiler) ?? "*" ? "*$(my.flag.compiler)*"
+.   heading2("$(my.flag.comment)$(my.show_compiler)")
+.   if (!defined(my.flag.alternate) & !is_true(my.flag.link))
+AS_CASE([${CC}], [$(my.compiler_pattern)],
+    [AX_CHECK_COMPILE_FLAG([-$(my.flag.name)],
+        [CXXFLAGS="$CXXFLAGS -$(my.flag.name)"])])
 
 .   endif
 .
-.   if (defined(my.dependency.alternate) & !is_true(my.dependency.link))
-AX_CHECK_COMPILE_FLAG([-$(my.dependency.name)],
-    [CXXFLAGS="$CXXFLAGS -$(my.dependency.name)"],
-    [AX_CHECK_COMPILE_FLAG([-$(my.dependency.alternate)],
-        [CXXFLAGS="$CXXFLAGS -$(my.dependency.alternate)"])])
+.   if (defined(my.flag.alternate) & !is_true(my.flag.link))
+AS_CASE([${CC}], [$(my.compiler_pattern)],
+    [AX_CHECK_COMPILE_FLAG([-$(my.flag.name)],
+        [CXXFLAGS="$CXXFLAGS -$(my.flag.name)"],
+        [AX_CHECK_COMPILE_FLAG([-$(my.flag.alternate)],
+            [CXXFLAGS="$CXXFLAGS -$(my.flag.alternate)"])])])
 
 .   endif
 .
-.   if (!defined(my.dependency.alternate) & is_true(my.dependency.link))
-AX_CHECK_COMPILE_FLAG([-$(my.dependency.name)],
-    [AX_CHECK_LINK_FLAG([-$(my.dependency.name)],
-        [CXXFLAGS="$CXXFLAGS -$(my.dependency.name)"])])
+.   if (!defined(my.flag.alternate) & is_true(my.flag.link))
+AS_CASE([${CC}], [$(my.compiler_pattern)],
+    [AX_CHECK_COMPILE_FLAG([-$(my.flag.name)],
+        [AX_CHECK_LINK_FLAG([-$(my.flag.name)],
+            [CXXFLAGS="$CXXFLAGS -$(my.flag.name)"])])])
 
 .   endif
 .
-.   if (defined(my.dependency.alternate) & is_true(my.dependency.link))
+.   if (defined(my.flag.alternate) & is_true(my.flag.link))
 .       abort "Conflicting repository.flag attributes: alternate + link."
 .   endif
 .endmacro # flag
@@ -314,6 +339,7 @@ AC_OUTPUT
 function generate_configure()
 for generate.repository by name as _repository
 
+    require(_repository, "repository", "name")
     define my.out_file = "$(_repository.name)/configure.ac"
     notify(my.out_file)
     output(my.out_file)
@@ -326,6 +352,7 @@ for generate.repository by name as _repository
 
     heading1("Process options.")
     for my.configure.option as _option
+        require(_option, "option", "type")
         if (_option.type = "with")
             with(_option)
         elsif (_option.type = "enable")
@@ -357,9 +384,9 @@ for generate.repository by name as _repository
     output_value("boost_LIBS", format_boost_libraries(my.configure))
 
     heading1("Set flags.")
-    for my.configure.flag as Flag1
-        flag(Flag1)
-    endfor Flag1
+    for my.configure.flag as _flag
+        flag(_flag)
+    endfor _flag
     
     heading1("Process outputs into templates.")
     compile("Makefile $(_repository->package.name).pc $(format_template_files(my.configure))")

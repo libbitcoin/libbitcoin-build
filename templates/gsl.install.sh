@@ -344,7 +344,7 @@ make_current_directory()
 
     ./autogen.sh
     configure_options "$@"
-    make_silent $JOBS
+    make_jobs $JOBS
     make install
 
     # Use ldconfig only in case of non --prefix installation on Linux.    
@@ -353,16 +353,16 @@ make_current_directory()
     fi
 }
 
-make_silent()
+make_jobs()
 {
     local JOBS=$1
     local TARGET=$2
 
     # Avoid setting -j1 (causes problems on Travis).
     if [[ $JOBS > $SEQUENTIAL ]]; then
-        make --silent -j$JOBS $TARGET
+        make -j$JOBS $TARGET
     else
-        make --silent $TARGET
+        make $TARGET
     fi
 }
 
@@ -371,7 +371,7 @@ make_tests()
     local JOBS=$1
 
     # Build and run unit tests relative to the primary directory.
-    make_silent $JOBS check
+    make_jobs $JOBS check
 }
 
 pop_directory()
@@ -448,7 +448,7 @@ build_from_tarball_gmp()
 
     # GMP does not honor noise reduction.
     echo "Making all..."
-    make_silent $JOBS >/dev/null
+    make_jobs $JOBS >/dev/null
     echo "Installing all..."
     make install >/dev/null
 

@@ -38,8 +38,8 @@ endfunction
 
 function job_install(job)
     define my.job = job_install.job
-    define my.sudo = is_true(my.job.sudo) ?? "sudo " ? ""
-    return "$(my.sudo)CXX=$CXX CC=$CC ./install.sh $(job_options(my.job))"
+    define my.sudo = is_true(my.job.sudo) ?? "sudo CXX=$CXX CC=$CC " ? ""
+    return "$(my.sudo)./install.sh $(job_options(my.job))"
 endfunction
 
 function job_predicate_link(job)
@@ -110,7 +110,6 @@ matrix:
 .macro set_aliases(matrix)
 .   my.matrix = set_aliases.matrix
     # Set aliases for readability.
-.   # TODO: enumerate from matrixes.
     - $(condition("$CC == gcc  ")) GCC=true; fi
     - $(condition("$CC == clang")) CLANG=true; fi
     - $(condition("$LINK == static ")) STATIC=true; fi

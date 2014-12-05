@@ -14,8 +14,8 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" />
-      
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
+
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_date_time" />
@@ -32,13 +32,12 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <!--<flag name="Wno-unused-local-typedefs" comment="Clean up Boost 1.49 headers (gcc, !osx clang)." />-->
-      <!--<flag name="Wno-deprecated-register" comment="Clean up Boost 1.54 headers (osx clang, !gcc)." />-->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <!-- Visibility restrictions are disabled pending comprehensive review. -->
-      <!--<flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />-->
-      <!--<flag name="fvisibility=internal" alternate="fvisibility=hidden" comment="Set visibility to internal or hidden." />-->
+      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
+      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
       
       <!--<template name="CompileMe.am" />-->
     </configure>
@@ -88,7 +87,7 @@
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+        <!--<option value="--disable-silent-rules" />-->
         <option value="${prefix_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -97,10 +96,6 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <!-- TEST LINK WARNING: ld: warning: PIE disabled. Absolute addressing (perhaps -mdynamic-no-pic)
-        not allowed in code signed PIE, but used in ___gmpn_divexact_1 from /Users/travis/prefix/lib/libgmp.a(dive_1.o).
-        To fix this warning, don't compile with -mdynamic-no-pic or link with -Wl,-no_pie -->
-        <!-- https://travis-ci.org/libbitcoin/libbitcoin/jobs/42957013#L1144 -->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -108,18 +103,17 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- TEST LINK ERROR (LIBC++?): ./test/libbitcoin_test: undefined symbol: _ZNSt3__18numpunctIcE2idE -->
-        <!-- https://travis-ci.org/libbitcoin/libbitcoin/jobs/42957016#L1287 -->
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <option value="--disable-silent-rules" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++abi'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
-        <!-- CLEAN W/WARNINGS -->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -129,23 +123,20 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!-- CLEAN -->
         <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
         <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- TEST LINK ERROR (LIBC++): uncaught_exception not yet implemented -->
-        <!-- https://travis-ci.org/libbitcoin/libbitcoin/jobs/42957017#L791 -->
-        <get name="libgmp-dev" />
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
-        <!-- CLang on linux requires libc++/c++abi.-->
+        <get name="libgmp-dev" />
+        <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
-        <option value="CXXFLAGS=-stdlib=libc++" />
-        <option value="LDLIBS=-lc++abi" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
-        <!-- CLEAN -->
         <option value="--disable-static" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -155,7 +146,7 @@
     
   </repository>
   
-  <repositoryX name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
 
     <package name="libbitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" >
       <cflag value="std=c++11" />
@@ -167,36 +158,27 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
-      <dependency name="boost" system="linux" version="1.49.0" />
-      <dependency name="boost" system="darwin" version="1.54.0" />
+      <dependency name="boost" compiler="gcc" version="1.49.0" />
+      <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="2.7.0" />
-      
+            
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <!--<flag name="Wno-deprecated-register" comment="Clean up Boost 1.54 headers (clang)." />-->
-      <flag name="Wno-unused-local-typedefs" comment="Clean up Boost 1.49 headers (gcc)." />
-      <!--<flag name="Wno-unknown-warning-option" comment="Clean up on OSX (clang)." />-->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <!--<flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />-->
-      <!--<flag name="fvisibility=internal" alternate="fvisibility=hidden" comment="Set visibility to internal or hidden." />-->
+      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
+      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
     </configure>
     
     <install>
-      <option value="CXXFLAGS='-Os -s'" />
-      <option value="--disable-shared" />
-      <option value="--enable-static" />
-      <option value="--build-gmp" />
-      <option value="--build-boost" />
-      
-      <get name="libleveldb-dev" comment="Test dependency." />
-      
-      <build name="boost" system="linux" version="1.49.0" parallel="true" >
+      <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -210,7 +192,7 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="boost" system="darwin" version="1.54.0" parallel="true" >
+      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=libc++" />
         <option value="linkflags=-stdlib=libc++" />
@@ -230,7 +212,7 @@
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repositoryX="secp256k1" branch="master" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
         <option value="--with-bignum=gmp" />
         <option value="--with-field=gmp" />
         <option value="--enable-benchmark=no" />
@@ -239,23 +221,77 @@
         <option value="${prefix_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
-      <build name="bitcoin" github="libbitcoin" repositoryX="libbitcoin" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${prefix_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repositoryX="libbitcoin-blockchain" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
-
-  </repositoryX>
+    
+    <matrix>
+      <job system="osx" compiler="clang" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="leveldb" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="static" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="libleveldb-dev" />
+        <option value="--disable-silent-rules" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="libleveldb-dev" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--build-dir=my-build" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
+        <get name="gmp" />
+        <get name="leveldb" />
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost in order to get the desired version.-->
+        <get name="libgmp-dev" />
+        <get name="libleveldb-dev" />
+        <option value="--disable-silent-rules" />
+        <option value="--disable-static" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <get name="libleveldb-dev" />
+        <option value="--disable-static" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+    </matrix>
+    
+  </repository>
   
-  <repositoryX name="libbitcoin-client" version="2.0.0" email="mienkphi@gmail.com" >
+  <repository name="libbitcoin-client" version="2.0.0" email="mienkphi@gmail.com" >
     
     <package name="libbitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" >
       <cflag value="std=c++11" />
@@ -267,10 +303,10 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
-      <dependency name="boost" system="linux" version="1.49.0" />
-      <dependency name="boost" system="darwin" version="1.54.0" />
+      <dependency name="boost" compiler="gcc" version="1.49.0" />
+      <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-protocol" version="2.0.0" />
       
@@ -278,24 +314,17 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <!--<flag name="Wno-deprecated-register" comment="Clean up Boost 1.54 headers (clang)." />-->
-      <flag name="Wno-unused-local-typedefs" comment="Clean up Boost 1.49 headers (gcc)." />
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
-      <!--<flag name="Wno-unknown-warning-option" comment="Clean up on OSX (clang)." />-->
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <!--<flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />-->
-      <!--<flag name="fvisibility=internal" alternate="fvisibility=hidden" comment="Set visibility to internal or hidden." />-->
+      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
+      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
     </configure>
     
-    <install>
-      <option value="CXXFLAGS='-Os -s'" />
-      <option value="--disable-shared" />
-      <option value="--enable-static" />
-      <option value="--build-gmp" />
-      <option value="--build-boost" />
-      
-      <build name="boost" system="linux" version="1.49.0" parallel="true" >
+    <install>      
+      <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -309,7 +338,7 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="boost" system="darwin" version="1.54.0" parallel="true" >
+      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=libc++" />
         <option value="linkflags=-stdlib=libc++" />
@@ -329,7 +358,7 @@
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repositoryX="secp256k1" branch="master" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
         <option value="--with-bignum=gmp" />
         <option value="--with-field=gmp" />
         <option value="--enable-benchmark=no" />
@@ -338,45 +367,92 @@
         <option value="${prefix_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
-      <build name="protobuf" github="libbitcoin" repositoryX="protobuf" branch="2.6.0" parallel="false" >
+      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
-      <build name="sodium" github="jedisct1" repositoryX="libsodium" branch="master" parallel="true" >
+      <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="zmq" github="zeromq" repositoryX="libzmq" branch="master" parallel="true" >
+      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
         <option value="--with-libsodium" />
       </build>
-      <build name="czmq" github="zeromq" repositoryX="czmq" branch="master" parallel="true" >
+      <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
         <option value="--without-makecert" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmqpp" github="zeromq" repositoryX="czmqpp" branch="master" parallel="true" >
+      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repositoryX="libbitcoin" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${prefix_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repositoryX="libbitcoin-protocol" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="libbitcoin" repositoryX="libbitcoin-client" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
-    
-  </repositoryX>
+
+    <matrix>
+      <job system="osx" compiler="clang" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="static" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <option value="--disable-silent-rules" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--build-dir=my-build" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
+        <get name="gmp" />
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost in order to get the desired version.-->
+        <get name="libgmp-dev" />
+        <option value="--disable-silent-rules" />
+        <option value="--disable-static" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <option value="--disable-static" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+    </matrix>
+
+  </repository>
   
-  <repositoryX name="libbitcoin-explorer" version="2.0.0" email="eric@voskuil.org">
+  <repository name="libbitcoin-explorer" version="2.0.0" email="eric@voskuil.org">
 
     <package name="libbitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" >
       <cflag value="std=c++11" />
@@ -384,52 +460,44 @@
     </package>
     
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="bash-completion-dir" default="no" example="[=PATH]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
       <define name="BOOST_NO_EXCEPTIONS" comment="Capture exceptional conditions in callback function." />
       <define name="BOOST_EXCEPTION_DISABLE" comment="Disable boost exception augmentation." />
       
-      <dependency name="boost" system="linux" version="1.49.0" />
-      <dependency name="boost" system="darwin" version="1.54.0" />
+      <dependency name="boost" compiler="gcc" version="1.49.0" />
+      <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_chrono" />
       <dependency name="boost_program_options" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completion-dir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="2.0.0" />
-      
+
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
-      <!-- Wpedantic causes lots of boost 1.49 property_tree included header warnings, so leave off. -->
-      <!--<flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />-->
+      <flag name="Wpedantic" alternate="pedantic" compiler="gcc" comment="Causes numerous property_tree warnings in clang." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
+      <flag name="Wno-maybe-uninitialized" compiler="gcc" comment="Clean up Boost 1.49 headers, static with no exceptions." />
+      <flag name="Wno-sometimes-uninitialized" compiler="clang" comment="Clean up Boost 1.54 headers, static with no exceptions." />
+      <flag name="Wno-return-type" comment="Clean up Boost property_tree headers with exceptions disabled." />
       <flag name="Wno-sign-compare" comment="Clean up protobuf headers." />
-      <!-- These cause problems on other compilers, despite checks. -->
-      <!--<flag name="Wno-unknown-warning-option" comment="Clean up on OSX (clang)." />-->
-      <!--<flag name="Wno-nested-anon-types" comment="Clean up protobuf headers (clang)." />-->
-      <!--<flag name="Wno-unused-local-typedefs" comment="Clean up Boost 1.49 headers (gcc)." />-->
-      <!--<flag name="Wno-deprecated-register" comment="Clean up Boost 1.54 headers (clang)." />-->
-      <flag name="Wno-maybe-uninitialized" comment="Clean up boost property_tree headers (boost exceptions off)." />
-      <flag name="Wno-return-type" comment="Clean up boost property_tree headers (boost exceptions off)." />
+      <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
+      <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers." />
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <!--<flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />-->
-      <!--<flag name="fvisibility=internal" alternate="fvisibility=hidden" comment="Set visibility to internal or hidden." />-->
+      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
+      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
     </configure>
     
     <install>
-      <option value="CXXFLAGS='-Os -s'" />
-      <option value="--disable-shared" />
-      <option value="--enable-static" />
-      <option value="--build-gmp" />
-      <option value="--build-boost" />
-      
-      <build name="boost" system="linux" version="1.49.0" parallel="true" >
+      <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -445,7 +513,7 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="boost" system="darwin" version="1.54.0" parallel="true" >
+      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=libc++" />
         <option value="linkflags=-stdlib=libc++" />
@@ -467,7 +535,7 @@
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repositoryX="secp256k1" branch="master" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
         <option value="--with-bignum=gmp" />
         <option value="--with-field=gmp" />
         <option value="--enable-benchmark=no" />
@@ -476,56 +544,103 @@
         <option value="${prefix_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
-      <build name="protobuf" github="libbitcoin" repositoryX="protobuf" branch="2.6.0" parallel="false" >
+      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
-      <build name="sodium" github="jedisct1" repositoryX="libsodium" branch="master" parallel="true" >
+      <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="zmq" github="zeromq" repositoryX="libzmq" branch="master" parallel="true" >
+      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
         <option value="--with-libsodium" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmq" github="zeromq" repositoryX="czmq" branch="master" parallel="true" >
+      <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
         <option value="--without-makecert" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmqpp" github="zeromq" repositoryX="czmqpp" branch="master" parallel="true" >
+      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repositoryX="libbitcoin" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${prefix_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repositoryX="libbitcoin-protocol" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="libbitcoin" repositoryX="libbitcoin-client" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-explorer" github="libbitcoin" repositoryX="libbitcoin-explorer" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version2" parallel="true" >
+        <option value="--with-bash-completion-dir" />
         <option value="${prefix_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
     
-    <!--<get name="bash-completion" />-->
-    <!--<option value="--with-bash-completion-dir=/usr/local/etc/bash_completion.d" />-->
-      
-  </repositoryX>
+    <matrix>
+      <job system="osx" compiler="clang" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="static" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <option value="--disable-silent-rules" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="bash-completion" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--build-dir=my-build" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
+        <get name="gmp" />
+        <get name="bash-completion" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <get name="bash-completion" />
+        <option value="--disable-static" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost in order to get the desired version.-->
+        <get name="libgmp-dev" />
+        <option value="--disable-silent-rules" />
+        <option value="--disable-static" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+    </matrix>
 
-  <repositoryX name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
+  </repository>
+
+  <repository name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
 
     <package name="libbitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" >
       <cflag value="std=c++11" />
@@ -537,35 +652,28 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
-      <dependency name="boost" system="linux" version="1.49.0" />
-      <dependency name="boost" system="darwin" version="1.54.0" />
+      <dependency name="boost" compiler="gcc" version="1.49.0" />
+      <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="2.7.0" />
       <dependency name="bitcoin-blockchain" version="2.0.0" />
-      
+
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <!--<flag name="Wno-deprecated-register" comment="Clean up Boost 1.54 headers (clang)." />-->
-      <flag name="Wno-unused-local-typedefs" comment="Clean up Boost 1.49 headers (gcc)." />
-      <!--<flag name="Wno-unknown-warning-option" comment="Clean up on OSX (clang)." />-->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <!--<flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />-->
-      <!--<flag name="fvisibility=internal" alternate="fvisibility=hidden" comment="Set visibility to internal or hidden." />-->
+      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
+      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
     </configure>
 
-    <install>
-      <option value="CXXFLAGS='-Os -s'" />
-      <option value="--disable-shared" />
-      <option value="--enable-static" />
-      <option value="--build-gmp" />
-      <option value="--build-boost" />
-      
-      <build name="boost" system="linux" version="1.49.0" parallel="true" >
+    <install>      
+      <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -579,7 +687,7 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="boost" system="darwin" version="1.54.0" parallel="true" >
+      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=libc++" />
         <option value="linkflags=-stdlib=libc++" />
@@ -599,7 +707,7 @@
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repositoryX="secp256k1" branch="master" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
         <option value="--with-bignum=gmp" />
         <option value="--with-field=gmp" />
         <option value="--enable-benchmark=no" />
@@ -608,29 +716,82 @@
         <option value="${prefix_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
-      <build name="bitcoin" github="libbitcoin" repositoryX="libbitcoin" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${prefix_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repositoryX="libbitcoin-blockchain" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repositoryX="libbitcoin-node" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
-  </repositoryX>
+    <matrix>
+      <job system="osx" compiler="clang" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="leveldb" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="static" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="libleveldb-dev" />
+        <option value="--disable-silent-rules" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="libleveldb-dev" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--build-dir=my-build" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
+        <get name="gmp" />
+        <get name="leveldb" />
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost in order to get the desired version.-->
+        <get name="libgmp-dev" />
+        <get name="libleveldb-dev" />
+        <option value="--disable-silent-rules" />
+        <option value="--disable-static" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <get name="libleveldb-dev" />
+        <option value="--disable-static" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+    </matrix>
 
-  <repositoryX name="libbitcoin-protocol" version="2.0.0" email="mienkphi@gmail.com">
+  </repository>
+
+  <repository name="libbitcoin-protocol" version="2.0.0" email="mienkphi@gmail.com">
 
     <package name="libbitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" >
       <cflag value="std=c++11" />
@@ -642,38 +803,31 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" />
-      
-      <dependency name="boost" system="linux" version="1.49.0" />
-      <dependency name="boost" system="darwin" version="1.54.0" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
+     
+      <dependency name="boost" compiler="gcc" version="1.49.0" />
+      <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="protobuf" version="2.6.0" unprefixed="true" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="0.4.1" />
       <dependency name="bitcoin" version="2.7.0" />
-      
+
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <!--<flag name="Wno-deprecated-register" comment="Clean up Boost 1.54 headers (clang)." />-->
-      <flag name="Wno-unused-local-typedefs" comment="Clean up Boost 1.49 headers (gcc)." />
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
-      <!--<flag name="Wno-unknown-warning-option" comment="Clean up on OSX (clang)." />-->
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <!--<flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />-->
-      <!--<flag name="fvisibility=internal" alternate="fvisibility=hidden" comment="Set visibility to internal or hidden." />-->
+      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
+      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
     </configure>
     
     <install>
-      <option value="CXXFLAGS='-Os -s'" />
-      <option value="--disable-shared" />
-      <option value="--enable-static" />
-      <option value="--build-gmp" />
-      <option value="--build-boost" />
-      
-      <build name="boost" system="linux" version="1.49.0" parallel="true" >
+      <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -687,7 +841,7 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="boost" system="darwin" version="1.54.0" parallel="true" >
+      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=libc++" />
         <option value="linkflags=-stdlib=libc++" />
@@ -707,7 +861,7 @@
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repositoryX="secp256k1" branch="master" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
         <option value="--with-bignum=gmp" />
         <option value="--with-field=gmp" />
         <option value="--enable-benchmark=no" />
@@ -716,40 +870,95 @@
         <option value="${prefix_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
-      <build name="protobuf" github="libbitcoin" repositoryX="protobuf" branch="2.6.0" parallel="false" >
+      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
-      <build name="sodium" github="jedisct1" repositoryX="libsodium" branch="master" parallel="true" >
+      <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="zmq" github="zeromq" repositoryX="libzmq" branch="master" parallel="true" >
+      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
         <option value="--with-libsodium" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmq" github="zeromq" repositoryX="czmq" branch="master" parallel="true" >
+      <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
         <option value="--without-makecert" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmqpp" github="zeromq" repositoryX="czmqpp" branch="master" parallel="true" >
+      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repositoryX="libbitcoin" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${prefix_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repositoryX="libbitcoin-protocol" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
-    
-  </repositoryX>
+
+    <matrix>
+      <job system="osx" compiler="clang" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="leveldb" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="static" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="libleveldb-dev" />
+        <option value="--disable-silent-rules" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="libleveldb-dev" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--build-dir=my-build" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
+        <get name="gmp" />
+        <get name="leveldb" />
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost in order to get the desired version.-->
+        <get name="libgmp-dev" />
+        <get name="libleveldb-dev" />
+        <option value="--disable-silent-rules" />
+        <option value="--disable-static" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <get name="libleveldb-dev" />
+        <option value="--disable-static" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+    </matrix>
+
+  </repository>
   
-  <repositoryX name="libbitcoin-server" version="3.0.0" email="eric@voskuil.org">
+  <repository name="libbitcoin-server" version="3.0.0" email="eric@voskuil.org">
+  
     <package name="libbitcoin-server" description="Bitcoin Server Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-server/tree/version3" >
       <cflag value="std=c++11" />
       <library name="bitcoin-server" />
@@ -760,10 +969,10 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" />
-      
-      <dependency name="boost" system="linux" version="1.49.0" />
-      <dependency name="boost" system="darwin" version="1.54.0" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
+     
+      <dependency name="boost" compiler="gcc" version="1.49.0" />
+      <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-protocol" version="2.0.0" />
       
@@ -771,24 +980,17 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <!--<flag name="Wno-deprecated-register" comment="Clean up Boost 1.54 headers (clang)." />-->
-      <flag name="Wno-unused-local-typedefs" comment="Clean up Boost 1.49 headers (gcc)." />
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
-      <!--<flag name="Wno-unknown-warning-option" comment="Clean up on OSX (clang)." />-->
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <!--<flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />-->
-      <!--<flag name="fvisibility=internal" alternate="fvisibility=hidden" comment="Set visibility to internal or hidden." />-->
+      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
+      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
     </configure>
     
     <install>
-      <option value="CXXFLAGS='-Os -s'" />
-      <option value="--disable-shared" />
-      <option value="--enable-static" />
-      <option value="--build-gmp" />
-      <option value="--build-boost" />
-      
-      <build name="boost" system="linux" version="1.49.0" parallel="true" >
+      <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -802,7 +1004,7 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="boost" system="darwin" version="1.54.0" parallel="true" >
+      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=libc++" />
         <option value="linkflags=-stdlib=libc++" />
@@ -822,7 +1024,7 @@
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repositoryX="secp256k1" branch="master" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
         <option value="--with-bignum=gmp" />
         <option value="--with-field=gmp" />
         <option value="--enable-benchmark=no" />
@@ -831,43 +1033,96 @@
         <option value="${prefix_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
-      <build name="protobuf" github="libbitcoin" repositoryX="protobuf" branch="2.6.0" parallel="false" >
+      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
-      <build name="sodium" github="jedisct1" repositoryX="libsodium" branch="master" parallel="true" >
+      <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="zmq" github="zeromq" repositoryX="libzmq" branch="master" parallel="true" >
+      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
         <option value="--with-libsodium" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmq" github="zeromq" repositoryX="czmq" branch="master" parallel="true" >
+      <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
         <option value="--without-makecert" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmqpp" github="zeromq" repositoryX="czmqpp" branch="master" parallel="true" >
+      <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repositoryX="libbitcoin" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${prefix_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repositoryX="libbitcoin-protocol" branch="version2" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-server" github="libbitcoin-server" repositoryX="libbitcoin-server" branch="version3" parallel="true" >
-        <option value="--enable-silent-rules" />
+      <build name="bitcoin-server" github="libbitcoin-server" repository="libbitcoin-server" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
-    
-  </repositoryX>
+
+    <matrix>
+      <job system="osx" compiler="clang" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="leveldb" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="static" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="libleveldb-dev" />
+        <option value="--disable-silent-rules" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" >
+        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <get name="libleveldb-dev" />
+        <option value="--disable-shared" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--build-dir=my-build" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
+        <get name="gmp" />
+        <get name="leveldb" />
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Must build boost in order to get the desired version.-->
+        <get name="libgmp-dev" />
+        <get name="libleveldb-dev" />
+        <option value="--disable-silent-rules" />
+        <option value="--disable-static" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
+        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <get name="libleveldb-dev" />
+        <option value="--disable-static" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+    </matrix>
+
+  </repository>
 
 </generate>
