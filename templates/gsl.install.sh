@@ -250,9 +250,9 @@ if [[ $PREFIX ]]; then
         with_boost="--with-boost=$PREFIX"
     fi
     
-    # Set public prefix_flags variable (because GMP has no pkg-config).
+    # Set public gmp_flags variable (because GMP has no pkg-config).
     if [[ $BUILD_GMP == yes ]]; then
-        prefix_flags="CPPFLAGS=-I$PREFIX/include LDFLAGS=-L$PREFIX/lib"
+        gmp_flags="CPPFLAGS=-I$PREFIX/include LDFLAGS=-L$PREFIX/lib"
     fi
     
     # Set public prefix variable (to tell Boost where to build).
@@ -263,7 +263,7 @@ fi
 echo "Published dynamic options:"
 echo "  boost_link: $boost_link"
 echo "  prefix: $prefix"
-echo "  prefix_flags: $prefix_flags"
+echo "  gmp_flags: $gmp_flags"
 echo "  with_boost: $with_boost"
 echo "  with_pkgconfigdir: $with_pkgconfigdir"
 
