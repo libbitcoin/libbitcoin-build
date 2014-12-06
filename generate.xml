@@ -32,8 +32,11 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
+      
+      <!-- boost -->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
+      
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
@@ -83,12 +86,12 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <!--<option value="--disable-silent-rules" />-->
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -169,8 +172,11 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
+      
+      <!-- boost -->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
+      
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
@@ -218,16 +224,17 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -314,9 +321,16 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
+      
+      <!-- boost -->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
+
+      <!-- protobuf -->
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
+      <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers, static." />
+      <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." />
+      
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
@@ -364,7 +378,7 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
@@ -385,16 +399,18 @@
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--without-tests" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -480,16 +496,25 @@
 
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
-      <flag name="Wpedantic" alternate="pedantic" compiler="gcc" comment="Causes numerous property_tree warnings in clang." />
+      <flag name="Wpedantic" alternate="pedantic" compiler="clang" comment="Causes numerous property_tree warnings in boost 1.49 (static, gcc)." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
-      <flag name="Wno-maybe-uninitialized" compiler="gcc" comment="Clean up Boost 1.49 headers, static with no exceptions." />
-      <flag name="Wno-sometimes-uninitialized" compiler="clang" comment="Clean up Boost 1.54 headers, static with no exceptions." />
-      <flag name="Wno-return-type" comment="Clean up Boost property_tree headers with exceptions disabled." />
-      <flag name="Wno-sign-compare" comment="Clean up protobuf headers." />
+      
+      <!-- boost -->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
+      
+      <!-- boost static, no exceptions -->
+      <flag name="Wno-maybe-uninitialized" compiler="gcc" comment="Clean up boost 1.49 headers, static with no exceptions." />
+      <flag name="Wno-sometimes-uninitialized" compiler="clang" comment="Clean up boost 1.54 headers, static with no exceptions." />
+      
+      <!-- boost property_tree, no exceptions -->
+      <flag name="Wno-return-type" comment="Clean up boost property_tree headers, with no exceptions." />
+      
+      <!-- protobuf -->
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
+      <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers." />
       <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers." />
+      
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
@@ -541,7 +566,7 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
@@ -563,23 +588,25 @@
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--without-tests" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="--without-tests" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version2" parallel="true" >
         <option value="--with-bash-completion-dir" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -619,13 +646,6 @@
         <get name="gmp" />
         <get name="bash-completion" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
-        <get name="bash-completion" />
-        <option value="--disable-static" />
-        <option value="--build-gmp" />
-        <option value="--build-boost" />
-        <option value="CXXFLAGS='-Os -s'" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
@@ -635,6 +655,13 @@
         <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -stdlib=libc++'" />
         <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <get name="bash-completion" />
+        <option value="--disable-static" />
+        <option value="--build-gmp" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
 
@@ -664,8 +691,16 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
+      
+      <!-- boost -->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
+
+      <!-- protobuf -->
+      <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
+      <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers, static." />
+      <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." />
+      
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
@@ -713,21 +748,23 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="--without-tests" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version2" parallel="true" >
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -817,9 +854,16 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
+      
+      <!-- boost -->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
+
+      <!-- protobuf -->
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
+      <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers, static." />
+      <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." />
+
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
@@ -867,7 +911,7 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
@@ -889,11 +933,12 @@
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -980,9 +1025,16 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up Boost 1.54 headers." />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up Boost 1.49 headers." />
+      
+      <!-- boost -->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
+
+      <!-- protobuf -->
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
+      <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers, static." />
+      <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." />
+      
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
@@ -1030,7 +1082,7 @@
         <option value="--enable-benchmark=no" />
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
@@ -1052,16 +1104,18 @@
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${prefix_flags}" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--without-tests" />
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-server" github="libbitcoin-server" repository="libbitcoin-server" branch="version3" parallel="true" >
+        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
