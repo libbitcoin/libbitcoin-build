@@ -12,7 +12,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
 
@@ -39,8 +39,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
       
       <!--<template name="CompileMe.am" />-->
     </configure>
@@ -107,7 +107,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-silent-rules" />
         <option value="--disable-shared" />
@@ -119,6 +119,7 @@
       </job>
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -131,9 +132,10 @@
         <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -160,7 +162,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
@@ -180,8 +182,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
     
     <install>
@@ -252,7 +254,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
         <option value="--disable-silent-rules" />
@@ -266,6 +268,7 @@
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -279,10 +282,11 @@
         <get name="leveldb" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -310,7 +314,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
@@ -335,8 +339,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
     
     <install>      
@@ -428,7 +432,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-silent-rules" />
         <option value="--disable-shared" />
@@ -440,6 +444,7 @@
       </job>
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -452,9 +457,10 @@
         <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -482,7 +488,7 @@
       <option type="with" name="bash-completion-dir" default="no" example="[=PATH]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
@@ -520,8 +526,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
     
     <install>
@@ -625,7 +631,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-silent-rules" />
         <option value="--disable-shared" />
@@ -638,6 +644,7 @@
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="bash-completion" />
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -651,9 +658,10 @@
         <get name="bash-completion" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -681,7 +689,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
@@ -707,8 +715,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
 
     <install>      
@@ -785,7 +793,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
         <option value="--disable-silent-rules" />
@@ -799,6 +807,7 @@
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -812,10 +821,11 @@
         <get name="leveldb" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -843,7 +853,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
      
@@ -871,8 +881,8 @@
 
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
     
     <install>
@@ -960,7 +970,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
         <option value="--disable-silent-rules" />
@@ -974,6 +984,7 @@
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -987,10 +998,11 @@
         <get name="leveldb" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -1018,7 +1030,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
      
@@ -1043,8 +1055,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
     
     <install>
@@ -1138,7 +1150,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
         <option value="--disable-silent-rules" />
@@ -1152,6 +1164,7 @@
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -1165,10 +1178,11 @@
         <get name="leveldb" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
