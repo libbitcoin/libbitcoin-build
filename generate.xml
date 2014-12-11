@@ -12,7 +12,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
 
@@ -119,6 +119,7 @@
       </job>
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -134,6 +135,7 @@
         <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -160,7 +162,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
@@ -266,6 +268,7 @@
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -283,6 +286,7 @@
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -310,7 +314,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
@@ -440,6 +444,7 @@
       </job>
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -455,6 +460,7 @@
         <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -482,7 +488,7 @@
       <option type="with" name="bash-completion-dir" default="no" example="[=PATH]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
@@ -638,6 +644,7 @@
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="bash-completion" />
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -654,6 +661,7 @@
         <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -681,7 +689,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
       
@@ -799,6 +807,7 @@
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -816,6 +825,7 @@
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -843,7 +853,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
      
@@ -974,6 +984,7 @@
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -991,6 +1002,7 @@
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -1018,7 +1030,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="debug" default="no" define="DEBUG" description="Compile with debug assertions." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
      
@@ -1152,6 +1164,7 @@
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -1169,6 +1182,7 @@
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
+        <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
         <option value="--build-boost" />
