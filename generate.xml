@@ -321,7 +321,9 @@
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin-protocol" version="2.0.0" />
+      <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
+      <dependency name="czmq++" version="0.4.1" />
+      <dependency name="bitcoin" version="2.7.0" />
 
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
