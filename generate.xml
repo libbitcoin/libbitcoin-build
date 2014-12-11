@@ -8,7 +8,7 @@
       <library name="bitcoin" />
       <library name="pthread" />
     </package>
-    
+
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
@@ -27,24 +27,24 @@
       <dependency name="gmp" system="linux" function="__gmpz_init" header="gmp.h" />
       <dependency name="gmp" system="darwin" function="__gmpz_init" header="gmp.h" libs="/opt/local/lib" includes="/opt/local/include" />
       <dependency name="secp256k1" version="0.0.1" />
-      
+
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      
+
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
-      
+
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
       <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
-      
+
       <!--<template name="CompileMe.am" />-->
     </configure>
-      
+
     <install>
       <build name="gmp" version="6.0.0a" parallel="true" >
         <option value="CPPFLAGS=-w" />
@@ -149,43 +149,43 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
-    
+
   </repository>
-  
+
   <repository name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
 
     <package name="libbitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" >
       <cflag value="std=c++11" />
       <library name="bitcoin-blockchain" />
     </package>
-    
+
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
-      
+
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="2.7.0" />
-            
+
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      
+
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
-      
+
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
       <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
-    
+
     <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
@@ -242,7 +242,7 @@
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
-    
+
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
@@ -301,33 +301,33 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
-    
+
   </repository>
-  
+
   <repository name="libbitcoin-client" version="2.0.0" email="mienkphi@gmail.com" >
-    
+
     <package name="libbitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" >
       <cflag value="std=c++11" />
       <library name="bitcoin-client" />
     </package>
-    
+
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
-      
+
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-protocol" version="2.0.0" />
-      
+
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      
+
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
@@ -336,14 +336,14 @@
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
       <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers, static." />
       <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." />
-      
+
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
       <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
-    
-    <install>      
+
+    <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
@@ -476,14 +476,14 @@
     </matrix>
 
   </repository>
-  
+
   <repository name="libbitcoin-explorer" version="2.0.0" email="eric@voskuil.org">
 
     <package name="libbitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" >
       <cflag value="std=c++11" />
       <library name="bitcoin-explorer" />
     </package>
-    
+
     <configure>
       <option type="with" name="bash-completion-dir" default="no" example="[=PATH]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
@@ -491,10 +491,10 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
-      
+
       <define name="BOOST_NO_EXCEPTIONS" comment="Capture exceptional conditions in callback function." />
       <define name="BOOST_EXCEPTION_DISABLE" comment="Disable boost exception augmentation." />
-      
+
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_chrono" />
@@ -507,29 +507,29 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" compiler="clang" comment="Causes numerous property_tree warnings in boost 1.49 (static, gcc)." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      
+
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
-      
+
       <!-- boost static, no exceptions -->
       <flag name="Wno-maybe-uninitialized" compiler="gcc" comment="Clean up boost 1.49 headers, static with no exceptions." />
       <flag name="Wno-sometimes-uninitialized" compiler="clang" comment="Clean up boost 1.54 headers, static with no exceptions." />
-      
+
       <!-- boost property_tree, no exceptions -->
       <flag name="Wno-return-type" comment="Clean up boost property_tree headers, with no exceptions." />
-      
+
       <!-- protobuf -->
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
       <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers." />
       <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers." />
-      
+
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
       <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
-    
+
     <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
@@ -620,7 +620,7 @@
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
-    
+
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
@@ -692,7 +692,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
-      
+
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -703,7 +703,7 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      
+
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
@@ -712,14 +712,14 @@
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
       <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers, static." />
       <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." />
-      
+
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
       <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
 
-    <install>      
+    <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
@@ -849,14 +849,14 @@
       <cflag value="std=c++11" />
       <library name="bitcoin-protocol" />
     </package>
-    
+
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
-     
+
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -869,7 +869,7 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      
+
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
@@ -884,7 +884,7 @@
       <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
       <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
-    
+
     <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
@@ -1019,9 +1019,9 @@
     </matrix>
 
   </repository>
-  
+
   <repository name="libbitcoin-server" version="3.0.0" email="eric@voskuil.org">
-  
+
     <package name="libbitcoin-server" description="Bitcoin Server Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-server/tree/version3" >
       <cflag value="std=c++11" />
       <library name="bitcoin-server" />
@@ -1033,17 +1033,17 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
-     
+
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-protocol" version="2.0.0" />
-      
+
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
-      
+
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
@@ -1052,13 +1052,13 @@
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
       <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers, static." />
       <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." />
-      
+
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
       <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
       <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
-    
+
     <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
