@@ -39,8 +39,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
       
       <!--<template name="CompileMe.am" />-->
     </configure>
@@ -107,7 +107,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-silent-rules" />
         <option value="--disable-shared" />
@@ -132,7 +132,7 @@
         <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
@@ -182,8 +182,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
     
     <install>
@@ -254,7 +254,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
         <option value="--disable-silent-rules" />
@@ -282,7 +282,7 @@
         <get name="leveldb" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
@@ -339,8 +339,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
     
     <install>      
@@ -432,7 +432,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-silent-rules" />
         <option value="--disable-shared" />
@@ -457,7 +457,7 @@
         <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
@@ -526,8 +526,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
     
     <install>
@@ -631,7 +631,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-silent-rules" />
         <option value="--disable-shared" />
@@ -658,7 +658,7 @@
         <get name="bash-completion" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
@@ -715,8 +715,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
 
     <install>      
@@ -793,7 +793,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
         <option value="--disable-silent-rules" />
@@ -821,7 +821,7 @@
         <get name="leveldb" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
@@ -881,8 +881,8 @@
 
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
     
     <install>
@@ -970,7 +970,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
         <option value="--disable-silent-rules" />
@@ -998,7 +998,7 @@
         <get name="leveldb" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
@@ -1055,8 +1055,8 @@
       
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
-      <flag name="fvisibility-inlines-hidden" compiler="disabled" comment="Hide inlines from external libs (disabled pending review)." />
-      <flag name="fvisibility=internal" alternate="fvisibility=hidden" compiler="disabled" comment="Set visibility to internal or hidden (disabled pending review)." />
+      <flag name="fvisibility-hidden" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" comment="Hide inlines from external libs." />
     </configure>
     
     <install>
@@ -1150,7 +1150,7 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="libleveldb-dev" />
         <option value="--disable-silent-rules" />
@@ -1178,7 +1178,7 @@
         <get name="leveldb" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- CLang on linux requires libc++/c++abi (at least for boost).-->
+        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
         <get name="libleveldb-dev" />
