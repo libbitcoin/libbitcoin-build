@@ -614,7 +614,6 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version2" parallel="true" >
-        <option value="--with-bash-completion-dir" />
         <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -650,12 +649,14 @@
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
+        <option value="--with-bash-completion-dir" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
         <get name="gmp" />
         <get name="bash-completion" />
+        <option value="--with-bash-completion-dir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
@@ -673,6 +674,7 @@
         <option value="--disable-static" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
+        <option value="--with-bash-completion-dir" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
