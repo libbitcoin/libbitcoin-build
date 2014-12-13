@@ -321,7 +321,11 @@
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin-protocol" version="2.0.0" />
+
+      <!--<dependency name="bitcoin-protocol" version="2.0.0" />-->
+      <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
+      <dependency name="czmq++" version="0.4.1" />
+      <dependency name="bitcoin" version="2.7.0" />
 
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
@@ -333,9 +337,9 @@
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
 
       <!-- protobuf -->
-      <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
+      <!--<flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
       <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers, static." />
-      <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." />
+      <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." />-->
 
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
@@ -387,9 +391,9 @@
         <option value="${gmp_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
-      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
+      <!--<build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
-      </build>
+      </build>-->
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -409,12 +413,12 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
+      <!--<build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
-      </build>
+      </build>-->
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="${gmp_flags}" />
         <option value="${with_boost}" />
@@ -520,9 +524,9 @@
       <flag name="Wno-return-type" comment="Clean up boost property_tree headers, with no exceptions." />
 
       <!-- protobuf -->
-      <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
+      <!--<flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
       <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers." />
-      <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers." />
+      <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers." />-->
 
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
@@ -578,9 +582,9 @@
         <option value="${gmp_flags}" />
         <!--<option value="${with_pkgconfigdir}" />-->
       </build>
-      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
+      <!--<build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
-      </build>
+      </build>-->
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -601,12 +605,12 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
+      <!--<build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
-      </build>
+      </build>-->
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${gmp_flags}" />
