@@ -244,10 +244,8 @@
     </install>
 
     <matrix>
-      <!-- LevelDB required for comparative tests. -->
       <job system="osx" compiler="clang" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <get name="leveldb" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -257,7 +255,6 @@
       <job system="linux" compiler="clang" link="static" >
         <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <get name="libleveldb-dev" />
         <option value="--disable-silent-rules" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -268,7 +265,6 @@
       </job>
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <get name="libleveldb-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -280,13 +276,11 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
         <get name="gmp" />
-        <get name="leveldb" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
-        <get name="libleveldb-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
@@ -295,7 +289,6 @@
         <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
-        <get name="libleveldb-dev" />
         <option value="--disable-static" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
@@ -948,7 +941,6 @@
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <get name="leveldb" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -958,7 +950,6 @@
       <job system="linux" compiler="clang" link="static" >
         <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <get name="libleveldb-dev" />
         <option value="--disable-silent-rules" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -969,7 +960,6 @@
       </job>
       <job system="linux" compiler="gcc" link="static" >
         <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <get name="libleveldb-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -981,13 +971,11 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
         <get name="gmp" />
-        <get name="leveldb" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
         <!-- Must build boost in order to get the desired version.-->
         <get name="libgmp-dev" />
-        <get name="libleveldb-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-silent-rules" />
         <option value="--disable-static" />
@@ -996,7 +984,6 @@
         <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
-        <get name="libleveldb-dev" />
         <option value="--disable-static" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
