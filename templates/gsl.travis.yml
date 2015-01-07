@@ -99,9 +99,6 @@ matrix:
     exclude:
         - os: osx
           compiler: gcc
-    allow_failures:
-        - os: linux
-          compiler: clang
     fast_finish:
         - true
 
@@ -110,23 +107,23 @@ matrix:
 .macro set_aliases(matrix)
 .   my.matrix = set_aliases.matrix
     # Set aliases for readability.
-    - $(condition("$CC == gcc  ")) GCC=true; fi
-    - $(condition("$CC == clang")) CLANG=true; fi
-    - $(condition("$LINK == static ")) STATIC=true; fi
-    - $(condition("$LINK == dynamic")) DYNAMIC=true; fi
-    - $(condition("$TRAVIS_OS_NAME == osx  ")) OSX=true; fi
-    - $(condition("$TRAVIS_OS_NAME == linux")) LINUX=true; fi
+    - $(condition("$CC             == gcc    ")) GCC=true; fi
+    - $(condition("$CC             == clang  ")) CLANG=true; fi
+    - $(condition("$LINK           == static ")) STATIC=true; fi
+    - $(condition("$LINK           == dynamic")) DYNAMIC=true; fi
+    - $(condition("$TRAVIS_OS_NAME == osx    ")) OSX=true; fi
+    - $(condition("$TRAVIS_OS_NAME == linux  ")) LINUX=true; fi
 
 .endmacro #set_aliases
 .
 .macro set_repositories(matrix)
 .   my.matrix = set_repositories.matrix
-.   my.linux       = condition("$LINUX")
-.   my.linux_gcc   = condition("$LINUX && $GCC  ")
+.   my.linux       = condition("$LINUX          ")
 .   my.linux_clang = condition("$LINUX && $CLANG")
 .
     # Set package repository.
-    - $(my.linux_gcc) sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+    - $(my.linux) sudo add-apt-repository -y ppa:boost-latest/ppa; fi
+    - $(my.linux) sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
     - $(my.linux_clang) sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
 
     # Update the system.
@@ -136,13 +133,13 @@ matrix:
 .
 .macro install_compilers(matrix)
 .   my.matrix = install_compilers.matrix
-.   my.linux_gcc   = condition("$LINUX && $GCC  ")
+.   my.linux       = condition("$LINUX          ")
 .   my.linux_clang = condition("$LINUX && $CLANG")
 .
     # Install g++ 4.8
-    - $(my.linux_gcc) sudo apt-get install -qq g++-4.8 --allow-unauthenticated; fi
-    - $(my.linux_gcc) sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50; fi
-    - $(my.linux_gcc) sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50; fi
+    - $(my.linux) sudo apt-get install -qq g++-4.8 --allow-unauthenticated; fi
+    - $(my.linux) sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50; fi
+    - $(my.linux) sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50; fi
 
     # Install clang++ 3.4
     - $(my.linux_clang) sudo apt-get install -qq clang-3.4 --allow-unauthenticated; fi
@@ -150,42 +147,6 @@ matrix:
     - $(my.linux_clang) sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.4 50; fi
 
 .endmacro #install_compilers
-.
-.macro install_libc(matrix)
-.   my.matrix = install_libc.matrix
-.   my.linux_clang = condition("$LINUX && $CLANG")
-.
-    # Install libc++ for linux/clang.
-    - $(my.linux_clang) svn co --quiet http://llvm.org/svn/llvm-project/libcxx/trunk libcxx; fi
-    
-    - $(my.linux_clang) pushd libcxx/lib/; fi
-    - $(my.linux_clang) bash buildit; fi
-    - $(my.linux_clang) sudo cp ./libc++.so.1.0 /usr/lib/; fi
-    - $(my.linux_clang) sudo mkdir -p /usr/include/c++/v1; fi
-    - $(my.linux_clang) sudo cp -r ../include/* /usr/include/c++/v1/; fi
-    - $(my.linux_clang) popd; fi
-    
-    - $(my.linux_clang) pushd /usr/lib/; fi
-    - $(my.linux_clang) sudo ln -sf libc++.so.1.0 libc++.so; fi
-    - $(my.linux_clang) sudo ln -sf libc++.so.1.0 libc++.so.1; fi
-    - $(my.linux_clang) popd; fi
-    
-    # Install libc++abi for linux/clang.
-    - $(my.linux_clang) svn co --quiet http://llvm.org/svn/llvm-project/libcxxabi/trunk libcxxabi; fi
-    
-    - $(my.linux_clang) pushd libcxxabi/lib/; fi
-    - $(my.linux_clang) bash buildit; fi
-    - $(my.linux_clang) sudo cp ./libc++abi.so.1.0 /usr/lib/; fi
-    - $(my.linux_clang) sudo mkdir -p /usr/include/c++/v1; fi
-    - $(my.linux_clang) sudo cp -r ../include/* /usr/include/c++/v1/; fi
-    - $(my.linux_clang) popd; fi
-    
-    - $(my.linux_clang) pushd /usr/lib/; fi
-    - $(my.linux_clang) sudo ln -sf libc++abi.so.1.0 libc++abi.so; fi
-    - $(my.linux_clang) sudo ln -sf libc++abi.so.1.0 libc++.so.1; fi
-    - $(my.linux_clang) popd; fi
-
-.endmacro #install_libc
 .
 .macro install_packages(matrix, system)
 .   my.matrix = install_packages.matrix
@@ -232,7 +193,6 @@ before_install:
 install:
 
 .   install_compilers(my.matrix)
-.   install_libc(my.matrix)
 .   install_packages(my.matrix)
 script:
 

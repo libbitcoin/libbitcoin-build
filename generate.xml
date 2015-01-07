@@ -25,6 +25,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="rt" function="clock_gettime" system="linux" />
       <dependency name="gmp" system="linux" function="__gmpz_init" header="gmp.h" />
+      <!-- TODO: obtain homebrew pre-installed GMP path via: gmp_prefix=`$BREW --prefix gmp 2>/dev/null` (macports gmp_prefix="/opt/local")-->
       <dependency name="gmp" system="darwin" function="__gmpz_init" header="gmp.h" libs="/opt/local/lib" includes="/opt/local/include" />
       <dependency name="secp256k1" version="0.0.1" />
 
@@ -32,6 +33,7 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." />
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
@@ -65,8 +67,8 @@
       </build>
       <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=libc++" />
-        <option value="linkflags=-stdlib=libc++" />
+        <option value="cxxflags=-stdlib=${boost_stdlib}" />
+        <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -87,19 +89,18 @@
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
         <option value="${gmp_flags}" />
-        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
-        <!--<option value="--disable-silent-rules" />-->
         <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
+        <!--<option value="--disable-silent-rules" />-->
       </build>
     </install>
 
     <matrix>
+      <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
       <job system="osx" compiler="clang" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -107,18 +108,14 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -128,19 +125,15 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
         <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost in order to get the desired version.-->
+        <get name="boost1.54" />
         <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
@@ -175,6 +168,7 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." />
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
@@ -203,8 +197,8 @@
       </build>
       <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=libc++" />
-        <option value="linkflags=-stdlib=libc++" />
+        <option value="cxxflags=-stdlib=${boost_stdlib}" />
+        <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -228,7 +222,6 @@
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
         <option value="${gmp_flags}" />
-        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -245,7 +238,6 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -253,18 +245,14 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -274,19 +262,15 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
         <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost in order to get the desired version.-->
+        <get name="boost1.54" />
         <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
@@ -325,6 +309,7 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." />
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
@@ -358,8 +343,8 @@
       </build>
       <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=libc++" />
-        <option value="linkflags=-stdlib=libc++" />
+        <option value="cxxflags=-stdlib=${boost_stdlib}" />
+        <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -383,7 +368,6 @@
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
         <option value="${gmp_flags}" />
-        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
@@ -413,7 +397,6 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -421,18 +404,14 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -442,19 +421,15 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
         <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost in order to get the desired version.-->
+        <get name="boost1.54" />
         <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
@@ -496,6 +471,7 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" compiler="clang" comment="Causes numerous property_tree warnings in boost 1.49 (static, gcc)." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." />
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
@@ -541,8 +517,8 @@
       </build>
       <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=libc++" />
-        <option value="linkflags=-stdlib=libc++" />
+        <option value="cxxflags=-stdlib=${boost_stdlib}" />
+        <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -568,7 +544,6 @@
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
         <option value="${gmp_flags}" />
-        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
@@ -605,7 +580,6 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -613,18 +587,14 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <get name="bash-completion" />
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
@@ -636,21 +606,17 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
         <get name="gmp" />
         <get name="bash-completion" />
         <option value="--with-bash-completion-dir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost in order to get the desired version.-->
+        <get name="boost1.54" />
         <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
@@ -688,6 +654,7 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." />
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
@@ -721,8 +688,8 @@
       </build>
       <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=libc++" />
-        <option value="linkflags=-stdlib=libc++" />
+        <option value="cxxflags=-stdlib=${boost_stdlib}" />
+        <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -746,7 +713,6 @@
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
         <option value="${gmp_flags}" />
-        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -769,7 +735,6 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -777,18 +742,14 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -798,19 +759,15 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
         <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost in order to get the desired version.-->
+        <get name="boost1.54" />
         <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
@@ -848,6 +805,7 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." />
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
@@ -881,8 +839,8 @@
       </build>
       <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=libc++" />
-        <option value="linkflags=-stdlib=libc++" />
+        <option value="cxxflags=-stdlib=${boost_stdlib}" />
+        <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -906,7 +864,6 @@
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
         <option value="${gmp_flags}" />
-        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
@@ -940,7 +897,6 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -948,18 +904,14 @@
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -969,19 +921,15 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
         <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost in order to get the desired version.-->
+        <get name="boost1.54" />
         <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
@@ -1022,6 +970,7 @@
       <flag name="Wextra" comment="Warn on extra stuff." />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
       <flag name="Wno-missing-braces" comment="Conform to style." />
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." />
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
@@ -1055,8 +1004,8 @@
       </build>
       <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
         <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=libc++" />
-        <option value="linkflags=-stdlib=libc++" />
+        <option value="cxxflags=-stdlib=${boost_stdlib}" />
+        <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=single" />
         <option value="variant=release" />
         <option value="--disable-icu" />
@@ -1080,7 +1029,6 @@
         <option value="--enable-tests=no" />
         <option value="--enable-endomorphism=no" />
         <option value="${gmp_flags}" />
-        <!--<option value="${with_pkgconfigdir}" />-->
       </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
@@ -1124,7 +1072,6 @@
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <get name="libconfig" />
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -1133,19 +1080,15 @@
       </job>
       <job system="linux" compiler="clang" link="static" >
         <get name="libconfig++-dev" />
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-shared" />
         <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
         <get name="libconfig++-dev" />
-        <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-gmp" />
@@ -1156,20 +1099,16 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="libconfig" />
-        <!-- Travis installs gmp and boost, but verify homebrew install of gmp. -->
         <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="libconfig++-dev" />
-        <!-- Clang on linux requires libc++/c++abi (at least for boost).-->
-        <!-- Must build boost in order to get the desired version.-->
+        <get name="boost1.54" />
         <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
-        <!--<option value="--disable-silent-rules" />-->
         <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="CXXFLAGS='-Os -stdlib=libc++'" />
-        <option value="LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="libconfig++-dev" />
