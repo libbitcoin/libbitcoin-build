@@ -6,15 +6,14 @@
 
 Libbitcoin Build uses [iMatix GSL](https://github.com/imatix/gsl) templates and XML data to generate build artifacts for the following libbitcoin libraries.
 
-```
-libbitcoin
-libbitcoin-blockchain
-libbitcoin-client
-libbitcoin-explorer
-libbitcoin-node
-libbitcoin-protocol
-libbitcoin-server
-```
+* [![libbitcoin](https://travis-ci.org/libbitcoin/libbitcoin.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin) libbitcoin
+* [![libbitcoin-blockchain](https://travis-ci.org/libbitcoin/libbitcoin-blockchain.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-blockchain) libbitcoin-blockchain
+* [![libbitcoin-client](https://travis-ci.org/libbitcoin/libbitcoin-client.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-client) libbitcoin-client
+* [![libbitcoin-explorer](https://travis-ci.org/libbitcoin/libbitcoin-explorer.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-explorer) libbitcoin-explorer
+* [![libbitcoin-node](https://travis-ci.org/libbitcoin/libbitcoin-node.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-node) libbitcoin-node
+* [![libbitcoin-protocol](https://travis-ci.org/libbitcoin/libbitcoin-protocol.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-protocol) libbitcoin-protocol
+* [![libbitcoin-server](https://travis-ci.org/libbitcoin/libbitcoin-server.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-server) libbitcoin-server
+
 The artifacts generated for each library are as follows. Package names coincide with libbitcoin repository names.
 
 ```
