@@ -1,7 +1,7 @@
 <?xml version = "1.0" ?>
 <generate script="generate.gsl" language="en-us">
 
-  <repository name="libbitcoin" version="2.7.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin" version="2.8.0" email="genjix@riseup.net" >
 
     <package name="libbitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
       <cflag value="std=c++11" />
@@ -24,9 +24,6 @@
       <dependency name="boost_system" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="rt" function="clock_gettime" system="linux" />
-      <dependency name="gmp" system="linux" function="__gmpz_init" header="gmp.h" />
-      <!-- TODO: obtain homebrew pre-installed GMP path via: gmp_prefix=`$BREW --prefix gmp 2>/dev/null` (macports gmp_prefix="/opt/local")-->
-      <dependency name="gmp" system="darwin" function="__gmpz_init" header="gmp.h" libs="/opt/local/lib" includes="/opt/local/include" />
       <dependency name="secp256k1" version="0.0.1" />
 
       <flag name="Wall" comment="Warn on all stuff." />
@@ -48,9 +45,6 @@
     </configure>
 
     <install>
-      <build name="gmp" version="6.0.0a" parallel="true" >
-        <option value="CPPFLAGS=-w" />
-      </build>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
         <option value="threading=single" />
         <option value="variant=release" />
@@ -81,17 +75,12 @@
         <option value="-q" />
         <option value="${prefix}" />
         <option value="${boost_link}" />
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
-        <option value="--with-bignum=gmp" />
-        <option value="--with-field=gmp" />
-        <option value="--enable-benchmark=no" />
+      </build>      
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
         <option value="--enable-tests=no" />
-        <option value="--enable-endomorphism=no" />
-        <option value="${gmp_flags}" />
+        <option value="--with-bignum=no" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
         <!--<option value="--disable-silent-rules" />-->
@@ -99,17 +88,15 @@
     </install>
 
     <matrix>
-      <!-- Must build boost and gmp in a prefix directory to ensure static linking.-->
+      <!-- Must build boost in a prefix directory to ensure static linking.-->
       <job system="osx" compiler="clang" link="static" >
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -118,18 +105,14 @@
       <job system="linux" compiler="gcc" link="static" >
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
-        <get name="gmp" />
-      </job>
+      <job system="osx" compiler="clang" link="dynamic" />
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
-        <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -137,7 +120,6 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
@@ -162,7 +144,7 @@
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin" version="2.7.0" />
+      <dependency name="bitcoin" version="2.8.0" />
 
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
@@ -212,25 +194,16 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="gmp" version="6.0.0a" parallel="true" >
-        <option value="CPPFLAGS=-w" />
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
-        <option value="--with-bignum=gmp" />
-        <option value="--with-field=gmp" />
-        <option value="--enable-benchmark=no" />
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
         <option value="--enable-tests=no" />
-        <option value="--enable-endomorphism=no" />
-        <option value="${gmp_flags}" />
+        <option value="--with-bignum=no" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
-        <option value="${gmp_flags}" />
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -240,13 +213,11 @@
       <job system="osx" compiler="clang" link="static" >
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -255,18 +226,14 @@
       <job system="linux" compiler="gcc" link="static" >
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
-        <get name="gmp" />
-      </job>
+      <job system="osx" compiler="clang" link="dynamic" />
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
-        <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -274,7 +241,6 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
@@ -282,7 +248,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-client" version="2.0.0" email="mienkphi@gmail.com" >
+  <repository name="libbitcoin-client" version="2.1.0" email="mienkphi@gmail.com" >
 
     <package name="libbitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" >
       <cflag value="std=c++11" />
@@ -303,7 +269,7 @@
       <!--<dependency name="bitcoin-protocol" version="2.0.0" />-->
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="0.4.1" />
-      <dependency name="bitcoin" version="2.7.0" />
+      <dependency name="bitcoin" version="2.8.0" />
 
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
@@ -358,17 +324,6 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="gmp" version="6.0.0a" parallel="true" >
-        <option value="CPPFLAGS=-w" />
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
-        <option value="--with-bignum=gmp" />
-        <option value="--with-field=gmp" />
-        <option value="--enable-benchmark=no" />
-        <option value="--enable-tests=no" />
-        <option value="--enable-endomorphism=no" />
-        <option value="${gmp_flags}" />
-      </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -382,14 +337,16 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+        <option value="--enable-tests=no" />
+        <option value="--with-bignum=no" />
+      </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -399,13 +356,11 @@
       <job system="osx" compiler="clang" link="static" >
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -414,18 +369,14 @@
       <job system="linux" compiler="gcc" link="static" >
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
-        <get name="gmp" />
-      </job>
+      <job system="osx" compiler="clang" link="dynamic" />
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
-        <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -433,7 +384,6 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
@@ -441,7 +391,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-explorer" version="2.0.0" email="eric@voskuil.org">
+  <repository name="libbitcoin-explorer" version="2.1.0" email="eric@voskuil.org">
 
     <package name="libbitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" >
       <cflag value="std=c++11" />
@@ -465,7 +415,7 @@
       <dependency name="boost_program_options" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completion-dir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-client" version="2.0.0" />
+      <dependency name="bitcoin-client" version="2.1.0" />
 
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
@@ -534,17 +484,6 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="gmp" version="6.0.0a" parallel="true" >
-        <option value="CPPFLAGS=-w" />
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
-        <option value="--with-bignum=gmp" />
-        <option value="--with-field=gmp" />
-        <option value="--enable-benchmark=no" />
-        <option value="--enable-tests=no" />
-        <option value="--enable-endomorphism=no" />
-        <option value="${gmp_flags}" />
-      </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -559,20 +498,21 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+        <option value="--enable-tests=no" />
+        <option value="--with-bignum=no" />
+      </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version2" parallel="true" >
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -582,13 +522,11 @@
       <job system="osx" compiler="clang" link="static" >
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -598,7 +536,6 @@
         <get name="bash-completion" />
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
@@ -606,13 +543,11 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <get name="gmp" />
         <get name="bash-completion" />
         <option value="--with-bash-completion-dir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
-        <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -621,7 +556,6 @@
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
         <option value="--disable-static" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--with-bash-completion-dir" />
         <option value="CXXFLAGS='-Os -s'" />
@@ -647,7 +581,6 @@
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin" version="2.7.0" />
       <dependency name="bitcoin-blockchain" version="2.0.0" />
 
       <flag name="Wall" comment="Warn on all stuff." />
@@ -703,31 +636,21 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="gmp" version="6.0.0a" parallel="true" >
-        <option value="CPPFLAGS=-w" />
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
-        <option value="--with-bignum=gmp" />
-        <option value="--with-field=gmp" />
-        <option value="--enable-benchmark=no" />
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
         <option value="--enable-tests=no" />
-        <option value="--enable-endomorphism=no" />
-        <option value="${gmp_flags}" />
+        <option value="--with-bignum=no" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
-        <option value="${gmp_flags}" />
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -737,13 +660,11 @@
       <job system="osx" compiler="clang" link="static" >
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -752,18 +673,14 @@
       <job system="linux" compiler="gcc" link="static" >
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
-        <get name="gmp" />
-      </job>
+      <job system="osx" compiler="clang" link="dynamic" />
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
-        <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -771,7 +688,6 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
@@ -779,7 +695,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-protocol" version="2.0.0" email="mienkphi@gmail.com">
+  <repository name="libbitcoin-protocol" version="0.1.0" email="mienkphi@gmail.com">
 
     <package name="libbitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" >
       <cflag value="std=c++11" />
@@ -799,7 +715,7 @@
       <dependency name="protobuf" version="2.6.0" unprefixed="true" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="0.4.1" />
-      <dependency name="bitcoin" version="2.7.0" />
+      <dependency name="bitcoin" version="2.8.0" />
 
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
@@ -854,17 +770,6 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="gmp" version="6.0.0a" parallel="true" >
-        <option value="CPPFLAGS=-w" />
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
-        <option value="--with-bignum=gmp" />
-        <option value="--with-field=gmp" />
-        <option value="--enable-benchmark=no" />
-        <option value="--enable-tests=no" />
-        <option value="--enable-endomorphism=no" />
-        <option value="${gmp_flags}" />
-      </build>
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
@@ -882,14 +787,16 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+        <option value="--enable-tests=no" />
+        <option value="--with-bignum=no" />
+      </build>
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -899,13 +806,11 @@
       <job system="osx" compiler="clang" link="static" >
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -914,18 +819,14 @@
       <job system="linux" compiler="gcc" link="static" >
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
-        <get name="gmp" />
-      </job>
+      <job system="osx" compiler="clang" link="dynamic" />
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
-        <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -933,7 +834,6 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
@@ -1019,17 +919,6 @@
         <option value="${prefix}" />
         <option value="${boost_link}" />
       </build>
-      <build name="gmp" version="6.0.0a" parallel="true" >
-        <option value="CPPFLAGS=-w" />
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="master" parallel="true" >
-        <option value="--with-bignum=gmp" />
-        <option value="--with-field=gmp" />
-        <option value="--enable-benchmark=no" />
-        <option value="--enable-tests=no" />
-        <option value="--enable-endomorphism=no" />
-        <option value="${gmp_flags}" />
-      </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1044,26 +933,26 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+        <option value="--enable-tests=no" />
+        <option value="--with-bignum=no" />
+      </build>
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version2" parallel="true" >
         <option value="--without-tests" />
-        <option value="${gmp_flags}" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="master" parallel="true" >
-        <option value="${gmp_flags}" />
+      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1074,14 +963,12 @@
         <get name="libconfig" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <get name="libconfig++-dev" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -1091,7 +978,6 @@
         <get name="libconfig++-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
@@ -1099,12 +985,10 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="libconfig" />
-        <get name="gmp" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="libconfig++-dev" />
         <get name="boost1.54" />
-        <get name="libgmp-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -1113,7 +997,6 @@
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="libconfig++-dev" />
         <option value="--disable-static" />
-        <option value="--build-gmp" />
         <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
