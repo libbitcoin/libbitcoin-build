@@ -22,7 +22,7 @@ function format_compiler_flags(package)
     define my.package = format_compiler_flags.package
     define my.compiler_flags = ""
     for my.package.cflag as _cflag
-        my.compiler_flags = "$(my.compiler_flags) -$(_cflag.value)"
+        my.compiler_flags = "$(my.compiler_flags) $(_cflag.value)"
     endfor _cflag
     return trim_left(my.compiler_flags)
 endfunction

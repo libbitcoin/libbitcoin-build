@@ -4,7 +4,8 @@
   <repository name="libbitcoin" version="2.8.0" email="genjix@riseup.net" >
 
     <package name="libbitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
-      <cflag value="std=c++11" />
+      <cflag value="-std=c++11" />
+      <cflag value="@testnet@" />
       <library name="bitcoin" />
       <library name="pthread" />
     </package>
@@ -13,13 +14,16 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
+      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" substitute="true" value="-DENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
+
+      <define name="SYSCONFDIR" value="&quot;${sysconfdir}&quot;" comment="Set the value of SYSCONFDIR for source usage." />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_date_time" />
       <dependency name="boost_filesystem" />
+      <dependency name="boost_program_options" />
       <dependency name="boost_regex" />
       <dependency name="boost_system" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -51,6 +55,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -68,6 +73,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -130,7 +136,7 @@
   <repository name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
 
     <package name="libbitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" >
-      <cflag value="std=c++11" />
+      <cflag value="-std=c++11" />
       <library name="bitcoin-blockchain" />
     </package>
 
@@ -138,7 +144,6 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
@@ -169,6 +174,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -186,6 +192,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -251,7 +258,7 @@
   <repository name="libbitcoin-client" version="2.1.0" email="mienkphi@gmail.com" >
 
     <package name="libbitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" >
-      <cflag value="std=c++11" />
+      <cflag value="-std=c++11" />
       <library name="bitcoin-client" />
     </package>
 
@@ -259,7 +266,6 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
@@ -299,6 +305,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -316,6 +323,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -394,7 +402,7 @@
   <repository name="libbitcoin-explorer" version="2.1.0" email="eric@voskuil.org">
 
     <package name="libbitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" >
-      <cflag value="std=c++11" />
+      <cflag value="-std=c++11" />
       <library name="bitcoin-explorer" />
     </package>
 
@@ -403,7 +411,6 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
 
       <define name="BOOST_NO_EXCEPTIONS" comment="Capture exceptional conditions in callback function." />
@@ -412,7 +419,6 @@
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_chrono" />
-      <dependency name="boost_program_options" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completion-dir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="2.1.0" />
@@ -567,7 +573,7 @@
   <repository name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
 
     <package name="libbitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" >
-      <cflag value="std=c++11" />
+      <cflag value="-std=c++11" />
       <library name="bitcoin-node" />
     </package>
 
@@ -575,7 +581,6 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
@@ -611,6 +616,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -628,6 +634,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -698,7 +705,7 @@
   <repository name="libbitcoin-protocol" version="0.1.0" email="mienkphi@gmail.com">
 
     <package name="libbitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" >
-      <cflag value="std=c++11" />
+      <cflag value="-std=c++11" />
       <library name="bitcoin-protocol" />
     </package>
 
@@ -706,7 +713,6 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
@@ -745,6 +751,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -762,6 +769,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -844,7 +852,7 @@
   <repository name="libbitcoin-server" version="2.0.0" email="genjix@riseup.net">
 
     <package name="libbitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" >
-      <cflag value="std=c++11" />
+      <cflag value="-std=c++11" />
       <!-- There is no library produced and there are currently no tests to link. -->
       <!--<library name="bitcoin-server" />-->
     </package>
@@ -853,8 +861,11 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <!--<option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />-->
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
+
+      <define name="BOOST_NO_EXCEPTIONS" comment="Capture exceptional conditions in callback function." />
+      <define name="BOOST_EXCEPTION_DISABLE" comment="Disable boost exception augmentation." />
+      <define name="SYSCONFDIR" value="&quot;${sysconfdir}&quot;" comment="Set the value of SYSCONFDIR for source usage." />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
@@ -875,6 +886,13 @@
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
+      
+      <!-- boost static, no exceptions -->
+      <flag name="Wno-maybe-uninitialized" compiler="gcc" comment="Clean up boost 1.49 headers, static with no exceptions." />
+      <flag name="Wno-sometimes-uninitialized" compiler="clang" comment="Clean up boost 1.54 headers, static with no exceptions." />
+
+      <!-- boost property_tree, no exceptions -->
+      <flag name="Wno-return-type" comment="Clean up boost property_tree headers, with no exceptions." />      
 
       <!-- protobuf -->
       <!--<flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
@@ -894,6 +912,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -911,6 +930,7 @@
         <option value="--disable-icu" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
@@ -960,14 +980,12 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <get name="libconfig" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <get name="libconfig++-dev" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
@@ -975,7 +993,6 @@
         <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
-        <get name="libconfig++-dev" />
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
@@ -984,10 +1001,8 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <get name="libconfig" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="libconfig++-dev" />
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -995,7 +1010,6 @@
         <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
-        <get name="libconfig++-dev" />
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -s'" />
