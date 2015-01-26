@@ -175,6 +175,7 @@ BOOST_OPTIONS_GCC=\
 "threading=single "\
 "variant=release "\
 "--disable-icu "\
+"--with-system "\
 "--with-test "\
 "-d0 "\
 "-q "\
@@ -190,6 +191,7 @@ BOOST_OPTIONS_CLANG=\
 "threading=single "\
 "variant=release "\
 "--disable-icu "\
+"--with-system "\
 "--with-test "\
 "-d0 "\
 "-q "\
@@ -201,6 +203,12 @@ BOOST_OPTIONS_CLANG=\
 SECP256K1_OPTIONS=\
 "--enable-tests=no "\
 "--with-bignum=no "
+
+# Define bitcoin-consensus options.
+#------------------------------------------------------------------------------
+BITCOIN_CONSENSUS_OPTIONS=\
+"${with_boost} "\
+"${with_pkgconfigdir} "
 
 
 # Define compiler settings.
@@ -441,7 +449,8 @@ build_from_travis()
 build_all()
 {
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
-    build_from_travis libbitcoin secp256k1 master $PARALLEL "$@" $SECP256K1_OPTIONS
+    build_from_github libbitcoin secp256k1 version2 $PARALLEL "$@" $SECP256K1_OPTIONS
+    build_from_travis libbitcoin libbitcoin-consensus master $PARALLEL "$@" $BITCOIN_CONSENSUS_OPTIONS
 }
 
 
