@@ -473,10 +473,12 @@
       <job system="osx" compiler="clang" link="static" >
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
         <option value="LDLIBS='-lstdc++'" />
@@ -484,6 +486,7 @@
       <job system="linux" compiler="gcc" link="static" >
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
         <option value="CXXFLAGS='-Os -s'" />
@@ -492,6 +495,7 @@
         <!--<get name="boost" />-->
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+        <get name="boost1.54" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
@@ -499,6 +503,7 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
+        <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
