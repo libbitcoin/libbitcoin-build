@@ -15,6 +15,7 @@ REM Make directories for generated build artifacts.
 if not exist libbitcoin             mkdir libbitcoin
 if not exist libbitcoin-blockchain  mkdir libbitcoin-blockchain
 if not exist libbitcoin-client      mkdir libbitcoin-client
+if not exist libbitcoin-consensus   mkdir libbitcoin-consensus
 if not exist libbitcoin-explorer    mkdir libbitcoin-explorer
 if not exist libbitcoin-node        mkdir libbitcoin-node
 if not exist libbitcoin-protocol    mkdir libbitcoin-protocol
@@ -23,6 +24,7 @@ if not exist libbitcoin-server      mkdir libbitcoin-server
 del /q libbitcoin\*
 del /q libbitcoin-blockchain\*
 del /q libbitcoin-client\*
+del /q libbitcoin-consensus\*
 del /q libbitcoin-explorer\*
 del /q libbitcoin-node\*
 del /q libbitcoin-protocol\*
@@ -35,6 +37,7 @@ REM Copy outputs to all repositories.
 copy /b /y libbitcoin\*             ..\libbitcoin\
 copy /b /y libbitcoin-blockchain\*  ..\libbitcoin-blockchain\
 copy /b /y libbitcoin-client\*      ..\libbitcoin-client\
+copy /b /y libbitcoin-consensus\*   ..\libbitcoin-consensus\
 copy /b /y libbitcoin-explorer\*    ..\libbitcoin-explorer\
 copy /b /y libbitcoin-node\*        ..\libbitcoin-node\
 copy /b /y libbitcoin-protocol\*    ..\libbitcoin-protocol\
