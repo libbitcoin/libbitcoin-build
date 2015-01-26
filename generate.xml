@@ -15,9 +15,7 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" substitute="true" value="-DENABLE_TESTNET" description="Compile for testnet (deprecated)." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
-
-      <define name="SYSCONFDIR" value="&quot;${sysconfdir}&quot;" comment="Set the value of SYSCONFDIR for source usage." />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
@@ -81,7 +79,7 @@
         <option value="-q" />
         <option value="${prefix}" />
         <option value="${boost_link}" />
-      </build>      
+      </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
         <option value="--enable-tests=no" />
         <option value="--with-bignum=no" />
@@ -116,7 +114,9 @@
         <option value="--build-dir=my-build" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" />
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!--<get name="boost" />-->
+      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
@@ -144,7 +144,7 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
@@ -238,7 +238,9 @@
         <option value="--build-dir=my-build" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" />
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!--<get name="boost" />-->
+      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
@@ -266,7 +268,7 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
@@ -382,7 +384,123 @@
         <option value="--build-dir=my-build" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" />
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!--<get name="boost" />-->
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+        <get name="boost1.54" />
+        <option value="--disable-ndebug" />
+        <option value="--disable-static" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <option value="--disable-static" />
+        <option value="--build-boost" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+    </matrix>
+
+  </repository>
+
+  <repository name="libbitcoin-consensus" version="3.0.0" email="eric@voskuil.org" >
+
+    <package name="libbitcoin-consensus" description="Bitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" >
+      <cflag value="-std=c++11" />
+      <cflag value="@testnet@" />
+      <library name="bitcoin-consensus" />
+    </package>
+
+    <configure>
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
+      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" substitute="true" value="-DENABLE_TESTNET" description="Compile for testnet (deprecated)." />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
+
+      <dependency name="boost" compiler="gcc" version="1.49.0" option="tests" />
+      <dependency name="boost" compiler="clang" version="1.54.0" option="tests" />
+      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="secp256k1" version="0.0.1" />
+
+      <flag name="Wall" comment="Warn on all stuff." />
+      <flag name="Wextra" comment="Warn on extra stuff." />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." />
+      <flag name="Wno-missing-braces" comment="Conform to style." />
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." />
+
+      <!-- boost -->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
+      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
+
+      <flag name="fstack-protector" link="true" comment="Protect stack." />
+      <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
+      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." />
+      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." />
+    </configure>
+
+    <install>
+        <!-- Boost.system is apparently necessary for the detection, which is only required for test. -->
+      <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
+        <option value="threading=single" />
+        <option value="variant=release" />
+        <option value="--disable-icu" />
+        <option value="--with-system" />
+        <option value="--with-test" />
+        <option value="-d0" />
+        <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${boost_link}" />
+      </build>
+      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
+        <option value="toolset=clang" />
+        <option value="cxxflags=-stdlib=${boost_stdlib}" />
+        <option value="linkflags=-stdlib=${boost_stdlib}" />
+        <option value="threading=single" />
+        <option value="variant=release" />
+        <option value="--disable-icu" />
+        <option value="--with-system" />
+        <option value="--with-test" />
+        <option value="-d0" />
+        <option value="-q" />
+        <option value="${prefix}" />
+        <option value="${boost_link}" />
+      </build>
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+        <option value="--enable-tests=no" />
+        <option value="--with-bignum=no" />
+      </build>
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+    </install>
+
+    <matrix>
+      <job system="osx" compiler="clang" link="static" >
+        <option value="--enable-testnet" />
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="static" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="LDLIBS='-lstdc++'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" >
+        <option value="--disable-ndebug" />
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--build-dir=my-build" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!--<get name="boost" />-->
+      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
@@ -411,7 +529,7 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
       <define name="BOOST_NO_EXCEPTIONS" comment="Capture exceptional conditions in callback function." />
       <define name="BOOST_EXCEPTION_DISABLE" comment="Disable boost exception augmentation." />
@@ -549,6 +667,7 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
+        <!--<get name="boost" />-->
         <get name="bash-completion" />
         <option value="--with-bash-completion-dir" />
       </job>
@@ -581,7 +700,7 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
@@ -685,7 +804,9 @@
         <option value="--build-dir=my-build" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" />
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!--<get name="boost" />-->
+      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
@@ -713,7 +834,7 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
@@ -832,7 +953,9 @@
         <option value="--build-dir=my-build" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" />
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!--<get name="boost" />-->
+      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
@@ -858,18 +981,19 @@
     </package>
 
     <configure>
+      <option type="with" name="bash-completion-dir" default="no" example="[=PATH]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <!--<option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />-->
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK"  description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
       <!--<define name="BOOST_NO_EXCEPTIONS" comment="Capture exceptional conditions in callback function." />-->
       <!--<define name="BOOST_EXCEPTION_DISABLE" comment="Disable boost exception augmentation." />-->
-      <define name="SYSCONFDIR" value="&quot;${sysconfdir}&quot;" comment="Set the value of SYSCONFDIR for source usage." />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <!--<dependency name="boost_unit_test_framework" option="tests" />-->
+      <dependency name="bash-completion" version="2.0.0" option="bash-completion-dir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
       <!--<dependency name="bitcoin-protocol" version="2.0.0" />-->
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
@@ -992,14 +1116,19 @@
         <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
+        <get name="bash-completion" />
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
+        <option value="--with-bash-completion-dir" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
+        <!--<get name="boost" />-->
+        <get name="bash-completion" />
+        <option value="--with-bash-completion-dir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
@@ -1009,8 +1138,10 @@
         <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <get name="bash-completion" />
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--with-bash-completion-dir" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>

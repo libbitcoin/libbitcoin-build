@@ -37,6 +37,7 @@ set -e
 mkdir -p libbitcoin
 mkdir -p libbitcoin-blockchain
 mkdir -p libbitcoin-client
+mkdir -p libbitcoin-consensus
 mkdir -p libbitcoin-explorer
 mkdir -p libbitcoin-node
 mkdir -p libbitcoin-protocol
@@ -49,6 +50,7 @@ gsl -q generate.xml
 copy_to_repository libbitcoin             ../libbitcoin
 copy_to_repository libbitcoin-blockchain  ../libbitcoin-blockchain
 copy_to_repository libbitcoin-client      ../libbitcoin-client
+copy_to_repository libbitcoin-consensus   ../libbitcoin-consensus
 copy_to_repository libbitcoin-explorer    ../libbitcoin-explorer
 copy_to_repository libbitcoin-node        ../libbitcoin-node
 copy_to_repository libbitcoin-protocol    ../libbitcoin-protocol
