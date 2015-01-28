@@ -4,7 +4,7 @@
 
 *Libbitcoin Build System*
 
-Libbitcoin Build uses [iMatix GSL](https://github.com/imatix/gsl) templates and XML data to generate build artifacts for the following libbitcoin libraries.
+Libbitcoin Build uses templates and XML data to generate build artifacts for the following libbitcoin libraries.
 
 * [![libbitcoin](https://travis-ci.org/libbitcoin/libbitcoin.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin) libbitcoin
 * [![libbitcoin-blockchain](https://travis-ci.org/libbitcoin/libbitcoin-blockchain.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-blockchain) libbitcoin-blockchain
