@@ -24,4 +24,4 @@ install.sh
 .travis.yml
 ```
 
-The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl). There are Linux/OSX and Visual Studio builds of GSL. There is also a single file executable available for [download from NuGet](https://github.com/imatix/gsl/blob/master/builds/msvc/README.md).
+The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl). There are Linux/OSX and Visual Studio builds of GSL. There is also a Windows single file executable available for [download](https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe).
