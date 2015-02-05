@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
 # GSL generate libbitcoin build and installation files.
 #
@@ -20,11 +20,13 @@ gsl from "templates/gsl.configure.ac"
 gsl from "templates/gsl.install.sh"
 gsl from "templates/gsl.libbitcoin.pc.in"
 gsl from "templates/gsl.travis.yml"
+gsl from "templates/gsl.version.hpp"
 
 generate_configure()
 generate_installer()
 generate_pkgconfig()
 generate_travisyml()
+generate_version()
 
 ###############################################################################
 .endtemplate

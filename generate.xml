@@ -1,4 +1,5 @@
 <?xml version = "1.0" ?>
+<!-- Copyright (c) 2014-2015 libbitcoin developers (see COPYING). -->
 <generate script="generate.gsl" language="en-us">
 
   <repository name="libbitcoin" version="2.8.0" email="genjix@riseup.net" >
@@ -531,9 +532,6 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
-      <define name="BOOST_NO_EXCEPTIONS" comment="Capture exceptional conditions in callback function." />
-      <define name="BOOST_EXCEPTION_DISABLE" comment="Disable boost exception augmentation." />
-
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_chrono" />
@@ -986,9 +984,6 @@
       <!--<option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />-->
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
-
-      <!--<define name="BOOST_NO_EXCEPTIONS" comment="Capture exceptional conditions in callback function." />-->
-      <!--<define name="BOOST_EXCEPTION_DISABLE" comment="Disable boost exception augmentation." />-->
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
