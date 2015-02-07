@@ -601,7 +601,7 @@ for generate.repository by name as _repository
     define_build_directory(_repository)
     define_boost(my.install, "gcc")
     define_boost(my.install, "clang")
-    define_gmp(my.install)
+    #define_gmp(my.install)
     
     heading1("Initialize the build environment.")
     define_initialize()
