@@ -6,6 +6,7 @@
 
     <package name="libbitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
       <cflag value="-std=c++11" />
+      <cflag value="-pthread" />
       <cflag value="@testnet@" />
       <library name="bitcoin" />
       <library name="pthread" />
@@ -28,6 +29,10 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="rt" function="clock_gettime" system="linux" />
       <dependency name="secp256k1" version="0.0.1" />
+      
+      <!-- The local build requires these because it doesn't use its own package config. -->
+      <flag name="std=c++11" comment="Require a c++11 compiler." />
+      <flag name="pthread" comment="Enable POSIX thread definitions." />
 
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
@@ -49,7 +54,7 @@
 
     <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
@@ -67,7 +72,7 @@
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=${boost_stdlib}" />
         <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
@@ -170,7 +175,7 @@
 
     <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
@@ -188,7 +193,7 @@
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=${boost_stdlib}" />
         <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
@@ -303,7 +308,7 @@
 
     <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
@@ -321,7 +326,7 @@
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=${boost_stdlib}" />
         <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
@@ -443,7 +448,7 @@
     <install>
         <!-- Boost.system is apparently necessary for the detection, which is only required for test. -->
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-system" />
@@ -457,7 +462,7 @@
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=${boost_stdlib}" />
         <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-system" />
@@ -572,7 +577,7 @@
 
     <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-chrono" />
@@ -591,7 +596,7 @@
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=${boost_stdlib}" />
         <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-chrono" />
@@ -728,7 +733,7 @@
 
     <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
@@ -746,7 +751,7 @@
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=${boost_stdlib}" />
         <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
@@ -865,7 +870,7 @@
 
     <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
@@ -883,7 +888,7 @@
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=${boost_stdlib}" />
         <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
@@ -1025,7 +1030,7 @@
 
     <install>
       <build name="boost" compiler="gcc" version="1.49.0" parallel="true" >
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
@@ -1043,7 +1048,7 @@
         <option value="toolset=clang" />
         <option value="cxxflags=-stdlib=${boost_stdlib}" />
         <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=single" />
+        <option value="threading=multi" />
         <option value="variant=release" />
         <option value="--disable-icu" />
         <option value="--with-date_time" />
