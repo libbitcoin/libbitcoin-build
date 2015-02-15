@@ -22,6 +22,7 @@ configure.ac
 <package>.pc.in
 install.sh
 .travis.yml
+version.hpp
 ```
 
 These artifacts are merged into their respective repositories by libbitcoin maintainers. There is no need to build libbitcoin-build if you are not a maintainer in the process of applying a build configuration change.
