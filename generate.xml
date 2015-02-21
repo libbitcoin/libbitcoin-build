@@ -411,25 +411,33 @@
 
   </repository>
 
-  <repository name="libbitcoin-consensus" version="3.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-consensus" version="1.0.0" email="eric@voskuil.org" >
 
-    <package name="libbitcoin-consensus" description="Bitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" >
+    <package name="libbitcoin-consensus" description="Libbitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" >
+      <!-- TODO: make c++11 conditional in libbitcoin-build and then remove here. -->
       <cflag value="-std=c++11" />
-      <cflag value="@testnet@" />
       <library name="bitcoin-consensus" />
     </package>
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="with" name="openssl" default="yes" description="Require OpenSSL dependency." />
+      <option type="with" name="secp256k1" default="no" define="USE_SECP256K1" conditional="true" description="Compile with Secp256k1 instead of OpenSSL." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" substitute="true" value="-DENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
       <dependency name="boost" compiler="gcc" version="1.49.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="secp256k1" version="0.0.1" />
+      <dependency name="secp256k1" version="0.0.1" option="secp256k1" />
+      
+      <!-- These are not used if --with-secp256k1 is specified. -->
+      <dependency name="ssl" version="1.0.1" option="openssl" />
+      <dependency name="crypto" version="1.0.1" option="openssl" />
+      
+      <!-- TODO: make c++11 conditional in libbitcoin-build and then remove here. -->
+      <flag name="std=c++11" comment="Require a c++11 compiler." />
 
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
@@ -486,12 +494,15 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <option value="--enable-testnet" />
+        <option value="--without-openssl" />
+        <option value="--with-secp256k1" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
+        <option value="--without-openssl" />
+        <option value="--with-secp256k1" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
@@ -499,6 +510,8 @@
         <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
+        <option value="--without-openssl" />
+        <option value="--with-secp256k1" />
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
@@ -508,15 +521,21 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
+        <option value="--without-openssl" />
+        <option value="--with-secp256k1" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
+        <option value="--without-openssl" />
+        <option value="--with-secp256k1" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
         <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <get name="libssl-dev" />
+        <option value="--with-openssl" />
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -s'" />
