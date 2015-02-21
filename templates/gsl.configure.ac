@@ -220,7 +220,7 @@ AC_DEFINE([$(my.define.name:upper,c)])
 PKG_CHECK_MODULES([$(my.dependency.name:c)], [$(my.prefix)$(my.dependency.name) >= $(my.dependency.version)])
 .   elsif (is_empty(my.dependency.extract))
 AS_IF([test x$$(my.symbol) = xyes],
-    PKG_CHECK_MODULES([$(my.dependency.name:c)], [$(my.prefix)$(my.dependency.name) >= $(my.dependency.version)]))
+    [PKG_CHECK_MODULES([$(my.dependency.name:c)], [$(my.prefix)$(my.dependency.name) >= $(my.dependency.version)])])
 .   else
 AS_IF([test x$$(my.symbol) = xyes],
     [PKG_CHECK_MODULES([$(my.dependency.name:c)], [$(my.prefix)$(my.dependency.name) >= $(my.dependency.version)],
