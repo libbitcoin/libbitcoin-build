@@ -43,6 +43,12 @@ function get_option_symbol(option)
     endif
 endfunction
 
+function find_flag_name(configure, value)
+    define my.configure = find_flag_name.configure
+    define my.found = my.configure->flag(flag.name = my.value)?
+    return defined(my.found)
+endfunction
+
 function find_option_symbol(dependency, configure)
     define my.dependency = find_option_symbol.dependency
     define my.configure = find_option_symbol.configure
@@ -57,6 +63,7 @@ endfunction
 ###############################################################################
 .endtemplate
 .template 1
+.
 .macro initialize(repository)
 .   define my.repository = initialize.repository
 .   require(my.repository, "repository", "email")
@@ -98,14 +105,8 @@ AC_PROG_CXX
 # Enable shared libraries if available, and static if they don't conflict.
 AC_PROG_LIBTOOL
 
-.# Declare using the GNU C library (glibc).
-.#AC_GNU_SOURCE
-.
 # Compute the canonical host-system type variable host, including host_os.
 AC_CANONICAL_HOST
-
-# Check for baseline language coverage in the compiler for the C++11 standard.
-AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 
 # Enable silent rules option.
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -119,6 +120,15 @@ AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
 AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 
 .endmacro # initialize
+.
+.macro require_stdcxx11(configure)
+.   define my.configure = require_stdcxx11.configure
+.   if (find_flag_name(my.configure, "std=c++11"))
+.heading2("Check for baseline language coverage in the compiler for the C++11 standard.")
+AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
+
+.   endif
+.endmacro # require_stdcxx11
 .
 .macro with(option)
 .   define my.option = with.option
@@ -365,6 +375,7 @@ for generate.repository by name as _repository
     
     heading1("Standard declarations.")
     initialize(_repository)
+    require_stdcxx11(my.configure)
 
     heading1("Process options.")
     for my.configure.option as _option
