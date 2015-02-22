@@ -414,8 +414,6 @@
   <repository name="libbitcoin-consensus" version="1.0.0" email="eric@voskuil.org" >
 
     <package name="libbitcoin-consensus" description="Libbitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" >
-      <!-- TODO: make c++11 conditional in libbitcoin-build and then remove here. -->
-      <cflag value="-std=c++11" />
       <library name="bitcoin-consensus" />
     </package>
 
@@ -432,12 +430,9 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="secp256k1" version="0.0.1" option="secp256k1" />
       
-      <!-- These are not used if --with-secp256k1 is specified. -->
+      <!-- These are effectively unused if --with-secp256k1 is specified. -->
       <dependency name="ssl" version="1.0.1" option="openssl" />
       <dependency name="crypto" version="1.0.1" option="openssl" />
-      
-      <!-- TODO: make c++11 conditional in libbitcoin-build and then remove here. -->
-      <flag name="std=c++11" comment="Require a c++11 compiler." />
 
       <flag name="Wall" comment="Warn on all stuff." />
       <flag name="Wextra" comment="Warn on extra stuff." />
@@ -448,6 +443,10 @@
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." />
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." />
+      
+      <!-- bitcoin -->
+      <flag name="Wno-long-long" compiler="gcc" comment="Clean up consensus warnings." />
+      <flag name="Wno-c++11-long-long" compiler="clang" comment="Clean up consensus warnings" />
 
       <flag name="fstack-protector" link="true" comment="Protect stack." />
       <flag name="fstack-protector-all" link="true" comment="Protect stack comprehensively." />
