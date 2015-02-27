@@ -150,6 +150,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="with" name="tools" default="yes" conditional="true" description="Compile with tools." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
@@ -274,6 +275,7 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="with" name="examples" default="yes" conditional="true" description="Compile with examples." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
@@ -554,6 +556,7 @@
       <option type="with" name="bash-completion-dir" default="no" example="[=PATH]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
@@ -657,6 +660,7 @@
       </build>
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="--without-tests" />
+        <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -724,6 +728,7 @@
       <option type="with" name="bash-completion-dir" default="no" example="[=PATH]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
@@ -801,6 +806,7 @@
       </build>
       <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="--without-tests" />
+        <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1019,6 +1025,7 @@
       <option type="with" name="bash-completion-dir" default="no" example="[=PATH]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=PATH" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <!--<option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />-->
+      <!--<option type="with" name="console" default="yes" conditional="true" description="Compile console application." />-->
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
 
@@ -1120,11 +1127,13 @@
       </build>
       <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="--without-tests" />
+        <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version2" parallel="true" >
         <option value="--without-tests" />
+        <option value="--without-console" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
