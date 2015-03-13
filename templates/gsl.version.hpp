@@ -17,12 +17,12 @@
 .   notify(my.out_file)
 .   output(my.out_file)
 .   c_copyleft(_repository.name)
-.   define my.package_version = _repository.version
-.   define my.package_name = "$(_repository->package.name:c,upper)"
-#ifndef $(my.package_name)_VERSION_HPP
-#define $(my.package_name)_VERSION_HPP
+.   define my.repository_version = _repository.version
+.   define my.repository_name = "$(_repository.name:c,upper)"
+#ifndef $(my.repository_name)_VERSION_HPP
+#define $(my.repository_name)_VERSION_HPP
 
-#define $(my.package_name)_VERSION "$(my.package_version)"
+#define $(my.repository_name)_VERSION "$(my.repository_version)"
 
 #endif
 .   close

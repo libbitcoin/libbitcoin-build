@@ -1,0 +1,594 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin Makefile.am.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+function get_assignment_operator(variable, accumulator)
+    define my.delimited = " $(my.variable) "
+    define my.repeat = is_token(my.delimited, my.accumulator)
+    # echo "$(my.variable) in $(my.accumulator) : $(my.repeat ?? '+=' ? '=')"
+    return my.repeat ?? "+=" ? "="
+endfunction
+
+function increment_accumulator(variable, accumulator)
+    define my.delimited = " $(my.variable) "
+    if (!is_token(my.delimited, accumulator))
+        my.accumulator += my.delimited
+    endif
+    return my.accumulator
+endfunction
+
+# Test for a prefix.
+function match_prefix(product, prefix)
+    define my.product = match_prefix.product
+    require(my.product, "product", "prefix")
+    return my.product.prefix = my.prefix
+endfunction
+
+# Test prefix for primary type (this is a simplified mapping).
+function is_data(product)
+    define my.product = is_data.product
+    return match_prefix(my.product, "bash_completion") |\
+    match_prefix(my.product, "doc") |\
+    match_prefix(my.product, "pkgconfig") |\
+    match_prefix(my.product, "sysconf")
+endfunction
+function is_headers(product)
+    define my.product = is_headers.product
+    return match_prefix(my.product, "include")
+endfunction
+function is_info(product)
+    define my.product = is_info.product
+    return match_prefix(my.product, "info")
+endfunction
+function is_library(product)
+    define my.product = is_library.product
+    return match_prefix(my.product, "lib")
+endfunction
+function is_manual(product)
+    define my.product = is_manual.product
+    return match_prefix(my.product, "man")
+endfunction
+function is_program(product)
+    define my.product = is_program.product
+    return match_prefix(my.product, "bin")
+endfunction
+function is_script(product)
+    define my.product = is_script.product
+    return match_prefix(my.product, "sbin")
+endfunction
+
+# Is the product built from c/c++?
+function is_cpp(product)
+    define my.product = is_cpp.product
+    return is_program(my.product) | is_library(my.product)
+endfunction
+
+# Is the product executable?
+function is_executable(product)
+    define my.product = is_executable.product
+    return is_program(my.product) | is_script(my.product)
+endfunction
+
+# Is the non-binary product explicitly set to distribute?
+function is_distribute(product)
+    define my.product = is_distribute.product
+    return !is_cpp(my.product) & is_true(my.product.install)
+endfunction
+
+# Is the non-binary product explicitly set to not distribute?
+function is_no_distribute(product)
+    define my.product = is_no_distribute.product
+    return !is_cpp(my.product) & !is_true(my.product.install) &\
+        defined(my.product.install)
+endfunction
+
+# Is the binary product explicitly set to not install?
+function is_no_install(product)
+    define my.product = is_no_install.product
+    return is_cpp(my.product) & !is_true(my.product.install) &\
+        defined(my.product.install)
+endfunction
+
+# Is the product a test executable?
+function is_test(product)
+    define my.product = is_test.product
+    if (is_true(my.product.test) & !is_executable(my.product))
+        abort "Tests must be executable: '$(my.product.prefix)'"
+    endif
+    return is_true(my.product.test) & is_executable(my.product)
+endfunction
+
+# Is the product build for check purposes?
+function is_check(product)
+    define my.product = is_check.product
+    return is_true(my.product.check) | is_test(my.product)
+endfunction
+
+# Map the prefix to the primary symbol (this is a simplified mapping).
+function get_primary(product)
+    define my.product = get_primary.product
+    if (is_data(my.product))
+        return "DATA"
+    elsif (is_headers(my.product))
+        return "HEADERS"
+    elsif (is_info(my.product))
+        return "TEXINFOS"
+    elsif (is_library(my.product))
+        return "LTLIBRARIES"
+    elsif (is_manual(my.product))
+        return "MANS"
+    elsif (is_program(my.product))
+        return "PROGRAMS"
+    elsif (is_script(my.product))
+        return "SCRIPTS"
+    endif
+    abort "Unknown automake primary for prefix: '$(my.product.prefix)'"
+endfunction
+
+function get_qualified_prefix(product)
+    define my.product = get_qualified_prefix.product
+    require(my.product, "product", "prefix")
+    define my.prefix = my.product.prefix
+    define my.qualifier = ""
+    if (is_check(my.product))
+        my.prefix = ""
+        my.qualifier = "check"
+    elsif (is_no_install(my.product))
+        my.prefix = ""
+        my.qualifier = "noinst"
+    elsif (is_no_distribute(my.product))
+        my.qualifier = "nodist_"
+    elsif (is_distribute(my.product))
+        my.qualifier = "dist_"
+    endif
+    return "$(my.qualifier)$(my.prefix)"
+endfunction
+
+# Does the file extension conform to the required prefix pattern?
+function is_product_file(product, path)
+    define my.product = is_product_file.product
+    require(my.product, "product", "prefix")
+
+    # doc expects no type and bash_completion and manual have no extension.
+    if (is_data(my.product))
+        if (match_prefix(my.product, "bash_completion"))
+            return ends_with(my.path, "")
+        elsif (match_prefix(my.product, "doc"))
+            return ends_with(my.path, "")
+        elsif (match_prefix(my.product, "pkgconfig"))
+            return ends_with(my.path, ".pc")
+        elsif (match_prefix(my.product, "sysconf"))
+            return ends_with(my.path, ".cfg")
+        endif
+    elsif (is_cpp(my.product))
+        return ends_with(my.path, ".cpp") | ends_with(my.path, ".c")        
+    elsif (is_headers(my.product))
+        return ends_with(my.path, ".hpp") | ends_with(my.path, ".h") |\
+            ends_with(my.path, ".ipp")
+    elsif (is_info(my.product))
+        return ends_with(my.path, ".texi")
+    elsif (is_manual(my.product))
+        return ends_with(my.path, "")
+    elsif (is_script(my.product))
+        return ends_with(my.path, ".sh")
+    endif
+    abort "Unknown product type for prefix: '$(my.product.prefix)'"
+endfunction
+
+# Get the target attribute, defaulting to [prefix]dir, bracketed as ${target}.
+function get_target(product)
+    require(my.product, "product", "prefix")
+    define my.target = "$(my.product.prefix)dir"
+    return "${$(my.target)}"
+endfunction
+
+# Get the full install location.
+function get_install(product, container)
+    define my.product = get_install.product
+    if (is_empty(my.container))
+        my.container = my.product.container ?
+    endif
+    if (is_empty(my.container))
+        return ""
+    else
+        my.container = "$(my.container)"
+    endif
+    define my.target = get_target(my.product)
+    return "$(my.target)/$(my.container)"
+endfunction
+
+# Normalize the product name (as "[lib]name[.la]" for libraries).
+function get_product_name(product)
+    define my.product = get_product_name.product
+    if (is_program(my.product))
+        return my.product.name
+    elsif (is_library(my.product))
+        return "lib$(my.product.name).la"
+    endif
+    return ""
+endfunction
+
+# Create the product path.
+function get_product_path(product)
+    define my.product = get_product_path.product
+    return join(my.product.path, get_product_name(my.product))
+endfunction
+
+# Get a description for comments.
+function get_product_description(product, container)
+    define my.product = get_product_description.product
+    define my.target = get_target(my.product)
+    if (is_cpp(my.product))
+        define my.path = get_product_path(my.product)
+        if (is_check(my.product) | is_no_install(my.product))
+            return "local: $(my.path)"
+        endif
+        return "$(my.path) => $(my.target)"
+    endif
+    define my.install = get_install(my.product)
+    if (is_empty(my.install))
+        my.install = my.target
+    endif
+    return "files => $(my.install)"
+endfunction
+
+# Get automake tag of the form: qualified-prefix[_container]
+function get_tag(product, container)
+    define my.product = get_tag.product
+    if (is_empty(my.container))
+        my.container = my.product.container ? ""
+    endif
+    if (!is_empty(my.container))
+        my.container = "_$(my.container:c)"
+    endif
+    define my.qualified_prefix = get_qualified_prefix(my.product)
+    return "$(my.qualified_prefix)$(my.container)"
+endfunction
+
+# Get the automake library add output variable type.
+function get_library_add(product)
+    define my.product = get_library_add.product
+    if (is_library(my.product))
+        return "LIBADD"
+    elsif (is_program(my.product))
+        return "LDADD"
+    endif
+    abort "Unknown library type: '$(my.product.prefix)'"
+endfunction
+
+# Open and validate a directory.
+function open_directory(folder)
+    define my.directory = directory.open(my.folder, error_text) ?
+    if (defined(my.directory))
+        return my.directory
+    endif
+    abort "Directory enumeration failure: $(error_text)"
+endfunction
+
+# Test a directory and return the normalized path.
+function normalize_directory(folder)
+    define my.directory = open_directory(my.folder)
+    return my.directory.path
+endfunction
+
+# Write the file names in the directory to a formatted string.
+function get_files(folder, trim, product)
+    define my.product = get_files.product
+    my.files = ""
+    define my.directory = open_directory(my.folder)
+    for my.directory.file as _object by _object.path\
+        where is_product_file(my.product, _object.name)
+        define my.full = "$(_object.path)$(_object.name)"
+        define my.relative = difference(my.full, my.trim)
+        my.files += " \\\n    $(my.relative)"
+    endfor
+    return my.files
+endfunction
+
+# Recurse directory tree, returning the formatted paths in flat list.
+function get_all_files(folder, trim, product)
+    define my.product = get_all_files.product
+    define my.files = get_files(my.folder, my.trim, my.product)
+    define my.directory = open_directory(my.folder)
+    for my.directory.directory as _object by _object.path
+        define my.subfolder = "$(_object.path)$(_object.name)"
+        my.files += get_all_files(my.subfolder, my.trim, my.product)
+    endfor
+    return my.files
+endfunction
+
+# Helper function for building a container segment.
+function construct_segment(product, folder, trim)
+    define my.product = construct_segment.product
+    define my.segment = difference(my.folder, my.trim)
+    define my.container = my.product.container ? ""
+    return join(my.container, my.segment)
+endfunction
+
+# Recurse directory tree, rendering outputs with files for each folder.
+function render_files_variables(folder, base_trim, path_trim, product)
+    define my.product = render_files_variables.product
+    require(my.product, "product", "prefix")
+    define my.files = get_files(my.folder, my.base_trim, my.product)
+    if (!is_empty(my.files))
+        define my.trim = my.base_trim + my.path_trim + 1
+        define my.segment = construct_segment(my.product, my.folder, my.trim)
+        define my.tag = get_tag(my.product, my.segment)
+        define my.install = get_install(my.product, my.segment)
+        define my.primary = get_primary(my.product)
+        
+        # Don't write a tautology, such as: installdir = ${installdir}
+        if (!is_empty(my.install))
+            write_line("$(my.tag)dir = $(my.install)")
+        endif
+        write_line("$(my.tag)_$(my.primary) =$(my.files)")
+        write_line()
+    endif
+ 
+    # Recurse the directory tree.
+    define my.directory = open_directory(my.folder)
+    for my.directory.directory as _object by _object.path
+        define my.subfolder = "$(_object.path)$(_object.name)"
+        render_files_variables(my.subfolder, my.base_trim, my.path_trim,\
+            my.product)
+    endfor
+endfunction
+
+# Format the flag either as a literal flag or a dereferenced variable.
+function get_flag(flag)
+    define my.flag = get_flag.flag
+    if (defined(my.flag.value))
+        return "-$(my.flag.value)"
+    elsif (defined(my.flag.define))
+         return "-D$(my.flag.define:upper)=${$(my.flag.define)}"
+    elsif (defined(my.flag.substitute))
+        return "${$(my.flag.substitute)}"
+    endif
+    abort "Required attribute missing: flag.value|define|substitute"
+endfunction
+
+# Get the product with the given library name.
+function get_library_product(name, build)
+    define my.build = get_library_product.build
+    return my.build->product((product.name ? "") = my.name)
+endfunction
+
+# Render c/c++ specific option variables: C??FLAGS, LIBADD, LDADD, SOURCES.
+function render_cpp_variables(product, root, repository, accumulator)
+    define my.product = render_cpp_variables.product
+    define my.repository = render_cpp_variables.repository
+    define my.build = my.repository->build
+    define my.configure = my.repository->configure
+    
+    if (is_cpp(my.product))
+        define my.libs = ""
+        define my.ld_flags = ""
+        define my.ccc_flags = ""
+        define my.cxx_flags = ""
+        define my.cpp_flags = ""
+        define my.sources = ""
+
+        # Accumulate values from input.
+        for my.product.headers as _headers
+            require(_headers, "headers", "path")
+            my.cpp_flags += " -I${srcdir}/$(_headers.path)"
+        endfor
+        for my.product.flag as _flag
+            define my.flag = " $(get_flag(_flag))"
+            if (is_ccc_flag(_flag))
+                my.ccc_flags += my.flag
+            elsif (is_cxx_flag(_flag))
+                my.cxx_flags += my.flag
+            elsif (is_cpp_flag(_flag))
+                my.cpp_flags += my.flag
+            else
+                define my.context = my.flag.context ? ""
+                abort "Invalid flag context: '$(my.context)'."
+            endif
+        endfor
+        for my.product.library as _library
+            require(_library, "_library", "name")
+            my.library_cname = "$(_library.name:c)"
+            
+            # TODO: recurse the referenced library (for libs only?).
+            define my.built = get_library_product(_library.name, my.build)?
+            if (defined(my.built))
+                my.libs += " -l$(my.library_cname)"
+                if (!is_empty(my.built.path))
+                    my.ld_flags += " -L${srcdir}/$(my.built.path)"
+                endif
+            else
+                # pkg-config is problematic in that it mixes LDFLAGS into LIBS
+                # and all flags into CFLAGS. We rewrite CFLAGS as CPPFLAGS.
+                define my.is_boost = is_boost_dependency(_library)
+                define my.is_boost_lib = is_boost_lib_dependency(_library)
+                define my.is_packaged = is_packaged_library(_library.name, my.configure)
+                if (!my.is_boost)
+                    my.libs += " ${$(my.library_cname)_LIBS}"
+                endif
+                if (!my.is_boost_lib)
+                    my.cpp_flags += " ${$(my.library_cname)_CPPFLAGS}"
+                endif
+                if (!my.is_packaged & !my.is_boost & !my.is_boost_lib)
+                    my.ccc_flags += " ${$(my.library_cname)_CFLAGS}"
+                endif
+                if (!my.is_packaged & !my.is_boost_lib)
+                    my.ld_flags += " ${$(my.library_cname)_LDFLAGS}"
+                endif
+                #my.cxx_flags += " ${$(my.library_cname)_CXXFLAGS}"
+            endif
+        endfor
+        for my.product.sources as _sources
+            require(_sources, "sources", "path")
+            define my.folder = "$(my.root)$(_sources.path)"
+            define my.length = string.length(my.root)
+            define my.sources = get_all_files(my.folder, my.length, my.product)
+        endfor
+
+        # Write values to file.
+        define my.tag = get_tag(my.product)
+        define my.primary = get_primary(my.product)
+        define my.path = get_product_path(my.product)
+        if (is_test(my.product))
+            heading3("Execute '$(my.path)' as a test.")
+            define my.variable = "TESTS"
+            define my.operator = get_assignment_operator(my.variable,\
+                my.accumulator)
+            my.accumulator = increment_accumulator(my.variable,\
+                my.accumulator)
+            write_line("TESTS $(my.operator) $(my.path)")
+            write_line()
+        endif
+        
+        # Declare or increment the library|program accumulator.
+        define my.variable = "$(my.tag)_$(my.primary)"
+        define my.operator = get_assignment_operator(my.variable,\
+            my.accumulator)
+        my.accumulator = increment_accumulator(my.variable,\
+            my.accumulator)
+        write_line("$(my.variable) $(my.operator) $(my.path)")
+        
+        if (!is_empty(my.ccc_flags))
+            write_line("$(my.path:c)_CFLAGS =$(my.ccc_flags)")
+        endif
+        if (!is_empty(my.cxx_flags))
+            write_line("$(my.path:c)_CXXFLAGS =$(my.cxx_flags)")
+        endif
+        if (!is_empty(my.cpp_flags))
+            write_line("$(my.path:c)_CPPFLAGS =$(my.cpp_flags)")
+        endif
+        if (!is_empty(my.ld_flags))
+            write_line("$(my.path:c)_LDFLAGS =$(my.ld_flags)")
+        endif
+        if (!is_empty(my.libs))
+            define my.add = get_library_add(my.product)
+            write_line("$(my.path:c)_$(my.add) =$(my.libs)")
+        endif
+        if (!is_empty(my.sources))
+            write_line("$(my.path:c)_SOURCES =$(my.sources)")
+        endif
+        write_line()
+    endif
+    return my.accumulator
+endfunction
+
+function render_file_variables(product)
+    define my.product = render_file_variables.product
+    define my.file = ""
+    for my.product.file as _file where !is_empty(_file.path) by _file.path
+        require(_file, "file", "path")
+        my.file += " \\\n    $(_file.path)"
+    endfor
+    if (!is_empty(my.file))
+        define my.tag = get_tag(my.product)
+        define my.primary = get_primary(my.product)
+        define my.install = get_install(my.product, my.container)
+        
+        # Don't write a tautology, such as: installdir = ${installdir}
+        if (!is_empty(my.install))
+            write_line("$(my.tag)dir = $(my.install)")
+        endif
+        write_line("$(my.tag)_$(my.primary) =$(my.file)")
+        write_line()
+    endif
+endfunction
+  
+function render_product_variables(product, root, repository, accumulator)
+    define my.product = render_product_variables.product
+    define my.repository = render_product_variables.repository
+    
+    # File elements are enumerated in metadata, just render them.
+    render_file_variables(my.product)
+
+    for my.product.files as _files where !is_empty(_files.path) by _files.path
+        require(_files, "files", "path")
+        define my.folder = "$(my.root)$(_files.path)"
+        define my.root_length = string.length(my.root)
+        define my.path_length = string.length(_files.path)
+        
+        # Files elements are enumerated by directory and mapped to targets.
+        render_files_variables(my.folder, my.root_length, my.path_length,\
+            my.product)
+    endfor
+    
+    # The c/c++ products define custom variable options.
+    return render_cpp_variables(my.product, my.root, my.repository,\
+        my.accumulator)
+endfunction
+
+function render_product(product, root, repository, accumulator)
+    define my.product = render_product.product
+    define my.repository = render_product.repository
+    define my.configure = my.repository->configure
+    define my.option = find_option_symbol(my.product, my.configure)?
+    if (defined(my.option))
+        write_line("if $(my.option:upper)")
+        write_line()
+    endif
+    my.accumulator = render_product_variables(my.product, my.root,\
+        my.repository, my.accumulator)
+    if (defined(my.option))
+        write_line("endif $(my.option:upper)")
+        write_line()
+    endif
+    return my.accumulator
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro initialize_automake()
+.
+# look for macros in the m4 subdirectory
+ACLOCAL_AMFLAGS = -I m4
+
+.endmacro # initialize_automake
+.
+.endtemplate
+.template 0
+###############################################################################
+# Generation
+###############################################################################
+function generate_automake()
+for generate.repository by name as _repository
+
+    require(_repository, "repository", "name")
+    define my.out_file = "$(_repository.name)/Makefile.am"
+    notify(my.out_file)
+    output(my.out_file)
+
+    copyleft(_repository.name)
+    define my.accumulator = ""
+    define my.build = _repository->build?
+    define my.base = "$(repositories_parent())/$(_repository.name)/"
+    define my.root = normalize_directory(my.base)
+    
+    heading1("Standard declarations.")
+    initialize_automake()
+
+    heading1("Automake products.")
+    if (!defined(my.build))
+        heading2("The repository/build element is not defined.")
+    else
+        for my.build.product as _product
+            heading2(get_product_description(_product))
+            my.accumulator = render_product(_product, my.root, _repository,\
+                my.accumulator)
+        endfor
+    endif
+    
+    close
+endfor _repository
+endfunction # generate_automake
+.endtemplate

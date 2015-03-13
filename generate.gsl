@@ -8,6 +8,7 @@
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
 
+[global].root = ".."
 [global].trace = 0
 [gsl].ignorecase = 0
 
@@ -19,14 +20,18 @@ gsl from "utilities.gsl"
 gsl from "templates/gsl.configure.ac"
 gsl from "templates/gsl.install.sh"
 gsl from "templates/gsl.libbitcoin.pc.in"
+gsl from "templates/gsl.Makefile.am"
 gsl from "templates/gsl.travis.yml"
 gsl from "templates/gsl.version.hpp"
+#gsl from "templates/gsl.include.hpp"
 
 generate_configure()
 generate_installer()
 generate_pkgconfig()
+generate_automake()
 generate_travisyml()
 generate_version()
+#generate_include()
 
 ###############################################################################
 .endtemplate

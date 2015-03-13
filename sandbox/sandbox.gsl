@@ -8,10 +8,82 @@
 #
 ###############################################################################
 
+function global.is_token(needle, haystack)
+    return defined(string.locate(my.haystack, my.needle))
+endfunction
+#echo is_token("es", "test")
+
+function test_ends_with(text, suffix)
+    # return string.suffixed(my.text, my.suffix)
+    return regexp.match("^(.*)$(my.suffix)$", my.text)
+endfunction
+# echo test_ends_with("foo.txt", ".txt")
+
+function test_trim_left(text)
+    define my.extracted = ""
+    regexp.match("^ +(.*)$", my.text, my.extracted)
+    return my.extracted ? ""
+endfunction
+#echo test_trim_left("  foobar  123")
+
+function test_maximum(value, limit)
+     return (my.value > my.limit) ?? my.limit ? my.value
+endfunction
+#echo test_maximum(7, 5)
+
+function global.maximum(value, limit)
+     if (my.value > my.limit)
+        return my.limit
+     endif
+     return my.value
+endfunction
+
+function global.minimum(value, limit)
+     if (my.value < my.limit)
+        return my.value
+     endif
+     return my.limit
+endfunction
+
+function global.left(text, length)
+    define my.text_length = string.length(my.text)
+    define my.new_length = minimum(my.length, my.text_length)
+    # Substring cannot return empty string.
+    if (my.new_length <= 0)
+        return ""
+    endif
+    return string.substr(my.text, 0, my.new_length - 1)
+endfunction
+#echo left("foobar", 1)
+
+function global.right(text, length)
+    define my.text_length = string.length(my.text)
+    define my.new_length = minimum(my.length, my.text_length)
+    # Substring cannot return empty string.
+    if (my.new_length <= 0)
+        return ""
+    endif
+    define my.start_position = my.text_length - my.new_length
+    define my.end_position = my.text_length - 1
+    return string.substr(my.text, my.start_position, my.text_length - 1)
+endfunction
+#echo right("foobar", 1)
+
+function global.remaining(full, base)
+   define my.length = string.length(my.full)
+   return right(my.full, my.length - my.base)
+endfunction
+#echo remaining("test-123", 5)
+
+function test_trim_one(text)
+    return test_left(my.text, string.length(my.text) - 1)
+endfunction
+#echo test_trim_one("foobar")
+
 function test_normalize(value)
     echo "$(my.value:upper,c)"
 endfunction
-test_normalize("czmq++")
+#test_normalize("czmq++")
 
 function test_assignment_ambiguity()
     test_value = "123"
@@ -101,7 +173,7 @@ function increment(value)
 endfunction
 #echo increment(0)
 
-function recursive (N)
+function recursive(N)
     echo my.N
     my.localvar = my.N - 1
     if (my.localvar > 0)
@@ -111,12 +183,21 @@ function recursive (N)
 endfunction
 #recursive(3)
 
-function decrementbyref(n)
-    $(my.n) = $(my.n) - 1
+function recursive_decrement_byref(n, counter)
+    #echo $(my.counter)
+    if ($(my.counter) = 0)
+        return
+    endif
+    $(my.counter) = $(my.counter) - 1
+    recursive_decrement_byref(n, "counter")
 endfunction
-#global.counter=5
-#decrementbyref("counter")
-#echo global.counter
+
+function test_recursive_decrement_byref()
+    counter=14
+    recursive_decrement_byref(1, "counter")
+    echo counter
+endfunction
+#test_recursive_decrement_byref()
 
 # Simulate a case where a scope predicate may not return a node.
 function defined_if_positive(value)

@@ -16,6 +16,10 @@ function global.is_empty(value)
     return ((my.value ? "") = "")
 endfunction
 
+function global.is_token(needle, haystack)
+    return defined(string.locate(my.haystack, my.needle))
+endfunction
+
 function global.is_true(value)
     return ((my.value ? "false") = "true")
 endfunction
@@ -24,22 +28,58 @@ function global.starts_with(text, prefix)
     return string.prefixed(my.text, my.prefix)
 endfunction
 
+function global.ends_with(text, suffix)
+    # return string.suffixed(my.text, my.suffix)
+    return regexp.match("^(.*)$(my.suffix)$", my.text ? "")
+endfunction
+
 function global.trim_left(text)
     define my.extracted = ""
     regexp.match("^ +(.*)$", my.text, my.extracted)
     return my.extracted ? ""
 endfunction
 
+function global.join(left, right, delimiter)
+    define my.char = my.delimiter ? "/"
+    define my.joiner = (is_empty(my.left) | is_empty(my.right)) ?? "" ? my.char
+    return "$(my.left ? "")$(my.joiner)$(my.right ? "")"
+endfunction
+
+function global.maximum(value, limit)
+     return (my.value > my.limit) ?? my.limit ? my.value
+endfunction
+
+function global.minimum(value, limit)
+     return (my.value < my.limit) ?? my.value ? my.limit
+endfunction
+
 function global.left(text, length)
     define my.text_length = string.length(my.text)
-    my.length = my.length > text_length ?? text_length ? my.length
-    return substr(my.text, 0, my.length)
+    define my.new_length = minimum(my.length, my.text_length)
+    if (my.new_length <= 0)
+        return ""
+    endif
+    return string.substr(my.text, 0, my.new_length - 1)
 endfunction
 
 function global.right(text, length)
     define my.text_length = string.length(my.text)
-    my.length = my.length > text_length ?? text_length ? my.length
-    return substr(my.text, my.text_length - my.length, my.length)
+    define my.new_length = minimum(my.length, my.text_length)
+    if (my.new_length <= 0)
+        return ""
+    endif
+    define my.start_position = my.text_length - my.new_length
+    define my.end_position = my.text_length - 1
+    return string.substr(my.text, my.start_position, my.text_length - 1)
+endfunction
+
+function global.difference(full, base)
+    define my.length = string.length(my.full)
+    return right(my.full, my.length - my.base)
+endfunction
+
+function global.repositories_parent()
+    return global.root
 endfunction
 
 function global.trim_right(text)
@@ -50,31 +90,56 @@ function global.trim_both(text)
     return trim_left(string.trim(my.text))
 endfunction
 
-function global.require(node, context, attribute)
-    if (!defined(require.node))
-        abort "Required node undefined for $(my.context).$(my.attribute)."
-    endif
-    define my.node = require.node
-    if (!defined(my.node.$(my.attribute)))
-        abort "Required attribute missing: $(my.context).$(my.attribute)"
-    endif
+function global.trim_right_one(text)
+    return left(my.text, string.length(my.text) - 1)
+endfunction
+
+function global.trim_left_one(text)
+    return right(my.text, string.length(my.text) - 1)
 endfunction
 
 # Dependency Utilities.
 
-# TODO: need to use function names as a form of namespace identification
-# so that the called can see the parameter as "dependency". This will allow
-# room for other similarly-named functions over differently-typed arguments.
+function global.find_library_dependency(name, configure)
+    define my.configure = find_library_dependency.configure
+    if (defined(my.configure))
+        return my.configure->dependency(dependency.name = my.name)
+    endif
+endfunction
+
+function global.is_packaged_library(name, configure)
+    define my.configure = is_packaged_library.configure
+    define my.dependency = find_library_dependency(my.name, my.configure)?
+    return defined(my.dependency) & is_package(my.dependency)
+endfunction
+
+function global.is_ax_dependency(dependency)
+    define my.dependency = is_ax_dependency.dependency
+    require(my.dependency, "dependency", "name")
+    return my.dependency.name = "pthread"
+endfunction
+
+function global.is_iconv_dependency(dependency)
+    define my.dependency = is_iconv_dependency.dependency
+    require(my.dependency, "dependency", "name")
+    return my.dependency.name = "iconv"
+endfunction
 
 function global.is_boost_dependency(dependency)
     define my.dependency = is_boost_dependency.dependency
+    require(my.dependency, "dependency", "name")
     return my.dependency.name = "boost"
 endfunction
 
 function global.is_boost_lib_dependency(dependency)
     define my.dependency = is_boost_lib_dependency.dependency
+    require(my.dependency, "dependency", "name")
     return starts_with(my.dependency.name, "boost_")
 endfunction
+
+# TODO: need to use function names as a form of namespace identification
+# so that the called can see the parameter as "dependency". This will allow
+# room for other similarly-named functions over differently-typed arguments.
 
 # is_package_dependency
 function global.is_package(dependency)
@@ -92,9 +157,72 @@ function global.is_unpackaged_lib(dependency)
         !is_boost_lib_dependency(my.dependency)
 endfunction
 
-function global.is_optional_dependency(dependency)
-    define my.dependency = is_optional_dependency.dependency
-    return defined(my.dependency.option)
+function global.is_optional_element(element)
+    define my.element = is_optional_element.element
+    return defined(my.element.option)
+endfunction
+
+# Test for a flag context.
+function global.match_flag_context(flag, context)
+    define my.flag = match_flag_context.flag?
+    return (my.flag.context ? "") = my.context
+endfunction
+
+# Test flag context value.
+function global.is_ccc_flag(flag)
+    define my.flag = is_ccc_flag.flag?
+    return match_flag_context(my.flag, "c")
+endfunction
+function global.is_cxx_flag(flag)
+    define my.flag = is_cxx_flag.flag?
+    return match_flag_context(my.flag, "c++")
+endfunction
+function global.is_cpp_flag(flag)
+    define my.flag = is_cpp_flag.flag?
+    return match_flag_context(my.flag, "") |\
+        match_flag_context(my.flag, "preprocessor")
+endfunction
+function global.is_link_flag(flag)
+    define my.flag = is_link_flag.flag?
+    return match_flag_context(my.flag, "link")
+endfunction
+
+# Return CPPFLAGS|CFLAGS|CXXFLAGS|LDFLAGS
+function get_flags_variable(flag)
+    define my.flag = get_flags_variable.flag
+    if (is_cpp_flag(my.flag))
+        return "CPPFLAGS"    
+    elsif (is_ccc_flag(my.flag))
+        return "CFLAGS"
+    elsif (is_cxx_flag(my.flag))
+        return "CXXFLAGS"
+    elsif (is_link_flag(my.flag))
+        return "LDFLAGS"
+    endif
+    define my.context = my.flag.context ? ""
+    abort "Invalid flag context: '$(my.context)'."
+endfunction
+
+function global.get_option_symbol(option)
+    define my.option = get_option_symbol.option?
+    if (defined(my.option))
+        require(my.option, "option", "type")
+        require(my.option, "option", "name")
+        define my.prefix = ""
+        if (!is_true(my.option.unprefixed))
+            my.prefix = "$(my.option.type:c)_"
+        endif
+        return "$(my.prefix)$(my.option.name:c)"
+    endif
+endfunction
+
+function global.find_option_symbol(element, configure)
+    define my.element = find_option_symbol.element
+    define my.configure = find_option_symbol.configure
+    if (is_optional_element(my.element))
+        define my.opt = my.configure->option(option.name = my.element.option)?
+        return get_option_symbol(my.opt)
+    endif
 endfunction
 
 # Build Utilities.
@@ -114,8 +242,21 @@ function global.is_github_build(build)
     return !is_empty(my.build.github)
 endfunction
 
-
 # Debugging utilities.
+
+function global.notify(filename)
+    echo "Generating $(my.filename)..."
+endfunction
+
+function global.require(node, context, attribute)
+    if (!defined(require.node))
+        abort "Required node undefined for $(my.context).$(my.attribute)."
+    endif
+    define my.node = require.node
+    if (!defined(my.node.$(my.attribute)))
+        abort "Required attribute missing: $(my.context).$(my.attribute)"
+    endif
+endfunction
 
 function global.trace1(text)
     trace(my.text, 1)
@@ -141,24 +282,35 @@ endfunction
 .endtemplate
 .template 1
 .
-.macro global.notify(filename)
-.   echo "Generating $(my.filename)..."
+.# Write a line to the template.
+.macro global.write_line(text)
+$(my.text ? "")
+.endmacro
+.
+.# Write a single indented line to the template.
+.macro global.write_line1(text)
+    $(my.text ? "")
+.endmacro
+.
+.# Write a double indented line to the template.
+.macro global.write_line2(text)
+        $(my.text ? "")
 .endmacro
 .
 .macro global.heading1(text)
 
 # $(my.text)
 #==============================================================================
-.endmacro heading1
+.endmacro
 .
 .macro global.heading2(text)
 # $(my.text)
 #------------------------------------------------------------------------------
-.endmacro heading2
+.endmacro
 .
 .macro global.heading3(text)
 # $(my.text)
-.endmacro heading3
+.endmacro
 .
 .macro global.copyleft(name)
 ###############################################################################
@@ -167,7 +319,7 @@ endfunction
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
 ###############################################################################
-.endmacro copyleft
+.endmacro
 .
 .macro global.c_copyleft(name)
 ///////////////////////////////////////////////////////////////////////////////
@@ -176,5 +328,5 @@ endfunction
 //        GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 //
 ///////////////////////////////////////////////////////////////////////////////
-.endmacro copyleft
+.endmacro
 .endtemplate
