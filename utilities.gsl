@@ -131,6 +131,18 @@ function global.is_boost_dependency(dependency)
     return my.dependency.name = "boost"
 endfunction
 
+function global.is_java_dependency(dependency)
+    define my.dependency = is_java_dependency.dependency
+    require(my.dependency, "dependency", "name")
+    return (my.dependency.name = "java")
+endfunction
+
+function global.is_python_dependency(dependency)
+    define my.dependency = is_python_dependency.dependency
+    require(my.dependency, "dependency", "name")
+    return (my.dependency.name = "python")
+endfunction
+
 function global.is_boost_lib_dependency(dependency)
     define my.dependency = is_boost_lib_dependency.dependency
     require(my.dependency, "dependency", "name")
@@ -147,6 +159,11 @@ function global.is_package(dependency)
     return defined(my.dependency.version) &\
         !is_boost_dependency(my.dependency) &\
         !is_boost_lib_dependency(my.dependency)
+endfunction
+
+function global.is_linked_package_depedency(dependency)
+    define my.dependency = is_linked_package_depedency.dependency
+    return is_package(my.dependency) & !is_true(_dependency.unlinked)
 endfunction
 
 # is_unpackaged_lib_dependency

@@ -17,7 +17,7 @@ function get_assignment_operator(variable, accumulator)
     return my.repeat ?? "+=" ? "="
 endfunction
 
-function increment_accumulator(variable, accumulator)
+function accumulate(variable, accumulator)
     define my.delimited = " $(my.variable) "
     if (!is_token(my.delimited, accumulator))
         my.accumulator += my.delimited
@@ -48,9 +48,14 @@ function is_info(product)
     define my.product = is_info.product
     return match_prefix(my.product, "info")
 endfunction
+function is_java(product)
+    define my.product = is_java.product
+    return match_prefix(my.product, "java")
+endfunction
 function is_library(product)
     define my.product = is_library.product
-    return match_prefix(my.product, "lib")
+    return match_prefix(my.product, "lib") |\
+        match_prefix(my.product, "pkgpyexec")
 endfunction
 function is_manual(product)
     define my.product = is_manual.product
@@ -59,6 +64,10 @@ endfunction
 function is_program(product)
     define my.product = is_program.product
     return match_prefix(my.product, "bin")
+endfunction
+function is_python(product)
+    define my.product = is_python.product
+    return match_prefix(my.product, "pkgpython")
 endfunction
 function is_script(product)
     define my.product = is_script.product
@@ -77,23 +86,29 @@ function is_executable(product)
     return is_program(my.product) | is_script(my.product)
 endfunction
 
-# Is the non-binary product explicitly set to distribute?
-function is_distribute(product)
-    define my.product = is_distribute.product
-    return !is_cpp(my.product) & is_true(my.product.install)
+# Is the product compiled?
+function is_compiled(product)
+    define my.product = is_compiled.product
+    return is_cpp(my.product) | is_java(my.product)
 endfunction
 
-# Is the non-binary product explicitly set to not distribute?
+# Is the non-compiled product explicitly set to distribute?
+function is_distribute(product)
+    define my.product = is_distribute.product
+    return !is_compiled(my.product) & is_true(my.product.install)
+endfunction
+
+# Is the non-compiled product explicitly set to not distribute?
 function is_no_distribute(product)
     define my.product = is_no_distribute.product
-    return !is_cpp(my.product) & !is_true(my.product.install) &\
+    return !is_compiled(my.product) & !is_true(my.product.install) &\
         defined(my.product.install)
 endfunction
 
-# Is the binary product explicitly set to not install?
+# Is the compiled product explicitly set to not install?
 function is_no_install(product)
     define my.product = is_no_install.product
-    return is_cpp(my.product) & !is_true(my.product.install) &\
+    return is_compiled(my.product) & !is_true(my.product.install) &\
         defined(my.product.install)
 endfunction
 
@@ -119,6 +134,8 @@ function get_primary(product)
         return "DATA"
     elsif (is_headers(my.product))
         return "HEADERS"
+    elsif (is_java(my.product))
+        return "JAVA"
     elsif (is_info(my.product))
         return "TEXINFOS"
     elsif (is_library(my.product))
@@ -127,6 +144,8 @@ function get_primary(product)
         return "MANS"
     elsif (is_program(my.product))
         return "PROGRAMS"
+    elsif (is_python(my.product))
+        return "PYTHON"
     elsif (is_script(my.product))
         return "SCRIPTS"
     endif
@@ -175,8 +194,12 @@ function is_product_file(product, path)
             ends_with(my.path, ".ipp")
     elsif (is_info(my.product))
         return ends_with(my.path, ".texi")
+    elsif (is_java(my.product))
+        return ends_with(my.path, ".java")
     elsif (is_manual(my.product))
         return ends_with(my.path, "")
+    elsif (is_python(my.product))
+        return ends_with(my.path, ".py")
     elsif (is_script(my.product))
         return ends_with(my.path, ".sh")
     endif
@@ -205,13 +228,20 @@ function get_install(product, container)
     return "$(my.target)/$(my.container)"
 endfunction
 
-# Normalize the product name (as "[lib]name[.la]" for libraries).
+# Normalize the library name (as "[lib]name[.la]").
+function get_library_name(library)
+    define my.library = get_library_name.library
+    define my.prefix = is_true(my.library.unprefixed) ?? "" ? "lib"
+    return "$(my.prefix)$(my.library.name).la"
+endfunction
+
+# Normalize the product name.
 function get_product_name(product)
     define my.product = get_product_name.product
     if (is_program(my.product))
         return my.product.name
     elsif (is_library(my.product))
-        return "lib$(my.product.name).la"
+        return get_library_name(my.product)
     endif
     return ""
 endfunction
@@ -337,8 +367,7 @@ function render_files_variables(folder, base_trim, path_trim, product)
     define my.directory = open_directory(my.folder)
     for my.directory.directory as _object by _object.path
         define my.subfolder = "$(_object.path)$(_object.name)"
-        render_files_variables(my.subfolder, my.base_trim, my.path_trim,\
-            my.product)
+        render_files_variables(my.subfolder, my.base_trim, my.path_trim, my.product)
     endfor
 endfunction
 
@@ -348,7 +377,7 @@ function get_flag(flag)
     if (defined(my.flag.value))
         return "-$(my.flag.value)"
     elsif (defined(my.flag.define))
-         return "-D$(my.flag.define:upper)=${$(my.flag.define)}"
+         return "-D$(my.flag.define:upper)=\\\"${$(my.flag.define)}\\\""
     elsif (defined(my.flag.substitute))
         return "${$(my.flag.substitute)}"
     endif
@@ -361,26 +390,34 @@ function get_library_product(name, build)
     return my.build->product((product.name ? "") = my.name)
 endfunction
 
-# Render c/c++ specific option variables: C??FLAGS, LIBADD, LDADD, SOURCES.
+# Render c/c++ specific option variables.
 function render_cpp_variables(product, root, repository, accumulator)
     define my.product = render_cpp_variables.product
     define my.repository = render_cpp_variables.repository
-    define my.build = my.repository->build
-    define my.configure = my.repository->configure
     
     if (is_cpp(my.product))
+        define my.build = my.repository->build
+        define my.configure = my.repository->configure
+    
         define my.libs = ""
         define my.ld_flags = ""
         define my.ccc_flags = ""
         define my.cxx_flags = ""
         define my.cpp_flags = ""
         define my.sources = ""
+        
+        # Define _LDFLAGS from an override of Libtool default naming.
+        if (is_true(my.product.unprefixed))
+            my.ld_flags += " -module"
+        endif
 
-        # Accumulate values from input.
+        # Define _CPPFLAGS values from input.
         for my.product.headers as _headers
             require(_headers, "headers", "path")
             my.cpp_flags += " -I${srcdir}/$(_headers.path)"
         endfor
+        
+        # Define _C??FLAGS values from input.
         for my.product.flag as _flag
             define my.flag = " $(get_flag(_flag))"
             if (is_ccc_flag(_flag))
@@ -394,68 +431,69 @@ function render_cpp_variables(product, root, repository, accumulator)
                 abort "Invalid flag context: '$(my.context)'."
             endif
         endfor
+        
+        # Define _LIBS|_LDFLAGS|C??FLAGS option variables from libraries.
         for my.product.library as _library
             require(_library, "_library", "name")
-            my.library_cname = "$(_library.name:c)"
             
             # TODO: recurse the referenced library (for libs only?).
-            define my.built = get_library_product(_library.name, my.build)?
+            define my.built = get_library_product(_library.name, my.build) ?
             if (defined(my.built))
-                my.libs += " -l$(my.library_cname)"
-                if (!is_empty(my.built.path))
-                    my.ld_flags += " -L${srcdir}/$(my.built.path)"
-                endif
+                define my.library_name = get_library_name(my.built)
+                my.library_path = join(my.built.path, my.library_name)
+                my.libs += " $(my.library_path)"
             else
                 # pkg-config is problematic in that it mixes LDFLAGS into LIBS
-                # and all flags into CFLAGS. We rewrite CFLAGS as CPPFLAGS.
+                # and all flags into CFLAGS. We rewrite its CFLAGS as CPPFLAGS.
+                define my.library_cname = "$(_library.name:c)"
+                define my.is_language = is_java_dependency(_library) | is_python_dependency(_library)
                 define my.is_boost = is_boost_dependency(_library)
                 define my.is_boost_lib = is_boost_lib_dependency(_library)
                 define my.is_packaged = is_packaged_library(_library.name, my.configure)
-                if (!my.is_boost)
+                if (!my.is_boost & !my.is_language)
                     my.libs += " ${$(my.library_cname)_LIBS}"
                 endif
                 if (!my.is_boost_lib)
                     my.cpp_flags += " ${$(my.library_cname)_CPPFLAGS}"
                 endif
-                if (!my.is_packaged & !my.is_boost & !my.is_boost_lib)
+                if (!my.is_packaged & !my.is_boost & !my.is_boost_lib & !my.is_language)
                     my.ccc_flags += " ${$(my.library_cname)_CFLAGS}"
                 endif
-                if (!my.is_packaged & !my.is_boost_lib)
+                if (!my.is_packaged & !my.is_boost_lib & !my.is_language)
                     my.ld_flags += " ${$(my.library_cname)_LDFLAGS}"
                 endif
                 #my.cxx_flags += " ${$(my.library_cname)_CXXFLAGS}"
             endif
         endfor
+        
+        # Define _SOURCES option variable from sources elements.
         for my.product.sources as _sources
             require(_sources, "sources", "path")
             define my.folder = "$(my.root)$(_sources.path)"
             define my.length = string.length(my.root)
-            define my.sources = get_all_files(my.folder, my.length, my.product)
+            define my.sources += get_all_files(my.folder, my.length, my.product)
         endfor
 
-        # Write values to file.
+        # Write TEST variable.
         define my.tag = get_tag(my.product)
         define my.primary = get_primary(my.product)
         define my.path = get_product_path(my.product)
         if (is_test(my.product))
             heading3("Execute '$(my.path)' as a test.")
             define my.variable = "TESTS"
-            define my.operator = get_assignment_operator(my.variable,\
-                my.accumulator)
-            my.accumulator = increment_accumulator(my.variable,\
-                my.accumulator)
+            define my.operator = get_assignment_operator(my.variable, my.accumulator)
+            my.accumulator = accumulate(my.variable, my.accumulator)
             write_line("TESTS $(my.operator) $(my.path)")
             write_line()
         endif
         
-        # Declare or increment the library|program accumulator.
+        # Write _PROGRAMS|_[LT]LIBRARIES variables.
         define my.variable = "$(my.tag)_$(my.primary)"
-        define my.operator = get_assignment_operator(my.variable,\
-            my.accumulator)
-        my.accumulator = increment_accumulator(my.variable,\
-            my.accumulator)
+        define my.operator = get_assignment_operator(my.variable, my.accumulator)
+        my.accumulator = accumulate(my.variable, my.accumulator)
         write_line("$(my.variable) $(my.operator) $(my.path)")
         
+        # Write all cpp option variables.
         if (!is_empty(my.ccc_flags))
             write_line("$(my.path:c)_CFLAGS =$(my.ccc_flags)")
         endif
@@ -476,6 +514,26 @@ function render_cpp_variables(product, root, repository, accumulator)
             write_line("$(my.path:c)_SOURCES =$(my.sources)")
         endif
         write_line()
+    endif
+    return my.accumulator
+endfunction
+
+# Render java specific variables: JAVA.
+function render_java_variables(product, root, repository, accumulator)
+    define my.product = render_java_variables.product
+    define my.repository = render_java_variables.repository
+    if (is_java(my.product))
+        # TODO: add java features.
+    endif
+    return my.accumulator
+endfunction
+
+# Render python specific variables: JAVA.
+function render_python_variables(product, root, repository, accumulator)
+    define my.product = render_python_variables.product
+    define my.repository = render_python_variables.repository
+    if (is_python(my.product))
+        # TODO: add python features.
     endif
     return my.accumulator
 endfunction
@@ -515,13 +573,13 @@ function render_product_variables(product, root, repository, accumulator)
         define my.path_length = string.length(_files.path)
         
         # Files elements are enumerated by directory and mapped to targets.
-        render_files_variables(my.folder, my.root_length, my.path_length,\
-            my.product)
+        render_files_variables(my.folder, my.root_length, my.path_length, my.product)
     endfor
     
-    # The c/c++ products define custom variable options.
-    return render_cpp_variables(my.product, my.root, my.repository,\
-        my.accumulator)
+    my.accumulator = render_cpp_variables(my.product, my.root, my.repository, my.accumulator)
+    my.accumulator = render_java_variables(my.product, my.root, my.repository, my.accumulator)
+    my.accumulator = render_python_variables(my.product, my.root, my.repository, my.accumulator)
+    return my.accumulator
 endfunction
 
 function render_product(product, root, repository, accumulator)
@@ -533,8 +591,7 @@ function render_product(product, root, repository, accumulator)
         write_line("if $(my.option:upper)")
         write_line()
     endif
-    my.accumulator = render_product_variables(my.product, my.root,\
-        my.repository, my.accumulator)
+    my.accumulator = render_product_variables(my.product, my.root, my.repository, my.accumulator)
     if (defined(my.option))
         write_line("endif $(my.option:upper)")
         write_line()
@@ -583,8 +640,7 @@ for generate.repository by name as _repository
     else
         for my.build.product as _product
             heading2(get_product_description(_product))
-            my.accumulator = render_product(_product, my.root, _repository,\
-                my.accumulator)
+            my.accumulator = render_product(_product, my.root, _repository, my.accumulator)
         endfor
     endif
     

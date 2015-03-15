@@ -30,20 +30,20 @@ function format_libs(package)
     return trim_left(my.libs)
 endfunction
 
+# TODO: pull from package[library].build instead of configure.
 # Requires is a list of other packages.
+# Conditional package definitions are always generated as substitutions.
 function format_requires(configure)
     define my.configure = format_requires.configure
     define my.packages = ""
-    
-    # TODO: optional dependencies should be dynamically populated based on config.
-    # Which means we need to generate packages into substitutions.
-    for my.configure.dependency as _dependency where is_package(_dependency) &\
-        !is_optional_element(_dependency)
+    for my.configure.dependency as _dependency where\
+        is_linked_package_depedency(_dependency)
         my.packages += " @$(_dependency.name:c)_PKG@"
     endfor _dependency
     return trim_left(my.packages)
 endfunction
 
+# TODO: pull from package[library].build instead of configure.
 # Libs is a conflation of LIBS and LDFLAGS.
 function format_unpackaged_libs(configure)
     define my.configure = format_unpackaged_libs.configure
@@ -51,7 +51,7 @@ function format_unpackaged_libs(configure)
     for my.configure.dependency as _dependency\
         where is_unpackaged_lib(_dependency)
         
-        # Unique by dependency.name.
+        # Unique by dependency.name, because of optionals.
         if !defined(my.lib_$(_dependency.name:c))
             define my.lib_$(_dependency.name:c) = 0
             my.free_libs += " @$(_dependency.name:c)_LIBS@"

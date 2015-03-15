@@ -83,6 +83,8 @@ function get_option_default(option)
         " @<:@default=$(my.option.default)@:>@" ? ""
 endfunction
 
+# For some reason all-am requires we make the pc file, so for now we always
+# define at least an empty package element.
 function get_package_config(repository)
     define my.repository = get_package_config.repository
     define my.package = my.repository->package?
@@ -138,6 +140,9 @@ AC_PROG_LIBTOOL
 
 # Compute the canonical host-system type variable host, including host_os.
 AC_CANONICAL_HOST
+
+# Enable directory creation macro.
+AC_PROG_MKDIR_P
 
 # Enable silent rules option.
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -221,6 +226,61 @@ AC_DEFINE([$(my.uname)])
 
 .endmacro # render_define
 .
+.macro check_java_dependency(dependency, configure)
+.   define my.dependency = check_java_dependency.dependency
+.   define my.configure = check_java_dependency.configure
+.   require(my.dependency, "dependency", "name")
+.
+.   define my.name = my.dependency.name
+.   define my.cname = "$(my.name:c)"
+.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+.   define my.show_option = !is_empty(my.symbol) ?? " if --$(my.symbol)" ? ""
+.   heading2("Require $(my.name)$(my.show_option) and output ${JAR/JAVAC/javadir} and ${$(my.cname)_CPPFLAGS}.")
+.   if (!is_empty(my.dependency.comment))
+.       heading3("$(my.dependency.comment)")
+.   endif
+.   if (is_empty(my.symbol))
+AX_JAVA_DEVEL
+AC_SUBST([$(my.cname)_CPPFLAGS], [${JAVA_CPPFLAGS}])
+AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
+.   else
+AS_CASE([${$(my.symbol)}], [yes],
+    [AX_JAVA_DEVEL
+     AC_SUBST([$(my.cname)_CPPFLAGS], [${JAVA_CPPFLAGS}])
+     AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])])
+.   endif
+
+.endmacro # check_java_dependency
+.
+.macro check_python_dependency(dependency, configure)
+.   define my.dependency = check_python_dependency.dependency
+.   define my.configure = check_python_dependency.configure
+.   require(my.dependency, "dependency", "name")
+.
+.   define my.name = my.dependency.name
+.   define my.cname = "$(my.name:c)"
+.   define my.version = my.dependency.version
+.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+.   define my.show_option = !is_empty(my.symbol) ?? " if --$(my.symbol)" ? ""
+.   heading2("Require $(my.name) of at least version $(my.version)$(my.show_option) and output ${$(my.cname)_CPPFLAGS}.")
+.   if (!is_empty(my.dependency.comment))
+.       heading3("$(my.dependency.comment)")
+.   endif
+.   if (is_empty(my.symbol))
+AM_PATH_PYTHON([$(my.version)],
+    [AX_PYTHON_DEVEL
+     AC_SUBST([$(my.cname)_CPPFLAGS], [${PYTHON_CPPFLAGS}])
+     AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])])
+.   else
+AS_CASE([${$(my.symbol)}], [yes],
+    [AM_PATH_PYTHON([$(my.version)],
+        [AX_PYTHON_DEVEL
+         AC_SUBST([$(my.cname)_CPPFLAGS], [${PYTHON_CPPFLAGS}])
+         AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])])])
+.   endif
+
+.endmacro # check_python_dependency
+.
 .macro check_iconv_dependency(dependency, configure)
 .   define my.dependency = check_iconv_dependency.dependency
 .   define my.configure = check_iconv_dependency.configure
@@ -229,7 +289,7 @@ AC_DEFINE([$(my.uname)])
 .   define my.name = my.dependency.name
 .   define my.cname = "$(my.name:c)"
 .   define my.symbol = find_option_symbol(my.dependency, my.configure)?
-.   define my.show_option = !is_empty(my.symbol) ?? "if --$(my.symbol)" ? ""
+.   define my.show_option = !is_empty(my.symbol) ?? " if --$(my.symbol)" ? ""
 .   heading2("Require $(my.name)$(my.show_option) and output ${$(my.cname)_CPPFLAGS/LIBS}.")
 .   if (!is_empty(my.dependency.comment))
 .       heading3("$(my.dependency.comment)")
@@ -259,7 +319,7 @@ AS_CASE([${$(my.symbol)}], [yes],
 .   define my.cname = "$(my.dependency.name:c)"
 .   define my.uname = "$(my.cname:upper)"
 .   define my.symbol = find_option_symbol(my.dependency, my.configure)?
-.   define my.show_option = !is_empty(my.symbol) ?? "if --$(my.symbol)" ? ""
+.   define my.show_option = !is_empty(my.symbol) ?? " if --$(my.symbol)" ? ""
 .   heading2("Require $(my.cname)$(my.show_option) and output ${$(my.cname)_CFLAGS/LIBS}.")
 .   if (!is_empty(my.dependency.comment))
 .       heading3("$(my.dependency.comment)")
@@ -273,12 +333,13 @@ AX_$(my.uname)(
     [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])
 .   else
 AS_CASE([${$(my.symbol)}], [yes],
-    AX_$(my.uname)(
+    [AX_$(my.uname)(
         [AC_SUBST([$(my.cname)_CFLAGS], [${$(my.uname)_CFLAGS}])
          AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIBS}])
          AC_MSG_NOTICE([$(my.cname)_CFLAGS : ${$(my.cname)_CFLAGS}])
          AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}]),
-        [AC_MSG_ERROR([$(my.cname) library is required but was not found.])]))      
+        [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])],
+    [AC_SUBST([$(my.cname)_LIBS], [])])
 .   endif
 .   if (my.cname = "pthread")
 # Hard wired -lpthread because AX_PTHREAD does not do it.
@@ -306,24 +367,9 @@ AS_CASE([${host_os}], [$(my.system_pattern)],
     [AC_CHECK_LIB([$(my.cname)], [$(my.dependency.function)],
         [AC_SUBST([$(my.cname)_LIBS], [-l$(my.cname)])
          AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])], 
-        [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])])
+        [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])],
+    [AC_SUBST([$(my.cname)_LIBS], [])])
 .   endif
-.
-.# .   if (!is_empty(my.dependency.includes))
-.# AS_CASE([${host_os}], [$(my.system_pattern)], 
-.#     [CPPFLAGS="$CPPFLAGS -I$(my.dependency.includes)"])
-.# .   endif
-.# .
-.# .   if (!is_empty(my.dependency.libs))
-.# AS_CASE([${host_os}], [$(my.system_pattern)], 
-.#     [LDFLAGS="$LDFLAGS -L$(my.dependency.libs)"])
-.# .   endif
-.# .
-.# .   if (!is_empty(my.dependency.header))
-.# AS_CASE([${host_os}], [$(my.system_pattern)], 
-.#     [AC_CHECK_HEADER([$(my.dependency.header)], [],
-.#     [AC_MSG_ERROR([$(my.cname) header is required but was not found.])],-)])
-.# .   endif
 
 .endmacro # check_dependency
 .
@@ -369,7 +415,8 @@ AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
 AS_CASE([${$(my.symbol)}], [yes],
     [AX_$(my.uname)
      AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIB}])
-     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])])
+     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
+    [AC_SUBST([$(my.cname)_LIBS], [])])
 .   endif
 
 .endmacro # check_boost_lib
@@ -387,7 +434,7 @@ AS_CASE([${$(my.symbol)}], [yes],
 .   define my.prefix = is_true(my.dependency.unprefixed) ?? "" ? "lib"
 .   define my.symbol = find_option_symbol(my.dependency, my.configure)?
 .   define my.check = "$(my.prefix)$(my.name) >= $(my.version)"
-.   heading2("Require $(my.name) of at least version $(my.version) and output ${$(my.cname)_CFLAGS/LIBS/PKG}.")
+.   heading2("Require $(my.name) of at least version $(my.version) and output ${$(my.cname)_CPPFLAGS/LIBS/PKG}.")
 .   if (!is_empty(my.dependency.comment))
 .       heading3("$(my.dependency.comment)")
 .   endif
@@ -404,7 +451,8 @@ AS_CASE([${$(my.symbol)}], [yes],
      AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
      AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
      AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
-     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])])
+     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
+    [AC_SUBST([$(my.cname)_PKG], [])])
 .   else
 AS_CASE([${$(my.symbol)}], [yes],
     [PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
@@ -413,7 +461,8 @@ AS_CASE([${$(my.symbol)}], [yes],
      AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
      AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
      AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
-     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])])
+     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
+    [AC_SUBST([$(my.cname)_PKG], [])])
 .   endif
 
 .endmacro # check_package
@@ -500,6 +549,10 @@ for generate.repository by name as _repository
                 check_boost(_dependency)
             elsif (is_boost_lib_dependency(_dependency))
                 check_boost_lib(_dependency, my.configure)
+            elsif (is_java_dependency(_dependency))
+                check_java_dependency(_dependency, my.configure)
+            elsif (is_python_dependency(_dependency))
+                check_python_dependency(_dependency, my.configure)
             elsif (is_package(_dependency))
                 check_package(_dependency, my.configure)
             elsif (is_ax_dependency(_dependency))
