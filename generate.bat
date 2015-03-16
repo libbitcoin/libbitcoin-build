@@ -44,6 +44,7 @@ copy /b /y libbitcoin-protocol\*    ..\libbitcoin-protocol\
 copy /b /y libbitcoin-server\*      ..\libbitcoin-server\
 
 REM Build bindings from generated binding generators.
+REM TODO: The path to swig.exe must be in our path.
 REM call ..\libbitcoin\bindings.bat
 REM call ..\libbitcoin-blockchain\bindings.bat
 REM call ..\libbitcoin-client\bindings.bat
