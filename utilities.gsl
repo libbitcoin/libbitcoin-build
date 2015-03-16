@@ -73,9 +73,9 @@ function global.right(text, length)
     return string.substr(my.text, my.start_position, my.text_length - 1)
 endfunction
 
-function global.difference(full, base)
+function global.difference(full, base_length)
     define my.length = string.length(my.full)
-    return right(my.full, my.length - my.base)
+    return right(my.full, my.length - my.base_length)
 endfunction
 
 function global.repositories_parent()
@@ -98,7 +98,7 @@ function global.trim_left_one(text)
     return right(my.text, string.length(my.text) - 1)
 endfunction
 
-# Dependency Utilities.
+# Library Utilities.
 
 function global.find_library_dependency(name, configure)
     define my.configure = find_library_dependency.configure
@@ -113,40 +113,76 @@ function global.is_packaged_library(name, configure)
     return defined(my.dependency) & is_package(my.dependency)
 endfunction
 
+# accepts [lib]bitcoin[-include] and returns include.
+function global.bitcoin_to_include(library)
+    define my.prefix = "bitcoin"
+    define my.libprefix = "lib$(my.prefix)"
+    if (my.library = my.prefix) | (my.library = my.libprefix)
+        return my.prefix
+    endif
+    my.prefix += "-"
+    if (starts_with(my.library, my.prefix))
+        return difference(my.library, string.length(my.prefix))
+    endif
+    my.libprefix += "-"
+    if (starts_with(my.library, my.libprefix))
+        return difference(my.library, string.length(my.libprefix))
+    endif
+    abort "The name is not a bitcoin library: $(my.library)"
+endfunction
+
+# accepts include and returns bitcoin[-include].
+function global.include_to_bitcoin(include)
+    define my.prefix = "bitcoin"
+    if (my.include = my.prefix)
+        return my.include
+    endif
+    return "$(my.prefix)-$(my.include)"
+endfunction
+
+# Dependency Utilities.
+
+function global.match_dependency(dependency, name)
+    define my.dependency = match_dependency.dependency
+    require(my.dependency, "dependency", "name")
+    return my.dependency.name = my.name
+endfunction
+
 function global.is_ax_dependency(dependency)
     define my.dependency = is_ax_dependency.dependency
-    require(my.dependency, "dependency", "name")
-    return my.dependency.name = "pthread"
+    return match_dependency(my.dependency, "pthread")
 endfunction
 
 function global.is_iconv_dependency(dependency)
     define my.dependency = is_iconv_dependency.dependency
-    require(my.dependency, "dependency", "name")
-    return my.dependency.name = "iconv"
+    return match_dependency(my.dependency, "iconv")
 endfunction
 
 function global.is_boost_dependency(dependency)
     define my.dependency = is_boost_dependency.dependency
-    require(my.dependency, "dependency", "name")
-    return my.dependency.name = "boost"
+    return match_dependency(my.dependency, "boost")
 endfunction
 
 function global.is_java_dependency(dependency)
     define my.dependency = is_java_dependency.dependency
-    require(my.dependency, "dependency", "name")
-    return (my.dependency.name = "java")
+    return match_dependency(my.dependency, "java")
 endfunction
 
 function global.is_python_dependency(dependency)
     define my.dependency = is_python_dependency.dependency
-    require(my.dependency, "dependency", "name")
-    return (my.dependency.name = "python")
+    return match_dependency(my.dependency, "python")
 endfunction
 
 function global.is_boost_lib_dependency(dependency)
     define my.dependency = is_boost_lib_dependency.dependency
     require(my.dependency, "dependency", "name")
     return starts_with(my.dependency.name, "boost_")
+endfunction
+
+function global.is_bitcoin_dependency(dependency)
+    define my.dependency = is_bitcoin_dependency.dependency
+    require(my.dependency, "dependency", "name")
+    return starts_with(my.dependency.name, "bitcoin")
 endfunction
 
 # TODO: need to use function names as a form of namespace identification
@@ -293,6 +329,19 @@ function global.trace(text, context)
     endif
 endfunction
 
+function global.shebang(interpreter)
+    write_line("#!/bin/$(my.interpreter)")
+endfunction
+
+function global.batch_no_echo()
+    write_line("@echo off")
+endfunction
+
+# Write one include.
+function write_include(path)
+    write_line("#include <$(my.path)>")
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -346,4 +395,14 @@ $(my.text ? "")
 //
 ///////////////////////////////////////////////////////////////////////////////
 .endmacro
+.
+.macro global.bat_copyleft(name)
+REM ###########################################################################
+REM #  Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
+REM #
+REM #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+REM #
+REM ###########################################################################
+.endmacro
+.
 .endtemplate

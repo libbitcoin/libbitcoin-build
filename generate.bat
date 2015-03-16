@@ -11,24 +11,24 @@ REM  Direct GSL download https://www.nuget.org/api/v2/package/gsl/4.1.0.1
 REM  Extract gsl.exe from package using NuGet's File > Export
 REM ###########################################################################
 
-REM Make directories for generated build artifacts.
-if not exist libbitcoin             mkdir libbitcoin
-if not exist libbitcoin-blockchain  mkdir libbitcoin-blockchain
-if not exist libbitcoin-client      mkdir libbitcoin-client
-if not exist libbitcoin-consensus   mkdir libbitcoin-consensus
-if not exist libbitcoin-explorer    mkdir libbitcoin-explorer
-if not exist libbitcoin-node        mkdir libbitcoin-node
-if not exist libbitcoin-protocol    mkdir libbitcoin-protocol
-if not exist libbitcoin-server      mkdir libbitcoin-server
+REM Clean and make directories for generated build artifacts.
+rmdir /s /q libbitcoin            2>NUL
+rmdir /s /q libbitcoin-blockchain 2>NUL
+rmdir /s /q libbitcoin-client     2>NUL
+rmdir /s /q libbitcoin-consensus  2>NUL
+rmdir /s /q libbitcoin-explorer   2>NUL
+rmdir /s /q libbitcoin-node       2>NUL
+rmdir /s /q libbitcoin-protocol   2>NUL
+rmdir /s /q libbitcoin-server     2>NUL
 
-del /q libbitcoin\*
-del /q libbitcoin-blockchain\*
-del /q libbitcoin-client\*
-del /q libbitcoin-consensus\*
-del /q libbitcoin-explorer\*
-del /q libbitcoin-node\*
-del /q libbitcoin-protocol\*
-del /q libbitcoin-server\*
+mkdir libbitcoin
+mkdir libbitcoin-blockchain
+mkdir libbitcoin-client
+mkdir libbitcoin-consensus
+mkdir libbitcoin-explorer
+mkdir libbitcoin-node
+mkdir libbitcoin-protocol
+mkdir libbitcoin-server
 
 REM Generate build artifacts.
 gsl -q generate.xml
@@ -43,4 +43,14 @@ copy /b /y libbitcoin-node\*        ..\libbitcoin-node\
 copy /b /y libbitcoin-protocol\*    ..\libbitcoin-protocol\
 copy /b /y libbitcoin-server\*      ..\libbitcoin-server\
 
-PAUSE
+REM Build bindings from generated binding generators.
+REM call ..\libbitcoin\bindings.bat
+REM call ..\libbitcoin-blockchain\bindings.bat
+REM call ..\libbitcoin-client\bindings.bat
+call ..\libbitcoin-consensus\bindings.bat
+REM call ..\libbitcoin-explorer\bindings.bat
+REM call ..\libbitcoin-node\bindings.bat
+REM call ..\libbitcoin-protocol\bindings.bat
+REM call ..\libbitcoin-server\bindings.bat
+
+pause

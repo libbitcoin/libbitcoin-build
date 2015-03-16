@@ -686,27 +686,27 @@
         <sources path="test" />
       </product>
       <product prefix="include" container="bitcoin">
-        <files path="include/bitcoin" />
+        <files path="include/bitcoin" summary="consensus" />
       </product>
       
-      <product prefix="lib" path="bindings/java/cpp" name="bitcoin-consensus-jni" option="java">
+      <product prefix="lib" path="bindings/java/wrap" name="bitcoin-consensus-jni" option="java">
         <library name="bitcoin-consensus" />
         <library name="java" />
         <headers path="include" />
-        <sources path="bindings/java/cpp" />
+        <sources path="bindings/java/wrap" />
       </product>
       <product prefix="java" install="false" option="java">
-        <files path="bindings/java/lang/org/libbitcoin/consensus" />
+        <files path="bindings/java/proxy/org/libbitcoin/consensus" />
       </product>
       
-      <product prefix="pkgpyexec" path="bindings/python/cpp" name="_bitcoin-consensus" unprefixed="true" option="python">
+      <product prefix="pkgpyexec" path="bindings/python/wrap" name="_bitcoin-consensus" unprefixed="true" option="python">
         <library name="bitcoin-consensus" />
         <library name="python" />
         <headers path="include" />
-        <sources path="bindings/python/cpp" />
+        <sources path="bindings/python/wrap" />
       </product>
       <product prefix="pkgpython" option="python">
-        <files path="bindings/python/lang" />
+        <files path="bindings/python/proxy" />
       </product>
     </build>
 

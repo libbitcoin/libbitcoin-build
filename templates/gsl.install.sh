@@ -92,12 +92,8 @@ endfunction
 .endtemplate
 .template 1
 .
-.macro language(interpreter)
-#!/bin/$(my.interpreter)
-.endmacro # language
-.
-.macro documentation(repository)
-.   define my.repo = documentation.repository
+.macro install_documentation(repository)
+.   define my.repo = install_documentation.repository
 # Script to build and install $(my.repo.name).
 #
 # Script options:
@@ -121,7 +117,7 @@ endfunction
 # the exception of the --build-<item> options, which are for the script only.
 # Depending on the caller's permission to the --prefix or --build-dir
 # directory, the script may need to be sudo'd.
-.endmacro documentation
+.endmacro # install_documentation
 .
 .macro define_build_directory(repository)
 .   define my.repo = define_build_directory.repository
@@ -592,10 +588,10 @@ for generate.repository by name as _repository
     notify(my.out_file)
     output(my.out_file)
     
-    language("bash")
+    shebang("bash")
     define my.install = _repository->install
     copyleft(_repository.name)
-    documentation(_repository)
+    install_documentation(_repository)
     
     heading1("Define common constants.")
     define_build_directory(_repository)
