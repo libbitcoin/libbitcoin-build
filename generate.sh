@@ -52,7 +52,7 @@ chmod +x ../libbitcoin-node/*.sh
 chmod +x ../libbitcoin-protocol/*.sh
 chmod +x ../libbitcoin-server/*.sh
 
-# Build bindings from generated binding generators.
+# Generate bindings from generated binding generators.
 # TODO: The path to swig must be in our path.
 # source ../libbitcoin/bindings.sh
 # source ../libbitcoin-blockchain/bindings.sh

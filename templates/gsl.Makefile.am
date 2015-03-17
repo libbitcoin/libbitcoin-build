@@ -11,16 +11,48 @@
 ###############################################################################
 
 function get_assignment_operator(variable, accumulator)
-    define my.delimited = " $(my.variable) "
-    define my.repeat = is_token(my.delimited, my.accumulator)
-    # echo "$(my.variable) in $(my.accumulator) : $(my.repeat ?? '+=' ? '=')"
-    return my.repeat ?? "+=" ? "="
+    define my.accumulated = is_accumulated(my.variable, my.accumulator)
+    return my.accumulated ?? "+=" ? "="
 endfunction
 
-function accumulate(variable, accumulator)
-    define my.delimited = " $(my.variable) "
-    if (!is_token(my.delimited, accumulator))
-        my.accumulator += my.delimited
+function is_dynamic(product, variable, fixed)
+    define my.product = is_dynamic.product
+    define my.was_fixed = is_accumulated(my.variable, my.fixed)
+    define my.is_fixed = !is_optional_element(my.product)
+    return !my.is_fixed & !my.was_fixed
+endfunction
+
+function initialize_dynamic_variables(heading, repository, accumulator)
+    define my.repository = initialize_dynamic_variables.repository
+    define my.build = my.repository->build?
+    if (!defined(my.build))
+        return my.accumulator
+    endif
+    define my.fixed = ""
+    define my.variables = ""
+    for my.build.product as _product where !is_singleton(_product)
+    
+        # Handle this product.
+        define my.variable = get_automake_variable(_product)
+        if (is_dynamic(_product, my.variable, my.fixed))
+            my.variables += "$(my.variable) =\n"
+            my.accumulator = accumulate(my.variable, my.accumulator)
+        endif
+        my.fixed = accumulate(my.variable, my.fixed)
+
+        # Handle special case of TESTS within the product.
+        my.variable = "TESTS"
+        if (is_test(_product))
+            if (is_dynamic(_product, my.variable, my.fixed))
+                my.variables += "$(my.variable) =\n"
+                my.accumulator = accumulate(my.variable, my.accumulator)
+            endif
+            my.fixed = accumulate(my.variable, my.fixed)
+        endif
+    endfor
+    if (!is_empty(my.variables))
+        heading1(my.heading)
+        write_line(my.variables)
     endif
     return my.accumulator
 endfunction
@@ -38,6 +70,7 @@ function is_data(product)
     return match_prefix(my.product, "bash_completion") |\
     match_prefix(my.product, "doc") |\
     match_prefix(my.product, "pkgconfig") |\
+    match_prefix(my.product, "jarexec") |\
     match_prefix(my.product, "sysconf")
 endfunction
 function is_headers(product)
@@ -50,7 +83,12 @@ function is_info(product)
 endfunction
 function is_java(product)
     define my.product = is_java.product
-    return match_prefix(my.product, "java")
+    return match_prefix(my.product, "javaexec")
+endfunction
+function is_jar(product)
+    define my.product = is_jar.product
+    # jar uses DATA but we wire it up as a product.
+    return match_prefix(my.product, "jarexec")
 endfunction
 function is_library(product)
     define my.product = is_library.product
@@ -74,6 +112,12 @@ function is_script(product)
     return match_prefix(my.product, "sbin")
 endfunction
 
+# Is the product allowed to be active only once?
+function is_singleton(product)
+    define my.product = is_singleton.product
+    return is_java(my.product) | is_jar(my.product)
+endfunction
+
 # Is the product built from c/c++?
 function is_cpp(product)
     define my.product = is_cpp.product
@@ -95,30 +139,28 @@ endfunction
 # Is the non-compiled product explicitly set to distribute?
 function is_distribute(product)
     define my.product = is_distribute.product
-    return !is_compiled(my.product) & is_true(my.product.install)
+    return defined(my.product.distribute) & is_true(my.product.distribute)
 endfunction
 
 # Is the non-compiled product explicitly set to not distribute?
 function is_no_distribute(product)
     define my.product = is_no_distribute.product
-    return !is_compiled(my.product) & !is_true(my.product.install) &\
-        defined(my.product.install)
+    return defined(my.product.distribute) & !is_true(my.product.distribute)
 endfunction
 
-# Is the compiled product explicitly set to not install?
+# Is the  product explicitly set to not install?
 function is_no_install(product)
     define my.product = is_no_install.product
-    return is_compiled(my.product) & !is_true(my.product.install) &\
-        defined(my.product.install)
+    return defined(my.product.install) & !is_true(my.product.install)
 endfunction
 
 # Is the product a test executable?
 function is_test(product)
     define my.product = is_test.product
-    if (is_true(my.product.test) & !is_executable(my.product))
-        abort "Tests must be executable: '$(my.product.prefix)'"
+    if (!is_true(my.product.test) | is_executable(my.product))
+        return is_true(my.product.test)
     endif
-    return is_true(my.product.test) & is_executable(my.product)
+    abort "Tests must be executable: '$(my.product.prefix)'"
 endfunction
 
 # Is the product build for check purposes?
@@ -156,19 +198,30 @@ function get_qualified_prefix(product)
     define my.product = get_qualified_prefix.product
     require(my.product, "product", "prefix")
     define my.prefix = my.product.prefix
-    define my.qualifier = ""
-    if (is_check(my.product))
-        my.prefix = ""
-        my.qualifier = "check"
-    elsif (is_no_install(my.product))
-        my.prefix = ""
-        my.qualifier = "noinst"
-    elsif (is_no_distribute(my.product))
-        my.qualifier = "nodist_"
-    elsif (is_distribute(my.product))
-        my.qualifier = "dist_"
+    define my.install = ""
+    define my.distribute = ""
+
+    # dist and nodist qualifications are mutually-exclusive and allow no check.
+    if (!is_check(my.product))
+        if (is_no_distribute(my.product))
+            my.distribute = "nodist"
+        elsif (is_distribute(my.product))
+            my.distribute = "dist"
+        endif
     endif
-    return "$(my.qualifier)$(my.prefix)"
+    
+    # check and noinst qualifications are mutually-exclusive and use no prefix.
+    if (is_check(my.product) | is_no_install(my.product))
+        my.prefix = ""
+        if (is_check(my.product))
+            my.install = "check"
+        elsif (is_no_install(my.product))
+            my.install = "noinst"
+        endif
+    endif
+    
+    # join and return the non-empty parts
+    return join(join(my.distribute, my.install, "_"), my.prefix, "_")
 endfunction
 
 # Does the file extension conform to the required prefix pattern?
@@ -209,7 +262,13 @@ endfunction
 # Get the target attribute, defaulting to [prefix]dir, bracketed as ${target}.
 function get_target(product)
     require(my.product, "product", "prefix")
-    define my.target = "$(my.product.prefix)dir"
+    define my.prefix = my.product.prefix
+    
+    # Workaround for failure of automake to properly handle noinst_JAVA.
+    if (is_java(my.product) & is_no_install(my.product))
+        my.prefix = "build"
+    endif
+    define my.target = "$(my.prefix)dir"
     return "${$(my.target)}"
 endfunction
 
@@ -262,6 +321,16 @@ function get_product_description(product, container)
             return "local: $(my.path)"
         endif
         return "$(my.path) => $(my.target)"
+    elsif (is_jar(my.product))
+        if (is_no_install(my.product))
+            return "*.class => *.jar (local), requires ax_java_devel.m4"
+        endif
+        return "*.class => *.jar => $(my.target), requires ax_java_devel.m4"
+    elsif (is_java(my.product))
+        if (is_no_install(my.product))
+            return "*.java => *.class (local), requires ax_java_devel.m4"
+        endif
+        return "*.java => *.class => $(my.target), requires ax_java_devel.m4"
     endif
     define my.install = get_install(my.product)
     if (is_empty(my.install))
@@ -344,7 +413,7 @@ function construct_segment(product, folder, trim)
 endfunction
 
 # Recurse directory tree, rendering outputs with files for each folder.
-function render_files_variables(folder, base_trim, path_trim, product)
+function render_files_variables(folder, base_trim, path_trim, product, accumulator)
     define my.product = render_files_variables.product
     require(my.product, "product", "prefix")
     define my.files = get_files(my.folder, my.base_trim, my.product)
@@ -353,22 +422,26 @@ function render_files_variables(folder, base_trim, path_trim, product)
         define my.segment = construct_segment(my.product, my.folder, my.trim)
         define my.tag = get_tag(my.product, my.segment)
         define my.install = get_install(my.product, my.segment)
-        define my.primary = get_primary(my.product)
-        
-        # Don't write a tautology, such as: installdir = ${installdir}
-        if (!is_empty(my.install))
+        define my.variable = get_automake_variable(my.product, my.segment)
+        define my.operator = get_assignment_operator(my.variable, my.accumulator)
+
+        # If the variable has no installdir we all its accumulation.
+        if (is_empty(my.install))
+            my.accumulator = accumulate(my.variable, my.accumulator)
+        else
+            # Don't write a tautology, such as: installdir = ${installdir}
             write_line("$(my.tag)dir = $(my.install)")
         endif
-        write_line("$(my.tag)_$(my.primary) =$(my.files)")
-        write_line()
+        write_line("$(my.variable) $(my.operator)$(my.files)\n")
     endif
  
     # Recurse the directory tree.
     define my.directory = open_directory(my.folder)
     for my.directory.directory as _object by _object.path
         define my.subfolder = "$(_object.path)$(_object.name)"
-        render_files_variables(my.subfolder, my.base_trim, my.path_trim, my.product)
+        my.accumulator = render_files_variables(my.subfolder, my.base_trim, my.path_trim, my.product, my.accumulator)
     endfor
+    return my.accumulator
 endfunction
 
 # Format the flag either as a literal flag or a dereferenced variable.
@@ -483,8 +556,7 @@ function render_cpp_variables(product, root, repository, accumulator)
             define my.variable = "TESTS"
             define my.operator = get_assignment_operator(my.variable, my.accumulator)
             my.accumulator = accumulate(my.variable, my.accumulator)
-            write_line("TESTS $(my.operator) $(my.path)")
-            write_line()
+            write_line("TESTS $(my.operator) $(my.path)\n")
         endif
         
         # Write _PROGRAMS|_[LT]LIBRARIES variables.
@@ -522,13 +594,62 @@ endfunction
 function render_java_variables(product, root, repository, accumulator)
     define my.product = render_java_variables.product
     define my.repository = render_java_variables.repository
+    define my.clean_files = "CLEANFILES"
+    define my.operator = get_assignment_operator(my.clean_files, my.accumulator)
+    my.accumulator = accumulate(my.clean_files, my.accumulator)
     if (is_java(my.product))
-        # TODO: add java features.
+        write_line("$(my.clean_files) $(my.operator) ${java_builddir}/*.class\n")
+        write_line("distclean-local:")
+        write_line("\trm -rf ${java_builddir} ${jar_builddir}\n")
     endif
     return my.accumulator
 endfunction
 
-# Render python specific variables: JAVA.
+function get_java_stamp_variable(product)
+    define my.product = get_java_stamp_variable.product
+    define my.container = my.product.container?
+    define my.prefix = is_empty(my.container) ?? "javaexec" ? ""
+    define my.install = is_no_install(my.product) ?? "noinst" ? my.prefix
+    return join(my.install, "$(my.container:c)", "_")
+endfunction
+
+function get_java_stamp(repository)
+    define my.repository = get_java_stamp.repository
+    define my.build = my.repository->build?
+    if (defined(my.build))
+        define my.java_product = my.build->product(prefix = "javaexec")?
+        if (defined(my.java_product))
+            define my.prefix = get_java_stamp_variable(my.java_product)
+            return "class$(my.prefix).stamp"
+        endif
+    endif
+    abort "The build is missing a required java product."
+endfunction
+
+function get_automake_variable(product, segment)
+    define my.product = get_automake_variable.product
+    define my.tag = get_tag(my.product, my.segment)
+    return join(my.tag, get_primary(my.product), "_")
+endfunction
+
+# Render java specific variables: jar_DATA.
+function render_jar_variables(product, root, repository, accumulator)
+    define my.product = render_jar_variables.product
+    define my.repository = render_jar_variables.repository
+    if (is_jar(my.product))
+        define my.stamp = get_java_stamp(my.repository)
+        define my.clean_files = "CLEANFILES"     
+        define my.external = get_automake_variable(my.product)
+        define my.operator = get_assignment_operator(my.clean_files, my.accumulator)
+        my.accumulator = accumulate(my.clean_files, my.accumulator)
+        write_line("${$(my.external)}: $(my.stamp)")
+        write_line("\t${JAR} cf ${JARFLAGS} ${$(my.external)} -C ${java_builddir} .\n")
+        write_line("$(my.clean_files) $(my.operator) ${jar_builddir}/*.jar\n")
+    endif
+    return my.accumulator
+endfunction
+
+# Render python specific variables: PYTHON.
 function render_python_variables(product, root, repository, accumulator)
     define my.product = render_python_variables.product
     define my.repository = render_python_variables.repository
@@ -538,25 +659,39 @@ function render_python_variables(product, root, repository, accumulator)
     return my.accumulator
 endfunction
 
-function render_file_variables(product)
+function get_source_directory(product)
+    define my.product = get_source_directory.product
+    if (is_jar(my.product))
+        return "${jar_builddir}"
+    endif
+    return ""
+endfunction
+
+function render_file_variables(product, accumulator)
     define my.product = render_file_variables.product
     define my.file = ""
+    define my.source = get_source_directory(my.product)
     for my.product.file as _file where !is_empty(_file.path) by _file.path
         require(_file, "file", "path")
-        my.file += " \\\n    $(_file.path)"
+        define my.path = join(my.source, _file.path)
+        my.file += " \\\n    $(my.path)"
     endfor
     if (!is_empty(my.file))
         define my.tag = get_tag(my.product)
-        define my.primary = get_primary(my.product)
+        define my.variable = get_automake_variable(my.product)
         define my.install = get_install(my.product, my.container)
+        define my.operator = get_assignment_operator(my.variable, my.accumulator)
         
-        # Don't write a tautology, such as: installdir = ${installdir}
-        if (!is_empty(my.install))
+        # If the variable has no installdir we all its accumulation.
+        if (is_empty(my.install))
+            my.accumulator = accumulate(my.variable, my.accumulator)
+        else
+            # Don't write a tautology, such as: installdir = ${installdir}.
             write_line("$(my.tag)dir = $(my.install)")
         endif
-        write_line("$(my.tag)_$(my.primary) =$(my.file)")
-        write_line()
+        write_line("$(my.variable) $(my.operator)$(my.file)\n")
     endif
+    return my.accumulator
 endfunction
   
 function render_product_variables(product, root, repository, accumulator)
@@ -564,7 +699,7 @@ function render_product_variables(product, root, repository, accumulator)
     define my.repository = render_product_variables.repository
     
     # File elements are enumerated in metadata, just render them.
-    render_file_variables(my.product)
+    my.accumulator = render_file_variables(my.product, my.accumulator)
 
     for my.product.files as _files where !is_empty(_files.path) by _files.path
         require(_files, "files", "path")
@@ -573,28 +708,27 @@ function render_product_variables(product, root, repository, accumulator)
         define my.path_length = string.length(_files.path)
         
         # Files elements are enumerated by directory and mapped to targets.
-        render_files_variables(my.folder, my.root_length, my.path_length, my.product)
+        my.accumulator = render_files_variables(my.folder, my.root_length, my.path_length, my.product, my.accumulator)
     endfor
     
     my.accumulator = render_cpp_variables(my.product, my.root, my.repository, my.accumulator)
     my.accumulator = render_java_variables(my.product, my.root, my.repository, my.accumulator)
+    my.accumulator = render_jar_variables(my.product, my.root, my.repository, my.accumulator)
     my.accumulator = render_python_variables(my.product, my.root, my.repository, my.accumulator)
     return my.accumulator
 endfunction
-
+    
 function render_product(product, root, repository, accumulator)
     define my.product = render_product.product
     define my.repository = render_product.repository
     define my.configure = my.repository->configure
     define my.option = find_option_symbol(my.product, my.configure)?
     if (defined(my.option))
-        write_line("if $(my.option:upper)")
-        write_line()
+        write_line("if $(my.option:upper)\n")
     endif
     my.accumulator = render_product_variables(my.product, my.root, my.repository, my.accumulator)
     if (defined(my.option))
-        write_line("endif $(my.option:upper)")
-        write_line()
+        write_line("endif $(my.option:upper)\n")
     endif
     return my.accumulator
 endfunction
@@ -617,6 +751,7 @@ ACLOCAL_AMFLAGS = -I m4
 ###############################################################################
 # Generation
 ###############################################################################
+
 function generate_automake()
 for generate.repository by name as _repository
 
@@ -633,6 +768,9 @@ for generate.repository by name as _repository
     
     heading1("Standard declarations.")
     initialize_automake()
+    
+    define my.heading1 = "Initialize initially conditional variables."
+    my.accumulator = initialize_dynamic_variables(my.heading1, _repository, my.accumulator)
 
     heading1("Automake products.")
     if (!defined(my.build))

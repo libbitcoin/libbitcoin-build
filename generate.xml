@@ -667,7 +667,6 @@
         <file path="ChangeLog" />
       </product>
       
-      <!-- The build order is incorrect, but reversal requires more robust accumulators. -->
       <product prefix="lib" path="src" name="bitcoin-consensus">
         <library name="crypto" />
         <library name="secp256k1" />
@@ -695,8 +694,11 @@
         <headers path="include" />
         <sources path="bindings/java/wrap" />
       </product>
-      <product prefix="java" install="false" option="java">
+      <product prefix="javaexec" distribute="true" install="false" option="java">
         <files path="bindings/java/proxy/org/libbitcoin/consensus" />
+      </product>
+      <product prefix="jarexec" distribute="false" install="true" option="java">
+        <file path="org.libbitcoin.consensus-${VERSION}.jar" />
       </product>
       
       <product prefix="pkgpyexec" path="bindings/python/wrap" name="_bitcoin-consensus" unprefixed="true" option="python">
@@ -768,6 +770,7 @@
       </job>
       <job system="linux" compiler="gcc" link="static" >
         <get name="swig" />
+        <option value="--with-java" />
         <option value="--without-openssl" />
         <option value="--with-secp256k1" />
         <option value="--disable-ndebug" />
@@ -780,11 +783,11 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
         <get name="swig" />
+        <option value="--with-python" />
         <option value="--without-openssl" />
         <option value="--with-secp256k1" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="swig" />
         <get name="boost1.54" />
         <option value="--without-openssl" />
         <option value="--with-secp256k1" />
