@@ -497,7 +497,35 @@
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
-    <build />
+    <build>
+      <product prefix="pkgconfig">
+        <file path="libbitcoin-client.pc" />
+      </product>
+      <product prefix="doc">
+        <file path="AUTHORS" />
+        <file path="COPYING" />
+        <file path="INSTALL" />
+        <file path="NEWS" />
+        <file path="README" />
+        <file path="ChangeLog" />
+      </product>
+      <product prefix="lib" path="src" name="bitcoin-client">
+        <library name="bitcoin" />
+        <headers path="include" />
+        <sources path="src" />
+      </product>
+      <product prefix="bin" path="test" name="libbitcoin_client_test" test="true" option="tests">
+        <!-- TODO: generate from bitcoin-client. -->
+        <library name="bitcoin-client" />
+        <library name="bitcoin" />
+        <library name="boost_unit_test_framework" />
+        <headers path="include" />
+        <sources path="test" />
+      </product>
+      <product prefix="include" container="bitcoin">
+        <files path="include/bitcoin" />
+      </product>
+    </build>
 
     <install>
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
