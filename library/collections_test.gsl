@@ -15,6 +15,7 @@ gsl from "collections.gsl"
 # Simple Map
 #
 # map_add(map, name, value)
+# map_exists(map, name)
 # map_get(map, name)
 # map_remove(map, name)
 #------------------------------------------------------------------------------
@@ -25,6 +26,22 @@ function test_map()
     endnew
 endfunction
 test("test_map")
+
+function test_map_add()
+    new map
+        map_add(map, "foo", "1")
+        test_require_eq(map.foo, 1, "map_add__single__value")
+        
+        map_add(map, "foo", "2")
+        test_require_eq(map.foo, 2, "map_add__second__value")
+        
+        map_add(map, "foo", bar)
+        test_require_eq(map.foo, "", "map_add__undefined__empty_string")
+
+        test_require_eq(map_add(map, "bar", "3"), map, "map_add__result__table")
+    endnew
+endfunction
+test("test_map_add")
 
 function test_map_get()
     new map
@@ -40,18 +57,17 @@ function test_map_get()
 endfunction
 test("test_map_get")
 
-function test_map_add()
+function test_map_exists()
     new map
-        map_add(map, "foo", "1")
-        test_require_eq(map.foo, 1, "map_add__single__value")
+        test_require(!map_exists(map, "bar"), "map_exists__empty__false")
         
+        map_add(map, "foo", "1")
         map_add(map, "foo", "2")
-        test_require_eq(map.foo, 2, "map_add__second__value")
-
-        test_require_eq(map_add(map, "bar", "3"), map, "map_add__result__table")
+        test_require(map_exists(map, "foo"), "map_exists__two_of_two__true")
+        test_require(!map_exists(map, "bar"), "map_exists__none_of_two__false")
     endnew
 endfunction
-test("test_map_add")
+test("test_map_exists")
 
 function test_map_remove()
     new map
@@ -67,7 +83,7 @@ endfunction
 test("test_map_remove")
 
 #------------------------------------------------------------------------------
-# Hash Table
+# Table
 # 
 # table_add(table, name, value)
 # table_any(table, name)

@@ -16,12 +16,11 @@
 # map_remove(map, name)
 #------------------------------------------------------------------------------
 
-# global
-
 # Add a name-value pair to the map and return the map.
+# If the value is undefined an empty string value is added.
 function global.map_add(map, name, value)
     define my.map = map_add.map
-    my.map.$(my.name) = my.value?
+    my.map.$(my.name) = my.value ? ""
     return my.map
 endfunction
 
@@ -31,15 +30,21 @@ function global.map_get(map, name)
     return my.map.$(my.name)
 endfunction
 
+# Return true if the name exists in the map.
+function global.map_exists(map, name)
+    define my.map = map_exists.map
+    return defined(map_get(my.map, my.name))
+endfunction
+
 # Remove the specified name from the map and return the map.
 function global.map_remove(map, name)
     define my.map = map_remove.map
-    map_add(my.map, my.name)
+    my.map.$(my.name) =
     return my.map
 endfunction
 
 #------------------------------------------------------------------------------
-# Hash Table
+# Table
 # 
 # table_add(table, name, value)
 # table_any(table, name)
@@ -111,17 +116,6 @@ function global.table_count(table, name)
     return count(my.table.row, _table_match_name(count, my.name))
 endfunction
 
-# Return the entire table as a string.
-# format: name1,value1\nname2,value2\n...name[n],value[n]\n
-function global.table_serialize(table)
-    define my.table = table_serialize.table
-    define my.buffer = ""
-    for my.table.row as _row
-        my.buffer += "$(_row.name),$(_row.value)\n"
-    endfor
-    return my.buffer
-endfunction
-
 # Return true if the table has no rows.
 function global.table_empty(table)
     define my.table = table_empty.table
@@ -167,6 +161,17 @@ function global.table_remove_all(table, name)
         delete _row
     endfor
     return my.table
+endfunction
+
+# Return the entire table as a string.
+# format: name1,value1\nname2,value2\n...name[n],value[n]\n
+function global.table_serialize(table)
+    define my.table = table_serialize.table
+    define my.buffer = ""
+    for my.table.row as _row
+        my.buffer += "$(_row.name),$(_row.value)\n"
+    endfor
+    return my.buffer
 endfunction
 
 # Return the number of rows in the table.
