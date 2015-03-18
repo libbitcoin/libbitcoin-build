@@ -13,7 +13,7 @@
 # Is the variable used for the first time in an optional section.
 function is_dynamic_variable(product, variable, fixed)
     define my.product = is_dynamic_variable.product
-    define my.was_fixed = is_accumulated(my.variable, my.fixed)
+    define my.was_fixed = map_exists(my.fixed, my.variable)
     define my.is_fixed = !is_optional_element(my.product)
     return !my.is_fixed & !my.was_fixed
 endfunction
@@ -39,37 +39,37 @@ function is_another_clean_files(build, product)
     return my.count > 0
 endfunction
 
-function initialize_dynamic_variables(heading, repository, accumulator)
+function initialize_dynamic_variables(heading, repository, mapper)
     define my.repository = initialize_dynamic_variables.repository
     define my.build = my.repository->build?
     if (defined(my.build))
-        define my.fixed = ""
-        define my.variables = ""
-        for my.build.product as _product
-            define my.variable = get_automake_variable(_product)
-            if (is_dynamic_variable(_product, my.variable, my.fixed))
-                if (is_reused_variable(my.build, my.variable))
-                    my.variables += "$(my.variable) =\n"
-                    my.accumulator = accumulate(my.variable, my.accumulator)
-                    if (is_test(_product))
-                        my.variables += "TESTS =\n"
-                        my.accumulator = accumulate("TESTS", my.accumulator)
+        new fixed as _fixed
+            define my.variables = ""
+            for my.build.product as _product
+                define my.variable = get_automake_variable(_product)
+                if (is_dynamic_variable(_product, my.variable, _fixed))
+                    if (is_reused_variable(my.build, my.variable))
+                        my.variables += "$(my.variable) =\n"
+                        map_add(my.mapper, my.variable)
+                        if (is_test(_product))
+                            my.variables += "TESTS =\n"
+                            map_add(my.mapper, "TESTS")
+                        endif
+                    endif
+                    if (is_another_clean_files(my.build, _product) &\
+                        !map_exists(my.mapper, "CLEANFILES"))
+                        my.variables += "CLEANFILES =\n"
+                        map_add(my.mapper, "CLEANFILES")
                     endif
                 endif
-                if (is_another_clean_files(my.build, _product) &\
-                    !is_accumulated("CLEANFILES", my.accumulator))
-                    my.variables += "CLEANFILES =\n"
-                    my.accumulator = accumulate("CLEANFILES", my.accumulator)
-                endif
+                map_add(_fixed, my.variable)
+            endfor
+            if (!is_empty(my.variables))
+                heading1(my.heading)
+                write_line(my.variables)
             endif
-            my.fixed = accumulate(my.variable, my.fixed)
-        endfor
-        if (!is_empty(my.variables))
-            heading1(my.heading)
-            write_line(my.variables)
-        endif
+        endnew _fixed
     endif
-    return my.accumulator
 endfunction
 
 function initialize_variables()
@@ -83,9 +83,9 @@ function initialize_variables()
 endfunction
 
 # Get an = or += depending on whether it's the first or later use.
-function get_assignment_operator(variable, accumulator)
-    define my.accumulated = is_accumulated(my.variable, my.accumulator)
-    return my.accumulated ?? "+=" ? "="
+function get_assignment_operator(mapper, variable)
+    define my.found = map_exists(my.mapper, my.variable)
+    return my.found ?? "+=" ? "="
 endfunction
 
 # Test for a prefix.
@@ -450,7 +450,7 @@ function construct_segment(product, folder, trim)
 endfunction
 
 # Recurse directory tree, rendering outputs with files for each folder.
-function render_files_variables(folder, base_trim, path_trim, product, accumulator)
+function render_files_variables(folder, base_trim, path_trim, product, mapper)
     define my.product = render_files_variables.product
     require(my.product, "product", "prefix")
     define my.files = get_files(my.folder, my.base_trim, my.product)
@@ -460,11 +460,11 @@ function render_files_variables(folder, base_trim, path_trim, product, accumulat
         define my.tag = get_tag(my.product, my.segment)
         define my.install = get_install(my.product, my.segment)
         define my.variable = get_automake_variable(my.product, my.segment)
-        define my.operator = get_assignment_operator(my.variable, my.accumulator)
+        define my.operator = get_assignment_operator(my.mapper, my.variable)
 
-        # If the variable has no installdir we all its accumulation.
+        # If the variable has no installdir we allow its accumulation.
         if (is_empty(my.install))
-            my.accumulator = accumulate(my.variable, my.accumulator)
+            map_add(my.mapper, my.variable)
         else
             # Don't write a tautology, such as: installdir = ${installdir}
             write_line("$(my.tag)dir = $(my.install)")
@@ -476,9 +476,8 @@ function render_files_variables(folder, base_trim, path_trim, product, accumulat
     define my.directory = open_directory(my.folder)
     for my.directory.directory as _object by _object.path
         define my.subfolder = "$(_object.path)$(_object.name)"
-        my.accumulator = render_files_variables(my.subfolder, my.base_trim, my.path_trim, my.product, my.accumulator)
+        render_files_variables(my.subfolder, my.base_trim, my.path_trim, my.product, my.mapper)
     endfor
-    return my.accumulator
 endfunction
 
 # Format the flag either as a literal flag or a dereferenced variable.
@@ -501,7 +500,7 @@ function get_library_product(name, build)
 endfunction
 
 # Render c/c++ specific option variables.
-function render_cpp_variables(product, root, repository, accumulator)
+function render_cpp_variables(product, root, repository, mapper)
     define my.product = render_cpp_variables.product
     define my.repository = render_cpp_variables.repository
     
@@ -591,15 +590,15 @@ function render_cpp_variables(product, root, repository, accumulator)
         if (is_test(my.product))
             heading3("Execute '$(my.path)' as a test.")
             define my.variable = "TESTS"
-            define my.operator = get_assignment_operator(my.variable, my.accumulator)
-            my.accumulator = accumulate(my.variable, my.accumulator)
+            define my.operator = get_assignment_operator(my.mapper, my.variable)
+            map_add(my.mapper, my.variable)
             write_line("TESTS $(my.operator) $(my.path)\n")
         endif
         
         # Write _PROGRAMS|_[LT]LIBRARIES variables.
         define my.variable = "$(my.tag)_$(my.primary)"
-        define my.operator = get_assignment_operator(my.variable, my.accumulator)
-        my.accumulator = accumulate(my.variable, my.accumulator)
+        define my.operator = get_assignment_operator(my.mapper, my.variable)
+        map_add(my.mapper, my.variable)
         write_line("$(my.variable) $(my.operator) $(my.path)")
         
         # Write all cpp option variables.
@@ -624,22 +623,19 @@ function render_cpp_variables(product, root, repository, accumulator)
         endif
         write_line()
     endif
-    return my.accumulator
 endfunction
 
 # Render java specific variables: JAVA.
-function render_java_variables(product, root, repository, accumulator)
+function render_java_variables(product, root, repository, mapper)
     define my.product = render_java_variables.product
     define my.repository = render_java_variables.repository
     if (is_java(my.product))
-        define my.clean_files = "CLEANFILES"
-        define my.operator = get_assignment_operator(my.clean_files, my.accumulator)
-        my.accumulator = accumulate(my.clean_files, my.accumulator)
-        write_line("$(my.clean_files) $(my.operator) ${java_builddir}/*.class\n")
+        define my.operator = get_assignment_operator(my.mapper, "CLEANFILES")
+        map_add(my.mapper, "CLEANFILES")
+        write_line("CLEANFILES $(my.operator) ${java_builddir}/*.class\n")
         write_line("distclean-local:")
         write_line("\trm -rf ${java_builddir} ${jar_builddir}\n")
     endif
-    return my.accumulator
 endfunction
 
 function get_java_stamp_variable(product)
@@ -670,30 +666,27 @@ function get_automake_variable(product, segment)
 endfunction
 
 # Render java specific variables: jar_DATA.
-function render_jar_variables(product, root, repository, accumulator)
+function render_jar_variables(product, root, repository, mapper)
     define my.product = render_jar_variables.product
     define my.repository = render_jar_variables.repository
     if (is_jar(my.product))
         define my.stamp = get_java_stamp(my.repository)
-        define my.clean_files = "CLEANFILES"     
         define my.variable = get_automake_variable(my.product)
-        define my.operator = get_assignment_operator(my.clean_files, my.accumulator)
-        my.accumulator = accumulate(my.clean_files, my.accumulator)
+        define my.operator = get_assignment_operator(my.mapper, "CLEANFILES")
+        map_add(my.mapper, "CLEANFILES")
         write_line("${$(my.variable)}: $(my.stamp)")
         write_line("\t${JAR} cf ${JARFLAGS} ${$(my.variable)} -C ${java_builddir} .\n")
-        write_line("$(my.clean_files) $(my.operator) ${jar_builddir}/*.jar\n")
+        write_line("CLEANFILES $(my.operator) ${jar_builddir}/*.jar\n")
     endif
-    return my.accumulator
 endfunction
 
 # Render python specific variables: PYTHON.
-function render_python_variables(product, root, repository, accumulator)
+function render_python_variables(product, root, repository, mapper)
     define my.product = render_python_variables.product
     define my.repository = render_python_variables.repository
     if (is_python(my.product))
         # TODO: add python features.
     endif
-    return my.accumulator
 endfunction
 
 function get_source_directory(product)
@@ -704,7 +697,7 @@ function get_source_directory(product)
     return ""
 endfunction
 
-function render_file_variables(product, accumulator)
+function render_file_variables(product, mapper)
     define my.product = render_file_variables.product
     define my.file = ""
     define my.source = get_source_directory(my.product)
@@ -717,26 +710,25 @@ function render_file_variables(product, accumulator)
         define my.tag = get_tag(my.product)
         define my.variable = get_automake_variable(my.product)
         define my.install = get_install(my.product, my.container)
-        define my.operator = get_assignment_operator(my.variable, my.accumulator)
+        define my.operator = get_assignment_operator(my.mapper, my.variable)
         
-        # If the variable has no installdir we all its accumulation.
+        # If the variable has no installdir we allow its accumulation.
         if (is_empty(my.install))
-            my.accumulator = accumulate(my.variable, my.accumulator)
+            map_add(my.mapper, my.variable)
         else
             # Don't write a tautology, such as: installdir = ${installdir}.
             write_line("$(my.tag)dir = $(my.install)")
         endif
         write_line("$(my.variable) $(my.operator)$(my.file)\n")
     endif
-    return my.accumulator
 endfunction
   
-function render_product_variables(product, root, repository, accumulator)
+function render_product_variables(product, root, repository, mapper)
     define my.product = render_product_variables.product
     define my.repository = render_product_variables.repository
     
     # File elements are enumerated in metadata, just render them.
-    my.accumulator = render_file_variables(my.product, my.accumulator)
+    render_file_variables(my.product, my.mapper)
 
     for my.product.files as _files where !is_empty(_files.path) by _files.path
         require(_files, "files", "path")
@@ -745,17 +737,16 @@ function render_product_variables(product, root, repository, accumulator)
         define my.path_length = string.length(_files.path)
         
         # Files elements are enumerated by directory and mapped to targets.
-        my.accumulator = render_files_variables(my.folder, my.root_length, my.path_length, my.product, my.accumulator)
+        render_files_variables(my.folder, my.root_length, my.path_length, my.product, my.mapper)
     endfor
     
-    my.accumulator = render_cpp_variables(my.product, my.root, my.repository, my.accumulator)
-    my.accumulator = render_java_variables(my.product, my.root, my.repository, my.accumulator)
-    my.accumulator = render_jar_variables(my.product, my.root, my.repository, my.accumulator)
-    my.accumulator = render_python_variables(my.product, my.root, my.repository, my.accumulator)
-    return my.accumulator
+    render_cpp_variables(my.product, my.root, my.repository, my.mapper)
+    render_java_variables(my.product, my.root, my.repository, my.mapper)
+    render_jar_variables(my.product, my.root, my.repository, my.mapper)
+    render_python_variables(my.product, my.root, my.repository, my.mapper)
 endfunction
     
-function render_product(product, root, repository, accumulator)
+function render_product(product, root, repository, mapper)
     define my.product = render_product.product
     define my.repository = render_product.repository
     define my.configure = my.repository->configure
@@ -763,11 +754,10 @@ function render_product(product, root, repository, accumulator)
     if (defined(my.option))
         write_line("if $(my.option:upper)\n")
     endif
-    my.accumulator = render_product_variables(my.product, my.root, my.repository, my.accumulator)
+    render_product_variables(my.product, my.root, my.repository, my.mapper)
     if (defined(my.option))
         write_line("endif $(my.option:upper)\n")
     endif
-    return my.accumulator
 endfunction
 
 ###############################################################################
@@ -798,7 +788,6 @@ for generate.repository by name as _repository
     output(my.out_file)
 
     copyleft(_repository.name)
-    define my.accumulator = ""
     define my.build = _repository->build?
     define my.base = "$(repositories_parent())/$(_repository.name)/"
     define my.root = normalize_directory(my.base)
@@ -806,18 +795,20 @@ for generate.repository by name as _repository
     heading1("Standard declarations.")
     initialize_automake()
     
-    define my.heading1 = "Initialize initially conditional variables."
-    my.accumulator = initialize_dynamic_variables(my.heading1, _repository, my.accumulator)
+    new mapper as _mapper
+        define my.heading1 = "Initialize initially conditional variables."
+        initialize_dynamic_variables(my.heading1, _repository, _mapper)
 
-    heading1("Automake products.")
-    if (!defined(my.build))
-        heading2("The repository/build element is not defined.")
-    else
-        for my.build.product as _product
-            heading2(get_product_description(_product))
-            my.accumulator = render_product(_product, my.root, _repository, my.accumulator)
-        endfor
-    endif
+        heading1("Automake products.")
+        if (!defined(my.build))
+            heading2("The repository/build element is not defined.")
+        else
+            for my.build.product as _product
+                heading2(get_product_description(_product))
+                render_product(_product, my.root, _repository, _mapper)
+            endfor
+        endif
+    endnew _mapper
     
     close
 endfor _repository

@@ -211,25 +211,6 @@ function global.is_github_build(build)
     return !is_empty(my.build.github)
 endfunction
 
-# Accumulator utilities
-
-function make_accumulator_token(variable)
-    return " $(my.variable) "
-endfunction
-
-function global.is_accumulated(variable, accumulator)
-    define my.token = make_accumulator_token(my.variable)
-    return is_token(my.token, my.accumulator)
-endfunction
-
-function global.accumulate(variable, accumulator)
-    define my.token = make_accumulator_token(my.variable)
-    if (!is_accumulated(my.token, my.accumulator))
-        my.accumulator += my.token
-    endif
-    return my.accumulator
-endfunction
-
 # Debugging utilities.
 
 function global.notify(filename)
