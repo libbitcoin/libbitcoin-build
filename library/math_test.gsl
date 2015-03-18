@@ -1,0 +1,40 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin math utilities tests.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+gsl from "test.gsl"
+gsl from "math.gsl"
+
+#------------------------------------------------------------------------------
+# Math
+#
+# maximum(value, limit)
+# minimum(value, limit)
+#------------------------------------------------------------------------------
+
+function test_maximum()
+    test_require_eq(maximum(0, 0), 0, "maximum__equal__expected")
+    test_require_eq(maximum(-1, 0), 0, "maximum__left_negative__expected")
+    test_require_eq(maximum(42, 0), 42, "maximum__left_positive__expected")
+    test_require_eq(maximum(-1, -2), -1, "maximum__right_more_negative__expected")
+    test_require_eq(maximum(42, 142), 142, "maximum__right_more_positive__expected")
+endfunction
+test("test_maximum")
+
+function test_minimum()
+    test_require_eq(minimum(0, 0), 0, "minimum__equal__expected")
+    test_require_eq(minimum(-1, 0), -1, "minimum__left_negative__expected")
+    test_require_eq(minimum(42, 0), 0, "minimum__left_positive__expected")
+    test_require_eq(minimum(-1, -2), -2, "minimum__right_more_negative__expected")
+    test_require_eq(minimum(42, 142), 42, "minimum__right_more_positive__expected")
+endfunction
+test("test_minimum")
+
+###############################################################################
+.endtemplate

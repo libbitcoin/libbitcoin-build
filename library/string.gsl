@@ -1,0 +1,112 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin string utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+#------------------------------------------------------------------------------
+# String
+#
+# difference(text, base_length)
+# is_empty(value)
+# is_token(needle, haystack)
+# is_true(value)
+# ends_with(text, suffix)
+# join(left, right, delimiter)
+# left(text, length)
+# right(text, length)
+# TODO: split(text, delimiter, list)
+# starts_with(text, prefix)
+# trim_left(text)
+# trim_right(text)
+# trim_both(text)
+#------------------------------------------------------------------------------
+
+# Return the remainder of the text after discarding the base_length.
+function global.difference(text, base_length)
+    define my.length = string.length(my.text)
+    return right(my.text, my.length - my.base_length)
+endfunction
+
+# Return true if undefined or empty string.
+function global.is_empty(value)
+    return ((my.value ? "") = "")
+endfunction
+
+# Return true if the needle string is a substring of the haystack string.
+function global.is_token(needle, haystack)
+    return defined(string.locate(my.haystack, my.needle))
+endfunction
+
+# Return true if the string value is "true", false if otherwise or undefined.
+function global.is_true(value)
+    return ((my.value ? "false") = "true")
+endfunction
+
+# Return true if the text ends with the prefix. 
+function global.ends_with(text, suffix)
+    # return string.suffixed(my.text, my.suffix)
+    return regexp.match("^(.*)$(my.suffix)$", my.text ? "")
+endfunction
+
+# Join two strings with the delimiter. If either is empty or
+# undefined return the other. Delimiter defaults to "/".
+function global.join(left, right, delimiter)
+    define my.char = my.delimiter ? "/"
+    define my.joiner = (is_empty(my.left) | is_empty(my.right)) ?? "" ? my.char
+    return "$(my.left ? "")$(my.joiner)$(my.right ? "")"
+endfunction
+
+# Return a left substring of the text, length is coerced.
+function global.left(text, length)
+    define my.text_length = string.length(my.text)
+    define my.new_length = minimum(my.length, my.text_length)
+    if (my.new_length <= 0)
+        return ""
+    endif
+    return string.substr(my.text, 0, my.new_length - 1)
+endfunction
+
+# Return a right substring of the text, length is coerced.
+function global.right(text, length)
+    define my.text_length = string.length(my.text)
+    define my.new_length = minimum(my.length, my.text_length)
+    if (my.new_length <= 0)
+        return ""
+    endif
+    define my.start_position = my.text_length - my.new_length
+    define my.end_position = my.text_length - 1
+    return string.substr(my.text, my.start_position, my.text_length - 1)
+endfunction
+
+# Return true if the text starts with the prefix. 
+function global.starts_with(text, prefix)
+    return string.prefixed(my.text, my.prefix)
+endfunction
+
+# Remove whitespace from the left side of the text.
+# BUGBUG: this cannot match across lines (but can remove leading /r/n 
+# whitespace). We need PCRE options to make regexp() more flexible.
+# See: https://github.com/imatix/gsl/issues/84 
+function global.trim_left(text)
+    define my.extracted = ""
+    regexp.match("^[ \t\r\n]+(.*)$", my.text, my.extracted)
+    return my.extracted ? my.text
+endfunction
+
+# Remove whitespace from the right side of the text.
+function global.trim_right(text)
+    return string.trim(my.text)
+endfunction
+
+# Remove whitespace from both sides of the text.
+function global.trim_both(text)
+    return trim_left(string.trim(my.text))
+endfunction
+
+###############################################################################
+.endtemplate

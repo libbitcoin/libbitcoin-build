@@ -11,6 +11,8 @@ REM  Direct GSL download https://www.nuget.org/api/v2/package/gsl/4.1.0.1
 REM  Extract gsl.exe from package using NuGet's File > Export
 REM ###########################################################################
 
-gsl collections_test.gsl
+REM gsl math_test.gsl
+gsl string_test.gsl
+REM gsl collections_test.gsl
 
 pause

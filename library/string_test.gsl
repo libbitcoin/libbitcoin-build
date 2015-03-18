@@ -1,0 +1,145 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin string utilities tests.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+gsl from "test.gsl"
+gsl from "math.gsl"
+gsl from "string.gsl"
+
+#------------------------------------------------------------------------------
+# String
+#
+# difference(text, base_length)
+# is_empty(value)
+# is_token(needle, haystack)
+# is_true(value)
+# ends_with(text, suffix)
+# join(left, right, delimiter)
+# left(text, length)
+# right(text, length)
+# TODO: split(text, delimiter, list)
+# starts_with(text, prefix)
+# trim_left(text)
+# trim_right(text)
+# trim_both(text)
+#------------------------------------------------------------------------------
+
+function test_difference()
+    test_require_eq(difference("libbitcoin", 142), "", "difference__excess__empty")
+    test_require_eq(difference("libbitcoin", 10), "", "difference__all__empty")
+    test_require_eq(difference("libbitcoin", 3), "bitcoin", "difference__some__partial")
+    test_require_eq(difference("libbitcoin", 0), "libbitcoin", "difference__none__full")
+    test_require_eq(difference("libbitcoin", -42), "libbitcoin", "difference__negative__full")
+endfunction
+test("test_difference")
+
+function test_is_empty()
+    test_require(is_empty(foo), "is_empty__undefined__true")
+    test_require(is_empty(""), "is_empty__empty__true")
+    test_require(!is_empty("bar"), "is_empty__not_empty__false")
+endfunction
+test("test_is_empty")
+
+function test_is_token()
+    test_require(is_token("", ""), "is_token__both_empty__true")
+    test_require(!is_token("foo", "bar"), "is_token__not__false")
+    test_require(is_token("foo", "foo"), "is_token__equal__true")
+    test_require(is_token("foo", "bar-foo-bar"), "is_token__contained__true")
+endfunction
+test("test_is_token")
+
+function test_is_true()
+    test_require(!is_true(foo), "is_true__undefined__false")
+    test_require(!is_true(""), "is_true__empty__false")
+    test_require(!is_true("bar"), "is_true__bogus__false")
+    test_require(!is_true("false"), "is_true__false__false")
+    test_require(!is_true("TRUE"), "is_true__TRUE__false")
+    test_require(!is_true("True"), "is_true__True__false")
+    test_require(is_true("true"), "is_true__true__true")
+endfunction
+test("test_is_empty")
+
+function test_ends_with()
+    test_require(ends_with("", ""), "ends_with__both_empty__true")
+    test_require(!ends_with("foo", "bar"), "ends_with__not__false")
+    test_require(ends_with("foo", "foo"), "ends_with__equal__true")
+    test_require(!ends_with("bar-foo-bar", "foo"), "ends_with__contained__false")
+    test_require(ends_with("foo-foo-bar", "bar"), "ends_with__end__true")
+endfunction
+test("test_ends_with")
+
+function test_join()
+    test_require_eq(join("", ""), "", "join__both_empty__empty")
+    test_require_eq(join(foo, bar), "", "join__both_undefined__empty")
+    test_require_eq(join("", "bar"), "bar", "join__left_empty__right")
+    test_require_eq(join("foo", ""), "foo", "join__right_empty__left")
+    test_require_eq(join(foo, "bar"), "bar", "join__left_undefined__right")
+    test_require_eq(join("foo", bar), "foo", "join__right_undefined__left")
+    test_require_eq(join("foo", "bar"), "foo/bar", "join__both_not_empty__delimited")
+endfunction
+test("test_join")
+
+function test_left()
+    test_require_eq(left("libbitcoin", -1), "", "left__negative__empty")
+    test_require_eq(left("libbitcoin", 0), "", "left__none__empty")
+    test_require_eq(left("libbitcoin", 3), "lib", "left__some__partial")
+    test_require_eq(left("libbitcoin", 10), "libbitcoin", "left__all__full")
+    test_require_eq(left("libbitcoin", 42), "libbitcoin", "left__excess__full")
+endfunction
+test("test_left")
+
+function test_right()
+    test_require_eq(right("libbitcoin", -1), "", "right__negative__empty")
+    test_require_eq(right("libbitcoin", 0), "", "right__none__empty")
+    test_require_eq(right("libbitcoin", 4), "coin", "right__some__partial")
+    test_require_eq(right("libbitcoin", 10), "libbitcoin", "right__all__full")
+    test_require_eq(right("libbitcoin", 42), "libbitcoin", "right__excess__full")
+endfunction
+test("test_right")
+
+function test_starts_with()
+    test_require(starts_with("", ""), "starts_with__both_empty__true")
+    test_require(!starts_with("foo", "bar"), "starts_with__not__false")
+    test_require(starts_with("foo", "foo"), "starts_with__equal__true")
+    test_require(!starts_with("bar-foo-bar", "foo"), "starts_with__contained__false")
+    test_require(starts_with("bar-foo-foo", "bar"), "starts_with__end__true")
+endfunction
+test("test_starts_with")
+
+function test_trim_left()
+    test_require_eq(trim_left("libbitcoin"), "libbitcoin", "trim_left__no_whitespace__full")
+    test_require_eq(trim_left("  libbitcoin"), "libbitcoin", "trim_left__left_spaces__full")
+    test_require_eq(trim_left("  libbitcoin  "), "libbitcoin  ", "trim_left__both_spaces__left_trimmed")
+    test_require_eq(trim_left("\t\r\n libbitcoin \t\t\t"), "libbitcoin \t\t\t", "trim_left__both_white_chars__left_trimmed")
+    
+    # This failure is the result of a regexp() limitation (no options).
+    # test_require_eq(trim_left("\t\r\n libbitcoin \t\n\r"), "libbitcoin \t\n\r", "trim_left__both_white_chars__left_trimmed")
+endfunction
+test("test_trim_left")
+
+function test_trim_right()
+    test_require_eq(trim_right("libbitcoin"), "libbitcoin", "trim_right__no_whitespace__full")
+    test_require_eq(trim_right("libbitcoin  "), "libbitcoin", "trim_right__right_spaces__full")
+    test_require_eq(trim_right("  libbitcoin  "), "  libbitcoin", "trim_right__both_spaces__right_trimmed")
+    test_require_eq(trim_right("\t\n\r libbitcoin \t\n\r"), "\t\n\r libbitcoin", "trim_right__both_white_chars__right_trimmed")
+endfunction
+test("test_trim_right")
+
+function test_trim_both()
+    test_require_eq(trim_both("libbitcoin"), "libbitcoin", "trim_both__no_whitespace__full")
+    test_require_eq(trim_both("  libbitcoin  "), "libbitcoin", "trim_both__both_spaces__full")
+    # test_require_eq(trim_both("\t\n\r libbitcoin \t\t\t"), "\t\t\t libbitcoin", "trim_both__both_white_chars__both_trimmed")
+    
+    # This failure is the result of a regexp() limitation (no options).
+    # test_require_eq(trim_both("\t\n\r libbitcoin \t\n\r"), "\t\n\r libbitcoin", "trim_both__both_white_chars__both_trimmed")
+endfunction
+test("test_trim_both")
+
+###############################################################################
+.endtemplate

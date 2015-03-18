@@ -7,14 +7,16 @@
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-# Functions
-###############################################################################
 
 gsl from "test.gsl"
 gsl from "collections.gsl"
 
 #------------------------------------------------------------------------------
 # Simple Map
+#
+# map_add(map, name, value)
+# map_get(map, name)
+# map_remove(map, name)
 #------------------------------------------------------------------------------
 
 function test_map()
@@ -66,6 +68,21 @@ test("test_map_remove")
 
 #------------------------------------------------------------------------------
 # Hash Table
+# 
+# table_add(table, name, value)
+# table_any(table, name)
+# TODO: table_at(table, index)
+# table_clear(table)
+# table_count(table, name)
+# table_empty(table)
+# table_exists(table, name, value)
+# TODO: table_find(table, name, value)
+# table_ordinal(table, name, ordinal)
+# table_remove(table, name, value)
+# table_remove_all(table, name)
+# table_serialize(table)
+# table_size(table)
+# table_sort(table)
 #------------------------------------------------------------------------------
 
 function test_map()
@@ -260,4 +277,5 @@ function test_table_sort()
 endfunction
 test("test_table_sort")
 
+###############################################################################
 .endtemplate

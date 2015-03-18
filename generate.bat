@@ -33,6 +33,9 @@ mkdir libbitcoin-server
 REM Generate build artifacts.
 gsl -q generate.xml
 
+REM Handle errors below.
+if %errorlevel% neq 0 goto error
+
 REM Copy outputs to all repositories.
 copy /b /y libbitcoin\*             ..\libbitcoin\
 copy /b /y libbitcoin-blockchain\*  ..\libbitcoin-blockchain\
@@ -48,10 +51,18 @@ REM TODO: The path to swig.exe must be in our path.
 REM call ..\libbitcoin\bindings.bat
 REM call ..\libbitcoin-blockchain\bindings.bat
 REM call ..\libbitcoin-client\bindings.bat
-call ..\libbitcoin-consensus\bindings.bat
+REM call ..\libbitcoin-consensus\bindings.bat
 REM call ..\libbitcoin-explorer\bindings.bat
 REM call ..\libbitcoin-node\bindings.bat
 REM call ..\libbitcoin-protocol\bindings.bat
 REM call ..\libbitcoin-server\bindings.bat
 
+echo --- OKAY, generation completed.
+goto end
+
+:error
+echo *** ERROR, generation terminated early.
+
+:end
 pause
+
