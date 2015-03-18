@@ -261,6 +261,18 @@ function get_qualified_prefix(product)
     return join(join(my.distribute, my.install, "_"), my.prefix, "_")
 endfunction
 
+# Return true if the path extension is that of a c/c++ header file.
+function is_cpp_header_file(path)
+    return ends_with(my.path, ".hpp") | ends_with(my.path, ".h") |\
+        ends_with(my.path, ".ipp")
+endfunction
+
+# Return true if the path extension is that of a c/c++ source file.
+function is_cpp_source_file(path)
+    return\
+        ends_with(my.path, ".cpp") | ends_with(my.path, ".c")
+endfunction
+
 # Does the file extension conform to the required prefix pattern?
 function is_product_file(product, path)
     define my.product = is_product_file.product
@@ -278,14 +290,10 @@ function is_product_file(product, path)
             return ends_with(my.path, ".cfg")
         endif
     elsif (is_cpp(my.product))
-        return\
-            ends_with(my.path, ".cpp") | ends_with(my.path, ".c") |\
-            ends_with(my.path, ".hpp") | ends_with(my.path, ".h") |\
-            ends_with(my.path, ".ipp")
+        # Headers are included for dist, otherwise ignored by Automake.
+        return is_cpp_source_file(my.path) | is_cpp_header_file(my.path)
     elsif (is_headers(my.product))
-        return\
-            ends_with(my.path, ".hpp") | ends_with(my.path, ".h") |\
-            ends_with(my.path, ".ipp")
+        return is_cpp_header_file(my.path)
     elsif (is_info(my.product))
         return ends_with(my.path, ".texi")
     elsif (is_java(my.product))
