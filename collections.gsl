@@ -1,0 +1,189 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin collection utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+gsl from "test.gsl"
+
+#------------------------------------------------------------------------------
+# Simple Map
+#
+# map_add(map, name, value)
+# map_get(map, name)
+# map_remove(map, name)
+#------------------------------------------------------------------------------
+
+# global
+
+# Add a name-value pair to the map and return the map.
+function global.map_add(map, name, value)
+    define my.map = map_add.map
+    my.map.$(my.name) = my.value?
+    return my.map
+endfunction
+
+# Get the value at the specified name (or undefined).
+function global.map_get(map, name)
+    define my.map = map_get.map
+    return my.map.$(my.name)
+endfunction
+
+# Remove the specified name from the map and return the map.
+function global.map_remove(map, name)
+    define my.map = map_remove.map
+    map_add(my.map, my.name)
+    return my.map
+endfunction
+
+#------------------------------------------------------------------------------
+# Hash Table
+# 
+# table_add(table, name, value)
+# table_any(table, name)
+# TODO: table_at(table, index)
+# table_clear(table)
+# table_count(table, name)
+# table_empty(table)
+# table_exists(table, name, value)
+# TODO: table_find(table, name, value)
+# table_ordinal(table, name, ordinal)
+# table_remove(table, name, value)
+# table_remove_all(table, name)
+# table_serialize(table)
+# table_size(table)
+# table_sort(table)
+#------------------------------------------------------------------------------
+
+# local
+
+function _table_match_name(row, name)
+    define my.row = _table_match_name.row
+    return (my.row.name = my.name)
+endfunction
+
+function _table_match_value(row, value)
+    define my.row = _table_match_value.row
+    return (my.row.value = my.value)
+endfunction
+
+function _table_match_row(row, name, value)
+    define my.row = _table_match_row.row
+    return _table_match_name(my.row, my.name) &\
+        _table_match_value(my.row, my.value)
+endfunction
+
+# global
+
+# Add a row with the specified name-value pair, if it does not exist.
+function global.table_add(table, name, value)
+    define my.table = table_add.table
+    if (!table_exists(my.table, my.name, my.value))
+        new my.table.row as _row
+            _row.name = my.name
+            _row.value = my.value
+            # echo "add: $(_row.name) <= $(_row.value)"
+        endnew
+    endif
+    return my.table
+endfunction
+
+# Return true if a row exists with the specified name.
+function global.table_any(table, name)
+    define my.table = table_any.table
+    return table_count(my.table, my.name) > 0
+endfunction
+
+# Delete all rows in the table.
+function global.table_clear(table)
+    define my.table = table_clear.table
+    for my.table.row as _row
+        delete _row
+    endfor
+    return my.table
+endfunction
+
+# Return the number of rows with the specified name.
+function global.table_count(table, name)
+    define my.table = table_count.table
+    return count(my.table.row, _table_match_name(count, my.name))
+endfunction
+
+# Return the entire table as a string.
+# format: name1,value1\nname2,value2\n...name[n],value[n]\n
+function global.table_serialize(table)
+    define my.table = table_serialize.table
+    define my.buffer = ""
+    for my.table.row as _row
+        my.buffer += "$(_row.name),$(_row.value)\n"
+    endfor
+    return my.buffer
+endfunction
+
+# Return true if the table has no rows.
+function global.table_empty(table)
+    define my.table = table_empty.table
+    return !defined(my.table->row)
+endfunction
+
+# Return true if the name-value pair exists in the table.
+function global.table_exists(table, name, value)
+    define my.table = table_exists.table
+    return count(my.table.row, _table_match_row(count, my.name, my.value)) > 0
+endfunction
+
+# Return the value of the Nth (ordinal) instance of row by name.
+function global.table_ordinal(table, name, ordinal)
+    define my.table = table_ordinal.table
+    if (my.ordinal < 0)
+        abort "table_ordinal: ordinal parameter must be non-negative."
+    endif
+    define my.position = 0
+    for my.table.row as _row where _table_match_name(_row, my.name)
+        if (my.position >= my.ordinal)
+            return _row.value
+        endif
+        my.position += 1
+    endfor
+endfunction
+
+# Delete the row identified by the name-value pair.
+function global.table_remove(table, name, value)
+    define my.table = table_remove.table
+    for my.table.row as _row where _table_match_row(_row, my.name, my.value)
+        # echo "remove by name-value: $(_row.name) ($(_row.value))"
+        delete _row
+    endfor
+    return my.table
+endfunction
+
+# Delete all rows identified by name.
+function global.table_remove_all(table, name)
+    define my.table = table_remove_all.table
+    for my.table.row as _row where (_row.name = my.name)
+        # echo "remove by name: $(_row.name) ($(_row.value))"
+        delete _row
+    endfor
+    return my.table
+endfunction
+
+# Return the number of rows in the table.
+function global.table_size(table)
+    define my.table = table_size.table
+    return count(my.table.row, 1)
+endfunction
+
+# Sort the table alphabetically by name.
+function global.table_sort(table)
+    define my.table = table_sort.table
+    sort my.table.row as _row by _row.name
+    return my.table
+endfunction
+
+.endtemplate

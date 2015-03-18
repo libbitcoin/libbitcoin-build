@@ -1,0 +1,263 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin collection utilities tests.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+gsl from "test.gsl"
+gsl from "collections.gsl"
+
+#------------------------------------------------------------------------------
+# Simple Map
+#------------------------------------------------------------------------------
+
+function test_map()
+    new map
+        test_require_undefined(map.foo, "map__empty__undefined")
+    endnew
+endfunction
+test("test_map")
+
+function test_map_get()
+    new map
+        map_add(map, "foo", "1")
+        test_require_eq(map_get(map, "foo"), 1, "map_get__single__value")
+        
+        map_add(map, "foo", "2")
+        test_require_eq(map_get(map, "foo"), 2, "map_get__second__value")
+        
+        map_add(map, "bar", "3")
+        test_require_eq(map_get(map, "bar"), 3, "map_get__unique__value")
+    endnew
+endfunction
+test("test_map_get")
+
+function test_map_add()
+    new map
+        map_add(map, "foo", "1")
+        test_require_eq(map.foo, 1, "map_add__single__value")
+        
+        map_add(map, "foo", "2")
+        test_require_eq(map.foo, 2, "map_add__second__value")
+
+        test_require_eq(map_add(map, "bar", "3"), map, "map_add__result__table")
+    endnew
+endfunction
+test("test_map_add")
+
+function test_map_remove()
+    new map
+        map_add(map, "foo", "1")
+        map_add(map, "bar", "2")
+        map_remove(map, "foo")
+        test_require_undefined(map.foo, "map_remove__only__undefined")
+        test_require_undefined(map_get(map, "foo"), "map_remove__get_only__undefined")
+        
+        test_require_eq(map_remove(map, "bar"), map, "map_remove__result__table")
+    endnew
+endfunction
+test("test_map_remove")
+
+#------------------------------------------------------------------------------
+# Hash Table
+#------------------------------------------------------------------------------
+
+function test_map()
+    new map
+        test_require_defined(map, "map__empty__defined")
+    endnew
+endfunction
+test("test_map")
+
+function test_table()
+    new table
+        test_require_defined(table, "table__empty__defined")
+        test_require_undefined(table->row, "table__empty__row_undefined")
+    endnew
+endfunction
+test("test_table")
+
+function test_table_add()
+    new table
+        table_add(table, "foo", "1")
+        test_require_defined(table->row, "table_add__single__row_defined")
+        
+        table_add(table, "foo", "2")
+        test_require_eq(count(table.row), 2, "table_add__second__row_count_2")
+        test_require_defined(table->row(name = "foo" & value = 2), "table_add__second__row_defined")
+        
+        define my.result = table_add(table, "foo", "2")
+        test_require_eq(count(table.row), 2, "table_add__redundant_entry__unchanged_row_count")
+        test_require_eq(table_add(table, "bar", "3"), table, "table_add__result__table")
+    endnew
+endfunction
+test("test_table_add")
+
+function test_table_any()
+    new table
+        test_require(!table_any(table, "foo"), "table_any__none__false")
+        
+        table_add(table, "foo", "1")
+        table_add(table, "foo", "2")
+        table_add(table, "bar", "3")
+        test_require(table_any(table, "foo"), "table_any__match_first__true")
+        test_require(table_any(table, "bar"), "table_any__match_unique__true")
+        test_require(!table_any(table, "foobar"), "table_any__missing_name__false")
+    endnew
+endfunction
+test("test_table_any")
+
+function test_table_clear()
+    new table
+        table_clear(table)
+        test_require_eq(count(table.row), 0, "table_clear__none__no_rows")
+        
+        table_add(table, "foo", "1")
+        table_add(table, "foo", "2")
+        table_clear(table)
+        test_require_eq(count(table.row), 0, "table_clear__two__no_rows")
+        
+        table_add(table_clear(table), "bar", "1")
+        test_require_eq(table->row.name, "bar", "table_clear__result__table_row_name")
+        test_require_eq(table->row.value, "1", "table_clear__result__table_row_value")
+    endnew
+endfunction
+test("test_table_clear")
+
+function test_table_count()
+    new table
+        table_add(table, "bar", "1")
+        table_add(table, "foo", "2")
+        table_add(table, "foo", "3")
+        test_require_eq(table_count(table, "foobar"), 0, "table_count__none_of_three__zero")
+        test_require_eq(table_count(table, "bar"), 1, "table_count__one_of_three__one")
+        test_require_eq(table_count(table, "foo"), 2, "table_count__two_of_three__two")
+    endnew
+endfunction
+test("test_table_count")
+
+function test_table_empty()
+    new table
+        test_require(table_empty(table), "table_empty__none__true")
+        
+        table_add(table, "foo", "1")
+        test_require(!table_empty(table), "table_empty__single__false")
+    endnew
+endfunction
+test("test_table_empty")
+
+function test_table_exists()
+    new table
+        test_require(!table_exists(table, "foo", "0"), "table_exists__none__false")
+        
+        table_add(table, "foo", "1")
+        table_add(table, "foo", "2")
+        table_add(table, "bar", "3")
+        test_require(table_exists(table, "foo", "1"), "table_exists__match_first__true")
+        test_require(table_exists(table, "foo", "2"), "table_exists__match_second__true")
+        test_require(table_exists(table, "bar", "3"), "table_exists__match_unique__true")
+        test_require(!table_exists(table, "foo", "0"), "table_exists__missing_value__false")
+        test_require(!table_exists(table, "foobar", "0"), "table_exists__missing_name__false")
+    endnew
+endfunction
+test("test_table_exists")
+
+function test_table_ordinal()
+    new table
+        test_require_undefined(table_ordinal(table, "foo", 0), "table_ordinal__empty__undefined")
+        
+        table_add(table, "foo", "a")
+        test_require_eq(table_ordinal(table, "foo", 0), "a", "table_ordinal__first_of_one__expected_value")
+        
+        table_add(table, "foo", "b")
+        table_add(table, "bar", "c")
+        test_require_eq(table_ordinal(table, "foo", 1), "b", "table_ordinal__second_of_three__expected_value")
+    endnew
+endfunction
+test("test_table_ordinal")
+
+function test_table_remove()
+    new table
+        table_add(table, "foo", "1")
+        table_add(table, "foo", "2")
+        table_remove(table, "foo", "1")
+        test_require_eq(count(table.row), 1, "table_remove__one_of_two__one_row")
+        
+        table_add(table, "bar", "3")
+        table_remove(table, "foo", "3")
+        test_require_eq(count(table.row), 2, "table_remove__none_of_two__two_rows")
+        
+        table_remove(table, "foo", "2")
+        table_remove(table, "bar", "3")
+        test_require_eq(count(table.row), 0, "table_remove__one_of_one_twice__no_rows")
+        
+        test_require_eq(table_remove(table, "bar", "3"), table, "table_remove__result__table")
+    endnew
+endfunction
+test("test_table_remove")
+
+function test_table_remove_all()
+    new table
+        table_add(table, "foo", "1")
+        table_add(table, "foo", "2")
+        table_remove_all(table, "bar")
+        test_require_eq(count(table.row), 2, "table_remove_all__none_of_two__two_rows")
+        
+        table_add(table, "bar", "3")
+        table_remove_all(table, "foo")
+        test_require_eq(count(table.row), 1, "table_remove_all__two_of_three__one_row")
+        
+        table_remove_all(table, "bar")
+        test_require_eq(count(table.row), 0, "table_remove_all__one_of_one__no_rows")
+        
+        test_require_eq(table_remove_all(table, "bar"), table, "table_remove_all__result__table")
+    endnew
+endfunction
+test("test_table_remove_all")
+
+function test_table_serialize()
+    new table
+        table_add(table, "a", "1")
+        table_add(table, "b", "2")
+        test_require_eq(table_serialize(table), "a,1\nb,2\n", "table_serialize__two_rows__expected")
+    endnew
+endfunction
+test("test_table_serialize")
+
+function test_table_size()
+    new table
+        test_require_eq(table_size(table), 0, "table_size__empty__returns_0")
+        
+        table_add(table, "foo", "1")
+        test_require_eq(table_size(table), 1, "table_size__single__returns_1")
+        
+        table_add(table, "foo", "1")
+        test_require_eq(table_size(table), 1, "table_size__redundant__returns_1")
+        
+        table_add(table, "foo", "2")
+        test_require_eq(table_size(table), 2, "table_size__second__returns_2")
+        
+        table_add(table, "bar", "1")
+        test_require_eq(table_size(table), 3, "table_size__distinct__returns_3")
+    endnew
+endfunction
+test("test_table_size")
+
+function test_table_sort()
+    new table
+        table_add(table, "b", "2")
+        table_add(table, "a", "1")
+        define my.sorted = table_sort(table)
+        test_require_eq(table_serialize(table), "a,1\nb,2\n", "table_serialize__two_rows__expected_change")
+        test_require_eq(table_serialize(my.sorted), "a,1\nb,2\n", "table_serialize__two_rows__expected_result")
+    endnew
+endfunction
+test("test_table_sort")
+
+.endtemplate

@@ -1,0 +1,51 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin test utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+# test utilities
+
+# Execute a test by name.
+function test(name)
+    echo "Running $(my.name)..."
+    $(my.name)()
+endfunction
+
+function test_require(a, message)
+    if (!defined(my.a) | !my.a)
+        echo "test require failure: $(my.message)"
+    endif
+endfunction
+
+function test_require_defined(a, message)
+    if (!defined(my.a))
+        echo "test require defined failure: $(my.message)"
+    endif
+endfunction
+
+function test_require_undefined(a, message)
+    if (defined(my.a))
+        echo "test require undefined failure: $(my.message)"
+    endif
+endfunction
+
+function test_require_eq(a, b, message)
+    if (!defined(my.a) | !defined(my.b) | (my.a <> my.b))
+        echo "test require equal failure: $(my.message)"
+    endif
+endfunction
+
+function test_require_ne(a, b, message)
+    if (!defined(my.a) | !defined(my.b) | (my.a = my.b))
+        echo "test require not equal failure: $(my.message)"
+    endif
+endfunction
+
+.endtemplate
