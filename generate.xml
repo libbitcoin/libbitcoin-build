@@ -10,6 +10,7 @@
       <library name="-lbitcoin" />
       
       <!-- TODO: generate from build.product[bitcoin] libraries. -->
+      <library name="@boost_chrono_LIBS@" />
       <library name="@boost_date_time_LIBS@" />
       <library name="@boost_filesystem_LIBS@" />
       <library name="@boost_locale_LIBS@" />
@@ -29,6 +30,7 @@
 
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
+      <dependency name="boost_chrono" />
       <dependency name="boost_date_time" />
       <dependency name="boost_filesystem" />
       <dependency name="boost_locale" />
@@ -78,6 +80,7 @@
       <product prefix="lib" path="src" name="bitcoin">
         <flag substitute="testnet" />
         <library name="boost" />
+        <library name="boost_chrono" />
         <library name="boost_date_time" />
         <library name="boost_filesystem" />
         <library name="boost_locale" />
@@ -97,6 +100,7 @@
         
         <!-- TODO: generate from bitcoin libraries. -->
         <library name="boost" />
+        <library name="boost_chrono" />
         <library name="boost_date_time" />
         <library name="boost_filesystem" />
         <library name="boost_locale" />
@@ -121,6 +125,7 @@
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
         <option value="threading=multi" />
         <option value="variant=release" />
+        <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-locale" />
@@ -139,6 +144,7 @@
         <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=multi" />
         <option value="variant=release" />
+        <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-locale" />
@@ -373,6 +379,7 @@
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
         <option value="threading=multi" />
         <option value="variant=release" />
+        <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-locale" />
@@ -391,6 +398,7 @@
         <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=multi" />
         <option value="variant=release" />
+        <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-locale" />
@@ -511,6 +519,8 @@
       </product>
       <product prefix="lib" path="src" name="bitcoin-client">
         <library name="bitcoin" />
+        <library name="sodium" />
+        <library name="czmq++" />
         <headers path="include" />
         <sources path="src" />
       </product>
@@ -522,6 +532,28 @@
         <headers path="include" />
         <sources path="test" />
       </product>
+      <product prefix="bin" path="examples/console" name="libbitcoin_client" install="false" option="examples">
+        <library name="bitcoin-client" />
+        
+        <!-- TODO: generate from bitcoin-client... -->
+        <library name="bitcoin" />
+        <library name="sodium" />
+        <library name="czmq++" />
+        
+        <headers path="include" />
+        <sources path="examples/console" />
+      </product>
+      <product prefix="bin" path="examples/get_height" name="get_height" install="false" option="examples">
+        <library name="bitcoin-client" />
+        
+        <!-- TODO: generate from bitcoin-client... -->
+        <library name="bitcoin" />
+        <library name="sodium" />
+        <library name="czmq++" />
+        
+        <headers path="include" />
+        <sources path="examples/get_height" />
+      </product>
       <product prefix="include" container="bitcoin">
         <files path="include/bitcoin" />
       </product>
@@ -531,6 +563,7 @@
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
         <option value="threading=multi" />
         <option value="variant=release" />
+        <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-locale" />
@@ -549,6 +582,7 @@
         <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=multi" />
         <option value="variant=release" />
+        <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-locale" />
@@ -886,7 +920,35 @@
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
-    <build />
+    <build>
+      <product prefix="pkgconfig">
+        <file path="libbitcoin-explorer.pc" />
+      </product>
+      <product prefix="doc">
+        <file path="AUTHORS" />
+        <file path="COPYING" />
+        <file path="INSTALL" />
+        <file path="NEWS" />
+        <file path="README" />
+        <file path="ChangeLog" />
+      </product>
+      <product prefix="lib" path="src" name="bitcoin-explorer">
+        <library name="bitcoin-client" />
+        <headers path="include" />
+        <sources path="src" />
+      </product>
+      <product prefix="bin" path="test" name="libbitcoin_explorer_test" test="true" option="tests">
+        <!-- TODO: generate from bitcoin-explorer. -->
+        <library name="bitcoin-explorer" />
+        <library name="bitcoin-client" />
+        <library name="boost_unit_test_framework" />
+        <headers path="include" />
+        <sources path="test" />
+      </product>
+      <product prefix="include" container="bitcoin">
+        <files path="include/bitcoin" />
+      </product>
+    </build>
 
     <install>
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
@@ -1238,12 +1300,44 @@
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
-    <build />
+    <build>
+      <product prefix="pkgconfig">
+        <file path="libbitcoin-protocol.pc" />
+      </product>
+      <product prefix="doc">
+        <file path="AUTHORS" />
+        <file path="COPYING" />
+        <file path="INSTALL" />
+        <file path="NEWS" />
+        <file path="README" />
+        <file path="ChangeLog" />
+      </product>
+      <product prefix="lib" path="src" name="bitcoin-protocol">
+        <library name="bitcoin" />
+        <headers path="include" />
+        <sources path="src" />
+      </product>
+      <product prefix="bin" path="test" name="libbitcoin_protocol_test" test="true" option="tests">
+        <!-- TODO: generate from bitcoin-protocol. -->
+        <library name="bitcoin-protocol" />
+        <library name="bitcoin" />
+        <library name="protobuf" />
+        <library name="sodium" />
+        <library name="czmq++" />
+        <library name="boost_unit_test_framework" />
+        <headers path="include" />
+        <sources path="test" />
+      </product>
+      <product prefix="include" container="bitcoin">
+        <files path="include/bitcoin" />
+      </product>
+    </build>
 
     <install>
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
         <option value="threading=multi" />
         <option value="variant=release" />
+        <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-locale" />
@@ -1262,6 +1356,7 @@
         <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=multi" />
         <option value="variant=release" />
+        <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-locale" />
@@ -1422,6 +1517,7 @@
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
         <option value="threading=multi" />
         <option value="variant=release" />
+        <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-locale" />
@@ -1440,6 +1536,7 @@
         <option value="linkflags=-stdlib=${boost_stdlib}" />
         <option value="threading=multi" />
         <option value="variant=release" />
+        <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-locale" />
