@@ -278,9 +278,13 @@ function is_product_file(product, path)
             return ends_with(my.path, ".cfg")
         endif
     elsif (is_cpp(my.product))
-        return ends_with(my.path, ".cpp") | ends_with(my.path, ".c")        
+        return\
+            ends_with(my.path, ".cpp") | ends_with(my.path, ".c") |\
+            ends_with(my.path, ".hpp") | ends_with(my.path, ".h") |\
+            ends_with(my.path, ".ipp")
     elsif (is_headers(my.product))
-        return ends_with(my.path, ".hpp") | ends_with(my.path, ".h") |\
+        return\
+            ends_with(my.path, ".hpp") | ends_with(my.path, ".h") |\
             ends_with(my.path, ".ipp")
     elsif (is_info(my.product))
         return ends_with(my.path, ".texi")
@@ -634,7 +638,7 @@ function render_java_variables(product, root, repository, mapper)
         map_add(my.mapper, "CLEANFILES")
         write_line("CLEANFILES $(my.operator) ${java_builddir}/*.class\n")
         write_line("distclean-local:")
-        write_line("\trm -rf ${java_builddir} ${jar_builddir}\n")
+        write_line("\t-rm -rf ${java_builddir} ${jar_builddir}\n")
     endif
 endfunction
 
