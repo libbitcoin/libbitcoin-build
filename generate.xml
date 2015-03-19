@@ -905,11 +905,6 @@
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." context="c++" />
-
-      <!-- boost static & property_tree, no exceptions -->
-      <!--<flag name="Wno-maybe-uninitialized" compiler="gcc" comment="Clean up boost 1.49 headers, static with no exceptions." context="c++" />
-      <flag name="Wno-sometimes-uninitialized" compiler="clang" comment="Clean up boost 1.54 headers, static with no exceptions." context="c++" />
-      <flag name="Wno-return-type" comment="Clean up boost property_tree headers, with no exceptions." />-->
       
       <!-- bx -->
       <flag name="Wno-unused-parameter" comment="Clean up bx generated code." context="c++" />
@@ -937,6 +932,18 @@
         <library name="bitcoin-client" />
         <headers path="include" />
         <sources path="src" />
+      </product>
+      <product prefix="bin" path="console" name="bx" option="console">
+        <library name="bitcoin-explorer" />
+        
+        <!-- TODO: generate from bitcoin-client... -->
+        <library name="bitcoin-client" />
+        <library name="bitcoin" />
+        <library name="sodium" />
+        <library name="czmq++" />
+        
+        <headers path="include" />
+        <sources path="console" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_explorer_test" test="true" option="tests">
         <flag define="sysconfdir" />
