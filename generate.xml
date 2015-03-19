@@ -98,7 +98,7 @@
         <flag substitute="testnet" />
         <library name="bitcoin" />
         
-        <!-- TODO: generate from bitcoin libraries. -->
+        <!-- TODO: generate from bitcoin. -->
         <library name="boost" />
         <library name="boost_chrono" />
         <library name="boost_date_time" />
@@ -266,17 +266,21 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_blockchain_test" test="true" option="tests">
-        <!-- TODO: generate from bitcoin-blockchain. -->
         <library name="bitcoin-blockchain" />
+        
+        <!-- TODO: generate from bitcoin-blockchain. -->
         <library name="bitcoin" />
+        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
       <product prefix="bin" path="tools/block_db" name="block_db" install="false" option="tools">
-        <!-- TODO: generate from bitcoin-blockchain... -->
         <library name="bitcoin-blockchain" />
+        
+        <!-- TODO: generate from bitcoin-blockchain. -->
         <library name="bitcoin" />
+        
         <headers path="include" />
         <sources path="tools/block_db" />
       </product>
@@ -525,9 +529,13 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_client_test" test="true" option="tests">
-        <!-- TODO: generate from bitcoin-client. -->
         <library name="bitcoin-client" />
+        
+        <!-- TODO: generate from bitcoin-client. -->
         <library name="bitcoin" />
+        <library name="sodium" />
+        <library name="czmq++" />
+        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
@@ -535,7 +543,7 @@
       <product prefix="bin" path="examples/console" name="libbitcoin_client" install="false" option="examples">
         <library name="bitcoin-client" />
         
-        <!-- TODO: generate from bitcoin-client... -->
+        <!-- TODO: generate from bitcoin-client. -->
         <library name="bitcoin" />
         <library name="sodium" />
         <library name="czmq++" />
@@ -546,7 +554,7 @@
       <product prefix="bin" path="examples/get_height" name="get_height" install="false" option="examples">
         <library name="bitcoin-client" />
         
-        <!-- TODO: generate from bitcoin-client... -->
+        <!-- TODO: generate from bitcoin-client. -->
         <library name="bitcoin" />
         <library name="sodium" />
         <library name="czmq++" />
@@ -737,10 +745,12 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_consensus_test" test="true" option="tests">
-        <!-- TODO: generate from bitcoin-consensus. -->
         <library name="bitcoin-consensus" />
+        
+        <!-- TODO: generate from bitcoin-consensus. -->
         <library name="crypto" />
         <library name="secp256k1" />
+        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <headers path="src" />
@@ -936,9 +946,8 @@
       <product prefix="bin" path="console" name="bx" option="console">
         <library name="bitcoin-explorer" />
         
-        <!-- TODO: generate from bitcoin-client... -->
+        <!-- TODO: generate from bitcoin-explorer. -->
         <library name="bitcoin-client" />
-        <library name="bitcoin" />
         <library name="sodium" />
         <library name="czmq++" />
         
@@ -947,9 +956,13 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_explorer_test" test="true" option="tests">
         <flag define="sysconfdir" />
-        <!-- TODO: generate from bitcoin-explorer. -->
         <library name="bitcoin-explorer" />
+        
+        <!-- TODO: generate from bitcoin-explorer. -->
         <library name="bitcoin-client" />
+        <library name="sodium" />
+        <library name="czmq++" />
+        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
@@ -1136,17 +1149,21 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_node_test" test="true" option="tests">
-        <!-- TODO: generate from bitcoin-node. -->
         <library name="bitcoin-node" />
+        
+        <!-- TODO: generate from bitcoin-node. -->
         <library name="bitcoin-blockchain" />
+        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
       <product prefix="bin" path="console" name="bitcoin_node" option="console">
-        <!-- TODO: generate from bitcoin-node. -->
         <library name="bitcoin-node" />
+        
+        <!-- TODO: generate from bitcoin-node. -->
         <library name="bitcoin-blockchain" />
+        
         <headers path="include" />
         <sources path="console" />
       </product>
@@ -1323,16 +1340,21 @@
       </product>
       <product prefix="lib" path="src" name="bitcoin-protocol">
         <library name="bitcoin" />
+        <library name="protobuf" />
+        <library name="sodium" />
+        <library name="czmq++" />
         <headers path="include" />
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_protocol_test" test="true" option="tests">
-        <!-- TODO: generate from bitcoin-protocol. -->
         <library name="bitcoin-protocol" />
+        
+        <!-- TODO: generate from bitcoin-protocol. -->
         <library name="bitcoin" />
         <library name="protobuf" />
         <library name="sodium" />
         <library name="czmq++" />
+        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
