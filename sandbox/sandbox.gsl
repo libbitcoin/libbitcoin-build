@@ -8,6 +8,16 @@
 #
 ###############################################################################
 
+function global.git_contributors()
+    # https://help.github.com/articles/changing-author-info
+    define my.command = "git log --pretty=format:\"%h - %an, %ar : %s\""
+    define my.git = proc.new(my.command, , , "AUTHORS")
+    define my.error =
+    my.git.run(my.error)
+    return my.error?
+endfunction
+#echo git_contributors() ? ""
+
 function global.is_token(needle, haystack)
     return defined(string.locate(my.haystack, my.needle))
 endfunction
