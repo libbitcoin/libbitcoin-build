@@ -18,10 +18,11 @@ Libbitcoin Build uses templates and XML data to generate build artifacts for the
 The artifacts generated for each library are as follows. Package names coincide with libbitcoin repository names.
 
 ```
-configure.ac
-<package>.pc.in
-install.sh
 .travis.yml
+configure.ac
+install.sh
+libbitcoin[-package].pc.in
+Makefile.am
 version.hpp
 ```
 
