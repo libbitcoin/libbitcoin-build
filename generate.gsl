@@ -20,14 +20,6 @@ gsl from "utilities.gsl"
 # Templates retain their natural extensions to enable editor association, and
 # are therefore prefixed with 'gsl' for sorting and template identification.
 
-# TODO: generate
-# AUTHORS           metadata and git (contributors)
-# ChangeLog         git (commits)
-# COPYING           name from metadata
-# INSTALL           options from metadata
-# NEWS              git (tags)
-# README            name from metadata
-
 gsl from "templates/gsl.version.hpp"
 gsl from "templates/gsl.include.hpp"
 gsl from "templates/gsl.interface.swg"
@@ -35,6 +27,12 @@ gsl from "templates/gsl.interface.swg"
 gsl from "templates/gsl.bindings.bat"
 gsl from "templates/gsl.bindings.sh"
 
+#gsl from "templates/gsl.AUTHORS"
+#gsl from "templates/gsl.ChangeLog"
+#gsl from "templates/gsl.COPYING"
+#gsl from "templates/gsl.INSTALL"
+#gsl from "templates/gsl.NEWS"
+#gsl from "templates/gsl.README"
 gsl from "templates/gsl.autogen.sh"
 gsl from "templates/gsl.configure.ac"
 gsl from "templates/gsl.Makefile.am"
@@ -51,6 +49,14 @@ generate_version()
 # Generate binding generators.
 #generate_bindings_sh()
 #generate_bindings_bat()
+
+# Generate GNU docs.
+#generate_authors()
+#generate_change_log()
+#generate_copying()
+#generate_install()
+#generate_news()
+#generate_readme()
 
 # Generate Autotools artifacts.
 generate_autogen()

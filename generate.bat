@@ -30,6 +30,9 @@ mkdir libbitcoin-node
 mkdir libbitcoin-protocol
 mkdir libbitcoin-server
 
+REM Generate git inputs for GSL scripts.
+REM The path to git.exe must be in our path.
+
 REM Generate build artifacts.
 gsl -q generate.xml
 
@@ -47,7 +50,7 @@ copy /b /y libbitcoin-protocol\*    ..\libbitcoin-protocol\
 copy /b /y libbitcoin-server\*      ..\libbitcoin-server\
 
 REM Generate bindings from generated binding generators.
-REM TODO: The path to swig.exe must be in our path.
+REM The path to swig.exe must be in our path.
 REM call ..\libbitcoin\bindings.bat
 REM call ..\libbitcoin-blockchain\bindings.bat
 REM call ..\libbitcoin-client\bindings.bat

@@ -29,6 +29,9 @@ mkdir libbitcoin-node
 mkdir libbitcoin-protocol
 mkdir libbitcoin-server
 
+# Generate git inputs for GSL scripts.
+# The path to git.exe must be in our path.
+
 # Generate build artifacts.
 gsl -q generate.xml
 
@@ -53,7 +56,7 @@ chmod +x ../libbitcoin-protocol/*.sh
 chmod +x ../libbitcoin-server/*.sh
 
 # Generate bindings from generated binding generators.
-# TODO: The path to swig must be in our path.
+# The path to swig must be in our path.
 # source ../libbitcoin/bindings.sh
 # source ../libbitcoin-blockchain/bindings.sh
 # source ../libbitcoin-client/bindings.sh
