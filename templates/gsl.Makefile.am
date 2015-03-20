@@ -290,7 +290,7 @@ function is_product_file(product, path)
             return ends_with(my.path, ".cfg")
         endif
     elsif (is_cpp(my.product))
-        # Headers are included for dist, otherwise ignored by Automake.
+        # Headers are included for dist, Automake ignores otherwise.
         return is_cpp_source_file(my.path) | is_cpp_header_file(my.path)
     elsif (is_headers(my.product))
         return is_cpp_header_file(my.path)
@@ -439,16 +439,28 @@ function normalize_directory(folder)
     return my.directory.path
 endfunction
 
+# Helper function for building a container segment.
+function construct_segment(product, folder, trim)
+    define my.product = construct_segment.product
+    define my.segment = difference(my.folder, my.trim)
+    define my.container = my.product.container ? ""
+    return join(my.container, my.segment)
+endfunction
+
+function get_relative_path(full_path, trim)
+    define my.relative_path = difference(my.full_path, my.trim)
+    return " \\\n    $(my.relative_path)"
+endfunction
+
 # Write the file names in the directory to a formatted string.
 function get_files(folder, trim, product)
     define my.product = get_files.product
     my.files = ""
     define my.directory = open_directory(my.folder)
-    for my.directory.file as _object by _object.path\
-        where is_product_file(my.product, _object.name)
-        define my.full = "$(_object.path)$(_object.name)"
-        define my.relative = difference(my.full, my.trim)
-        my.files += " \\\n    $(my.relative)"
+    for my.directory.file as _file by _file.name\
+         where is_product_file(my.product, _file.name)
+        define my.full_path = "$(_file.path)$(_file.name)"
+        my.files += get_relative_path(my.full_path, my.trim)
     endfor
     return my.files
 endfunction
@@ -458,24 +470,29 @@ function get_all_files(folder, trim, product)
     define my.product = get_all_files.product
     define my.files = get_files(my.folder, my.trim, my.product)
     define my.directory = open_directory(my.folder)
-    for my.directory.directory as _object by _object.path
-        define my.subfolder = "$(_object.path)$(_object.name)"
+    for my.directory.directory as _directory by _directory.name
+        define my.subfolder = "$(_directory.path)$(_directory.name)"
         my.files += get_all_files(my.subfolder, my.trim, my.product)
     endfor
     return my.files
 endfunction
 
-# Helper function for building a container segment.
-function construct_segment(product, folder, trim)
-    define my.product = construct_segment.product
-    define my.segment = difference(my.folder, my.trim)
-    define my.container = my.product.container ? ""
-    return join(my.container, my.segment)
+# Recurse the directory tree, rendering all files.
+function render_all_variables(folder, base_trim, path_trim, product, mapper)
+    define my.mapper = render_all_variables.mapper
+    define my.product = render_all_variables.product
+    define my.directory = open_directory(my.folder)
+    for my.directory.directory as _directory by _directory.name
+        define my.subfolder = "$(_directory.path)$(_directory.name)"
+        render_files_variables(my.subfolder, my.base_trim, my.path_trim,\
+            my.product, my.mapper)
+    endfor
 endfunction
 
 # Recurse directory tree, rendering outputs with files for each folder.
 function render_files_variables(folder, base_trim, path_trim, product, mapper)
     define my.product = render_files_variables.product
+    define my.mapper = render_files_variables.mapper
     require(my.product, "product", "prefix")
     define my.files = get_files(my.folder, my.base_trim, my.product)
     if (!is_empty(my.files))
@@ -491,13 +508,8 @@ function render_files_variables(folder, base_trim, path_trim, product, mapper)
         define my.operator = get_assignment_operator(my.mapper, my.variable)
         write_line("$(my.variable) $(my.operator)$(my.files)\n")
     endif
- 
-    # Recurse the directory tree.
-    define my.directory = open_directory(my.folder)
-    for my.directory.directory as _object by _object.path
-        define my.subfolder = "$(_object.path)$(_object.name)"
-        render_files_variables(my.subfolder, my.base_trim, my.path_trim, my.product, my.mapper)
-    endfor
+    render_all_variables(my.folder, my.base_trim, my.path_trim, my.product,\
+        my.mapper)
 endfunction
 
 # Format the flag either as a literal flag or a dereferenced variable.
@@ -784,7 +796,6 @@ function render_file_variables(product, mapper)
     define my.file = ""
     define my.source = get_source_directory(my.product)
     for my.product.file as _file where !is_empty(_file.path) by _file.path
-        require(_file, "file", "path")
         define my.path = join(my.source, _file.path)
         my.file += " \\\n    $(my.path)"
     endfor
@@ -809,14 +820,14 @@ function render_product_variables(product, root, repository, mapper)
     # File elements are enumerated in metadata, just render them.
     render_file_variables(my.product, my.mapper)
 
-    for my.product.files as _files where !is_empty(_files.path) by _files.path
-        require(_files, "files", "path")
+    for my.product.files as _files where !is_empty(_files.path)
         define my.folder = "$(my.root)$(_files.path)"
         define my.root_length = string.length(my.root)
         define my.path_length = string.length(_files.path)
         
         # Files elements are enumerated by directory and mapped to targets.
-        render_files_variables(my.folder, my.root_length, my.path_length, my.product, my.mapper)
+        render_files_variables(my.folder, my.root_length, my.path_length,\
+            my.product, my.mapper)
     endfor
     
     render_cpp_variables(my.product, my.root, my.repository, my.mapper)
