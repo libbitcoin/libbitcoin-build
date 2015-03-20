@@ -519,27 +519,36 @@ function get_chase_product(library, build)
         (product.name = my.library.name))
 endfunction
 
-function get_chase_cursor(product)
-    define my.product = get_chase_cursor.product
+function add_cursor(product)
+    define my.product = add_cursor.product
     new cursor as _cursor
         move _cursor to my.product
         return _cursor
     endnew
 endfunction
 
+function delete_cursor(cursor)
+    define my.cursor = delete_cursor.cursor
+    delete my.cursor
+endfunction
+
+# We insert before a dummy element (cursor) at the end of the product.
+# This provides a simple workaround for lack of reverse iteration in GSL,
+# allowing order preservation and insertion at the end of the list.
+# Fortunately extending a list while iterating it does not alter the iteration.
 function chase_libraries(product, build)
     define my.product = chase_libraries.product
     define my.build = chase_libraries.build
+    define my.cursor = add_cursor(my.product)
     for my.product.library as _library
         define my.chased_product = get_chase_product(_library, my.build)?
         if (defined(my.chased_product))
-            define my.cursor = get_chase_cursor(my.product)
             for my.chased_product.library as _chased_library
                 copy _chased_library before my.cursor
             endfor
-            delete my.cursor
         endif
     endfor
+    delete_cursor(my.cursor)
 endfunction
 
 # Render c/c++ specific option variables.
