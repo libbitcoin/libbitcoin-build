@@ -511,6 +511,37 @@ function get_library_product(name, build)
     return my.build->product((product.name ? "") = my.name)
 endfunction
 
+function get_chase_product(library, build)
+    define my.library = get_chase_product.library
+    define my.build = get_chase_product.build
+    echo "chase: $(my.library.name)"
+    return my.build->product(is_library(product) &\
+        (product.name = my.library.name))
+endfunction
+
+function get_chase_cursor(product)
+    define my.product = get_chase_cursor.product
+    new cursor as _cursor
+        move _cursor to my.product
+        return _cursor
+    endnew
+endfunction
+
+function chase_libraries(product, build)
+    define my.product = chase_libraries.product
+    define my.build = chase_libraries.build
+    for my.product.library as _library
+        define my.chased_product = get_chase_product(_library, my.build)?
+        if (defined(my.chased_product))
+            define my.cursor = get_chase_cursor(my.product)
+            for my.chased_product.library as _chased_library
+                copy _chased_library before my.cursor
+            endfor
+            delete my.cursor
+        endif
+    endfor
+endfunction
+
 # Render c/c++ specific option variables.
 function render_cpp_variables(product, root, repository, mapper)
     define my.product = render_cpp_variables.product
@@ -519,6 +550,9 @@ function render_cpp_variables(product, root, repository, mapper)
     if (is_cpp(my.product))
         define my.build = my.repository->build
         define my.configure = my.repository->configure
+        
+        # Flatten chained libraries.
+        chase_libraries(my.product, my.build)
     
         define my.libs = ""
         define my.ld_flags = ""
@@ -734,7 +768,7 @@ function render_file_variables(product, mapper)
         write_line("$(my.variable) $(my.operator)$(my.file)\n")
     endif
 endfunction
-  
+
 function render_product_variables(product, root, repository, mapper)
     define my.product = render_product_variables.product
     define my.repository = render_product_variables.repository

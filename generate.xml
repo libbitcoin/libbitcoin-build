@@ -97,21 +97,6 @@
       <product prefix="bin" path="test" name="libbitcoin_test" test="true" option="tests">
         <flag substitute="testnet" />
         <library name="bitcoin" />
-        
-        <!-- TODO: generate from bitcoin. -->
-        <library name="boost" />
-        <library name="boost_chrono" />
-        <library name="boost_date_time" />
-        <library name="boost_filesystem" />
-        <library name="boost_locale" />
-        <library name="boost_program_options" />
-        <library name="boost_regex" />
-        <library name="boost_system" />
-        <library name="iconv" />
-        <library name="pthread" />
-        <library name="rt" />
-        <library name="secp256k1" />
-        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
@@ -266,111 +251,88 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_blockchain_test" test="true" option="tests">
-        <library name="bitcoin-blockchain" />
-        
-        <!-- TODO: generate from bitcoin-blockchain. -->
-        <library name="bitcoin" />
-        
+        <library name="bitcoin-blockchain" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
       <product prefix="bin" path="tools/block_db" name="block_db" install="false" option="tools">
-        <library name="bitcoin-blockchain" />
-        
-        <!-- TODO: generate from bitcoin-blockchain. -->
-        <library name="bitcoin" />
-        
+        <library name="bitcoin-blockchain" />        
         <headers path="include" />
         <sources path="tools/block_db" />
       </product>
       <product prefix="bin" path="tools/count_records" name="count_records" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/count_records" />
       </product>
       <product prefix="bin" path="tools/history_db" name="history_db" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/history_db" />
       </product>
       <product prefix="bin" path="tools/initchain" name="initchain" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/initchain" />
       </product>
       <product prefix="bin" path="tools/mmr_add_row" name="mmr_add_row" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/mmr_add_row" />
       </product>
       <product prefix="bin" path="tools/mmr_create" name="mmr_create" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/mmr_create" />
       </product>
       <product prefix="bin" path="tools/mmr_delete_last_row" name="mmr_delete_last_row" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/mmr_delete_last_row" />
       </product>
       <product prefix="bin" path="tools/mmr_lookup" name="mmr_lookup" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/mmr_lookup" />
       </product>
       <product prefix="bin" path="tools/read_htdb_record_value" name="read_htdb_record_value" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/read_htdb_record_value" />
       </product>
       <product prefix="bin" path="tools/read_htdb_slab_value" name="read_htdb_slab_value" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/read_htdb_slab_value" />
       </product>
       <product prefix="bin" path="tools/show_array" name="show_array" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/show_array" />
       </product>
       <product prefix="bin" path="tools/show_linked_records" name="show_linked_records" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/show_linked_records" />
       </product>
       <product prefix="bin" path="tools/show_records" name="show_records" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/show_records" />
       </product>
       <product prefix="bin" path="tools/spend_db" name="spend_db" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/spend_db" />
       </product>
       <product prefix="bin" path="tools/stealth_db" name="stealth_db" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/stealth_db" />
       </product>
       <product prefix="bin" path="tools/transaction_db" name="transaction_db" install="false" option="tools">
         <library name="bitcoin-blockchain" />
-        <library name="bitcoin" />
         <headers path="include" />
         <sources path="tools/transaction_db" />
       </product>
@@ -529,36 +491,18 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_client_test" test="true" option="tests">
-        <library name="bitcoin-client" />
-        
-        <!-- TODO: generate from bitcoin-client. -->
-        <library name="bitcoin" />
-        <library name="sodium" />
-        <library name="czmq++" />
-        
+        <library name="bitcoin-client" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
       <product prefix="bin" path="examples/console" name="libbitcoin_client" install="false" option="examples">
-        <library name="bitcoin-client" />
-        
-        <!-- TODO: generate from bitcoin-client. -->
-        <library name="bitcoin" />
-        <library name="sodium" />
-        <library name="czmq++" />
-        
+        <library name="bitcoin-client" />        
         <headers path="include" />
         <sources path="examples/console" />
       </product>
       <product prefix="bin" path="examples/get_height" name="get_height" install="false" option="examples">
-        <library name="bitcoin-client" />
-        
-        <!-- TODO: generate from bitcoin-client. -->
-        <library name="bitcoin" />
-        <library name="sodium" />
-        <library name="czmq++" />
-        
+        <library name="bitcoin-client" />        
         <headers path="include" />
         <sources path="examples/get_height" />
       </product>
@@ -745,12 +689,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_consensus_test" test="true" option="tests">
-        <library name="bitcoin-consensus" />
-        
-        <!-- TODO: generate from bitcoin-consensus. -->
-        <library name="crypto" />
-        <library name="secp256k1" />
-        
+        <library name="bitcoin-consensus" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <headers path="src" />
@@ -886,7 +825,7 @@
   <repository name="libbitcoin-explorer" version="2.1.0" email="eric@voskuil.org">
 
     <package name="libbitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" >
-      <library name="-1bitcoin-explorer" />
+      <library name="-lbitcoin-explorer" />
     </package>
 
     <configure>
@@ -944,25 +883,13 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="console" name="bx" option="console">
-        <library name="bitcoin-explorer" />
-        
-        <!-- TODO: generate from bitcoin-explorer. -->
-        <library name="bitcoin-client" />
-        <library name="sodium" />
-        <library name="czmq++" />
-        
+        <library name="bitcoin-explorer" />        
         <headers path="include" />
         <sources path="console" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_explorer_test" test="true" option="tests">
         <flag define="sysconfdir" />
-        <library name="bitcoin-explorer" />
-        
-        <!-- TODO: generate from bitcoin-explorer. -->
-        <library name="bitcoin-client" />
-        <library name="sodium" />
-        <library name="czmq++" />
-        
+        <library name="bitcoin-explorer" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
@@ -1150,20 +1077,12 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_node_test" test="true" option="tests">
         <library name="bitcoin-node" />
-        
-        <!-- TODO: generate from bitcoin-node. -->
-        <library name="bitcoin-blockchain" />
-        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
       <product prefix="bin" path="console" name="bitcoin_node" option="console">
-        <library name="bitcoin-node" />
-        
-        <!-- TODO: generate from bitcoin-node. -->
-        <library name="bitcoin-blockchain" />
-        
+        <library name="bitcoin-node" />        
         <headers path="include" />
         <sources path="console" />
       </product>
@@ -1347,14 +1266,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_protocol_test" test="true" option="tests">
-        <library name="bitcoin-protocol" />
-        
-        <!-- TODO: generate from bitcoin-protocol. -->
-        <library name="bitcoin" />
-        <library name="protobuf" />
-        <library name="sodium" />
-        <library name="czmq++" />
-        
+        <library name="bitcoin-protocol" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
@@ -1505,11 +1417,6 @@
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." context="c++" />
       
-      <!-- boost static & property_tree, no exceptions -->
-      <!--<flag name="Wno-maybe-uninitialized" compiler="gcc" comment="Clean up boost 1.49 headers, static with no exceptions." context="c++" />
-      <flag name="Wno-sometimes-uninitialized" compiler="clang" comment="Clean up boost 1.54 headers, static with no exceptions." context="c++" />
-      <flag name="Wno-return-type" comment="Clean up boost property_tree headers, with no exceptions." context="c++" />--> 
-
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
