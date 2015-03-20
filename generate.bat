@@ -11,6 +11,9 @@ REM  Direct GSL download https://www.nuget.org/api/v2/package/gsl/4.1.0.1
 REM  Extract gsl.exe from package using NuGet's File > Export
 REM ###########################################################################
 
+REM Do everything relative to this file location.
+pushd %~dp0
+
 REM Clean and make directories for generated build artifacts.
 rmdir /s /q libbitcoin            2>NUL
 rmdir /s /q libbitcoin-blockchain 2>NUL
@@ -67,5 +70,9 @@ goto end
 echo *** ERROR, generation terminated early.
 
 :end
+REM Restore directory.
+popd
+
+REM Delay for manual confirmation.
 pause
 

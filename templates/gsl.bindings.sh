@@ -24,7 +24,8 @@ set -e
 echo Generating $(my.interface) bindings...
 
 # Do everything relative to this file location.
-pushd `cd "$\( dirname "$0" )" && pwd`
+PWD="`dirname "$0"`"
+pushd `cd "${PWD}" && pwd`
 
 # Clean and make required directories.
 rm -rf "bindings/java/wrap"

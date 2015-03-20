@@ -10,6 +10,10 @@
 # Exit this script on the first build error.
 set -e
 
+# Do everything relative to this file location.
+PWD="`dirname "$0"`"
+pushd `cd "${PWD}" && pwd`
+
 # Clean and make directories for generated build artifacts.
 rm -rf libbitcoin
 rm -rf libbitcoin-blockchain
@@ -36,14 +40,14 @@ mkdir libbitcoin-server
 gsl -q generate.xml
 
 # Copy outputs to all repositories.
-cp -r  libbitcoin             ../libbitcoin
-cp -r  libbitcoin-blockchain  ../libbitcoin-blockchain
-cp -r  libbitcoin-client      ../libbitcoin-client
-cp -r  libbitcoin-consensus   ../libbitcoin-consensus
-cp -r  libbitcoin-explorer    ../libbitcoin-explorer
-cp -r  libbitcoin-node        ../libbitcoin-node
-cp -r  libbitcoin-protocol    ../libbitcoin-protocol
-cp -r  libbitcoin-server      ../libbitcoin-server
+cp -r  libbitcoin/.             ../libbitcoin
+cp -r  libbitcoin-blockchain/.  ../libbitcoin-blockchain
+cp -r  libbitcoin-client/.      ../libbitcoin-client
+cp -r  libbitcoin-consensus/.   ../libbitcoin-consensus
+cp -r  libbitcoin-explorer/.    ../libbitcoin-explorer
+cp -r  libbitcoin-node/.        ../libbitcoin-node
+cp -r  libbitcoin-protocol/.    ../libbitcoin-protocol
+cp -r  libbitcoin-server/.      ../libbitcoin-server
 
 # Make root scripts executable.
 chmod +x ../libbitcoin/*.sh
@@ -65,3 +69,6 @@ chmod +x ../libbitcoin-server/*.sh
 # source ../libbitcoin-node/bindings.sh
 # source ../libbitcoin-protocol/bindings.sh
 # source ../libbitcoin-server/bindings.sh
+
+# Restore directory.
+popd
