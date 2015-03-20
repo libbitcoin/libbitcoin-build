@@ -21,7 +21,7 @@ REM Add the path to swig.exe to the path of this process or your global path.
 echo Generating $(my.interface) bindings...
 
 REM Do everything relative to this file location.
-pushd %~dp0
+cd %~dp0
 
 REM Clean and make required directories.
 rmdir /s /q "bindings\\java\\wrap" 2>NUL
@@ -37,9 +37,6 @@ mkdir "bindings\\python\\proxy"
 REM Generate bindings.
 swig -c++ -java -outdir "bindings\\java\\proxy\\org\\libbitcoin\\$(my.interface)" -o "bindings\\java\\wrap\\$(my.interface).cpp" "bindings\\$(my.interface).swg"
 swig -c++ -python -outdir "bindings\\python\\proxy" -o "bindings\\python\\wrap\\$(my.interface).cpp" "bindings\\$(my.interface).swg"
-
-REM Restore directory.
-popd
 .
 .endmacro # bindings_content_bat
 .

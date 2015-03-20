@@ -24,8 +24,7 @@ set -e
 echo Generating $(my.interface) bindings...
 
 # Do everything relative to this file location.
-PWD="`dirname "$0"`"
-pushd `cd "${PWD}" && pwd`
+cd `dirname "$0"`
 
 # Clean and make required directories.
 rm -rf "bindings/java/wrap"
@@ -41,9 +40,6 @@ mkdir -p "bindings/python/proxy"
 # Generate bindings.
 swig -c++ -java -outdir "bindings/java/proxy/org/libbitcoin/$(my.interface)" -o "bindings/java/wrap/$(my.interface).cpp" "bindings/$(my.interface).swg"
 swig -c++ -python -outdir "bindings/python/proxy" -o "bindings/python/wrap/$(my.interface).cpp" "bindings/$(my.interface).swg"
-
-# Restore directory.
-popd
 .
 .endmacro # bindings_content_sh
 .
