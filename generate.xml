@@ -95,6 +95,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_test" test="true" option="tests">
+        <runner random="true" />
         <flag substitute="testnet" />
         <library name="bitcoin" />
         <library name="boost_unit_test_framework" />
@@ -251,6 +252,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_blockchain_test" test="true" option="tests">
+        <runner random="true" />
         <library name="bitcoin-blockchain" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -491,6 +493,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_client_test" test="true" option="tests">
+        <runner random="true" />
         <library name="bitcoin-client" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -689,6 +692,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_consensus_test" test="true" option="tests">
+        <runner random="true" />
         <library name="bitcoin-consensus" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -888,6 +892,13 @@
         <sources path="console" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_explorer_test" test="true" option="tests">
+        <runner random="true">
+          <run test="primitives" />
+          <run test="generated" />
+          <run test="offline" />
+          <run test="stub" />
+          <run test="obsolete" />
+        </runner>
         <flag define="sysconfdir" />
         <library name="bitcoin-explorer" />        
         <library name="boost_unit_test_framework" />
@@ -1076,6 +1087,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_node_test" test="true" option="tests">
+        <runner random="true" />
         <library name="bitcoin-node" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -1266,6 +1278,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_protocol_test" test="true" option="tests">
+        <runner random="true" />
         <library name="bitcoin-protocol" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />

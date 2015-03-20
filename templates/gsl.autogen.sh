@@ -15,7 +15,7 @@
 .    notify(my.out_file)
 .    output(my.out_file)
 .    
-.    shebang("bash")
+.    shebang("sh")
 .    copyleft(_repository.name)
 
 autoreconf -i
@@ -24,5 +24,3 @@ autoreconf -i
 .endfor _repository
 .endmacro # generate_autogen
 .endtemplate
-
-

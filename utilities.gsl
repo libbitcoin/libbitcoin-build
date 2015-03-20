@@ -14,6 +14,36 @@ function global.repositories_parent()
     return global.root
 endfunction
 
+# Collection utilities.
+
+function set_cursor_begin(element)
+    define my.element = set_cursor_begin.element
+    for my.element as _element
+        new cursor as _cursor
+            move _cursor to _element
+            return _cursor
+        endnew
+    endfor
+    return set_cursor_end(my.element)
+endfunction
+
+# We insert before a dummy element (cursor) at the end of the product.
+# This provides a simple workaround for lack of reverse iteration in GSL,
+# allowing order preservation and insertion at the end of the list.
+# Fortunately extending a list while iterating it does not alter the iteration.
+function set_cursor_end(element)
+    define my.element = set_cursor_end.element
+    new cursor as _cursor
+        move _cursor to my.element
+        return _cursor
+    endnew
+endfunction
+
+function clear_cursor(cursor)
+    define my.cursor = clear_cursor.cursor
+    delete my.cursor
+endfunction
+
 # Library Utilities.
 
 function global.find_library_dependency(name, configure)

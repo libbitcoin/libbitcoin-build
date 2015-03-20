@@ -85,6 +85,7 @@ endfunction
 # Get an = or += depending on whether it's the first or later use.
 function get_assignment_operator(mapper, variable)
     define my.found = map_exists(my.mapper, my.variable)
+    map_add(my.mapper, my.variable)
     return my.found ?? "+=" ? "="
 endfunction
 
@@ -269,8 +270,7 @@ endfunction
 
 # Return true if the path extension is that of a c/c++ source file.
 function is_cpp_source_file(path)
-    return\
-        ends_with(my.path, ".cpp") | ends_with(my.path, ".c")
+    return ends_with(my.path, ".cpp") | ends_with(my.path, ".c")
 endfunction
 
 # Does the file extension conform to the required prefix pattern?
@@ -358,6 +358,18 @@ endfunction
 function get_product_path(product)
     define my.product = get_product_path.product
     return join(my.product.path, get_product_name(my.product))
+endfunction
+
+# Get the command to execute the test runner. If there is a runner element the
+# test runner is a generated script ${sourcedir}/[product.name]_runner.sh.
+# Otherwise the runner is ${sourcedir}/[product.path]/[product.name].
+function get_test_path(product)
+    define my.product = get_test_path.product
+    define my.name = get_product_name(my.product)
+    if (defined(my.product->runner))
+        return "$(my.name)_runner.sh"
+    endif
+    return join(my.product.path, my.name)
 endfunction
 
 # Get a description for comments.
@@ -472,15 +484,11 @@ function render_files_variables(folder, base_trim, path_trim, product, mapper)
         define my.tag = get_tag(my.product, my.segment)
         define my.install = get_install(my.product, my.segment)
         define my.variable = get_automake_variable(my.product, my.segment)
-        define my.operator = get_assignment_operator(my.mapper, my.variable)
-
-        # If the variable has no installdir we allow its accumulation.
-        if (is_empty(my.install))
-            map_add(my.mapper, my.variable)
-        else
-            # Don't write a tautology, such as: installdir = ${installdir}
+        # Don't write a tautology, such as: installdir = ${installdir}
+        if (!is_empty(my.install))
             write_line("$(my.tag)dir = $(my.install)")
         endif
+        define my.operator = get_assignment_operator(my.mapper, my.variable)
         write_line("$(my.variable) $(my.operator)$(my.files)\n")
     endif
  
@@ -514,32 +522,14 @@ endfunction
 function get_chase_product(library, build)
     define my.library = get_chase_product.library
     define my.build = get_chase_product.build
-    echo "chase: $(my.library.name)"
     return my.build->product(is_library(product) &\
         (product.name = my.library.name))
 endfunction
 
-function add_cursor(product)
-    define my.product = add_cursor.product
-    new cursor as _cursor
-        move _cursor to my.product
-        return _cursor
-    endnew
-endfunction
-
-function delete_cursor(cursor)
-    define my.cursor = delete_cursor.cursor
-    delete my.cursor
-endfunction
-
-# We insert before a dummy element (cursor) at the end of the product.
-# This provides a simple workaround for lack of reverse iteration in GSL,
-# allowing order preservation and insertion at the end of the list.
-# Fortunately extending a list while iterating it does not alter the iteration.
 function chase_libraries(product, build)
     define my.product = chase_libraries.product
     define my.build = chase_libraries.build
-    define my.cursor = add_cursor(my.product)
+    define my.cursor = set_cursor_end(my.product)
     for my.product.library as _library
         define my.chased_product = get_chase_product(_library, my.build)?
         if (defined(my.chased_product))
@@ -548,7 +538,120 @@ function chase_libraries(product, build)
             endfor
         endif
     endfor
-    delete_cursor(my.cursor)
+    clear_cursor(my.cursor)
+endfunction
+
+# TODO: generate test runner based on metadata.
+function get_tests_variable(product, mapper)
+    define my.product = get_tests_variable.product
+    define my.mapper = get_tests_variable.mapper
+    define my.path = get_test_path(my.product)
+    define my.variable = "TESTS"
+    define my.operator = get_assignment_operator(my.mapper, my.variable)
+    return "$(my.variable) $(my.operator) $(my.path)"
+endfunction
+
+function get_binaries_variable(product, mapper)
+    define my.product = get_binaries_variable.product
+    define my.mapper = get_binaries_variable.mapper
+    define my.path = get_product_path(my.product)
+    define my.variable = get_automake_variable(my.product)
+    define my.operator = get_assignment_operator(my.mapper, my.variable)
+    return "$(my.variable) $(my.operator) $(my.path)"
+endfunction
+
+function initialize_cpp_variables(variables)
+    define my.variables = initialize_cpp_variables.variables
+    my.variables.libs = ""
+    my.variables.ld_flags = ""
+    my.variables.ccc_flags = ""
+    my.variables.cxx_flags = ""
+    my.variables.cpp_flags = ""
+    my.variables.sources = ""
+endfunction
+
+function write_cpp_variables(variables, product)
+    define my.product = write_cpp_variables.product
+    define my.variables = write_cpp_variables.variables
+    define my.cpath = "$(get_product_path(my.product):c)"
+    if (defined(my.variables.tests))
+        write_line("$(my.variables.tests)\n")
+    endif
+    if (defined(my.variables.binaries))
+        write_line("$(my.variables.binaries)")
+    endif
+    if (!is_empty(my.variables.ccc_flags))
+        write_line("$(my.cpath)_CFLAGS =$(my.variables.ccc_flags)")
+    endif
+    if (!is_empty(my.variables.cxx_flags))
+        write_line("$(my.cpath)_CXXFLAGS =$(my.variables.cxx_flags)")
+    endif
+    if (!is_empty(my.variables.cpp_flags))
+        write_line("$(my.cpath)_CPPFLAGS =$(my.variables.cpp_flags)")
+    endif
+    if (!is_empty(my.variables.ld_flags))
+        write_line("$(my.cpath)_LDFLAGS =$(my.variables.ld_flags)")
+    endif
+    if (!is_empty(my.variables.libs))
+        define my.add = get_library_add(my.product)
+        write_line("$(my.cpath)_$(my.add) =$(my.variables.libs)")
+    endif
+    if (!is_empty(my.variables.sources))
+        write_line("$(my.cpath)_SOURCES =$(my.variables.sources)")
+    endif
+    write_line()
+endfunction
+
+function define_cpp_flag_variable(variables, flag)
+    define my.variables = define_cpp_flag_variable.variables
+    define my.flag = define_cpp_flag_variable.flag
+    define my.flag_value = " $(get_flag(my.flag))"
+    if (is_ccc_flag(my.flag))
+        my.variables.ccc_flags += my.flag_value
+    elsif (is_cxx_flag(my.flag))
+        my.variables.cxx_flags += my.flag_value
+    elsif (is_cpp_flag(my.flag))
+        my.variables.cpp_flags += my.flag_value
+    else
+        define my.context = my.flag.context ? ""
+        abort "Invalid flag context: '$(my.context)'."
+    endif
+endfunction
+
+function define_cpp_lib_variables(variables, library, build, configure)
+    define my.variables = define_cpp_lib_variables.variables
+    define my.library = define_cpp_lib_variables.library
+    define my.build = define_cpp_lib_variables.build
+    define my.configure = define_cpp_lib_variables.configure
+    require(my.library, "library", "name")
+    define my.built = get_library_product(my.library.name, my.build)?
+    if (defined(my.built))
+        define my.library_name = get_library_name(my.built)
+        my.library_path = join(my.built.path, my.library_name)
+        my.variables.libs += " $(my.library_path)"
+    else
+        # pkg-config is problematic in that it mixes LDFLAGS into LIBS
+        # and all flags into CFLAGS. We rewrite its CFLAGS as CPPFLAGS.
+        define my.library_cname = "$(my.library.name:c)"
+        define my.is_language = is_java_dependency(my.library) |\
+            is_python_dependency(my.library)
+        define my.is_boost = is_boost_dependency(my.library)
+        define my.is_boost_lib = is_boost_lib_dependency(my.library)
+        define my.is_packaged = is_packaged_library(my.library.name, my.configure)
+        if (!my.is_boost & !my.is_language)
+            my.variables.libs += " ${$(my.library_cname)_LIBS}"
+        endif
+        if (!my.is_boost_lib)
+            my.variables.cpp_flags += " ${$(my.library_cname)_CPPFLAGS}"
+        endif
+        if (!my.is_packaged & !my.is_boost & !my.is_boost_lib & !my.is_language)
+            my.variables.ccc_flags += " ${$(my.library_cname)_CFLAGS}"
+        endif
+        if (!my.is_packaged & !my.is_boost_lib & !my.is_language)
+            my.variables.ld_flags += " ${$(my.library_cname)_LDFLAGS}"
+        endif
+        #my.variables.cxx_flags += " ${$(my.library_cname)_CXXFLAGS}"
+    endif
 endfunction
 
 # Render c/c++ specific option variables.
@@ -559,124 +662,50 @@ function render_cpp_variables(product, root, repository, mapper)
     if (is_cpp(my.product))
         define my.build = my.repository->build
         define my.configure = my.repository->configure
-        
-        # Flatten chained libraries.
+        define my.root_length = string.length(my.root)
+        new variables as _variables
+        initialize_cpp_variables(_variables)
         chase_libraries(my.product, my.build)
-    
-        define my.libs = ""
-        define my.ld_flags = ""
-        define my.ccc_flags = ""
-        define my.cxx_flags = ""
-        define my.cpp_flags = ""
-        define my.sources = ""
+        
+        # Define _PROGRAMS|_[LT]LIBRARIES variables.
+        _variables.binaries = get_binaries_variable(my.product, my.mapper)
+
+        # Define TESTS variable.
+        if (is_test(my.product))
+            _variables.tests = get_tests_variable(my.product, my.mapper)
+        endif
         
         # Define _LDFLAGS from an override of Libtool default naming.
         if (is_true(my.product.unprefixed))
-            my.ld_flags += " -module"
+            _variables.ld_flags += " -module"
         endif
 
         # Define _CPPFLAGS values from input.
         for my.product.headers as _headers
             require(_headers, "headers", "path")
-            my.cpp_flags += " -I${srcdir}/$(_headers.path)"
+            _variables.cpp_flags += " -I${srcdir}/$(_headers.path)"
         endfor
         
         # Define _C??FLAGS values from input.
         for my.product.flag as _flag
-            define my.flag = " $(get_flag(_flag))"
-            if (is_ccc_flag(_flag))
-                my.ccc_flags += my.flag
-            elsif (is_cxx_flag(_flag))
-                my.cxx_flags += my.flag
-            elsif (is_cpp_flag(_flag))
-                my.cpp_flags += my.flag
-            else
-                define my.context = my.flag.context ? ""
-                abort "Invalid flag context: '$(my.context)'."
-            endif
+            define_cpp_flag_variable(_variables, _flag)
         endfor
         
         # Define _LIBS|_LDFLAGS|C??FLAGS option variables from libraries.
         for my.product.library as _library
-            require(_library, "_library", "name")
-            
-            # TODO: recurse the referenced library (for libs only?).
-            define my.built = get_library_product(_library.name, my.build) ?
-            if (defined(my.built))
-                define my.library_name = get_library_name(my.built)
-                my.library_path = join(my.built.path, my.library_name)
-                my.libs += " $(my.library_path)"
-            else
-                # pkg-config is problematic in that it mixes LDFLAGS into LIBS
-                # and all flags into CFLAGS. We rewrite its CFLAGS as CPPFLAGS.
-                define my.library_cname = "$(_library.name:c)"
-                define my.is_language = is_java_dependency(_library) | is_python_dependency(_library)
-                define my.is_boost = is_boost_dependency(_library)
-                define my.is_boost_lib = is_boost_lib_dependency(_library)
-                define my.is_packaged = is_packaged_library(_library.name, my.configure)
-                if (!my.is_boost & !my.is_language)
-                    my.libs += " ${$(my.library_cname)_LIBS}"
-                endif
-                if (!my.is_boost_lib)
-                    my.cpp_flags += " ${$(my.library_cname)_CPPFLAGS}"
-                endif
-                if (!my.is_packaged & !my.is_boost & !my.is_boost_lib & !my.is_language)
-                    my.ccc_flags += " ${$(my.library_cname)_CFLAGS}"
-                endif
-                if (!my.is_packaged & !my.is_boost_lib & !my.is_language)
-                    my.ld_flags += " ${$(my.library_cname)_LDFLAGS}"
-                endif
-                #my.cxx_flags += " ${$(my.library_cname)_CXXFLAGS}"
-            endif
+            define_cpp_lib_variables(_variables, _library, my.build, my.configure)
         endfor
         
         # Define _SOURCES option variable from sources elements.
         for my.product.sources as _sources
             require(_sources, "sources", "path")
             define my.folder = "$(my.root)$(_sources.path)"
-            define my.length = string.length(my.root)
-            define my.sources += get_all_files(my.folder, my.length, my.product)
+            define _variables.sources += get_all_files(my.folder,\
+                my.root_length, my.product)
         endfor
-
-        # Write TEST variable.
-        define my.tag = get_tag(my.product)
-        define my.primary = get_primary(my.product)
-        define my.path = get_product_path(my.product)
-        if (is_test(my.product))
-            heading3("Execute '$(my.path)' as a test.")
-            define my.variable = "TESTS"
-            define my.operator = get_assignment_operator(my.mapper, my.variable)
-            map_add(my.mapper, my.variable)
-            write_line("TESTS $(my.operator) $(my.path)\n")
-        endif
         
-        # Write _PROGRAMS|_[LT]LIBRARIES variables.
-        define my.variable = "$(my.tag)_$(my.primary)"
-        define my.operator = get_assignment_operator(my.mapper, my.variable)
-        map_add(my.mapper, my.variable)
-        write_line("$(my.variable) $(my.operator) $(my.path)")
-        
-        # Write all cpp option variables.
-        if (!is_empty(my.ccc_flags))
-            write_line("$(my.path:c)_CFLAGS =$(my.ccc_flags)")
-        endif
-        if (!is_empty(my.cxx_flags))
-            write_line("$(my.path:c)_CXXFLAGS =$(my.cxx_flags)")
-        endif
-        if (!is_empty(my.cpp_flags))
-            write_line("$(my.path:c)_CPPFLAGS =$(my.cpp_flags)")
-        endif
-        if (!is_empty(my.ld_flags))
-            write_line("$(my.path:c)_LDFLAGS =$(my.ld_flags)")
-        endif
-        if (!is_empty(my.libs))
-            define my.add = get_library_add(my.product)
-            write_line("$(my.path:c)_$(my.add) =$(my.libs)")
-        endif
-        if (!is_empty(my.sources))
-            write_line("$(my.path:c)_SOURCES =$(my.sources)")
-        endif
-        write_line()
+        write_cpp_variables(_variables, my.product)
+        endnew
     endif
 endfunction
 
@@ -686,7 +715,6 @@ function render_java_variables(product, root, repository, mapper)
     define my.repository = render_java_variables.repository
     if (is_java(my.product))
         define my.operator = get_assignment_operator(my.mapper, "CLEANFILES")
-        map_add(my.mapper, "CLEANFILES")
         write_line("CLEANFILES $(my.operator) ${java_builddir}/*.class\n")
         write_line("distclean-local:")
         write_line("\t-rm -rf ${java_builddir} ${jar_builddir}\n")
@@ -728,7 +756,6 @@ function render_jar_variables(product, root, repository, mapper)
         define my.stamp = get_java_stamp(my.repository)
         define my.variable = get_automake_variable(my.product)
         define my.operator = get_assignment_operator(my.mapper, "CLEANFILES")
-        map_add(my.mapper, "CLEANFILES")
         write_line("${$(my.variable)}: $(my.stamp)")
         write_line("\t${JAR} cf ${JARFLAGS} ${$(my.variable)} -C ${java_builddir} .\n")
         write_line("CLEANFILES $(my.operator) ${jar_builddir}/*.jar\n")
@@ -765,15 +792,12 @@ function render_file_variables(product, mapper)
         define my.tag = get_tag(my.product)
         define my.variable = get_automake_variable(my.product)
         define my.install = get_install(my.product, my.container)
-        define my.operator = get_assignment_operator(my.mapper, my.variable)
         
-        # If the variable has no installdir we allow its accumulation.
-        if (is_empty(my.install))
-            map_add(my.mapper, my.variable)
-        else
-            # Don't write a tautology, such as: installdir = ${installdir}.
+        # Don't write a tautology, such as: installdir = ${installdir}.
+        if (!is_empty(my.install))
             write_line("$(my.tag)dir = $(my.install)")
         endif
+        define my.operator = get_assignment_operator(my.mapper, my.variable)
         write_line("$(my.variable) $(my.operator)$(my.file)\n")
     endif
 endfunction
@@ -863,7 +887,7 @@ for generate.repository by name as _repository
                 render_product(_product, my.root, _repository, _mapper)
             endfor
         endif
-    endnew _mapper
+    endnew
     
     close
 endfor _repository

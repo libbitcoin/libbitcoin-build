@@ -58,7 +58,7 @@ for generate.repository by name as _repository
     notify(my.out_file)
     output(my.out_file)
     
-    shebang("bash")
+    shebang("sh")
     copyleft(_repository.name)
     define my.interface = bitcoin_to_include(_repository.name)
     bindings_content_sh(my.interface)
