@@ -10,76 +10,44 @@
 # Functions
 ###############################################################################
 
-# Is the variable used for the first time in an optional section.
-function is_dynamic_variable(product, variable, fixed)
-    define my.product = is_dynamic_variable.product
-    define my.was_fixed = map_exists(my.fixed, my.variable)
-    define my.is_fixed = !is_optional_element(my.product)
-    return !my.is_fixed & !my.was_fixed
+function is_multiple_first_optional(table, row)
+    define my.table = is_multiple_first_optional.table
+    define my.row = is_multiple_first_optional.row
+    define my.name = my.row.name
+    define my.value = my.row.value
+    return !is_empty(my.value) &\
+        (table_ordinal(my.table, my.name, 0) = my.value) &\
+        (table_count(my.table, my.name) > 1)
 endfunction
 
-# TODO: is_another_variable_option(build, product, variable)
-# Is the variable use in more than one product in the build.
-function is_reused_variable(build, variable)
-    define my.build = is_reused_variable.build
-    define my.count = count(my.build.product,\
-        get_automake_variable(count) = my.variable)
-    return my.count > 1
+function get_variables_string(table, mapper)
+    define my.table = get_variables_string.table
+    define my.mapper = get_variables_string.mapper
+    define my.variables = ""
+    for my.table.row as _row where is_multiple_first_optional(my.table, _row)
+        my.variables += "$(_row.name) =\n"
+        map_add(my.mapper, _row.name)
+    endfor
+    return my.variables
 endfunction
 
-# Is there another product using CLEANFILES under different conditions?
-function is_another_clean_files(build, product)
-    define my.build = is_another_clean_files.build
-    define my.product = is_another_clean_files.product
-    define my.count = 0
-    if (is_clean_files(my.product))
-        my.count = count(my.build.product,\
-            is_clean_files(count) & ((count.option ? "") <> my.product.option))
-    endif
-    return my.count > 0
-endfunction
-
-function initialize_dynamic_variables(heading, repository, mapper)
-    define my.repository = initialize_dynamic_variables.repository
-    define my.build = my.repository->build?
-    if (defined(my.build))
-        new fixed as _fixed
-            define my.variables = ""
-            for my.build.product as _product
-                define my.variable = get_automake_variable(_product)
-                if (is_dynamic_variable(_product, my.variable, _fixed))
-                    if (is_reused_variable(my.build, my.variable))
-                        my.variables += "$(my.variable) =\n"
-                        map_add(my.mapper, my.variable)
-                        if (is_test(_product))
-                            my.variables += "TESTS =\n"
-                            map_add(my.mapper, "TESTS")
-                        endif
-                    endif
-                    if (is_another_clean_files(my.build, _product) &\
-                        !map_exists(my.mapper, "CLEANFILES"))
-                        my.variables += "CLEANFILES =\n"
-                        map_add(my.mapper, "CLEANFILES")
-                    endif
-                endif
-                map_add(_fixed, my.variable)
-            endfor
-            if (!is_empty(my.variables))
-                heading1(my.heading)
-                write_line(my.variables)
+function get_initial_variables(build, mapper)
+    define my.build = get_initial_variables.build
+    define my.mapper = get_initial_variables.mapper
+    new table as _table
+        for my.build.product as _product
+            define my.option = _product.option ? ""
+            define my.variable = get_automake_variable(_product)
+            table_add(_table, my.variable, my.option)
+            if (is_test(_product))
+                table_add(_table, "TESTS", my.option)
             endif
-        endnew _fixed
-    endif
-endfunction
-
-function initialize_variables()
-    # Create a appearance-ordered list of distinct variable[:option] tuples.
-    # Iterate the list and initialize any multiple-first-optional variable.
-    # Multiple means more than one of the same variable (despite option).
-    # Optional means there exists an option in the tuple.
-    
-    # Create a local scope to define properties as variable names.
-    # Assign the option (or empty string) to each property.
+            if (is_clean_files(_product))
+                table_add(_table, "CLEANFILES", my.option)
+            endif
+        endfor
+        return get_variables_string(_table, my.mapper)
+    endnew _table
 endfunction
 
 # Get an = or += depending on whether it's the first or later use.
@@ -870,7 +838,8 @@ ACLOCAL_AMFLAGS = -I m4
 ###############################################################################
 
 function generate_automake()
-for generate.repository by name as _repository
+for generate.repository as _repository by _repository.name\
+    where (defined(_repository->build))
 
     require(_repository, "repository", "name")
     define my.out_file = "$(_repository.name)/Makefile.am"
@@ -878,27 +847,26 @@ for generate.repository by name as _repository
     output(my.out_file)
 
     copyleft(_repository.name)
-    define my.build = _repository->build?
-    define my.base = "$(repositories_parent())/$(_repository.name)/"
+    define my.build = _repository->build
+    define my.base = "$(global.root)/$(_repository.name)/"
     define my.root = normalize_directory(my.base)
     
     heading1("Standard declarations.")
     initialize_automake()
     
     new mapper as _mapper
-        define my.heading1 = "Initialize initially conditional variables."
-        initialize_dynamic_variables(my.heading1, _repository, _mapper)
-
-        heading1("Automake products.")
-        if (!defined(my.build))
-            heading2("The repository/build element is not defined.")
-        else
-            for my.build.product as _product
-                heading2(get_product_description(_product))
-                render_product(_product, my.root, _repository, _mapper)
-            endfor
+        define my.variables = get_initial_variables(my.build, _mapper)
+        if (!is_empty(my.variables))
+            heading1("Conditional variables.")
+            write_line(my.variables)
         endif
-    endnew
+        
+        heading1("Automake products.")
+        for my.build.product as _product
+            heading2(get_product_description(_product))
+            render_product(_product, my.root, _repository, _mapper)
+        endfor
+    endnew _mapper
     
     close
 endfor _repository

@@ -10,10 +10,6 @@
 # Functions
 ###############################################################################
 
-function global.repositories_parent()
-    return global.root
-endfunction
-
 # Collection utilities.
 
 function set_cursor_begin(element)
@@ -203,7 +199,7 @@ function get_flags_variable(flag)
 endfunction
 
 function global.get_option_symbol(option)
-    define my.option = get_option_symbol.option?
+    define my.option = get_option_symbol.option
     if (defined(my.option))
         require(my.option, "option", "type")
         require(my.option, "option", "name")
@@ -220,7 +216,10 @@ function global.find_option_symbol(element, configure)
     define my.configure = find_option_symbol.configure
     if (is_optional_element(my.element))
         define my.opt = my.configure->option(option.name = my.element.option)?
-        return get_option_symbol(my.opt)
+        if (defined(my.opt))
+            return get_option_symbol(my.opt)
+        endif
+        abort "Symbol not defined for option: $(my.element.option)"
     endif
 endfunction
 

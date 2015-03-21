@@ -68,6 +68,7 @@ goto end
 
 :error
 echo *** ERROR, generation terminated early.
+exit /b %errorlevel%
 
 :end
 REM Restore directory.
