@@ -20,19 +20,16 @@ function is_multiple_first_optional(table, row)
         (table_count(my.table, my.name) > 1)
 endfunction
 
-function get_variables_string(table, mapper)
-    define my.table = get_variables_string.table
-    define my.mapper = get_variables_string.mapper
-    define my.variables = ""
-    for my.table.row as _row where is_multiple_first_optional(my.table, _row)
-        my.variables += "$(_row.name) =\n"
-        map_add(my.mapper, _row.name)
+function render_variables(table)
+    define my.table = render_variables.table
+    for my.table.row as _row
+        write_line("$(_row.name) =")
     endfor
-    return my.variables
 endfunction
 
-function get_initial_variables(build, mapper)
+function get_initial_variables(build, variables, mapper)
     define my.build = get_initial_variables.build
+    define my.variables = get_initial_variables.variables
     define my.mapper = get_initial_variables.mapper
     new table as _table
         for my.build.product as _product
@@ -46,7 +43,10 @@ function get_initial_variables(build, mapper)
                 table_add(_table, "CLEANFILES", my.option)
             endif
         endfor
-        return get_variables_string(_table, my.mapper)
+        for _table.row as _row where is_multiple_first_optional(_table, _row)
+            map_add(my.mapper, _row.name)
+            table_add(my.variables, _row.name, "")
+        endfor
     endnew _table
 endfunction
 
@@ -169,10 +169,16 @@ function is_test(product)
     abort "Tests must be executable: '$(my.product.prefix)'"
 endfunction
 
-# Is the product build for check purposes?
+# Is the product a check target.
 function is_check(product)
     define my.product = is_check.product
     return is_true(my.product.check) | is_test(my.product)
+endfunction
+
+# Is the product a custom target.
+function is_custom_target(product)
+    define my.product = is_custom_target.product
+    return is_optional_element(my.product) & !is_test(my.product)
 endfunction
 
 # Map the prefix to the primary symbol (this is a simplified mapping).
@@ -407,14 +413,6 @@ function normalize_directory(folder)
     return my.directory.path
 endfunction
 
-# Helper function for building a container segment.
-function construct_segment(product, folder, trim)
-    define my.product = construct_segment.product
-    define my.segment = difference(my.folder, my.trim)
-    define my.container = my.product.container ? ""
-    return join(my.container, my.segment)
-endfunction
-
 function get_relative_path(full_path, trim)
     define my.relative_path = difference(my.full_path, my.trim)
     return " \\\n    $(my.relative_path)"
@@ -455,6 +453,14 @@ function render_all_variables(folder, base_trim, path_trim, product, mapper)
         render_files_variables(my.subfolder, my.base_trim, my.path_trim,\
             my.product, my.mapper)
     endfor
+endfunction
+
+# Helper function for building a container segment.
+function construct_segment(product, folder, trim)
+    define my.product = construct_segment.product
+    define my.segment = difference(my.folder, my.trim)
+    define my.container = my.product.container ? ""
+    return join(my.container, my.segment)
 endfunction
 
 # Recurse directory tree, rendering outputs with files for each folder.
@@ -521,7 +527,6 @@ function chase_libraries(product, build)
     clear_cursor(my.cursor)
 endfunction
 
-# TODO: generate test runner based on metadata.
 function get_tests_variable(product, mapper)
     define my.product = get_tests_variable.product
     define my.mapper = get_tests_variable.mapper
@@ -818,21 +823,43 @@ function render_product(product, root, repository, mapper)
     endif
 endfunction
 
-###############################################################################
-# Macros
-###############################################################################
-.endtemplate
-.template 1
-.
-.macro initialize_automake()
-.
-# look for macros in the m4 subdirectory
-ACLOCAL_AMFLAGS = -I m4
+function initialize_automake()
+    heading2("Look for macros in the m4 subdirectory.")
+    write_line("ACLOCAL_AMFLAGS = -I m4\n")
+endfunction
 
-.endmacro # initialize_automake
-.
-.endtemplate
-.template 0
+# For each option, write all paths to the option-named target.
+function render_make_targets(targets)
+    define my.targets = render_make_targets.targets
+    define my.last_row_name = ""
+    for my.targets.row as _outer by _outer.name
+        if (_outer.name = my.last_row_name)
+            next _outer
+        endif
+        define my.target = ""
+        my.last_row_name = _outer.name
+        for my.targets.row as _inner where (_inner.name = _outer.name)
+            my.target += " \\\n    $(_inner.value)"
+        endfor
+        heading2("make target: $(_outer.name)")
+        write_line("target_$(_outer.name) =$(my.target)\n")
+        write_line("$(_outer.name): ${target_$(_outer.name)}\n")
+    endfor
+endfunction
+
+# For each non-test product that is not a test, accumulate the product's 
+# option (name) and path (value) in the targets table. 
+function define_make_targets(build, targets)
+    define my.build = define_make_targets.build
+    define my.targets = define_make_targets.targets
+    for my.build.product as _product where is_custom_target(_product)
+        define my.path = get_product_path(_product)
+        if (!is_empty(my.path))
+            table_add(my.targets, _product.option, my.path)
+        endif
+    endfor
+endfunction
+
 ###############################################################################
 # Generation
 ###############################################################################
@@ -851,23 +878,33 @@ for generate.repository as _repository by _repository.name\
     define my.base = "$(global.root)/$(_repository.name)/"
     define my.root = normalize_directory(my.base)
     
-    heading1("Standard declarations.")
+    heading1("Automake settings.")
     initialize_automake()
     
     new mapper as _mapper
-        define my.variables = get_initial_variables(my.build, _mapper)
-        if (!is_empty(my.variables))
-            heading1("Conditional variables.")
-            write_line(my.variables)
-        endif
+        new variables as _variables
+            get_initial_variables(my.build, _variables, _mapper)
+            if (!table_empty(_variables))
+                heading1("Conditional variables.")
+                render_variables(_variables)
+            endif
+        endnew _variables
         
-        heading1("Automake products.")
+        heading1("Distribution, build and install products.")
         for my.build.product as _product
             heading2(get_product_description(_product))
             render_product(_product, my.root, _repository, _mapper)
         endfor
     endnew _mapper
     
+    new targets as _targets
+        define_make_targets(my.build, _targets)
+        if (!table_empty(_targets))
+            heading1("Custom make targets.")
+            render_make_targets(_targets)
+        endif
+   endnew _targets
+       
     close
 endfor _repository
 endfunction # generate_automake
