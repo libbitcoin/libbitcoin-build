@@ -1,3 +1,4 @@
+#!/bin/sh
 ###############################################################################
 # Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
@@ -11,8 +12,7 @@
 set -e
 
 # Do everything relative to this file location.
-PWD="`dirname "$0"`"
-pushd `cd "${PWD}" && pwd`
+cd `dirname "$0"`
 
 # Clean and make directories for generated build artifacts.
 rm -rf libbitcoin
@@ -70,5 +70,3 @@ chmod +x ../libbitcoin-server/*.sh
 # source ../libbitcoin-protocol/bindings.sh
 # source ../libbitcoin-server/bindings.sh
 
-# Restore directory.
-popd
