@@ -1,4 +1,4 @@
-@ECHO OFF
+@echo off
 REM ###########################################################################
 REM  Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 REM 
@@ -32,9 +32,6 @@ mkdir libbitcoin-explorer
 mkdir libbitcoin-node
 mkdir libbitcoin-protocol
 mkdir libbitcoin-server
-
-REM Generate git inputs for GSL scripts.
-REM The path to git.exe must be in our path.
 
 REM Generate build artifacts.
 gsl -q generate.xml
