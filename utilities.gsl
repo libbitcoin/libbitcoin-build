@@ -225,11 +225,6 @@ endfunction
 
 # Build Utilities.
 
-function global.is_gmp_build(build)
-    define my.build = is_gmp_build.build
-    return my.build.name = "gmp"
-endfunction
-
 function global.is_boost_build(build)
     define my.build = is_boost_build.build
     return my.build.name = "boost"
@@ -238,6 +233,132 @@ endfunction
 function global.is_github_build(build)
     define my.build = is_github_build.build
     return !is_empty(my.build.github)
+endfunction
+
+# Product tests.
+
+# Test for a prefix.
+function global.match_prefix(product, prefix)
+    define my.product = match_prefix.product
+    require(my.product, "product", "prefix")
+    return my.product.prefix = my.prefix
+endfunction
+
+# Test prefix for primary type (this is a simplified mapping).
+function global.is_data(product)
+    define my.product = is_data.product
+    return match_prefix(my.product, "bash_completion") |\
+    match_prefix(my.product, "doc") |\
+    match_prefix(my.product, "pkgconfig") |\
+    match_prefix(my.product, "jarexec") |\
+    match_prefix(my.product, "sysconf")
+endfunction
+function global.is_headers(product)
+    define my.product = is_headers.product
+    return match_prefix(my.product, "include")
+endfunction
+function global.is_info(product)
+    define my.product = is_info.product
+    return match_prefix(my.product, "info")
+endfunction
+function global.is_java(product)
+    define my.product = is_java.product
+    return match_prefix(my.product, "javaexec")
+endfunction
+function global.is_jar(product)
+    define my.product = is_jar.product
+    # jar uses DATA but we wire it up as a product.
+    return match_prefix(my.product, "jarexec")
+endfunction
+function global.is_library(product)
+    define my.product = is_library.product
+    return match_prefix(my.product, "lib") |\
+        match_prefix(my.product, "pkgpyexec")
+endfunction
+function global.is_manual(product)
+    define my.product = is_manual.product
+    return match_prefix(my.product, "man")
+endfunction
+function global.is_program(product)
+    define my.product = is_program.product
+    return match_prefix(my.product, "bin")
+endfunction
+function global.is_python(product)
+    define my.product = is_python.product
+    return match_prefix(my.product, "pkgpython")
+endfunction
+function global.is_script(product)
+    define my.product = is_script.product
+    return match_prefix(my.product, "sbin")
+endfunction
+
+# Is the product allowed to be active only once?
+function global.is_singleton(product)
+    define my.product = is_singleton.product
+    return is_java(my.product) | is_jar(my.product)
+endfunction
+
+# Does the product assign to the CLEANFILES variable.
+function global.is_clean_files(product)
+    define my.product = is_clean_files.product
+    return is_java(my.product) | is_jar(my.product)
+endfunction
+
+# Is the product built from c/c++?
+function global.is_cpp(product)
+    define my.product = is_cpp.product
+    return is_program(my.product) | is_library(my.product)
+endfunction
+
+# Is the product executable?
+function global.is_executable(product)
+    define my.product = is_executable.product
+    return is_program(my.product) | is_script(my.product)
+endfunction
+
+# Is the product compiled?
+function global.is_compiled(product)
+    define my.product = is_compiled.product
+    return is_cpp(my.product) | is_java(my.product)
+endfunction
+
+# Is the non-compiled product explicitly set to distribute?
+function global.is_distribute(product)
+    define my.product = is_distribute.product
+    return defined(my.product.distribute) & is_true(my.product.distribute)
+endfunction
+
+# Is the non-compiled product explicitly set to not distribute?
+function global.is_no_distribute(product)
+    define my.product = is_no_distribute.product
+    return defined(my.product.distribute) & !is_true(my.product.distribute)
+endfunction
+
+# Is the  product explicitly set to not install?
+function global.is_no_install(product)
+    define my.product = is_no_install.product
+    return defined(my.product.install) & !is_true(my.product.install)
+endfunction
+
+# Is the product a test executable?
+function global.is_test(product)
+    define my.product = is_test.product
+    if (!is_true(my.product.test) | is_executable(my.product))
+        return is_true(my.product.test)
+    endif
+    abort "Tests must be executable: '$(my.product.prefix)'"
+endfunction
+
+# Is the product a check target.
+function global.is_check(product)
+    define my.product = is_check.product
+    return is_true(my.product.check) | is_test(my.product)
+endfunction
+
+# Is the product a custom target.
+function global.is_custom_target(product)
+    define my.product = is_custom_target.product
+    return is_optional_element(my.product) & !is_test(my.product)
 endfunction
 
 # Debugging utilities.
