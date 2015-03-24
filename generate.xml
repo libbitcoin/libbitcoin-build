@@ -203,6 +203,7 @@
     </package>
 
     <configure>
+      <option type="with" name="consensus" default="yes" define="WITH_CONSENSUS" description="Link libbitcoin-consensus and use for consensus checks." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="tools" default="yes" conditional="true" description="Compile with tools." />
@@ -212,7 +213,9 @@
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
+      <!-- libbitcoin and libbitcoin-consensus are independent, so must declare both. -->
       <dependency name="bitcoin" version="2.8.0" />
+      <dependency name="bitcoin-consensus" version="1.0.0" option="consensus" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -247,6 +250,8 @@
       </product>
       <product prefix="lib" path="src" name="bitcoin-blockchain">
         <library name="bitcoin" />
+        <!-- For without-consensus builds this will just produce empty variables. -->
+        <library name="bitcoin-consensus" />
         <headers path="include" />
         <sources path="src" />
       </product>
@@ -387,6 +392,11 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
       <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -395,12 +405,18 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
+        <option value="--without-consensus" />
+        <!-- these allow unused build to complete -->
+        <option value="--with-secp256k1" />
+        <option value="--without-openssl" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
+        <option value="--with-secp256k1" />
+        <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
@@ -417,6 +433,8 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
+        <option value="--with-secp256k1" />
+        <option value="--without-openssl" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
@@ -426,6 +444,7 @@
         <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -s'" />
@@ -682,7 +701,6 @@
         <file path="NEWS" />
         <file path="README" />
       </product>
-      
       <product prefix="lib" path="src" name="bitcoin-consensus">
         <library name="crypto" />
         <library name="secp256k1" />
@@ -692,7 +710,8 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_consensus_test" test="true" option="tests">
         <runner random="true" />
-        <library name="bitcoin-consensus" />        
+        <library name="bitcoin-consensus" />
+        <library name="boost" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <headers path="src" />
@@ -701,7 +720,6 @@
       <product prefix="include" container="bitcoin">
         <files path="include/bitcoin" summary="consensus" />
       </product>
-      
       <product prefix="lib" path="bindings/java/wrap" name="bitcoin-consensus-jni" option="java">
         <library name="bitcoin-consensus" />
         <library name="java" />
@@ -714,7 +732,6 @@
       <product prefix="jarexec" distribute="false" install="true" option="java">
         <file path="org.libbitcoin.consensus-${VERSION}.jar" />
       </product>
-      
       <product prefix="pkgpyexec" path="bindings/python/wrap" name="_bitcoin-consensus" unprefixed="true" option="python">
         <library name="bitcoin-consensus" />
         <library name="python" />
@@ -764,9 +781,9 @@
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <get name="swig" />
-        <option value="--with-java" />
         <option value="--without-openssl" />
         <option value="--with-secp256k1" />
+        <option value="--with-java" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
@@ -774,8 +791,6 @@
       <job system="linux" compiler="clang" link="static" >
         <get name="swig" />
         <option value="--with-python" />
-        <option value="--without-openssl" />
-        <option value="--with-secp256k1" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
@@ -815,8 +830,6 @@
         <get name="libssl-dev" />
         <option value="--with-java" />
         <option value="--with-python" />
-        <option value="--with-openssl" />
-        <option value="--without-secp256k1" />
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -s'" />
@@ -1152,6 +1165,11 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
       <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
@@ -1166,12 +1184,18 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
+        <option value="--without-consensus" />
+        <!-- these allow unused build to complete -->
+        <option value="--with-secp256k1" />
+        <option value="--without-openssl" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
+        <option value="--with-secp256k1" />
+        <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
@@ -1191,6 +1215,8 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
         <get name="bash-completion" />
+        <option value="--with-secp256k1" />
+        <option value="--without-openssl" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
@@ -1202,13 +1228,13 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
+        <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--with-bash-completiondir" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
-
   </repository>
 
   <repository name="libbitcoin-protocol" version="0.1.0" email="mienkphi@gmail.com">
@@ -1522,6 +1548,11 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
       <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
@@ -1542,12 +1573,18 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
+        <option value="--without-consensus" />
+        <!-- these allow unused build to complete -->
+        <option value="--with-secp256k1" />
+        <option value="--without-openssl" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
+        <option value="--with-secp256k1" />
+        <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
@@ -1567,6 +1604,8 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
         <get name="bash-completion" />
+        <option value="--with-secp256k1" />
+        <option value="--without-openssl" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
@@ -1578,6 +1617,7 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
+        <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--with-bash-completiondir" />
