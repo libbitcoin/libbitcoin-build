@@ -35,7 +35,7 @@ endfunction
 BOOST_UNIT_TEST_OPTIONS=\\
 "--run_test=$(my.run) "\\
 "--random=$(my.randomize ?? 1 ? 0) "\\
-"--show_progress=yes "\\
+"--show_progress=no "\\
 "--detect_memory_leak=0 "\\
 "--report_level=no "\\
 "--build_info=yes"
