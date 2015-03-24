@@ -10,7 +10,8 @@
 # Functions
 ###############################################################################  
 
-# Get all bitcoin headers in our dependencies, since they are chained.
+# Get all bitcoin headers in our dependencies. Since they are chained and only
+# incorporated if not redunant, this yields the minimal necessary set.
 function write_bitcoin_includes(configure)
     define my.configure = write_bitcoin_includes.configure
     for my.configure.dependency as _dependency\
@@ -20,16 +21,10 @@ function write_bitcoin_includes(configure)
     endfor
 endfunction
 
-# This is redundant with private functions of gsl.Makefile.am.
-function is_include(product)
-    define my.product = is_include.product
-    require(my.product, "product", "prefix")
-    return my.product.prefix = "include"
-endfunction
-
-# TODO: Create sorted graph for bindings interface construction.
-function write_all_includes(build)
-    define my.build = write_all_includes.build
+# Search [include.path/][summary] => [include.path/][summary.hpp]
+function write_local_includes(configure)
+    define my.configure = write_local_includes.configure
+    define my.build = my.configure->build
     for my.build.product as _product where is_include(_product)
         for _product.files as _files
             # TODO
@@ -66,9 +61,8 @@ endfunction
 # Generation
 ###############################################################################
 function generate_include()
-for generate.repository by name as _repository
-
-    # TODO: Search [include.path/][summary] => [include.path/][summary.hpp]
+for generate.repository by name as _repository\
+    where (defined(_repository->build))
 
     define my.include = bitcoin_to_include(_repository.name)
     define my.out_file = "$(_repository.name)/$(my.include).hpp"
@@ -78,12 +72,11 @@ for generate.repository by name as _repository
     c_copyleft(_repository.name)
     begin_include(_repository)
     
-    write_line("// TODO: populate includes from sources.")
+    define my.configure = _repository->configure
+    write_bitcoin_includes(my.configure)
+    write_local_includes(my.configure)
     
-    write_bitcoin_includes(_repository->configure)
-    write_all_includes(_repository->build)
     end_include()
-
     close
     
 endfor _repository
