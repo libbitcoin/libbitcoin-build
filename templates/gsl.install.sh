@@ -44,16 +44,6 @@ function get_boost_file(install, compiler)
     return "boost_$(my.underscore_version).tar.bz2"
 endfunction
 
-function get_gmp_file(install, compiler)
-    define my.install = get_gmp_file.install
-    define my.version = get_archive_version(my.install, "gmp", my.compiler)?
-    if (!defined(my.version))    
-        trace1("get_gmp_file:get_archive_version($(my.compiler ? 0)) = []")
-        return
-    endif
-    return "gmp-$(my.version).tar.bz2"
-endfunction
-
 function get_boost_url(install, compiler)
     trace1("get_boost_url($(my.compiler) ? 0)")
     define my.install = get_boost_url.install
@@ -73,19 +63,6 @@ function get_boost_url(install, compiler)
     return my.url
 endfunction
 
-function get_gmp_url(install, compiler)
-    define my.install = get_gmp_url.install
-    define my.base_url = "https\://ftp.gnu.org/gnu/gmp"
-    define my.archive = get_gmp_file(my.install, my.compiler)?
-    if (!defined(my.archive))
-        trace1("get_gmp_url:get_gmp_file($(my.compiler ? 0)) = []")
-        return
-    endif
-    define my.url = "$(my.base_url)/$(my.archive)"
-    trace1("get_gmp_url = $(my.url)")
-    return my.url
-endfunction
-
 ###############################################################################
 # Macros
 ###############################################################################
@@ -97,9 +74,6 @@ endfunction
 # Script to build and install $(my.repo.name).
 #
 # Script options:
-.   if (have_build(my.repo->install, "gmp"))
-# --build-gmp              Builds GMP library.
-.   endif
 .   if (have_build(my.repo->install, "boost"))
 # --build-boost            Builds Boost libraries.
 .   endif
@@ -142,22 +116,6 @@ BOOST_ARCHIVE$(my.upper_compiler)="$(get_boost_file(my.install, my.compiler))"
 
 .endmacro # define_boost
 .
-.macro define_gmp(install, compiler)
-.   trace1("define_gmp($(my.compiler ? 0))")
-.   define my.install = define_gmp.install
-.   define my.show_compiler = defined(my.compiler) ?? " for $(my.compiler)" ? ""
-.   define my.upper_compiler = defined(my.compiler) ?? "_$(my.compiler:upper,c)" ? ""
-.   heading2("GMP archives$(my.show_compiler).")
-.   define my.url = get_gmp_url(my.install, my.compiler)?
-.   if (!defined(my.url))
-.       #abort "A version of gmp$(my.show_compiler) is not defined."
-.       return
-.   endif
-GMP_URL$(my.upper_compiler)="$(my.url)"
-GMP_ARCHIVE$(my.upper_compiler)="$(get_gmp_file(my.install, my.compiler))"
-
-.endmacro # define_gmp
-.
 .macro define_initialize()
 .   heading2("Exit this script on the first build error.")
 set -e
@@ -196,10 +154,7 @@ for OPTION in "$@"; do
     case $OPTION in
         (--prefix=*) PREFIX="${OPTION#*=}";;
         (--build-dir=*) BUILD_DIR="${OPTION#*=}";;
-
-        (--build-gmp) BUILD_GMP="yes";;
         (--build-boost) BUILD_BOOST="yes";;
-        
         (--disable-shared) DISABLE_SHARED="yes";;
         (--disable-static) DISABLE_STATIC="yes";;
     esac
@@ -209,7 +164,7 @@ echo "Prefix directory: $PREFIX"
 
 .   heading2("Purge our custom options so they don't go to configure.")
 CONFIGURE_OPTIONS=( "$@" )
-CUSTOM_OPTIONS=( "--build-dir=$BUILD_DIR" "--build-boost" "--build-gmp" )
+CUSTOM_OPTIONS=( "--build-dir=$BUILD_DIR" "--build-boost" )
 for CUSTOM_OPTION in "${CUSTOM_OPTIONS[@]}"; do
     CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/$CUSTOM_OPTION}" )
 done
@@ -252,12 +207,7 @@ if [[ $PREFIX ]]; then
     if [[ $BUILD_BOOST == yes ]]; then
         with_boost="--with-boost=$PREFIX"
     fi
-    
-    # Set public gmp_flags variable (because GMP has no pkg-config).
-    if [[ $BUILD_GMP == yes ]]; then
-        gmp_flags="CPPFLAGS=-I$PREFIX/include LDFLAGS=-L$PREFIX/lib"
-    fi
-    
+
     # Set public prefix variable (to tell Boost where to build).
     prefix="--prefix=$PREFIX"
 fi
@@ -267,7 +217,6 @@ echo "Published dynamic options:"
 echo "  boost_link: $boost_link"
 echo "  boost_stdlib: $boost_stdlib"
 echo "  prefix: $prefix"
-echo "  gmp_flags: $gmp_flags"
 echo "  with_boost: $with_boost"
 echo "  with_pkgconfigdir: $with_pkgconfigdir"
 
@@ -425,41 +374,6 @@ build_from_tarball_boost()
     pop_directory
 }
 
-build_from_tarball_gmp()
-{
-    local URL=$1
-    local ARCHIVE=$2
-    local REPO=$3
-    local JOBS=$4
-    shift 4
-
-    if [[ $BUILD_GMP != yes ]]; then
-        display_message "GMP build not enabled"
-        return
-    fi
-
-    display_message "Download $ARCHIVE"
-    
-    create_directory $REPO
-    push_directory $REPO
-    
-    # Extract the source locally.
-    wget --output-document $ARCHIVE $URL
-    tar --extract --file $ARCHIVE --bzip2 --strip-components=1
-
-    # Build the local sources.
-    # GMP does not provide autogen.sh or package config.
-    configure_options "$@"
-
-    # GMP does not honor noise reduction.
-    echo "Making all..."
-    make_jobs $JOBS >/dev/null
-    echo "Installing all..."
-    make install >/dev/null
-
-    pop_directory
-}
-
 build_from_github()
 {
     local ACCOUNT=$1
@@ -518,10 +432,6 @@ build_from_travis()
 
 .endmacro # define_utility_functions
 .
-.macro build_gmp()
-    build_from_tarball_gmp $GMP_URL $GMP_ARCHIVE gmp $PARALLEL "$@" $GMP_OPTIONS
-.endmacro # build_gmp
-.
 .macro build_boost()
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
 .endmacro # build_boost
@@ -549,9 +459,7 @@ build_all()
 .       if !defined(my.build_$(_build.name:c))
 .           define my.build_$(_build.name:c) = 0
 .
-.           if (is_gmp_build(_build))
-.               build_gmp()
-.           elsif (is_boost_build(_build))
+.           if (is_boost_build(_build))
 .               build_boost()
 .           elsif (is_github_build(_build))
 .               if (!last())
@@ -597,7 +505,6 @@ for generate.repository by name as _repository
     define_build_directory(_repository)
     define_boost(my.install, "gcc")
     define_boost(my.install, "clang")
-    #define_gmp(my.install)
     
     heading1("Initialize the build environment.")
     define_initialize()
