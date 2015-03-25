@@ -19,9 +19,11 @@ The artifacts generated for each library are as follows. Package names coincide 
 
 ```
 .travis.yml
+autogen.sh
 configure.ac
 install.sh
 libbitcoin[-package].pc.in
+libbitcoin[_package]_test_runner.sh
 Makefile.am
 version.hpp
 ```
