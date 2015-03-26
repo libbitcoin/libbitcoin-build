@@ -27,12 +27,12 @@ function render_variables(table)
     endfor
 endfunction
 
-function get_initial_variables(build, variables, mapper)
-    define my.build = get_initial_variables.build
-    define my.variables = get_initial_variables.variables
-    define my.mapper = get_initial_variables.mapper
+function get_make_variables(make, variables, mapper)
+    define my.make = get_make_variables.make
+    define my.variables = get_make_variables.variables
+    define my.mapper = get_make_variables.mapper
     new table as _table
-        for my.build.product as _product
+        for my.make.product as _product
             define my.option = _product.option ? ""
             define my.variable = get_automake_variable(_product)
             table_add(_table, my.variable, my.option)
@@ -187,8 +187,8 @@ function get_install(product, container)
 endfunction
 
 # Normalize the library name (as "[lib]name[.la]").
-function get_library_name(library)
-    define my.library = get_library_name.library
+function get_archive_name(library)
+    define my.library = get_archive_name.library
     define my.prefix = is_true(my.library.unprefixed) ?? "" ? "lib"
     return "$(my.prefix)$(my.library.name).la"
 endfunction
@@ -199,7 +199,7 @@ function get_product_name(product)
     if (is_program(my.product))
         return my.product.name
     elsif (is_library(my.product))
-        return get_library_name(my.product)
+        return get_archive_name(my.product)
     endif
     return ""
 endfunction
@@ -375,25 +375,15 @@ function get_flag(flag)
     abort "Required attribute missing: flag.value|define|substitute"
 endfunction
 
-# Get the product with the given library name.
-function get_library_product(name, build)
-    define my.build = get_library_product.build
-    return my.build->product((product.name ? "") = my.name)
-endfunction
-
-function get_chase_product(library, build)
-    define my.library = get_chase_product.library
-    define my.build = get_chase_product.build
-    return my.build->product(is_library(product) &\
-        (product.name = my.library.name))
-endfunction
-
-function chase_libraries(product, build)
+# For each library of this product that references another product,
+# copy the other product's library elements into this product element.
+# This function is not idempotent, call only once for a given product.
+function chase_libraries(product, make)
     define my.product = chase_libraries.product
-    define my.build = chase_libraries.build
+    define my.make = chase_libraries.make
     define my.cursor = set_cursor_end(my.product)
     for my.product.library as _library
-        define my.chased_product = get_chase_product(_library, my.build)?
+        define my.chased_product = find_library_product(_library.name, my.make)?
         if (defined(my.chased_product))
             for my.chased_product.library as _chased_library
                 copy _chased_library before my.cursor
@@ -479,39 +469,48 @@ function define_cpp_flag_variable(variables, flag)
     endif
 endfunction
 
-function define_cpp_lib_variables(variables, library, build, configure)
+function define_cpp_lib_variables(variables, library, make, configure)
     define my.variables = define_cpp_lib_variables.variables
     define my.library = define_cpp_lib_variables.library
-    define my.build = define_cpp_lib_variables.build
+    define my.make = define_cpp_lib_variables.make
     define my.configure = define_cpp_lib_variables.configure
     require(my.library, "library", "name")
-    define my.built = get_library_product(my.library.name, my.build)?
-    if (defined(my.built))
-        define my.library_name = get_library_name(my.built)
-        my.library_path = join(my.built.path, my.library_name)
-        my.variables.libs += " $(my.library_path)"
+    define my.name = my.library.name
+    define my.product = find_library_product(my.name, my.make)?
+    if (defined(my.product))
+        define my.archive_name = get_archive_name(my.product)
+        my.archive_path = join(my.product.path, my.archive_name)
+        my.variables.libs += " $(my.archive_path)"
     else
-        # pkg-config is problematic in that it mixes LDFLAGS into LIBS
-        # and all flags into CFLAGS. We rewrite its CFLAGS as CPPFLAGS.
-        define my.library_cname = "$(my.library.name:c)"
-        define my.is_language = is_java_dependency(my.library) |\
-            is_python_dependency(my.library)
-        define my.is_boost = is_boost_dependency(my.library)
-        define my.is_boost_lib = is_boost_lib_dependency(my.library)
-        define my.is_packaged = is_packaged_library(my.library.name, my.configure)
-        if (!my.is_boost & !my.is_language)
-            my.variables.libs += " ${$(my.library_cname)_LIBS}"
+        define my.cname = "$(my.name:c)"
+        define my.dependency = find_dependency_by_name(my.name, my.configure)?
+        if (!defined(my.dependency))
+            abort "The product library has no dependency: $(my.name)"
         endif
-        if (!my.is_boost_lib)
-            my.variables.cpp_flags += " ${$(my.library_cname)_CPPFLAGS}"
+        define my.is_package = is_package_dependency(my.dependency)
+        define my.is_function = is_function_dependency(my.dependency)
+        define my.is_boost = is_boost_dependency(my.dependency)
+        define my.is_boost_lib = is_boost_lib_dependency(my.dependency)
+        define my.is_language = is_java_dependency(my.dependency) |\
+            is_python_dependency(my.dependency)
+        define my.is_common = is_pthread_dependency(my.dependency) |\
+            is_iconv_dependency(my.dependency)
+
+        if (my.is_boost)
+            my.variables.ld_flags += " ${$(my.cname)_LDFLAGS}"
         endif
-        if (!my.is_packaged & !my.is_boost & !my.is_boost_lib & !my.is_language)
-            my.variables.ccc_flags += " ${$(my.library_cname)_CFLAGS}"
+        if (my.is_boost_lib | my.is_common | my.is_function | my.is_package)
+            my.variables.libs += " ${$(my.cname)_LIBS}"
         endif
-        if (!my.is_packaged & !my.is_boost_lib & !my.is_language)
-            my.variables.ld_flags += " ${$(my.library_cname)_LDFLAGS}"
+        if (my.is_boost | my.is_common | my.is_language | my.is_package)
+            my.variables.cpp_flags += " ${$(my.cname)_CPPFLAGS}"
         endif
-        #my.variables.cxx_flags += " ${$(my.library_cname)_CXXFLAGS}"
+        if (0)
+            my.variables.ccc_flags += " ${$(my.cname)_CFLAGS}"
+        endif
+        if (0)        
+            my.variables.cxx_flags += " ${$(my.cname)_CXXFLAGS}"
+        endif
     endif
 endfunction
 
@@ -521,12 +520,12 @@ function render_cpp_variables(product, root, repository, mapper)
     define my.repository = render_cpp_variables.repository
     
     if (is_cpp(my.product))
-        define my.build = my.repository->build
+        define my.make = my.repository->make
         define my.configure = my.repository->configure
         define my.root_length = string.length(my.root)
         new variables as _variables
         initialize_cpp_variables(_variables)
-        chase_libraries(my.product, my.build)
+        chase_libraries(my.product, my.make)
         
         # Define _PROGRAMS|_[LT]LIBRARIES variables.
         _variables.binaries = get_binaries_variable(my.product, my.mapper)
@@ -552,12 +551,12 @@ function render_cpp_variables(product, root, repository, mapper)
             define_cpp_flag_variable(_variables, _flag)
         endfor
         
-        # Define _LIBS|_LDFLAGS|C??FLAGS option variables from libraries.
+        # Define _LIBS|_LDFLAGS|C??FLAGS variables from libraries.
         for my.product.library as _library
-            define_cpp_lib_variables(_variables, _library, my.build, my.configure)
+            define_cpp_lib_variables(_variables, _library, my.make, my.configure)
         endfor
         
-        # Define _SOURCES option variable from sources elements.
+        # Define _SOURCES variable from sources elements.
         for my.product.sources as _sources
             require(_sources, "sources", "path")
             define my.folder = "$(my.root)$(_sources.path)"
@@ -592,15 +591,15 @@ endfunction
 
 function get_java_stamp(repository)
     define my.repository = get_java_stamp.repository
-    define my.build = my.repository->build?
-    if (defined(my.build))
-        define my.java_product = my.build->product(prefix = "javaexec")?
+    define my.make = my.repository->make?
+    if (defined(my.make))
+        define my.java_product = my.make->product(prefix = "javaexec")?
         if (defined(my.java_product))
             define my.prefix = get_java_stamp_variable(my.java_product)
             return "class$(my.prefix).stamp"
         endif
     endif
-    abort "The build is missing a required java product."
+    abort "The make is missing a required java product."
 endfunction
 
 function get_automake_variable(product, segment)
@@ -725,10 +724,10 @@ endfunction
 
 # For each non-test product that is not a test, accumulate the product's 
 # option (name) and path (value) in the targets table. 
-function define_make_targets(build, targets)
-    define my.build = define_make_targets.build
+function define_make_targets(make, targets)
+    define my.make = define_make_targets.make
     define my.targets = define_make_targets.targets
-    for my.build.product as _product where is_custom_target(_product)
+    for my.make.product as _product where is_custom_target(_product)
         define my.path = get_product_path(_product)
         if (!is_empty(my.path))
             table_add(my.targets, _product.option, my.path)
@@ -742,7 +741,7 @@ endfunction
 
 function generate_automake()
 for generate.repository as _repository by _repository.name\
-    where (defined(_repository->build))
+    where (defined(_repository->make))
 
     require(_repository, "repository", "name")
     define my.out_file = "$(_repository.name)/Makefile.am"
@@ -750,7 +749,7 @@ for generate.repository as _repository by _repository.name\
     output(my.out_file)
 
     copyleft(_repository.name)
-    define my.build = _repository->build
+    define my.make = _repository->make
     define my.base = "$(global.root)/$(_repository.name)/"
     define my.root = normalize_directory(my.base)
     
@@ -759,22 +758,22 @@ for generate.repository as _repository by _repository.name\
     
     new mapper as _mapper
         new variables as _variables
-            get_initial_variables(my.build, _variables, _mapper)
+            get_make_variables(my.make, _variables, _mapper)
             if (!table_empty(_variables))
                 heading1("Conditional variables.")
                 render_variables(_variables)
             endif
         endnew _variables
         
-        heading1("Distribution, build and install products.")
-        for my.build.product as _product
+        heading1("Distribute, make and install products.")
+        for my.make.product as _product
             heading2(get_product_description(_product))
             render_product(_product, my.root, _repository, _mapper)
         endfor
     endnew _mapper
     
     new targets as _targets
-        define_make_targets(my.build, _targets)
+        define_make_targets(my.make, _targets)
         if (!table_empty(_targets))
             heading1("Custom make targets.")
             render_make_targets(_targets)

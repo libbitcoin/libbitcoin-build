@@ -10,6 +10,12 @@
 # Functions
 ###############################################################################
 
+function global.match_name(element, name)
+    define my.element = match_name.element
+    require(my.element, "element", "name")
+    return my.element.name = my.name
+endfunction
+
 # Collection utilities.
 
 function set_cursor_begin(element)
@@ -40,22 +46,16 @@ function clear_cursor(cursor)
     delete my.cursor
 endfunction
 
-# Library Utilities.
+# Library utilities.
 
-function global.find_library_dependency(name, configure)
-    define my.configure = find_library_dependency.configure
-    if (defined(my.configure))
-        return my.configure->dependency(dependency.name = my.name)
-    endif
+# Get the product with the given library name.
+function global.find_library_product(name, make)
+    define my.make = find_library_product.make
+    return my.make->product(is_library(product) &\
+        match_name(product, my.name))
 endfunction
 
-function global.is_packaged_library(name, configure)
-    define my.configure = is_packaged_library.configure
-    define my.dependency = find_library_dependency(my.name, my.configure)?
-    return defined(my.dependency) & is_package(my.dependency)
-endfunction
-
-# accepts [lib]bitcoin[-include] and returns include.
+# Accepts [lib]bitcoin[-include] and returns include.
 function global.bitcoin_to_include(library)
     define my.prefix = "bitcoin"
     define my.libprefix = "lib$(my.prefix)"
@@ -73,7 +73,7 @@ function global.bitcoin_to_include(library)
     abort "The name is not a bitcoin library: $(my.library)"
 endfunction
 
-# accepts include and returns bitcoin[-include].
+# Accepts include and returns bitcoin[-include].
 function global.include_to_bitcoin(include)
     define my.prefix = "bitcoin"
     if (my.include = my.prefix)
@@ -82,37 +82,30 @@ function global.include_to_bitcoin(include)
     return "$(my.prefix)-$(my.include)"
 endfunction
 
-# Dependency Utilities.
+# Dependency utilities.
 
-function global.match_dependency(dependency, name)
-    define my.dependency = match_dependency.dependency
-    require(my.dependency, "dependency", "name")
-    return my.dependency.name = my.name
+# Get the dependency with the given name.
+function global.find_dependency_by_name(name, configure)
+    define my.configure = find_dependency_by_name.configure
+    return my.configure->dependency(match_name(dependency, my.name))
 endfunction
 
-function global.is_ax_dependency(dependency)
-    define my.dependency = is_ax_dependency.dependency
-    return match_dependency(my.dependency, "pthread")
+function global.is_function_dependency(dependency)
+    define my.dependency = is_function_dependency.dependency
+    return defined(my.dependency.function)
 endfunction
 
-function global.is_iconv_dependency(dependency)
-    define my.dependency = is_iconv_dependency.dependency
-    return match_dependency(my.dependency, "iconv")
+function global.is_package_dependency(dependency)
+    define my.dependency = is_package_dependency.dependency
+    return defined(my.dependency.version) &\
+        !is_boost_dependency(my.dependency) &\
+        !is_boost_lib_dependency(my.dependency) &\
+        !is_python_dependency(my.dependency)
 endfunction
 
 function global.is_boost_dependency(dependency)
     define my.dependency = is_boost_dependency.dependency
-    return match_dependency(my.dependency, "boost")
-endfunction
-
-function global.is_java_dependency(dependency)
-    define my.dependency = is_java_dependency.dependency
-    return match_dependency(my.dependency, "java")
-endfunction
-
-function global.is_python_dependency(dependency)
-    define my.dependency = is_python_dependency.dependency
-    return match_dependency(my.dependency, "python")
+    return match_name(my.dependency, "boost")
 endfunction
 
 function global.is_boost_lib_dependency(dependency)
@@ -121,40 +114,40 @@ function global.is_boost_lib_dependency(dependency)
     return starts_with(my.dependency.name, "boost_")
 endfunction
 
-function global.is_bitcoin_dependency(dependency)
-    define my.dependency = is_bitcoin_dependency.dependency
-    require(my.dependency, "dependency", "name")
-    return starts_with(my.dependency.name, "bitcoin")
+function global.is_java_dependency(dependency)
+    define my.dependency = is_java_dependency.dependency
+    return match_name(my.dependency, "java")
 endfunction
 
-# TODO: need to use function names as a form of namespace identification
-# so that the called can see the parameter as "dependency". This will allow
-# room for other similarly-named functions over differently-typed arguments.
-
-# is_package_dependency
-function global.is_package(dependency)
-    define my.dependency = is_package.dependency
-    return defined(my.dependency.version) &\
-        !is_boost_dependency(my.dependency) &\
-        !is_boost_lib_dependency(my.dependency)
+function global.is_python_dependency(dependency)
+    define my.dependency = is_python_dependency.dependency
+    return match_name(my.dependency, "python")
 endfunction
 
-function global.is_linked_package_depedency(dependency)
-    define my.dependency = is_linked_package_depedency.dependency
-    return is_package(my.dependency) & !is_true(_dependency.unlinked)
+function global.is_pthread_dependency(dependency)
+    define my.dependency = is_pthread_dependency.dependency
+    return match_name(my.dependency, "pthread")
 endfunction
 
-# is_unpackaged_lib_dependency
-function global.is_unpackaged_lib(dependency)
-    define my.dependency = is_unpackaged_lib.dependency
-    return defined(my.dependency.function) &\
-        !is_boost_dependency(my.dependency) &\
-        !is_boost_lib_dependency(my.dependency)
+function global.is_iconv_dependency(dependency)
+    define my.dependency = is_iconv_dependency.dependency
+    return match_name(my.dependency, "iconv")
 endfunction
+
+#function global.is_bitcoin_dependency(dependency)
+#    define my.dependency = is_bitcoin_dependency.dependency
+#    require(my.dependency, "dependency", "name")
+#    return starts_with(my.dependency.name, "bitcoin")
+#endfunction
 
 function global.is_optional_element(element)
     define my.element = is_optional_element.element
     return defined(my.element.option)
+endfunction
+
+function global.is_private_element(element)
+    define my.element = is_private_element.element
+    return is_true(my.element.private)
 endfunction
 
 # Test for a flag context.
@@ -223,7 +216,7 @@ function global.find_option_symbol(element, configure)
     endif
 endfunction
 
-# Build Utilities.
+# Build utilities.
 
 function global.is_boost_build(build)
     define my.build = is_boost_build.build
@@ -235,9 +228,8 @@ function global.is_github_build(build)
     return !is_empty(my.build.github)
 endfunction
 
-# Product tests.
+# Product utilities.
 
-# Test for a prefix.
 function global.match_prefix(product, prefix)
     define my.product = match_prefix.product
     require(my.product, "product", "prefix")
@@ -359,6 +351,14 @@ endfunction
 function global.is_custom_target(product)
     define my.product = is_custom_target.product
     return is_optional_element(my.product) & !is_test(my.product)
+endfunction
+
+# Package utilities.
+
+function global.get_package_name(package)
+    define my.package = get_package_name.package
+    require(my.package, "package", "library")
+    return "lib$(my.package.library)"
 endfunction
 
 # Debugging utilities.

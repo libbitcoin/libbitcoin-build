@@ -22,7 +22,7 @@ function format_template_files(configure)
     define my.template_files = ""
     for my.configure.template as _template
         require(_template, "template", "name")
-        my.template_files = "$(my.template_files) $(_template.name)"
+        my.template_files += " $(_template.name)"
     endfor _template
     return trim_left(my.template_files)
 endfunction
@@ -32,20 +32,6 @@ function find_flag_name(configure, name)
     define my.found = my.configure->flag(flag.name = my.name)?
     return defined(my.found)
 endfunction
-
-#function find_build_flag_name(build, name)
-#    define my.build = find_build_flag_name.build?
-#    if (!defined(my.build))
-#        return 0
-#    endif
-#    #echo my.name
-#    for my.build.product as _product
-#        for _product.flag as _flag where (_flag.value ? "") = my.name
-#            return 1
-#        endfor
-#    endfor
-#    return 0
-#endfunction
 
 function find_flag_name(configure, value)
     define my.configure = find_flag_name.configure
@@ -85,10 +71,22 @@ endfunction
 
 # For some reason all-am requires we make the pc file, so for now we always
 # define at least an empty package element.
-function get_package_config(repository)
-    define my.repository = get_package_config.repository
-    define my.package = my.repository->package?
-    return defined(my.package) ?? "$(my.package.name).pc "
+function get_package_files(repository)
+    define my.repository = get_package_files.repository
+    define my.make = my.repository->make
+    define my.packages = ""
+    for my.repository.package as _package where defined(_package.library)
+        define my.product = find_library_product(_package.library, my.make)?
+        if (defined(my.product))
+            # TODO: define package name conditionally in configure.ac.
+            if (is_optional_element(my.product))
+                abort "Conditional pkg-config not yet supported: $(_package.library)"
+            endif
+            define my.package = get_package_name(_package)
+            my.packages += " $(my.package).pc"
+        endif
+    endfor
+    return my.packages
 endfunction
 
 ###############################################################################
@@ -223,9 +221,9 @@ AC_DEFINE([$(my.uname)])
 
 .endmacro # render_define
 .
-.macro check_java_dependency(dependency, configure)
-.   define my.dependency = check_java_dependency.dependency
-.   define my.configure = check_java_dependency.configure
+.macro check_java(dependency, configure)
+.   define my.dependency = check_java.dependency
+.   define my.configure = check_java.configure
 .   require(my.dependency, "dependency", "name")
 .
 .   define my.name = my.dependency.name
@@ -247,11 +245,11 @@ AS_CASE([${$(my.symbol)}], [yes],
      AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])])
 .   endif
 
-.endmacro # check_java_dependency
+.endmacro # check_java
 .
-.macro check_python_dependency(dependency, configure)
-.   define my.dependency = check_python_dependency.dependency
-.   define my.configure = check_python_dependency.configure
+.macro check_python(dependency, configure)
+.   define my.dependency = check_python.dependency
+.   define my.configure = check_python.configure
 .   require(my.dependency, "dependency", "name")
 .
 .   define my.name = my.dependency.name
@@ -276,11 +274,11 @@ AS_CASE([${$(my.symbol)}], [yes],
          AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])])])
 .   endif
 
-.endmacro # check_python_dependency
+.endmacro # check_python
 .
-.macro check_iconv_dependency(dependency, configure)
-.   define my.dependency = check_iconv_dependency.dependency
-.   define my.configure = check_iconv_dependency.configure
+.macro check_iconv(dependency, configure)
+.   define my.dependency = check_iconv.dependency
+.   define my.configure = check_iconv.configure
 .   require(my.dependency, "dependency", "name")
 .
 .   define my.name = my.dependency.name
@@ -306,34 +304,35 @@ AS_CASE([${$(my.symbol)}], [yes],
     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}]))
 .   endif
 
-.endmacro # check_iconv_dependency
+.endmacro # check_iconv
 .
-.macro check_ax_dependency(dependency, configure)
-.   define my.dependency = check_ax_dependency.dependency
-.   define my.configure = check_ax_dependency.configure
+.# Could be more general than pthread.
+.macro check_pthread(dependency, configure)
+.   define my.dependency = check_pthread.dependency
+.   define my.configure = check_pthread.configure
 .   require(my.dependency, "dependency", "name")
 .
 .   define my.cname = "$(my.dependency.name:c)"
 .   define my.uname = "$(my.cname:upper)"
 .   define my.symbol = find_option_symbol(my.dependency, my.configure)?
 .   define my.show_option = !is_empty(my.symbol) ?? " if --$(my.symbol)" ? ""
-.   heading2("Require $(my.cname)$(my.show_option) and output ${$(my.cname)_CFLAGS/LIBS}.")
+.   heading2("Require $(my.cname)$(my.show_option) and output ${$(my.cname)_CPPFLAGS/LIBS}.")
 .   if (!is_empty(my.dependency.comment))
 .       heading3("$(my.dependency.comment)")
 .   endif
 .   if (is_empty(my.symbol))
 AX_$(my.uname)(
-    [AC_SUBST([$(my.cname)_CFLAGS], [${$(my.uname)_CFLAGS}])
+    [AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.uname)_CPPFLAGS}])
      AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIBS}])
-     AC_MSG_NOTICE([$(my.cname)_CFLAGS : ${$(my.cname)_CFLAGS}])
+     AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
      AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
     [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])
 .   else
 AS_CASE([${$(my.symbol)}], [yes],
     [AX_$(my.uname)(
-        [AC_SUBST([$(my.cname)_CFLAGS], [${$(my.uname)_CFLAGS}])
+        [AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.uname)_CPPFLAGS}])
          AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIBS}])
-         AC_MSG_NOTICE([$(my.cname)_CFLAGS : ${$(my.cname)_CFLAGS}])
+         AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
          AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}]),
         [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])],
     [AC_SUBST([$(my.cname)_LIBS], [])])
@@ -343,7 +342,7 @@ AS_CASE([${$(my.symbol)}], [yes],
 AC_SUBST([pthread_LIBS], [-lpthread])
 .   endif
 
-.endmacro # check_ax_dependency
+.endmacro # check_pthread
 .
 .macro check_dependency(dependency)
 .   define my.dependency = check_dependency.dependency
@@ -547,15 +546,15 @@ for generate.repository by name as _repository
             elsif (is_boost_lib_dependency(_dependency))
                 check_boost_lib(_dependency, my.configure)
             elsif (is_java_dependency(_dependency))
-                check_java_dependency(_dependency, my.configure)
+                check_java(_dependency, my.configure)
             elsif (is_python_dependency(_dependency))
-                check_python_dependency(_dependency, my.configure)
-            elsif (is_package(_dependency))
+                check_python(_dependency, my.configure)
+            elsif (is_package_dependency(_dependency))
                 check_package(_dependency, my.configure)
-            elsif (is_ax_dependency(_dependency))
-                check_ax_dependency(_dependency, my.configure)
+            elsif (is_pthread_dependency(_dependency))
+                check_pthread(_dependency, my.configure)
             elsif (is_iconv_dependency(_dependency))
-                check_iconv_dependency(_dependency, my.configure)
+                check_iconv(_dependency, my.configure)
             else
                 check_dependency(_dependency)
             endif
@@ -570,8 +569,8 @@ for generate.repository by name as _repository
     endif
     
     heading1("Process outputs into templates.")
-    define my.pkg_config = get_package_config(_repository) ? ""
-    compile("Makefile $(my.pkg_config)$(format_template_files(my.configure))")
+    define my.packages = get_package_files(_repository)
+    compile("Makefile$(my.packages)$(format_template_files(my.configure))")
     
     close
 endfor _repository
