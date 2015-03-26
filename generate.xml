@@ -4,21 +4,8 @@
 
   <repository name="libbitcoin" version="2.8.0" email="genjix@riseup.net" >
 
-    <package name="libbitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
-      <cflag value="@pthread_CFLAGS@" />
-      <cflag value="@testnet@" />
-      <library name="-lbitcoin" />
-      
-      <!-- TODO: generate from build.product[bitcoin] libraries. -->
-      <library name="@boost_chrono_LIBS@" />
-      <library name="@boost_date_time_LIBS@" />
-      <library name="@boost_filesystem_LIBS@" />
-      <library name="@boost_locale_LIBS@" />
-      <library name="@boost_program_options_LIBS@" />
-      <library name="@boost_regex_LIBS@" />
-      <library name="@boost_system_LIBS@" />
-      <library name="@iconv_LIBS@" />
-      <library name="@pthread_LIBS@" />
+    <package library="bitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
+      <flag value="@testnet@" />
     </package>
 
     <configure>
@@ -65,7 +52,7 @@
       <!--<template name="CompileMe.am" />-->
     </configure>
 
-    <build>
+    <make>
       <product prefix="pkgconfig">
         <file path="libbitcoin.pc" />
       </product>
@@ -105,7 +92,7 @@
       <product prefix="include" container="bitcoin">
         <files path="include/bitcoin" />
       </product>
-    </build>
+    </make>
 
     <install>
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
@@ -198,9 +185,7 @@
     
   <repository name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
 
-    <package name="libbitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" >
-      <library name="-lbitcoin-blockchain" />
-    </package>
+    <package library="bitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
     <configure>
       <option type="with" name="consensus" default="yes" define="WITH_CONSENSUS" description="Link libbitcoin-consensus and use for consensus checks." />
@@ -213,7 +198,6 @@
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <!-- libbitcoin and libbitcoin-consensus are independent, so must declare both. -->
       <dependency name="bitcoin" version="2.8.0" />
       <dependency name="bitcoin-consensus" version="1.0.0" option="consensus" />
       
@@ -236,7 +220,7 @@
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
-    <build>
+    <make>
       <product prefix="pkgconfig">
         <file path="libbitcoin-blockchain.pc" />
       </product>
@@ -250,7 +234,6 @@
       </product>
       <product prefix="lib" path="src" name="bitcoin-blockchain">
         <library name="bitcoin" />
-        <!-- For without-consensus builds this will just produce empty variables. -->
         <library name="bitcoin-consensus" />
         <headers path="include" />
         <sources path="src" />
@@ -345,7 +328,7 @@
       <product prefix="include" container="bitcoin">
         <files path="include/bitcoin" />
       </product>
-    </build>
+    </make>
 
     <install>
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
@@ -455,9 +438,7 @@
 
   <repository name="libbitcoin-client" version="2.1.0" email="mienkphi@gmail.com" >
 
-    <package name="libbitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" >
-      <library name="-lbitcoin-client" />
-    </package>
+    <package library="bitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" />
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
@@ -491,7 +472,7 @@
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
-    <build>
+    <make>
       <product prefix="pkgconfig">
         <file path="libbitcoin-client.pc" />
       </product>
@@ -530,7 +511,7 @@
       <product prefix="include" container="bitcoin">
         <files path="include/bitcoin" />
       </product>
-    </build>
+    </make>
 
     <install>
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
@@ -640,9 +621,7 @@
 
   <repository name="libbitcoin-consensus" version="1.0.0" email="eric@voskuil.org" >
 
-    <package name="libbitcoin-consensus" description="Libbitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" >
-      <library name="-lbitcoin-consensus" />
-    </package>
+    <package library="bitcoin-consensus" description="Libbitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" />
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
@@ -659,8 +638,8 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="crypto" version="1.0.1" option="openssl" />
       <dependency name="secp256k1" version="0.0.1" option="secp256k1" />
-      <dependency name="java" unlinked="true" option="java" />
-      <dependency name="python" version="2.7" unlinked="true" option="python" />
+      <dependency name="java" option="java" />
+      <dependency name="python" version="2.7" option="python" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
@@ -689,7 +668,7 @@
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
-    <build>
+    <make>
       <product prefix="pkgconfig">
         <file path="libbitcoin-consensus.pc" />
       </product>
@@ -741,7 +720,7 @@
       <product prefix="pkgpython" option="python">
         <files path="bindings/python/proxy" />
       </product>
-    </build>
+    </make>
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
@@ -840,9 +819,7 @@
 
   <repository name="libbitcoin-explorer" version="2.1.0" email="eric@voskuil.org">
 
-    <package name="libbitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" >
-      <library name="-lbitcoin-explorer" />
-    </package>
+    <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
 
     <configure>
       <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
@@ -855,7 +832,7 @@
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" unlinked="true" default="${datadir}/bash-completion/completions" />
+      <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="2.1.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -879,7 +856,7 @@
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
-    <build>
+    <make>
       <product prefix="pkgconfig">
         <file path="libbitcoin-explorer.pc" />
       </product>
@@ -919,7 +896,7 @@
       <product prefix="include" container="bitcoin">
         <files path="include/bitcoin" />
       </product>
-    </build>
+    </make>
 
     <install>
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
@@ -1042,9 +1019,7 @@
 
   <repository name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
 
-    <package name="libbitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" >
-      <library name="-lbitcoin-node" />
-    </package>
+    <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
     <configure>
       <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
@@ -1057,7 +1032,7 @@
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" unlinked="true" default="${datadir}/bash-completion/completions" />
+      <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="2.0.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1078,7 +1053,7 @@
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
-    <build>
+    <make>
       <product prefix="pkgconfig">
         <file path="libbitcoin-node.pc" />
       </product>
@@ -1117,7 +1092,7 @@
       <product prefix="sysconf" container="libbitcoin">
         <file path="data/node.cfg" />
       </product>
-    </build>
+    </make>
 
     <install>
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
@@ -1238,9 +1213,7 @@
 
   <repository name="libbitcoin-protocol" version="0.1.0" email="mienkphi@gmail.com">
 
-    <package name="libbitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" >
-      <library name="-lbitcoin-protocol" />
-    </package>
+    <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
@@ -1280,7 +1253,7 @@
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
-    <build>
+    <make>
       <product prefix="pkgconfig">
         <file path="libbitcoin-protocol.pc" />
       </product>
@@ -1310,7 +1283,7 @@
       <product prefix="include" container="bitcoin">
         <files path="include/bitcoin" />
       </product>
-    </build>
+    </make>
 
     <install>
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
@@ -1424,8 +1397,8 @@
 
   <repository name="libbitcoin-server" version="2.0.0" email="genjix@riseup.net">
 
-    <!-- There is no library produced, but we still need to define a package for now. -->
-    <package name="libbitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
+    <!-- TODO: There is no library produced, but we get an error if we don't emit the reference. -->
+    <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
 
     <configure>
       <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
@@ -1435,7 +1408,7 @@
 
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
-      <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" unlinked="true" default="${datadir}/bash-completion/completions" />
+      <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
@@ -1459,7 +1432,7 @@
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
-    <build>
+    <make>
       <product prefix="pkgconfig">
         <file path="libbitcoin-server.pc" />
       </product>
@@ -1485,7 +1458,7 @@
       <product prefix="sysconf" container="libbitcoin">
         <file path="data/server.cfg" />
       </product>
-    </build>
+    </make>
 
     <install>
       <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >

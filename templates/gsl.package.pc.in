@@ -10,94 +10,200 @@
 # Functions
 ###############################################################################
 
-# CFlags is a conflation of CFLAGS and CPPFLAGS, but not for CXXFLAGS.
-function format_cflags(package)
+# Cflags is a conflation of CFLAGS and CPPFLAGS, but not for CXXFLAGS.
+function format_cflags(variables, package)
+    define my.variables = format_cflags.variables
     define my.package = format_cflags.package
-    define my.compiler_flags = ""
-    for my.package.cflag as _cflag
-        my.compiler_flags += " $(_cflag.value)"
-    endfor _cflag
-    return trim_left(my.compiler_flags)
+    for my.package.flag as _flag
+        my.variables.cflags += " $(_flag.value)"
+    endfor
 endfunction
 
-# This is a simple list of tokens from the package element.
-function format_libs(package)
+# Libs is a conflation of LDFLAGS and LDADD|LIBADD values.
+function format_libs(variables, package)
+    define my.variables = format_libs.variables
     define my.package = format_libs.package
-    define my.libs = ""
     for my.package.library as _library
-        my.libs += " $(_library.name)"
-    endfor _library
-    return trim_left(my.libs)
+        define my.private = is_private_element(_library) ?? "_private" ? ""
+        my.variables.libs$(my.private) += " $(_library.name)"
+    endfor
 endfunction
 
-# TODO: pull from package[library].build instead of configure.
-# Requires is a list of other packages.
-# Conditional package definitions are always generated as substitutions.
-function format_requires(configure)
-    define my.configure = format_requires.configure
-    define my.packages = ""
-    for my.configure.dependency as _dependency where\
-        is_linked_package_depedency(_dependency)
-        my.packages += " @$(_dependency.name:c)_PKG@"
-    endfor _dependency
-    return trim_left(my.packages)
+# Unconditional package dependencies are generated as literal inequalities.
+function format_conditional_pkg(dependency)
+    define my.dependency = format_conditional_pkg.dependency
+    define my.name = "$(my.dependency.name)"
+    if (is_optional_element(my.dependency))
+        return "@$(my.name:c)_PKG@"
+    endif
+    define my.prefix = is_true(my.dependency.unprefixed) ?? "" ? "lib"
+    define my.package = "$(my.prefix)$(my.name)"
+    return "$(my.package) >= $(my.dependency.version)"
 endfunction
 
-# TODO: pull from package[library].build instead of configure.
-# Libs is a conflation of LIBS and LDFLAGS.
-function format_unpackaged_libs(configure)
-    define my.configure = format_unpackaged_libs.configure
-    define my.free_libs = ""
-    for my.configure.dependency as _dependency\
-        where is_unpackaged_lib(_dependency)
-        
-        # Unique by dependency.name, because of optionals.
-        if !defined(my.lib_$(_dependency.name:c))
-            define my.lib_$(_dependency.name:c) = 0
-            my.free_libs += " @$(_dependency.name:c)_LIBS@"
+function initialize_package_variables(variables)
+    define my.variables = initialize_package_variables.variables
+    my.variables.cflags = " -I@includedir@"
+    my.variables.libs = " -L@libdir@"
+    my.variables.libs_private = ""
+    my.variables.requires = ""
+    my.variables.requires_private = ""
+endfunction
+
+function define_library_variables(variables, library, make, configure)
+    define my.variables = define_library_variables.variables
+    define my.library = define_library_variables.library
+    define my.make = define_library_variables.make
+    define my.configure = define_library_variables.configure
+    require(my.library, "library", "name")
+    define my.name = my.library.name
+    define my.cname = "$(my.name:c)"
+    
+    define my.product = find_library_product(my.name, my.make)?
+    if (defined(my.product))
+        if (is_no_install(my.product))
+            abort "Package-referenced library is not installed: $(my.name)"
         endif
-    endfor _dependency
-    return trim_left(my.free_libs)
+        my.variables.libs = "-l$(my.name)"
+    else
+        define my.dependency = find_dependency_by_name(my.name, my.configure)?
+        if (!defined(my.dependency))
+            abort "The packaged library has no dependency: $(my.name)"
+        endif
+        define my.is_package = is_package_dependency(my.dependency)
+        define my.is_function = is_function_dependency(my.dependency)
+        define my.is_boost = is_boost_dependency(my.dependency)
+        define my.is_boost_lib = is_boost_lib_dependency(my.dependency)
+        define my.is_language = is_java_dependency(my.dependency) |\
+            is_python_dependency(my.dependency)
+        define my.is_common = is_pthread_dependency(my.dependency) |\
+            is_iconv_dependency(my.dependency)
+        
+        define my.private = is_private_element(my.dependency)\
+            ?? "_private" ? ""
+
+        if (my.is_boost)
+            my.variables.libs$(my.private) += " @$(my.cname)_LDFLAGS@"
+        endif
+        if (my.is_boost_lib | my.is_common | my.is_function)
+            my.variables.libs$(my.private) += " @$(my.cname)_LIBS@"
+        endif
+        if (my.is_package)
+            define my.package = format_conditional_pkg(my.dependency)
+            my.variables.requires$(my.private) += " $(my.package)"
+        endif
+        if (my.is_boost | my.is_common | my.is_language)
+            my.variables.cflags += " @$(my.cname)_CPPFLAGS@"
+        endif
+    endif
+endfunction
+
+# Define Cflags, Libs|Libs.private and Requires|Requires.private variables.
+function define_package_variables(variables, package, make, configure)
+    define my.variables = define_package_variables.variables
+    define my.package = define_package_variables.package
+    define my.make = define_package_variables.make
+    define my.configure = define_package_variables.configure
+    require(my.package, "package", "library")
+    define my.name = my.package.library
+    initialize_package_variables(_variables)
+    
+    # Add explicit package.flag declarations.
+    format_cflags(my.variables, my.package)
+    
+    # Add explicit package.library declarations.
+    format_libs(my.variables, my.package)
+    
+    # Get the lib product that corresponds to the package.
+    define my.product = find_library_product(my.name, my.make)?
+    if (!defined(my.product))
+        #abort "Packaged library is not a product: $(my.name)"
+        return
+    elsif (is_no_install(my.product))
+        abort "Packaged library is not installed: $(my.name)"
+    endif
+    my.variables.libs += " -l$(my.name)"
+    
+    # Get the dependency libs of the product and their flags.
+    for my.product.library as _library
+        define_library_variables(my.variables, _library, my.make, my.configure)
+    endfor
+endfunction
+        
+function write_package_variable(name, value)
+    if (!is_empty(my.value))
+        write_line("$(my.name):$(my.value)")
+    endif
+endfunction
+
+function write_public_variable(name, value)
+    return write_package_variable(my.name, my.value)
+endfunction
+
+function write_private_variable(name, value)
+    return write_package_variable("$(my.name).private", my.value)
 endfunction
 
 ###############################################################################
-# Generation
+# Macros
 ###############################################################################
 .endtemplate
 .template 1
-.macro generate_pkgconfig()
-.for generate.repository by name as _repository
-.   if (!defined(_repository->package))
-.       next _repository
-.   endif
-.   define my.out_file = "$(_repository.name)/$(_repository->package.name).pc.in"
-.   notify(my.out_file)
-.   output(my.out_file)
-.   copyleft(_repository.name)
-.   define my.configure = _repository->configure
-.   define my.package = _repository->package
-
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
-
-Name: $(_repository->package.name)
-Description: $(_repository->package.description)
-URL: $(_repository->package.url)
+.
+.macro initialize_package(package)
+.   require(my.package, "package", "description")
+.   require(my.package, "package", "url")
+Name: $(get_package_name(my.package))
+Description: $(my.package.description)
+URL: $(my.package.url)
 Version: @PACKAGE_VERSION@
 
-.# TODO: differentiate public vs. private dependencies.
-# Our dependencies that publish package configuration.
-Requires: $(format_requires(my.configure))
-
-# Our own include directory and any other compiler flags we require.
-Cflags: -I${includedir} $(format_cflags(my.package))
-
-.# TODO: differentiate public vs. private libs.
-# Our own lib directory, lib and any that do not publish package configuration.
-Libs: -L${libdir} $(format_libs(my.package)) $(format_unpackaged_libs(my.configure))
-.   close
-.endfor _repository
-.endmacro # generate_pkgconfig
+.
+.endmacro # initialize_package
+.
+.endtemplate
+.template 0
+###############################################################################
+# Generation
+function generate_pkgconfig()
+for generate.repository by name as _repository\
+    where defined(_repository->package)
+    
+    define my.make = _repository->make
+    define my.configure = _repository->configure
+    
+    for _repository.package as _package
+        define my.package_name = get_package_name(_package)
+        define my.out_file = "$(_repository.name)/$(my.package_name).pc.in"
+        notify(my.out_file)
+        output(my.out_file)
+        
+        copyleft(_repository.name)
+        
+        heading1("Package metadata.")
+        initialize_package(_package)
+        
+        heading1("Package variables.")
+        new variables as _variables
+            define_package_variables(_variables, _package, my.make, my.configure)
+            
+            heading2("Dependencies that publish package configuration.")
+            write_public_variable("Requires", _variables.requires)
+            write_private_variable("Requires", _variables.requires_private)
+            write_line()
+            
+            heading2("Include directory and any other required compiler flags.")
+            write_public_variable("Cflags", _variables.cflags)
+            write_line()
+            
+            heading2("Lib directory, lib and any required that do not publish pkg-config.")
+            write_public_variable("Libs", _variables.libs)
+            write_private_variable("Libs", _variables.libs_private)
+            write_line()
+        endnew
+        
+        close
+    endfor _package
+endfor _repository
+endfunction # generate_pkgconfig
 .endtemplate
