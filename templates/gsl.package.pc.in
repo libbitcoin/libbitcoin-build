@@ -43,8 +43,8 @@ endfunction
 
 function initialize_package_variables(variables)
     define my.variables = initialize_package_variables.variables
-    my.variables.cflags = " -I@includedir@"
-    my.variables.libs = " -L@libdir@"
+    my.variables.cflags = " -I{includedir}"
+    my.variables.libs = " -L{libdir}"
     my.variables.libs_private = ""
     my.variables.requires = ""
     my.variables.requires_private = ""
@@ -150,7 +150,16 @@ endfunction
 .endtemplate
 .template 1
 .
-.macro initialize_package(package)
+.macro initialize_package_substitutions()
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+.
+.endmacro # initialize_package_substitutions
+.
+.macro initialize_package_metadata(package)
 .   require(my.package, "package", "description")
 .   require(my.package, "package", "url")
 Name: $(get_package_name(my.package))
@@ -159,8 +168,7 @@ URL: $(my.package.url)
 Version: @PACKAGE_VERSION@
 
 .
-.endmacro # initialize_package
-.
+.endmacro # initialize_package_metadata
 .endtemplate
 .template 0
 ###############################################################################
@@ -180,10 +188,13 @@ for generate.repository by name as _repository\
         
         copyleft(_repository.name)
         
-        heading1("Package metadata.")
-        initialize_package(_package)
+        heading1("Substitutions")
+        initialize_package_substitutions()
         
-        heading1("Package variables.")
+        heading1("Metadata")
+        initialize_package_metadata(_package)
+        
+        heading1("Variables")
         new variables as _variables
             define_package_variables(_variables, _package, my.make, my.configure)
             
