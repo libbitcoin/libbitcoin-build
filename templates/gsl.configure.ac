@@ -77,14 +77,14 @@ function get_package_files(repository)
     define my.packages = ""
     for my.repository.package as _package where defined(_package.library)
         define my.product = find_library_product(_package.library, my.make)?
-        if (defined(my.product))
+        #if (defined(my.product))
             # TODO: define package name conditionally in configure.ac.
-            if (is_optional_element(my.product))
-                abort "Conditional pkg-config not yet supported: $(_package.library)"
-            endif
+            #if (is_optional_element(my.product))
+            #    abort "Conditional pkg-config not yet supported: $(_package.library)"
+            #endif
             define my.package = get_package_name(_package)
             my.packages += " $(my.package).pc"
-        endif
+        #endif
     endfor
     return my.packages
 endfunction
@@ -570,7 +570,8 @@ for generate.repository by name as _repository
     
     heading1("Process outputs into templates.")
     define my.packages = get_package_files(_repository)
-    compile("Makefile$(my.packages)$(format_template_files(my.configure))")
+    define my.templates = format_template_files(my.configure)
+    compile("Makefile$(my.packages)$(my.templates)")
     
     close
 endfor _repository
