@@ -16,11 +16,11 @@ function split_version(version, version_string)
     define my.position = string.locate(my.version_string, ".")
     define my.version.major = left(my.version_string, my.position)
     
-    define my.version_string = string.substr(my.version_string, my.position + 1)    
-    define my.position = string.locate(my.version_string, ".")
-    define my.version.minor = left(my.version_string, my.position)
+    define my.remainder = string.substr(my.version_string, my.position + 1)
+    define my.position = string.locate(my.remainder, ".")
+    define my.version.minor = left(my.remainder, my.position)
     
-    define my.version.patch = string.substr(my.version_string, my.position + 1)
+    define my.version.patch = string.substr(my.remainder, my.position + 1)
 endfunction
 
 ###############################################################################
