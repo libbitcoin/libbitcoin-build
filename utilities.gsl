@@ -10,15 +10,31 @@
 # Functions
 ###############################################################################
 
+#------------------------------------------------------------------------------
+# Node utilities.
+#------------------------------------------------------------------------------
+
 function global.match_name(element, name)
     define my.element = match_name.element
     require(my.element, "element", "name")
     return my.element.name = my.name
 endfunction
 
-# Collection utilities.
+function global.is_optional_element(element)
+    define my.element = is_optional_element.element
+    return defined(my.element.option)
+endfunction
 
-function set_cursor_begin(element)
+function global.is_private_element(element)
+    define my.element = is_private_element.element
+    return is_true(my.element.private)
+endfunction
+
+#------------------------------------------------------------------------------
+# Collection utilities.
+#------------------------------------------------------------------------------
+
+function global.set_cursor_begin(element)
     define my.element = set_cursor_begin.element
     for my.element as _element
         new cursor as _cursor
@@ -29,11 +45,11 @@ function set_cursor_begin(element)
     return set_cursor_end(my.element)
 endfunction
 
-# We insert before a dummy element (cursor) at the end of the product.
+# We insert before a dummy element (cursor) at the end of the element.
 # This provides a simple workaround for lack of reverse iteration in GSL,
 # allowing order preservation and insertion at the end of the list.
 # Fortunately extending a list while iterating it does not alter the iteration.
-function set_cursor_end(element)
+function global.set_cursor_end(element)
     define my.element = set_cursor_end.element
     new cursor as _cursor
         move _cursor to my.element
@@ -41,12 +57,42 @@ function set_cursor_end(element)
     endnew
 endfunction
 
-function clear_cursor(cursor)
+function global.clear_cursor(cursor)
     define my.cursor = clear_cursor.cursor
     delete my.cursor
 endfunction
 
+#------------------------------------------------------------------------------
+# I/O utilities.
+#------------------------------------------------------------------------------
+
+# Open and validate a directory.
+function global.create_directory(folder)
+    define my.result = directory.create(my.folder)
+    if (my.result = 0)
+        return
+    endif
+    abort "Directory creation failure: $(error_text)"
+endfunction
+
+# Open and validate a directory.
+function global.open_directory(folder)
+    define my.directory = directory.open(my.folder, error_text)?
+    if (defined(my.directory))
+        return my.directory
+    endif
+    abort "Directory open failure: $(error_text)"
+endfunction
+
+# Test a directory and return the normalized path.
+function global.normalize_directory(folder)
+    define my.directory = open_directory(my.folder)
+    return my.directory.path
+endfunction
+
+#------------------------------------------------------------------------------
 # Library utilities.
+#------------------------------------------------------------------------------
 
 # Get the product with the given library name.
 function global.find_library_product(name, make)
@@ -82,7 +128,9 @@ function global.include_to_bitcoin(include)
     return "$(my.prefix)-$(my.include)"
 endfunction
 
+#------------------------------------------------------------------------------
 # Dependency utilities.
+#------------------------------------------------------------------------------
 
 # Get the dependency with the given name.
 function global.find_dependency_by_name(name, configure)
@@ -134,20 +182,10 @@ function global.is_iconv_dependency(dependency)
     return match_name(my.dependency, "iconv")
 endfunction
 
-#function global.is_bitcoin_dependency(dependency)
-#    define my.dependency = is_bitcoin_dependency.dependency
-#    require(my.dependency, "dependency", "name")
-#    return starts_with(my.dependency.name, "bitcoin")
-#endfunction
-
-function global.is_optional_element(element)
-    define my.element = is_optional_element.element
-    return defined(my.element.option)
-endfunction
-
-function global.is_private_element(element)
-    define my.element = is_private_element.element
-    return is_true(my.element.private)
+function global.is_bitcoin_dependency(dependency)
+    define my.dependency = is_bitcoin_dependency.dependency
+    require(my.dependency, "dependency", "name")
+    return starts_with(my.dependency.name, "bitcoin")
 endfunction
 
 # Test for a flag context.
@@ -191,6 +229,10 @@ function get_flags_variable(flag)
     abort "Invalid flag context: '$(my.context)'."
 endfunction
 
+#------------------------------------------------------------------------------
+# Option utilities.
+#------------------------------------------------------------------------------
+
 function global.get_option_symbol(option)
     define my.option = get_option_symbol.option
     if (defined(my.option))
@@ -216,7 +258,9 @@ function global.find_option_symbol(element, configure)
     endif
 endfunction
 
+#------------------------------------------------------------------------------
 # Build utilities.
+#------------------------------------------------------------------------------
 
 function global.is_boost_build(build)
     define my.build = is_boost_build.build
@@ -228,7 +272,9 @@ function global.is_github_build(build)
     return !is_empty(my.build.github)
 endfunction
 
+#------------------------------------------------------------------------------
 # Product utilities.
+#------------------------------------------------------------------------------
 
 function global.match_prefix(product, prefix)
     define my.product = match_prefix.product
@@ -282,6 +328,11 @@ endfunction
 function global.is_script(product)
     define my.product = is_script.product
     return match_prefix(my.product, "sbin")
+endfunction
+
+function global.is_bitcoin_headers(product)
+    define my.product = is_bitcoin_headers.product
+    return is_headers(my.product) & ((my.product.container ? "") = "bitcoin")
 endfunction
 
 # Is the product allowed to be active only once?
@@ -353,7 +404,86 @@ function global.is_custom_target(product)
     return is_optional_element(my.product) & !is_test(my.product)
 endfunction
 
+# Is the path extension that of a c/c++ interface implementation file.
+function global.is_cpp_implementation_file(path)
+    return ends_with(my.path, ".ipp")
+endfunction
+
+# Is the path extension that of a c/c++ header file.
+function global.is_cpp_header_file(path, use_implementation)
+    return ends_with(my.path, ".hpp") | ends_with(my.path, ".h") |\
+        ((my.use_implementation ? 0) & is_cpp_implementation_file(my.path))
+endfunction
+
+# Is the path extension that of a c/c++ source file.
+function global.is_cpp_source_file(path)
+    return ends_with(my.path, ".cpp") | ends_with(my.path, ".c")
+endfunction
+
+# Does the file extension conform to the required prefix pattern?
+function global.is_product_file(product, path, use_implementation)
+    define my.product = is_product_file.product
+    require(my.product, "product", "prefix")
+
+    # doc expects no type and bash_completion and manual have no extension.
+    if (is_data(my.product))
+        if (match_prefix(my.product, "bash_completion"))
+            return ends_with(my.path, "")
+        elsif (match_prefix(my.product, "doc"))
+            return ends_with(my.path, "")
+        elsif (match_prefix(my.product, "pkgconfig"))
+            return ends_with(my.path, ".pc")
+        elsif (match_prefix(my.product, "sysconf"))
+            return ends_with(my.path, ".cfg")
+        endif
+    elsif (is_cpp(my.product))
+        return is_cpp_source_file(my.path) |\
+            is_cpp_header_file(my.path, my.use_implementation)
+    elsif (is_headers(my.product))
+        return is_cpp_header_file(my.path, my.use_implementation)
+    elsif (is_info(my.product))
+        return ends_with(my.path, ".texi")
+    elsif (is_java(my.product))
+        return ends_with(my.path, ".java")
+    elsif (is_manual(my.product))
+        return ends_with(my.path, "")
+    elsif (is_python(my.product))
+        return ends_with(my.path, ".py")
+    elsif (is_script(my.product))
+        return ends_with(my.path, ".sh")
+    endif
+    abort "Unknown product type for prefix: '$(my.product.prefix)'"
+endfunction
+
+# Get the relative files in the directory.
+function global.get_product_files(files, folder, trim, product,\
+    use_implementation)
+    define my.files = get_product_files.files
+    define my.product = get_product_files.product
+    define my.directory = open_directory(my.folder)
+    for my.directory.file as _file by _file.name\
+        where is_product_file(my.product, _file.name, my.use_implementation)
+        define my.path = "$(_file.path)$(_file.name)"
+        define my.relative = difference(my.path, my.trim)
+        table_add(my.files, my.relative, "")
+    endfor
+endfunction
+
+# Get the relative files in the directory hierarchy.
+function global.get_all_product_files(files, folder, trim, product)
+    define my.files = get_all_product_files.files
+    define my.product = get_all_product_files.product
+    get_product_files(my.files, my.folder, my.trim, my.product, 1)
+    define my.directory = open_directory(my.folder)
+    for my.directory.directory as _directory by _directory.name
+        define my.subfolder = "$(_directory.path)$(_directory.name)"
+        get_all_product_files(my.files, my.subfolder, my.trim, my.product)
+    endfor
+endfunction
+
+#------------------------------------------------------------------------------
 # Package utilities.
+#------------------------------------------------------------------------------
 
 function global.get_package_name(package)
     define my.package = get_package_name.package
@@ -361,7 +491,9 @@ function global.get_package_name(package)
     return "lib$(my.package.library)"
 endfunction
 
+#------------------------------------------------------------------------------
 # Debugging utilities.
+#------------------------------------------------------------------------------
 
 function global.notify(filename)
     echo "Generating $(my.filename)..."
@@ -404,7 +536,7 @@ function global.batch_no_echo()
 endfunction
 
 # Write one include.
-function write_include(path)
+function global.write_include(path)
     write_line("#include <$(my.path)>")
 endfunction
 

@@ -14,7 +14,7 @@ set -e
 # Do everything relative to this file location.
 cd `dirname "$0"`
 
-# Clean and make directories for generated build artifacts.
+# Clean directories for generated build artifacts.
 rm -rf libbitcoin
 rm -rf libbitcoin-blockchain
 rm -rf libbitcoin-client
@@ -24,37 +24,28 @@ rm -rf libbitcoin-node
 rm -rf libbitcoin-protocol
 rm -rf libbitcoin-server
 
-mkdir libbitcoin
-mkdir libbitcoin-blockchain
-mkdir libbitcoin-client
-mkdir libbitcoin-consensus
-mkdir libbitcoin-explorer
-mkdir libbitcoin-node
-mkdir libbitcoin-protocol
-mkdir libbitcoin-server
-
 # Generate build artifacts.
 gsl -q generate.xml
 
-# Copy outputs to all repositories.
-cp -r  libbitcoin/.             ../libbitcoin
-cp -r  libbitcoin-blockchain/.  ../libbitcoin-blockchain
-cp -r  libbitcoin-client/.      ../libbitcoin-client
-cp -r  libbitcoin-consensus/.   ../libbitcoin-consensus
-cp -r  libbitcoin-explorer/.    ../libbitcoin-explorer
-cp -r  libbitcoin-node/.        ../libbitcoin-node
-cp -r  libbitcoin-protocol/.    ../libbitcoin-protocol
-cp -r  libbitcoin-server/.      ../libbitcoin-server
+# Make generated scripts executable.
+chmod +x libbitcoin/*.sh
+chmod +x libbitcoin-blockchain/*.sh
+chmod +x libbitcoin-client/*.sh
+chmod +x libbitcoin-consensus/*.sh
+chmod +x libbitcoin-explorer/*.sh
+chmod +x libbitcoin-node/*.sh
+chmod +x libbitcoin-protocol/*.sh
+chmod +x libbitcoin-server/*.sh
 
-# Make root scripts executable.
-chmod +x ../libbitcoin/*.sh
-chmod +x ../libbitcoin-blockchain/*.sh
-chmod +x ../libbitcoin-client/*.sh
-chmod +x ../libbitcoin-consensus/*.sh
-chmod +x ../libbitcoin-explorer/*.sh
-chmod +x ../libbitcoin-node/*.sh
-chmod +x ../libbitcoin-protocol/*.sh
-chmod +x ../libbitcoin-server/*.sh
+# Copy outputs to all repositories.
+cp -rf  libbitcoin/.             ../libbitcoin
+cp -rf  libbitcoin-blockchain/.  ../libbitcoin-blockchain
+cp -rf  libbitcoin-client/.      ../libbitcoin-client
+cp -rf  libbitcoin-consensus/.   ../libbitcoin-consensus
+cp -rf  libbitcoin-explorer/.    ../libbitcoin-explorer
+cp -rf  libbitcoin-node/.        ../libbitcoin-node
+cp -rf  libbitcoin-protocol/.    ../libbitcoin-protocol
+cp -rf  libbitcoin-server/.      ../libbitcoin-server
 
 # Generate bindings from generated binding generators.
 # The path to swig must be in our path.

@@ -181,6 +181,8 @@ for generate.repository by name as _repository\
     define my.configure = _repository->configure
     
     for _repository.package as _package
+        require(_repository, "repository", "name")
+        create_directory(_repository.name)
         define my.package_name = get_package_name(_package)
         define my.out_file = "$(_repository.name)/$(my.package_name).pc.in"
         notify(my.out_file)

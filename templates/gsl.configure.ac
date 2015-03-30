@@ -10,13 +10,6 @@
 # Functions
 ###############################################################################
 
-# `-all-static'
-# Always choose static libraries where possible, and try to create a completely statically linked executable.
-# -static is interpreted by libtool, where it has a different meaning.
-# In libtool-speak, it's -all-static.
-# AX_CHECK_LINK_FLAG([[-static]],[LIBTOOL_APP_LDFLAGS="$LIBTOOL_APP_LDFLAGS -all-static"])
-# AC_SUBST(LIBTOOL_APP_LDFLAGS)
-
 function format_template_files(configure)
     define my.configure = format_template_files.configure
     define my.template_files = ""
@@ -95,6 +88,9 @@ endfunction
 .endtemplate
 .template 1
 .
+.#-----------------------------------------------------------------------------
+.# Initialize
+.#-----------------------------------------------------------------------------
 .macro initialize_configure(repository)
 .   define my.repository = initialize_configure.repository
 .   require(my.repository, "repository", "email")
@@ -150,8 +146,11 @@ AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
 AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
 AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 
-.endmacro # initialize
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# AX_CXX_COMPILE_STDCXX_11
+.#-----------------------------------------------------------------------------
 .macro require_stdcxx11(repository)
 .   define my.repository = require_stdcxx11.repository
 .   if (find_flag_name(my.repository->configure, "std=c++11"))
@@ -159,8 +158,11 @@ AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 
 .   endif
-.endmacro # require_stdcxx11
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# AC_ARG_ENABLE | AC_ARG_WITH
+.#-----------------------------------------------------------------------------
 .macro render_option(option)
 .   define my.option = render_option.option
 .   require(my.option, "option", "description")
@@ -202,8 +204,11 @@ AC_SUBST([$(my.symbol)])
 AM_CONDITIONAL([$(my.symbol:upper)], [test x$$(my.symbol) != xno])
 .   endif
 
-.endmacro # render_option
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# AC_DEFINE
+.#-----------------------------------------------------------------------------
 .macro render_define(item)
 .   define my.define = render_define.item
 .   require(my.define, "define", "name")
@@ -219,8 +224,11 @@ AC_DEFINE([$(my.uname)], [$(my.define.value)])
 AC_DEFINE([$(my.uname)])
 .   endif
 
-.endmacro # render_define
+.endmacro 
 .
+.#-----------------------------------------------------------------------------
+.# AX_JAVA_DEVEL
+.#-----------------------------------------------------------------------------
 .macro check_java(dependency, configure)
 .   define my.dependency = check_java.dependency
 .   define my.configure = check_java.configure
@@ -245,8 +253,11 @@ AS_CASE([${$(my.symbol)}], [yes],
      AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])])
 .   endif
 
-.endmacro # check_java
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# AX_PYTHON_DEVEL
+.#-----------------------------------------------------------------------------
 .macro check_python(dependency, configure)
 .   define my.dependency = check_python.dependency
 .   define my.configure = check_python.configure
@@ -274,8 +285,11 @@ AS_CASE([${$(my.symbol)}], [yes],
          AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])])])
 .   endif
 
-.endmacro # check_python
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# AM_ICONV
+.#-----------------------------------------------------------------------------
 .macro check_iconv(dependency, configure)
 .   define my.dependency = check_iconv.dependency
 .   define my.configure = check_iconv.configure
@@ -306,7 +320,10 @@ AS_CASE([${$(my.symbol)}], [yes],
 
 .endmacro # check_iconv
 .
-.# Could be more general than pthread.
+.#-----------------------------------------------------------------------------
+.# AX_PTHREAD
+.#-----------------------------------------------------------------------------
+.# This could be more general than pthread.
 .macro check_pthread(dependency, configure)
 .   define my.dependency = check_pthread.dependency
 .   define my.configure = check_pthread.configure
@@ -342,8 +359,11 @@ AS_CASE([${$(my.symbol)}], [yes],
 AC_SUBST([pthread_LIBS], [-lpthread])
 .   endif
 
-.endmacro # check_pthread
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# AC_CHECK_LIB
+.#-----------------------------------------------------------------------------
 .macro check_dependency(dependency)
 .   define my.dependency = check_dependency.dependency
 .   require(my.dependency, "dependency", "name")
@@ -367,8 +387,11 @@ AS_CASE([${host_os}], [$(my.system_pattern)],
     [AC_SUBST([$(my.cname)_LIBS], [])])
 .   endif
 
-.endmacro # check_dependency
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# AX_BOOST_BASE
+.#-----------------------------------------------------------------------------
 .macro check_boost(dependency)
 .   define my.dependency = check_boost.dependency
 .   require(my.dependency, "dependency", "version")
@@ -389,8 +412,11 @@ AS_CASE([${CC}], [$(my.compiler_pattern)],
          AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
         [AC_MSG_ERROR([Boost $(my.version) or later is required but was not found.])])])
 
-.endmacro # check_boost
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# AX_BOOST_XXX
+.#-----------------------------------------------------------------------------
 .macro check_boost_lib(dependency, configure)
 .   define my.dependency = check_boost_lib.dependency
 .   define my.configure = check_boost_lib.configure
@@ -415,8 +441,11 @@ AS_CASE([${$(my.symbol)}], [yes],
     [AC_SUBST([$(my.cname)_LIBS], [])])
 .   endif
 
-.endmacro # check_boost_lib
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# PKG_CHECK_MODULES
+.#-----------------------------------------------------------------------------
 .macro check_package(dependency, configure)
 .   define my.dependency = check_package.dependency
 .   define my.configure = check_package.configure
@@ -461,8 +490,11 @@ AS_CASE([${$(my.symbol)}], [yes],
     [AC_SUBST([$(my.cname)_PKG], [])])
 .   endif
 
-.endmacro # check_package
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# AX_CHECK_XXX_FLAG
+.#-----------------------------------------------------------------------------
 .macro render_flag(flag)
 .   define my.flag = render_flag.flag
 .   require(my.flag, "flag", "name")
@@ -489,20 +521,26 @@ AS_CASE([${CC}], [$(my.compiler_pattern)],
             [$(my.flags_variable)="$$(my.flags_variable) -$(my.flag.alternate)"])])])
 .   endif
 
-.endmacro # render_flag
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# AC_SUBST
+.#-----------------------------------------------------------------------------
 .macro output_value(name, value)
 .   if (defined(my.value))
 .       heading2("Output ${$(my.name)}")
 AC_SUBST([$(my.name)], [$(my.value)])
 .   endif
 
-.endmacro # output_value
+.endmacro
 .
+.#-----------------------------------------------------------------------------
+.# AC_OUTPUT
+.#-----------------------------------------------------------------------------
 .macro compile(files)
 AC_CONFIG_FILES([$(my.files)])
 AC_OUTPUT
-.endmacro # compile
+.endmacro
 .
 .endtemplate
 .template 0
@@ -513,6 +551,7 @@ function generate_configure()
 for generate.repository by name as _repository
 
     require(_repository, "repository", "name")
+    create_directory(_repository.name)
     define my.out_file = "$(_repository.name)/configure.ac"
     notify(my.out_file)
     output(my.out_file)
@@ -577,3 +616,12 @@ for generate.repository by name as _repository
 endfor _repository
 endfunction # generate_configure
 .endtemplate
+###############################################################################
+# NOTES on: -all-static
+# Always choose static libraries where possible, and try to create a completely
+#  statically linked executable.
+# -static is interpreted by libtool, where it has a different meaning.
+# In libtool-speak, it's -all-static.
+# AX_CHECK_LINK_FLAG([[-static]],[LIBTOOL_APP_LDFLAGS="$LIBTOOL_APP_LDFLAGS -all-static"])
+# AC_SUBST(LIBTOOL_APP_LDFLAGS)
+###############################################################################

@@ -47,6 +47,8 @@ swig -c++ -python -outdir "bindings\\python\\proxy" -o "bindings\\python\\wrap\\
 ###############################################################################
 function generate_bindings_bat()
 for generate.repository by name as _repository
+    require(_repository, "repository", "name")
+    create_directory(_repository.name)
     define my.out_file = "$(_repository.name)/bindings.bat"
     notify(my.out_file)
     output(my.out_file)

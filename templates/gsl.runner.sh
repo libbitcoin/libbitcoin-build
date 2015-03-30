@@ -48,9 +48,14 @@ BOOST_UNIT_TEST_OPTIONS=\\
 # Generation
 ###############################################################################
 function generate_runner()
-for generate.repository by name as _repository where (defined(_repository->build))
-    for _repository->build.product as _product where (defined(_product->runner))
-    
+for generate.repository by name as _repository\
+    where (defined(_repository->make))
+    require(_repository, "repository", "name")
+    for _repository->make.product as _product\
+        where (defined(_product->runner))
+        
+        require(_product, "product", "name")
+        create_directory(_repository.name)
         define my.out_file = "$(_repository.name)/$(_product.name)_runner.sh"
         notify(my.out_file)
         output(my.out_file)

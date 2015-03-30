@@ -23,15 +23,18 @@
 ###############################################################################
 function generate_interface()
 for generate.repository by name as _repository
-    define my.interface = bitcoin_to_include(_repository.name)
-    define my.out_file = "$(_repository.name)/$(my.interface).swg"
+    define my.library = bitcoin_to_include(_repository.name)
+    require(_repository, "repository", "name")
+    define my.path = "$(_repository.name)/bindings"
+    create_directory(my.path)
+    define my.out_file = "$(my.path)/$(my.library).swg"
     notify(my.out_file)
     output(my.out_file)
 
     c_copyleft(_repository.name)
     
-    write_line("// TODO: populate interface from sources.")
-    
+    write_line("// TODO: populate interface from headers.")
+
     close
 endfor _repository
 endfunction # generate_interface

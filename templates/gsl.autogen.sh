@@ -10,17 +10,19 @@
 # Generation
 ###############################################################################
 .macro generate_autogen()
-.for generate.repository by name as _repository
-.    define my.out_file = "$(_repository.name)/autogen.sh"
-.    notify(my.out_file)
-.    output(my.out_file)
+.   for generate.repository by name as _repository
+.       require(_repository, "repository", "name")
+.       create_directory(_repository.name)
+.       define my.out_file = "$(_repository.name)/autogen.sh"
+.       notify(my.out_file)
+.       output(my.out_file)
 .    
-.    shebang("sh")
-.    copyleft(_repository.name)
+.       shebang("sh")
+.       copyleft(_repository.name)
 
 autoreconf -i
 .
-.    close
-.endfor _repository
+.       close
+.   endfor _repository
 .endmacro # generate_autogen
 .endtemplate

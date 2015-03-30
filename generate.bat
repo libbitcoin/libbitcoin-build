@@ -14,7 +14,7 @@ REM ###########################################################################
 REM Do everything relative to this file location.
 pushd %~dp0
 
-REM Clean and make directories for generated build artifacts.
+REM Clean directories for generated build artifacts.
 rmdir /s /q libbitcoin            2>NUL
 rmdir /s /q libbitcoin-blockchain 2>NUL
 rmdir /s /q libbitcoin-client     2>NUL
@@ -24,15 +24,6 @@ rmdir /s /q libbitcoin-node       2>NUL
 rmdir /s /q libbitcoin-protocol   2>NUL
 rmdir /s /q libbitcoin-server     2>NUL
 
-mkdir libbitcoin
-mkdir libbitcoin-blockchain
-mkdir libbitcoin-client
-mkdir libbitcoin-consensus
-mkdir libbitcoin-explorer
-mkdir libbitcoin-node
-mkdir libbitcoin-protocol
-mkdir libbitcoin-server
-
 REM Generate build artifacts.
 gsl -q generate.xml
 
@@ -40,14 +31,14 @@ REM Handle errors below.
 if %errorlevel% neq 0 goto error
 
 REM Copy outputs to all repositories.
-copy /b /y libbitcoin\*             ..\libbitcoin\
-copy /b /y libbitcoin-blockchain\*  ..\libbitcoin-blockchain\
-copy /b /y libbitcoin-client\*      ..\libbitcoin-client\
-copy /b /y libbitcoin-consensus\*   ..\libbitcoin-consensus\
-copy /b /y libbitcoin-explorer\*    ..\libbitcoin-explorer\
-copy /b /y libbitcoin-node\*        ..\libbitcoin-node\
-copy /b /y libbitcoin-protocol\*    ..\libbitcoin-protocol\
-copy /b /y libbitcoin-server\*      ..\libbitcoin-server\
+xcopy /s /y libbitcoin\*             ..\libbitcoin\
+xcopy /s /y libbitcoin-blockchain\*  ..\libbitcoin-blockchain\
+xcopy /s /y libbitcoin-client\*      ..\libbitcoin-client\
+xcopy /s /y libbitcoin-consensus\*   ..\libbitcoin-consensus\
+xcopy /s /y libbitcoin-explorer\*    ..\libbitcoin-explorer\
+xcopy /s /y libbitcoin-node\*        ..\libbitcoin-node\
+xcopy /s /y libbitcoin-protocol\*    ..\libbitcoin-protocol\
+xcopy /s /y libbitcoin-server\*      ..\libbitcoin-server\
 
 REM Generate bindings from generated binding generators.
 REM The path to swig.exe must be in our path.

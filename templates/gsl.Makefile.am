@@ -10,52 +10,9 @@
 # Functions
 ###############################################################################
 
-function is_multiple_first_optional(table, row)
-    define my.table = is_multiple_first_optional.table
-    define my.row = is_multiple_first_optional.row
-    define my.name = my.row.name
-    define my.value = my.row.value
-    return !is_empty(my.value) &\
-        (table_ordinal(my.table, my.name, 0) = my.value) &\
-        (table_count(my.table, my.name) > 1)
-endfunction
-
-function render_variables(table)
-    define my.table = render_variables.table
-    for my.table.row as _row
-        write_line("$(_row.name) =")
-    endfor
-endfunction
-
-function get_make_variables(make, variables, mapper)
-    define my.make = get_make_variables.make
-    define my.variables = get_make_variables.variables
-    define my.mapper = get_make_variables.mapper
-    new table as _table
-        for my.make.product as _product
-            define my.option = _product.option ? ""
-            define my.variable = get_automake_variable(_product)
-            table_add(_table, my.variable, my.option)
-            if (is_test(_product))
-                table_add(_table, "TESTS", my.option)
-            endif
-            if (is_clean_files(_product))
-                table_add(_table, "CLEANFILES", my.option)
-            endif
-        endfor
-        for _table.row as _row where is_multiple_first_optional(_table, _row)
-            map_add(my.mapper, _row.name)
-            table_add(my.variables, _row.name, "")
-        endfor
-    endnew _table
-endfunction
-
-# Get an = or += depending on whether it's the first or later use.
-function get_assignment_operator(mapper, variable)
-    define my.found = map_exists(my.mapper, my.variable)
-    map_add(my.mapper, my.variable)
-    return my.found ?? "+=" ? "="
-endfunction
+#------------------------------------------------------------------------------
+# Get Automake Variable
+#------------------------------------------------------------------------------
 
 # Map the prefix to the primary symbol (this is a simplified mapping).
 function get_primary(product)
@@ -112,51 +69,28 @@ function get_qualified_prefix(product)
     return join(join(my.distribute, my.install, "_"), my.prefix, "_")
 endfunction
 
-# Return true if the path extension is that of a c/c++ header file.
-function is_cpp_header_file(path)
-    return ends_with(my.path, ".hpp") | ends_with(my.path, ".h") |\
-        ends_with(my.path, ".ipp")
-endfunction
-
-# Return true if the path extension is that of a c/c++ source file.
-function is_cpp_source_file(path)
-    return ends_with(my.path, ".cpp") | ends_with(my.path, ".c")
-endfunction
-
-# Does the file extension conform to the required prefix pattern?
-function is_product_file(product, path)
-    define my.product = is_product_file.product
-    require(my.product, "product", "prefix")
-
-    # doc expects no type and bash_completion and manual have no extension.
-    if (is_data(my.product))
-        if (match_prefix(my.product, "bash_completion"))
-            return ends_with(my.path, "")
-        elsif (match_prefix(my.product, "doc"))
-            return ends_with(my.path, "")
-        elsif (match_prefix(my.product, "pkgconfig"))
-            return ends_with(my.path, ".pc")
-        elsif (match_prefix(my.product, "sysconf"))
-            return ends_with(my.path, ".cfg")
-        endif
-    elsif (is_cpp(my.product))
-        # Headers are included for dist, Automake ignores otherwise.
-        return is_cpp_source_file(my.path) | is_cpp_header_file(my.path)
-    elsif (is_headers(my.product))
-        return is_cpp_header_file(my.path)
-    elsif (is_info(my.product))
-        return ends_with(my.path, ".texi")
-    elsif (is_java(my.product))
-        return ends_with(my.path, ".java")
-    elsif (is_manual(my.product))
-        return ends_with(my.path, "")
-    elsif (is_python(my.product))
-        return ends_with(my.path, ".py")
-    elsif (is_script(my.product))
-        return ends_with(my.path, ".sh")
+# Get automake tag of the form: qualified-prefix[_container]
+function get_tag(product, container)
+    define my.product = get_tag.product
+    if (is_empty(my.container))
+        my.container = my.product.container ? ""
     endif
-    abort "Unknown product type for prefix: '$(my.product.prefix)'"
+    if (!is_empty(my.container))
+        my.container = "_$(my.container:c)"
+    endif
+    define my.qualified_prefix = get_qualified_prefix(my.product)
+    return "$(my.qualified_prefix)$(my.container)"
 endfunction
+
+function get_automake_variable(product, segment)
+    define my.product = get_automake_variable.product
+    define my.tag = get_tag(my.product, my.segment)
+    return join(my.tag, get_primary(my.product), "_")
+endfunction
+
+#------------------------------------------------------------------------------
+# Get Automake Install
+#------------------------------------------------------------------------------
 
 # Get the target attribute, defaulting to [prefix]dir, bracketed as ${target}.
 function get_target(product)
@@ -186,6 +120,10 @@ function get_install(product, container)
     return "$(my.target)/$(my.container)"
 endfunction
 
+#------------------------------------------------------------------------------
+# Get Product/Runner Path
+#------------------------------------------------------------------------------
+
 # Normalize the library name (as "[lib]name[.la]").
 function get_archive_name(library)
     define my.library = get_archive_name.library
@@ -213,8 +151,8 @@ endfunction
 # Get the command to execute the test runner. If there is a runner element the
 # test runner is a generated script ${sourcedir}/[product.name]_runner.sh.
 # Otherwise the runner is ${sourcedir}/[product.path]/[product.name].
-function get_test_path(product)
-    define my.product = get_test_path.product
+function get_runner_path(product)
+    define my.product = get_runner_path.product
     define my.name = get_product_name(my.product)
     if (defined(my.product->runner))
         return "$(my.name)_runner.sh"
@@ -222,181 +160,77 @@ function get_test_path(product)
     return join(my.product.path, my.name)
 endfunction
 
-# Get a description for comments.
-function get_product_description(product, container)
-    define my.product = get_product_description.product
-    define my.target = get_target(my.product)
-    if (is_cpp(my.product))
-        define my.path = get_product_path(my.product)
-        if (is_check(my.product) | is_no_install(my.product))
-            return "local: $(my.path)"
-        endif
-        return "$(my.path) => $(my.target)"
-    elsif (is_jar(my.product))
-        if (is_no_install(my.product))
-            return "*.class => *.jar (local), requires ax_java_devel.m4"
-        endif
-        return "*.class => *.jar => $(my.target), requires ax_java_devel.m4"
-    elsif (is_java(my.product))
-        if (is_no_install(my.product))
-            return "*.java => *.class (local), requires ax_java_devel.m4"
-        endif
-        return "*.java => *.class => $(my.target), requires ax_java_devel.m4"
-    endif
-    define my.install = get_install(my.product)
-    if (is_empty(my.install))
-        my.install = my.target
-    endif
-    return "files => $(my.install)"
-endfunction
+#------------------------------------------------------------------------------
+# Render Files Variables
+#------------------------------------------------------------------------------
 
-# Get automake tag of the form: qualified-prefix[_container]
-function get_tag(product, container)
-    define my.product = get_tag.product
-    if (is_empty(my.container))
-        my.container = my.product.container ? ""
-    endif
-    if (!is_empty(my.container))
-        my.container = "_$(my.container:c)"
-    endif
-    define my.qualified_prefix = get_qualified_prefix(my.product)
-    return "$(my.qualified_prefix)$(my.container)"
-endfunction
-
-# Get the automake library add output variable type.
-function get_library_add(product)
-    define my.product = get_library_add.product
-    if (is_library(my.product))
-        return "LIBADD"
-    elsif (is_program(my.product))
-        return "LDADD"
-    endif
-    abort "Unknown library type: '$(my.product.prefix)'"
-endfunction
-
-# Open and validate a directory.
-function open_directory(folder)
-    define my.directory = directory.open(my.folder, error_text) ?
-    if (defined(my.directory))
-        return my.directory
-    endif
-    abort "Directory enumeration failure: $(error_text)"
-endfunction
-
-# Test a directory and return the normalized path.
-function normalize_directory(folder)
-    define my.directory = open_directory(my.folder)
-    return my.directory.path
-endfunction
-
-function get_relative_path(full_path, trim)
-    define my.relative_path = difference(my.full_path, my.trim)
-    return " \\\n    $(my.relative_path)"
-endfunction
-
-# Write the file names in the directory to a formatted string.
-function get_files(folder, trim, product)
-    define my.product = get_files.product
-    my.files = ""
-    define my.directory = open_directory(my.folder)
-    for my.directory.file as _file by _file.name\
-         where is_product_file(my.product, _file.name)
-        define my.full_path = "$(_file.path)$(_file.name)"
-        my.files += get_relative_path(my.full_path, my.trim)
+function serialize_sources(files)
+    define my.files = serialize_sources.files
+    define my.buffer = ""
+    for my.files.row as _row
+        my.buffer += " \\\n    $(_row.name)"
     endfor
-    return my.files
+    return my.buffer
 endfunction
 
-# Recurse directory tree, returning the formatted paths in flat list.
-function get_all_files(folder, trim, product)
-    define my.product = get_all_files.product
-    define my.files = get_files(my.folder, my.trim, my.product)
+function get_all_sources(folder, trim, product)
+    define my.product = get_all_sources.product
+    new files as _files
+        get_all_product_files(_files, my.folder, my.trim, my.product)
+        return serialize_sources(_files)
+    endnew
+endfunction
+
+function render_sources(files, folder, base_trim, path_trim, product, mapper)
+    define my.files = render_sources.files
+    define my.product = render_sources.product
+    define my.mapper = render_sources.mapper
+    get_product_files(my.files, my.folder, my.base_trim, my.product, 1)
+    if (!table_empty(my.files))
+        # Don't write a tautology, such as: installdir = ${installdir}
+        define my.trim = my.base_trim + my.path_trim + 1
+        define my.relative = difference(my.folder, my.trim)
+        define my.segment = join(my.product.container, my.relative)
+        define my.install = get_install(my.product, my.segment)
+        if (!is_empty(my.install))
+            define my.tag = get_tag(my.product, my.segment)
+            write_line("$(my.tag)dir = $(my.install)")
+        endif
+        define my.paths = serialize_sources(my.files)
+        define my.op = get_assignment_operator(my.mapper, my.variable)
+        define my.variable = get_automake_variable(my.product, my.segment)
+        write_line("$(my.variable) $(my.op)$(my.paths)\n")
+        table_clear(my.files)
+    endif
+    
+    # Recurse the directory tree, rendering all files.
     define my.directory = open_directory(my.folder)
     for my.directory.directory as _directory by _directory.name
         define my.subfolder = "$(_directory.path)$(_directory.name)"
-        my.files += get_all_files(my.subfolder, my.trim, my.product)
-    endfor
-    return my.files
-endfunction
-
-# Recurse the directory tree, rendering all files.
-function render_all_variables(folder, base_trim, path_trim, product, mapper)
-    define my.mapper = render_all_variables.mapper
-    define my.product = render_all_variables.product
-    define my.directory = open_directory(my.folder)
-    for my.directory.directory as _directory by _directory.name
-        define my.subfolder = "$(_directory.path)$(_directory.name)"
-        render_files_variables(my.subfolder, my.base_trim, my.path_trim,\
+        render_sources(my.files, my.subfolder, my.base_trim, my.path_trim,\
             my.product, my.mapper)
     endfor
 endfunction
 
-# Helper function for building a container segment.
-function construct_segment(product, folder, trim)
-    define my.product = construct_segment.product
-    define my.segment = difference(my.folder, my.trim)
-    define my.container = my.product.container ? ""
-    return join(my.container, my.segment)
-endfunction
-
+# <files>
 # Recurse directory tree, rendering outputs with files for each folder.
 function render_files_variables(folder, base_trim, path_trim, product, mapper)
     define my.product = render_files_variables.product
     define my.mapper = render_files_variables.mapper
-    require(my.product, "product", "prefix")
-    define my.files = get_files(my.folder, my.base_trim, my.product)
-    if (!is_empty(my.files))
-        define my.trim = my.base_trim + my.path_trim + 1
-        define my.segment = construct_segment(my.product, my.folder, my.trim)
-        define my.tag = get_tag(my.product, my.segment)
-        define my.install = get_install(my.product, my.segment)
-        define my.variable = get_automake_variable(my.product, my.segment)
-        # Don't write a tautology, such as: installdir = ${installdir}
-        if (!is_empty(my.install))
-            write_line("$(my.tag)dir = $(my.install)")
-        endif
-        define my.operator = get_assignment_operator(my.mapper, my.variable)
-        write_line("$(my.variable) $(my.operator)$(my.files)\n")
-    endif
-    render_all_variables(my.folder, my.base_trim, my.path_trim, my.product,\
-        my.mapper)
+    new files as _files
+        render_sources(_files, my.folder, my.base_trim, my.path_trim,\
+            my.product, my.mapper)
+    endnew
 endfunction
 
-# Format the flag either as a literal flag or a dereferenced variable.
-function get_flag(flag)
-    define my.flag = get_flag.flag
-    if (defined(my.flag.value))
-        return "-$(my.flag.value)"
-    elsif (defined(my.flag.define))
-         return "-D$(my.flag.define:upper)=\\\"${$(my.flag.define)}\\\""
-    elsif (defined(my.flag.substitute))
-        return "${$(my.flag.substitute)}"
-    endif
-    abort "Required attribute missing: flag.value|define|substitute"
-endfunction
-
-# For each library of this product that references another product,
-# copy the other product's library elements into this product element.
-# This function is not idempotent, call only once for a given product.
-function chase_libraries(product, make)
-    define my.product = chase_libraries.product
-    define my.make = chase_libraries.make
-    define my.cursor = set_cursor_end(my.product)
-    for my.product.library as _library
-        define my.chased_product = find_library_product(_library.name, my.make)?
-        if (defined(my.chased_product))
-            for my.chased_product.library as _chased_library
-                copy _chased_library before my.cursor
-            endfor
-        endif
-    endfor
-    clear_cursor(my.cursor)
-endfunction
+#------------------------------------------------------------------------------
+# Render CPP Variables
+#------------------------------------------------------------------------------
 
 function get_tests_variable(product, mapper)
     define my.product = get_tests_variable.product
     define my.mapper = get_tests_variable.mapper
-    define my.path = get_test_path(my.product)
+    define my.path = get_runner_path(my.product)
     define my.variable = "TESTS"
     define my.operator = get_assignment_operator(my.mapper, my.variable)
     return "$(my.variable) $(my.operator) $(my.path)"
@@ -421,36 +255,35 @@ function initialize_cpp_variables(variables)
     my.variables.sources = ""
 endfunction
 
-function write_cpp_variables(variables, product)
-    define my.product = write_cpp_variables.product
-    define my.variables = write_cpp_variables.variables
-    define my.cpath = "$(get_product_path(my.product):c)"
-    if (defined(my.variables.tests))
-        write_line("$(my.variables.tests)\n")
+# For each library of this product that references another product,
+# copy the other product's library elements into this product element.
+# This function is not idempotent, call only once for a given product.
+function chase_libraries(product, make)
+    define my.product = chase_libraries.product
+    define my.make = chase_libraries.make
+    define my.cursor = set_cursor_end(my.product)
+    for my.product.library as _library
+        define my.chase_product = find_library_product(_library.name, my.make)?
+        if (defined(my.chase_product))
+            for my.chase_product.library as _chase_library
+                copy _chase_library before my.cursor
+            endfor
+        endif
+    endfor
+    clear_cursor(my.cursor)
+endfunction
+
+# Format the flag either as a literal flag or a dereferenced variable.
+function get_flag(flag)
+    define my.flag = get_flag.flag
+    if (defined(my.flag.value))
+        return "-$(my.flag.value)"
+    elsif (defined(my.flag.define))
+         return "-D$(my.flag.define:upper)=\\\"${$(my.flag.define)}\\\""
+    elsif (defined(my.flag.substitute))
+        return "${$(my.flag.substitute)}"
     endif
-    if (defined(my.variables.binaries))
-        write_line("$(my.variables.binaries)")
-    endif
-    if (!is_empty(my.variables.ccc_flags))
-        write_line("$(my.cpath)_CFLAGS =$(my.variables.ccc_flags)")
-    endif
-    if (!is_empty(my.variables.cxx_flags))
-        write_line("$(my.cpath)_CXXFLAGS =$(my.variables.cxx_flags)")
-    endif
-    if (!is_empty(my.variables.cpp_flags))
-        write_line("$(my.cpath)_CPPFLAGS =$(my.variables.cpp_flags)")
-    endif
-    if (!is_empty(my.variables.ld_flags))
-        write_line("$(my.cpath)_LDFLAGS =$(my.variables.ld_flags)")
-    endif
-    if (!is_empty(my.variables.libs))
-        define my.add = get_library_add(my.product)
-        write_line("$(my.cpath)_$(my.add) =$(my.variables.libs)")
-    endif
-    if (!is_empty(my.variables.sources))
-        write_line("$(my.cpath)_SOURCES =$(my.variables.sources)")
-    endif
-    write_line()
+    abort "Required attribute missing: flag.value|define|substitute"
 endfunction
 
 function define_cpp_flag_variable(variables, flag)
@@ -514,6 +347,49 @@ function define_cpp_lib_variables(variables, library, make, configure)
     endif
 endfunction
 
+# Get the automake library add output variable type.
+function get_library_add(product)
+    define my.product = get_library_add.product
+    if (is_library(my.product))
+        return "LIBADD"
+    elsif (is_program(my.product))
+        return "LDADD"
+    endif
+    abort "Unknown library type: '$(my.product.prefix)'"
+endfunction
+
+function write_cpp_variables(variables, product)
+    define my.product = write_cpp_variables.product
+    define my.variables = write_cpp_variables.variables
+    define my.cpath = "$(get_product_path(my.product):c)"
+    if (defined(my.variables.tests))
+        write_line("$(my.variables.tests)\n")
+    endif
+    if (defined(my.variables.binaries))
+        write_line("$(my.variables.binaries)")
+    endif
+    if (!is_empty(my.variables.ccc_flags))
+        write_line("$(my.cpath)_CFLAGS =$(my.variables.ccc_flags)")
+    endif
+    if (!is_empty(my.variables.cxx_flags))
+        write_line("$(my.cpath)_CXXFLAGS =$(my.variables.cxx_flags)")
+    endif
+    if (!is_empty(my.variables.cpp_flags))
+        write_line("$(my.cpath)_CPPFLAGS =$(my.variables.cpp_flags)")
+    endif
+    if (!is_empty(my.variables.ld_flags))
+        write_line("$(my.cpath)_LDFLAGS =$(my.variables.ld_flags)")
+    endif
+    if (!is_empty(my.variables.libs))
+        define my.add = get_library_add(my.product)
+        write_line("$(my.cpath)_$(my.add) =$(my.variables.libs)")
+    endif
+    if (!is_empty(my.variables.sources))
+        write_line("$(my.cpath)_SOURCES =$(my.variables.sources)")
+    endif
+    write_line()
+endfunction
+
 # Render c/c++ specific option variables.
 function render_cpp_variables(product, root, repository, mapper)
     define my.product = render_cpp_variables.product
@@ -553,21 +429,27 @@ function render_cpp_variables(product, root, repository, mapper)
         
         # Define _LIBS|_LDFLAGS|C??FLAGS variables from libraries.
         for my.product.library as _library
-            define_cpp_lib_variables(_variables, _library, my.make, my.configure)
+            define_cpp_lib_variables(_variables, _library, my.make,\
+                my.configure)
         endfor
         
+        # <sources>
         # Define _SOURCES variable from sources elements.
         for my.product.sources as _sources
             require(_sources, "sources", "path")
             define my.folder = "$(my.root)$(_sources.path)"
-            define _variables.sources += get_all_files(my.folder,\
-                my.root_length, my.product)
+            _variables.sources += get_all_sources(my.folder, my.root_length,\
+                my.product)
         endfor
         
         write_cpp_variables(_variables, my.product)
         endnew
     endif
 endfunction
+
+#------------------------------------------------------------------------------
+# Render Java Variables
+#------------------------------------------------------------------------------
 
 # Render java specific variables: JAVA.
 function render_java_variables(product, root, repository, mapper)
@@ -580,6 +462,10 @@ function render_java_variables(product, root, repository, mapper)
         write_line("\t-rm -rf ${java_builddir} ${jar_builddir}\n")
     endif
 endfunction
+
+#------------------------------------------------------------------------------
+# Render Jar Variables
+#------------------------------------------------------------------------------
 
 function get_java_stamp_variable(product)
     define my.product = get_java_stamp_variable.product
@@ -602,13 +488,7 @@ function get_java_stamp(repository)
     abort "The make is missing a required java product."
 endfunction
 
-function get_automake_variable(product, segment)
-    define my.product = get_automake_variable.product
-    define my.tag = get_tag(my.product, my.segment)
-    return join(my.tag, get_primary(my.product), "_")
-endfunction
-
-# Render java specific variables: jar_DATA.
+# Render jar specific variables: jar_DATA.
 function render_jar_variables(product, root, repository, mapper)
     define my.product = render_jar_variables.product
     define my.repository = render_jar_variables.repository
@@ -622,6 +502,10 @@ function render_jar_variables(product, root, repository, mapper)
     endif
 endfunction
 
+#------------------------------------------------------------------------------
+# Render Python Variables
+#------------------------------------------------------------------------------
+
 # Render python specific variables: PYTHON.
 function render_python_variables(product, root, repository, mapper)
     define my.product = render_python_variables.product
@@ -631,6 +515,10 @@ function render_python_variables(product, root, repository, mapper)
     endif
 endfunction
 
+#------------------------------------------------------------------------------
+# Render File Variables
+#------------------------------------------------------------------------------
+
 function get_source_directory(product)
     define my.product = get_source_directory.product
     if (is_jar(my.product))
@@ -639,6 +527,7 @@ function get_source_directory(product)
     return ""
 endfunction
 
+# <file>
 function render_file_variables(product, mapper)
     define my.product = render_file_variables.product
     define my.file = ""
@@ -648,32 +537,64 @@ function render_file_variables(product, mapper)
         my.file += " \\\n    $(my.path)"
     endfor
     if (!is_empty(my.file))
-        define my.tag = get_tag(my.product)
-        define my.variable = get_automake_variable(my.product)
-        define my.install = get_install(my.product, my.container)
-        
         # Don't write a tautology, such as: installdir = ${installdir}.
+        define my.install = get_install(my.product, my.container)
         if (!is_empty(my.install))
+            define my.tag = get_tag(my.product)
             write_line("$(my.tag)dir = $(my.install)")
         endif
+        define my.variable = get_automake_variable(my.product)
         define my.operator = get_assignment_operator(my.mapper, my.variable)
         write_line("$(my.variable) $(my.operator)$(my.file)\n")
     endif
+endfunction
+
+#------------------------------------------------------------------------------
+# Render Product
+#------------------------------------------------------------------------------
+
+# Get a product description for comments.
+function get_product_description(product, container)
+    define my.product = get_product_description.product
+    define my.target = get_target(my.product)
+    if (is_cpp(my.product))
+        define my.path = get_product_path(my.product)
+        if (is_check(my.product) | is_no_install(my.product))
+            return "local: $(my.path)"
+        endif
+        return "$(my.path) => $(my.target)"
+    elsif (is_jar(my.product))
+        if (is_no_install(my.product))
+            return "*.class => *.jar (local), requires ax_java_devel.m4"
+        endif
+        return "*.class => *.jar => $(my.target), requires ax_java_devel.m4"
+    elsif (is_java(my.product))
+        if (is_no_install(my.product))
+            return "*.java => *.class (local), requires ax_java_devel.m4"
+        endif
+        return "*.java => *.class => $(my.target), requires ax_java_devel.m4"
+    endif
+    define my.install = get_install(my.product)
+    if (is_empty(my.install))
+        my.install = my.target
+    endif
+    return "files => $(my.install)"
 endfunction
 
 function render_product_variables(product, root, repository, mapper)
     define my.product = render_product_variables.product
     define my.repository = render_product_variables.repository
     
-    # File elements are enumerated in metadata, just render them.
+    # <file> are enumerated in metadata, just render them.
     render_file_variables(my.product, my.mapper)
 
-    for my.product.files as _files where !is_empty(_files.path)
+    for my.product.files as _files
+        require(_files, "files", "path")
         define my.folder = "$(my.root)$(_files.path)"
         define my.root_length = string.length(my.root)
         define my.path_length = string.length(_files.path)
         
-        # Files elements are enumerated by directory and mapped to targets.
+        # <files> are enumerated by directory and mapped to targets.
         render_files_variables(my.folder, my.root_length, my.path_length,\
             my.product, my.mapper)
     endfor
@@ -683,7 +604,8 @@ function render_product_variables(product, root, repository, mapper)
     render_jar_variables(my.product, my.root, my.repository, my.mapper)
     render_python_variables(my.product, my.root, my.repository, my.mapper)
 endfunction
-    
+
+# <product>
 function render_product(product, root, repository, mapper)
     define my.product = render_product.product
     define my.repository = render_product.repository
@@ -698,10 +620,9 @@ function render_product(product, root, repository, mapper)
     endif
 endfunction
 
-function initialize_automake()
-    heading2("Look for macros in the m4 subdirectory.")
-    write_line("ACLOCAL_AMFLAGS = -I m4\n")
-endfunction
+#------------------------------------------------------------------------------
+# Make Targets
+#------------------------------------------------------------------------------
 
 # For each option, write all paths to the option-named target.
 function render_make_targets(targets)
@@ -735,6 +656,71 @@ function define_make_targets(make, targets)
     endfor
 endfunction
 
+#------------------------------------------------------------------------------
+# Automake Variables
+#------------------------------------------------------------------------------
+
+function initialize_automake()
+    heading2("Look for macros in the m4 subdirectory.")
+    write_line("ACLOCAL_AMFLAGS = -I m4\n")
+endfunction
+
+function render_make_variables(table)
+    define my.table = render_make_variables.table
+    for my.table.row as _row
+        write_line("$(_row.name) =")
+    endfor
+endfunction
+
+function is_multiple_first_optional(table, row)
+    define my.table = is_multiple_first_optional.table
+    define my.row = is_multiple_first_optional.row
+    define my.name = my.row.name
+    define my.value = my.row.value
+    return !is_empty(my.value) &\
+        (table_ordinal(my.table, my.name, 0) = my.value) &\
+        (table_count(my.table, my.name) > 1)
+endfunction
+
+function get_make_variables(make, variables, mapper)
+    define my.make = get_make_variables.make
+    define my.variables = get_make_variables.variables
+    define my.mapper = get_make_variables.mapper
+    new table as _table
+        for my.make.product as _product
+            define my.option = _product.option ? ""
+            define my.variable = get_automake_variable(_product)
+            table_add(_table, my.variable, my.option)
+            if (is_test(_product))
+                table_add(_table, "TESTS", my.option)
+            endif
+            if (is_clean_files(_product))
+                table_add(_table, "CLEANFILES", my.option)
+            endif
+        endfor
+        for _table.row as _row where is_multiple_first_optional(_table, _row)
+            map_add(my.mapper, _row.name)
+            table_add(my.variables, _row.name, "")
+        endfor
+    endnew _table
+endfunction
+
+# Get an = or += depending on whether it's the first or later use.
+function get_assignment_operator(mapper, variable)
+    define my.found = map_exists(my.mapper, my.variable)
+    map_add(my.mapper, my.variable)
+    return my.found ?? "+=" ? "="
+endfunction
+
+#------------------------------------------------------------------------------
+# Initialize
+#------------------------------------------------------------------------------
+
+function initialize_automake()
+    heading2("Look for macros in the m4 subdirectory.")
+    write_line("ACLOCAL_AMFLAGS = -I m4\n")
+endfunction
+
 ###############################################################################
 # Generation
 ###############################################################################
@@ -744,14 +730,15 @@ for generate.repository as _repository by _repository.name\
     where (defined(_repository->make))
 
     require(_repository, "repository", "name")
+    create_directory("$(_repository.name)")
     define my.out_file = "$(_repository.name)/Makefile.am"
     notify(my.out_file)
     output(my.out_file)
 
     copyleft(_repository.name)
     define my.make = _repository->make
-    define my.base = "$(global.root)/$(_repository.name)/"
-    define my.root = normalize_directory(my.base)
+    define my.absolute = "$(global.root)/$(_repository.name)"
+    define my.base = normalize_directory(my.absolute)
     
     heading1("Automake settings.")
     initialize_automake()
@@ -761,14 +748,14 @@ for generate.repository as _repository by _repository.name\
             get_make_variables(my.make, _variables, _mapper)
             if (!table_empty(_variables))
                 heading1("Conditional variables.")
-                render_variables(_variables)
+                render_make_variables(_variables)
             endif
         endnew _variables
         
         heading1("Distribute, make and install products.")
         for my.make.product as _product
             heading2(get_product_description(_product))
-            render_product(_product, my.root, _repository, _mapper)
+            render_product(_product, my.base, _repository, _mapper)
         endfor
     endnew _mapper
     
@@ -784,3 +771,4 @@ for generate.repository as _repository by _repository.name\
 endfor _repository
 endfunction # generate_automake
 .endtemplate
+###############################################################################
