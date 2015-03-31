@@ -22,10 +22,11 @@ The artifacts generated for each library are as follows. Package names coincide 
 autogen.sh
 configure.ac
 install.sh
-libbitcoin[-package].pc.in
-libbitcoin[_package]_test_runner.sh
+[library].pc.in
+[library]_test_runner.sh
 Makefile.am
-version.hpp
+include/bitcoin/[library].hpp
+include/bitcoin/[library]/version.hpp
 ```
 
 These artifacts are merged into their respective repositories by libbitcoin maintainers. There is no need to build libbitcoin-build if you are not a maintainer in the process of applying a build configuration change.
