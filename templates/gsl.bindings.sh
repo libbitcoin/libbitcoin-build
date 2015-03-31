@@ -50,6 +50,8 @@ swig -c++ -python -outdir "bindings/python/proxy" -o "bindings/python/wrap/$(my.
 ###############################################################################
 function generate_bindings_sh()
 for generate.repository by name as _repository
+    require(_repository, "repository", "name")
+    create_directory(_repository.name)
     define my.out_file = "$(_repository.name)/bindings.sh"
     notify(my.out_file)
     output(my.out_file)

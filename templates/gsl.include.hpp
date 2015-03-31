@@ -8,7 +8,58 @@
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
 # Functions
-###############################################################################  
+###############################################################################
+
+#------------------------------------------------------------------------------
+# Render Local Includes
+#------------------------------------------------------------------------------
+
+# Recurse the directory tree, rendering all files.
+function render_headers(files, folder, base_trim, path_trim, product)
+    define my.files = render_headers.files
+    define my.product = render_headers.product
+    define my.directory = open_directory(my.folder)
+    for my.directory.directory as _directory by _directory.name
+        define my.subfolder = "$(_directory.path)$(_directory.name)"
+        get_product_files(my.files, my.subfolder, my.base_trim, my.product)
+        if (!table_empty(my.files))
+            for my.files.row as _row
+                write_include(join(my.product.container, _row.name))
+            endfor
+            table_clear(my.files)
+        endif
+        render_headers(my.files, my.subfolder, my.base_trim, my.path_trim,\
+            my.product)
+    endfor
+endfunction
+
+# <files>
+# Recurse directory tree, render headers for each folder excluding the first.
+function render_files_headers(folder, base_trim, path_trim, product)
+    define my.product = render_files_headers.product
+    new files as _files
+        render_headers(_files, my.folder, my.base_trim, my.path_trim,\
+            my.product)
+    endnew
+endfunction
+
+# <files> as include source.
+function write_local_includes(files, product, root, repository)
+    define my.files = write_local_includes.files
+    define my.product = write_local_includes.product
+    define my.repository = write_local_includes.repository
+    require(my.files, "files", "path")
+    define my.folder = "$(my.root)$(my.files.path)/"
+    define my.root_length = string.length(my.folder)
+    define my.path_length = string.length(my.files.path)
+    render_files_headers(my.folder, my.root_length, my.path_length,\
+        my.product)
+return
+endfunction
+
+#------------------------------------------------------------------------------
+# Render Bitcoin Includes
+#------------------------------------------------------------------------------
 
 # Get all bitcoin headers in our dependencies. Since they are chained and only
 # incorporated if not redunant, this yields the minimal necessary set.
@@ -16,19 +67,15 @@ function write_bitcoin_includes(configure)
     define my.configure = write_bitcoin_includes.configure
     for my.configure.dependency as _dependency\
         where is_bitcoin_dependency(_dependency)
-        define my.include = bitcoin_to_include(_dependency.name)
-        write_include("bitcoin/$(my.include)")
-    endfor
-endfunction
-
-# Search [include.path/][summary] => [include.path/][summary.hpp]
-function write_local_includes(configure)
-    define my.configure = write_local_includes.configure
-    define my.build = my.configure->build
-    for my.build.product as _product where is_include(_product)
-        for _product.files as _files
-            # TODO
-        endfor
+        define my.option = find_option_symbol(_dependency, my.configure)?
+        if (defined(my.option))
+            write_line("\n#ifdef $(my.option:upper)")
+        endif
+        define my.library = bitcoin_to_include(_dependency.name)
+        write_include("bitcoin/$(my.library).hpp")
+        if (defined(my.option))
+            write_line("#endif\n")
+        endif
     endfor
 endfunction
 
@@ -46,8 +93,13 @@ endfunction
 #ifndef LIBBITCOIN_$(my.upper_include)_HPP
 #define LIBBITCOIN_$(my.upper_include)_HPP
 
-// Convenience header that includes everything
-// Not to be used internally. For API users.
+/**
+ * API Users: Include only this header. Direct use of other headers is fragile 
+ * and unsupported as header organization is subject to change.
+ *
+ * Maintainers: Do not include this header internal to this library.
+ */
+
 .endmacro # begin_include
 .
 .macro end_include()
@@ -61,24 +113,33 @@ endfunction
 # Generation
 ###############################################################################
 function generate_include()
-for generate.repository by name as _repository\
-    where (defined(_repository->build))
+    for generate.repository by name as _repository
+        define my.primary = bitcoin_to_include(_repository.name)
+        define my.absolute = "$(global.root)/$(_repository.name)"
+        define my.base = normalize_directory(my.absolute)
+        for _repository.make as _make
+            for _make.product as _product where is_headers(_product)
+                for _product.files as _files
+                    define my.include = join(_repository.name, _files.path)
+                    create_directory(my.include)
+                    define my.out_file = "$(my.include)/$(my.primary).hpp"
+                    notify(my.out_file)
+                    output(my.out_file)
 
-    define my.include = bitcoin_to_include(_repository.name)
-    define my.out_file = "$(_repository.name)/$(my.include).hpp"
-    notify(my.out_file)
-    output(my.out_file)
+                    c_copyleft(_repository.name)
+                    begin_include(_repository)
 
-    c_copyleft(_repository.name)
-    begin_include(_repository)
-    
-    define my.configure = _repository->configure
-    write_bitcoin_includes(my.configure)
-    write_local_includes(my.configure)
-    
-    end_include()
-    close
-    
-endfor _repository
+                    if (is_bitcoin_headers(_product))
+                        write_bitcoin_includes(_repository->configure)
+                    endif
+                    write_local_includes(_files, _product, my.base, _repository)
+
+                    end_include()
+                    close
+                endfor _files
+            endfor _product
+        endfor _make
+    endfor _repository
 endfunction # generate_include
-endtemplate
+.endtemplate
+###############################################################################

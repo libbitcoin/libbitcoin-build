@@ -134,7 +134,7 @@
         <option value="--enable-tests=no" />
         <option value="--with-bignum=no" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
         <!--<option value="--disable-silent-rules" />-->
@@ -370,17 +370,17 @@
         <option value="--enable-tests=no" />
         <option value="--with-bignum=no" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -567,12 +567,12 @@
         <option value="--enable-tests=no" />
         <option value="--with-bignum=no" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -697,7 +697,7 @@
         <sources path="test" />
       </product>
       <product prefix="include" container="bitcoin">
-        <files path="include/bitcoin" summary="consensus" />
+        <files path="include/bitcoin" />
       </product>
       <product prefix="lib" path="bindings/java/wrap" name="bitcoin-consensus-jni" option="java">
         <library name="bitcoin-consensus" />
@@ -751,7 +751,7 @@
         <option value="--enable-tests=no" />
         <option value="--with-bignum=no" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -953,18 +953,18 @@
         <option value="--enable-tests=no" />
         <option value="--with-bignum=no" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="master" parallel="true" >
+      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1134,23 +1134,23 @@
         <option value="--enable-tests=no" />
         <option value="--with-bignum=no" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1343,7 +1343,7 @@
         <option value="--enable-tests=no" />
         <option value="--with-bignum=no" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1515,29 +1515,29 @@
         <option value="--enable-tests=no" />
         <option value="--with-bignum=no" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-console" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="master" parallel="true" >
+      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
