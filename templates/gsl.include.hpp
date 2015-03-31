@@ -2,7 +2,7 @@
 ###############################################################################
 # Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
-# GSL generate libbitcoin include.hpp.
+# GSL generate bitcoin.hpp.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
