@@ -904,6 +904,12 @@
       <product prefix="include" container="bitcoin" >
         <files path="include/bitcoin" />
       </product>
+      <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
+        <file path="data/bx" />
+      </product>
+      <product prefix="sysconf" container="libbitcoin" >
+        <file path="data/bx.cfg" />
+      </product>
     </make>
 
     <install>
