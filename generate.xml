@@ -174,9 +174,11 @@
         <!--<get name="boost" />-->
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
+        <!-- TODO: figure out why building boost here prevents a test case mnemonic normalization failure. -->
+        <!--<get name="boost1.54" />-->
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
         <option value="LDLIBS='-lstdc++'" />
       </job>
@@ -1016,9 +1018,10 @@
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
+        <!--<get name="boost1.54" />-->
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
         <option value="LDLIBS='-lstdc++'" />
       </job>
@@ -1600,9 +1603,11 @@
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
+        <!-- TODO: figure out why building boost here prevents a test case mnemonic normalization failure. -->
+        <!--<get name="boost1.54" />-->
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
         <option value="LDLIBS='-lstdc++'" />
       </job>
