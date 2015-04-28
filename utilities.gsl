@@ -262,6 +262,11 @@ endfunction
 # Build utilities.
 #------------------------------------------------------------------------------
 
+function global.is_icu_build(build)
+    define my.build = is_icu_build.build
+    return starts_with(my.build.name, "icu")
+endfunction
+
 function global.is_boost_build(build)
     define my.build = is_boost_build.build
     return my.build.name = "boost"
