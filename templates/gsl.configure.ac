@@ -397,7 +397,7 @@ AS_CASE([${host_os}], [$(my.system_pattern)],
 .   require(my.dependency, "dependency", "version")
 .
 .   define my.version = my.dependency.version
-.   define my.compiler = my.dependency.compiler
+.   define my.compiler = my.dependency.compiler?
 .   define my.show_compiler = is_empty(my.compiler) ?? "" ? " if in $(my.compiler)"
 .   define my.compiler_pattern = is_empty(my.compiler) ?? "*" ? "*$(my.compiler)*"
 .   heading2("Require Boost of at least version $(my.version)$(my.show_compiler) and output ${boost_CPPFLAGS/LDFLAGS}.")
