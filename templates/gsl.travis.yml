@@ -13,7 +13,7 @@
 function apt_get(name, system)
     define my.get = ""
     if (my.system = "osx")
-        my.get = "brew install $(my.name)"
+        my.get = "brew unlink $(my.name); brew install $(my.name)"
     elsif (my.system = "linux")
         my.get = "sudo apt-get -qq install $(my.name)"
     else
@@ -134,7 +134,6 @@ matrix:
 .macro install_compilers(matrix)
 .   my.matrix = install_compilers.matrix
 .   my.linux       = condition("$LINUX          ")
-.#  my.linux_gcc   = condition("$LINUX && $GCC  ")
 .   my.linux_clang = condition("$LINUX && $CLANG")
 .
     # Install g++ 4.8
