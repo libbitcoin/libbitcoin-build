@@ -474,6 +474,7 @@
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
       <dependency name="bitcoin" version="3.0.0" />
+      <dependency name="bitcoin-protocol" version="0.1.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -506,7 +507,7 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" name="bitcoin-client" uuid="475e189d-f147-4122-b5fe-5bcf1153696e" >
-        <library name="bitcoin" />
+        <library name="bitcoin-protocol" />
         <library name="sodium" />
         <library name="czmq++" />
         <headers path="include" />
