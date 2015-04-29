@@ -197,7 +197,7 @@
 
   </repository>
     
-  <repositoryX name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
@@ -433,9 +433,9 @@
       </job>
     </matrix>
 
-  </repositoryX>
+  </repository>
 
-  <repositoryX name="libbitcoin-client" version="2.1.0" email="mienkphi@gmail.com" >
+  <repository name="libbitcoin-client" version="2.1.0" email="mienkphi@gmail.com" >
 
     <package library="bitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" />
 
@@ -601,9 +601,9 @@
       </job>
     </matrix>
 
-  </repositoryX>
+  </repository>
 
-  <repositoryX name="libbitcoin-consensus" version="1.1.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-consensus" version="1.1.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-consensus" description="Libbitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" />
 
@@ -783,9 +783,9 @@
       </job>
     </matrix>
 
-  </repositoryX>
+  </repository>
 
-  <repositoryX name="libbitcoin-explorer" version="2.1.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-explorer" version="2.1.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
 
@@ -794,7 +794,6 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
-      <option type="with" name="icu" default="no" define="BOOST_HAS_ICU" description="Compile with International Components for Unicode." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -803,8 +802,6 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="2.1.0" />
-      <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
-      <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -841,8 +838,6 @@
       <product prefix="lib" path="src" name="bitcoin-explorer" uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f" >
         <flag define="sysconfdir" />
         <library name="bitcoin-client" />
-        <library name="icu-i18n" />
-        <library name="dl" />
         <headers path="include" />
         <sources path="src" />
       </product>
@@ -995,9 +990,9 @@
       </job>
     </matrix>
 
-  </repositoryX>
+  </repository>
 
-  <repositoryX name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
 
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
@@ -1174,9 +1169,9 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
-  </repositoryX>
+  </repository>
 
-  <repositoryX name="libbitcoin-protocol" version="0.1.0" email="mienkphi@gmail.com" >
+  <repository name="libbitcoin-protocol" version="0.1.0" email="mienkphi@gmail.com" >
 
     <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
 
@@ -1343,9 +1338,9 @@
       </job>
     </matrix>
 
-  </repositoryX>
+  </repository>
 
-  <repositoryX name="libbitcoin-server" version="2.0.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-server" version="2.0.0" email="genjix@riseup.net" >
 
     <!-- TODO: There is no library produced, but we get an error if we don't emit the reference. -->
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
@@ -1532,6 +1527,6 @@
       </job>
     </matrix>
 
-  </repositoryX>
+  </repository>
 
 </generate>
