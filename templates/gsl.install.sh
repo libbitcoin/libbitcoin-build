@@ -14,14 +14,15 @@
 
 function have_build(install, name)
     define my.install = have_build.install
-    return defined(my.install->build(build.name = my.name))
+    return defined(my.install->build(starts_with(build.name, my.name)))
 endfunction
 
 function is_archive_match(build, name, compiler)
     define my.build = is_archive_match.build
     trace1("is_archive_match($(my.name), $(my.compiler ? 0)) : $(my.build.name)")
     return defined(my.build.version) & (my.build.name = my.name) & \
-        (!defined(my.compiler) | (my.build.compiler = my.compiler))
+        (!defined(my.compiler) | !defined(my.build.compiler) | \
+        (my.build.compiler = my.compiler))
 endfunction
 
 function get_archive_version(install, name, compiler)
@@ -31,7 +32,7 @@ function get_archive_version(install, name, compiler)
     return defined(my.build) ?? my.build.version
 endfunction
 
-# Functions with specific knowledge of archive file name and URL structure.
+# Functions with specific knowledge of Boost archive file name and URL structure.
 
 function get_boost_file(install, compiler)
     define my.install = get_boost_file.install
@@ -45,7 +46,7 @@ function get_boost_file(install, compiler)
 endfunction
 
 function get_boost_url(install, compiler)
-    trace1("get_boost_url($(my.compiler) ? 0)")
+    trace1("get_boost_url($(my.compiler ? 0))")
     define my.install = get_boost_url.install
     define my.version = get_archive_version(my.install, "boost", my.compiler)?
     if (!defined(my.version))
@@ -56,10 +57,42 @@ function get_boost_url(install, compiler)
     if (!defined(my.archive))
         trace1("get_boost_url:get_boost_file($(my.compiler ? 0)) = []")
         return
-    endif        
+    endif
     define my.base_url = "http\://sourceforge.net/projects/boost/files/boost"
     define my.url = "$(my.base_url)/$(my.version)/$(my.archive)/download"
     trace1("get_boost_url = $(my.url)")
+    return my.url
+endfunction
+
+# Functions with specific knowledge of ICU archive file name and URL structure.
+
+function get_icu_file(install, compiler)
+    define my.install = get_icu_file.install
+    define my.version = get_archive_version(my.install, "icu", my.compiler)?
+    if (!defined(my.version))
+        trace1("get_icu_file:get_archive_version($(my.compiler ? 0)) = []")
+        return
+    endif
+    define my.underscore_version = string.convch(my.version, ".", "_")
+    return "icu4c-$(my.underscore_version)-src.tgz"
+endfunction
+
+function get_icu_url(install, compiler)
+    trace1("get_icu_url($(my.compiler ? 0))")
+    define my.install = get_icu_url.install
+    define my.version = get_archive_version(my.install, "icu", my.compiler)?
+    if (!defined(my.version))
+        trace1("get_icu_url:get_archive_version($(my.compiler ? 0)) = []")
+        return
+    endif
+    define my.archive = get_icu_file(my.install, my.compiler)?
+    if (!defined(my.archive))
+        trace1("get_icu_url:get_icu_file($(my.compiler ? 0)) = []")
+        return
+    endif
+    define my.base_url = "http\://download.icu-project.org/files/icu4c"
+    define my.url = "$(my.base_url)/$(my.version)/$(my.archive)"
+    trace1("get_icu_url = $(my.url)")
     return my.url
 endfunction
 
@@ -74,6 +107,9 @@ endfunction
 # Script to build and install $(my.repo.name).
 #
 # Script options:
+.   if (have_build(my.repo->install, "icu"))
+# --build-icu              Builds ICU libraries.
+.   endif
 .   if (have_build(my.repo->install, "boost"))
 # --build-boost            Builds Boost libraries.
 .   endif
@@ -86,7 +122,7 @@ endfunction
 # Verified on OSX 10.10, using MacPorts and Homebrew repositories, requires
 # Apple LLVM version 6.0 (clang-600.0.54) (based on LLVM 3.5svn) or newer.
 # This script does not like spaces in the --prefix or --build-dir, sorry.
-# Values (e.g. yes|no) in the boolean options are not supported by the script.
+# Values (e.g. yes|no) in the '--disable-<linkage>' options are not supported.
 # All command line options are passed to 'configure' of each repo, with
 # the exception of the --build-<item> options, which are for the script only.
 # Depending on the caller's permission to the --prefix or --build-dir
@@ -100,6 +136,24 @@ BUILD_DIR="build-$(my.repo.name)"
 
 .endmacro # define_build_directory
 .
+.macro define_icu(install, compiler)
+.   trace1("define_icu($(my.compiler ? 0))")
+.   define my.install = define_icu.install
+.   define my.show_compiler = defined(my.compiler) ?? " for $(my.compiler)" ? ""
+.   define my.upper_compiler = defined(my.compiler) ?? "_$(my.compiler:upper,c)" ? ""
+.   define my.url = get_icu_url(my.install, my.compiler)?
+.   if (!defined(my.url))
+.       #abort "A version of icu$(my.show_compiler) is not defined."
+.       return
+.   endif
+.   heading2("ICU archive$(my.show_compiler).")
+ICU_URL$(my.upper_compiler)="$(my.url)"
+ICU_ARCHIVE$(my.upper_compiler)="$(get_icu_file(my.install, my.compiler))"
+ICU_STANDARD=\\
+"CXXFLAGS=-std=c++0x"
+
+.endmacro # define_icu
+.
 .macro define_boost(install, compiler)
 .   trace1("define_boost($(my.compiler ? 0))")
 .   define my.install = define_boost.install
@@ -110,9 +164,14 @@ BUILD_DIR="build-$(my.repo.name)"
 .       #abort "A version of boost$(my.show_compiler) is not defined."
 .       return
 .   endif
-.   heading2("Boost archives$(my.show_compiler).")
+.   heading2("Boost archive$(my.show_compiler).")
 BOOST_URL$(my.upper_compiler)="$(my.url)"
 BOOST_ARCHIVE$(my.upper_compiler)="$(get_boost_file(my.install, my.compiler))"
+BOOST_STANDARD$(my.upper_compiler)=\\
+"threading=multi "\\
+"variant=release "\\
+"-d0 "\\
+"-q"
 
 .endmacro # define_boost
 .
@@ -136,89 +195,92 @@ fi
 echo "Make jobs: $PARALLEL"
 echo "Make for system: $OS"
 
-.   heading2("Define operating system settings.")
+.   heading2("Define operating system specific settings.")
 if [[ $OS == Darwin ]]; then
-
-    # Always require CLang, common lib linking will otherwise fail.
+    # Always require clang, common lib linking will otherwise fail.
     export CC="clang"
     export CXX="clang++"
+    LIBC="libc++"
     
-    # Always initialize prefix on OSX so default is consistent.
+    # Always initialize prefix on OSX so default is useful.
     PREFIX="/usr/local"
+else
+    LIBC="libstdc++"
 fi
 echo "Make with cc: $CC"
 echo "Make with cxx: $CXX"
 
+.   heading2("Define compiler specific settings.")
+COMPILER="GCC"
+if [[ $CXX == "clang++" ]]; then
+    BOOST_TOOLS="toolset=clang cxxflags=-stdlib=$LIBC linkflags=-stdlib=$LIBC"  
+    COMPILER="CLANG"
+fi
+
 .   heading2("Parse command line options that are handled by this script.")
 for OPTION in "$@"; do
     case $OPTION in
-        (--prefix=*) PREFIX="${OPTION#*=}";;
-        (--build-dir=*) BUILD_DIR="${OPTION#*=}";;
-        (--build-boost) BUILD_BOOST="yes";;
+        # Custom build options (in the form of --build-<option>).
+        (--build-icu)      BUILD_ICU="yes";;
+        (--build-boost)    BUILD_BOOST="yes";;
+        (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
+        
+        # Standard build options.
+        (--prefix=*)       PREFIX="${OPTION#*=}";;
         (--disable-shared) DISABLE_SHARED="yes";;
         (--disable-static) DISABLE_STATIC="yes";;
+        (--with-icu)       WITH_ICU="yes";;
     esac
 done
 echo "Build directory: $BUILD_DIR"
 echo "Prefix directory: $PREFIX"
 
-.   heading2("Purge our custom options so they don't go to configure.")
+.   heading2("Purge custom options so they don't go to configure.")
 CONFIGURE_OPTIONS=( "$@" )
-CUSTOM_OPTIONS=( "--build-dir=$BUILD_DIR" "--build-boost" )
+CUSTOM_OPTIONS=( "--build-icu" "--build-boost" "--build-dir=$BUILD_DIR" )
 for CUSTOM_OPTION in "${CUSTOM_OPTIONS[@]}"; do
     CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/$CUSTOM_OPTION}" )
 done
 
-.   heading2("Set public boost_link variable (to translate configuration to Boost build).")
+.   heading2("Set link variables.")
 if [[ $DISABLE_STATIC == yes ]]; then
-    boost_link="link=shared"
+    BOOST_LINK="link=shared"
+    ICU_LINK="--enable-shared --disable-static"
 elif [[ $DISABLE_SHARED == yes ]]; then
-    boost_link="link=static"
+    BOOST_LINK="link=static"
+    ICU_LINK="--disable-shared --enable-static"
 else
-    boost_link="link=static,shared"
-fi
-
-.   heading2("Set public boost_stdlib variable (to translate configuration to Boost build).")
-if [[ $OS == Darwin ]]; then
-    boost_stdlib="libc++"
-else
-    boost_stdlib="libstdc++"
+    BOOST_LINK="link=static,shared"
+    ICU_LINK="--enable-shared --enable-static"
 fi
 
 .   heading2("Incorporate the prefix.")
 if [[ $PREFIX ]]; then
+    # Set the prefix-based package config directory.
+    PREFIX_PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
 
-    # Set public with_pkgconfigdir variable (for packages that handle it).
-    # Currently all relevant dependencies support it except secp256k1.
-    PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
-    with_pkgconfigdir="--with-pkgconfigdir=$PKG_CONFIG_DIR"
+    # Augment PKG_CONFIG_PATH search path with our prefix.
+    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX_PKG_CONFIG_DIR"
     
-    # Augment PKG_CONFIG_PATH with prefix path. 
-    # This allows package config to locate packages installed to the prefix.
-    # TODO: determine why this is necessary when setting with_pkgconfigdir.
-    export PKG_CONFIG_PATH="$PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
-
-    # Boost m4 discovery searches in the following order:
-    # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, BOOST_ROOT.
-    # We use --with-boost to prioritize the --prefix path when we build it.
-    # Otherwise the standard paths suffice for Linux, Homebrew and MacPorts.
-
-    # Set public with_boost variable (because Boost has no pkg-config).
-    if [[ $BUILD_BOOST == yes ]]; then
-        with_boost="--with-boost=$PREFIX"
-    fi
-
-    # Set public prefix variable (to tell Boost where to build).
+    # Set public prefix variable.
     prefix="--prefix=$PREFIX"
+    
+    # Set a package config save path that can be passed via our builds.
+    with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
+    
+    if [[ $BUILD_BOOST ]]; then
+        # Boost has no pkg-config, m4 searches in the following order:
+        # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
+        # We use --with-boost to prioritize the --prefix path when we build it.
+        # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
+        with_boost="--with-boost=$PREFIX" 
+    fi
 fi
 
 .   heading2("Echo published dynamic build options.")
-echo "Published dynamic options:"
-echo "  boost_link: $boost_link"
-echo "  boost_stdlib: $boost_stdlib"
-echo "  prefix: $prefix"
-echo "  with_boost: $with_boost"
-echo "  with_pkgconfigdir: $with_pkgconfigdir"
+echo "  prefix: ${prefix}"
+echo "  with_boost: ${with_boost}"
+echo "  with_pkgconfigdir: ${with_pkgconfigdir}"
 
 .endmacro # define_initialize
 .
@@ -234,25 +296,36 @@ $(my.build.name:upper,c)_OPTIONS$(my.compiler_name)=\\
 
 .endmacro # define_build_options
 .
-.macro define_compiler_settings()
-if [[ $CXX == "clang++" ]]; then
-    BOOST_URL="$BOOST_URL_CLANG"
-    BOOST_ARCHIVE="$BOOST_ARCHIVE_CLANG"
-    BOOST_OPTIONS="$BOOST_OPTIONS_CLANG"
-else # g++
-    BOOST_URL="$BOOST_URL_GCC"
-    BOOST_ARCHIVE="$BOOST_ARCHIVE_GCC"
-    BOOST_OPTIONS="$BOOST_OPTIONS_GCC"
-fi
-
-.endmacro # define_compiler_settings
-.
 .macro define_utility_functions()
 .
+circumvent_boost_icu_detection()
+{
+    # Boost expects a directory structure for ICU which is incorrect.
+    # Boost ICU discovery fails when using prefix, can't fix with -sICU_LINK,
+    # so we rewrite the two 'has_icu_test.cpp' files to always return success.
+    
+    local SUCCESS="int main() { return 0; }"
+    local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
+    local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
+    
+    echo $SUCCESS > $REGEX_TEST
+    echo $SUCCESS > $LOCALE_TEST
+    
+    echo "hack: ICU detection modified, will always indicate found."
+}
+
 configure_options()
 {
     echo "configure: $@"
     ./configure "$@"
+}
+
+configure_links()
+{
+    # Configure dynamic linker run-time bindings.
+    if [[ ($OS == Linux) && !($PREFIX) ]]; then
+        ldconfig
+    fi
 }
 
 create_directory()
@@ -261,18 +334,6 @@ create_directory()
 
     rm -rf "$DIRECTORY"
     mkdir "$DIRECTORY"
-}
-
-display_linkage()
-{
-    local LIBRARY="$1"
-    
-    # Display shared library links.
-    if [[ $OS == Darwin ]]; then
-        otool -L "$LIBRARY"
-    else
-        ldd --verbose "$LIBRARY"
-    fi
 }
 
 display_message()
@@ -290,6 +351,58 @@ initialize_git()
     git config user.name anonymous
 }
 
+initialize_boost_icu()
+{
+    if [[ $WITH_ICU ]]; then
+        # Restrict other local options when compiling boost with icu.
+        BOOST_ICU_ONLY="boost.locale.iconv=off boost.locale.posix=off"
+        
+        # Extract ICU prefix directory from package config variable.
+        local ICU_PREFIX=`pkg-config icu-i18n --variable=prefix`
+        BOOST_ICU_PATH="-sICU_PATH=$ICU_PREFIX"
+        BOOTSTRAP_WITH_ICU="--with-icu=$ICU_PREFIX"
+
+        # Extract ICU libs from package config variables and augment with -ldl.
+        local ICU_LIBS="`pkg-config icu-i18n --libs` -ldl"
+        BOOST_ICU_LINK="-sICU_LINK=$ICU_LIBS"
+    fi
+}
+
+initialize_icu_packages()
+{
+    if [[ $OS == Darwin && !($BUILD_ICU) ]]; then
+        # Update PKG_CONFIG_PATH for ICU package installations on OSX.
+        # OSX provides libicucore.dylib with no pkgconfig and doesn't support
+        # renaming or important features, so we can't use that.
+        HOMEBREW_ICU_PKG_CONFIG="/usr/local/opt/icu4c/lib/pkgconfig"
+        MACPORTS_ICU_PKG_CONFIG="/opt/local/lib/pkgconfig"
+        
+        if [[ -d "$HOMEBREW_ICU_PKG_CONFIG" ]]; then
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_ICU_PKG_CONFIG"
+        elif [[ -d "$MACPORTS_ICU_PKG_CONFIG" ]]; then
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$MACPORTS_ICU_PKG_CONFIG"
+        fi
+    fi
+}
+
+initialize_options()
+{
+    if [[ !($BOOST_OPTIONS) ]]; then
+        # Select compiler-conditional generated configuration parameters.
+        if [[ $COMPILER == CLANG ]]; then
+            BOOST_URL=$BOOST_URL_CLANG
+            BOOST_ARCHIVE=$BOOST_ARCHIVE_CLANG
+            BOOST_STANDARD=$BOOST_STANDARD_CLANG
+            BOOST_OPTIONS=$BOOST_OPTIONS_CLANG
+        else
+            BOOST_URL=$BOOST_URL_GCC
+            BOOST_ARCHIVE=$BOOST_ARCHIVE_GCC
+            BOOST_STANDARD=$BOOST_STANDARD_GCC
+            BOOST_OPTIONS=$BOOST_OPTIONS_GCC
+        fi
+    fi
+}
+
 make_current_directory()
 {
     local JOBS=$1
@@ -299,11 +412,7 @@ make_current_directory()
     configure_options "$@"
     make_jobs $JOBS
     make install
-
-    # Use ldconfig only in case of non --prefix installation on Linux.    
-    if [[ ($OS == Linux) && !($PREFIX)]]; then
-        ldconfig
-    fi
+    configure_links
 }
 
 make_jobs()
@@ -324,7 +433,7 @@ make_tests()
     local JOBS=$1
 
     # Build and run unit tests relative to the primary directory.
-    # VERBOSE=1 ensures test-suite.log output sent to console.
+    # VERBOSE=1 ensures test-suite.log output sent to console (gcc).
     make_jobs $JOBS check VERBOSE=1
 }
 
@@ -342,6 +451,41 @@ push_directory()
 
 .   heading1("Build functions.")
 .
+build_from_tarball_icu()
+{
+    local URL=$1
+    local ARCHIVE=$2
+    local REPO=$3
+    local JOBS=$4
+    shift 4
+
+    if [[ !($BUILD_ICU) ]]; then
+        initialize_icu_packages
+        display_message "ICU build not enabled"
+        return
+    fi
+
+    display_message "Download $ARCHIVE"
+
+    create_directory $REPO
+    push_directory $REPO
+
+    # Extract the source locally.
+    wget --output-document $ARCHIVE $URL
+    tar --extract --file $ARCHIVE --strip-components=1
+    push_directory "source"
+
+    # Build and install.
+    # ICU is a typical GNU build except that it fails on unknown options.
+    configure_options $ICU_LINK $ICU_STANDARD ${prefix} "$@"
+    make_jobs $JOBS --silent
+    make install
+    configure_links
+
+    pop_directory
+    pop_directory
+}
+
 build_from_tarball_boost()
 {
     local URL=$1
@@ -350,7 +494,7 @@ build_from_tarball_boost()
     local JOBS=$4
     shift 4
 
-    if [[ $BUILD_BOOST != yes ]]; then
+    if [[ !($BUILD_BOOST) ]]; then
         display_message "Boost build not enabled"
         return
     fi
@@ -363,13 +507,28 @@ build_from_tarball_boost()
     # Extract the source locally.
     wget --output-document $ARCHIVE $URL
     tar --extract --file $ARCHIVE --bzip2 --strip-components=1
+    
+    # Circumvent Boost ICU detection bug.
+    circumvent_boost_icu_detection
 
-    echo "configure: $@"
+    initialize_boost_icu
+    
+    # Build and install.
+    BOOSTSTRAP_OPTIONS="${prefix} $BOOTSTRAP_WITH_ICU"
+    B2_OPTIONS="install --reconfigure -j $JOBS ${prefix} $BOOST_LINK $BOOST_TOOLS $BOOST_STANDARD $BOOST_ICU_PATH $BOOST_ICU_LINK $BOOST_ICU_ONLY $@"
+    
+    echo "bootstrap: $BOOSTSTRAP_OPTIONS"
+    echo "b2: $B2_OPTIONS"
     echo
-
-    # Build and install (note that "$@" is not from script args).
-    ./bootstrap.sh
-    ./b2 install boost.locale.icu=off -j $JOBS "$@"
+    
+    ./bootstrap.sh $BOOSTSTRAP_OPTIONS
+    ./b2 $B2_OPTIONS
+    
+    # Boost has no pkg-config, m4 searches in the following order:
+    # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
+    # We use --with-boost to prioritize the --prefix path when we build it.
+    # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
+    with_boost="--with-boost=$PREFIX"
 
     pop_directory
 }
@@ -416,8 +575,6 @@ build_from_travis()
 
     # The primary build is not downloaded if we are running in Travis.
     if [[ $TRAVIS == true ]]; then
-        # TODO: enable so build-dir in travis can be absolute or multi-segment.
-        # push_directory "$TRAVIS_BUILD_DIR"
         push_directory ".."
         build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "$@"
         make_tests $JOBS
@@ -431,6 +588,10 @@ build_from_travis()
 }
 
 .endmacro # define_utility_functions
+.
+.macro build_icu()
+    build_from_tarball_icu $ICU_URL $ICU_ARCHIVE icu $PARALLEL $ICU_OPTIONS
+.endmacro # build_icu
 .
 .macro build_boost()
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
@@ -461,6 +622,8 @@ build_all()
 .
 .           if (is_boost_build(_build))
 .               build_boost()
+.           elsif (is_icu_build(_build))
+.               build_icu()
 .           elsif (is_github_build(_build))
 .               if (!last())
 .                   build_github(_build)
@@ -480,7 +643,8 @@ build_all()
 .macro define_invoke()
 create_directory "$BUILD_DIR"
 push_directory "$BUILD_DIR"
-initialize_git   
+initialize_git
+initialize_options
 time build_all "${CONFIGURE_OPTIONS[@]}"
 pop_directory
 .endmacro # define_invoke
@@ -505,6 +669,7 @@ for generate.repository by name as _repository
     
     heading1("Define common constants.")
     define_build_directory(_repository)
+    define_icu(my.install)
     define_boost(my.install, "gcc")
     define_boost(my.install, "clang")
     
@@ -515,9 +680,6 @@ for generate.repository by name as _repository
     for my.install.build as _build where count(_build.option) > 0
          define_build_options(_build)
     endfor _build
-
-    heading1("Define compiler settings.")
-    define_compiler_settings()
 
     heading1("Define utility functions.")
     define_utility_functions()

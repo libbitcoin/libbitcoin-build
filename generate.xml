@@ -12,12 +12,13 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="examples" default="yes" conditional="true" description="Compile with examples." />
+      <option type="with" name="icu" default="no" define="BOOST_HAS_ICU" description="Compile with International Components for Unicode." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" substitute="true" value="-DENABLE_TESTNET" description="Compile for testnet (deprecated)." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.50.0" />
-      <dependency name="boost" compiler="clang" version="1.54.0" />
+      <dependency name="boost" version="1.50.0" compiler="gcc" />
+      <dependency name="boost" version="1.54.0" compiler="clang" />
       <dependency name="boost_chrono" />
       <dependency name="boost_date_time" />
       <dependency name="boost_filesystem" />
@@ -25,13 +26,18 @@
       <dependency name="boost_program_options" />
       <dependency name="boost_regex" />
       <dependency name="boost_system" />
+      <dependency name="boost_thread" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="iconv" />
       <dependency name="pthread" />
       <dependency name="rt" function="clock_gettime" system="linux" />
+      <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
+      <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       <dependency name="secp256k1" version="0.0.1" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
+      
+      <!-- boost -->
+      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
@@ -39,10 +45,6 @@
       <flag name="Wno-long-long" alternate="pedantic" comment="Allow use of C99 'long long' type." context="c" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
-
-      <!-- boost -->
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." context="c++" />
       
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -75,9 +77,11 @@
         <library name="boost_program_options" />
         <library name="boost_regex" />
         <library name="boost_system" />
-        <library name="iconv" />
+        <library name="boost_thread" />
         <library name="pthread" />
         <library name="rt" />
+        <library name="icu-i18n" />
+        <library name="dl" />
         <library name="secp256k1" />
         <headers path="include" />
         <sources path="src" />
@@ -101,28 +105,18 @@
     </make>
 
     <install>
-      <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
-        <option value="threading=multi" />
-        <option value="variant=release" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-locale" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
+      <build name="icu" version="55.1" parallel="true" >
+        <!-- Bug in ICU build requires --enable-draft. -->
+        <option value="--enable-draft" />
+        <option value="--enable-tools" />
+        <option value="--disable-extras" />
+        <option value="--disable-icuio" />
+        <option value="--disable-layout" />
+        <option value="--disable-layoutex" />
+        <option value="--disable-tests" />
+        <option value="--disable-samples" />
       </build>
-      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
-        <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=${boost_stdlib}" />
-        <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -130,15 +124,23 @@
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
+        <option value="--with-thread" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
+      </build>
+      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+        <option value="--with-chrono" />
+        <option value="--with-date_time" />
+        <option value="--with-filesystem" />
+        <option value="--with-locale" />
+        <option value="--with-program_options" />
+        <option value="--with-regex" />
+        <option value="--with-system" />
+        <option value="--with-thread" />
+        <option value="--with-test" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
-        <option value="--enable-tests=no" />
-        <option value="--with-bignum=no" />
+        <option value="--disable-tests" />
+        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="${with_boost}" />
@@ -148,50 +150,54 @@
     </install>
 
     <matrix>
-      <!-- Must build boost in a prefix directory to ensure static linking.-->
       <job system="osx" compiler="clang" link="static" >
+        <option value="--with-icu" />
+        <option value="--build-icu" />
+        <option value="--build-boost" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
-        <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <option value="--disable-shared" />
+        <option value="--with-icu" />
+        <option value="--build-icu" />
         <option value="--build-boost" />
+        <option value="--disable-shared" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
         <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
+        <option value="--with-icu" />
+        <option value="--build-icu" />
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
-        <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
-        <option value="CXXFLAGS='-Os -s'" />
+        <!-- TODO: -static-libstdc++|-static, review links/size: -->
+        <option value="CXXFLAGS='-Os -s -static'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- TODO: figure out why building boost here prevents a test case mnemonic normalization failure. -->
-        <!--<get name="boost1.54" />-->
+        <get name="boost1.54" />
+        <option value="--with-icu" />
+        <option value="--build-icu" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
-        <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
         <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
-        <option value="--disable-static" />
         <option value="--build-boost" />
-        <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
 
   </repository>
     
-  <repository name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
+  <repositoryX name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
@@ -201,7 +207,7 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="tools" default="yes" conditional="true" description="Compile with tools." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
@@ -219,7 +225,6 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." context="c++" />
       <flag name="Wno-unused-parameter" compiler="gcc" comment="Clean up boost 1.50 headers." context="c++" />
       
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -339,9 +344,7 @@
     </make>
 
     <install>
-      <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -350,17 +353,8 @@
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
-      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
-        <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=${boost_stdlib}" />
-        <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -369,14 +363,10 @@
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
-        <option value="--enable-tests=no" />
-        <option value="--with-bignum=no" />
+        <option value="--disable-tests" />
+        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -421,7 +411,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
-        <option value="CXXFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s -static'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -443,9 +433,9 @@
       </job>
     </matrix>
 
-  </repository>
+  </repositoryX>
 
-  <repository name="libbitcoin-client" version="2.1.0" email="mienkphi@gmail.com" >
+  <repositoryX name="libbitcoin-client" version="2.1.0" email="mienkphi@gmail.com" >
 
     <package library="bitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" />
 
@@ -454,7 +444,7 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="examples" default="yes" conditional="true" description="Compile with examples." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
@@ -473,7 +463,6 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -523,9 +512,7 @@
     </make>
 
     <install>
-      <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -534,17 +521,8 @@
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
-      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
-        <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=${boost_stdlib}" />
-        <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -553,10 +531,6 @@
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
@@ -573,8 +547,8 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
-        <option value="--enable-tests=no" />
-        <option value="--with-bignum=no" />
+        <option value="--disable-tests" />
+        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -608,7 +582,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
-        <option value="CXXFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s -static'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -627,9 +601,9 @@
       </job>
     </matrix>
 
-  </repository>
+  </repositoryX>
 
-  <repository name="libbitcoin-consensus" version="1.1.0" email="eric@voskuil.org" >
+  <repositoryX name="libbitcoin-consensus" version="1.1.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-consensus" description="Libbitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" />
 
@@ -641,7 +615,7 @@
       <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." />
       <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" compiler="gcc" version="1.50.0" option="tests" />
       <dependency name="boost" compiler="clang" version="1.54.0" option="tests" />
@@ -659,7 +633,6 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." context="c++" />
       
       <!-- bitcoin -->
       <flag name="Wno-unused-variable" comment="Clean up consensus warnings." context="c" />
@@ -734,32 +707,17 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
-      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
-        <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=${boost_stdlib}" />
-        <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
-        <option value="--enable-tests=no" />
-        <option value="--with-bignum=no" />
+        <option value="--disable-tests" />
+        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
         <option value="${with_boost}" />
@@ -796,7 +754,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
-        <option value="CXXFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s -static'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -825,9 +783,9 @@
       </job>
     </matrix>
 
-  </repository>
+  </repositoryX>
 
-  <repository name="libbitcoin-explorer" version="2.1.0" email="eric@voskuil.org" >
+  <repositoryX name="libbitcoin-explorer" version="2.1.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
 
@@ -836,14 +794,17 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
+      <option type="with" name="icu" default="no" define="BOOST_HAS_ICU" description="Compile with International Components for Unicode." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="2.1.0" />
+      <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
+      <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -855,7 +816,6 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." context="c++" />
       
       <!-- bx -->
       <flag name="Wno-unused-parameter" comment="Clean up bx generated code." context="c++" />
@@ -881,6 +841,8 @@
       <product prefix="lib" path="src" name="bitcoin-explorer" uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f" >
         <flag define="sysconfdir" />
         <library name="bitcoin-client" />
+        <library name="icu-i18n" />
+        <library name="dl" />
         <headers path="include" />
         <sources path="src" />
       </product>
@@ -916,28 +878,18 @@
     </make>
 
     <install>
-      <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
-        <option value="threading=multi" />
-        <option value="variant=release" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-locale" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
+      <build name="icu" version="55.1" parallel="true" >
+        <!-- Bug in ICU build requires --enable-draft. -->
+        <option value="--enable-draft" />
+        <option value="--enable-tools" />
+        <option value="--disable-extras" />
+        <option value="--disable-icuio" />
+        <option value="--disable-layout" />
+        <option value="--disable-layoutex" />
+        <option value="--disable-tests" />
+        <option value="--disable-samples" />
       </build>
-      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
-        <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=${boost_stdlib}" />
-        <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -945,11 +897,19 @@
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
+        <option value="--with-thread" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
+      </build>
+      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+        <option value="--with-chrono" />
+        <option value="--with-date_time" />
+        <option value="--with-filesystem" />
+        <option value="--with-locale" />
+        <option value="--with-program_options" />
+        <option value="--with-regex" />
+        <option value="--with-system" />
+        <option value="--with-thread" />
+        <option value="--with-test" />
       </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
@@ -967,8 +927,8 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
-        <option value="--enable-tests=no" />
-        <option value="--with-bignum=no" />
+        <option value="--disable-tests" />
+        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -990,54 +950,54 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
+        <option value="--with-icu" />
+        <option value="--build-icu" />
+        <option value="--build-boost" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
-        <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--disable-shared" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
         <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
         <get name="bash-completion" />
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
-        <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
         <option value="--with-bash-completiondir" />
-        <option value="CXXFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s -static'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
         <get name="bash-completion" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <!-- TODO: figure out why building boost here prevents a test case mnemonic normalization failure. -->
-        <!--<get name="boost1.54" />-->
+        <get name="boost1.54" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
-        <option value="--build-boost" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
         <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
-        <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
 
-  </repository>
+  </repositoryX>
 
-  <repository name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
+  <repositoryX name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
 
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
@@ -1047,7 +1007,7 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
@@ -1065,7 +1025,6 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -1115,9 +1074,7 @@
     </make>
 
     <install>
-      <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1126,17 +1083,8 @@
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
-      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
-        <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=${boost_stdlib}" />
-        <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1145,14 +1093,10 @@
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
-        <option value="--enable-tests=no" />
-        <option value="--with-bignum=no" />
+        <option value="--disable-tests" />
+        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -1205,7 +1149,7 @@
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
         <option value="--with-bash-completiondir" />
-        <option value="CXXFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s -static'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -1230,9 +1174,9 @@
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
-  </repository>
+  </repositoryX>
 
-  <repository name="libbitcoin-protocol" version="0.1.0" email="mienkphi@gmail.com" >
+  <repositoryX name="libbitcoin-protocol" version="0.1.0" email="mienkphi@gmail.com" >
 
     <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
 
@@ -1240,7 +1184,7 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
@@ -1260,7 +1204,6 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." context="c++" />
       <flag name="Wno-unused-parameter" compiler="gcc" comment="Clean up boost 1.50 headers." context="c++" />
 
       <!-- protobuf -->
@@ -1307,9 +1250,7 @@
     </make>
 
     <install>
-      <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1318,17 +1259,8 @@
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
-      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
-        <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=${boost_stdlib}" />
-        <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1337,10 +1269,6 @@
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
@@ -1361,8 +1289,8 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
-        <option value="--enable-tests=no" />
-        <option value="--with-bignum=no" />
+        <option value="--disable-tests" />
+        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -1396,7 +1324,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
-        <option value="CXXFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s -static'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -1415,9 +1343,9 @@
       </job>
     </matrix>
 
-  </repository>
+  </repositoryX>
 
-  <repository name="libbitcoin-server" version="2.0.0" email="genjix@riseup.net" >
+  <repositoryX name="libbitcoin-server" version="2.0.0" email="genjix@riseup.net" >
 
     <!-- TODO: There is no library produced, but we get an error if we don't emit the reference. -->
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
@@ -1426,7 +1354,7 @@
       <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" description="Required for dynamically linking boost test." inherited="true" />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" compiler="gcc" version="1.50.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
@@ -1446,7 +1374,6 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <flag name="Wno-unused-local-typedefs" compiler="gcc" comment="Clean up boost 1.49 headers." context="c++" />
       
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -1466,7 +1393,7 @@
         <file path="NEWS" />
         <file path="README" />
       </product>
-      <product prefix="bin" path="src" name="bitcoin_server" uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe" >
+      <product prefix="bin" path="src" name="bs" uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe" >
         <flag define="sysconfdir" />
         <library name="bitcoin-node" />
         <library name="sodium" />
@@ -1475,17 +1402,15 @@
         <sources path="src" />
       </product>
       <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
-        <file path="data/bitcoin_server" />
+        <file path="data/bs" />
       </product>
       <product prefix="sysconf" container="libbitcoin" >
-        <file path="data/server.cfg" />
+        <file path="data/bs.cfg" />
       </product>
     </make>
 
     <install>
-      <build name="boost" compiler="gcc" version="1.50.0" parallel="true" >
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1494,17 +1419,8 @@
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
-      <build name="boost" compiler="clang" version="1.54.0" parallel="true" >
-        <option value="toolset=clang" />
-        <option value="cxxflags=-stdlib=${boost_stdlib}" />
-        <option value="linkflags=-stdlib=${boost_stdlib}" />
-        <option value="threading=multi" />
-        <option value="variant=release" />
+      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1513,10 +1429,6 @@
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-test" />
-        <option value="-d0" />
-        <option value="-q" />
-        <option value="${prefix}" />
-        <option value="${boost_link}" />
       </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
@@ -1534,8 +1446,8 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
-        <option value="--enable-tests=no" />
-        <option value="--with-bignum=no" />
+        <option value="--disable-tests" />
+        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -1594,7 +1506,7 @@
         <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
         <option value="--with-bash-completiondir" />
-        <option value="CXXFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s -static'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -1620,6 +1532,6 @@
       </job>
     </matrix>
 
-  </repository>
+  </repositoryX>
 
 </generate>
