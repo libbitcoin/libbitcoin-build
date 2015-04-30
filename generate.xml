@@ -5,6 +5,7 @@
   <repository name="libbitcoin" version="2.8.0" email="genjix@riseup.net" >
 
     <package library="bitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
+      <flag value="@icu@" />
       <flag value="@testnet@" />
     </package>
 
@@ -12,12 +13,14 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="examples" default="yes" conditional="true" description="Compile with examples." />
-      <option type="with" name="icu" default="no" define="BOOST_HAS_ICU" description="Compile with International Components for Unicode." />
+      <option type="with" name="icu" default="no" define="BOOST_HAS_ICU" substitute="true" value="-DWITH_ICU" description="Compile with International Components for Unicode." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="testnet" default="no" define="ENABLE_TESTNET" substitute="true" value="-DENABLE_TESTNET" description="Compile for testnet (deprecated)." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.50.0" compiler="gcc" />
+      <!-- https://svn.boost.org/trac/boost/ticket/8973 [1.54] -->
+      <!-- https://svn.boost.org/trac/boost/ticket/6851 [1.50-1.53] -->
+      <dependency name="boost" version="1.55.0" compiler="gcc" />
       <dependency name="boost" version="1.54.0" compiler="clang" />
       <dependency name="boost_chrono" />
       <dependency name="boost_date_time" />
@@ -31,6 +34,7 @@
       <dependency name="pthread" />
       <dependency name="rt" function="clock_gettime" system="linux" />
       <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
+      <!-- -ldl is missing from icu package config -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       <dependency name="secp256k1" version="0.0.1" />
 
@@ -81,6 +85,7 @@
         <library name="pthread" />
         <library name="rt" />
         <library name="icu-i18n" />
+        <!-- -ldl is missing from icu package config -->
         <library name="dl" />
         <library name="secp256k1" />
         <headers path="include" />
@@ -116,7 +121,7 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
+      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -209,7 +214,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.50.0" />
+      <dependency name="boost" compiler="gcc" version="1.55.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="2.8.0" />
@@ -225,7 +230,7 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <flag name="Wno-unused-parameter" compiler="gcc" comment="Clean up boost 1.50 headers." context="c++" />
+      <!--<flag name="Wno-unused-parameter" compiler="gcc" comment="Clean up boost 1.50 headers." context="c++" />-->
       
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -344,7 +349,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
+      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -446,7 +451,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.50.0" />
+      <dependency name="boost" compiler="gcc" version="1.55.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
@@ -512,7 +517,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
+      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -617,7 +622,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.50.0" option="tests" />
+      <dependency name="boost" compiler="gcc" version="1.55.0" option="tests" />
       <dependency name="boost" compiler="clang" version="1.54.0" option="tests" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="crypto" version="1.0.1" option="openssl" />
@@ -699,7 +704,7 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
+      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
@@ -789,11 +794,13 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.50.0" />
+      <dependency name="boost" compiler="gcc" version="1.55.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="2.1.0" />
+      <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
+      <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -830,6 +837,8 @@
       <product prefix="lib" path="src" name="bitcoin-explorer" uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f" >
         <flag define="sysconfdir" />
         <library name="bitcoin-client" />
+        <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
+        <library name="dl" />
         <headers path="include" />
         <sources path="src" />
       </product>
@@ -876,7 +885,7 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
+      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -996,7 +1005,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.50.0" />
+      <dependency name="boost" compiler="gcc" version="1.55.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
@@ -1061,7 +1070,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
+      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1173,7 +1182,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.50.0" />
+      <dependency name="boost" compiler="gcc" version="1.55.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="protobuf" version="2.6.0" unprefixed="true" />
@@ -1191,7 +1200,7 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <flag name="Wno-unused-parameter" compiler="gcc" comment="Clean up boost 1.50 headers." context="c++" />
+      <!--<flag name="Wno-unused-parameter" compiler="gcc" comment="Clean up boost 1.50 headers." context="c++" />-->
 
       <!-- protobuf -->
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
@@ -1237,7 +1246,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
+      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1343,7 +1352,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.50.0" />
+      <dependency name="boost" compiler="gcc" version="1.55.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
@@ -1397,7 +1406,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.50.0" parallel="true" compiler="gcc" >
+      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
