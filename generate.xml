@@ -138,7 +138,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
         <option value="--disable-bignum" />
       </build>
@@ -364,7 +364,7 @@
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
         <option value="--disable-bignum" />
       </build>
@@ -546,7 +546,7 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
         <option value="--disable-bignum" />
       </build>
@@ -634,16 +634,8 @@
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       
-      <!-- bitcoin -->
-      <flag name="Wno-unused-variable" comment="Clean up consensus warnings." context="c" />
-      <flag name="Wno-unused-parameter" comment="Clean up consensus warnings." context="c" />
-      <flag name="Wno-pedantic" compiler="gcc" comment="Clean up consensus warnings." context="c" />
-      <flag name="Wno-long-long" compiler="gcc" comment="Clean up consensus warnings." context="c" />
-      <flag name="Wno-self-assign" compiler="clang" comment="Clean up consensus warnings." context="c" />
-      <flag name="Wno-vla-extension" compiler="clang" comment="Clean up consensus warnings." context="c" />
-      <flag name="Wno-c99-extensions" compiler="clang" comment="Clean up consensus warnings." context="c" />
-      <flag name="Wno-c++11-long-long" compiler="clang" comment="Clean up consensus warnings." context="c++" />
-      <flag name="Wno-c++11-extensions" compiler="clang" comment="Clean up consensus warnings." context="c++" />
+      <!-- bitcoin (with openssl) -->
+      <flag name="Wno-deprecated-declarations" comment="Clean up consensus warnings from OpenSSL headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -715,7 +707,7 @@
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
         <option value="--disable-bignum" />
       </build>
@@ -921,7 +913,7 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
         <option value="--disable-bignum" />
       </build>
@@ -1089,7 +1081,7 @@
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
         <option value="--disable-bignum" />
       </build>
@@ -1283,7 +1275,7 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
         <option value="--disable-bignum" />
       </build>
@@ -1440,7 +1432,7 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version2" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
         <option value="--disable-bignum" />
       </build>
