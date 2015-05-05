@@ -42,6 +42,7 @@
       
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
+      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
       
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
@@ -72,6 +73,7 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" name="bitcoin" uuid="39f60708-ff48-4c22-952d-43470866f684" >
+        <flag substitute="icu" />
         <flag substitute="testnet" />
         <library name="boost" />
         <library name="boost_chrono" />
@@ -92,12 +94,15 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="examples" name="libbitcoin_examples" install="false" option="examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e" >
+        <flag substitute="icu" />
+        <flag substitute="testnet" />
         <library name="bitcoin" />        
         <headers path="include" />
         <sources path="examples" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_test" test="true" option="tests" uuid="51a424a9-2c12-4211-8d40-e49d1534c541" >
         <runner random="true" />
+        <flag substitute="icu" />
         <flag substitute="testnet" />
         <library name="bitcoin" />
         <library name="boost_unit_test_framework" />
@@ -230,7 +235,7 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <!--<flag name="Wno-unused-parameter" compiler="gcc" comment="Clean up boost 1.50 headers." context="c++" />-->
+      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
       
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -468,6 +473,7 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
+      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -639,8 +645,8 @@
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       
-      <!-- bitcoin (with openssl) -->
-      <flag name="Wno-deprecated-declarations" comment="Clean up consensus warnings from OpenSSL headers." context="c++" />
+      <!-- bitcoin (with openssl), boost (gcc) -->
+      <flag name="Wno-deprecated-declarations" comment="Clean up consensus warnings from boost 1.55 and OpenSSL headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -812,6 +818,7 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
+      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
       
       <!-- bx -->
       <flag name="Wno-unused-parameter" comment="Clean up bx generated code." context="c++" />
@@ -1021,6 +1028,7 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
+      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -1200,7 +1208,7 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <!--<flag name="Wno-unused-parameter" compiler="gcc" comment="Clean up boost 1.50 headers." context="c++" />-->
+      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
 
       <!-- protobuf -->
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
@@ -1370,6 +1378,7 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
+      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
       
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
