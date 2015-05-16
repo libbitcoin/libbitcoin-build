@@ -150,7 +150,6 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
-        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="${with_boost}" />
@@ -166,27 +165,27 @@
         <option value="--build-boost" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--with-icu" />
         <option value="--build-icu" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
         <option value="--with-icu" />
         <option value="--build-icu" />
         <option value="--build-boost" />
-        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
-        <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
-        <!-- TODO: -static-libstdc++|-static, review links/size: -->
-        <option value="CXXFLAGS='-Os -s -static'" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-O0 -g -static --coverage'" />
+        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
@@ -197,8 +196,8 @@
         <option value="--build-icu" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--build-boost" />
@@ -376,7 +375,6 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
-        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -404,24 +402,24 @@
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--with-secp256k1" />
         <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" >
-        <option value="--disable-ndebug" />
-        <option value="--disable-shared" />
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
-        <option value="CXXFLAGS='-Os -s -static'" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-O0 -g -static --coverage'" />
+        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -432,13 +430,14 @@
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
@@ -559,7 +558,6 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
-        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -578,22 +576,22 @@
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" >
-        <option value="--disable-ndebug" />
-        <option value="--disable-shared" />
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
-        <option value="CXXFLAGS='-Os -s -static'" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-O0 -g -static --coverage'" />
+        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -602,12 +600,13 @@
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
@@ -720,7 +719,6 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
-        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
         <option value="${with_boost}" />
@@ -736,28 +734,28 @@
         <option value="--with-java" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <get name="swig" />
         <option value="--with-python" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="swig" />
         <option value="--with-java" />
         <option value="--without-openssl" />
         <option value="--with-secp256k1" />
-        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
-        <option value="CXXFLAGS='-Os -s -static'" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-g -O0 -static --coverage'" />
+        <option value="CXXFLAGS='-g -O0 -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -772,8 +770,8 @@
         <option value="--with-secp256k1" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="swig" />
@@ -782,6 +780,7 @@
         <option value="--with-python" />
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
@@ -931,7 +930,6 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
-        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -958,24 +956,24 @@
         <option value="--build-boost" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--build-boost" />
         <option value="--disable-shared" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
         <option value="--build-boost" />
-        <option value="--disable-ndebug" />
         <option value="--disable-shared" />
-        <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="--with-bash-completiondir" />
-        <option value="CXXFLAGS='-Os -s -static'" />
+        <option value="CFLAGS='-g -O0 -static --coverage'" />
+        <option value="CXXFLAGS='-g -O0 -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
@@ -986,14 +984,15 @@
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
         <option value="--build-boost" />
         <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
+        <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
@@ -1100,7 +1099,6 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
-        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -1134,26 +1132,26 @@
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--with-secp256k1" />
         <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="--with-bash-completiondir" />
-        <option value="CXXFLAGS='-Os -s -static'" />
+        <option value="CFLAGS='-g -O0 -static --coverage'" />
+        <option value="CXXFLAGS='-g -O0 -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -1166,8 +1164,8 @@
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
@@ -1175,6 +1173,7 @@
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--with-bash-completiondir" />
+        <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
@@ -1294,7 +1293,6 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
-        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -1313,22 +1311,22 @@
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" >
-        <option value="--disable-ndebug" />
-        <option value="--disable-shared" />
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
-        <option value="CXXFLAGS='-Os -s -static'" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-g -O0 -static --coverage'" />
+        <option value="CXXFLAGS='-g -O0 -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -1337,12 +1335,13 @@
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
@@ -1452,7 +1451,6 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
-        <option value="--disable-bignum" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -1492,25 +1490,27 @@
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--with-secp256k1" />
         <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="static" >
+        <!-- No tests to measure coverage against. -->
         <get name="bash-completion" />
         <option value="--disable-ndebug" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <option value="--prefix=$HOME/my-prefix" />
         <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="--with-bash-completiondir" />
+        <option value="CFLAGS='-Os -s -static'" />
         <option value="CXXFLAGS='-Os -s -static'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
@@ -1524,8 +1524,8 @@
         <get name="boost1.54" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="CFLAGS='-Os -stdlib=libstdc++'" />
         <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
-        <option value="LDLIBS='-lstdc++'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
@@ -1533,6 +1533,7 @@
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--with-bash-completiondir" />
+        <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
     </matrix>
