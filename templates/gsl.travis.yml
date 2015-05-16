@@ -53,6 +53,11 @@ function job_coverage_exclusions(job, repository)
         endfor _product
     endif
     
+    # Exclude explicitly-specified paths.
+    for my.job.exclude as _exclude
+        my.excludes += " $(quote(_exclude.path))"
+    endfor _exclude    
+    
     return my.excludes
 endfunction
 
