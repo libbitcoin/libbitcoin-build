@@ -22,6 +22,7 @@ gsl from "string.gsl"
 # ends_with(text, suffix)
 # join(left, right, delimiter)
 # left(text, length)
+# quote(text, delimiter)
 # right(text, length)
 # TODO: split(text, delimiter, list)
 # starts_with(text, prefix)
@@ -93,6 +94,15 @@ function test_left()
     test_require_eq(left("libbitcoin", 42), "libbitcoin", "left__excess__full")
 endfunction
 test("test_left")
+
+function test_quote()
+    test_require_eq(quote("", ""), "", "quote__empty_empty__empty")
+    test_require_eq(quote("", "42"), "4242", "quote__empty_42__4242")
+    test_require_eq(quote("libbitcoin", ""), "libbitcoin", "quote__empty__unquoted")
+    test_require_eq(quote("libbitcoin"), "\"libbitcoin\"", "quote__default__quoted")
+    test_require_eq(quote("42", "|"), "|42|", "quote__bar__absolute_value")
+endfunction
+test("test_quote")
 
 function test_right()
     test_require_eq(right("libbitcoin", -1), "", "right__negative__empty")
