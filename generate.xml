@@ -263,7 +263,12 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_blockchain_test" test="true" option="tests" uuid="cec6de45-b67a-487f-b3ad-3d14e83ad032" >
-        <runner random="true" />
+        <runner random="true" >
+          <run test="databases" />
+          <run test="disk_objs" />
+          <run test="htdb" />
+          <!--<run test="database_interface" />-->
+        </runner>
         <library name="bitcoin-blockchain" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -761,8 +766,8 @@
         <option value="--build-boost" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-g -O0 -static --coverage'" />
-        <option value="CXXFLAGS='-g -O0 -static --coverage'" />
+        <option value="CFLAGS='-O0 -g -static --coverage'" />
+        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -864,11 +869,12 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_explorer_test" test="true" option="tests" uuid="1a0e5edd-e803-4268-9dfb-044eb80bb0f1" >
         <runner random="true" >
-          <run test="primitives" />
           <run test="generated" />
-          <run test="offline" />
-          <run test="stub" />
+          <!--<run test="network" />-->
           <run test="obsolete" />
+          <run test="offline" />
+          <run test="primitives" />
+          <run test="stub" />
         </runner>
         <flag define="sysconfdir" />
         <library name="bitcoin-explorer" />        
@@ -981,8 +987,8 @@
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="--with-bash-completiondir" />
-        <option value="CFLAGS='-g -O0 -static --coverage'" />
-        <option value="CXXFLAGS='-g -O0 -static --coverage'" />
+        <option value="CFLAGS='-O0 -g -static --coverage'" />
+        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
@@ -1161,8 +1167,8 @@
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="--with-bash-completiondir" />
-        <option value="CFLAGS='-g -O0 -static --coverage'" />
-        <option value="CXXFLAGS='-g -O0 -static --coverage'" />
+        <option value="CFLAGS='-O0 -g -static --coverage'" />
+        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
@@ -1338,8 +1344,8 @@
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-g -O0 -static --coverage'" />
-        <option value="CXXFLAGS='-g -O0 -static --coverage'" />
+        <option value="CFLAGS='-O0 -g -static --coverage'" />
+        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
