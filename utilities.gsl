@@ -259,6 +259,32 @@ function global.find_option_symbol(element, configure)
 endfunction
 
 #------------------------------------------------------------------------------
+# Matrix utilities.
+#------------------------------------------------------------------------------
+
+function global.matrix_converage_job(matrix)
+    define my.matrix = matrix_converage_job.matrix?
+    if (defined(my.matrix))
+        return my.matrix->job(system = "linux" & compiler = "gcc" &\
+            link = "static" & is_true(coverage))
+    endif
+endfunction
+
+#------------------------------------------------------------------------------
+# Job utilities.
+#------------------------------------------------------------------------------
+
+# Get the value part of a standard form (e.g. "--prefix=value") job option.
+function global.job_option(job, option)
+    define my.job = job_option.job
+    define my.assigner = "--$(my.option)="
+    define my.option = my.job->option(starts_with(option.value, my.assigner))?
+    if defined(my.option)
+        return difference(my.option.value, string.length(my.assigner))
+    endif
+endfunction
+
+#------------------------------------------------------------------------------
 # Build utilities.
 #------------------------------------------------------------------------------
 
@@ -396,6 +422,14 @@ function global.is_test(product)
     endif
     abort "Tests must be executable: '$(my.product.prefix)'"
 endfunction
+
+# Is the product a check target.
+function global.is_not_covered(product)
+    define my.product = is_not_covered.product
+    return (is_test(my.product) | is_no_install(my.product)) &\
+        is_cpp(my.product)
+endfunction
+
 
 # Is the product a check target.
 function global.is_check(product)
