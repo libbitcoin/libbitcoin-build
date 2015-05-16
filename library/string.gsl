@@ -71,6 +71,11 @@ function global.left(text, length)
     return string.substr(my.text, 0, my.new_length - 1)
 endfunction
 
+# Quote a string with the given character.
+function global.quote(text, quote)
+    return "$(my.quote ? "\"")$(my.text)$(my.quote ? "\"")"
+endfunction
+
 # Return a right substring of the text, length is coerced.
 function global.right(text, length)
     define my.text_length = string.length(my.text)
