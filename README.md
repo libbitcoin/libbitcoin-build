@@ -14,15 +14,15 @@ Libbitcoin Build uses templates and XML data to generate build artifacts for the
 * [![libbitcoin-protocol](https://travis-ci.org/libbitcoin/libbitcoin-protocol.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-protocol) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-protocol/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-protocol) libbitcoin-protocol
 * [![libbitcoin-server](https://travis-ci.org/libbitcoin/libbitcoin-server.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-server) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-server/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-server) libbitcoin-server
 * [![libbitcoin-client](https://travis-ci.org/libbitcoin/libbitcoin-client.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-client) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-client/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-client) libbitcoin-client
-* [![libbitcoin-explorer](https://travis-ci.org/libbitcoin/libbitcoin-explorer.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-explorer) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-explorer/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-explorer) libbitcoin-explorer
+* [![libbitcoin-explorer](https://travis-ci.org/libbitcoin/libbitcoin-explorer.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-explorer) [![Coverage Status](https://s3.amazonaws.com/assets.coveralls.io/badges/coveralls_70.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-explorer) libbitcoin-explorer
 
 Notes on Badges
 * `libitcoin-blockchain` has tests disabled due to Travis-CI resource limitations.
 * `libitcoin-node` has tests disabled due to Travis-CI resource limitations.
 * `libitcoin-server` does not currently have tests independent of other libraries.
 * `libitcoin-client` coverage does not reflect the effect of `libitcoin-explorer` network tests.
-* `libitcoin-explorer` build and coverage is usually gray because of a Travis-CI time limit.
-* `libitcoin-explorer` has network tests disabled to isolate results from network issues.
+* `libitcoin-explorer` build is usually gray because of a Travis-CI time limit.
+* `libitcoin-explorer` converage is based on offline measurement due to Travis-CI timeout issue.
 * GitHub/Coveralls [image caching is breaking coverage badges](https://github.com/lemurheavy/coveralls-public/issues/460). Click on the badge for accurate details.
 
 The artifacts generated for each library are as follows. Package names coincide with libbitcoin repository names.
