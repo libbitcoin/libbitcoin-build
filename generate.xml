@@ -579,6 +579,15 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
+      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
+        <option value="--enable-silent-rules" />
+      </build>
+      <build name="bitcoin-protocol" github="pmienk" repository="libbitcoin-protocol" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="--without-examples" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
       <build name="bitcoin-client" github="pmienk" repository="libbitcoin-client" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -985,6 +994,15 @@
         <option value="--disable-tests" />
       </build>
       <build name="bitcoin" github="pmienk" repository="libbitcoin" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="--without-examples" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
+        <option value="--enable-silent-rules" />
+      </build>
+      <build name="bitcoin-protocol" github="pmienk" repository="libbitcoin-protocol" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
