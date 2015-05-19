@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2014-2015 libbitcoin developers (see COPYING). -->
 <generate script="generate.gsl" language="en-us" >
 
-  <repository name="libbitcoin" version="2.8.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin" version="2.9.0" email="genjix@riseup.net" >
 
     <package library="bitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
       <flag value="@icu@" />
@@ -208,7 +208,7 @@
 
   </repository>
     
-  <repository name="libbitcoin-blockchain" version="2.0.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-blockchain" version="2.1.0" email="genjix@riseup.net" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
@@ -223,7 +223,7 @@
       <dependency name="boost" compiler="gcc" version="1.55.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin" version="2.8.0" />
+      <dependency name="bitcoin" version="2.9.0" />
       <dependency name="bitcoin-consensus" version="1.0.0" option="consensus" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -264,10 +264,10 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_blockchain_test" test="true" option="tests" uuid="cec6de45-b67a-487f-b3ad-3d14e83ad032" >
         <runner random="true" >
-          <run test="databases" />
+          <!--<run test="databases" />
           <run test="disk_objs" />
           <run test="htdb" />
-          <!--<run test="database_interface" />-->
+          <run test="database_interface" />-->
         </runner>
         <library name="bitcoin-blockchain" />        
         <library name="boost_unit_test_framework" />
@@ -803,7 +803,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-explorer" version="2.1.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-explorer" version="2.1.1" email="eric@voskuil.org" >
 
     <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
 
@@ -1021,7 +1021,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-node" version="2.0.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-node" version="2.1.0" email="genjix@riseup.net" >
 
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
@@ -1037,7 +1037,7 @@
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-blockchain" version="2.0.0" />
+      <dependency name="bitcoin-blockchain" version="2.1.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1077,8 +1077,7 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_node_test" test="true" option="tests" uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8" >
         <runner random="true" >
-          <run test="node_tests" />
-          <!--<run test="slow_node_tests" />-->
+          <!--<run test="node_tests" />-->
         </runner>
         <library name="bitcoin-node" />
         <library name="boost_unit_test_framework" />
@@ -1378,7 +1377,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-server" version="2.0.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-server" version="2.1.0" email="genjix@riseup.net" >
 
     <!-- TODO: There is no library produced, but we get an error if we don't emit the reference. -->
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
@@ -1395,7 +1394,7 @@
 
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
-      <dependency name="bitcoin-node" version="2.0.0" />
+      <dependency name="bitcoin-node" version="2.1.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
