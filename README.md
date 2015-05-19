@@ -23,7 +23,6 @@ Notes on Badges
 * `libitcoin-client` coverage does not reflect the effect of `libitcoin-explorer` network tests.
 * `libitcoin-explorer` build is usually gray because of a Travis-CI time limit.
 * `libitcoin-explorer` converage is based on offline measurement due to Travis-CI timeout issue.
-* GitHub/Coveralls [image caching is breaking coverage badges](https://github.com/lemurheavy/coveralls-public/issues/460). Click on the badge for accurate details.
 
 The artifacts generated for each library are as follows. Package names coincide with libbitcoin repository names.
 
