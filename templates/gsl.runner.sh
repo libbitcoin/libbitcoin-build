@@ -29,12 +29,11 @@ endfunction
 .endtemplate
 .template 1
 .
-.macro write_test_options(tests, randomize)
+.macro write_test_options(tests)
 .   define my.run = is_empty(my.tests) ?? "*" ? "$(my.tests)"
 .
 BOOST_UNIT_TEST_OPTIONS=\\
 "--run_test=$(my.run) "\\
-"--random=$(my.randomize ?? 1 ? 0) "\\
 "--show_progress=no "\\
 "--detect_memory_leak=0 "\\
 "--report_level=no "\\
@@ -66,10 +65,9 @@ for generate.repository by name as _repository\
         define my.runner = _product->runner
         define my.path = "$(_product.path)/$(_product.name)"
         define my.tests = get_test_list(_product)
-        define my.randomize = is_true(my.runner.random)
         
         heading1("Define tests and options.")
-        write_test_options(my.tests, my.randomize)
+        write_test_options(my.tests)
         
         heading1("Run tests.")
         write_test_run(my.path)

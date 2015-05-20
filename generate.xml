@@ -101,7 +101,7 @@
         <sources path="examples" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_test" test="true" option="tests" uuid="51a424a9-2c12-4211-8d40-e49d1534c541" >
-        <runner random="true" />
+        <runner/>
         <flag substitute="icu" />
         <flag substitute="testnet" />
         <library name="bitcoin" />
@@ -263,7 +263,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_blockchain_test" test="true" option="tests" uuid="cec6de45-b67a-487f-b3ad-3d14e83ad032" >
-        <runner random="true" >
+        <runner>
           <!--<run test="databases" />
           <run test="disk_objs" />
           <run test="htdb" />
@@ -509,7 +509,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_client_test" test="true" option="tests" uuid="a56a00c6-669b-4535-9dc2-772a931b04c2" >
-        <runner random="true" />
+        <runner/>
         <library name="bitcoin-client" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -685,7 +685,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_consensus_test" test="true" option="tests" uuid="d282ef8c-6217-483c-ac47-864b2fba50fd" >
-        <runner random="true" />
+        <runner/>
         <library name="bitcoin-consensus" />
         <library name="boost" />
         <library name="boost_unit_test_framework" />
@@ -871,7 +871,7 @@
         <sources path="console" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_explorer_test" test="true" option="tests" uuid="1a0e5edd-e803-4268-9dfb-044eb80bb0f1" >
-        <runner random="true" >
+        <runner>
           <run test="generated" />
           <!--<run test="network" />-->
           <run test="obsolete" />
@@ -1076,7 +1076,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_node_test" test="true" option="tests" uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8" >
-        <runner random="true" >
+        <runner>
           <!--<run test="node_tests" />-->
         </runner>
         <library name="bitcoin-node" />
@@ -1267,7 +1267,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_protocol_test" test="true" option="tests" uuid="c42be17b-063d-44f1-a5bb-9f8295144b70" >
-        <runner random="true" />
+        <runner/>
         <library name="bitcoin-protocol" />        
         <library name="boost_unit_test_framework" />
         <headers path="include" />
