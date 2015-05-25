@@ -1439,7 +1439,7 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_server_test" test="true" option="tests" uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea" >
         <runner/>
-        <library name="bitcoin-node" />
+        <library name="bitcoin-server" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
@@ -1551,14 +1551,13 @@
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="--with-bash-completiondir" />
-        <option value="CFLAGS='-Os -s -static'" />
-        <option value="CXXFLAGS='-Os -s -static'" />
+        <option value="CFLAGS='-O0 -g -static --coverage'" />
+        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
