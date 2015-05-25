@@ -17,12 +17,10 @@ Libbitcoin Build uses templates and XML data to generate build artifacts for the
 * [![libbitcoin-explorer](https://travis-ci.org/libbitcoin/libbitcoin-explorer.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-explorer) [![Coverage Status](https://s3.amazonaws.com/assets.coveralls.io/badges/coveralls_70.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-explorer) libbitcoin-explorer
 
 Notes on Badges
-* `libitcoin-blockchain` has tests disabled due to Travis-CI resource limitations.
-* `libitcoin-node` has tests disabled due to Travis-CI resource limitations.
-* `libitcoin-server` does not currently have tests independent of other libraries.
 * `libitcoin-client` coverage does not reflect the effect of `libitcoin-explorer` network tests.
 * `libitcoin-explorer` build is usually gray because of a Travis-CI time limit.
 * `libitcoin-explorer` converage is based on offline measurement due to Travis-CI timeout issue.
+* Current converage is inflated by the fact that only files with some level of coverage are counted.
 
 The artifacts generated for each library are as follows. Package names coincide with libbitcoin repository names.
 
