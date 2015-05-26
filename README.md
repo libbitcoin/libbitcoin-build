@@ -14,12 +14,12 @@ Libbitcoin Build uses templates and XML data to generate build artifacts for the
 * [![libbitcoin-protocol](https://travis-ci.org/libbitcoin/libbitcoin-protocol.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-protocol) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-protocol/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-protocol) libbitcoin-protocol
 * [![libbitcoin-server](https://travis-ci.org/libbitcoin/libbitcoin-server.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-server) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-server/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-server) libbitcoin-server
 * [![libbitcoin-client](https://travis-ci.org/libbitcoin/libbitcoin-client.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-client) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-client/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-client) libbitcoin-client
-* [![libbitcoin-explorer](https://travis-ci.org/libbitcoin/libbitcoin-explorer.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-explorer) [![Coverage Status](https://s3.amazonaws.com/assets.coveralls.io/badges/coveralls_70.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-explorer) libbitcoin-explorer
+* [![libbitcoin-explorer](https://travis-ci.org/libbitcoin/libbitcoin.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-explorer) [![Coverage Status](https://s3.amazonaws.com/assets.coveralls.io/badges/coveralls_70.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-explorer) libbitcoin-explorer
 
 Notes on Badges
 * `libitcoin-client` coverage does not reflect the effect of `libitcoin-explorer` network tests.
 * `libitcoin-explorer` build is usually gray because of a Travis-CI time limit.
-* `libitcoin-explorer` converage is based on offline measurement due to Travis-CI timeout issue.
+* `libitcoin-explorer` build/converage is based on offline measurement due to Travis-CI timeout issue.
 * Current converage is inflated by the fact that only files with some level of coverage are counted.
 
 The artifacts generated for each library are as follows. Package names coincide with libbitcoin repository names.
