@@ -480,7 +480,7 @@
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
       <dependency name="bitcoin" version="3.0.0" />
-      <dependency name="bitcoin-protocol" version="0.1.0" />
+      <!-- dependency name="bitcoin-protocol" version="0.1.0" /-->
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -513,7 +513,7 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" name="bitcoin-client" uuid="475e189d-f147-4122-b5fe-5bcf1153696e" >
-        <library name="bitcoin-protocol" />
+        <library name="bitcoin" />
         <library name="sodium" />
         <library name="czmq++" />
         <headers path="include" />
@@ -587,6 +587,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
+      <!--
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
@@ -596,6 +597,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
+      -->
       <build name="bitcoin-client" github="pmienk" repository="libbitcoin-client" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1009,6 +1011,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
+      <!--
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
@@ -1018,6 +1021,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
+      -->
       <build name="bitcoin-client" github="pmienk" repository="libbitcoin-client" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
