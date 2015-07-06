@@ -638,9 +638,41 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <define header="endian.h" />
+      <!-- Locate headers and define symbols if found. -->
+      <!--<define header="endian.h" />
       <define header="sys/endian.h" />
-      <define header="byteswap.h" />
+      <define header="byteswap.h" />-->
+      
+      <!-- Locate function declarations and define symbols if found. -->
+      <define header="byteswap.h" export="bswap_16" />
+      <define header="byteswap.h" export="bswap_32" />
+      <define header="byteswap.h" export="bswap_64" />
+      
+      <define header="endian.h" export="le16toh" />
+      <define header="endian.h" export="le32toh" />
+      <define header="endian.h" export="le64toh" />
+      <define header="endian.h" export="htole16" />
+      <define header="endian.h" export="htole32" />
+      <define header="endian.h" export="htole64" />
+      <define header="endian.h" export="be16toh" />
+      <define header="endian.h" export="be32toh" />
+      <define header="endian.h" export="be64toh" />
+      <define header="endian.h" export="htobe16" />
+      <define header="endian.h" export="htobe32" />
+      <define header="endian.h" export="htobe64" />
+      
+      <define header="sys/endian.h" export="le16toh" />
+      <define header="sys/endian.h" export="le32toh" />
+      <define header="sys/endian.h" export="le64toh" />
+      <define header="sys/endian.h" export="htole16" />
+      <define header="sys/endian.h" export="htole32" />
+      <define header="sys/endian.h" export="htole64" />
+      <define header="sys/endian.h" export="be16toh" />
+      <define header="sys/endian.h" export="be32toh" />
+      <define header="sys/endian.h" export="be64toh" />
+      <define header="sys/endian.h" export="htobe16" />
+      <define header="sys/endian.h" export="htobe32" />
+      <define header="sys/endian.h" export="htobe64" />
       
       <dependency name="boost" compiler="gcc" version="1.55.0" option="tests" />
       <dependency name="boost" compiler="clang" version="1.54.0" option="tests" />
@@ -662,6 +694,8 @@
       <!-- bitcoin (with openssl), boost (gcc) -->
       <flag name="Wno-deprecated-declarations" comment="Clean up consensus warnings from boost 1.55 and OpenSSL headers." context="c++" />
 
+      <!--<flag name="pie" comment="Create position independent code." context="link" />
+      <flag name="fPIE" comment="Create position independent code." context="c++" />-->
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
