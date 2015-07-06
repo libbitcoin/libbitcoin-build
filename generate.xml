@@ -638,6 +638,10 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
+      <define header="endian.h" />
+      <define header="sys/endian.h" />
+      <define header="byteswap.h" />
+      
       <dependency name="boost" compiler="gcc" version="1.55.0" option="tests" />
       <dependency name="boost" compiler="clang" version="1.54.0" option="tests" />
       <dependency name="boost_unit_test_framework" option="tests" />
