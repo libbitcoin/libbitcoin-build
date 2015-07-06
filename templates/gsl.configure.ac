@@ -211,17 +211,23 @@ AM_CONDITIONAL([$(my.symbol:upper)], [test x$$(my.symbol) != xno])
 .#-----------------------------------------------------------------------------
 .macro render_define(item)
 .   define my.define = render_define.item
-.   require(my.define, "define", "name")
-.   define my.uname = "$(my.define.name:upper,c)"
-.   heading2("Unconditionally define the preprocessor symbol $(my.uname).")
-.   if (!is_empty(my.define.comment))
+.   if (defined(my.define.name))
+.       define my.uname = "$(my.define.name:upper,c)"
+.       heading2("Unconditionally define the preprocessor symbol $(my.uname).")
+.       if (!is_empty(my.define.comment))
 .       heading3(my.define.comment)
-.   endif
+.       endif
 .
-.   if (defined(my.define.value))
+.       if (defined(my.define.value))
 AC_DEFINE([$(my.uname)], [$(my.define.value)])
-.   else
+.       else
 AC_DEFINE([$(my.uname)])
+.       endif
+.   else
+.       require(my.define, "define", "header")
+.       define my.symbol = "HAVE_$(my.define.header:upper,c)"
+.       heading2("Conditionally define the preprocessor symbol $(my.symbol).")
+AC_CHECK_HEADERS([$(my.define.header)])
 .   endif
 
 .endmacro 
@@ -571,7 +577,7 @@ for generate.repository by name as _repository
     endif
     
     if (defined(my.configure->define))
-        heading1("Set unconditional preprocessor defines.")
+        heading1("Set preprocessor defines.")
         for my.configure.define as _define
             render_define(_define)
         endfor
