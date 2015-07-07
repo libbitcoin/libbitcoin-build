@@ -57,6 +57,9 @@
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
       <flag name="fno-var-tracking-assignments" compiler="gcc" comment="Limit delays and warnings." context="c++" />
 
+      <!--<flag name="pie" comment="Create position independent code." context="link" />-->
+      <!--<flag name="fPIE" comment="Create position independent code." context="c++" />-->
+
       <!--<template name="CompileMe.am" />-->
     </configure>
 
@@ -264,10 +267,11 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_blockchain_test" test="true" option="tests" uuid="cec6de45-b67a-487f-b3ad-3d14e83ad032" >
         <runner>
-          <!--<run test="databases" />
+          <run test="databases" />
           <run test="disk_objs" />
           <run test="htdb" />
-          <run test="database_interface" />-->
+          <!-- Too much for Travis. -->
+          <!--<run test="database_interface" />-->
         </runner>
         <library name="bitcoin-blockchain" />        
         <library name="boost_unit_test_framework" />
@@ -689,8 +693,6 @@
       <!-- bitcoin (with openssl), boost (gcc) -->
       <flag name="Wno-deprecated-declarations" comment="Clean up consensus warnings from boost 1.55 and OpenSSL headers." context="c++" />
 
-      <!--<flag name="pie" comment="Create position independent code." context="link" />
-      <flag name="fPIE" comment="Create position independent code." context="c++" />-->
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
@@ -1110,6 +1112,8 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_node_test" test="true" option="tests" uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8" >
         <runner>
+          <run test="thread_tests" />
+          <!-- Too much for Travis. -->
           <!--<run test="node_tests" />-->
         </runner>
         <library name="bitcoin-node" />
@@ -1471,7 +1475,11 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" name="libbitcoin_server_test" test="true" option="tests" uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea" >
-        <runner/>
+        <runner>
+          <run test="endpont_tests" />
+          <!-- Too much for Travis. -->
+          <!--<run test="server_tests" />-->
+        </runner>
         <library name="bitcoin-server" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
