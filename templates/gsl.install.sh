@@ -235,6 +235,22 @@ done
 echo "Build directory: $BUILD_DIR"
 echo "Prefix directory: $PREFIX"
 
+.   heading2("Warn on configurations that imply static/prefix isolation.")
+if [[ !($PREFIX)]]; then
+    if [[ $BUILD_ICU == yes ]]; then
+        echo "Warning: --prefix recommended when building ICU."
+        if [[ !($DISABLE_SHARED) ]]; then
+            echo "Warning: --disable-shared recommended when building ICU."
+        fi
+    fi
+    if [[ $BUILD_BOOST == yes ]]; then
+        echo "Warning: --prefix recommended when building boost."
+        if [[ !($DISABLE_SHARED) ]]; then
+            echo "Warning: --disable-shared recommended when building boost."
+        fi
+    fi
+fi
+
 .   heading2("Purge custom options so they don't go to configure.")
 CONFIGURE_OPTIONS=( "$@" )
 CUSTOM_OPTIONS=( "--build-icu" "--build-boost" "--build-dir=$BUILD_DIR" )
