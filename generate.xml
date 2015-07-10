@@ -562,7 +562,7 @@
         <option value="--with-libsodium" />
       </build>
       <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
-        <option value="--without-makecert" />
+        <option value="--without-zmakecert" />
         <option value="--without-test_zgossip" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -973,7 +973,7 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
-        <option value="--without-makecert" />
+        <option value="--without-zmakecert" />
         <option value="--without-test_zgossip" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1112,6 +1112,7 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_node_test" test="true" option="tests" uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8" >
         <runner>
+          <run test="config_tests" />
           <run test="thread_tests" />
           <!-- Too much for Travis. -->
           <!--<run test="node_tests" />-->
@@ -1347,7 +1348,7 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
-        <option value="--without-makecert" />
+        <option value="--without-zmakecert" />
         <option value="--without-test_zgossip" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1476,9 +1477,7 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_server_test" test="true" option="tests" uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea" >
         <runner>
-          <run test="endpont_tests" />
-          <!-- Too much for Travis. -->
-          <!--<run test="server_tests" />-->
+          <run test="server_tests" />
         </runner>
         <library name="bitcoin-server" />
         <library name="boost_unit_test_framework" />
@@ -1530,7 +1529,7 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
-        <option value="--without-makecert" />
+        <option value="--without-zmakecert" />
         <option value="--without-test_zgossip" />
         <option value="${with_pkgconfigdir}" />
       </build>
