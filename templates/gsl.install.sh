@@ -58,8 +58,8 @@ function get_boost_url(install, compiler)
         trace1("get_boost_url:get_boost_file($(my.compiler ? 0)) = []")
         return
     endif
-    define my.base_url = "http\://sourceforge.net/projects/boost/files/boost"
-    define my.url = "$(my.base_url)/$(my.version)/$(my.archive)/download"
+    define my.base_url = "http\://github.com/libbitcoin/libbitcoin-build/blob/master/mirror"
+    define my.url = "$(my.base_url)/$(my.archive)?raw=true"
     trace1("get_boost_url = $(my.url)")
     return my.url
 endfunction
