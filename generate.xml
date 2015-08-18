@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2014-2015 libbitcoin developers (see COPYING). -->
 <generate script="generate.gsl" language="en-us" >
 
-  <repository name="libbitcoin" version="2.10.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin" version="3.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
       <flag value="@icu@" />
@@ -154,7 +154,7 @@
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
         <!--<option value="--disable-silent-rules" />-->
@@ -211,7 +211,7 @@
 
   </repository>
     
-  <repository name="libbitcoin-blockchain" version="2.2.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-blockchain" version="3.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
@@ -226,7 +226,7 @@
       <dependency name="boost" compiler="gcc" version="1.55.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin" version="2.10.0" />
+      <dependency name="bitcoin" version="3.0.0" />
       <dependency name="bitcoin-consensus" version="1.0.0" option="consensus" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -387,7 +387,7 @@
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -398,7 +398,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -457,7 +457,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-client" version="2.2.0" email="mienkphi@gmail.com" >
+  <repository name="libbitcoin-client" version="3.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" />
 
@@ -473,7 +473,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
-      <dependency name="bitcoin" version="2.10.0" />
+      <dependency name="bitcoin" version="3.0.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -572,13 +572,13 @@
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -838,7 +838,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-explorer" version="2.2.1" email="eric@voskuil.org" >
+  <repository name="libbitcoin-explorer" version="3.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
 
@@ -983,19 +983,19 @@
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version2" parallel="true" >
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version2" parallel="true" >
+      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1053,7 +1053,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-node" version="2.2.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-node" version="3.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
@@ -1159,7 +1159,7 @@
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -1170,13 +1170,13 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version2" parallel="true" >
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1256,7 +1256,7 @@
       <dependency name="protobuf" version="2.6.0" unprefixed="true" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
-      <dependency name="bitcoin" version="2.8.0" />
+      <dependency name="bitcoin" version="3.0.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1355,7 +1355,7 @@
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -1412,7 +1412,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-server" version="2.2.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-server" version="3.0.0" email="eric@voskuil.org" >
 
     <!-- TODO: There is no library produced, but we get an error if we don't emit the reference. -->
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
@@ -1536,7 +1536,7 @@
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -1547,19 +1547,19 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version2" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version2" parallel="true" >
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-console" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="version2" parallel="true" >
+      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
