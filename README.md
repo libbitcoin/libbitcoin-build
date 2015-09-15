@@ -19,7 +19,7 @@ Libbitcoin Build uses templates and XML data to generate build artifacts for the
 Notes on Badges
 * `libitcoin-client` coverage does not reflect the effect of `libitcoin-explorer` network tests.
 * `libitcoin-explorer` coverage does not reflect the effect of network tests.
-* `libitcoin-explorer` build is usually gray because of a Travis-CI time limit on OSX.
+* `libitcoin-explorer` build sometimes fails while generating test metrics due to Travis limits.
 * Current converage is inflated by the fact that only files with some level of coverage are counted.
 
 The artifacts generated for each library are as follows. Package names coincide with libbitcoin repository names.
