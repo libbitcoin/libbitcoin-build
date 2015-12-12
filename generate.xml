@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2014-2015 libbitcoin developers (see COPYING). -->
 <generate script="generate.gsl" language="en-us" >
 
-  <repository name="libbitcoin" version="2.9.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin" version="2.10.0" email="genjix@riseup.net" >
 
     <package library="bitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
       <flag value="@icu@" />
@@ -151,8 +151,9 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-recovery" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="${with_boost}" />
@@ -211,7 +212,7 @@
 
   </repository>
     
-  <repository name="libbitcoin-blockchain" version="2.1.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-blockchain" version="2.2.0" email="genjix@riseup.net" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
@@ -226,8 +227,8 @@
       <dependency name="boost" compiler="gcc" version="1.55.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin" version="2.9.0" />
-      <dependency name="bitcoin-consensus" version="1.0.0" option="consensus" />
+      <dependency name="bitcoin" version="2.10.0" />
+      <dependency name="bitcoin-consensus" version="1.3.0" option="consensus" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -384,8 +385,9 @@
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-recovery" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -457,7 +459,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-client" version="2.1.0" email="mienkphi@gmail.com" >
+  <repository name="libbitcoin-client" version="2.2.0" email="mienkphi@gmail.com" >
 
     <package library="bitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" />
 
@@ -473,7 +475,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
-      <dependency name="bitcoin" version="2.8.0" />
+      <dependency name="bitcoin" version="2.10.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -569,8 +571,9 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-recovery" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -628,15 +631,13 @@
 
   </repository>
 
-  <repository name="libbitcoin-consensus" version="1.2.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-consensus" version="1.3.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-consensus" description="Libbitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" />
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="with" name="openssl" default="yes" description="Require OpenSSL dependency." />
-      <option type="with" name="secp256k1" default="no" define="USE_SECP256K1" conditional="true" description="Compile with secp256k1 instead of OpenSSL." />
       <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." />
       <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
@@ -676,8 +677,7 @@
       <dependency name="boost" compiler="gcc" version="1.55.0" option="tests" />
       <dependency name="boost" compiler="clang" version="1.54.0" option="tests" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="crypto" version="1.0.1" option="openssl" />
-      <dependency name="secp256k1" version="0.0.1" option="secp256k1" />
+      <dependency name="secp256k1" version="0.0.1" />
       <dependency name="java" option="java" />
       <dependency name="python" version="2.7" option="python" />
 
@@ -689,9 +689,6 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      
-      <!-- bitcoin (with openssl), boost (gcc) -->
-      <flag name="Wno-deprecated-declarations" comment="Clean up consensus warnings from boost 1.55 and OpenSSL headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -712,7 +709,6 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" name="bitcoin-consensus" uuid="6c521d95-00ce-4120-97d1-430e2870d738" >
-        <library name="crypto" />
         <library name="secp256k1" />
         <headers path="include" />
         <headers path="src" />
@@ -765,8 +761,9 @@
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-recovery" />
       </build>
       <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
         <option value="${with_boost}" />
@@ -777,8 +774,6 @@
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <get name="swig" />
-        <option value="--without-openssl" />
-        <option value="--with-secp256k1" />
         <option value="--with-java" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
@@ -798,8 +793,6 @@
         <exclude path="clone/*" />
         <get name="swig" />
         <option value="--with-java" />
-        <option value="--without-openssl" />
-        <option value="--with-secp256k1" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--build-dir=my-build" />
@@ -811,13 +804,9 @@
         <!--<get name="boost" />-->
         <get name="swig" />
         <option value="--with-python" />
-        <option value="--without-openssl" />
-        <option value="--with-secp256k1" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
-        <option value="--without-openssl" />
-        <option value="--with-secp256k1" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
@@ -826,7 +815,6 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="swig" />
-        <get name="libssl-dev" />
         <option value="--with-java" />
         <option value="--with-python" />
         <option value="--disable-static" />
@@ -838,7 +826,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-explorer" version="2.1.1" email="eric@voskuil.org" >
+  <repository name="libbitcoin-explorer" version="2.2.1" email="eric@voskuil.org" >
 
     <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
 
@@ -854,7 +842,7 @@
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-client" version="2.1.0" />
+      <dependency name="bitcoin-client" version="2.2.0" />
       <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       
@@ -980,8 +968,9 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-recovery" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -1056,7 +1045,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-node" version="2.1.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-node" version="2.2.0" email="genjix@riseup.net" >
 
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
@@ -1072,7 +1061,7 @@
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-blockchain" version="2.1.0" />
+      <dependency name="bitcoin-blockchain" version="2.2.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1159,8 +1148,9 @@
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-recovery" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -1355,8 +1345,9 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-recovery" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
@@ -1415,7 +1406,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-server" version="2.1.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-server" version="2.2.0" email="genjix@riseup.net" >
 
     <!-- TODO: There is no library produced, but we get an error if we don't emit the reference. -->
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
@@ -1435,7 +1426,7 @@
 
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
-      <dependency name="bitcoin-node" version="2.1.0" />
+      <dependency name="bitcoin-node" version="2.2.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1536,8 +1527,9 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-recovery" />
       </build>
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
         <option value="--without-tests" />
