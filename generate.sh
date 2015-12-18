@@ -21,7 +21,7 @@ rm -rf libbitcoin-client
 rm -rf libbitcoin-consensus
 rm -rf libbitcoin-explorer
 rm -rf libbitcoin-node
-rm -rf libbitcoin-protocol
+# rm -rf libbitcoin-protocol
 rm -rf libbitcoin-server
 
 # Generate build artifacts.
@@ -34,7 +34,7 @@ chmod +x libbitcoin-client/*.sh
 chmod +x libbitcoin-consensus/*.sh
 chmod +x libbitcoin-explorer/*.sh
 chmod +x libbitcoin-node/*.sh
-chmod +x libbitcoin-protocol/*.sh
+# chmod +x libbitcoin-protocol/*.sh
 chmod +x libbitcoin-server/*.sh
 
 # Copy outputs to all repositories.
@@ -44,7 +44,7 @@ cp -rf  libbitcoin-client/.      ../libbitcoin-client
 cp -rf  libbitcoin-consensus/.   ../libbitcoin-consensus
 cp -rf  libbitcoin-explorer/.    ../libbitcoin-explorer
 cp -rf  libbitcoin-node/.        ../libbitcoin-node
-cp -rf  libbitcoin-protocol/.    ../libbitcoin-protocol
+# cp -rf  libbitcoin-protocol/.    ../libbitcoin-protocol
 cp -rf  libbitcoin-server/.      ../libbitcoin-server
 
 # Generate bindings from generated binding generators.

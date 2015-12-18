@@ -395,7 +395,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -765,7 +765,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1158,7 +1158,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1233,7 +1233,7 @@
     </matrix>
   </repository>
 
-  <repository name="libbitcoin-protocol" version="0.1.0" email="mienkphi@gmail.com" >
+  <!--<repository name="libbitcoin-protocol" version="0.1.0" email="mienkphi@gmail.com" >
 
     <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
 
@@ -1259,11 +1259,11 @@
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
-      <!-- boost -->
+      <!-/- boost -/->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
 
-      <!-- protobuf -->
+      <!-/- protobuf -/->
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
       <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers, static." context="c++" />
       <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." context="c++" />
@@ -1386,7 +1386,7 @@
         <option value="CXXFLAGS='-O0 -g -static --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <!-/-<get name="boost" />-/->
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
@@ -1404,7 +1404,7 @@
       </job>
     </matrix>
 
-  </repository>
+  </repository>-->
 
   <repository name="libbitcoin-server" version="2.2.0" email="genjix@riseup.net" >
 
@@ -1537,7 +1537,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
