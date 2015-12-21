@@ -1249,7 +1249,7 @@
       <dependency name="protobuf" version="2.6.0" unprefixed="true" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
-      <dependency name="bitcoin" version="2.8.0" />
+      <dependency name="bitcoin" version="3.0.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1311,6 +1311,7 @@
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-iostreams" />
         <option value="--with-locale" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
@@ -1321,6 +1322,7 @@
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
+        <option value="--with-iostreams" />
         <option value="--with-locale" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
@@ -1345,11 +1347,10 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
-        <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version2" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -1363,7 +1364,6 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
