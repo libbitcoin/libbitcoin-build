@@ -228,7 +228,7 @@
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="2.10.0" />
-      <dependency name="bitcoin-consensus" version="1.3.0" option="consensus" />
+      <dependency name="bitcoin-consensus" version="2.0.0" option="consensus" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -395,7 +395,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -631,7 +631,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-consensus" version="1.3.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-consensus" version="2.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-consensus" description="Libbitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" />
 
@@ -765,7 +765,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1158,7 +1158,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1537,7 +1537,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
