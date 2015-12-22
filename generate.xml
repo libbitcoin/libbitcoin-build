@@ -226,7 +226,7 @@
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="3.0.0" />
-      <dependency name="bitcoin-consensus" version="1.3.0" option="consensus" />
+      <dependency name="bitcoin-consensus" version="2.0.0" option="consensus" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -395,7 +395,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -643,7 +643,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-consensus" version="1.3.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-consensus" version="2.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-consensus" description="Libbitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" />
 
@@ -777,7 +777,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -854,7 +854,7 @@
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-client" version="2.2.0" />
+      <dependency name="bitcoin-client" version="3.0.0" />
       <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       
@@ -1082,7 +1082,7 @@
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-blockchain" version="2.2.0" />
+      <dependency name="bitcoin-blockchain" version="3.0.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1449,7 +1449,7 @@
 
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
-      <dependency name="bitcoin-node" version="2.2.0" />
+      <dependency name="bitcoin-node" version="3.0.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
