@@ -212,7 +212,7 @@
 
   </repository>
     
-  <repository name="libbitcoin-blockchain" version="2.2.1" email="genjix@riseup.net" >
+  <repository name="libbitcoin-blockchain" version="2.3.0" email="genjix@riseup.net" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
@@ -227,7 +227,7 @@
       <dependency name="boost" compiler="gcc" version="1.55.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin" version="2.10.0" />
+      <dependency name="bitcoin" version="2.10.1" />
       <dependency name="bitcoin-consensus" version="2.0.0" option="consensus" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1045,7 +1045,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-node" version="2.2.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-node" version="2.3.0" email="genjix@riseup.net" >
 
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
@@ -1061,7 +1061,7 @@
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-blockchain" version="2.2.0" />
+      <dependency name="bitcoin-blockchain" version="2.3.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1406,7 +1406,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-server" version="2.2.0" email="genjix@riseup.net" >
+  <repository name="libbitcoin-server" version="2.3.0" email="genjix@riseup.net" >
 
     <!-- TODO: There is no library produced, but we get an error if we don't emit the reference. -->
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
@@ -1426,7 +1426,7 @@
 
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
-      <dependency name="bitcoin-node" version="2.2.0" />
+      <dependency name="bitcoin-node" version="2.3.0" />
       
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
