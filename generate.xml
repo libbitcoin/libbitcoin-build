@@ -1,5 +1,5 @@
 <?xml version = "1.0" ?>
-<!-- Copyright (c) 2014-2015 libbitcoin developers (see COPYING). -->
+<!-- Copyright (c) 2014-2016 libbitcoin developers (see COPYING). -->
 <generate script="generate.gsl" language="en-us" >
 
   <repository name="libbitcoin" version="3.0.0" email="eric@voskuil.org" >
@@ -97,7 +97,7 @@
       </product>
       <product prefix="bin" path="examples" name="libbitcoin_examples" install="false" option="examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e" >
         <flag substitute="icu" />
-        <library name="bitcoin" />        
+        <library name="bitcoin" />
         <headers path="include" />
         <sources path="examples" />
       </product>
@@ -209,7 +209,7 @@
     </matrix>
 
   </repository>
-    
+
   <repository name="libbitcoin-blockchain" version="3.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
@@ -227,7 +227,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="3.0.0" />
       <dependency name="bitcoin-consensus" version="2.0.0" option="consensus" />
-      
+
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -239,7 +239,7 @@
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      
+
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
@@ -272,13 +272,13 @@
           <!-- Too much for Travis. -->
           <!--<run test="database_interface" />-->
         </runner>
-        <library name="bitcoin-blockchain" />        
+        <library name="bitcoin-blockchain" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
       <product prefix="bin" path="tools/block_db" name="block_db" install="false" option="tools" uuid="b9ced930-2ec0-4639-9427-d8edb9a677ac" >
-        <library name="bitcoin-blockchain" />        
+        <library name="bitcoin-blockchain" />
         <headers path="include" />
         <sources path="tools/block_db" />
       </product>
@@ -476,7 +476,7 @@
       <dependency name="czmq++" version="1.1.0" />
       <dependency name="bitcoin" version="3.0.0" />
       <!-- dependency name="bitcoin-protocol" version="0.1.0" /-->
-      
+
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -516,18 +516,18 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_client_test" test="true" option="tests" uuid="a56a00c6-669b-4535-9dc2-772a931b04c2" >
         <runner/>
-        <library name="bitcoin-client" />        
+        <library name="bitcoin-client" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
       <product prefix="bin" path="examples/console" name="console" install="false" option="examples" uuid="fbcc58ad-93a1-4247-b660-b32c61aca680" >
-        <library name="bitcoin-client" />        
+        <library name="bitcoin-client" />
         <headers path="include" />
         <sources path="examples/console" />
       </product>
       <product prefix="bin" path="examples/get_height" name="get_height" install="false" option="examples" uuid="" >
-        <library name="bitcoin-client" />        
+        <library name="bitcoin-client" />
         <headers path="include" />
         <sources path="examples/get_height" />
       </product>
@@ -654,12 +654,12 @@
       <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
-      
+
       <!-- Locate function declarations and define found header and export symbols. -->
       <define header="byteswap.h" export="bswap_16" />
       <define header="byteswap.h" export="bswap_32" />
       <define header="byteswap.h" export="bswap_64" />
-      
+
       <define header="endian.h" export="le16toh" />
       <define header="endian.h" export="le32toh" />
       <define header="endian.h" export="le64toh" />
@@ -672,7 +672,7 @@
       <define header="endian.h" export="htobe16" />
       <define header="endian.h" export="htobe32" />
       <define header="endian.h" export="htobe64" />
-      
+
       <define header="sys/endian.h" export="le16toh" />
       <define header="sys/endian.h" export="le32toh" />
       <define header="sys/endian.h" export="le64toh" />
@@ -685,7 +685,7 @@
       <define header="sys/endian.h" export="htobe16" />
       <define header="sys/endian.h" export="htobe32" />
       <define header="sys/endian.h" export="htobe64" />
-      
+
       <dependency name="boost" compiler="gcc" version="1.55.0" option="tests" />
       <dependency name="boost" compiler="clang" version="1.54.0" option="tests" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -857,7 +857,7 @@
       <dependency name="bitcoin-client" version="3.0.0" />
       <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
-      
+
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -869,7 +869,7 @@
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      
+
       <!-- bx -->
       <flag name="Wno-unused-parameter" comment="Clean up bx generated code." context="c++" />
 
@@ -901,7 +901,7 @@
       </product>
       <product prefix="bin" path="console" name="bx" option="console" uuid="098a91f3-291c-4a0d-ae5a-bc5f9f5693ed" >
         <flag define="sysconfdir" />
-        <library name="bitcoin-explorer" />        
+        <library name="bitcoin-explorer" />
         <headers path="include" />
         <sources path="console" />
       </product>
@@ -915,7 +915,7 @@
           <run test="stub" />
         </runner>
         <flag define="sysconfdir" />
-        <library name="bitcoin-explorer" />        
+        <library name="bitcoin-explorer" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
@@ -1083,7 +1083,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="3.0.0" />
-      
+
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -1133,7 +1133,7 @@
         <sources path="test" />
       </product>
       <product prefix="bin" path="console" name="bn" option="console" uuid="d3404804-c83f-46ce-a5a6-3a39ef93de46" >
-        <library name="bitcoin-node" />        
+        <library name="bitcoin-node" />
         <headers path="include" />
         <sources path="console" />
       </product>
@@ -1181,7 +1181,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1272,7 +1272,7 @@
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
       <dependency name="bitcoin" version="3.0.0" />
-      
+
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -1318,7 +1318,7 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_protocol_test" test="true" option="tests" uuid="c42be17b-063d-44f1-a5bb-9f8295144b70" >
         <runner/>
-        <library name="bitcoin-protocol" />        
+        <library name="bitcoin-protocol" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
@@ -1450,7 +1450,7 @@
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
       <dependency name="bitcoin-node" version="3.0.0" />
-      
+
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -1462,13 +1462,13 @@
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      
+
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
-    
+
     <make>
       <product prefix="pkgconfig" >
         <file path="libbitcoin-server.pc" />
@@ -1562,7 +1562,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version1" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
