@@ -410,15 +410,11 @@
       <job system="osx" compiler="clang" link="static" >
         <option value="--without-consensus" />
         <!-- these allow unused build to complete -->
-        <option value="--with-secp256k1" />
-        <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <option value="--with-secp256k1" />
-        <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -436,8 +432,6 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
-        <option value="--with-secp256k1" />
-        <option value="--without-openssl" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
@@ -1202,15 +1196,11 @@
       <job system="osx" compiler="clang" link="static" >
         <option value="--without-consensus" />
         <!-- these allow unused build to complete -->
-        <option value="--with-secp256k1" />
-        <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <option value="--with-secp256k1" />
-        <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1231,8 +1221,6 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
         <get name="bash-completion" />
-        <option value="--with-secp256k1" />
-        <option value="--without-openssl" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
@@ -1369,7 +1357,7 @@
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version3" parallel="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1589,15 +1577,11 @@
       <job system="osx" compiler="clang" link="static" >
         <option value="--without-consensus" />
         <!-- these allow unused build to complete -->
-        <option value="--with-secp256k1" />
-        <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
-        <option value="--with-secp256k1" />
-        <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1618,8 +1602,6 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
         <get name="bash-completion" />
-        <option value="--with-secp256k1" />
-        <option value="--without-openssl" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
