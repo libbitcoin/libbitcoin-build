@@ -1187,10 +1187,7 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_node_test" test="true" option="tests" uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8" >
         <runner>
-          <run test="config_tests" />
-          <run test="thread_tests" />
-          <!-- Too much for Travis. -->
-          <!--<run test="node_tests" />-->
+          <run test="node_tests" />
         </runner>
         <library name="bitcoin-node" />
         <library name="boost_unit_test_framework" />
