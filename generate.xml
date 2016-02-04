@@ -920,6 +920,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="3.0.0" />
+	  <!--<dependency name="bitcoin-network" version="3.0.0" />-->
       <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
 
@@ -959,6 +960,7 @@
       <product prefix="lib" path="src" name="bitcoin-explorer" uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f" >
         <flag define="sysconfdir" />
         <library name="bitcoin-client" />
+        <!--<library name="bitcoin-network" />-->
         <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
         <library name="dl" />
         <headers path="include" />
@@ -1074,6 +1076,11 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
+      <!--<build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>-->
       <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="sync" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1131,6 +1138,149 @@
 
   </repository>
 
+  <repository name="libbitcoin-network" version="3.0.0" email="eric@voskuil.org" >
+
+    <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" />
+
+    <configure>
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+
+      <dependency name="boost" compiler="gcc" version="1.55.0" />
+      <dependency name="boost" compiler="clang" version="1.54.0" />
+      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="bitcoin" version="3.0.0" />
+
+      <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
+
+      <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+
+      <!-- boost -->
+      <!--<flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
+      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />-->
+
+      <flag name="fstack-protector" comment="Protect stack." context="link" />
+      <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
+      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
+      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
+    </configure>
+
+    <make>
+      <product prefix="pkgconfig" >
+        <file path="libbitcoin-network.pc" />
+      </product>
+      <product prefix="doc" >
+        <file path="AUTHORS" />
+        <file path="COPYING" />
+        <file path="ChangeLog" />
+        <file path="INSTALL" />
+        <file path="NEWS" />
+        <file path="README" />
+      </product>
+      <product prefix="lib" path="src" name="bitcoin-network" uuid="" >
+        <library name="bitcoin" />
+        <headers path="include" />
+        <sources path="src" />
+      </product>
+      <product prefix="bin" path="test" name="libbitcoin_network_test" test="true" option="tests" uuid="" >
+        <runner>
+          <run test="network_tests" />
+        </runner>
+        <library name="bitcoin-network" />
+        <library name="boost_unit_test_framework" />
+        <headers path="include" />
+        <sources path="test" />
+      </product>
+      <product prefix="include" container="bitcoin" >
+        <files path="include/bitcoin" />
+      </product>
+    </make>
+
+    <install>
+      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
+        <option value="--with-chrono" />
+        <option value="--with-date_time" />
+        <option value="--with-filesystem" />
+        <option value="--with-iostreams" />
+        <option value="--with-locale" />
+        <option value="--with-program_options" />
+        <option value="--with-regex" />
+        <option value="--with-system" />
+        <option value="--with-test" />
+      </build>
+      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+        <option value="--with-chrono" />
+        <option value="--with-date_time" />
+        <option value="--with-filesystem" />
+        <option value="--with-iostreams" />
+        <option value="--with-locale" />
+        <option value="--with-program_options" />
+        <option value="--with-regex" />
+        <option value="--with-system" />
+        <option value="--with-test" />
+      </build>
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="--without-examples" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+    </install>
+
+    <matrix>
+      <job system="osx" compiler="clang" link="static" >
+        <!-- these allow unused build to complete -->
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="static" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="LDLIBS='-lstdc++'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <option value="--build-boost" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-O0 -g -static --coverage'" />
+        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
+      </job>
+      <job system="osx" compiler="clang" link="dynamic" >
+        <!--<get name="boost" />-->
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+        <get name="boost1.54" />
+        <option value="--disable-ndebug" />
+        <option value="--disable-static" />
+        <option value="CFLAGS='-Os'" />
+        <option value="LDLIBS='-lstdc++'" />
+        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <option value="--disable-static" />
+        <option value="--build-boost" />
+        <option value="CFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+    </matrix>
+
+  </repository>
+
   <repository name="libbitcoin-node" version="3.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
@@ -1148,6 +1298,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="3.0.0" />
+	  <!--<dependency name="bitcoin-network" version="3.0.0" />-->
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1182,6 +1333,7 @@
       <product prefix="lib" path="src" name="bitcoin-node" uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158" >
         <flag define="sysconfdir" />
         <library name="bitcoin-blockchain" />
+        <!--<library name="bitcoin-network" />-->
         <headers path="include" />
         <sources path="src" />
       </product>
@@ -1254,6 +1406,11 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
+      <!--<build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>-->
       <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="sync" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1629,6 +1786,11 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
+      <!--<build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>-->
       <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="sync" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-console" />
