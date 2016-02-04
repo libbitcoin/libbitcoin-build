@@ -122,12 +122,12 @@ os:
 .   # TODO: enumerate from matrixes.
     - osx
     - linux
-    
+
 compiler:
 .   # TODO: enumerate from matrixes.
     - clang
     - gcc
-    
+
 env:
 .   # TODO: enumerate from matrixes.
     - LINK=static
@@ -206,7 +206,7 @@ matrix:
     - $(my.linux_gcc_static) lcov --directory . --capture --output-file coverage.info; fi
     - $(my.linux_gcc_static) lcov --remove coverage.info $(my.exclusions) --output-file coverage.info; fi
     - $(my.linux_gcc_static) lcov --list coverage.info; fi
-    
+
     # Upload coverage info to coveralls service (--repo-token <private coveralls repo token>).
     - $(my.linux_gcc_static) coveralls-lcov coverage.info; fi
 .
