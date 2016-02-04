@@ -20,6 +20,7 @@ rm -rf libbitcoin-blockchain
 rm -rf libbitcoin-client
 rm -rf libbitcoin-consensus
 rm -rf libbitcoin-explorer
+rm -rf libbitcoin-network
 rm -rf libbitcoin-node
 rm -rf libbitcoin-protocol
 rm -rf libbitcoin-server
@@ -33,6 +34,7 @@ chmod +x libbitcoin-blockchain/*.sh
 chmod +x libbitcoin-client/*.sh
 chmod +x libbitcoin-consensus/*.sh
 chmod +x libbitcoin-explorer/*.sh
+chmod +x libbitcoin-network/*.sh
 chmod +x libbitcoin-node/*.sh
 chmod +x libbitcoin-protocol/*.sh
 chmod +x libbitcoin-server/*.sh
@@ -44,6 +46,7 @@ cp -rf  libbitcoin-client/.      ../libbitcoin-client
 cp -rf  libbitcoin-consensus/.   ../libbitcoin-consensus
 cp -rf  libbitcoin-explorer/.    ../libbitcoin-explorer
 cp -rf  libbitcoin-node/.        ../libbitcoin-node
+cp -rf  libbitcoin-network/.     ../libbitcoin-network
 cp -rf  libbitcoin-protocol/.    ../libbitcoin-protocol
 cp -rf  libbitcoin-server/.      ../libbitcoin-server
 
@@ -55,6 +58,7 @@ cp -rf  libbitcoin-server/.      ../libbitcoin-server
 # source ../libbitcoin-consensus/bindings.sh
 # source ../libbitcoin-explorer/bindings.sh
 # source ../libbitcoin-node/bindings.sh
+# source ../libbitcoin-node/network.sh
 # source ../libbitcoin-protocol/bindings.sh
 # source ../libbitcoin-server/bindings.sh
 

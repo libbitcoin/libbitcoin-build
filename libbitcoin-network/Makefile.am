@@ -97,7 +97,8 @@ include_bitcoin_network_HEADERS = \
     include/bitcoin/network/pending_sockets.hpp \
     include/bitcoin/network/proxy.hpp \
     include/bitcoin/network/settings.hpp \
-    include/bitcoin/network/shared_const_buffer.hpp
+    include/bitcoin/network/shared_const_buffer.hpp \
+    include/bitcoin/network/version.hpp
 
 include_bitcoin_network_protocolsdir = ${includedir}/bitcoin/network/protocols
 include_bitcoin_network_protocols_HEADERS = \

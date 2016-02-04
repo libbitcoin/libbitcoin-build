@@ -20,20 +20,21 @@ before_install:
 
     # Install pcre3-dev.
     - sudo apt-get -qq install libpcre3-dev
-    
+
     # Install the iMatix GSL code generator.
     - git clone --branch master --single-branch git://github.com/imatix/gsl
     - cd gsl/src
     - make --silent
     - sudo make install
     - cd ../..
-    
+
     # Clone all repositories managed by libbitcoin-build to sibling directories.
     - git clone --branch master --single-branch https://github.com/libbitcoin/libbitcoin ../libbitcoin
     - git clone --branch master --single-branch https://github.com/libbitcoin/libbitcoin-blockchain ../libbitcoin-blockchain
     - git clone --branch master --single-branch https://github.com/libbitcoin/libbitcoin-client ../libbitcoin-client
     - git clone --branch master --single-branch https://github.com/libbitcoin/libbitcoin-consensus ../libbitcoin-consensus
     - git clone --branch master --single-branch https://github.com/libbitcoin/libbitcoin-explorer ../libbitcoin-explorer
+    - git clone --branch master --single-branch https://github.com/libbitcoin/libbitcoin-network ../libbitcoin-network
     - git clone --branch master --single-branch https://github.com/libbitcoin/libbitcoin-node ../libbitcoin-node
     - git clone --branch master --single-branch https://github.com/libbitcoin/libbitcoin-protocol ../libbitcoin-protocol
     - git clone --branch master --single-branch https://github.com/libbitcoin/libbitcoin-server ../libbitcoin-server

@@ -149,7 +149,6 @@
           <run test="network_address_tests"/>
           <run test="not_found_tests"/>
           <run test="output_tests"/>
-          <!--<run test="p2p_tests"/>-->
           <run test="parameter_tests"/>
           <run test="payment_address_tests"/>
           <run test="ping_tests"/>
@@ -920,7 +919,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="3.0.0" />
-	  <!--<dependency name="bitcoin-network" version="3.0.0" />-->
+	  <dependency name="bitcoin-network" version="3.0.0" />
       <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
 
@@ -960,7 +959,7 @@
       <product prefix="lib" path="src" name="bitcoin-explorer" uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f" >
         <flag define="sysconfdir" />
         <library name="bitcoin-client" />
-        <!--<library name="bitcoin-network" />-->
+        <library name="bitcoin-network" />
         <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
         <library name="dl" />
         <headers path="include" />
@@ -1076,11 +1075,11 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <!--<build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
-      </build>-->
+      </build>
       <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="sync" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1162,8 +1161,10 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <!--<flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
-      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />-->
+      <!--
+	  <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
+      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
+	  -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -1183,12 +1184,12 @@
         <file path="NEWS" />
         <file path="README" />
       </product>
-      <product prefix="lib" path="src" name="bitcoin-network" uuid="" >
+      <product prefix="lib" path="src" name="bitcoin-network" uuid="564eb540-d6b6-425c-b8db-b0bee8970c18" >
         <library name="bitcoin" />
         <headers path="include" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="test" name="libbitcoin_network_test" test="true" option="tests" uuid="" >
+      <product prefix="bin" path="test" name="libbitcoin_network_test" test="true" option="tests" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff" >
         <runner>
           <run test="network_tests" />
         </runner>
@@ -1298,7 +1299,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="3.0.0" />
-	  <!--<dependency name="bitcoin-network" version="3.0.0" />-->
+	  <dependency name="bitcoin-network" version="3.0.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1333,7 +1334,7 @@
       <product prefix="lib" path="src" name="bitcoin-node" uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158" >
         <flag define="sysconfdir" />
         <library name="bitcoin-blockchain" />
-        <!--<library name="bitcoin-network" />-->
+        <library name="bitcoin-network" />
         <headers path="include" />
         <sources path="src" />
       </product>
@@ -1406,11 +1407,11 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <!--<build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
-      </build>-->
+      </build>
       <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="sync" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1786,11 +1787,11 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <!--<build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
-      </build>-->
+      </build>
       <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="sync" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-console" />
