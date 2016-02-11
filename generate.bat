@@ -19,6 +19,7 @@ rmdir /s /q libbitcoin            2>NUL
 rmdir /s /q libbitcoin-blockchain 2>NUL
 rmdir /s /q libbitcoin-client     2>NUL
 rmdir /s /q libbitcoin-consensus  2>NUL
+rmdir /s /q libbitcoin-database   2>NUL
 rmdir /s /q libbitcoin-explorer   2>NUL
 rmdir /s /q libbitcoin-network    2>NUL
 rmdir /s /q libbitcoin-node       2>NUL
@@ -36,6 +37,7 @@ xcopy /s /y libbitcoin\*             ..\libbitcoin\
 xcopy /s /y libbitcoin-blockchain\*  ..\libbitcoin-blockchain\
 xcopy /s /y libbitcoin-client\*      ..\libbitcoin-client\
 xcopy /s /y libbitcoin-consensus\*   ..\libbitcoin-consensus\
+xcopy /s /y libbitcoin-database\*    ..\libbitcoin-database\
 xcopy /s /y libbitcoin-explorer\*    ..\libbitcoin-explorer\
 xcopy /s /y libbitcoin-network\*     ..\libbitcoin-network\
 xcopy /s /y libbitcoin-node\*        ..\libbitcoin-node\
@@ -48,6 +50,7 @@ REM call ..\libbitcoin\bindings.bat
 REM call ..\libbitcoin-blockchain\bindings.bat
 REM call ..\libbitcoin-client\bindings.bat
 REM call ..\libbitcoin-consensus\bindings.bat
+REM call ..\libbitcoin-database\bindings.bat
 REM call ..\libbitcoin-explorer\bindings.bat
 REM call ..\libbitcoin-network\bindings.bat
 REM call ..\libbitcoin-node\bindings.bat
