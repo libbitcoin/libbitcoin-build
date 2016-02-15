@@ -54,7 +54,7 @@ function get_qualified_prefix(product)
             my.distribute = "dist"
         endif
     endif
-    
+
     # check and noinst qualifications are mutually-exclusive and use no prefix.
     if (is_check(my.product) | is_no_install(my.product))
         my.prefix = ""
@@ -64,7 +64,7 @@ function get_qualified_prefix(product)
             my.install = "noinst"
         endif
     endif
-    
+
     # join and return the non-empty parts
     return join(join(my.distribute, my.install, "_"), my.prefix, "_")
 endfunction
@@ -96,7 +96,7 @@ endfunction
 function get_target(product)
     require(my.product, "product", "prefix")
     define my.prefix = my.product.prefix
-    
+
     # Workaround for failure of automake to properly handle noinst_JAVA.
     if (is_java(my.product) & is_no_install(my.product))
         my.prefix = "build"
@@ -202,7 +202,7 @@ function render_sources(files, folder, base_trim, path_trim, product, mapper)
         write_line("$(my.variable) $(my.op)$(my.paths)\n")
         table_clear(my.files)
     endif
-    
+
     # Recurse the directory tree, rendering all files.
     define my.directory = open_directory(my.folder)
     for my.directory.directory as _directory by _directory.name
@@ -324,6 +324,10 @@ function define_cpp_lib_variables(variables, library, make, configure)
         define my.is_function = is_function_dependency(my.dependency)
         define my.is_boost = is_boost_dependency(my.dependency)
         define my.is_boost_lib = is_boost_lib_dependency(my.dependency)
+        define my.is_png = is_png_dependency(my.dependency)
+        define my.is_png_lib = is_png_lib_dependency(my.dependency)
+        define my.is_qrencode = is_qrencode_dependency(my.dependency)
+        define my.is_qrencode_lib = is_qrencode_lib_dependency(my.dependency)
         define my.is_language = is_java_dependency(my.dependency) |\
             is_python_dependency(my.dependency)
         define my.is_common = is_pthread_dependency(my.dependency) |\
@@ -337,6 +341,18 @@ function define_cpp_lib_variables(variables, library, make, configure)
         endif
         if (my.is_boost | my.is_common | my.is_language | my.is_package)
             my.variables.cpp_flags += " ${$(my.cname)_CPPFLAGS}"
+        endif
+        if (my.is_png)
+            my.variables.cpp_flags += " ${$(my.cname)_CPPFLAGS}"
+        endif
+        if (my.is_png_lib)
+            my.variables.libs += " ${$(my.cname)_LIBS}"
+        endif
+        if (my.is_qrencode)
+            my.variables.cpp_flags += " ${$(my.cname)_CPPFLAGS}"
+        endif
+        if (my.is_qrencode_lib)
+            my.variables.libs += " ${$(my.cname)_LIBS}"
         endif
         if (0)
             my.variables.ccc_flags += " ${$(my.cname)_CFLAGS}"
@@ -394,7 +410,7 @@ endfunction
 function render_cpp_variables(product, root, repository, mapper)
     define my.product = render_cpp_variables.product
     define my.repository = render_cpp_variables.repository
-    
+
     if (is_cpp(my.product))
         define my.make = my.repository->make
         define my.configure = my.repository->configure
@@ -402,7 +418,7 @@ function render_cpp_variables(product, root, repository, mapper)
         new variables as _variables
         initialize_cpp_variables(_variables)
         chase_libraries(my.product, my.make)
-        
+
         # Define _PROGRAMS|_[LT]LIBRARIES variables.
         _variables.binaries = get_binaries_variable(my.product, my.mapper)
 
@@ -410,7 +426,7 @@ function render_cpp_variables(product, root, repository, mapper)
         if (is_test(my.product))
             _variables.tests = get_tests_variable(my.product, my.mapper)
         endif
-        
+
         # Define _LDFLAGS from an override of Libtool default naming.
         if (is_true(my.product.unprefixed))
             _variables.ld_flags += " -module"
@@ -421,18 +437,18 @@ function render_cpp_variables(product, root, repository, mapper)
             require(_headers, "headers", "path")
             _variables.cpp_flags += " -I${srcdir}/$(_headers.path)"
         endfor
-        
+
         # Define _C??FLAGS values from input.
         for my.product.flag as _flag
             define_cpp_flag_variable(_variables, _flag)
         endfor
-        
+
         # Define _LIBS|_LDFLAGS|C??FLAGS variables from libraries.
         for my.product.library as _library
             define_cpp_lib_variables(_variables, _library, my.make,\
                 my.configure)
         endfor
-        
+
         # <sources>
         # Define _SOURCES variable from sources elements.
         for my.product.sources as _sources
@@ -441,7 +457,7 @@ function render_cpp_variables(product, root, repository, mapper)
             _variables.sources += get_all_sources(my.folder, my.root_length,\
                 my.product)
         endfor
-        
+
         write_cpp_variables(_variables, my.product)
         endnew
     endif
@@ -584,7 +600,7 @@ endfunction
 function render_product_variables(product, root, repository, mapper)
     define my.product = render_product_variables.product
     define my.repository = render_product_variables.repository
-    
+
     # <file> are enumerated in metadata, just render them.
     render_file_variables(my.product, my.mapper)
 
@@ -593,12 +609,12 @@ function render_product_variables(product, root, repository, mapper)
         define my.folder = "$(my.root)$(_files.path)"
         define my.root_length = string.length(my.root)
         define my.path_length = string.length(_files.path)
-        
+
         # <files> are enumerated by directory and mapped to targets.
         render_files_variables(my.folder, my.root_length, my.path_length,\
             my.product, my.mapper)
     endfor
-    
+
     render_cpp_variables(my.product, my.root, my.repository, my.mapper)
     render_java_variables(my.product, my.root, my.repository, my.mapper)
     render_jar_variables(my.product, my.root, my.repository, my.mapper)
@@ -739,10 +755,10 @@ for generate.repository as _repository by _repository.name\
     define my.make = _repository->make
     define my.absolute = "$(global.root)/$(_repository.name)"
     define my.base = normalize_directory(my.absolute)
-    
+
     heading1("Automake settings.")
     initialize_automake()
-    
+
     new mapper as _mapper
         new variables as _variables
             get_make_variables(my.make, _variables, _mapper)
@@ -751,14 +767,14 @@ for generate.repository as _repository by _repository.name\
                 render_make_variables(_variables)
             endif
         endnew _variables
-        
+
         heading1("Distribute, make and install products.")
         for my.make.product as _product
             heading2(get_product_description(_product))
             render_product(_product, my.base, _repository, _mapper)
         endfor
     endnew _mapper
-    
+
     new targets as _targets
         define_make_targets(my.make, _targets)
         if (!table_empty(_targets))
@@ -766,7 +782,7 @@ for generate.repository as _repository by _repository.name\
             render_make_targets(_targets)
         endif
    endnew _targets
-       
+
     close
 endfor _repository
 endfunction # generate_automake

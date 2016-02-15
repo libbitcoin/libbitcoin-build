@@ -162,6 +162,28 @@ function global.is_boost_lib_dependency(dependency)
     return starts_with(my.dependency.name, "boost_")
 endfunction
 
+function global.is_png_dependency(dependency)
+    define my.dependency = is_png_dependency.dependency
+    return match_name(my.dependency, "png")
+endfunction
+
+function global.is_png_lib_dependency(dependency)
+    define my.dependency = is_png_lib_dependency.dependency
+    require(my.dependency, "dependency", "name")
+    return starts_with(my.dependency.name, "png")
+endfunction
+
+function global.is_qrencode_dependency(dependency)
+    define my.dependency = is_qrencode_dependency.dependency
+    return match_name(my.dependency, "qrencode")
+endfunction
+
+function global.is_qrencode_lib_dependency(dependency)
+    define my.dependency = is_qrencode_lib_dependency.dependency
+    require(my.dependency, "dependency", "name")
+    return starts_with(my.dependency.name, "qrencode")
+endfunction
+
 function global.is_java_dependency(dependency)
     define my.dependency = is_java_dependency.dependency
     return match_name(my.dependency, "java")
@@ -175,6 +197,16 @@ endfunction
 function global.is_pthread_dependency(dependency)
     define my.dependency = is_pthread_dependency.dependency
     return match_name(my.dependency, "pthread")
+endfunction
+
+function global.is_png_dependency(dependency)
+    define my.dependency = is_png_dependency.dependency
+    return match_name(my.dependency, "png")
+endfunction
+
+function global.is_qrencode_dependency(dependency)
+    define my.dependency = is_qrencode_dependency.dependency
+    return match_name(my.dependency, "qrencode")
 endfunction
 
 function global.is_iconv_dependency(dependency)
@@ -291,6 +323,16 @@ endfunction
 function global.is_icu_build(build)
     define my.build = is_icu_build.build
     return starts_with(my.build.name, "icu")
+endfunction
+
+function global.is_png_build(build)
+    define my.build = is_png_build.build
+    return starts_with(my.build.name, "png")
+endfunction
+
+function global.is_qrencode_build(build)
+    define my.build = is_qrencode_build.build
+    return starts_with(my.build.name, "qrencode")
 endfunction
 
 function global.is_boost_build(build)

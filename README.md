@@ -40,3 +40,41 @@ include/bitcoin/[library]/version.hpp
 These artifacts are merged into their respective repositories by libbitcoin maintainers. There is no need to build libbitcoin-build if you are not a maintainer in the process of applying a build configuration change.
 
 The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl). There are Linux/OSX and Visual Studio builds of GSL. There is also a Windows single file executable available for [download](https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe).
+
+*Quick Start*
+
+This method has been tested on GNU/Linux only.  It may help as a
+simple guide for other platforms.
+
+```
+# Create a top-level work_dir
+work_dir=$HOME/work
+
+mkdir -p $work_dir
+cd $work_dir
+
+# Clone, build and install the gsl dependency
+git clone https://github.com/imatix/gsl.git
+
+cd gsl/src
+make && sudo make install
+cd ../../
+
+# Define all libbitcoin repositories
+repos="libbitcoin libbitcoin-server libbitcoin-blockchain \
+libbitcoin-node libbitcoin-network libbitcoin-consensus   \
+libbitcoin-client libbitcoin-explorer libbitcoin-build    \
+libbitcoin-database libbitcoin-protocol"
+
+# Clone all libbitcoin repositories
+for repo in $repos; do
+    git clone https://github.com/libbitcoin/${repo}.git
+done
+
+# Run the libbitcoin-build generate script
+cd libbitcoin-build
+./generate.sh
+
+# NOTE: The result of this command is newly generated build
+# files in the repos that were cloned into $work_dir
+```
