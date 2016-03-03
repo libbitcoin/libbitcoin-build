@@ -33,8 +33,8 @@
       <dependency name="boost_thread" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="pthread" />
-      <dependency name="png" option="png"/>
-      <dependency name="qrencode" option="qrencode" />
+      <dependency name="png" version="1.6.2" option="png" />
+      <dependency name="qrencode" version="3.4.4" option="qrencode" />
       <dependency name="rt" function="clock_gettime" system="linux" />
       <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
       <!-- -ldl is missing from icu package config -->
@@ -80,6 +80,8 @@
       </product>
       <product prefix="lib" path="src" name="bitcoin" uuid="39f60708-ff48-4c22-952d-43470866f684" >
         <flag substitute="icu" />
+        <flag substitute="png" />
+        <flag substitute="qrencode" />
         <library name="boost" />
         <library name="boost_chrono" />
         <library name="boost_date_time" />
@@ -103,6 +105,10 @@
       </product>
       <product prefix="bin" path="examples" name="libbitcoin_examples" install="false" option="examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e" >
         <flag substitute="icu" />
+        <flag substitute="png" />
+        <flag substitute="qrencode" />
+        <library name="png" />
+        <library name="qrencode" />
         <library name="bitcoin" />
         <headers path="include" />
         <sources path="examples" />
@@ -182,6 +188,10 @@
           <run test="version_tests"/>
         </runner>
         <flag substitute="icu" />
+        <flag substitute="png" />
+        <flag substitute="qrencode" />
+        <library name="png" />
+        <library name="qrencode" />
         <library name="bitcoin" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -205,10 +215,10 @@
         <option value="--disable-samples" />
       </build>
       <build name="png" version="1.6.21" parallel="true">
-        <option value="" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="qrencode" version="3.4.4" parallel="true">
-        <option value="" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
@@ -1102,14 +1112,14 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="png" option="png"/>
-      <dependency name="qrencode" option="qrencode" />
+      <dependency name="png" version="1.6.2" option="png" />
+      <dependency name="qrencode" version="3.4.4" option="qrencode" />
       <dependency name="boost" compiler="gcc" version="1.55.0" />
       <dependency name="boost" compiler="clang" version="1.54.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="3.0.0" />
-	  <dependency name="bitcoin-network" version="3.0.0" />
+      <dependency name="bitcoin-network" version="3.0.0" />
       <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
 
@@ -1148,6 +1158,8 @@
       </product>
       <product prefix="lib" path="src" name="bitcoin-explorer" uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f" >
         <flag define="sysconfdir" />
+        <flag substitute="png" />
+        <flag substitute="qrencode" />
         <library name="bitcoin-client" />
         <library name="bitcoin-network" />
         <library name="png" />
@@ -1159,7 +1171,11 @@
       </product>
       <product prefix="bin" path="console" name="bx" option="console" uuid="098a91f3-291c-4a0d-ae5a-bc5f9f5693ed" >
         <flag define="sysconfdir" />
+        <flag substitute="png" />
+        <flag substitute="qrencode" />
         <library name="bitcoin-explorer" />
+        <library name="png" />
+        <library name="qrencode" />
         <headers path="include" />
         <sources path="console" />
       </product>
@@ -1173,6 +1189,10 @@
           <run test="stub" />
         </runner>
         <flag define="sysconfdir" />
+        <flag substitute="png" />
+        <flag substitute="qrencode" />
+        <library name="png" />
+        <library name="qrencode" />
         <library name="bitcoin-explorer" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -1190,7 +1210,7 @@
     </make>
 
     <install>
-        <build name="icu" version="55.1" parallel="true" >
+      <build name="icu" version="55.1" parallel="true" >
         <!-- Bug in ICU build requires --enable-draft. -->
         <option value="--enable-draft" />
         <option value="--enable-tools" />
@@ -1202,10 +1222,10 @@
         <option value="--disable-samples" />
       </build>
       <build name="png" version="1.6.21" parallel="true">
-        <option value="" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="qrencode" version="3.4.4" parallel="true">
-        <option value="" />
+        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
         <option value="--with-chrono" />
