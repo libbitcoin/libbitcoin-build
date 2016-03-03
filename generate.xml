@@ -909,11 +909,10 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_database_test" test="true" option="tests" uuid="{5c4da53a-8c06-4da6-a2a8-3c30f338ed70}" >
         <runner>
-          <run test="databases" />
-          <run test="disk_objs" />
-          <run test="htdb" />
-          <!-- Too much for Travis. -->
-          <!--<run test="database_interface" />-->
+          <run test="database_tests" />
+          <run test="hash_table_tests" />
+          <run test="structure_tests" />
+          <run test="data_base_tests" />
         </runner>
         <library name="bitcoin-database" />
         <library name="boost_unit_test_framework" />
