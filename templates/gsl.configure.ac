@@ -364,54 +364,6 @@ AS_CASE([${$(my.symbol)}], [yes],
 .endmacro # check_iconv
 .
 .#-----------------------------------------------------------------------------
-.# Conditional PNG support
-.#-----------------------------------------------------------------------------
-.macro check_png(dependency, configure)
-.   define my.dependency = check_png.dependency
-.   define my.configure = check_png.configure
-.   require(my.dependency, "dependency", "name")
-.
-.   define my.name = my.dependency.name
-.   define my.cname = "$(my.name:c)"
-.   define my.uname = "$(my.cname:upper)"
-.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
-.   define my.show_option = !is_empty(my.symbol) ?? " if --$(my.symbol)" ? ""
-.   heading2("Require $(my.name)$(my.show_option) and output ${$(my.cname)_CPPFLAGS/LIBS}.")
-.   if (!is_empty(my.dependency.comment))
-.       heading3("$(my.dependency.comment)")
-.   endif
-AS_CASE([${$(my.symbol)}], [yes],
-    AC_SUBST([$(my.cname)_CPPFLAGS], [-DWITH_$(my.uname)])
-    AC_SUBST([$(my.cname)_LIBS], [-l$(my.cname)])
-    AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}]))
-
-.endmacro # check_png
-.
-.#-----------------------------------------------------------------------------
-.# Conditional QRENCODE support
-.#-----------------------------------------------------------------------------
-.macro check_qrencode(dependency, configure)
-.   define my.dependency = check_qrencode.dependency
-.   define my.configure = check_qrencode.configure
-.   require(my.dependency, "dependency", "name")
-.
-.   define my.name = my.dependency.name
-.   define my.cname = "$(my.name:c)"
-.   define my.uname = "$(my.cname:upper)"
-.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
-.   define my.show_option = !is_empty(my.symbol) ?? " if --$(my.symbol)" ? ""
-.   heading2("Require $(my.name)$(my.show_option) and output ${$(my.cname)_CPPFLAGS/LIBS}.")
-.   if (!is_empty(my.dependency.comment))
-.       heading3("$(my.dependency.comment)")
-.   endif
-AS_CASE([${$(my.symbol)}], [yes],
-    AC_SUBST([$(my.cname)_CPPFLAGS], [-DWITH_$(my.uname)])
-    AC_SUBST([$(my.cname)_LIBS], [-l$(my.cname)])
-    AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}]))
-
-.endmacro # check_qrencode
-.
-.#-----------------------------------------------------------------------------
 .# AX_PTHREAD
 .#-----------------------------------------------------------------------------
 .# This could be more general than pthread.
@@ -683,10 +635,6 @@ for generate.repository by name as _repository
                 check_package(_dependency, my.configure)
             elsif (is_pthread_dependency(_dependency))
                 check_pthread(_dependency, my.configure)
-            elsif (is_png_dependency(_dependency))
-                check_png(_dependency, my.configure)
-            elsif (is_qrencode_dependency(_dependency))
-                check_qrencode(_dependency, my.configure)
             elsif (is_iconv_dependency(_dependency))
                 check_iconv(_dependency, my.configure)
             else
