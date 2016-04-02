@@ -42,10 +42,9 @@ These artifacts are merged into their respective repositories by libbitcoin main
 
 The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl). There are Linux/OSX and Visual Studio builds of GSL. There is also a Windows single file executable available for [download](https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe).
 
-*Quick Start*
+### Quick Start
 
-This method has been tested on GNU/Linux only.  It may help as a
-simple guide for other platforms.
+This accomplishes the same result as the [.travis.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.travis.yml) and may be useful for local generation.
 
 ```
 # Create a top-level work_dir
