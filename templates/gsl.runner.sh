@@ -11,7 +11,7 @@
 ###############################################################################
 
 function write_test_run(path)
-    write_line("./$(my.path) ${BOOST_UNIT_TEST_OPTIONS}")
+    write_line("./$(my.path) ${BOOST_UNIT_TEST_OPTIONS} > test.log")
 endfunction
 
 function get_test_list(product)

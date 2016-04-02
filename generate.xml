@@ -6,6 +6,8 @@
 
     <package library="bitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
       <flag value="@icu@" />
+      <flag value="@png@" />
+      <flag value="@qrencode@" />
     </package>
 
     <configure>
@@ -18,10 +20,11 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <!-- https://svn.boost.org/trac/boost/ticket/8973 [1.54] -->
-      <!-- https://svn.boost.org/trac/boost/ticket/6851 [1.50-1.53] -->
-      <dependency name="boost" version="1.55.0" compiler="gcc" />
-      <dependency name="boost" version="1.54.0" compiler="clang" />
+      <!-- Boost bugs we need to avoid. -->
+      <!-- https://trac.macports.org/ticket/42282       [clang, 1.55] -->
+      <!-- https://svn.boost.org/trac/boost/ticket/8973 [gcc, 1.54] -->
+      <!-- https://svn.boost.org/trac/boost/ticket/6851 [gcc, 1.50-1.53] -->
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_chrono" />
       <dependency name="boost_date_time" />
       <dependency name="boost_filesystem" />
@@ -33,18 +36,19 @@
       <dependency name="boost_thread" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="pthread" />
-      <dependency name="png" version="1.6.2" option="png" />
-      <dependency name="qrencode" version="3.4.4" option="qrencode" />
       <dependency name="rt" function="clock_gettime" system="linux" />
       <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
       <!-- -ldl is missing from icu package config -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
+      <!-- PNG requires zlib, which may not be present in the necessary form. -->
+      <!--<dependency name="zlib" version="1.2.8" option="png" />-->
+      <dependency name="png" version="1.6.2" option="png" />
+      <dependency name="qrencode" version="3.4.4" option="qrencode" />
       <dependency name="secp256k1" version="0.0.1" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
       
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -59,9 +63,6 @@
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
       <flag name="fno-var-tracking-assignments" compiler="gcc" comment="Limit delays and warnings." context="c++" />
-
-      <!--<flag name="pie" comment="Create position independent code." context="link" />-->
-      <!--<flag name="fPIE" comment="Create position independent code." context="c++" />-->
 
       <!--<template name="CompileMe.am" />-->
     </configure>
@@ -94,11 +95,11 @@
         <library name="boost_thread" />
         <library name="pthread" />
         <library name="rt" />
-        <library name="png" />
-        <library name="qrencode" />
         <library name="icu-i18n" />
         <!-- -ldl is missing from icu package config -->
         <library name="dl" />
+        <library name="png" />
+        <library name="qrencode" />
         <library name="secp256k1" />
         <headers path="include" />
         <sources path="src" />
@@ -211,25 +212,13 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
+      <build name="zlib" version="1.2.8" parallel="true">
+      </build>
       <build name="png" version="1.6.21" parallel="true">
-        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="qrencode" version="3.4.4" parallel="true">
-        <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+      <build name="boost" version="1.56.0" parallel="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -258,6 +247,7 @@
         <option value="--with-png" />
         <option value="--with-qrencode" />
         <option value="--build-icu" />
+        <option value="--build-zlib" />
         <option value="--build-png" />
         <option value="--build-qrencode" />
         <option value="--build-boost" />
@@ -269,14 +259,14 @@
         <option value="--with-png" />
         <option value="--with-qrencode" />
         <option value="--build-icu" />
+        <option value="--build-zlib" />
         <option value="--build-png" />
         <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
@@ -284,31 +274,37 @@
         <option value="--with-png" />
         <option value="--with-qrencode" />
         <option value="--build-icu" />
+        <option value="--build-zlib" />
         <option value="--build-png" />
         <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-O0 -g -static --coverage'" />
-        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
+        <option value="CFLAGS='-O0 -g --coverage'" />
+        <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
-      </job>
+      </job>      
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
         <option value="--with-icu" />
         <option value="--build-icu" />
+        <!-- This version isn't available in the repository. -->
+        <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+        <option value="--without-consensus" />
+        <option value="--disable-static" />
         <option value="--build-boost" />
-      </job>
+        <option value="CFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>      
     </matrix>
 
   </repository>
@@ -325,8 +321,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.54.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-database" version="3.0.0" />
       <dependency name="bitcoin-consensus" version="2.0.0" option="consensus" />
@@ -340,7 +335,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -388,19 +382,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+      <build name="boost" version="1.56.0" parallel="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -452,27 +434,27 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-O0 -g -static --coverage'" />
-        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
+        <option value="CFLAGS='-O0 -g --coverage'" />
+        <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
+        <!-- This version isn't available in the repository. -->
+        <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--without-consensus" />
@@ -496,8 +478,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.54.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
@@ -513,7 +494,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -564,19 +544,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+      <build name="boost" version="1.56.0" parallel="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -640,27 +608,27 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-O0 -g -static --coverage'" />
-        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
+        <option value="CFLAGS='-O0 -g --coverage'" />
+        <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
+        <!-- This version isn't available in the repository. -->
+        <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
@@ -716,7 +684,7 @@
       <define header="sys/endian.h" export="htobe64" />
 
       <dependency name="boost" compiler="gcc" version="1.55.0" option="tests" />
-      <dependency name="boost" compiler="clang" version="1.54.0" option="tests" />
+      <dependency name="boost" compiler="clang" version="1.56.0" option="tests" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="secp256k1" version="0.0.1" />
       <dependency name="java" option="java" />
@@ -729,7 +697,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -794,11 +761,7 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
-        <option value="--with-system" />
-        <option value="--with-test" />
-      </build>
-      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+      <build name="boost" version="1.56.0" parallel="true">
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
@@ -827,8 +790,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <exclude path="clone/*" />
@@ -838,21 +800,22 @@
         <option value="--build-boost" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-O0 -g -static --coverage'" />
-        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
+        <option value="CFLAGS='-O0 -g --coverage'" />
+        <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
         <get name="swig" />
         <option value="--with-python" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
+        <!-- This version isn't available in the repository. -->
+        <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="swig" />
@@ -878,8 +841,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.54.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="3.0.0" />
 
@@ -892,7 +854,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -1016,19 +977,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+      <build name="boost" version="1.56.0" parallel="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1068,27 +1017,27 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-O0 -g -static --coverage'" />
-        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
+        <option value="CFLAGS='-O0 -g --coverage'" />
+        <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
+        <!-- This version isn't available in the repository. -->
+        <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
@@ -1109,15 +1058,10 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
-      <option type="with" name="png" default="no" substitute="true" value="-DWITH_PNG" description="Compile with Libpng support." />
-      <option type="with" name="qrencode" default="no" substitute="true" value="-DWITH_QRENCODE" description="Compile with QREncode." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="png" version="1.6.2" option="png" />
-      <dependency name="qrencode" version="3.4.4" option="qrencode" />
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.54.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="3.0.0" />
@@ -1134,7 +1078,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
 
       <!-- bx -->
@@ -1162,8 +1105,6 @@
         <flag define="sysconfdir" />
         <library name="bitcoin-client" />
         <library name="bitcoin-network" />
-        <library name="png" />
-        <library name="qrencode" />
         <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
         <library name="dl" />
         <headers path="include" />
@@ -1172,8 +1113,6 @@
       <product prefix="bin" path="console" name="bx" option="console" uuid="098a91f3-291c-4a0d-ae5a-bc5f9f5693ed" >
         <flag define="sysconfdir" />
         <library name="bitcoin-explorer" />
-        <library name="png" />
-        <library name="qrencode" />
         <headers path="include" />
         <sources path="console" />
       </product>
@@ -1215,25 +1154,13 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
+      <build name="zlib" version="1.2.8" parallel="true">
+      </build>
       <build name="png" version="1.6.21" parallel="true">
-        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="qrencode" version="3.4.4" parallel="true">
-        <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+      <build name="boost" version="1.56.0" parallel="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1246,7 +1173,6 @@
         <option value="--with-test" />
       </build>
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
-        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
         <option value="--with-libsodium" />
@@ -1319,8 +1245,7 @@
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
@@ -1333,8 +1258,8 @@
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="--with-bash-completiondir" />
-        <option value="CFLAGS='-O0 -g -static --coverage'" />
-        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
+        <option value="CFLAGS='-O0 -g --coverage'" />
+        <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
@@ -1342,16 +1267,17 @@
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
         <option value="--with-png" />
         <option value="--with-qrencode" />
         <option value="--build-png" />
         <option value="--build-qrencode" />
+        <!-- This version isn't available in the repository. -->
+        <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
@@ -1379,8 +1305,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.54.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="3.0.0" />
 
@@ -1431,19 +1356,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+      <build name="boost" version="1.56.0" parallel="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1483,27 +1396,27 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-O0 -g -static --coverage'" />
-        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
+        <option value="CFLAGS='-O0 -g --coverage'" />
+        <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
+        <!-- This version isn't available in the repository. -->
+        <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
@@ -1527,8 +1440,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.54.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="3.0.0" />
@@ -1543,7 +1455,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -1597,19 +1508,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+      <build name="boost" version="1.56.0" parallel="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1672,8 +1571,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
@@ -1682,21 +1580,22 @@
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="--with-bash-completiondir" />
-        <option value="CFLAGS='-O0 -g -static --coverage'" />
-        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
+        <option value="CFLAGS='-O0 -g --coverage'" />
+        <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
         <get name="bash-completion" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
+        <!-- This version isn't available in the repository. -->
+        <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
@@ -1720,8 +1619,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.54.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="protobuf" version="2.6.0" unprefixed="true" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
@@ -1737,7 +1635,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
 
       <!-- protobuf -->
@@ -1784,19 +1681,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+      <build name="boost" version="1.56.0" parallel="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1853,8 +1738,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <exclude path="interface.pb.*" />
@@ -1862,19 +1746,20 @@
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-O0 -g -static --coverage'" />
-        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
+        <option value="CFLAGS='-O0 -g --coverage'" />
+        <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
+        <!-- This version isn't available in the repository. -->
+        <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
@@ -1899,8 +1784,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.54.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
@@ -1917,7 +1801,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -1972,19 +1855,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.55.0" parallel="true" compiler="gcc" >
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="boost" version="1.54.0" parallel="true" compiler="clang" >
+      <build name="boost" version="1.56.0" parallel="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -2068,8 +1939,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
@@ -2078,21 +1948,22 @@
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="--with-bash-completiondir" />
-        <option value="CFLAGS='-O0 -g -static --coverage'" />
-        <option value="CXXFLAGS='-O0 -g -static --coverage'" />
+        <option value="CFLAGS='-O0 -g --coverage'" />
+        <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
         <get name="bash-completion" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
-        <get name="boost1.54" />
+        <!-- This version isn't available in the repository. -->
+        <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
-        <option value="LDLIBS='-lstdc++'" />
-        <option value="CXXFLAGS='-Os -stdlib=libstdc++'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
