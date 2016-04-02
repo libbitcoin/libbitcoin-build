@@ -321,8 +321,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.56.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-database" version="3.0.0" />
       <dependency name="bitcoin-consensus" version="2.0.0" option="consensus" />
@@ -446,7 +445,7 @@
         <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <!-- This version isn't available in the repository. -->
@@ -479,8 +478,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.56.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
       <dependency name="czmq++" version="1.1.0" />
@@ -621,7 +619,7 @@
         <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <!-- This version isn't available in the repository. -->
@@ -806,7 +804,7 @@
         <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
         <get name="swig" />
         <option value="--with-python" />
       </job>
@@ -843,8 +841,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.56.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="3.0.0" />
 
@@ -1031,7 +1028,7 @@
         <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <!-- This version isn't available in the repository. -->
@@ -1064,8 +1061,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.56.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="3.0.0" />
@@ -1309,8 +1305,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.56.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin" version="3.0.0" />
 
@@ -1412,11 +1407,12 @@
         <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
@@ -1444,8 +1440,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.56.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="3.0.0" />
@@ -1589,13 +1584,14 @@
         <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
         <get name="bash-completion" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
@@ -1623,8 +1619,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.56.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="protobuf" version="2.6.0" unprefixed="true" />
       <dependency name="sodium" version="1.0.0" comment="The chained zmq dependency doesn't set a minimum version for sodium." />
@@ -1755,11 +1750,12 @@
         <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.56" />-->
+        <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
@@ -1788,8 +1784,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" compiler="gcc" version="1.55.0" />
-      <dependency name="boost" compiler="clang" version="1.56.0" />
+      <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
@@ -1957,7 +1952,7 @@
         <option value="CXXFLAGS='-O0 -g --coverage'" />
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
-        <!--<get name="boost" />-->
+        <get name="boost" />
         <get name="bash-completion" />
         <option value="--with-bash-completiondir" />
       </job>
