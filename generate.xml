@@ -469,7 +469,7 @@
 
   <repository name="libbitcoin-client" version="3.0.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-client" description="Bitcoin Client Protocol Library" url="https://github.com/libbitcoin/libbitcoin-client" />
+    <package library="bitcoin-client" description="Bitcoin Client Query Library" url="https://github.com/libbitcoin/libbitcoin-client" />
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
@@ -1605,7 +1605,7 @@
 
   <repository name="libbitcoin-protocol" version="3.0.0" email="mienkphi@gmail.com" >
 
-    <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Privacy Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
+    <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
@@ -1617,8 +1617,6 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.2.0" />
-      <!-- TODO: remove this dependency by using only zmq API. -->
-      <dependency name="czmq" version="3.0.0" />
       <!--<dependency name="protobuf" version="2.6.0" unprefixed="true" /> -->
       <dependency name="bitcoin" version="3.0.0" />
 
@@ -1632,9 +1630,6 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-
-      <!-- czmq -->
-      <flag name="Wformat-security" comment="Clean up czmq non-literal string format warnings." context="c++" />
       
       <!-- protobuf -->
       <!--
@@ -1663,7 +1658,6 @@
       </product>
       <product prefix="lib" path="src" name="bitcoin-protocol" uuid="6b94e2a5-c054-4790-963d-a7be493259b0" >
         <library name="zmq" />
-        <library name="czmq" />
         <!--<library name="protobuf" />-->
         <library name="bitcoin" />
         <headers path="include" />
@@ -1696,12 +1690,6 @@
       </build>
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
-      </build>
-      <!-- TODO: remove this dependency by using only zmq API in libbitcoin-protocol. -->
-      <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
-        <option value="--disable-zmakecert" />
-        <option value="--disable-czmq_selftest" />
-        <option value="${with_pkgconfigdir}" />
       </build>
       <!-- version4
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
