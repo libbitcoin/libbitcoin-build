@@ -557,12 +557,6 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
       </build>
-      <!-- TODO: remove this dependency by using only zmq API in libbitcoin-protocol. -->
-      <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
-        <option value="--disable-zmakecert" />
-        <option value="--disable-czmq_selftest" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
       <!-- version4
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
@@ -1670,9 +1664,11 @@
           <run test="certificate_tests" />
           <run test="context_tests" />
           <run test="frame_tests" />
+          <run test="identifiers_tests" />
           <run test="message_tests" />
           <run test="poller_tests" />
           <run test="socket_tests" />
+          <run test="worker_tests" />
         </runner>
         <library name="bitcoin-protocol" />
         <library name="boost_unit_test_framework" />
@@ -1862,12 +1858,6 @@
       </build>
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
-      </build>
-      <!-- TODO: remove this dependency by using only zmq API in libbitcoin-protocol. -->
-      <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
-        <option value="--disable-zmakecert" />
-        <option value="--disable-czmq_selftest" />
-        <option value="${with_pkgconfigdir}" />
       </build>
       <!-- version4
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
