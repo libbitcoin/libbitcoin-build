@@ -40,11 +40,11 @@ include/bitcoin/[library]/version.hpp
 
 These artifacts are merged into their respective repositories by libbitcoin maintainers. There is no need to build libbitcoin-build if you are not a maintainer in the process of applying a build configuration change.
 
-The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl). There are Linux/OSX and Visual Studio builds of GSL. There is also a Windows single file executable available for [download](https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe).
+The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl). There are Linux/OSX and Visual Studio builds of GSL. A recent version is recommended. There is also a Windows single file executable available for [download](https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe).
 
 ### Quick Start
 
-This accomplishes the same result as the [.travis.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.travis.yml) and may be useful for local generation.
+This is similar to the [.travis.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.travis.yml) and is useful for local generation. There is a `generate.bat` script for a native Windows environment.
 
 ```
 # Create a top-level work_directory.
