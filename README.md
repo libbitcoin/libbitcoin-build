@@ -47,34 +47,32 @@ The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl)
 This accomplishes the same result as the [.travis.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.travis.yml) and may be useful for local generation.
 
 ```
-# Create a top-level work_dir
-work_dir=$HOME/work
+# Create a top-level work_directory.
+work_directory=$HOME/work
+mkdir -p $work_directory
+cd $work_directory
 
-mkdir -p $work_dir
-cd $work_dir
-
-# Clone, build and install the gsl dependency
+# Clone, build and install the gsl dependency.
 git clone https://github.com/imatix/gsl.git
-
 cd gsl/src
 make && sudo make install
 cd ../../
 
-# Define all libbitcoin repositories
-repos="libbitcoin libbitcoin-server libbitcoin-blockchain \
-libbitcoin-node libbitcoin-network libbitcoin-consensus   \
-libbitcoin-client libbitcoin-explorer libbitcoin-build    \
-libbitcoin-database libbitcoin-protocol"
+# Clone all libbitcoin repositories.
+git clone https://github.com/libbitcoin/libbitcoin.git
+git clone https://github.com/libbitcoin/libbitcoin-blockchain.git
+git clone https://github.com/libbitcoin/libbitcoin-build.git
+git clone https://github.com/libbitcoin/libbitcoin-client.git
+git clone https://github.com/libbitcoin/libbitcoin-consensus.git
+git clone https://github.com/libbitcoin/libbitcoin-database.git
+git clone https://github.com/libbitcoin/libbitcoin-explorer.git
+git clone https://github.com/libbitcoin/libbitcoin-network.git
+git clone https://github.com/libbitcoin/libbitcoin-node.git
+git clone https://github.com/libbitcoin/libbitcoin-protocol.git
+git clone https://github.com/libbitcoin/libbitcoin-server.git
 
-# Clone all libbitcoin repositories
-for repo in $repos; do
-    git clone https://github.com/libbitcoin/${repo}.git
-done
-
-# Run the libbitcoin-build generate script
+# Run the libbitcoin-build generation script.
+# Newly generated build files are copied to the cloned repos.
 cd libbitcoin-build
 ./generate.sh
-
-# NOTE: The result of this command is newly generated build
-# files in the repos that were cloned into $work_dir
 ```
