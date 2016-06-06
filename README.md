@@ -44,7 +44,7 @@ The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl)
 
 ### Quick Start
 
-This is similar to the [.travis.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.travis.yml) and is useful for local generation. There is a `generate.bat` script for a native Windows environment.
+This is similar to the [.travis.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.travis.yml) and is useful for local generation. In addition to `generate.sh` there is a `generate.bat` for the native Windows environment.
 
 ```
 # Create a top-level work_directory.
