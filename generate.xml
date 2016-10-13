@@ -18,7 +18,7 @@
       <option type="with" name="png" default="no" substitute="true" value="-DWITH_PNG" description="Compile with Libpng support." />
       <option type="with" name="qrencode" default="no" substitute="true" value="-DWITH_QRENCODE" description="Compile with QREncode." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <!-- Boost bugs we need to avoid. -->
       <!-- https://trac.macports.org/ticket/42282       [clang, 1.55] -->
@@ -30,6 +30,7 @@
       <dependency name="boost_filesystem" />
       <dependency name="boost_iostreams" />
       <dependency name="boost_locale" />
+      <dependency name="boost_log" />
       <dependency name="boost_program_options" />
       <dependency name="boost_regex" />
       <dependency name="boost_system" />
@@ -89,6 +90,7 @@
         <library name="boost_filesystem" />
         <library name="boost_iostreams" />
         <library name="boost_locale" />
+        <library name="boost_log" />
         <library name="boost_program_options" />
         <library name="boost_regex" />
         <library name="boost_system" />
@@ -240,6 +242,7 @@
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
+        <option value="--with-log" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
@@ -335,7 +338,7 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="tools" default="yes" conditional="true" description="Compile with tools." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -405,6 +408,7 @@
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
+        <option value="--with-log" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
@@ -493,7 +497,7 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="examples" default="yes" conditional="true" description="Compile with examples." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -564,6 +568,7 @@
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
+        <option value="--with-log" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
@@ -653,7 +658,7 @@
       <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." />
       <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <!-- Locate function declarations and define found header and export symbols. -->
       <define header="byteswap.h" export="bswap_16" />
@@ -842,7 +847,7 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="tools" default="yes" conditional="true" description="Compile with tools." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -986,6 +991,7 @@
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
+        <option value="--with-log" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
@@ -1062,7 +1068,7 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -1170,6 +1176,7 @@
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
+        <option value="--with-log" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
@@ -1296,7 +1303,7 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -1355,6 +1362,7 @@
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
+        <option value="--with-log" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
@@ -1431,7 +1439,7 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -1514,6 +1522,7 @@
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
+        <option value="--with-log" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
@@ -1617,7 +1626,7 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -1698,6 +1707,7 @@
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
+        <option value="--with-log" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
@@ -1783,7 +1793,7 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" version="1.56.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -1861,6 +1871,7 @@
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
+        <option value="--with-log" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
