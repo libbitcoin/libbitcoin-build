@@ -761,8 +761,6 @@ initialize_boost_icu_configuration()
 # Because boost doesn't use autoconfig.
 build_from_tarball_boost()
 {
-    push_directory "$BUILD_DIR"
-
     local URL=$1
     local ARCHIVE=$2
     local COMPRESSION=$3
@@ -779,6 +777,7 @@ build_from_tarball_boost()
 
     # Use the suffixed archive name as the extraction directory.
     local EXTRACT="build-$ARCHIVE"
+    push_directory "$BUILD_DIR"
     create_directory $EXTRACT
     push_directory $EXTRACT
 
