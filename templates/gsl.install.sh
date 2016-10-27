@@ -237,12 +237,6 @@ BUILD_DIR="build-$(my.repo.name)"
 
 .endmacro # define_build_directory
 .
-.macro define_object_directory(repository)
-.   heading2("The default object directory.")
-OBJECT_DIR="bin-objects"
-
-.endmacro #define_object_directory
-
 .macro define_icu(install)
 .   define my.install = define_icu.install
 .   define my.url = get_icu_url(my.install)?
@@ -465,18 +459,6 @@ configure_options()
     ./configure "$@"
 }
 
-configure_options_object_dir()
-{
-    echo "configure options:"
-    for OPTION in "$@"; do
-        if [[ $OPTION ]]; then
-            echo $OPTION
-        fi
-    done
-
-    ../configure "$@"
-}
-
 configure_links()
 {
     # Configure dynamic linker run-time bindings when installing to system.
@@ -515,14 +497,11 @@ make_current_directory()
     local JOBS=$1
     shift 1
 
-    create_directory "$OBJECT_DIR"
     ./autogen.sh
-    push_directory "$OBJECT_DIR"
-    configure_options_object_dir "$@"
+    configure_options "$@"
     make_jobs $JOBS
     make install
     configure_links
-    pop_directory
 }
 
 # make_jobs jobs [make_options]
@@ -904,15 +883,11 @@ build_from_travis()
     # The primary build is not downloaded if we are running in Travis.
     if [[ $TRAVIS == true ]]; then
         build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "${OPTIONS[@]}" "$@"
-        push_directory $OBJECT_DIR
         make_tests $JOBS
-        pop_directory
     else
         build_from_github $ACCOUNT $REPO $BRANCH $JOBS "${OPTIONS[@]}" "$@"
         push_directory $REPO
-        push_directory $OBJECT_DIR
         make_tests $JOBS
-        pop_directory
         pop_directory
     fi
 }
@@ -1016,7 +991,6 @@ for generate.repository by name as _repository
     
     heading1("Define constants.")
     define_build_directory(_repository)
-    define_object_directory(_repository)
     define_icu(my.install)
     define_zlib(my.install)
     define_png(my.install)
