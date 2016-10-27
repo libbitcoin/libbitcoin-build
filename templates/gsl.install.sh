@@ -904,13 +904,15 @@ build_from_travis()
     # The primary build is not downloaded if we are running in Travis.
     if [[ $TRAVIS == true ]]; then
         build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "${OPTIONS[@]}" "$@"
-        push_directory "$OBJECT_DIR"
+        push_directory $OBJECT_DIR
         make_tests $JOBS
         pop_directory
     else
         build_from_github $ACCOUNT $REPO $BRANCH $JOBS "${OPTIONS[@]}" "$@"
         push_directory $REPO
+        push_directory $OBJECT_DIR
         make_tests $JOBS
+        pop_directory
         pop_directory
     fi
 }
