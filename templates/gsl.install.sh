@@ -311,8 +311,6 @@ SEQUENTIAL=1
 OS=`uname -s`
 if [[ $PARALLEL ]]; then
     echo "Using shell-defined PARALLEL value."
-elif [[ $TRAVIS == true ]]; then
-    PARALLEL=$SEQUENTIAL
 elif [[ $OS == Linux ]]; then
     PARALLEL=`nproc`
 elif [[ ($OS == Darwin) || ($OS == OpenBSD) ]]; then
