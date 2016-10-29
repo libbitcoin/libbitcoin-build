@@ -305,8 +305,8 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
-      </job>      
-      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+      </job> 
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--with-icu" />
         <option value="--build-icu" />
         <!-- This version isn't available in the repository. -->
@@ -314,13 +314,15 @@
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
         <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-O3 -g'" />
         <option value="CXXFLAGS='-O3 -g'" />
       </job>      
@@ -468,19 +470,21 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
         <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-O3 -g'" />
         <option value="CXXFLAGS='-O3 -g'" />
       </job>
@@ -629,18 +633,20 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-O3 -g'" />
         <option value="CXXFLAGS='-O3 -g'" />
       </job>
@@ -816,21 +822,23 @@
         <get name="swig" />
         <option value="--with-python" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
         <get name="swig" />
         <option value="--with-java" />
         <option value="--with-python" />
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-O3 -g'" />
         <option value="CXXFLAGS='-O3 -g'" />
       </job>
@@ -1039,18 +1047,20 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-O3 -g'" />
         <option value="CXXFLAGS='-O3 -g'" />
       </job>
@@ -1266,7 +1276,7 @@
         <get name="bash-completion" />
         <option value="--with-bash-completiondir" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--with-png" />
         <option value="--with-qrencode" />
         <option value="--build-png" />
@@ -1276,10 +1286,11 @@
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
         <get name="bash-completion" />
         <option value="--with-png" />
         <option value="--with-qrencode" />
@@ -1288,6 +1299,7 @@
         <option value="--build-boost" />
         <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-O3 -g'" />
         <option value="CXXFLAGS='-O3 -g'" />
       </job>
@@ -1410,18 +1422,20 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-O3 -g'" />
         <option value="CXXFLAGS='-O3 -g'" />
       </job>
@@ -1597,21 +1611,23 @@
         <get name="bash-completion" />
         <option value="--with-bash-completiondir" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
         <get name="bash-completion" />
         <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--with-bash-completiondir" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-O3 -g'" />
         <option value="CXXFLAGS='-O3 -g'" />
       </job>
@@ -1763,18 +1779,20 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-O3 -g'" />
         <option value="CXXFLAGS='-O3 -g'" />
       </job>
@@ -1966,21 +1984,23 @@
         <get name="bash-completion" />
         <option value="--with-bash-completiondir" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="true" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
+      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
         <get name="bash-completion" />
         <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--with-bash-completiondir" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-O3 -g'" />
         <option value="CXXFLAGS='-O3 -g'" />
       </job>
