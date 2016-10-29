@@ -839,7 +839,7 @@ build_from_github()
     display_message "Download $FORK/$BRANCH"
 
     # Clone the repository locally.
-    git clone --branch $BRANCH --single-branch "https://github.com/$FORK"
+    git clone --depth 1 --branch $BRANCH --single-branch "https://github.com/$FORK"
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
