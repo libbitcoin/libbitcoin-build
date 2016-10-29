@@ -15,7 +15,6 @@ function apt_get(name, system)
     if (my.system = "osx")
         my.get = "brew unlink $(my.name); brew install $(my.name)"
     elsif (my.system = "linux")
-        my.get = "sudo apt-get -qq install $(my.name)"
     else
         abort "Invalid system type for get package: $(my.name)."
     endif
@@ -75,10 +74,12 @@ function job_options(job)
     return trim_left(my.job_options)
 endfunction
 
-function job_install(job)
+function job_install(job, restrict_parallel)
     define my.job = job_install.job
-    define my.sudo = is_true(my.job.sudo) ?? "sudo CXX=$CXX CC=$CC " ? ""
-    return "$(my.sudo)./install.sh $(job_options(my.job))"
+    define my.parallel = job_install.restrict_parallel ?? "PARALLEL=1 " ? ""
+    define my.sudo = is_true(my.job.sudo) ?? "sudo " ? ""
+    define my.compiler = "CC=$CC CXX=$CXX "
+    return "$(my.sudo)$(my.compiler)$(my.parallel)./install.sh $(job_options(my.job))"
 endfunction
 
 function job_predicate_link(job)
@@ -118,26 +119,41 @@ endfunction
 .
 .macro initialize_matrix(matrix)
 .   define my.matrix = initialize_matrix.matrix
-os:
-.   # TODO: enumerate from matrixes.
-    - osx
-    - linux
+addons:
+    apt:
+        sources:
+            - boost-latest
+            - ubuntu-toolchain-r-test
+        packages:
+            - g++-4.8
 
-compiler:
-.   # TODO: enumerate from matrixes.
-    - clang
-    - gcc
-
-env:
-.   # TODO: enumerate from matrixes.
-    - LINK=static
-    - LINK=dynamic
-
-.   # TODO: enumerate from matrixes.
 matrix:
-    exclude:
-        - os: osx
-          compiler: gcc
+    include:
+.   for my.matrix.job by "$(system)-$(compiler)-$(link)" as _job
+.       define my.is_clang = (_job.compiler = "clang")
+        - os: $(_job.system)
+          compiler: $(_job.compiler)
+          env: LINK=$(_job.link)
+.       if (_job.system = "linux") # specify linux apt requirements
+          apt:
+.           if (my.is_clang) # clang compiler repository
+            sources:
+                - sourceline: 'ppa:h-rayflood/llvm'
+.           endif
+.           if (my.is_clang | is_coverage_job(_job) | count(_job.get) > 0)
+            packages:
+.           endif
+.           if (my.is_clang) # clang compiler repository
+                - clang-3.4
+.           endif
+.           if (is_coverage_job(_job))
+                - lcov
+.           endif
+.           for _job.get as _get
+                - $(_get.name)
+.           endfor _get
+.       endif
+.   endfor _job
     fast_finish:
         - true
 
@@ -146,7 +162,11 @@ matrix:
 .macro set_aliases(matrix)
 .   define my.matrix = set_aliases.matrix
     # Set aliases for readability.
-    - $(condition("$CC             == gcc    ")) GCC=true; fi
+    - $(condition("$CC             == gcc    "))
+        GCC=true;
+        export CC=gcc-4.8;
+        export CXX=g++-4.8;
+      fi
     - $(condition("$CC             == clang  ")) CLANG=true; fi
     - $(condition("$LINK           == static ")) STATIC=true; fi
     - $(condition("$LINK           == dynamic")) DYNAMIC=true; fi
@@ -155,80 +175,55 @@ matrix:
 
 .endmacro #set_aliases
 .
-.macro set_repositories(matrix)
-.   define my.matrix = set_repositories.matrix
-.   define my.linux       = condition("$LINUX          ")
-.   define my.linux_clang = condition("$LINUX && $CLANG")
-.
-    # Set package repository.
-    - $(my.linux) sudo add-apt-repository -y ppa:boost-latest/ppa; fi
-    - $(my.linux) sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-    - $(my.linux_clang) sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
-
-    # Update the system.
-    - $(my.linux) sudo apt-get -qq update; fi
-
-.endmacro #set_repositories
-.
-.macro install_compilers(matrix)
-.   define my.matrix = install_compilers.matrix
-.   define my.linux       = condition("$LINUX          ")
-.   define my.linux_clang = condition("$LINUX && $CLANG")
-.
-    # Install g++ 4.8
-    - $(my.linux) sudo apt-get install -qq g++-4.8 --allow-unauthenticated; fi
-    - $(my.linux) sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50; fi
-    - $(my.linux) sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50; fi
-    - $(my.linux) sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 50; fi
-
-    # Install clang++ 3.4
-    - $(my.linux_clang) sudo apt-get install -qq clang-3.4 --allow-unauthenticated; fi
-    - $(my.linux_clang) sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.4 50; fi
-    - $(my.linux_clang) sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.4 50; fi
-
-.endmacro #install_compilers
-.
 .# The --build-dir install.sh option is not supported by this code coverage tool.
 .macro code_coverage(repository)
 .   define my.repository = code_coverage.repository
-.   define my.job = matrix_converage_job(my.repository->matrix)?
-.   if (defined(my.job))
-.       define my.linux_gcc_static = condition("$LINUX && $GCC   && $STATIC ")
-.       define my.exclusions = job_coverage_exclusions(my.job, my.repository)
-.
+.   if (count_matrix_coverage_job(my.repository->matrix) > 0)
     # Install coveralls and current lcov.
-    - $(my.linux_gcc_static) wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.11.orig.tar.gz; fi
-    - $(my.linux_gcc_static) tar xf lcov_1.11.orig.tar.gz; fi
-    - $(my.linux_gcc_static) sudo make -C lcov-1.11 install; fi
-    - $(my.linux_gcc_static) gem install coveralls-lcov; fi
+.      for my.repository->matrix.job as _job where is_coverage_job(_job)
+.           define my.job_condition = condition(job_predicate(_job))
+    - $(my.job_condition) gem install coveralls-lcov; fi
+.      endfor
 
     # Capture coverage info, filter out system and test code, and debug before upload.
-    - $(my.linux_gcc_static) lcov --directory . --capture --output-file coverage.info; fi
-    - $(my.linux_gcc_static) lcov --remove coverage.info $(my.exclusions) --output-file coverage.info; fi
-    - $(my.linux_gcc_static) lcov --list coverage.info; fi
+.      for my.repository->matrix.job as _job where is_coverage_job(_job)
+.           define my.job_condition = condition(job_predicate(_job))
+.           define my.exclusions = job_coverage_exclusions(_job, my.repository)
+    - $(my.job_condition) lcov --directory . --capture --output-file coverage.info; fi
+    - $(my.job_condition) lcov --remove coverage.info $(my.exclusions) --output-file coverage.info; fi
+    - $(my.job_condition) lcov --list coverage.info; fi
+.       endfor
 
     # Upload coverage info to coveralls service (--repo-token <private coveralls repo token>).
-    - $(my.linux_gcc_static) coveralls-lcov coverage.info; fi
-.
+.      for my.repository->matrix.job as _job where is_coverage_job(_job)
+.           define my.job_condition = condition(job_predicate(_job))
+    - $(my.job_condition) coveralls-lcov coverage.info; fi
+.       endfor
 .   endif
+
 .endmacro #code_coverage
 .
 .macro install_packages(matrix, system)
 .   define my.matrix = install_packages.matrix
 .   for my.matrix.job as _job where count(_job.get) > 0
-    # Download and install packages for $(job_title(_job)).
 .       for _job.get as _get
+.           if (_job.system = "osx")
+    # Download and install packages for $(job_title(_job)).
     - $(condition(job_predicate(_job))) $(apt_get(_get.name, system)); fi
+.           elsif (_job.system = "linux")
+.           else
+.               abort "Invalid system type for get package: $(my.name)."
+.           endif
 .       endfor _get
-
 .   endfor _job
 .endmacro #install_packages
 .
 .macro run_script(matrix)
 .   define my.matrix = run_script.matrix
+.   define my.restrict_parallel = defined(my.matrix->job(defined(sudo) & sudo = "true"))
     # Download and build $(_repository.name) and all dependencies.
 .   for my.matrix.job as _job
-    - $(condition(job_predicate(_job))) $(job_install(_job)); fi
+    - $(condition(job_predicate(_job))) $(job_install(_job, my.restrict_parallel)); fi
 .   endfor _job
 
 .endmacro #run_script
@@ -249,6 +244,9 @@ matrix:
 .   output(my.out_file)
 .   copyleft(_repository.name)
 .   define my.matrix = _repository->matrix
+.   define my.sudo = defined(my.matrix->job(defined(sudo) & sudo = "true")) ?? "true" ? "false"
+sudo:
+    - $(my.sudo)
 
 language:
     - cpp
@@ -257,10 +255,8 @@ language:
 before_install:
 
 .   set_aliases(my.matrix)
-.   set_repositories(my.matrix)
 install:
 
-.   install_compilers(my.matrix)
 .   install_packages(my.matrix)
 script:
 

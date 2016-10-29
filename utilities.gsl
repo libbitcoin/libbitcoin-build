@@ -262,11 +262,17 @@ endfunction
 # Matrix utilities.
 #------------------------------------------------------------------------------
 
-function global.matrix_converage_job(matrix)
-    define my.matrix = matrix_converage_job.matrix?
+function global.is_coverage_job(job)
+    define my.job = is_coverage_job.job
+    return defined(my.job) & my.job.system = "linux" & my.job.compiler = "gcc" &\
+           my.job.link = "static" & is_true(my.job.coverage)
+endfunction
+
+function global.count_matrix_coverage_job(matrix)
+    define my.matrix = count_matrix_coverage_job.matrix?
     if (defined(my.matrix))
-        return my.matrix->job(system = "linux" & compiler = "gcc" &\
-            link = "static" & is_true(coverage))
+        return count(my.matrix->job(system = "linux" & compiler = "gcc" &\
+            link = "static" & is_true(coverage)))
     endif
 endfunction
 
