@@ -99,7 +99,7 @@
       <product prefix="bin" path="examples" name="libbitcoin_examples" install="false" option="examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e" >
         <flag substitute="icu" />
         <flag substitute="testnet" />
-        <library name="bitcoin" />        
+        <library name="bitcoin" />
         <headers path="include" />
         <sources path="examples" />
       </product>
@@ -211,7 +211,7 @@
     </matrix>
 
   </repository>
-    
+
   <repository name="libbitcoin-blockchain" version="2.4.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Implementation" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
@@ -458,7 +458,7 @@
     </matrix>
 
   </repository>
-
+  
   <repository name="libbitcoin-client" version="2.2.0" email="mienkphi@gmail.com" >
 
     <package library="bitcoin-client" description="Bitcoin Client Protocol Implementation" url="https://github.com/libbitcoin/libbitcoin-client" />
@@ -516,18 +516,18 @@
       </product>
       <product prefix="bin" path="test" name="libbitcoin_client_test" test="true" option="tests" uuid="a56a00c6-669b-4535-9dc2-772a931b04c2" >
         <runner/>
-        <library name="bitcoin-client" />        
+        <library name="bitcoin-client" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
       <product prefix="bin" path="examples/console" name="console" install="false" option="examples" uuid="fbcc58ad-93a1-4247-b660-b32c61aca680" >
-        <library name="bitcoin-client" />        
+        <library name="bitcoin-client" />
         <headers path="include" />
         <sources path="examples/console" />
       </product>
       <product prefix="bin" path="examples/get_height" name="get_height" install="false" option="examples" uuid="" >
-        <library name="bitcoin-client" />        
+        <library name="bitcoin-client" />
         <headers path="include" />
         <sources path="examples/get_height" />
       </product>
@@ -560,13 +560,18 @@
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
+      <build name="zeromq" version="4.2.0" parallel="true" >
+        <option value="--disable-perf" />
+        <option value="--disable-drafts" />
+        <option value="--disable-curve-keygen" />
         <option value="--with-libsodium" />
-      </build>
-      <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
-        <option value="--disable-zmakecert" />
-        <!--<option value="--without-czmq_selftest" />-->
         <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="czmq" version="3.0.2" parallel="true" >
+        <option value="--without-makecert" />
+        <option value="--without-test_zgossip" />
+        <option value="${with_pkgconfigdir}" />
+        <option value="CFLAGS=-Wno-unknown-pragmas" />
       </build>
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
@@ -592,11 +597,15 @@
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="LDLIBS='-lstdc++'" />
@@ -604,6 +613,8 @@
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -612,9 +623,13 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
@@ -624,6 +639,8 @@
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
@@ -857,7 +874,7 @@
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      
+
       <!-- bx -->
       <flag name="Wno-unused-parameter" comment="Clean up bx generated code." context="c++" />
 
@@ -889,7 +906,7 @@
       </product>
       <product prefix="bin" path="console" name="bx" option="console" uuid="098a91f3-291c-4a0d-ae5a-bc5f9f5693ed" >
         <flag define="sysconfdir" />
-        <library name="bitcoin-explorer" />        
+        <library name="bitcoin-explorer" />
         <headers path="include" />
         <sources path="console" />
       </product>
@@ -903,7 +920,7 @@
           <run test="stub" />
         </runner>
         <flag define="sysconfdir" />
-        <library name="bitcoin-explorer" />        
+        <library name="bitcoin-explorer" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
@@ -956,14 +973,18 @@
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
+      <build name="zeromq" version="4.2.0" parallel="true" >
+        <option value="--disable-perf" />
+        <option value="--disable-drafts" />
+        <option value="--disable-curve-keygen" />
         <option value="--with-libsodium" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
-        <option value="--disable-zmakecert" />
-        <!--<option value="--without-czmq_selftest" />-->
+      <build name="czmq" version="3.0.2" parallel="true" >
+        <option value="--without-makecert" />
+        <option value="--without-test_zgossip" />
         <option value="${with_pkgconfigdir}" />
+        <option value="CFLAGS=-Wno-unknown-pragmas" />
       </build>
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
@@ -995,12 +1016,16 @@
         <option value="--with-icu" />
         <option value="--build-icu" />
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
@@ -1011,6 +1036,8 @@
         <!-- Coverage is disabled due to Travis-CI time limit of 50 minutes. -->
         <get name="bash-completion" />
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1023,10 +1050,14 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
@@ -1036,6 +1067,8 @@
       <job system="linux" compiler="gcc" link="dynamic" sudo="true" >
         <get name="bash-completion" />
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
         <option value="CFLAGS='-Os -s'" />
@@ -1439,7 +1472,7 @@
       <!-- boost -->
       <flag name="Wno-deprecated-register" compiler="clang" comment="Clean up boost 1.54 headers." context="c++" />
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      
+
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
@@ -1515,14 +1548,18 @@
       <build name="sodium" github="jedisct1" repository="libsodium" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
+      <build name="zeromq" version="4.2.0" parallel="true" >
+        <option value="--disable-perf" />
+        <option value="--disable-drafts" />
+        <option value="--disable-curve-keygen" />
         <option value="--with-libsodium" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="czmq" github="zeromq" repository="czmq" branch="master" parallel="true" >
-        <option value="--disable-zmakecert" />
-        <!--<option value="--without-czmq_selftest" />-->
+      <build name="czmq" version="3.0.2" parallel="true" >
+        <option value="--without-makecert" />
+        <option value="--without-test_zgossip" />
         <option value="${with_pkgconfigdir}" />
+        <option value="CFLAGS=-Wno-unknown-pragmas" />
       </build>
       <build name="czmqpp" github="zeromq" repository="czmqpp" branch="master" parallel="true" >
         <option value="${with_pkgconfigdir}" />
@@ -1569,6 +1606,8 @@
         <option value="--enable-testnet" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" >
@@ -1576,6 +1615,8 @@
         <option value="--without-openssl" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="LDLIBS='-lstdc++'" />
@@ -1584,6 +1625,8 @@
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1594,12 +1637,16 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <!--<get name="boost" />-->
         <get name="bash-completion" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--with-secp256k1" />
         <option value="--without-openssl" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="true" >
         <get name="boost1.54" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="CFLAGS='-Os'" />
@@ -1611,6 +1658,8 @@
         <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--build-zeromq" />
+        <option value="--build-czmq" />
         <option value="--with-bash-completiondir" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />

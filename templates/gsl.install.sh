@@ -96,6 +96,70 @@ function get_icu_url(install, compiler)
     return my.url
 endfunction
 
+# Functions with specific knowledge of ZEROMQ archive file name and URL structure.
+# https://github.com/zeromq/libzmq/releases/download/v4.2.0/zeromq-4.2.0.tar.gz
+
+function get_zeromq_file(install, compiler)
+    define my.install = get_zeromq_file.install
+    define my.version = get_archive_version(my.install, "zeromq", my.compiler)?
+    if (!defined(my.version))
+        trace1("get_zeromq_file:get_archive_version($(my.compiler ? 0)) = []")
+        return
+    endif
+    return "zeromq-$(my.version).tar.gz"
+endfunction
+
+function get_zeromq_url(install, compiler)
+    trace1("get_zeromq_url($(my.compiler ? 0))")
+    define my.install = get_zeromq_url.install
+    define my.version = get_archive_version(my.install, "zeromq", my.compiler)?
+    if (!defined(my.version))
+        trace1("get_zeromq_url:get_archive_version($(my.compiler ? 0)) = []")
+        return
+    endif
+    define my.archive = get_zeromq_file(my.install, my.compiler)?
+    if (!defined(my.archive))
+        trace1("get_zeromq_url:get_zeromq_file($(my.compiler ? 0)) = []")
+        return
+    endif
+    define my.base_url = "https\://github.com/zeromq/libzmq/releases/download"
+    define my.url = "$(my.base_url)/v$(my.version)/$(my.archive)"
+    trace1("get_zeromq_url = $(my.url)")
+    return my.url
+endfunction
+
+# Functions with specific knowledge of CZMQ archive file name and URL structure.
+# https://github.com/zeromq/czmq/releases/download/v3.0.2/czmq-3.0.2.tar.gz
+
+function get_czmq_file(install, compiler)
+    define my.install = get_czmq_file.install
+    define my.version = get_archive_version(my.install, "czmq", my.compiler)?
+    if (!defined(my.version))
+        trace1("get_czmq_file:get_archive_version($(my.compiler ? 0)) = []")
+        return
+    endif
+    return "czmq-$(my.version).tar.gz"
+endfunction
+
+function get_czmq_url(install, compiler)
+    trace1("get_czmq_url($(my.compiler ? 0))")
+    define my.install = get_czmq_url.install
+    define my.version = get_archive_version(my.install, "czmq", my.compiler)?
+    if (!defined(my.version))
+        trace1("get_czmq_url:get_archive_version($(my.compiler ? 0)) = []")
+        return
+    endif
+    define my.archive = get_czmq_file(my.install, my.compiler)?
+    if (!defined(my.archive))
+        trace1("get_czmq_url:get_czmq_file($(my.compiler ? 0)) = []")
+        return
+    endif
+    define my.base_url = "https\://github.com/zeromq/czmq/releases/download"
+    define my.url = "$(my.base_url)/v$(my.version)/$(my.archive)"
+    trace1("get_czmq_url = $(my.url)")
+    return my.url
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -112,6 +176,12 @@ endfunction
 .   endif
 .   if (have_build(my.repo->install, "boost"))
 # --build-boost            Builds Boost libraries.
+.   endif
+.   if (have_build(my.repo->install, "zeromq"))
+# --build-zeromq           Builds ZEROMQ libraries.
+.   endif
+.   if (have_build(my.repo->install, "czmq"))
+# --build-czmq             Builds CZMQ libraries.
 .   endif
 # --build-dir=<path>       Location of downloaded and intermediate files.
 # --prefix=<absolute-path> Library install location (defaults to /usr/local).
@@ -175,6 +245,34 @@ BOOST_STANDARD$(my.upper_compiler)=\\
 
 .endmacro # define_boost
 .
+.macro define_zeromq(install)
+.   trace1("define_zeromq()")
+.   define my.install = define_zeromq.install
+.   define my.url = get_zeromq_url(my.install)?
+.   if (!defined(my.url))
+.       #abort "A version of zeromq is not defined."
+.       return
+.   endif
+.   heading2("ZeroMQ archive.")
+ZEROMQ_URL="$(my.url)"
+ZEROMQ_ARCHIVE="$(get_zeromq_file(my.install))"
+
+.endmacro # define_zeromq
+.
+.macro define_czmq(install)
+.   trace1("define_czmq()")
+.   define my.install = define_czmq.install
+.   define my.url = get_czmq_url(my.install)?
+.   if (!defined(my.url))
+.       #abort "A version of czmq is not defined."
+.       return
+.   endif
+.   heading2("CZMQ archive.")
+CZMQ_URL="$(my.url)"
+CZMQ_ARCHIVE="$(get_czmq_file(my.install))"
+
+.endmacro # define_czmq
+.
 .macro define_initialize()
 .   heading2("Exit this script on the first build error.")
 set -e
@@ -231,6 +329,8 @@ for OPTION in "$@"; do
         # Custom build options (in the form of --build-<option>).
         (--build-icu)      BUILD_ICU="yes";;
         (--build-boost)    BUILD_BOOST="yes";;
+        (--build-zeromq)   BUILD_ZEROMQ="yes";;
+        (--build-czmq)     BUILD_CZMQ="yes";;
         (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
         
         # Standard build options.
@@ -263,7 +363,7 @@ fi
 
 .   heading2("Purge custom options so they don't go to configure.")
 CONFIGURE_OPTIONS=( "$@" )
-CUSTOM_OPTIONS=( "--build-icu" "--build-boost" "--build-dir=$BUILD_DIR" )
+CUSTOM_OPTIONS=( "--build-icu" "--build-boost" "--build-zeromq" "--build-czmq" "--build-dir=$BUILD_DIR" )
 for CUSTOM_OPTION in "${CUSTOM_OPTIONS[@]}"; do
     CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/$CUSTOM_OPTION}" )
 done
@@ -570,6 +670,39 @@ build_from_tarball_boost()
     pop_directory
 }
 
+build_from_tarball_github()
+{
+    local URL=$1
+    local ARCHIVE=$2
+    local REPO=$3
+    local JOBS=$4
+    local BUILD=$5
+    shift 5
+
+    if [[ !($BUILD) ]]; then
+        display_message "$REPO build not enabled"
+        return
+    fi
+
+    display_message "Download $ARCHIVE"
+
+    create_directory $REPO
+    push_directory $REPO
+
+    # Extract the source locally.
+    wget --output-document $ARCHIVE $URL
+    tar --extract --file $ARCHIVE --strip-components=1
+
+    # Build and install (czmq lacks autogen.sh).
+    autoreconf -i
+    configure_options "$@"
+    make_jobs $JOBS
+    make install
+    configure_links
+
+    pop_directory
+}
+
 build_from_github()
 {
     local ACCOUNT=$1
@@ -634,6 +767,14 @@ build_from_travis()
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
 .endmacro # build_boost
 .
+.macro build_zeromq()
+    build_from_tarball_github $ZEROMQ_URL $ZEROMQ_ARCHIVE zeromq $PARALLEL "$BUILD_ZEROMQ" "$@" $ZEROMQ_OPTIONS
+.endmacro # build_zeromq
+.
+.macro build_czmq()
+    build_from_tarball_github $CZMQ_URL $CZMQ_ARCHIVE czmq $PARALLEL "$BUILD_CZMQ" "$@" $CZMQ_OPTIONS
+.endmacro # build_czmq
+.
 .macro build_github(build)
 .   define my.build = build_github.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
@@ -661,6 +802,10 @@ build_all()
 .               build_boost()
 .           elsif (is_icu_build(_build))
 .               build_icu()
+.           elsif (is_zeromq_build(_build))
+.               build_zeromq()
+.           elsif (is_czmq_build(_build))
+.               build_czmq()
 .           elsif (is_github_build(_build))
 .               if (!last())
 .                   build_github(_build)
@@ -709,6 +854,8 @@ for generate.repository by name as _repository
     define_icu(my.install)
     define_boost(my.install, "gcc")
     define_boost(my.install, "clang")
+    define_zeromq(my.install)
+    define_czmq(my.install)
     
     heading1("Initialize the build environment.")
     define_initialize()
