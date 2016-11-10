@@ -293,6 +293,16 @@ function global.is_icu_build(build)
     return starts_with(my.build.name, "icu")
 endfunction
 
+function global.is_zeromq_build(build)
+    define my.build = is_zeromq_build.build
+    return my.build.name = "zeromq"
+endfunction
+
+function global.is_czmq_build(build)
+    define my.build = is_czmq_build.build
+    return my.build.name = "czmq"
+endfunction
+
 function global.is_boost_build(build)
     define my.build = is_boost_build.build
     return my.build.name = "boost"
