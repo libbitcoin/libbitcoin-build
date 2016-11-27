@@ -60,11 +60,6 @@ function job_coverage_exclusions(job, repository)
     return my.excludes
 endfunction
 
-function job_title(job)
-    define my.job = job_title.job
-    return "$(my.job.system)/$(my.job.compiler)/$(my.job.link)"
-endfunction
-
 function job_options(job)
     define my.job = job_options.job
     define my.job_options = ""
@@ -204,10 +199,10 @@ matrix:
     # Export CC/CXX to control gcc version.
     - if [[ $GCC                         ]]; then export CC=gcc-4.8; export CXX=g++-4.8; fi
 
+    # Download and install packages.
 .   for my.matrix.job as _job where count(_job.get) > 0
 .       for _job.get as _get
 .           if (_job.system = "osx")
-    # Download and install packages for $(job_title(_job)).
     - $(condition(job_predicate(_job))) $(apt_get(_get.name, _job.system)); fi
 .           elsif (_job.system = "linux")
 .           else
