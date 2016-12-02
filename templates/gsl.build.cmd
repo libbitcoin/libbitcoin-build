@@ -86,7 +86,7 @@ IF NOT EXIST "%path_base%\\%~2" (
 )
 
 call :bld_proj %~2
-.   emit_error_handler("build_repository_project %~2 failed.")
+.   emit_error_handler("Building project %~2 failed.")
 call :success "Initialization of %~1/%~2/%~3 complete."
 exit /b 0
 .endmacro # emit_lib_init_repository
@@ -95,11 +95,11 @@ exit /b 0
 :bld_repo
 call :pending "Building respository %~1..."
 call :depends "%~1"
-.   emit_error_handler("init_dependencies %~1 failed.")
+.   emit_error_handler("Initializing dependencies %~1 failed.")
 call cd /d "%path_base%\\%~1\\builds\\msvc\\vs2013"
 call msbuild %msbuild_args% %~1.sln
 .   emit_error_handler("msbuild %msbuild_args% %~1.sln failed.")
-call :success "Build repository %~1 execution complete."
+call :success "Building repository %~1 execution complete."
 call cd /d "%path_base%"
 exit /b 0
 .endmacro # emit_lib_build_repository
@@ -108,11 +108,11 @@ exit /b 0
 :bld_proj
 call :pending "Building respository project %~1..."
 call :depends %~1
-.   emit_error_handler("init_dependencies %~1 failed.")
+.   emit_error_handler("Initializing dependencies %~1 failed.")
 call cd /d "%path_base%\\%~1\\builds\\msvc\\vs2013"
 call msbuild %msbuild_args% /target:%~1:Rebuild %~1.sln
 .   emit_error_handler("msbuildl %msbuild_args% /target:%~1:Rebuild %~1.sln")
-call :success "Build repository project %~1 execution complete."
+call :success "Building repository project %~1 execution complete."
 call cd /d "%path_base%"
 exit /b 0
 .endmacro # emit_lib_build_repository_project
@@ -140,6 +140,15 @@ echo [91m%~1[0m
 exit /b 0
 .endmacro # emit_lib_colorized_echos
 .
+.macro initialize_batch_script
+@echo off
+SETLOCAL ENABLEEXTENSIONS
+SET parent=%~dp0
+SET path_base=%~1
+SET nuget_pkg_path=%~1\\..\\nuget
+SET msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3
+.endmacro #initialize_batch_script
+.
 .endtemplate
 .template 0
 ###############################################################################
@@ -156,17 +165,12 @@ exit /b 0
 .   notify(my.out_file)
 .   output(my.out_file)
 .   bat_copyleft(_repository.name)
-@echo off
-SETLOCAL ENABLEEXTENSIONS
-SET parent=%~dp0
-SET path_base=%~1
-SET nuget_pkg_path=%~1\\..\\nuget
-SET msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3
+.   initialize_batch_script()
 
 .   emit_instructions(_repository)
 
-.#   emit_lib_project_init(_repository)
-.
+
+
 .   emit_lib_init_repository()
 
 .   emit_lib_build_repository()
