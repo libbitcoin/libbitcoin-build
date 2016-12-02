@@ -142,11 +142,11 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="zlib" version="1.2.8" parallel="true">
+      <build name="zlib" version="1.2.8" parallel="true" >
       </build>
-      <build name="png" version="1.6.25" parallel="true">
+      <build name="png" version="1.6.25" parallel="true" >
       </build>
-      <build name="qrencode" version="3.4.4" parallel="true">
+      <build name="qrencode" version="3.4.4" parallel="true" >
       </build>
       <build name="boost" version="1.57.0" parallel="true" >
         <option value="--with-chrono" />
@@ -161,7 +161,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -237,7 +237,11 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
-      </job>      
+      </job>
+      <job system="windows" compiler="x64" link="StaticDebug" />
+      <job system="windows" compiler="x64" link="StaticRelease" />
+      <job system="windows" compiler="Win32" link="StaticDebug" />
+      <job system="windows" compiler="Win32" link="StaticRelease" />
     </matrix>
 
   </repository>
@@ -325,7 +329,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -396,6 +400,8 @@
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
+      <job system="windows" compiler="x64" link="StaticDebug" />
+      <job system="windows" compiler="x64" link="StaticRelease" />
     </matrix>
 
   </repository>
@@ -488,14 +494,14 @@
         <option value="--with-test" />
       </build>
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
-      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
+      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
       <!-- version4
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
       -->
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -558,6 +564,10 @@
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
+      <job system="windows" compiler="x64" link="StaticDebug" />
+      <job system="windows" compiler="x64" link="StaticRelease" />
+      <job system="windows" compiler="Win32" link="StaticDebug" />
+      <job system="windows" compiler="Win32" link="StaticRelease" />
     </matrix>
 
   </repository>
@@ -683,11 +693,11 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.57.0" parallel="true">
+      <build name="boost" version="1.57.0" parallel="true" >
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -750,6 +760,10 @@
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
+      <job system="windows" compiler="x64" link="StaticDebug" />
+      <job system="windows" compiler="x64" link="StaticRelease" />
+      <job system="windows" compiler="Win32" link="StaticDebug" />
+      <job system="windows" compiler="Win32" link="StaticRelease" />
     </matrix>
 
   </repository>
@@ -909,7 +923,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -967,6 +981,8 @@
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
+      <job system="windows" compiler="x64" link="StaticDebug" />
+      <job system="windows" compiler="x64" link="StaticRelease" />
     </matrix>
 
   </repository>
@@ -1077,11 +1093,11 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="zlib" version="1.2.8" parallel="true">
+      <build name="zlib" version="1.2.8" parallel="true" >
       </build>
-      <build name="png" version="1.6.25" parallel="true">
+      <build name="png" version="1.6.25" parallel="true" >
       </build>
-      <build name="qrencode" version="3.4.4" parallel="true">
+      <build name="qrencode" version="3.4.4" parallel="true" >
       </build>
       <build name="boost" version="1.57.0" parallel="true" >
         <option value="--with-chrono" />
@@ -1097,14 +1113,14 @@
         <option value="--with-test" />
       </build>
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
-      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
+      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
       <!-- version4
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
       -->
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1206,6 +1222,10 @@
         <option value="CFLAGS='-Og -g'" />
         <option value="CXXFLAGS='-Og -g'" />
       </job>
+      <job system="windows" compiler="x64" link="StaticDebug" />
+      <job system="windows" compiler="x64" link="StaticRelease" />
+      <job system="windows" compiler="Win32" link="StaticDebug" />
+      <job system="windows" compiler="Win32" link="StaticRelease" />
     </matrix>
 
   </repository>
@@ -1284,7 +1304,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1342,6 +1362,10 @@
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
+      <job system="windows" compiler="x64" link="StaticDebug" />
+      <job system="windows" compiler="x64" link="StaticRelease" />
+      <job system="windows" compiler="Win32" link="StaticDebug" />
+      <job system="windows" compiler="Win32" link="StaticRelease" />
     </matrix>
 
   </repository>
@@ -1438,7 +1462,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1526,7 +1550,10 @@
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
+      <job system="windows" compiler="x64" link="StaticDebug" />
+      <job system="windows" compiler="x64" link="StaticRelease" />
     </matrix>
+
   </repository>
 
   <repository name="libbitcoin-protocol" version="3.0.0" email="mienkphi@gmail.com" >
@@ -1616,14 +1643,14 @@
         <option value="--with-test" />
       </build>
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
-      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
+      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
       <!-- version4
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
       -->
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1681,6 +1708,10 @@
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
+      <job system="windows" compiler="x64" link="StaticDebug" />
+      <job system="windows" compiler="x64" link="StaticRelease" />
+      <job system="windows" compiler="Win32" link="StaticDebug" />
+      <job system="windows" compiler="Win32" link="StaticRelease" />
     </matrix>
 
   </repository>
@@ -1780,14 +1811,14 @@
         <option value="--with-test" />
       </build>
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
-      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" >
+      <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
       <!-- version4
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
       -->
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1887,6 +1918,8 @@
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
+      <job system="windows" compiler="x64" link="StaticDebug" />
+      <job system="windows" compiler="x64" link="StaticRelease" />
     </matrix>
 
   </repository>

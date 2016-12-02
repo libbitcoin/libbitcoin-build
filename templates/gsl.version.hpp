@@ -56,6 +56,7 @@ endfunction
 # Generation
 ###############################################################################
 function generate_version()
+    terminator="\n"
     for generate.repository by name as _repository
         define my.primary = bitcoin_to_include(_repository.name)
         define my.upper_repository = "$(_repository.name:c,upper)"

@@ -977,6 +977,7 @@ time build_all "${CONFIGURE_OPTIONS[@]}"
 # Generation
 ###############################################################################
 function generate_installer()
+terminator="\n"
 for generate.repository by name as _repository
     require(_repository, "repository", "name")
     create_directory(_repository.name)

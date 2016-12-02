@@ -47,6 +47,7 @@ BOOST_UNIT_TEST_OPTIONS=\\
 # Generation
 ###############################################################################
 function generate_runner()
+terminator="\n"
 for generate.repository by name as _repository\
     where (defined(_repository->make))
     require(_repository, "repository", "name")

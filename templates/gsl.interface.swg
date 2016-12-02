@@ -22,6 +22,7 @@
 # Generation
 ###############################################################################
 function generate_interface()
+terminator="\n"
 for generate.repository by name as _repository
     define my.library = bitcoin_to_include(_repository.name)
     require(_repository, "repository", "name")

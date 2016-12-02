@@ -10,6 +10,7 @@
 # Generation
 ###############################################################################
 .macro generate_autogen()
+.terminator="\n"
 .   for generate.repository by name as _repository
 .       require(_repository, "repository", "name")
 .       create_directory(_repository.name)
