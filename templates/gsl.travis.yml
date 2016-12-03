@@ -106,11 +106,53 @@ function condition(predicate)
     return "if [[ $(my.predicate) ]]; then"
 endfunction
 
+function is_system_linux(job)
+    define my.job = is_system_linux.job
+    return defined(my.job) & my.job.system = "linux"
+endfunction
+
+function is_system_osx(job)
+    define my.job = is_system_osx.job
+    return defined(my.job) & my.job.system = "osx"
+endfunction
+
+function is_travis_job(job)
+    define my.job = is_travis_job.job
+    return is_system_linux(my.job) | is_system_osx(my.job)
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
 .endtemplate
 .template 1
+.
+.macro initialize_job(job)
+.   define my.job = initialize_job.job
+.   define my.is_clang = (my.job.compiler = "clang")
+        - os: $(my.job.system)
+          compiler: $(my.job.compiler)
+          env: LINK=$(my.job.link)
+.   if (my.job.system = "linux")
+          apt:
+.       if (my.is_clang)
+            sources:
+                - sourceline: 'ppa:h-rayflood/llvm'
+.       endif
+.           if (my.is_clang | is_coverage_job(my.job) | count(my.job.get) > 0)
+            packages:
+.       endif
+.       if (my.is_clang)
+                - clang-3.4
+.       endif
+.       if (is_coverage_job(my.job))
+                - lcov
+.       endif
+.       for my.job.get as _get
+                - $(_get.name)
+.       endfor _get
+.   endif
+.endmacro #initialize_job
 .
 .macro initialize_matrix(matrix)
 .   define my.matrix = initialize_matrix.matrix
@@ -124,30 +166,11 @@ addons:
 
 matrix:
     include:
-.   for my.matrix.job by "$(system)-$(compiler)-$(link)" as _job
-.       define my.is_clang = (_job.compiler = "clang")
-        - os: $(_job.system)
-          compiler: $(_job.compiler)
-          env: LINK=$(_job.link)
-.       if (_job.system = "linux")
-          apt:
-.           if (my.is_clang)
-            sources:
-                - sourceline: 'ppa:h-rayflood/llvm'
-.           endif
-.           if (my.is_clang | is_coverage_job(_job) | count(_job.get) > 0)
-            packages:
-.           endif
-.           if (my.is_clang)
-                - clang-3.4
-.           endif
-.           if (is_coverage_job(_job))
-                - lcov
-.           endif
-.           for _job.get as _get
-                - $(_get.name)
-.           endfor _get
-.       endif
+.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_osx(_job)
+.       initialize_job(_job)
+.   endfor _job
+.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_linux(_job)
+.       initialize_job(_job)
 .   endfor _job
     fast_finish:
         - true
@@ -200,7 +223,7 @@ matrix:
     - if [[ $GCC                         ]]; then export CC=gcc-4.8; export CXX=g++-4.8; fi
 
     # Download and install packages.
-.   for my.matrix.job as _job where count(_job.get) > 0
+.   for my.matrix.job as _job where is_travis_job(_job) & count(_job.get) > 0
 .       for _job.get as _get
 .           if (_job.system = "osx")
     - $(condition(job_predicate(_job))) $(apt_get(_get.name, _job.system)); fi
@@ -217,7 +240,7 @@ matrix:
 .   define my.matrix = run_script.matrix
 .   define my.restrict_parallel = is_true(my.matrix->job.sudo)
     # Download and build $(_repository.name) and all dependencies.
-.   for my.matrix.job as _job
+.   for my.matrix.job as _job where is_travis_job(_job)
     - $(condition(job_predicate(_job))) $(job_install(_job, my.restrict_parallel)); fi
 .   endfor _job
 
@@ -230,7 +253,8 @@ matrix:
 ###############################################################################
 .endtemplate
 .template 1
-.macro generate_travisyml()
+.macro generate_travis_yml()
+.terminator="\n"
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
 .   create_directory(_repository.name)
@@ -262,5 +286,5 @@ after_success:
 .
 .   close
 .endfor _repository
-.endmacro # generate_travisyml
+.endmacro # generate_travis_yml
 .endtemplate

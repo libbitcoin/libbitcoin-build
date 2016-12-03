@@ -1,0 +1,166 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin appveyor.yml.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+function get_test_list(product)
+    define my.product = get_test_list.product
+    define my.tests = ""
+    for my.product->runner.run as _run
+        my.tests = join(my.tests, _run.test, ",")
+    endfor
+    return my.tests
+endfunction 
+
+function emit_unit_test_options(repository)
+   define my.repository = emit_unit_test_options.repository
+   for my.repository->make.product as _product where (defined(_product->runner))
+      define my.tests = get_test_list(_product)
+       define my.run = is_empty(my.tests) ?? "*" ? "$(my.tests)"
+       write_line("      BOOST_UNIT_TEST_OPTIONS: \"--run_test=$(my.run) --show_progress=no --detect_memory_leak=0 --report_level=no --build_info=yes\"")
+   endfor
+endfunction
+
+function is_system_windows(job)
+    define my.job = is_system_windows.job
+    return defined(my.job) & my.job.system = "windows"
+endfunction
+
+function is_platform_x64(job)
+    define my.job = is_platform_x64.job
+    return defined(my.job) & my.job.compiler = "x64"
+endfunction
+
+function is_platform_Win32(job)
+    define my.job = is_platform_Win32.job
+    return defined(my.job) & my.job.compiler = "Win32"
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_ctp_installation()
+  - ps: >-
+      $BASE_KEY = "HKLM:SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
+      $WOW_KEY = "HKLM:SOFTWARE\\wow6432node\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
+      $CTP_URL = "https://download.microsoft.com/download/3/C/2/3C271B79-6354-4B66-9014-C6CEBC14C5C4/vc_CompilerCTP.Nov2013.exe";
+      $CTP_FILENAME = "vc_CompilerCTP.Nov2013.exe";
+      $INSTALL_LOG_PATH = "c:\\users\\appveyor\\install-log.txt";
+      function GetUninstallString($product_name) {
+        $x64_items = @(Get-ChildItem $BASE_KEY);
+        ($x64_items + @(Get-ChildItem $WOW_KEY) `
+          | ForEach-Object { Get-ItemProperty Microsoft.PowerShell.Core\\Registry::$_ } `
+          | Where-Object { $_.DisplayName -and $_.DisplayName.Contains($product_name) } `
+          | Select UninstallString).UninstallString
+      }
+      Write-Host "Uninstalling Microsoft Visual C++ 2013 Redistributable (x64)..." -ForegroundColor Yellow;
+      "\$(GetUninstallString "Microsoft Visual C++ 2013 Redistributable (x64)") /quiet" | out-file "$env:TEMP\\uninstall.cmd" -Encoding ASCII;
+      & $env:temp\\uninstall.cmd;
+      Write-Host "Uninstalling Microsoft Visual C++ 2013 Redistributable (x86)..." -Foreground Yellow;
+      "\$(GetUninstallString "Microsoft Visual C++ 2013 Redistributable (x86)") /quiet" | out-file "$env:TEMP\\uninstall.cmd" -Encoding ASCII;
+      & $env:temp\\uninstall.cmd;
+      Write-Host "Downloading Visual C++ Compiler November 2013 CTP..." -ForegroundColor Yellow;
+      $CTP_INSTALLER_PATH = "\$($env:TEMP)\\$CTP_FILENAME";
+      (New-Object Net.WebClient).DownloadFile($CTP_URL, $CTP_INSTALLER_PATH);
+      Write-Host "Installing CTP Compiler..." -ForegroundColor Yellow;
+      cmd /c start /wait $CTP_INSTALLER_PATH /install /quiet /norestart /log $INSTALL_LOG_PATH;
+      Write-Host "CTP Compiler Installation Complete." -ForegroundColor Green;
+.endmacro # emit_ctp_installation
+.
+.macro emit_test_execution()
+  - ps: >-
+      Write-Host "Locating test executables..." -ForegroundColor Yellow;
+      $BC_TEST_EXES = @(Get-ChildItem -Path "$env:APPVEYOR_BUILD_FOLDER\\bin" -recurse | Where-Object { $_.Name -eq "$env:APPVEYOR_PROJECT_NAME-test.exe" });
+      If ($BC_TEST_EXES.Count -ne 1) {
+        Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
+        exit 1;
+      }
+      Write-Host "Found single test executable: " $BC_TEST_EXES.FullName -ForegroundColor Green;
+      $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
+      Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
+      try {
+        Invoke-Expression "$BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS"
+      }
+      catch {
+        $ERR = $_;
+        Write-Host "Test execution failure: " $ERR -ForegroundColor Red;
+        exit $ERR;
+      }
+      Write-Host "Test execution complete." -ForegroundColor Green;
+.endmacro # emit_test_execution
+.
+.macro emit_job(job, repository)
+.   define my.job = emit_job.job
+.   define my.repository = emit_job.repository
+    - configuration: $(my.job.link)
+      platform: $(my.job.compiler)
+.     emit_unit_test_options(my.repository)
+.endmacro # emit_job
+.
+.macro emit_matrix(matrix, repository)
+.   define my.matrix = emit_matrix.matrix
+.   define my.repository = emit_matrix.repository
+.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_windows(_job) & is_platform_x64(_job)
+.       emit_job(_job, my.repository)
+.   endfor _job
+.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_windows(_job) & is_platform_Win32(_job)
+.       emit_job(_job, my.repository)
+.   endfor _job
+.endmacro # emit_matrix
+.
+.endtemplate
+.template 0
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.macro generate_appveyor_yml()
+.terminator="\n"
+.for generate.repository by name as _repository
+.   require(_repository, "repository", "name")
+.   create_directory(_repository.name)
+.   define my.out_file = "$(_repository.name)/appveyor.yml"
+.   notify(my.out_file)
+.   output(my.out_file)
+.   copyleft(_repository.name)
+.   define my.matrix = _repository->matrix
+version: 3.0.0.{build}-{branch}
+
+os:
+  - Visual Studio 2013
+
+clone_folder: c:\\git\\$(_repository.name)
+skip_tags: true
+
+environment:
+  matrix:
+.   emit_matrix(my.matrix, _repository)
+
+matrix:
+  fast_finish: true
+
+before_build:
+.   emit_ctp_installation()
+
+build_script:
+  - c:\\git\\$(_repository.name)\\build.cmd c:\\git %PLATFORM% %CONFIGURATION%
+.#  - powershell c:\\git\\$(_repository.name)\\build.ps1 -PATH c:\\git -PLATFORM %PLATFORM% -CONFIGURATION %CONFIGURATION%
+  - cd /d %APPVEYOR_BUILD_FOLDER%
+
+test_script:
+.   emit_test_execution()
+.
+.   close
+.endfor _repository
+.endmacro # generate_appveyoryml
+.endtemplate

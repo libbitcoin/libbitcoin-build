@@ -42,6 +42,10 @@ gsl from "templates/gsl.install.sh"
 gsl from "templates/gsl.runner.sh"
 gsl from "templates/gsl.travis.yml"
 
+gsl from "templates/gsl.build.cmd"
+#gsl from "templates/gsl.build.ps1"
+gsl from "templates/gsl.appveyor.yml"
+
 # Generate public API.
 generate_version()
 generate_include()
@@ -79,7 +83,10 @@ generate_pkgconfig()
 # Generate validation scripts.
 generate_installer()
 generate_runner()
-generate_travisyml()
+generate_travis_yml()
+generate_build_cmd()
+#generate_build_ps1()
+generate_appveyor_yml()
 
 ###############################################################################
 .endtemplate
