@@ -726,7 +726,6 @@ endfunction
 ###############################################################################
 
 function generate_automake()
-terminator="\n"
 for generate.repository as _repository by _repository.name\
     where (defined(_repository->make))
 

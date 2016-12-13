@@ -157,7 +157,6 @@ SET msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3
 .endtemplate
 .template 1
 .macro generate_build_cmd()
-.terminator="\r\n"
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
 .   create_directory(_repository.name)
