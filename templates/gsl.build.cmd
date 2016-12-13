@@ -12,7 +12,8 @@
 function is_matching_repository_name(repository, build)
     define my.repository = is_matching_repository_name.repository
     define my.build = is_matching_repository_name.build
-    return defined(my.repository.name) & defined(my.build.repository) & (my.repository.name = my.build.repository)
+    return defined(my.repository.name) & defined(my.build.repository) & \
+        (my.repository.name = my.build.repository)
 endfunction
 
 function is_github_dependency(build)
@@ -28,7 +29,8 @@ endfunction
 function is_build_dependency(repository, build)
     define my.repository = is_build_dependency.repository
     define my.build = is_build_dependency.build
-    return !is_matching_repository_name(my.repository, my.build) & is_github_dependency(my.build) & !is_nugetable(my.build)
+    return !is_matching_repository_name(my.repository, my.build) & \
+        is_github_dependency(my.build) & !is_nugetable(my.build)
 endfunction
 
 ###############################################################################
