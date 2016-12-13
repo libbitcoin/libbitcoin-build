@@ -149,6 +149,9 @@ environment:
 matrix:
   fast_finish: true
 
+init:
+  - git config --global core.autocrlf true
+
 before_build:
 .   emit_ctp_installation()
 
