@@ -254,7 +254,6 @@ matrix:
 .endtemplate
 .template 1
 .macro generate_travis_yml()
-.terminator="\n"
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
 .   create_directory(_repository.name)

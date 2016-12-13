@@ -113,7 +113,6 @@ endfunction
 # Generation
 ###############################################################################
 function generate_include()
-    terminator="\n"
     for generate.repository by name as _repository
         define my.primary = bitcoin_to_include(_repository.name)
         define my.absolute = "$(global.root)/$(_repository.name)"

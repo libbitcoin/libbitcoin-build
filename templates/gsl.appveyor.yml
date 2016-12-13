@@ -125,7 +125,6 @@ endfunction
 .endtemplate
 .template 1
 .macro generate_appveyor_yml()
-.terminator="\n"
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
 .   create_directory(_repository.name)
@@ -148,6 +147,9 @@ environment:
 
 matrix:
   fast_finish: true
+
+init:
+  - git config --global core.autocrlf true
 
 before_build:
 .   emit_ctp_installation()

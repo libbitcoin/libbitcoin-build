@@ -162,7 +162,6 @@ function execute_cmd(\$command) {
 .endtemplate
 .template 1
 .macro generate_build_ps1()
-.terminator="\r\n"
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
 .   create_directory(_repository.name)
