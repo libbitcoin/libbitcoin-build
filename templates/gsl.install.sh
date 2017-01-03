@@ -71,7 +71,7 @@ function get_zlib_file(install)
         trace1("get_zlib_file:get_archive_version() = []")
         return
     endif
-    return "zlib-$(my.version).tar.xz"
+    return "v$(my.version).tar.gz"
 endfunction
 
 function get_zlib_url(install)
@@ -87,7 +87,7 @@ function get_zlib_url(install)
         trace1("get_zlib_url:get_zlib_file() = []")
         return
     endif
-    define my.base_url = "http\://zlib.net"
+    define my.base_url = "https\://github.com/madler/zlib/archive"
     define my.url = "$(my.base_url)/$(my.archive)"
     trace1("get_zlib_url = $(my.url)")
     return my.url
@@ -899,7 +899,7 @@ build_from_travis()
 .endmacro # build_icu
 .
 .macro build_from_tarball_zlib()
-    build_from_tarball $ZLIB_URL $ZLIB_ARCHIVE xz . $PARALLEL "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
+    build_from_tarball $ZLIB_URL $ZLIB_ARCHIVE gzip . $PARALLEL "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
 .endmacro # build_zlib
 .
 .macro build_from_tarball_png()
