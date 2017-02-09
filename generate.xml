@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2014-2016 libbitcoin developers (see COPYING). -->
 <generate script="generate.gsl" language="en-us" >
 
-  <repository name="libbitcoin" version="3.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin" >
       <flag value="@icu@" />
@@ -246,7 +246,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-blockchain" version="3.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-blockchain" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Library" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
@@ -260,8 +260,8 @@
 
       <dependency name="boost" version="1.57.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin-database" version="3.0.0" />
-      <dependency name="bitcoin-consensus" version="2.0.0" option="consensus" />
+      <dependency name="bitcoin-database" version="4.0.0" />
+      <dependency name="bitcoin-consensus" version="4.0.0" option="consensus" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -340,7 +340,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -407,7 +407,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-client" version="3.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-client" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-client" description="Bitcoin Client Query Library" url="https://github.com/libbitcoin/libbitcoin-client" />
 
@@ -420,8 +420,8 @@
 
       <dependency name="boost" version="1.57.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin" version="3.0.0" />
-      <dependency name="bitcoin-protocol" version="3.0.0" />
+      <dependency name="bitcoin" version="4.0.0" />
+      <dependency name="bitcoin-protocol" version="4.0.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -573,9 +573,9 @@
 
   </repository>
 
-  <repository name="libbitcoin-consensus" version="2.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-consensus" version="4.0.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-consensus" description="Libbitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" />
+    <package library="bitcoin-consensus" description="Bitcoin Consensus Library (optional)" url="https://github.com/libbitcoin/libbitcoin-consensus" />
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
@@ -632,7 +632,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
@@ -704,7 +703,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -771,7 +770,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-database" version="3.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-database" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-database" description="Bitcoin High Performance Blockchain Database" url="https://github.com/libbitcoin/libbitcoin-database" />
 
@@ -784,7 +783,7 @@
 
       <dependency name="boost" version="1.57.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin" version="3.0.0" />
+      <dependency name="bitcoin" version="4.0.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -991,7 +990,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-explorer" version="3.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-explorer" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
 
@@ -1006,8 +1005,8 @@
       <dependency name="boost" version="1.57.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-client" version="3.0.0" />
-      <dependency name="bitcoin-network" version="3.0.0" />
+      <dependency name="bitcoin-client" version="4.0.0" />
+      <dependency name="bitcoin-network" version="4.0.0" />
       <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
 
@@ -1233,7 +1232,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-network" version="3.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-network" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" />
 
@@ -1245,7 +1244,7 @@
 
       <dependency name="boost" version="1.57.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin" version="3.0.0" />
+      <dependency name="bitcoin" version="4.0.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1373,7 +1372,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-node" version="3.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-node" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
@@ -1388,8 +1387,8 @@
       <dependency name="boost" version="1.57.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-blockchain" version="3.0.0" />
-	  <dependency name="bitcoin-network" version="3.0.0" />
+      <dependency name="bitcoin-blockchain" version="4.0.0" />
+      <dependency name="bitcoin-network" version="4.0.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1475,7 +1474,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1559,7 +1558,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-protocol" version="3.0.0" email="mienkphi@gmail.com" >
+  <repository name="libbitcoin-protocol" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
 
@@ -1574,7 +1573,7 @@
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.2.0" />
       <!--<dependency name="protobuf" version="2.6.0" unprefixed="true" /> -->
-      <dependency name="bitcoin" version="3.0.0" />
+      <dependency name="bitcoin" version="4.0.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1719,9 +1718,8 @@
 
   </repository>
 
-  <repository name="libbitcoin-server" version="3.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-server" version="4.0.0" email="eric@voskuil.org" >
 
-    <!-- TODO: There is no library produced, but we get an error if we don't emit the reference. -->
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
 
     <configure>
@@ -1736,8 +1734,8 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
-      <dependency name="bitcoin-node" version="3.0.0" />
-      <dependency name="bitcoin-protocol" version="3.0.0" />
+      <dependency name="bitcoin-node" version="4.0.0" />
+      <dependency name="bitcoin-protocol" version="4.0.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1831,7 +1829,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
