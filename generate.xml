@@ -165,7 +165,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
         <!--<option value="--disable-silent-rules" />-->
@@ -261,7 +261,7 @@
       <dependency name="boost" version="1.57.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-database" version="3.0.0" />
-      <dependency name="bitcoin-consensus" version="2.0.0" option="consensus" />
+      <dependency name="bitcoin-consensus" version="3.0.0" option="consensus" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -334,24 +334,24 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -497,28 +497,23 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
-      <!-- version4
-      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
-        <option value="--enable-silent-rules" />
-      </build>
-      -->
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -573,9 +568,9 @@
 
   </repository>
 
-  <repository name="libbitcoin-consensus" version="2.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-consensus" version="3.0.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-consensus" description="Libbitcoin Consensus Library" url="https://github.com/libbitcoin/libbitcoin-consensus" />
+    <package library="bitcoin-consensus" description="Bitcoin Consensus Library (optional)" url="https://github.com/libbitcoin/libbitcoin-consensus" />
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
@@ -632,7 +627,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
@@ -704,7 +698,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -931,13 +925,13 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="verion3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="verion3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1127,30 +1121,30 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="verion3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="verion3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="verion3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="verion3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="master" parallel="true" >
+      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="verion3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1311,13 +1305,13 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="verion3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="verion3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1469,35 +1463,35 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="verion3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version3" parallel="true" >
+        <option value="--without-tests" />
+        <option value="--without-tools" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1559,7 +1553,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-protocol" version="3.0.0" email="mienkphi@gmail.com" >
+  <repository name="libbitcoin-protocol" version="3.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
 
@@ -1573,7 +1567,6 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.2.0" />
-      <!--<dependency name="protobuf" version="2.6.0" unprefixed="true" /> -->
       <dependency name="bitcoin" version="3.0.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1586,14 +1579,7 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      
-      <!-- protobuf -->
-      <!--
-      <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
-      <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers, static." context="c++" />
-      <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." context="c++" />
-      -->
-      
+
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
@@ -1648,22 +1634,17 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
-      <!-- version4
-      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
-        <option value="--enable-silent-rules" />
-      </build>
-      -->
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1721,7 +1702,6 @@
 
   <repository name="libbitcoin-server" version="3.0.0" email="eric@voskuil.org" >
 
-    <!-- TODO: There is no library produced, but we get an error if we don't emit the reference. -->
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
 
     <configure>
@@ -1816,56 +1796,51 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
-      <!-- version4
-      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
-        <option value="--enable-silent-rules" />
-      </build>
-      -->
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
+      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version2" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version3" parallel="true" >
+        <option value="--without-tests" />
+        <option value="--without-tools" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-console" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="master" parallel="true" >
+      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
