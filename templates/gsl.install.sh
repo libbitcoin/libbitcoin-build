@@ -118,7 +118,7 @@ function get_png_url(install)
         trace1("get_png_url:get_png_file() = []")
         return
     endif
-    define my.base_url = "http://downloads.sourceforge.net/project/libpng/libpng16"
+    define my.base_url = "http://downloads.sourceforge.net/project/libpng/libpng16/older-releases"
     define my.url = "$(my.base_url)/$(my.version)/$(my.archive)"
     trace1("get_png_url = $(my.url)")
     return my.url
