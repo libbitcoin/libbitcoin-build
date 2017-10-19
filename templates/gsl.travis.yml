@@ -192,7 +192,7 @@ matrix:
 .macro update_environment(matrix)
 .   define my.matrix = update_environment.matrix
     # Update homebrew.
-    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew update; fi
+    - if [[ $OSX   && $CLANG             ]]; then brew update; fi
 
 .endmacro #update_environment
 .
