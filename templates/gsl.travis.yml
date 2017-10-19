@@ -189,6 +189,13 @@ matrix:
 
 .endmacro #set_aliases
 .
+.macro update_environment(matrix)
+.   define my.matrix = update_environment.matrix
+    # Update homebrew.
+    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew update; fi
+
+.endmacro #update_environment
+.
 .# The --build-dir install.sh option is not supported by this code coverage tool.
 .macro code_coverage(repository)
 .   define my.repository = code_coverage.repository
@@ -273,6 +280,7 @@ language:
 before_install:
 
 .   set_aliases(my.matrix)
+.   update_environment(my.matrix)
 install:
 
 .   install_packages(my.matrix)
