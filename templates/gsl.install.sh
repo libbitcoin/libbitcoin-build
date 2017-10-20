@@ -8,7 +8,7 @@
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
 # Functions
-###############################################################################  
+###############################################################################
 
 # General repository query functions.
 
@@ -310,13 +310,13 @@ set -e
 SEQUENTIAL=1
 OS=`uname -s`
 if [[ $PARALLEL ]]; then
-    echo "Using shell-defined PARALLEL value."
+    display_message "Using shell-defined PARALLEL value."
 elif [[ $OS == Linux ]]; then
     PARALLEL=`nproc`
 elif [[ ($OS == Darwin) || ($OS == OpenBSD) ]]; then
     PARALLEL=`sysctl -n hw.ncpu`
 else
-    echo "Unsupported system: $OS"
+    display_error "Unsupported system: $OS"
     exit 1
 fi
 
@@ -404,32 +404,32 @@ if [[ $BUILD_BOOST ]]; then
 fi
 
 .   heading2("Echo generated values.")
-echo "Libbitcoin installer configuration."
-echo "--------------------------------------------------------------------"
-echo "OS                    : $OS"
-echo "PARALLEL              : $PARALLEL"
-echo "CC                    : $CC"
-echo "CXX                   : $CXX"
-echo "CPPFLAGS              : $CPPFLAGS"
-echo "CFLAGS                : $CFLAGS"
-echo "CXXFLAGS              : $CXXFLAGS"
-echo "LDFLAGS               : $LDFLAGS"
-echo "LDLIBS                : $LDLIBS"
-echo "WITH_ICU              : $WITH_ICU"
-echo "WITH_PNG              : $WITH_PNG"
-echo "WITH_QRENCODE         : $WITH_QRENCODE"
-echo "BUILD_ICU             : $BUILD_ICU"
-echo "BUILD_ZLIB            : $BUILD_ZLIB"
-echo "BUILD_PNG             : $BUILD_PNG"
-echo "BUILD_QRENCODE        : $BUILD_QRENCODE"
-echo "BUILD_BOOST           : $BUILD_BOOST"
-echo "PREFIX                : $PREFIX"
-echo "BUILD_DIR             : $BUILD_DIR"
-echo "DISABLE_SHARED        : $DISABLE_SHARED"
-echo "DISABLE_STATIC        : $DISABLE_STATIC"
-echo "with_boost            : ${with_boost}"
-echo "with_pkgconfigdir     : ${with_pkgconfigdir}"
-echo "--------------------------------------------------------------------"
+display_message "Libbitcoin installer configuration."
+display_message "--------------------------------------------------------------------"
+display_message "OS                    : $OS"
+display_message "PARALLEL              : $PARALLEL"
+display_message "CC                    : $CC"
+display_message "CXX                   : $CXX"
+display_message "CPPFLAGS              : $CPPFLAGS"
+display_message "CFLAGS                : $CFLAGS"
+display_message "CXXFLAGS              : $CXXFLAGS"
+display_message "LDFLAGS               : $LDFLAGS"
+display_message "LDLIBS                : $LDLIBS"
+display_message "WITH_ICU              : $WITH_ICU"
+display_message "WITH_PNG              : $WITH_PNG"
+display_message "WITH_QRENCODE         : $WITH_QRENCODE"
+display_message "BUILD_ICU             : $BUILD_ICU"
+display_message "BUILD_ZLIB            : $BUILD_ZLIB"
+display_message "BUILD_PNG             : $BUILD_PNG"
+display_message "BUILD_QRENCODE        : $BUILD_QRENCODE"
+display_message "BUILD_BOOST           : $BUILD_BOOST"
+display_message "PREFIX                : $PREFIX"
+display_message "BUILD_DIR             : $BUILD_DIR"
+display_message "DISABLE_SHARED        : $DISABLE_SHARED"
+display_message "DISABLE_STATIC        : $DISABLE_STATIC"
+display_message "with_boost            : ${with_boost}"
+display_message "with_pkgconfigdir     : ${with_pkgconfigdir}"
+display_message "--------------------------------------------------------------------"
 
 .endmacro # define_initialize
 .
@@ -447,10 +447,10 @@ $(my.build.name:upper,c)_OPTIONS=(
 .
 configure_options()
 {
-    echo "configure options:"
+    display_message "configure options:"
     for OPTION in "$@"; do
         if [[ $OPTION ]]; then
-            echo $OPTION
+            display_message $OPTION
         fi
     done
 
@@ -473,13 +473,25 @@ create_directory()
     mkdir "$DIRECTORY"
 }
 
-display_message()
+display_heading_message()
 {
     local MESSAGE="$1"
 
     echo
     echo "********************** $MESSAGE **********************"
     echo
+}
+
+display_message()
+{
+    local MESSAGE="$1"
+    echo "$MESSAGE"
+}
+
+display_error()
+{
+    local MESSAGE="$1"
+    >&2 echo "$MESSAGE"
 }
 
 initialize_git()
@@ -586,7 +598,7 @@ patch_zlib_configuration()
     sed -i.tmp "/unknown option/d" configure
     sed -i.tmp "/help for help/d" configure
 
-    # echo "Hack: ZLIB configuration options modified."
+    # display_message "Hack: ZLIB configuration options modified."
 }
 
 # Because ZLIB can't build shared only.
@@ -630,7 +642,7 @@ build_from_tarball()
         export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
     fi
 
-    display_message "Download $ARCHIVE"
+    display_heading_message "Download $ARCHIVE"
 
     # Use the suffixed archive name as the extraction directory.
     local EXTRACT="build-$ARCHIVE"
@@ -682,10 +694,10 @@ circumvent_boost_icu_detection()
     local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
     local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
 
-    echo $SUCCESS > $REGEX_TEST
-    echo $SUCCESS > $LOCALE_TEST
+    display_message $SUCCESS > $REGEX_TEST
+    display_message $SUCCESS > $LOCALE_TEST
 
-    # echo "Hack: ICU detection modified, will always indicate found."
+    # display_message "Hack: ICU detection modified, will always indicate found."
 }
 
 # Because boost doesn't support autoconfig and doesn't like empty settings.
@@ -750,7 +762,7 @@ build_from_tarball_boost()
         return
     fi
 
-    display_message "Download $ARCHIVE"
+    display_heading_message "Download $ARCHIVE"
 
     # Use the suffixed archive name as the extraction directory.
     local EXTRACT="build-$ARCHIVE"
@@ -765,28 +777,28 @@ build_from_tarball_boost()
     initialize_boost_configuration
     initialize_boost_icu_configuration
 
-    echo "Libbitcoin boost configuration."
-    echo "--------------------------------------------------------------------"
-    echo "variant               : release"
-    echo "threading             : multi"
-    echo "toolset               : $CC"
-    echo "cxxflags              : $STDLIB_FLAG"
-    echo "linkflags             : $STDLIB_FLAG"
-    echo "link                  : $BOOST_LINK"
-    echo "boost.locale.iconv    : $BOOST_ICU_ICONV"
-    echo "boost.locale.posix    : $BOOST_ICU_POSIX"
-    echo "-sNO_BZIP2            : 1" 
-    echo "-sICU_PATH            : $ICU_PREFIX"
-    echo "-sICU_LINK            : ${ICU_LIBS[@]}"
-    echo "-sZLIB_LIBPATH        : $PREFIX/lib"
-    echo "-sZLIB_INCLUDE        : $PREFIX/include"
-    echo "-j                    : $JOBS"
-    echo "-d0                   : [supress informational messages]"
-    echo "-q                    : [stop at the first error]"
-    echo "--reconfigure         : [ignore cached configuration]"
-    echo "--prefix              : $PREFIX"
-    echo "BOOST_OPTIONS         : $@"
-    echo "--------------------------------------------------------------------"
+    display_message "Libbitcoin boost configuration."
+    display_message "--------------------------------------------------------------------"
+    display_message "variant               : release"
+    display_message "threading             : multi"
+    display_message "toolset               : $CC"
+    display_message "cxxflags              : $STDLIB_FLAG"
+    display_message "linkflags             : $STDLIB_FLAG"
+    display_message "link                  : $BOOST_LINK"
+    display_message "boost.locale.iconv    : $BOOST_ICU_ICONV"
+    display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
+    display_message "-sNO_BZIP2            : 1"
+    display_message "-sICU_PATH            : $ICU_PREFIX"
+    display_message "-sICU_LINK            : ${ICU_LIBS[@]}"
+    display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
+    display_message "-sZLIB_INCLUDE        : $PREFIX/include"
+    display_message "-j                    : $JOBS"
+    display_message "-d0                   : [supress informational messages]"
+    display_message "-q                    : [stop at the first error]"
+    display_message "--reconfigure         : [ignore cached configuration]"
+    display_message "--prefix              : $PREFIX"
+    display_message "BOOST_OPTIONS         : $@"
+    display_message "--------------------------------------------------------------------"
 
     # boost_iostreams
     # The zlib options prevent boost linkage to system libs in the case where
@@ -836,7 +848,7 @@ build_from_github()
     shift 5
 
     FORK="$ACCOUNT/$REPO"
-    display_message "Download $FORK/$BRANCH"
+    display_heading_message "Download $FORK/$BRANCH"
 
     # Clone the repository locally.
     git clone --depth 1 --branch $BRANCH --single-branch "https://github.com/$FORK"
@@ -859,7 +871,7 @@ build_from_local()
     local OPTIONS=$3
     shift 3
 
-    display_message "$MESSAGE"
+    display_heading_message "$MESSAGE"
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
@@ -958,7 +970,7 @@ build_all()
 .           endif
 .
 .       endif
-.   endfor _build    
+.   endfor _build
 }
 
 .endmacro # define_build_all
@@ -983,12 +995,12 @@ for generate.repository by name as _repository
     define my.out_file = "$(_repository.name)/install.sh"
     notify(my.out_file)
     output(my.out_file)
-    
+
     shebang("bash")
     define my.install = _repository->install
     copyleft(_repository.name)
     install_documentation(_repository)
-    
+
     heading1("Define constants.")
     define_build_directory(_repository)
     define_icu(my.install)
@@ -996,27 +1008,27 @@ for generate.repository by name as _repository
     define_png(my.install)
     define_qrencode(my.install)
     define_boost(my.install)
-    
+
+    heading1("Define utility functions.")
+    define_utility_functions()
+
     heading1("Initialize the build environment.")
     define_initialize()
-    
+
     heading1("Define build options.")
     for my.install.build as _build where count(_build.option) > 0
          define_build_options(_build)
     endfor _build
 
-    heading1("Define utility functions.")
-    define_utility_functions()
-    
     heading1("Define build functions.")
     define_build_functions()
-        
+
     heading1("The master build function.")
     define_build_all(my.install)
 
     heading1("Build the primary library and all dependencies.")
     define_invoke()
-    
+
     close
 endfor _repository
 endfunction # generate_installer
