@@ -217,7 +217,7 @@ endfunction
 function get_flags_variable(flag)
     define my.flag = get_flags_variable.flag
     if (is_cpp_flag(my.flag))
-        return "CPPFLAGS"    
+        return "CPPFLAGS"
     elsif (is_ccc_flag(my.flag))
         return "CFLAGS"
     elsif (is_cxx_flag(my.flag))
@@ -637,6 +637,7 @@ $(my.text ? "")
 .endmacro
 .
 .macro global.copyleft(name)
+.    define my.name = copyleft.name
 ###############################################################################
 #  Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
 #
@@ -646,6 +647,7 @@ $(my.text ? "")
 .endmacro
 .
 .macro global.c_copyleft(name)
+.    define my.name = c_copyleft.name
 ///////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
 //
@@ -655,6 +657,7 @@ $(my.text ? "")
 .endmacro
 .
 .macro global.bat_copyleft(name)
+.    define my.name = bat_copyleft.name
 REM ###########################################################################
 REM #  Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
 REM #
