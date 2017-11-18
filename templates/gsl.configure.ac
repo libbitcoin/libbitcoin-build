@@ -425,7 +425,7 @@ AC_SUBST([pthread_LIBS], [-lpthread])
 AS_CASE([${host_os}], [$(my.system_pattern)],
     [AC_CHECK_LIB([$(my.cname)], [$(my.dependency.function)],
         [AC_SUBST([$(my.cname)_LIBS], [-l$(my.cname)])
-         AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])], 
+         AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
         [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])],
     [AC_SUBST([$(my.cname)_LIBS], [])])
 .   endif
@@ -601,7 +601,7 @@ for generate.repository by name as _repository
 
     copyleft(_repository.name)
     define my.configure = _repository->configure
-    
+
     heading1("Standard declarations.")
     initialize_configure(_repository)
     require_stdcxx11(_repository)
@@ -612,14 +612,14 @@ for generate.repository by name as _repository
             render_option(_option)
         endfor
     endif
-    
+
     if (defined(my.configure->define))
         heading1("Set preprocessor defines.")
         for my.configure.define as _define
             render_define_item(_define)
         endfor
     endif
-    
+
     if (defined(my.configure->dependency))
         heading1("Check dependencies.")
         for my.configure.dependency as _dependency
@@ -649,16 +649,15 @@ for generate.repository by name as _repository
             render_flag(_flag)
         endfor
     endif
-    
+
     heading1("Process outputs into templates.")
     define my.packages = get_package_files(_repository)
     define my.templates = format_template_files(my.configure)
     compile("Makefile$(my.packages)$(my.templates)")
-    
+
     close
 endfor _repository
 endfunction # generate_configure
-.endtemplate
 ###############################################################################
 # NOTES on: -all-static
 # Always choose static libraries where possible, and try to create a completely
@@ -668,3 +667,21 @@ endfunction # generate_configure
 # AX_CHECK_LINK_FLAG([[-static]],[LIBTOOL_APP_LDFLAGS="$LIBTOOL_APP_LDFLAGS -all-static"])
 # AC_SUBST(LIBTOOL_APP_LDFLAGS)
 ###############################################################################
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_configure()
+
+.endtemplate

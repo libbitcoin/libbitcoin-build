@@ -341,7 +341,7 @@ function define_cpp_lib_variables(variables, library, make, configure)
         if (0)
             my.variables.ccc_flags += " ${$(my.cname)_CFLAGS}"
         endif
-        if (0)        
+        if (0)
             my.variables.cxx_flags += " ${$(my.cname)_CXXFLAGS}"
         endif
     endif
@@ -643,8 +643,8 @@ function render_make_targets(targets)
     endfor
 endfunction
 
-# For each non-test product that is not a test, accumulate the product's 
-# option (name) and path (value) in the targets table. 
+# For each non-test product that is not a test, accumulate the product's
+# option (name) and path (value) in the targets table.
 function define_make_targets(make, targets)
     define my.make = define_make_targets.make
     define my.targets = define_make_targets.targets
@@ -771,4 +771,20 @@ for generate.repository as _repository by _repository.name\
 endfor _repository
 endfunction # generate_automake
 .endtemplate
+.template 0
 ###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_automake()
+
+.endtemplate

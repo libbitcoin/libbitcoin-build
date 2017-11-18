@@ -153,7 +153,7 @@ function generate_filter()
                   output(my.out_file)
 
                   c_copyleft(_repository.name)
-                  
+
                   render_project("","")
 
                 close
@@ -162,4 +162,20 @@ function generate_filter()
     endfor _repository
 endfunction # generate_filter
 .endtemplate
+.template 0
 ###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_filter()
+
+.endtemplate

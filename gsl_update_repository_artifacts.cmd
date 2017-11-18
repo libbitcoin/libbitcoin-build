@@ -32,7 +32,7 @@ rmdir /s /q $(_repo.name) 2>NUL
 
 REM Generate build artifacts.
 .   for buildgen->templates.template as _template
-gsl -q -script:wrappers\\wrapped_$(_template.name).gsl generate.xml
+gsl -q -script:templates\\$(_template.name) generate.xml
 if %errorlevel% neq 0 goto error
 
 .   endfor
