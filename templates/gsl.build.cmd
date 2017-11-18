@@ -184,5 +184,22 @@ SET msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3
 .
 .   close
 .endfor _repository
-.endmacro # generate_appveyoryml
+.endmacro # generate_build_cmd
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_build_cmd()
+
 .endtemplate

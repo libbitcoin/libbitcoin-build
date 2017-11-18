@@ -11,7 +11,6 @@
 # Exit this script on the first build error.
 set -e
 
-gsl -q -script:template_wrapper.gsl buildgen.xml
 gsl -q -script:gsl_update_repository_artifacts.cmd buildgen.xml
 gsl -q -script:gsl_update_repository_artifacts.sh buildgen.xml
 

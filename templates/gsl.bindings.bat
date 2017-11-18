@@ -52,7 +52,7 @@ for generate.repository by name as _repository
     define my.out_file = "$(_repository.name)/bindings.bat"
     notify(my.out_file)
     output(my.out_file)
-    
+
     batch_no_echo()
     bat_copyleft(_repository.name)
     define my.interface = bitcoin_to_include(_repository.name)
@@ -62,4 +62,20 @@ for generate.repository by name as _repository
 endfor _repository
 endfunction # generate_bindings_bat
 .endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
 
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_bindings_bat()
+
+.endtemplate

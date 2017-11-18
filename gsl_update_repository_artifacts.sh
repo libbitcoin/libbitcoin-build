@@ -49,7 +49,7 @@ generate_artifacts()
 {
     for gen in "\${generator[@]}"
     do
-        eval gsl -q "-script:wrappers/wrapped_\$gen.gsl" generate.xml
+        eval gsl -q -script:templates/\$gen generate.xml
     done
 }
 
