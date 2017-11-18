@@ -116,9 +116,63 @@ function is_system_osx(job)
     return defined(my.job) & my.job.system = "osx"
 endfunction
 
+function is_compiler_clang(job)
+    define my.job = is_compiler_clang.job
+    return defined(my.job) & my.job.compiler = "clang"
+endfunction
+
+function is_compiler_gcc(job)
+    define my.job = is_compiler_gcc.job
+    return defined(my.job) & my.job.compiler = "gcc"
+endfunction
+
 function is_travis_job(job)
     define my.job = is_travis_job.job
     return is_system_linux(my.job) | is_system_osx(my.job)
+endfunction
+
+function is_versioned_compiler(job)
+    define my.job = is_versioned_compiler.job
+    return !defined(my.job) | !((my.job.version = "latest") |\
+        (my.job.version = ""))
+endfunction
+
+function get_compiler_version(job)
+    define my.job = get_compiler_version.job
+    return (defined(my.job) & defined(my.job.version)) ?? "$(my.job.version)" ? ""
+endfunction
+
+function cc_flags(job)
+    define my.job = cc_flags.job
+    define version = get_compiler_version(my.job)
+    if (is_empty(version) | (version = "latest"))
+        return "$(my.job.compiler)"
+    endif
+    return "$(my.job.compiler)-$(version)"
+endfunction
+
+function compiler_package_name(job)
+    define my.job = compiler_package_name.job
+    return is_compiler_gcc(my.job) ?? "g++" ?\
+        "$(my.job.compiler)"
+endfunction
+
+function cxx_compiler_name(job)
+    define my.job = cxx_compiler_name.job
+    return is_compiler_gcc(my.job) ?? "g++" ?\
+        "$(my.job.compiler)++"
+endfunction
+
+function cxx_flags(job)
+    define my.job = cxx_flags.job
+    define version = get_compiler_version(my.job)
+    define mapped_compiler = cxx_compiler_name(my.job)
+
+    if (is_empty(version) | (version = "latest"))
+        return "$(mapped_compiler)"
+    endif
+
+    return "$(mapped_compiler)-$(version)"
 endfunction
 
 ###############################################################################
@@ -129,23 +183,24 @@ endfunction
 .
 .macro initialize_job(job)
 .   define my.job = initialize_job.job
-.   define my.is_clang = (my.job.compiler = "clang")
+.   define has_addons = (my.job.system = "linux") &\
+        ((is_versioned_compiler(my.job) | is_coverage_job(my.job) |\
+        count(my.job.get) > 0) | (is_compiler_clang(my.job) &\
+        is_versioned_compiler(my.job)))
         - os: $(my.job.system)
           compiler: $(my.job.compiler)
           env: LINK=$(my.job.link)
-.   if (my.job.system = "linux")
-.       if ((my.is_clang | is_coverage_job(my.job) | count(my.job.get) > 0))
+.   if (has_addons)
           addons:
             apt:
-.           if (my.is_clang)
+.       if (is_compiler_clang(my.job) & is_versioned_compiler(my.job))
               sources:
                 - sourceline: 'ppa:h-rayflood/llvm'
-.           endif
-.           if (my.is_clang | is_coverage_job(my.job) | count(my.job.get) > 0)
+.       endif
+.       if (is_versioned_compiler(my.job) | is_coverage_job(my.job) | count(my.job.get) > 0)
               packages:
-.           endif
-.           if (my.is_clang)
-                - clang-3.4
+.           if (is_versioned_compiler(my.job))
+                - $(compiler_package_name(my.job))-$(my.job.version)
 .           endif
 .           if (is_coverage_job(my.job))
                 - lcov
@@ -164,8 +219,6 @@ addons:
         sources:
             - boost-latest
             - ubuntu-toolchain-r-test
-        packages:
-            - g++-4.8
 
 matrix:
     include:
@@ -229,11 +282,12 @@ matrix:
 .
 .macro install_packages(matrix)
 .   define my.matrix = install_packages.matrix
-    # Export CC/CXX to control gcc version.
-    - if [[ $GCC                         ]]; then export CC=gcc-4.8; export CXX=g++-4.8; fi
-
-    # Export CC/CXX to control clang version.
-    - if [[ $CLANG                       ]]; then export CC=clang-3.4; export CXX=clang++-3.4; fi
+    # Export CC/CXX to control compiler/version.
+.   for my.matrix.job as _job where is_travis_job(_job)
+.       define cc = cc_flags(_job)
+.       define cxx = cxx_flags(_job)
+    - $(condition(job_predicate(_job))) export CC=$(cc); export CXX=$(cxx); fi
+.   endfor _job
 
     # Download and install packages.
 .   for my.matrix.job as _job where is_travis_job(_job) & count(_job.get) > 0
