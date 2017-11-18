@@ -173,7 +173,7 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" version="latest" >
+      <job system="osx" compiler="clang" link="static" >
         <option value="--with-icu" />
         <option value="--with-png" />
         <option value="--with-qrencode" />
@@ -199,7 +199,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" version="latest" coverage="true" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
         <option value="--with-icu" />
         <option value="--with-png" />
@@ -215,11 +215,11 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" version="latest" >
+      <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" version="latest" sudo="false" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--with-icu" />
         <option value="--build-icu" />
         <!-- This version isn't available in the repository. -->
@@ -358,7 +358,7 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" version="latest" >
+      <job system="osx" compiler="clang" link="static" >
         <option value="--without-consensus" />
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
@@ -372,7 +372,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" version="latest" coverage="true" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
@@ -380,11 +380,11 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" version="latest" >
+      <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" version="latest" sudo="false" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
@@ -526,7 +526,7 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" version="latest" >
+      <job system="osx" compiler="clang" link="static" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -538,7 +538,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" version="latest" coverage="true" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
@@ -546,11 +546,11 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" version="latest" >
+      <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" version="latest" sudo="false" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
@@ -712,7 +712,7 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" version="latest" >
+      <job system="osx" compiler="clang" link="static" >
         <get name="swig" />
         <option value="--with-java" />
         <option value="--disable-shared" />
@@ -728,7 +728,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" version="latest" coverage="true" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <exclude path="clone/*" />
         <get name="swig" />
         <option value="--with-java" />
@@ -739,13 +739,13 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" version="latest" >
+      <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="swig" />
         <option value="--disable-static" />
         <option value="--with-python" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" version="latest" sudo="false" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
@@ -871,7 +871,7 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" version="latest" >
+      <job system="osx" compiler="clang" link="static" >
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
@@ -884,7 +884,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" version="latest" coverage="true" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
@@ -892,11 +892,11 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" version="latest" >
+      <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" version="latest" sudo="false" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
@@ -1085,7 +1085,7 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" version="latest" >
+      <job system="osx" compiler="clang" link="static" >
         <option value="--with-icu" />
         <option value="--with-png" />
         <option value="--with-qrencode" />
@@ -1107,7 +1107,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" version="latest" coverage="true" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
         <option value="--with-png" />
         <option value="--with-qrencode" />
@@ -1121,13 +1121,13 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" version="latest" >
+      <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
         <option value="--with-bash-completiondir" />
         <option value="--disable-static" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" version="latest" sudo="false" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--with-png" />
         <option value="--with-qrencode" />
         <option value="--build-png" />
@@ -1253,7 +1253,7 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" version="latest" >
+      <job system="osx" compiler="clang" link="static" >
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
@@ -1266,7 +1266,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" version="latest" coverage="true" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
@@ -1274,11 +1274,11 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" version="latest" >
+      <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" version="latest" sudo="false" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
@@ -1434,7 +1434,7 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" version="latest" >
+      <job system="osx" compiler="clang" link="static" >
         <option value="--without-consensus" />
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
@@ -1448,7 +1448,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" version="latest" coverage="true" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
@@ -1458,13 +1458,13 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" version="latest" >
+      <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
         <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" version="latest" sudo="false" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
@@ -1601,7 +1601,7 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" version="latest" >
+      <job system="osx" compiler="clang" link="static" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1613,7 +1613,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" version="latest" coverage="true" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <exclude path="interface.pb.*" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
@@ -1622,11 +1622,11 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" version="latest" >
+      <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" version="latest" sudo="false" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
@@ -1803,7 +1803,7 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" version="latest" >
+      <job system="osx" compiler="clang" link="static" >
         <option value="--without-consensus" />
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
@@ -1817,7 +1817,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" version="latest" coverage="true" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
@@ -1827,13 +1827,13 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" version="latest" >
+      <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
         <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
       </job>
-      <job system="linux" compiler="clang" link="dynamic" version="latest" sudo="false" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />

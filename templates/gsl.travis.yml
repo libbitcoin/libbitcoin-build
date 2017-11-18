@@ -133,13 +133,12 @@ endfunction
 
 function is_versioned_compiler(job)
     define my.job = is_versioned_compiler.job
-    return !defined(my.job) | !((my.job.version = "latest") |\
-        (my.job.version = ""))
+    return defined(my.job) & defined(my.job.version)
 endfunction
 
 function get_compiler_version(job)
     define my.job = get_compiler_version.job
-    return (defined(my.job) & defined(my.job.version)) ?? "$(my.job.version)" ? ""
+    return is_versioned_compiler(my.job) ?? "$(my.job.version)" ? ""
 endfunction
 
 function cc_flags(job)
@@ -200,7 +199,7 @@ endfunction
 .       if (is_versioned_compiler(my.job) | is_coverage_job(my.job) | count(my.job.get) > 0)
               packages:
 .           if (is_versioned_compiler(my.job))
-                - $(compiler_package_name(my.job))-$(my.job.version)
+                - $(compiler_package_name(my.job))-$(get_compiler_version(my.job))
 .           endif
 .           if (is_coverage_job(my.job))
                 - lcov
