@@ -133,25 +133,27 @@ endfunction
         - os: $(my.job.system)
           compiler: $(my.job.compiler)
           env: LINK=$(my.job.link)
-.   if (my.job.system = "linux") & ((my.is_clang | is_coverage_job(my.job) | count(my.job.get) > 0))
+.   if (my.job.system = "linux")
+.       if ((my.is_clang | is_coverage_job(my.job) | count(my.job.get) > 0))
           addons:
             apt:
-.       if (my.is_clang)
+.           if (my.is_clang)
               sources:
                 - sourceline: 'ppa:h-rayflood/llvm'
-.       endif
+.           endif
 .           if (my.is_clang | is_coverage_job(my.job) | count(my.job.get) > 0)
               packages:
-.       endif
-.       if (my.is_clang)
+.           endif
+.           if (my.is_clang)
                 - clang-3.4
-.       endif
-.       if (is_coverage_job(my.job))
+.           endif
+.           if (is_coverage_job(my.job))
                 - lcov
-.       endif
-.       for my.job.get as _get
+.           endif
+.           for my.job.get as _get
                 - $(_get.name)
-.       endfor _get
+.           endfor _get
+.       endif
 .   endif
 .endmacro #initialize_job
 .
@@ -298,4 +300,21 @@ after_success:
 .   close
 .endfor _repository
 .endmacro # generate_travis_yml
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_travis_yml()
+
 .endtemplate

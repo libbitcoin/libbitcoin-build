@@ -1033,7 +1033,20 @@ for generate.repository by name as _repository
 endfor _repository
 endfunction # generate_installer
 .endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
 
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
 
+generate_installer()
 
-
+.endtemplate

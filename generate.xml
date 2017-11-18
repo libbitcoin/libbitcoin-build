@@ -1,6 +1,6 @@
 <?xml version = "1.0" ?>
 <!-- Copyright (c) 2014-2016 libbitcoin developers (see COPYING). -->
-<generate script="generate.gsl" language="en-us" >
+<generate language="en-us" >
 
   <repository name="libbitcoin" version="4.0.0" email="eric@voskuil.org" >
 
@@ -52,14 +52,14 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      
+
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
       <flag name="Wno-long-long" comment="Allow use of C99 'long long' type." context="c" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
-      
+
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
@@ -217,7 +217,8 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
-      </job> 
+        <option value="--disable-static" />
+      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--with-icu" />
         <option value="--build-icu" />
@@ -381,6 +382,7 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -546,6 +548,7 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -739,6 +742,7 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="swig" />
+        <option value="--disable-static" />
         <option value="--with-python" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
@@ -890,6 +894,7 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -1120,6 +1125,7 @@
         <get name="boost" />
         <get name="bash-completion" />
         <option value="--with-bash-completiondir" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--with-png" />
@@ -1270,6 +1276,7 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -1454,6 +1461,7 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
+        <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
@@ -1509,14 +1517,14 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      
+
       <!-- protobuf -->
       <!--
       <flag name="Wno-unused-parameter" comment="Clean up protobuf headers." />
       <flag name="Wno-sign-compare" compiler="clang" comment="Clean up protobuf headers, static." context="c++" />
       <flag name="Wno-nested-anon-types" compiler="clang" comment="Clean up protobuf headers, static." context="c++" />
       -->
-      
+
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
@@ -1616,6 +1624,7 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -1821,6 +1830,7 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
+        <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >

@@ -58,7 +58,7 @@ function define_library_variables(variables, library, make, configure)
     require(my.library, "library", "name")
     define my.name = my.library.name
     define my.cname = "$(my.name:c)"
-    
+
     define my.product = find_library_product(my.name, my.make)?
     if (defined(my.product))
         if (is_no_install(my.product))
@@ -78,7 +78,7 @@ function define_library_variables(variables, library, make, configure)
             is_python_dependency(my.dependency)
         define my.is_common = is_pthread_dependency(my.dependency) |\
             is_iconv_dependency(my.dependency)
-        
+
         define my.private = is_private_element(my.dependency)\
             ?? "_private" ? ""
 
@@ -107,13 +107,13 @@ function define_package_variables(variables, package, make, configure)
     require(my.package, "package", "library")
     define my.name = my.package.library
     initialize_package_variables(_variables)
-    
+
     # Add explicit package.flag declarations.
     format_cflags(my.variables, my.package)
-    
+
     # Add explicit package.library declarations.
     format_libs(my.variables, my.package)
-    
+
     # Get the lib product that corresponds to the package.
     define my.product = find_library_product(my.name, my.make)?
     if (!defined(my.product))
@@ -123,13 +123,13 @@ function define_package_variables(variables, package, make, configure)
         abort "Packaged library is not installed: $(my.name)"
     endif
     my.variables.libs += " -l$(my.name)"
-    
+
     # Get the dependency libs of the product and their flags.
     for my.product.library as _library
         define_library_variables(my.variables, _library, my.make, my.configure)
     endfor
 endfunction
-        
+
 function write_package_variable(name, value)
     if (!is_empty(my.value))
         write_line("$(my.name):$(my.value)")
@@ -176,10 +176,10 @@ Version: @PACKAGE_VERSION@
 function generate_pkgconfig()
 for generate.repository by name as _repository\
     where defined(_repository->package)
-    
+
     define my.make = _repository->make
     define my.configure = _repository->configure
-    
+
     for _repository.package as _package
         require(_repository, "repository", "name")
         create_directory(_repository.name)
@@ -187,36 +187,53 @@ for generate.repository by name as _repository\
         define my.out_file = "$(_repository.name)/$(my.package_name).pc.in"
         notify(my.out_file)
         output(my.out_file)
-        
+
         copyleft(_repository.name)
-        
+
         heading1("Substitutions")
         initialize_package_substitutions()
-        
+
         heading1("Metadata")
         initialize_package_metadata(_package)
-        
+
         heading1("Variables")
         new variables as _variables
             define_package_variables(_variables, _package, my.make, my.configure)
-            
+
             heading2("Dependencies that publish package configuration.")
             write_public_variable("Requires", _variables.requires)
             write_private_variable("Requires", _variables.requires_private)
             write_line()
-            
+
             heading2("Include directory and any other required compiler flags.")
             write_public_variable("Cflags", _variables.cflags)
             write_line()
-            
+
             heading2("Lib directory, lib and any required that do not publish pkg-config.")
             write_public_variable("Libs", _variables.libs)
             write_private_variable("Libs", _variables.libs_private)
             write_line()
         endnew
-        
+
         close
     endfor _package
 endfor _repository
 endfunction # generate_pkgconfig
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_pkgconfig()
+
 .endtemplate

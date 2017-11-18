@@ -94,7 +94,7 @@ endfunction
 #define LIBBITCOIN_$(my.upper_include)_HPP
 
 /**
- * API Users: Include only this header. Direct use of other headers is fragile 
+ * API Users: Include only this header. Direct use of other headers is fragile
  * and unsupported as header organization is subject to change.
  *
  * Maintainers: Do not include this header internal to this library.
@@ -142,4 +142,20 @@ function generate_include()
     endfor _repository
 endfunction # generate_include
 .endtemplate
+.template 0
 ###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_include()
+
+.endtemplate
