@@ -20,7 +20,9 @@ endfunction
 
 function match_file_element_path_prefix(element, path_prefix)
     define my.element = match_file_element_path_prefix.element
-    return defined(my.element) & (my.element.path_prefix = my.path_prefix)
+    return defined(my.element) &\
+        ((!defined(my.element.path_prefix) & !defined(my.path_prefix)) |\
+        (my.element.path_prefix = my.path_prefix))
 endfunction
 
 function match_file_element_file_name(element, file_name)
@@ -55,7 +57,9 @@ function add_file_element(root, build_path, path_prefix, file_name)
 
         new my.root.element as _element
             _element.build_path = my.build_path
-            _element.path_prefix = my.path_prefix
+            if (!is_empty(my.path_prefix))
+                _element.path_prefix = my.path_prefix
+            endif
             _element.file_name = my.file_name
         endnew
     endif
@@ -112,10 +116,10 @@ function project_file(product, repository_name)
 endfunction
 
 function append_prefix(base, subdir)
-    if (is_empty(base))
-        return "$(my.subdir)_"
+    if (!is_empty(my.base))
+        return "$(my.base)_$(my.subdir)"
     endif
-    return "$(my.base)_$(my.subdir)_"
+    return "$(my.subdir)"
 endfunction
 
 function append_win_path(base, subdir)
@@ -123,30 +127,36 @@ function append_win_path(base, subdir)
 endfunction
 
 function append_path(base, subdir)
-    return "$(my.base)/$(my.subdir)"
+    return "$(my.base)$(my.subdir)"
 endfunction
 
 ###
 ### generic assistance functions
 ###
-function discover_files(file_data, directory, win_path, prefix)
+function discover_files(file_data, directory, win_path, prefix, recurse)
     define my.file_data = discover_files.file_data
     define my.directory = discover_files.directory
 
+#    echo("Listing directory $(my.directory.path)")
     for my.directory.file as _file by _file.name
+#        echo("    $(_file.name)")
         add_file_element(my.file_data, append_win_path(my.win_path,\
             _file.name), my.prefix, _file.name)
     endfor
 
-    for my.directory.directory as _directory by _directory.name
-        define my.subdir_path = append_path(my.directory.path, _directory.name)
-        define my.subdir = open_directory(my.subdir_path)
-        define my.subdir_win_path = append_win_path(my.win_path, _directory.name)
-        define my.subdir_prefix = append_prefix(my.prefix, _directory.name)
+    if (is_true(my.recurse))
+        for my.directory.directory as _directory by _directory.name
+            define my.subdir_path = append_path(my.directory.path,\
+                _directory.name)
+            define my.subdir = open_directory(my.subdir_path)
+            define my.subdir_win_path = append_win_path(my.win_path,\
+                _directory.name)
+            define my.subdir_prefix = append_prefix(my.prefix, _directory.name)
 
-        discover_files(my.file_data, my.subdir, my.subdir_win_path,\
-            my.subdir_prefix)
-    endfor
+            discover_files(my.file_data, my.subdir, my.subdir_win_path,\
+                my.subdir_prefix, my.recurse)
+        endfor
+    endif
 
 endfunction
 
@@ -161,18 +171,34 @@ function populate_collisions(collisions, file_data)
     endfor
 endfunction
 
-function is_compiler_include_type(element)
-    define my.element = is_compiler_include_type.element
-    return ends_with(my.element.file_name, ".cpp") |\
-        ends_with(my.element.file_name, ".c")
+function is_compiled_type(element)
+    define my.element = is_compiled_type.element
+    return matches_filetype(my.element.file_name, "cpp") |\
+        matches_filetype(my.element.file_name, "c")
+endfunction
+
+function is_included_type(element)
+    define my.element = is_included_type.element
+    return matches_filetype(my.element.file_name, "hpp") |\
+        matches_filetype(my.element.file_name, "h")
+endfunction
+
+function is_none_type(element)
+    define my.element = is_none_type.element
+    return matches_filetype(my.element.file_name, "ipp")
+endfunction
+
+function is_resources_type(element)
+    define my.element = is_resources_type.element
+    return matches_filetype(my.element.file_name, "rc")
 endfunction
 
 function object_base_from_element(element)
     define my.element = object_base_from_element.element
-    if (global.ends_with(my.element.file_name, ".cpp"))
+    if (matches_filetype(my.element.file_name, "cpp"))
         return global.left(my.element.file_name,\
             string.length(my.element.file_name) - 4)
-    elsif (global.ends_with(my.element.file_name, ".c"))
+    elsif (matches_filetype(my.element.file_name, "c"))
         return global.left(my.element.file_name,\
             string.length(my.element.file_name) - 2)
     endif
@@ -180,48 +206,126 @@ function object_base_from_element(element)
     return my.element.file_name
 endfunction
 
+function matches_filetype(file_name, extension)
+    return (regexp.match("(^.)(.*)\\.$(my.extension)$", my.file_name) > 0)
+endfunction
+
 ###
 ### functional artifact emission
 ###
-function emit_items_compiler_includes(file_data, collisions)
-    define my.file_data = emit_items_compiler_includes.file_data
-    define my.collisions = emit_items_compiler_includes.collisions
+function emit_item_group_compiler(file_data, collisions)
+    define my.file_data = emit_item_group_compiler.file_data
+    define my.collisions = emit_item_group_compiler.collisions
+
+    if (count(my.file_data.element, is_compiled_type(count)) > 0)
+        emit_item_group_open()
+
+        for my.file_data.element as _element by _element.build_path
+            if (is_compiled_type(_element))
+                #echo("    $(_element.build_path)")
+                emit_compile_item(my.collisions, _element)
+            endif
+        endfor
+
+        emit_item_group_close()
+    endif
+endfunction
+
+function emit_item_group_includes(file_data, collisions)
+    define my.file_data = emit_item_group_includes.file_data
+    define my.collisions = emit_item_group_includes.collisions
+
+    if (count(my.file_data.element, is_included_type(count)) > 0)
+        emit_item_group_open()
+
+        for my.file_data.element as _element by _element.build_path
+            if (is_included_type(_element))
+                #echo("    $(_element.build_path)")
+                emit_include_item(_element)
+            endif
+        endfor
+
+        emit_item_group_close()
+    endif
+endfunction
+
+function emit_item_group_none(file_data, collisions)
+    define my.file_data = emit_item_group_none.file_data
+    define my.collisions = emit_item_group_none.collisions
 
     emit_item_group_open()
 
     for my.file_data.element as _element by _element.build_path
-        if (is_compiler_include_type(_element))
-            emit_compiler_include(my.collisions, _element)
+        if (is_none_type(_element))
+            #echo("    $(_element.build_path)")
+            emit_none_item(_element)
         endif
     endfor
 
-    emit_item_group_close()
+    new element as _element
+        _element.build_path = "packages.config"
+        emit_none_item(_element)
+    endnew
 
+    emit_item_group_close()
+endfunction
+
+function emit_item_group_resources(file_data, collisions)
+    define my.file_data = emit_item_group_resources.file_data
+    define my.collisions = emit_item_group_resources.collisions
+
+    if (count(my.file_data.element, is_resources_type(count)) > 0)
+        emit_item_group_open()
+
+        for my.file_data.element as _element by _element.build_path
+            if (is_resources_type(_element))
+                #echo("    $(_element.build_path)")
+                emit_resources_item(_element)
+            endif
+        endfor
+
+        emit_item_group_close()
+    endif
 endfunction
 
 function emit_project(repository, product, project_path)
     define my.repository = emit_project.repository
     define my.product = emit_project.product
+    require(my.product, "product", "path")
+    require(my.product, "product", "prefix")
+    require(my.product, "product", "uuid")
     define my.product_path = "$(my.project_path)/$(my.product.path)"
     define my.product_dir = open_directory(my.product_path)
     define my.product_offset = "..\\..\\..\\..\\$(my.product.path)"
-    define my.product_disambiguator = ""
 
     emit_xml_declaration(my.project_path, "12.0")
 
     # scan files (product, conditionally 'includes', build relative resources)
     new encountered_files as _files
         discover_files(_files, my.product_dir, my.product_offset,\
-            my.product_disambiguator)
+            my.product.path, "true")
 
         new collisions as _map
             populate_collisions(_map, _files)
 
             # TODO: consider providing this relationship in xml
-            if (my.product.prefix)
+            if (match_prefix(my.product, "lib"))
+                define my.include_path = "$(my.project_path)/include"
+                define my.include_dir = open_directory(my.include_path)
+
+                discover_files(_files, my.include_dir, my.product_offset,\
+                    "include", "true")
+
+                define my.resources_path = "$(my.project_path)/builds/msvc"
+                define my.resources_dir = open_directory(my.resources_path)
+                discover_files(_files, my.resources_dir, "..\\..",\
+                    "build", "false")
             endif
 
-            emit_items_compiler_includes(_files, _map)
+            emit_item_group_compiler(_files, _map)
+            emit_item_group_includes(_files, _map)
+            emit_item_group_none(_files, _map)
+            emit_item_group_resources(_files, _map)
         endnew
     endnew
 
@@ -252,138 +356,40 @@ endfunction emit_project
   </ItemGroup>
 .endmacro emit_item_group_close
 .
-.macro emit_compiler_include(collisions, file_record)
-.   define my.collisions = emit_compiler_include.collisions
-.   define my.file_record = emit_compiler_include.file_record
+.macro emit_compile_item(collisions, file_record)
+.   define my.collisions = emit_compile_item.collisions
+.   define my.file_record = emit_compile_item.file_record
 .
 .   if (!exists_collision(my.collisions, my.file_record.file_name))
     <ClCompile Include="$(my.file_record.build_path)" />
 .   else
 .       define my.object_base_name = object_base_from_element(my.file_record)
     <ClCompile Include="$(my.file_record.build_path)">
-      <ObjectFileName>\$(IntDir)$(my.file_record.path_prefix)$(my.object_base_name).obj</ObjectFileName>
+      <ObjectFileName>\$(IntDir)$(my.file_record.path_prefix)_$(my.object_base_name).obj</ObjectFileName>
     </ClCompile>
 .   endif
-.endmacro emit_compiler_include
+.endmacro emit_compile_item
 .
-.macro emit_project_old(repository, product, project_path)
-.   define my.repository = emit_project.repository
-.   define my.product = emit_project.product
-.   define my.product_path = "$(my.project_path)/$(my.product.path)"
-.   define my.product_dir = open_directory(my.product_path)
-.   define my.product_relative_offset = "..\\..\\..\\..\\$(my.product.path)"
-.   define my.product_relative_disambiguator = ""
+.macro emit_include_item(file_record)
+.   define my.file_record = emit_include_item.file_record
 .
-.   emit_xml_declaration(my.project_path)
-    <ItemGroup>
-.   emit_files(my.product_dir, my.product_relative_offset,\
-        my.product_relative_disambiguator)
+    <ClInclude Include="$(my.file_record.build_path)" />
 .
-    </ItemGroup>
-.   if (string.match(my.product.path, "src"))
-.       for my.product.headers as _headers where defined(_headers.path)
-.           define my.headers_dir = open_directory("$(my.project_path)/$(_headers.path)")
-.           define my.headers_relative_offset = "..\\..\\..\\..\\$(my.product.path)"
-.           define my.headers_relative_disambiguator = ""
-    <ItemGroup>
-.           emit_files(my.headers_dir, my.headers_relative_offset, my.headers_relative_disambiguator)
-    </ItemGroup>
-.       endfor
-.   endif
-</Project>
-.endmacro emit_project
+.endmacro emit_include_item
 .
-.macro emit_files_2(product, product_path, project_path, product_relative_offset)
-.   define my.product = emit_files_2.product
-.   define my.product_path = emit_files_2.product_path
-.   define my.project_path = emit_files_2.project_path
+.macro emit_none_item(file_record)
+.   define my.file_record = emit_none_item.file_record
 .
-.   new files as _files
-.       get_all_product_files(_files, my.product_path, string.length(my.project_path), my.product)
+    <ClNone Include="$(my.file_record.build_path)" />
 .
-.       for _files as _file by _file.name
-.           # TODO: Emit variations based on file name/type pattern matching
-.           if (global.ends_with(_file.name, ".cpp"))
-.               define name_length = string.length(_file.name) - 4
-.               define disambiguated_name = global.left(_file.name, name_length)
+.endmacro emit_none_item
 .
-        <ClCompile Include="$(my.relative_path_offset)\\$(_file.name)">
-            <ObjectFileName>\$(IntDir)$(my.relative_disambiguator)$(disambiguated_name).obj</ObjectFileName>
-            <length>$(name_length)</length>
-            <name>$(disambiguated_name)</name>
-            <original_name>$(_file.name)</original_name>
-        </ClCompile>
+.macro emit_resources_item(file_record)
+.   define my.file_record = emit_resources_item.file_record
 .
-.           elsif (global.ends_with(_file.name, ".c"))
-.               define disambiguated_name = global.left(_file.name, string.length(_file.name) - 2)
-        <ClCompile Include="$(my.relative_path_offset)\\$(_file.name)">
-            <ObjectFileName>\$(IntDir)$(my.relative_disambiguator)$(disambiguated_name).obj</ObjectFileName>
-        </ClCompile>
+    <ResourceCompile Include="$(my.file_record.build_path)" />
 .
-.           elsif (global.ends_with(_file.name, ".hpp") | global.ends_with(_file.name, ".h"))
-.
-        <ClInclude Include="$(my.relative_path_offset)\\$(_file.name)" />
-.
-.           elsif (global.ends_with(_file.name, ".ipp"))
-.
-        <None Include="$(my.relative_path_offset)\\$(_file.name)" />
-.
-.           endif
-.       endfor
-.   endnew
-.endmacro emit_files_2
-.
-.macro emit_files(directory, relative_path_offset, relative_disambiguator, filters)
-.   define my.directory = emit_files.directory
-.   define my.relative_path_offset = emit_files.relative_path_offset
-.   define my.relative_disambiguator = emit_files.relative_disambiguator
-.#   define my.filters = emit_files.filters
-.
-.   for my.directory.file as _file by _file.name
-.#       define matches_filter = false
-.#       define exhausted_filters = false
-.#       while (!matches_filter & !exhausted_filters)
-.#
-.#       endwhile
-.
-.       if (global.ends_with(_file.name, ".cpp"))
-.           define disambiguated_name = global.left(_file.name, string.length(_file.name) - 4)
-.
-        <ClCompile Include="$(my.relative_path_offset)\\$(_file.name)">
-            <ObjectFileName>\$(IntDir)$(my.relative_disambiguator)$(disambiguated_name).obj</ObjectFileName>
-        </ClCompile>
-.
-.       elsif (global.ends_with(_file.name, ".c"))
-.           define disambiguated_name = global.left(_file.name, string.length(_file.name) - 2)
-.
-        <ClCompile Include="$(my.relative_path_offset)\\$(_file.name)">
-            <ObjectFileName>\$(IntDir)$(my.relative_disambiguator)$(disambiguated_name).obj</ObjectFileName>
-        </ClCompile>
-.
-.       elsif (global.ends_with(_file.name, ".hpp") | global.ends_with(_file.name, ".h"))
-.
-        <ClInclude Include="$(my.relative_path_offset)\\$(_file.name)" />
-.
-.       elsif (global.ends_with(_file.name, ".ipp"))
-.
-        <None Include="$(my.relative_path_offset)\\$(_file.name)" />
-.
-.       else
-.
-        <None Include="$(my.relative_path_offset)\\$(_file.name)" />
-.
-.       endif
-.   endfor
-.
-.   for my.directory.directory as _directory by _directory.name
-.       define my.subdir_path = "$(my.directory.path)/$(_directory.name)"
-.       define my.subdir = open_directory(my.subdir_path)
-.       define my.subdir_relative_path = "$(my.relative_path_offset)\\$(_directory.name)"
-.       define my.subdir_disambiguator = "$(my.relative_disambiguator)$(_directory.name)_"
-.       emit_files(my.subdir, my.subdir_relative_path, my.subdir_disambiguator)
-.   endfor
-.
-.endmacro emit_files
+.endmacro emit_none_item
 .
 .endtemplate
 .template 0
