@@ -1,8 +1,8 @@
-﻿.template 0
+.template 0
 ###############################################################################
 # Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
-# GSL generate libbitcoin.vcxproj.
+# GSL generate libbitcoin Makefile.am.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
@@ -10,157 +10,412 @@
 # Functions
 ###############################################################################
 
+###
+### File element-related string data storage/query
+###
+function match_file_element_build_path(element, build_path)
+    define my.element = match_file_element_build_path.element
+    return defined(my.element) & (my.element.build_path = my.build_path)
+endfunction
+
+function match_file_element_path_prefix(element, path_prefix)
+    define my.element = match_file_element_path_prefix.element
+    return defined(my.element) & (my.element.path_prefix = my.path_prefix)
+endfunction
+
+function match_file_element_file_name(element, file_name)
+    define my.element = match_file_element_file_name.element
+    return defined(my.element) & (my.element.file_name = my.file_name)
+endfunction
+
+function match_file_element(element, build_path, path_prefix, file_name)
+    define my.element = match_file_element.element
+    return defined(my.element) &\
+        match_file_element_build_path(my.element, my.build_path) &\
+        match_file_element_path_prefix(my.element, my.path_prefix) &\
+        match_file_element_file_name(my.element, my.file_name)
+endfunction
+
+function exists_file_element(root, build_path, path_prefix, file_name)
+    define my.root = exists_file_element.root
+    return count(my.root.element, match_file_element(count, my.build_path,\
+        my.path_prefix, my.file_name)) > 0
+endfunction
+
+function collides_file_element_file_name(root, file_name)
+    define my.root = collides_file_element_file_name.root
+    return count(my.root.element,\
+        match_file_element_file_name(count, my.file_name)) > 1
+endfunction
+
+function add_file_element(root, build_path, path_prefix, file_name)
+    define my.root = add_file_element.root
+    if (defined(my.root) & !exists_file_element(my.root, my.build_path,\
+        my.prefix_path, my.file_name))
+
+        new my.root.element as _element
+            _element.build_path = my.build_path
+            _element.path_prefix = my.path_prefix
+            _element.file_name = my.file_name
+        endnew
+    endif
+    return my.root
+endfunction
+
+###
+### File name collision-related data storage/query
+###
+function match_collision(collision, file_name)
+    define my.collision = match_collision.collision
+    return defined(my.collision) &\
+        (my.collision.file_name = my.file_name)
+endfunction
+
+function exists_collision(root, file_name)
+    define my.root = exists_collision.root
+    return count(my.root.collision, match_collision(count, my.file_name)) > 0
+endfunction
+
+function add_collision(root, file_name)
+    define my.root = add_collision.root
+    if (defined(my.root) & !exists_collision(my.root, my.file_name))
+        new my.root.collision as _collision
+            _collision.file_name = my.file_name
+        endnew
+    endif
+    return my.root
+endfunction
+
+###
+### vcxproj related string generators
+###
+function project_base(product, repository_name)
+    define my.product = project_base.product
+    if (defined(my.product.option))
+        return "$(my.repository_name)-$(_product.option)"
+    endif
+    return "$(my.repository_name)"
+endfunction
+
+function project_build_dir_relative_path(product, repository_name)
+    define my.product = project_build_dir_relative_path.product
+    define my.proj_name = project_base(my.product, my.repository_name)
+    return "$(my.repository_name)/builds/msvc/vs2013/$(my.proj_name)"
+endfunction
+
+function project_file(product, repository_name)
+    define my.product = project_file.product
+    define my.proj_relative_path = project_build_dir_relative_path(my.product,\
+        my.repository_name)
+    define my.proj_name = project_base(my.product, my.repository_name)
+    return "$(my.proj_relative_path)/$(my.proj_name).vcxproj"
+endfunction
+
+function append_prefix(base, subdir)
+    if (is_empty(base))
+        return "$(my.subdir)_"
+    endif
+    return "$(my.base)_$(my.subdir)_"
+endfunction
+
+function append_win_path(base, subdir)
+    return "$(my.base)\\$(my.subdir)"
+endfunction
+
+function append_path(base, subdir)
+    return "$(my.base)/$(my.subdir)"
+endfunction
+
+###
+### generic assistance functions
+###
+function discover_files(file_data, directory, win_path, prefix)
+    define my.file_data = discover_files.file_data
+    define my.directory = discover_files.directory
+
+    for my.directory.file as _file by _file.name
+        add_file_element(my.file_data, append_win_path(my.win_path,\
+            _file.name), my.prefix, _file.name)
+    endfor
+
+    for my.directory.directory as _directory by _directory.name
+        define my.subdir_path = append_path(my.directory.path, _directory.name)
+        define my.subdir = open_directory(my.subdir_path)
+        define my.subdir_win_path = append_win_path(my.win_path, _directory.name)
+        define my.subdir_prefix = append_prefix(my.prefix, _directory.name)
+
+        discover_files(my.file_data, my.subdir, my.subdir_win_path,\
+            my.subdir_prefix)
+    endfor
+
+endfunction
+
+function populate_collisions(collisions, file_data)
+    define my.collisions = populate_collisions.collisions
+    define my.file_data = populate_collisions.file_data
+
+    for my.file_data.element as _element
+        if (collides_file_element_file_name(my.file_data, _element.file_name))
+            add_collision(my.collisions, _element.file_name)
+        endif
+    endfor
+endfunction
+
+function is_compiler_include_type(element)
+    define my.element = is_compiler_include_type.element
+    return ends_with(my.element.file_name, ".cpp") |\
+        ends_with(my.element.file_name, ".c")
+endfunction
+
+function object_base_from_element(element)
+    define my.element = object_base_from_element.element
+    if (global.ends_with(my.element.file_name, ".cpp"))
+        return global.left(my.element.file_name,\
+            string.length(my.element.file_name) - 4)
+    elsif (global.ends_with(my.element.file_name, ".c"))
+        return global.left(my.element.file_name,\
+            string.length(my.element.file_name) - 2)
+    endif
+
+    return my.element.file_name
+endfunction
+
+###
+### functional artifact emission
+###
+function emit_items_compiler_includes(file_data, collisions)
+    define my.file_data = emit_items_compiler_includes.file_data
+    define my.collisions = emit_items_compiler_includes.collisions
+
+    emit_item_group_open()
+
+    for my.file_data.element as _element by _element.build_path
+        if (is_compiler_include_type(_element))
+            emit_compiler_include(my.collisions, _element)
+        endif
+    endfor
+
+    emit_item_group_close()
+
+endfunction
+
+function emit_project(repository, product, project_path)
+    define my.repository = emit_project.repository
+    define my.product = emit_project.product
+    define my.product_path = "$(my.project_path)/$(my.product.path)"
+    define my.product_dir = open_directory(my.product_path)
+    define my.product_offset = "..\\..\\..\\..\\$(my.product.path)"
+    define my.product_disambiguator = ""
+
+    emit_xml_declaration(my.project_path, "12.0")
+
+    # scan files (product, conditionally 'includes', build relative resources)
+    new encountered_files as _files
+        discover_files(_files, my.product_dir, my.product_offset,\
+            my.product_disambiguator)
+
+        new collisions as _map
+            populate_collisions(_map, _files)
+
+            # TODO: consider providing this relationship in xml
+            if (my.product.prefix)
+            endif
+
+            emit_items_compiler_includes(_files, _map)
+        endnew
+    endnew
+
+    emit_xml_close()
+endfunction emit_project
+
 ###############################################################################
 # Macros
 ###############################################################################
 .endtemplate
 .template 1
 .
-.macro render_project(compile, include, uuid)
+.macro emit_xml_declaration(project_path, version)
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Label="Globals">
-    <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>CTP_Nov2013</PlatformToolset>
-    <ProjectGuid>{$(my.uuid)}</ProjectGuid>
-    <ProjectName>bx</ProjectName>
-    <NuGetPackageImportStamp>4fc3919d</NuGetPackageImportStamp>
-  </PropertyGroup>
-  <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="DebugDEXE|Win32">
-      <Configuration>DebugDEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseDEXE|Win32">
-      <Configuration>ReleaseDEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugDEXE|x64">
-      <Configuration>DebugDEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseDEXE|x64">
-      <Configuration>ReleaseDEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugLEXE|Win32">
-      <Configuration>DebugLEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseLEXE|Win32">
-      <Configuration>ReleaseLEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugLEXE|x64">
-      <Configuration>DebugLEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseLEXE|x64">
-      <Configuration>ReleaseLEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugSEXE|Win32">
-      <Configuration>DebugSEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseSEXE|Win32">
-      <Configuration>ReleaseSEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugSEXE|x64">
-      <Configuration>DebugSEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseSEXE|x64">
-      <Configuration>ReleaseSEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\..\console\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="..\..\resource.rc" />
-  </ItemGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="PropertySheets">
-    <Import Project="$(ProjectDir)..\..\properties\$(Configuration).props" />
-    <Import Project="$(ProjectDir)..\..\properties\Output.props" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-  </ImportGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets" />
-  <ImportGroup Label="ExtensionSettings">
-    <Import Project="..\..\..\..\..\..\nuget\boost.1.57.0.0\build\native\boost.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost.1.57.0.0\build\native\boost.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\czmq_vc120.3.0.2.0\build\native\czmq_vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\czmq_vc120.3.0.2.0\build\native\czmq_vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\czmqpp_vc120.1.2.0.0\build\native\czmqpp_vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\czmqpp_vc120.1.2.0.0\build\native\czmqpp_vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\libsodium_vc120.1.0.0.0\build\native\libsodium_vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\libsodium_vc120.1.0.0.0\build\native\libsodium_vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\libzmq_vc120.4.3.0.0\build\native\libzmq_vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\libzmq_vc120.4.3.0.0\build\native\libzmq_vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.7\build\native\secp256k1_vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.7\build\native\secp256k1_vc120.targets')" />
-  </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost.1.57.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost.1.57.0.0\build\native\boost.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\czmq_vc120.3.0.2.0\build\native\czmq_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\czmq_vc120.3.0.2.0\build\native\czmq_vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\czmqpp_vc120.1.2.0.0\build\native\czmqpp_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\czmqpp_vc120.1.2.0.0\build\native\czmqpp_vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\libsodium_vc120.1.0.0.0\build\native\libsodium_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\libsodium_vc120.1.0.0.0\build\native\libsodium_vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\libzmq_vc120.4.3.0.0\build\native\libzmq_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\libzmq_vc120.4.3.0.0\build\native\libzmq_vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.7\build\native\secp256k1_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\secp256k1_vc120.0.1.0.7\build\native\secp256k1_vc120.targets'))" />
-  </Target>
-  <ItemGroup>
-    <ProjectReference Include="..\libbitcoin-explorer\libbitcoin-explorer.vcxproj">
-      <Project>{4A1D71D5-3DEE-47F0-A189-21C301E2808F}</Project>
-    </ProjectReference>
-  </ItemGroup>
+<Project DefaultTargets="Build" ToolsVersion="$(my.version)" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <path>$(my.project_path)</path>
+.endmacro emit_xml_declaration
+.
+.macro emit_xml_close()
 </Project>
-.endmacro
+.endmacro emit_xml_close
+.
+.macro emit_item_group_open()
+  <ItemGroup>
+.endmacro emit_item_group_open
+.
+.macro emit_item_group_close()
+  </ItemGroup>
+.endmacro emit_item_group_close
+.
+.macro emit_compiler_include(collisions, file_record)
+.   define my.collisions = emit_compiler_include.collisions
+.   define my.file_record = emit_compiler_include.file_record
+.
+.   if (!exists_collision(my.collisions, my.file_record.file_name))
+    <ClCompile Include="$(my.file_record.build_path)" />
+.   else
+.       define my.object_base_name = object_base_from_element(my.file_record)
+    <ClCompile Include="$(my.file_record.build_path)">
+      <ObjectFileName>\$(IntDir)$(my.file_record.path_prefix)$(my.object_base_name).obj</ObjectFileName>
+    </ClCompile>
+.   endif
+.endmacro emit_compiler_include
+.
+.macro emit_project_old(repository, product, project_path)
+.   define my.repository = emit_project.repository
+.   define my.product = emit_project.product
+.   define my.product_path = "$(my.project_path)/$(my.product.path)"
+.   define my.product_dir = open_directory(my.product_path)
+.   define my.product_relative_offset = "..\\..\\..\\..\\$(my.product.path)"
+.   define my.product_relative_disambiguator = ""
+.
+.   emit_xml_declaration(my.project_path)
+    <ItemGroup>
+.   emit_files(my.product_dir, my.product_relative_offset,\
+        my.product_relative_disambiguator)
+.
+    </ItemGroup>
+.   if (string.match(my.product.path, "src"))
+.       for my.product.headers as _headers where defined(_headers.path)
+.           define my.headers_dir = open_directory("$(my.project_path)/$(_headers.path)")
+.           define my.headers_relative_offset = "..\\..\\..\\..\\$(my.product.path)"
+.           define my.headers_relative_disambiguator = ""
+    <ItemGroup>
+.           emit_files(my.headers_dir, my.headers_relative_offset, my.headers_relative_disambiguator)
+    </ItemGroup>
+.       endfor
+.   endif
+</Project>
+.endmacro emit_project
+.
+.macro emit_files_2(product, product_path, project_path, product_relative_offset)
+.   define my.product = emit_files_2.product
+.   define my.product_path = emit_files_2.product_path
+.   define my.project_path = emit_files_2.project_path
+.
+.   new files as _files
+.       get_all_product_files(_files, my.product_path, string.length(my.project_path), my.product)
+.
+.       for _files as _file by _file.name
+.           # TODO: Emit variations based on file name/type pattern matching
+.           if (global.ends_with(_file.name, ".cpp"))
+.               define name_length = string.length(_file.name) - 4
+.               define disambiguated_name = global.left(_file.name, name_length)
+.
+        <ClCompile Include="$(my.relative_path_offset)\\$(_file.name)">
+            <ObjectFileName>\$(IntDir)$(my.relative_disambiguator)$(disambiguated_name).obj</ObjectFileName>
+            <length>$(name_length)</length>
+            <name>$(disambiguated_name)</name>
+            <original_name>$(_file.name)</original_name>
+        </ClCompile>
+.
+.           elsif (global.ends_with(_file.name, ".c"))
+.               define disambiguated_name = global.left(_file.name, string.length(_file.name) - 2)
+        <ClCompile Include="$(my.relative_path_offset)\\$(_file.name)">
+            <ObjectFileName>\$(IntDir)$(my.relative_disambiguator)$(disambiguated_name).obj</ObjectFileName>
+        </ClCompile>
+.
+.           elsif (global.ends_with(_file.name, ".hpp") | global.ends_with(_file.name, ".h"))
+.
+        <ClInclude Include="$(my.relative_path_offset)\\$(_file.name)" />
+.
+.           elsif (global.ends_with(_file.name, ".ipp"))
+.
+        <None Include="$(my.relative_path_offset)\\$(_file.name)" />
+.
+.           endif
+.       endfor
+.   endnew
+.endmacro emit_files_2
+.
+.macro emit_files(directory, relative_path_offset, relative_disambiguator, filters)
+.   define my.directory = emit_files.directory
+.   define my.relative_path_offset = emit_files.relative_path_offset
+.   define my.relative_disambiguator = emit_files.relative_disambiguator
+.#   define my.filters = emit_files.filters
+.
+.   for my.directory.file as _file by _file.name
+.#       define matches_filter = false
+.#       define exhausted_filters = false
+.#       while (!matches_filter & !exhausted_filters)
+.#
+.#       endwhile
+.
+.       if (global.ends_with(_file.name, ".cpp"))
+.           define disambiguated_name = global.left(_file.name, string.length(_file.name) - 4)
+.
+        <ClCompile Include="$(my.relative_path_offset)\\$(_file.name)">
+            <ObjectFileName>\$(IntDir)$(my.relative_disambiguator)$(disambiguated_name).obj</ObjectFileName>
+        </ClCompile>
+.
+.       elsif (global.ends_with(_file.name, ".c"))
+.           define disambiguated_name = global.left(_file.name, string.length(_file.name) - 2)
+.
+        <ClCompile Include="$(my.relative_path_offset)\\$(_file.name)">
+            <ObjectFileName>\$(IntDir)$(my.relative_disambiguator)$(disambiguated_name).obj</ObjectFileName>
+        </ClCompile>
+.
+.       elsif (global.ends_with(_file.name, ".hpp") | global.ends_with(_file.name, ".h"))
+.
+        <ClInclude Include="$(my.relative_path_offset)\\$(_file.name)" />
+.
+.       elsif (global.ends_with(_file.name, ".ipp"))
+.
+        <None Include="$(my.relative_path_offset)\\$(_file.name)" />
+.
+.       else
+.
+        <None Include="$(my.relative_path_offset)\\$(_file.name)" />
+.
+.       endif
+.   endfor
+.
+.   for my.directory.directory as _directory by _directory.name
+.       define my.subdir_path = "$(my.directory.path)/$(_directory.name)"
+.       define my.subdir = open_directory(my.subdir_path)
+.       define my.subdir_relative_path = "$(my.relative_path_offset)\\$(_directory.name)"
+.       define my.subdir_disambiguator = "$(my.relative_disambiguator)$(_directory.name)_"
+.       emit_files(my.subdir, my.subdir_relative_path, my.subdir_disambiguator)
+.   endfor
+.
+.endmacro emit_files
 .
 .endtemplate
 .template 0
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_filter()
-    for generate.repository by name as _repository
-        for _repository.make as _make
-            for _make.product as _product
-                  create_directory(my.project)
-                  define my.out_file = "$(my.project)/$(my.primary).vcxproj"
-                  notify(my.out_file)
-                  output(my.out_file)
+function generate_vcxproj()
+    for generate.repository as _repository by _repository.name\
+        where defined(_repository->make)
 
-                  c_copyleft(_repository.name)
+        require(_repository, "repository", "name")
+        define my.make = _repository->make
+        define my.absolute_proj_path = "$(global.root)/$(_repository.name)"
 
-                  render_project("","")
+        for _repository->make.product as _product where \
+            (defined(_product.uuid) & defined(_product.path))
 
-                close
-            endfor _product
-        endfor _make
+            define my.proj_dir_name = project_build_dir_relative_path(\
+                _product, _repository.name)
+
+            define my.proj_file = project_file(_product, _repository.name)
+
+            create_directory(my.proj_dir_name)
+            notify(my.proj_file)
+            output(my.proj_file)
+
+            emit_project(_repository, _product, my.absolute_proj_path)
+
+            close
+        endfor
     endfor _repository
-endfunction # generate_filter
+endfunction # generate_vcxproj
 .endtemplate
 .template 0
 ###############################################################################
@@ -176,6 +431,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_filter()
+generate_vcxproj()
 
 .endtemplate
