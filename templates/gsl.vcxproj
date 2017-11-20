@@ -210,6 +210,26 @@ function matches_filetype(file_name, extension)
     return (regexp.match("(^.)(.*)\\.$(my.extension)$", my.file_name) > 0)
 endfunction
 
+function is_product_binary(product)
+    define my.product = is_product_binary.product
+    require(my.product, "product", "prefix")
+    return (my.product.prefix = "bin")
+endfunction
+
+function is_product_library(product)
+    define my.product = is_product_library.product
+    require(my.product, "product", "prefix")
+    return (my.product.prefix = "lib")
+endfunction
+
+function get_msbuild_version(product)
+    define my.product = get_msbuild_version.product
+    if (is_product_library(my.product))
+        return "12.0"
+    endif
+    return "4.0"
+endfunction
+
 ###
 ### functional artifact emission
 ###
@@ -288,8 +308,27 @@ function emit_item_group_resources(file_data, collisions)
     endif
 endfunction
 
+function emit_item_group_product_configurations(product)
+    define my.product = emit_item_group_product_configurations.product
+    if (is_product_binary(my.product))
+        emit_item_group_product_configurations_binary()
+    elsif (is_product_library(my.product))
+        emit_item_group_product_configurations_library()
+    else
+        abort("Product type not recognized: $(my.product.prefix)")
+    endif
+endfunction
+
+function emit_propery_group_configuration(product)
+    define my.product = emit_propery_group_configuration.product
+    if (is_product_library(my.product))
+        emit_propery_group_configuration_library()
+    endif
+endfunction
+
 function emit_project(repository, product, project_path)
     define my.repository = emit_project.repository
+    require(my.repository, "repository", "name")
     define my.product = emit_project.product
     require(my.product, "product", "path")
     require(my.product, "product", "prefix")
@@ -298,7 +337,13 @@ function emit_project(repository, product, project_path)
     define my.product_dir = open_directory(my.product_path)
     define my.product_offset = "..\\..\\..\\..\\$(my.product.path)"
 
-    emit_xml_declaration(my.project_path, "12.0")
+    emit_xml_declaration(my.project_path, get_msbuild_version(my.product))
+
+    emit_property_group_globals(my.product, my.repository.name)
+    emit_item_group_product_configurations(my.product)
+    emit_propery_group_configuration(my.product)
+    emit_import_props()
+    emit_import_property_sheets()
 
     # scan files (product, conditionally 'includes', build relative resources)
     new encountered_files as _files
@@ -329,6 +374,9 @@ function emit_project(repository, product, project_path)
         endnew
     endnew
 
+    emit_import_targets()
+    emit_import_group_extension_targets()
+
     emit_xml_close()
 endfunction emit_project
 
@@ -341,7 +389,6 @@ endfunction emit_project
 .macro emit_xml_declaration(project_path, version)
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="$(my.version)" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <path>$(my.project_path)</path>
 .endmacro emit_xml_declaration
 .
 .macro emit_xml_close()
@@ -391,6 +438,157 @@ endfunction emit_project
 .
 .endmacro emit_none_item
 .
+.macro emit_property_group_globals(product, repository_name)
+.   define my.product = emit_property_group_globals.product
+.   require(my.product, "product", "uuid")
+  <PropertyGroup Label="Globals">
+.   if (is_product_binary(my.product))
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+.   elsif (is_product_library(my.product))
+    <PlatformToolset>CTP_Nov2013</PlatformToolset>
+.   else
+.       abort "Current product prefix not supported: $(my.product.prefix)"
+.   endif
+    <ProjectGuid>{$(my.product.uuid)}</ProjectGuid>
+    <ProjectName>$(project_base(my.product, my.repository_name))</ProjectName>
+  </PropertyGroup>
+.endmacro emit_property_group_globals
+.
+.macro emit_item_group_product_configurations_binary()
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugDEXE|Win32">
+      <Configuration>DebugDEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDEXE|Win32">
+      <Configuration>ReleaseDEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugDEXE|x64">
+      <Configuration>DebugDEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDEXE|x64">
+      <Configuration>ReleaseDEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLEXE|Win32">
+      <Configuration>DebugLEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLEXE|Win32">
+      <Configuration>ReleaseLEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLEXE|x64">
+      <Configuration>DebugLEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLEXE|x64">
+      <Configuration>ReleaseLEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugSEXE|Win32">
+      <Configuration>DebugSEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseSEXE|Win32">
+      <Configuration>ReleaseSEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugSEXE|x64">
+      <Configuration>DebugSEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseSEXE|x64">
+      <Configuration>ReleaseSEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+.endmacro emict_item_group_product_configurations
+.
+.macro emit_item_group_product_configurations_library()
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugDLL|Win32">
+      <Configuration>DebugDLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDLL|Win32">
+      <Configuration>ReleaseDLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugDLL|x64">
+      <Configuration>DebugDLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDLL|x64">
+      <Configuration>ReleaseDLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLTCG|Win32">
+      <Configuration>DebugLTCG</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLTCG|Win32">
+      <Configuration>ReleaseLTCG</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLTCG|x64">
+      <Configuration>DebugLTCG</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLTCG|x64">
+      <Configuration>ReleaseLTCG</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLIB|Win32">
+      <Configuration>DebugLIB</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLIB|Win32">
+      <Configuration>ReleaseLIB</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLIB|x64">
+      <Configuration>DebugLIB</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLIB|x64">
+      <Configuration>ReleaseLIB</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+.endmacro emit_item_group_product_configurations_library
+.
+.macro emit_propery_group_configuration_library()
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType Condition="\$(Configuration.IndexOf('DLL')) == -1">StaticLibrary</ConfigurationType>
+    <ConfigurationType Condition="\$(Configuration.IndexOf('DLL')) != -1">DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+.endmacro emit_propery_group_configuration_library
+.
+.macro emit_import_props()
+  <Import Project="\$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="\$(VCTargetsPath)\Microsoft.Cpp.props" />
+.endmacro emit_import_props
+.
+.macro emit_import_targets()
+  <Import Project="\$(VCTargetsPath)\Microsoft.Cpp.targets" />
+.endmacro emit_import_targets
+.
+.macro emit_import_property_sheets()
+  <ImportGroup Label="PropertySheets">
+    <Import Project="\$(ProjectDir)..\\..\\properties\\\$(Configuration).props" />
+    <Import Project="\$(ProjectDir)..\\..\\properties\\Output.props" />
+    <Import Project="\$(ProjectDir)\$(ProjectName).props" />
+  </ImportGroup>
+.endmacro emit_import_property_sheets
+.
+.macro emit_import_group_extension_targets()
+  <ImportGroup Label="ExtensionTargets" />
+.endmacro emit_import_group_extension_targets
+.
 .endtemplate
 .template 0
 ###############################################################################
@@ -401,7 +599,6 @@ function generate_vcxproj()
         where defined(_repository->make)
 
         require(_repository, "repository", "name")
-        define my.make = _repository->make
         define my.absolute_proj_path = "$(global.root)/$(_repository.name)"
 
         for _repository->make.product as _product where \
