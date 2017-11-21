@@ -235,6 +235,16 @@ function is_product_library(product)
     return (my.product.prefix = "lib")
 endfunction
 
+function is_option_console(product)
+    define my.product = is_option_console.product
+    return defined(my.product.option) & (my.product.option = "console")
+endfunction
+
+function is_option_tests(product)
+    define my.product = is_option_tests.product
+    return defined(my.product.option) & (my.product.option = "tests")
+endfunction
+
 function get_msbuild_version(product)
     define my.product = get_msbuild_version.product
     if (is_product_library(my.product))
@@ -246,12 +256,20 @@ endfunction
 ###
 ### functional artifact emission
 ###
-function emit_item_group_compiler(file_data, collisions)
+function emit_item_group_compiler(repository, product, file_data, collisions)
+    define my.repository = emit_item_group_compiler.repository
+    define my.product = emit_item_group_compiler.product
     define my.file_data = emit_item_group_compiler.file_data
     define my.collisions = emit_item_group_compiler.collisions
 
-    if (count(my.file_data.element, is_compiled_type(count)) > 0)
+    if ((my.repository.name = "libbitcoin") |\
+        count(my.file_data.element, is_compiled_type(count)) > 0)
+
         emit_item_group_open()
+
+        if (my.repository.name = "libbitcoin" & is_product_library(my.product))
+            emit_compile_item_threadsafe_statistics()
+        endif
 
         for my.file_data.element as _element by _element.build_path
             if (is_compiled_type(_element))
@@ -367,7 +385,7 @@ function emit_project(repository, product, project_path)
             populate_collisions(_map, _files)
 
             # TODO: consider providing this relationship in xml
-            if (match_prefix(my.product, "lib"))
+            if (is_product_library(my.product))
                 define my.include_path = "$(my.project_path)/include"
                 define my.include_dir = open_directory(my.include_path)
 
@@ -380,7 +398,7 @@ function emit_project(repository, product, project_path)
                     "build", "false")
             endif
 
-            emit_item_group_compiler(_files, _map)
+            emit_item_group_compiler(my.repository, my.product, _files, _map)
             emit_item_group_includes(_files, _map)
             emit_item_group_none(_files, _map)
             emit_item_group_resources(_files, _map)
@@ -415,6 +433,12 @@ endfunction emit_project
 .macro emit_item_group_close()
   </ItemGroup>
 .endmacro emit_item_group_close
+.
+.macro emit_compile_item_threadsafe_statistics()
+    <ClCompile Include="\$(VC_CTP_Nov2013_InstallDir)\\crt\\src\\threadsafestatics.cpp">
+      <ExcludedFromBuild Condition="\$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
+    </ClCompile>
+.endmacro emit_compile_item_threadsafe_statistics
 .
 .macro emit_compile_item(collisions, file_record)
 .   define my.collisions = emit_compile_item.collisions
