@@ -95,10 +95,23 @@ endfunction
 ###
 function project_base(product, repository_name)
     define my.product = project_base.product
-    if (defined(my.product.option))
-        return "$(my.repository_name)-$(_product.option)"
+    require(my.product, "product", "prefix")
+
+    if (is_product_library(my.product))
+        return "$(my.repository_name)"
+    elsif (is_product_binary(my.product))
+        if (defined(my.product.option))
+            if (defined(my.product.msvc_name))
+                return "$(my.product.msvc_name)"
+            else
+                return "$(my.repository_name)-$(my.product.option)"
+            endif
+        else
+            require(my.product, "product", "option")
+        endif
+    else
+        abort("Unrecognized product prefix: $(my.product.prefix)")
     endif
-    return "$(my.repository_name)"
 endfunction
 
 function project_build_dir_relative_path(product, repository_name)
