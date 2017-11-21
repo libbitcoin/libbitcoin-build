@@ -391,6 +391,11 @@ function emit_project(repository, product, project_path)
 
                 discover_files(_files, my.include_dir, my.product_offset,\
                     "include", "true")
+            endif
+
+
+            if (is_product_library(my.product) |\
+                (is_product_binary(my.product) & !is_option_tests(my.product)))
 
                 define my.resources_path = "$(my.project_path)/builds/msvc"
                 define my.resources_dir = open_directory(my.resources_path)
