@@ -254,9 +254,14 @@ function get_msbuild_version(product)
 endfunction
 
 function get_nuget_entry(nuget_registry, name)
-    define nuget_registry = get_nuget_entry.nuget_registry
+    define my.nuget_registry = get_nuget_entry.nuget_registry
     # echo "   Looking for nuget $(my.name)..."
     return my.nuget_registry->nuget(_nuget.build_name = my.name, _nuget)
+endfunction
+
+function get_repository_library_uuid(repository)
+    define my.repository = get_repository_library_uuid.repository
+    return my.repository->make->product(is_product_library(_product), _product).uuid
 endfunction
 
 ###
@@ -427,6 +432,23 @@ function emit_target_ensure_nuget_imports(nuget_registry, repository,\
     emit_target_ensure_nuget_imports_end()
 endfunction
 
+function emit_item_group_project_references(repository, product)
+    define my.repository = emit_project.repository
+    require(my.repository, "repository", "name")
+    define my.product = emit_project.product
+    require(my.product, "product", "path")
+    require(my.product, "product", "prefix")
+    require(my.product, "product", "uuid")
+
+    if (!is_product_library(my.product))
+        emit_item_group_open()
+        emit_item_group_project_reference_item(my.repository.name,\
+            get_repository_library_uuid(my.repository))
+        emit_item_group_close()
+    endif
+
+endfunction
+
 function emit_project(nuget_registry, repository, product, project_path)
     define my.nuget_registry = emit_project.nuget_registry
     define my.repository = emit_project.repository
@@ -459,8 +481,9 @@ function emit_project(nuget_registry, repository, product, project_path)
             if (is_product_library(my.product))
                 define my.include_path = "$(my.project_path)/include"
                 define my.include_dir = open_directory(my.include_path)
+                define my.headers_offset = "..\\..\\..\\..\\include"
 
-                discover_files(_files, my.include_dir, my.product_offset,\
+                discover_files(_files, my.include_dir, my.headers_offset,\
                     "include", "true")
             endif
 
@@ -487,6 +510,7 @@ function emit_project(nuget_registry, repository, product, project_path)
         my.product)
     emit_target_ensure_nuget_imports(my.nuget_registry, my.repository,\
         my.product)
+    emit_item_group_project_references(my.repository, my.product)
 
     emit_xml_close()
 endfunction emit_project
@@ -544,7 +568,7 @@ endfunction emit_project
 .macro emit_none_item(file_record)
 .   define my.file_record = emit_none_item.file_record
 .
-    <ClNone Include="$(my.file_record.build_path)" />
+    <None Include="$(my.file_record.build_path)" />
 .
 .endmacro emit_none_item
 .
@@ -559,10 +583,10 @@ endfunction emit_project
 .   define my.product = emit_property_group_globals.product
 .   require(my.product, "product", "uuid")
   <PropertyGroup Label="Globals">
-.   if (is_product_binary(my.product))
+.   if (is_option_tests(my.product))
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v120</PlatformToolset>
-.   elsif (is_product_library(my.product))
+.   elsif (is_product_library(my.product) | is_product_binary(my.product))
     <PlatformToolset>CTP_Nov2013</PlatformToolset>
 .   else
 .       abort "Current product prefix not supported: $(my.product.prefix)"
@@ -686,12 +710,12 @@ endfunction emit_project
 .endmacro emit_propery_group_configuration_library
 .
 .macro emit_import_props()
-  <Import Project="\$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <Import Project="\$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.Default.props" />
+  <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.props" />
 .endmacro emit_import_props
 .
 .macro emit_import_targets()
-  <Import Project="\$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.targets" />
 .endmacro emit_import_targets
 .
 .macro emit_import_property_sheets()
@@ -717,7 +741,7 @@ endfunction emit_project
 .macro emit_import_project_nuget(package)
 .   define my.package = emit_import_project_nuget.package
 .   define my.target = "..\\..\\..\\..\\..\\..\\nuget\\$(my.package.name)\\$(my.package.target_path)"
-   <Import Project="$(my.target)" Condition="Exists('$(my.target)')" />
+    <Import Project="$(my.target)" Condition="Exists('$(my.target)')" />
 .endmacro emit_import_project_nuget
 .
 .macro emit_target_ensure_nuget_imports_begin()
@@ -734,8 +758,14 @@ endfunction emit_project
 .macro emit_error_condition_nuget(package)
 .   define my.package = emit_error_condition_nuget.package
 .   define my.target = "..\\..\\..\\..\\..\\..\\nuget\\$(my.package.name)\\$(my.package.target_path)"
-   <Error Condition="!Exists('$(my.target)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.target)'))" />
+    <Error Condition="!Exists('$(my.target)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.target)'))" />
 .endmacro emit_error_condition_nuget
+.
+.macro emit_item_group_project_reference_item(name, uuid)
+    <ProjectReference Include="..\\$(my.name)\\$(my.name).vcxproj">
+      <Project>{$(my.uuid)}</Project>
+    </ProjectReference>
+.endmacro emit_item_group_project_reference_item
 .
 .endtemplate
 .template 0
