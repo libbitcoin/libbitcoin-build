@@ -148,7 +148,7 @@
       </build>
       <build name="qrencode" version="3.4.4" parallel="true" >
       </build>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -317,7 +317,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -482,7 +482,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -697,7 +697,7 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
@@ -841,7 +841,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1030,7 +1030,7 @@
       </build>
       <build name="qrencode" version="3.4.4" parallel="true" >
       </build>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1223,7 +1223,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1382,7 +1382,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1563,7 +1563,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1731,7 +1731,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1859,7 +1859,7 @@
 
   </repository>
 
-  <nuget-registry>
+  <nuget_registry>
     <nuget build_name="boost">
       <package label="boost"           name="boost.1.57.0.0"                           target_path="build\native\boost.targets" />
       <package label="chrono"          name="boost_chrono-vc120.1.57.0.0"              target_path="build\native\boost_chrono-vc120.targets" />
@@ -1878,8 +1878,8 @@
     <nuget build_name="secp256k1">
       <package label="secp256k1" name="secp256k1_vc120.0.1.0.14" target_path="build\native\secp256k1_vc120.targets" />
     </nuget>
-    <nuget build_name="libzmq">
+    <nuget build_name="zmq">
       <package label="zmq" name="libzmq_vc120.4.2.20.1" target_path="build\native\libzmq_vc120.targets" />
     </nuget>
-  </nuget-registry>
+  </nuget_registry>
 </generate>
