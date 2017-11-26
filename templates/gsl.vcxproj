@@ -253,6 +253,12 @@ function get_msbuild_version(product)
     return "4.0"
 endfunction
 
+function get_nuget_entry(nuget_registry, name)
+    define nuget_registry = get_nuget_entry.nuget_registry
+    # echo "   Looking for nuget $(my.name)..."
+    return my.nuget_registry->nuget(_nuget.build_name = my.name, _nuget)
+endfunction
+
 ###
 ### functional artifact emission
 ###
@@ -357,7 +363,72 @@ function emit_propery_group_configuration(product)
     endif
 endfunction
 
-function emit_project(repository, product, project_path)
+function emit_import_group_extension_settings(nuget_registry, repository,\
+    product)
+    define my.nuget_registry = emit_project.nuget_registry
+    define my.repository = emit_project.repository
+    require(my.repository, "repository", "name")
+    define my.product = emit_project.product
+    require(my.product, "product", "path")
+    require(my.product, "product", "prefix")
+    require(my.product, "product", "uuid")
+
+    emit_import_group_extension_settings_begin()
+
+    for my.repository->install.build as _build where defined(_build.nuget) &\
+        (_build.nuget = "true")
+
+        define nuget_entry = get_nuget_entry(my.nuget_registry, _build.name)
+        for nuget_entry.package as _package
+            require(_package, "package", "label")
+            require(_package, "package", "name")
+            require(_package, "package", "target_path")
+
+            if (!(_package.label = "test") |\
+                ((_package.label = "test") & is_true(my.product.test)))
+                emit_import_project_nuget(_package)
+            endif
+
+        endfor
+    endfor
+
+    emit_import_group_extension_settings_end()
+endfunction
+
+function emit_target_ensure_nuget_imports(nuget_registry, repository,\
+    product)
+    define my.nuget_registry = emit_project.nuget_registry
+    define my.repository = emit_project.repository
+    require(my.repository, "repository", "name")
+    define my.product = emit_project.product
+    require(my.product, "product", "path")
+    require(my.product, "product", "prefix")
+    require(my.product, "product", "uuid")
+
+    emit_target_ensure_nuget_imports_begin()
+
+    for my.repository->install.build as _build where defined(_build.nuget) &\
+        (_build.nuget = "true")
+
+        define nuget_entry = get_nuget_entry(my.nuget_registry, _build.name)
+        for nuget_entry.package as _package
+            require(_package, "package", "label")
+            require(_package, "package", "name")
+            require(_package, "package", "target_path")
+
+            if (!(_package.label = "test") |\
+                ((_package.label = "test") & is_true(my.product.test)))
+                emit_error_condition_nuget(_package)
+            endif
+
+        endfor
+    endfor
+
+    emit_target_ensure_nuget_imports_end()
+endfunction
+
+function emit_project(nuget_registry, repository, product, project_path)
+    define my.nuget_registry = emit_project.nuget_registry
     define my.repository = emit_project.repository
     require(my.repository, "repository", "name")
     define my.product = emit_project.product
@@ -412,6 +483,10 @@ function emit_project(repository, product, project_path)
 
     emit_import_targets()
     emit_import_group_extension_targets()
+    emit_import_group_extension_settings(my.nuget_registry, my.repository,\
+        my.product)
+    emit_target_ensure_nuget_imports(my.nuget_registry, my.repository,\
+        my.product)
 
     emit_xml_close()
 endfunction emit_project
@@ -631,6 +706,37 @@ endfunction emit_project
   <ImportGroup Label="ExtensionTargets" />
 .endmacro emit_import_group_extension_targets
 .
+.macro emit_import_group_extension_settings_begin()
+  <ImportGroup Label="ExtensionSettings">
+.endmacro emit_import_group_extension_settings_begin
+.
+.macro emit_import_group_extension_settings_end()
+  </ImportGroup>
+.endmacro emit_import_group_extension_settings_end
+.
+.macro emit_import_project_nuget(package)
+.   define my.package = emit_import_project_nuget.package
+.   define my.target = "..\\..\\..\\..\\..\\..\\nuget\\$(my.package.name)\\$(my.package.target_path)"
+   <Import Project="$(my.target)" Condition="Exists('$(my.target)')" />
+.endmacro emit_import_project_nuget
+.
+.macro emit_target_ensure_nuget_imports_begin()
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+.endmacro emit_target_ensure_nuget_imports_begin
+.
+.macro emit_target_ensure_nuget_imports_end()
+  </Target>
+.endmacro emit_target_ensure_nuget_imports_end
+.
+.macro emit_error_condition_nuget(package)
+.   define my.package = emit_error_condition_nuget.package
+.   define my.target = "..\\..\\..\\..\\..\\..\\nuget\\$(my.package.name)\\$(my.package.target_path)"
+   <Error Condition="!Exists('$(my.target)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.target)'))" />
+.endmacro emit_error_condition_nuget
+.
 .endtemplate
 .template 0
 ###############################################################################
@@ -642,6 +748,7 @@ function generate_vcxproj()
 
         require(_repository, "repository", "name")
         define my.absolute_proj_path = "$(global.root)/$(_repository.name)"
+        define my.nuget_registry = generate->nuget_registry
 
         for _repository->make.product as _product where \
             (defined(_product.uuid) & defined(_product.path))
@@ -655,7 +762,8 @@ function generate_vcxproj()
             notify(my.proj_file)
             output(my.proj_file)
 
-            emit_project(_repository, _product, my.absolute_proj_path)
+            emit_project(my.nuget_registry, _repository, _product,\
+                my.absolute_proj_path)
 
             close
         endfor
