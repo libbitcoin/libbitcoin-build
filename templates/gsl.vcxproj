@@ -388,7 +388,7 @@ function emit_import_group_extension_settings(nuget_registry, repository,\
     require(my.product, "product", "prefix")
     require(my.product, "product", "uuid")
 
-    emit_import_group_extension_settings_begin()
+    emit_import_group_extension_settings_open()
 
     for my.repository->install.build as _build where defined(_build.nuget) &\
         (_build.nuget = "true")
@@ -407,7 +407,7 @@ function emit_import_group_extension_settings(nuget_registry, repository,\
         endfor
     endfor
 
-    emit_import_group_extension_settings_end()
+    emit_import_group_extension_settings_close()
 endfunction
 
 function emit_target_ensure_nuget_imports(nuget_registry, repository,\
@@ -420,7 +420,7 @@ function emit_target_ensure_nuget_imports(nuget_registry, repository,\
     require(my.product, "product", "prefix")
     require(my.product, "product", "uuid")
 
-    emit_target_ensure_nuget_imports_begin()
+    emit_target_ensure_nuget_imports_open()
 
     for my.repository->install.build as _build where defined(_build.nuget) &\
         (_build.nuget = "true")
@@ -439,7 +439,7 @@ function emit_target_ensure_nuget_imports(nuget_registry, repository,\
         endfor
     endfor
 
-    emit_target_ensure_nuget_imports_end()
+    emit_target_ensure_nuget_imports_close()
 endfunction
 
 function emit_item_group_project_references(repository, product)
@@ -471,7 +471,9 @@ function emit_project(nuget_registry, repository, product, project_path)
     define my.product_dir = open_directory(my.product_path)
     define my.product_offset = "..\\..\\..\\..\\$(my.product.path)"
 
-    emit_xml_declaration(my.project_path, get_msbuild_version(my.product))
+    emit_xml_declaration()
+    xml_copyleft(my.repository.name)
+    emit_project_open(my.project_path, get_msbuild_version(my.product))
 
     emit_property_group_globals(my.product, my.repository.name)
     emit_item_group_product_configurations(my.product)
@@ -522,7 +524,7 @@ function emit_project(nuget_registry, repository, product, project_path)
         my.product)
     emit_item_group_project_references(my.repository, my.product)
 
-    emit_xml_close()
+    emit_project_close()
 endfunction emit_project
 
 ###############################################################################
@@ -531,14 +533,18 @@ endfunction emit_project
 .endtemplate
 .template 1
 .
-.macro emit_xml_declaration(project_path, version)
+.macro emit_xml_declaration()
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="$(my.version)" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 .endmacro emit_xml_declaration
 .
-.macro emit_xml_close()
+.macro emit_project_open(project_path, version)
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="$(my.version)" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+.endmacro emit_project_open
+.
+.macro emit_project_close()
 </Project>
-.endmacro emit_xml_close
+.endmacro emit_project_close
 .
 .macro emit_item_group_open()
   <ItemGroup>
@@ -740,13 +746,13 @@ endfunction emit_project
   <ImportGroup Label="ExtensionTargets" />
 .endmacro emit_import_group_extension_targets
 .
-.macro emit_import_group_extension_settings_begin()
+.macro emit_import_group_extension_settings_open()
   <ImportGroup Label="ExtensionSettings">
-.endmacro emit_import_group_extension_settings_begin
+.endmacro emit_import_group_extension_settings_open
 .
-.macro emit_import_group_extension_settings_end()
+.macro emit_import_group_extension_settings_close()
   </ImportGroup>
-.endmacro emit_import_group_extension_settings_end
+.endmacro emit_import_group_extension_settings_close
 .
 .macro emit_import_project_nuget(package)
 .   define my.package = emit_import_project_nuget.package
@@ -754,16 +760,16 @@ endfunction emit_project
     <Import Project="$(my.target)" Condition="Exists('$(my.target)')" />
 .endmacro emit_import_project_nuget
 .
-.macro emit_target_ensure_nuget_imports_begin()
+.macro emit_target_ensure_nuget_imports_open()
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-.endmacro emit_target_ensure_nuget_imports_begin
+.endmacro emit_target_ensure_nuget_imports_open
 .
-.macro emit_target_ensure_nuget_imports_end()
+.macro emit_target_ensure_nuget_imports_close()
   </Target>
-.endmacro emit_target_ensure_nuget_imports_end
+.endmacro emit_target_ensure_nuget_imports_close
 .
 .macro emit_error_condition_nuget(package)
 .   define my.package = emit_error_condition_nuget.package
