@@ -264,6 +264,16 @@ function get_repository_library_uuid(repository)
     return my.repository->make->product(is_product_library(_product), _product).uuid
 endfunction
 
+function nuget_package_name(package)
+    define my.package = nuget_package_name.package
+    return "$(my.package.name).$(my.package.version)"
+endfunction
+
+function nuget_package_targets_path(package)
+    define my.package = nuget_package_targets_path.package
+    return "build\\native\\$(my.package.name).targets"
+endfunction
+
 ###
 ### functional artifact emission
 ###
@@ -370,10 +380,10 @@ endfunction
 
 function emit_import_group_extension_settings(nuget_registry, repository,\
     product)
-    define my.nuget_registry = emit_project.nuget_registry
-    define my.repository = emit_project.repository
+    define my.nuget_registry = emit_import_group_extension_settings.nuget_registry
+    define my.repository = emit_import_group_extension_settings.repository
     require(my.repository, "repository", "name")
-    define my.product = emit_project.product
+    define my.product = emit_import_group_extension_settings.product
     require(my.product, "product", "path")
     require(my.product, "product", "prefix")
     require(my.product, "product", "uuid")
@@ -387,7 +397,7 @@ function emit_import_group_extension_settings(nuget_registry, repository,\
         for nuget_entry.package as _package
             require(_package, "package", "label")
             require(_package, "package", "name")
-            require(_package, "package", "target_path")
+            require(_package, "package", "version")
 
             if (!(_package.label = "test") |\
                 ((_package.label = "test") & is_true(my.product.test)))
@@ -402,10 +412,10 @@ endfunction
 
 function emit_target_ensure_nuget_imports(nuget_registry, repository,\
     product)
-    define my.nuget_registry = emit_project.nuget_registry
-    define my.repository = emit_project.repository
+    define my.nuget_registry = emit_target_ensure_nuget_imports.nuget_registry
+    define my.repository = emit_target_ensure_nuget_imports.repository
     require(my.repository, "repository", "name")
-    define my.product = emit_project.product
+    define my.product = emit_target_ensure_nuget_imports.product
     require(my.product, "product", "path")
     require(my.product, "product", "prefix")
     require(my.product, "product", "uuid")
@@ -419,7 +429,7 @@ function emit_target_ensure_nuget_imports(nuget_registry, repository,\
         for nuget_entry.package as _package
             require(_package, "package", "label")
             require(_package, "package", "name")
-            require(_package, "package", "target_path")
+            require(_package, "package", "version")
 
             if (!(_package.label = "test") |\
                 ((_package.label = "test") & is_true(my.product.test)))
@@ -433,9 +443,9 @@ function emit_target_ensure_nuget_imports(nuget_registry, repository,\
 endfunction
 
 function emit_item_group_project_references(repository, product)
-    define my.repository = emit_project.repository
+    define my.repository = emit_item_group_project_references.repository
     require(my.repository, "repository", "name")
-    define my.product = emit_project.product
+    define my.product = emit_item_group_project_references.product
     require(my.product, "product", "path")
     require(my.product, "product", "prefix")
     require(my.product, "product", "uuid")
@@ -740,7 +750,7 @@ endfunction emit_project
 .
 .macro emit_import_project_nuget(package)
 .   define my.package = emit_import_project_nuget.package
-.   define my.target = "..\\..\\..\\..\\..\\..\\nuget\\$(my.package.name)\\$(my.package.target_path)"
+.   define my.target = "..\\..\\..\\..\\..\\..\\nuget\\$(nuget_package_name(my.package))\\$(nuget_package_targets_path(my.package))"
     <Import Project="$(my.target)" Condition="Exists('$(my.target)')" />
 .endmacro emit_import_project_nuget
 .
@@ -757,7 +767,7 @@ endfunction emit_project
 .
 .macro emit_error_condition_nuget(package)
 .   define my.package = emit_error_condition_nuget.package
-.   define my.target = "..\\..\\..\\..\\..\\..\\nuget\\$(my.package.name)\\$(my.package.target_path)"
+.   define my.target = "..\\..\\..\\..\\..\\..\\nuget\\$(nuget_package_name(my.package))\\$(nuget_package_targets_path(my.package))"
     <Error Condition="!Exists('$(my.target)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.target)'))" />
 .endmacro emit_error_condition_nuget
 .
