@@ -599,14 +599,10 @@ endfunction emit_project
 .   define my.product = emit_property_group_globals.product
 .   require(my.product, "product", "uuid")
   <PropertyGroup Label="Globals">
-.   if (is_option_tests(my.product))
+.   if (is_product_binary(my.product))
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v120</PlatformToolset>
-.   elsif (is_product_library(my.product) | is_product_binary(my.product))
-    <PlatformToolset>CTP_Nov2013</PlatformToolset>
-.   else
-.       abort "Current product prefix not supported: $(my.product.prefix)"
 .   endif
+    <PlatformToolset>CTP_Nov2013</PlatformToolset>
     <ProjectGuid>{$(my.product.uuid)}</ProjectGuid>
     <ProjectName>$(project_base(my.product, my.repository_name))</ProjectName>
   </PropertyGroup>
