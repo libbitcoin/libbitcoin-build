@@ -1,0 +1,221 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin Makefile.am.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+###
+### packages.config related string generators
+###
+function project_base(product, repository_name)
+    define my.product = project_base.product
+    require(my.product, "product", "prefix")
+
+    if (is_product_library(my.product))
+        return "$(my.repository_name)"
+    elsif (is_product_binary(my.product))
+        if (defined(my.product.option))
+            if (defined(my.product.msvc_name))
+                return "$(my.product.msvc_name)"
+            else
+                return "$(my.repository_name)-$(my.product.option)"
+            endif
+        else
+            require(my.product, "product", "option")
+        endif
+    else
+        abort("Unrecognized product prefix: $(my.product.prefix)")
+    endif
+endfunction
+
+function solution_relative_path(repository_name)
+    return "$(my.repository_name)/builds/msvc/vs2013"
+endfunction
+
+function packages_config_file(product, repository_name)
+    define my.product = packages_config_file.product
+    define my.proj_relative_path = project_build_dir_relative_path(my.product,\
+        my.repository_name)
+    return "$(my.proj_relative_path)/packages.config"
+endfunction
+
+###
+### generic assistance functions
+###
+function is_product_binary(product)
+    define my.product = is_product_binary.product
+    require(my.product, "product", "prefix")
+    return (my.product.prefix = "bin")
+endfunction
+
+function is_product_library(product)
+    define my.product = is_product_library.product
+    require(my.product, "product", "prefix")
+    return (my.product.prefix = "lib")
+endfunction
+
+###
+### functional artifact emission
+###
+function emit_projects(repository)
+    define my.repository = emit_projects.repository
+    require(my.repository, "repository", "name")
+
+    for my.repository->make.product as _product where defined(_product.uuid)
+        define my.project_name = project_base(_product, my.repository.name)
+        define my.project_path = "$(my.project_name)\\$(my.project_name).vcxproj"
+
+        emit_project(my.project_name, my.project_path, _product.uuid)
+    endfor
+endfunction
+
+function emit_postsolution(repository)
+    define my.repository = emit_postsolution.repository
+    require(my.repository, "repository", "name")
+
+    emit_global_postsolution_open()
+
+    for my.repository->make.product as _product where defined(_product.uuid)
+        define my.project_name = project_base(_product, my.repository.name)
+        define my.project_path = "$(my.project_name)\\$(my.project_name).vcxproj"
+
+        if (is_product_binary(_product))
+            emit_binary_crossproduct(_product.uuid)
+        elsif (is_product_library(_product))
+            emit_library_crossproduct(_product.uuid)
+        else
+            abort("Unrecognized product type.")
+        endif
+    endfor
+
+    emit_global_postsolution_close()
+endfunction
+
+function emit_solution(repository)
+    define my.repository = emit_solution.repository
+    require(my.repository, "repository", "name")
+
+    emit_version()
+    emit_projects(my.repository)
+    emit_global_open()
+    emit_presolution()
+    emit_postsolution(my.repository)
+    emit_solution_properties()
+    emit_global_close()
+endfunction emit_solution
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_version()
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+.endmacro emit_version
+.
+.macro emit_project(project_name, project_path, uuid)
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(my.project_name)", "$(my.project_path)", "{$(my.uuid:upper)}"
+EndProject
+.endmacro emit_project
+.
+.macro emit_global_open()
+Global
+.endmacro emit_global_open
+.
+.macro emit_global_close()
+EndGlobal
+.endmacro emit_global_close
+.
+.macro emit_presolution()
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        StaticDebug|Win32 = StaticDebug|Win32
+        StaticDebug|x64 = StaticDebug|x64
+        StaticRelease|Win32 = StaticRelease|Win32
+        StaticRelease|x64 = StaticRelease|x64
+    EndGlobalSection
+.endmacro emit_presolution
+.
+.macro emit_global_postsolution_open()
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+.endmacro emit_global_postsolution_open
+.
+.macro emit_global_postsolution_close()
+    EndGlobalSection
+.endmacro emit_global_postsolution_close
+.
+.macro emit_library_crossproduct(uuid)
+        {$(my.uuid:upper)}.StaticDebug|Win32.ActiveCfg = DebugLIB|Win32
+        {$(my.uuid:upper)}.StaticDebug|Win32.Build.0 = DebugLIB|Win32
+        {$(my.uuid:upper)}.StaticDebug|x64.ActiveCfg = DebugLIB|x64
+        {$(my.uuid:upper)}.StaticDebug|x64.Build.0 = DebugLIB|x64
+        {$(my.uuid:upper)}.StaticRelease|Win32.ActiveCfg = ReleaseLIB|Win32
+        {$(my.uuid:upper)}.StaticRelease|Win32.Build.0 = ReleaseLIB|Win32
+        {$(my.uuid:upper)}.StaticRelease|x64.ActiveCfg = ReleaseLIB|x64
+        {$(my.uuid:upper)}.StaticRelease|x64.Build.0 = ReleaseLIB|x64
+.endmacro emit_library_crossproduct
+.
+.macro emit_binary_crossproduct(uuid)
+        {$(my.uuid:upper)}.StaticDebug|Win32.ActiveCfg = DebugSEXE|Win32
+        {$(my.uuid:upper)}.StaticDebug|Win32.Build.0 = DebugSEXE|Win32
+        {$(my.uuid:upper)}.StaticDebug|x64.ActiveCfg = DebugSEXE|x64
+        {$(my.uuid:upper)}.StaticDebug|x64.Build.0 = DebugSEXE|x64
+        {$(my.uuid:upper)}.StaticRelease|Win32.ActiveCfg = ReleaseSEXE|Win32
+        {$(my.uuid:upper)}.StaticRelease|Win32.Build.0 = ReleaseSEXE|Win32
+        {$(my.uuid:upper)}.StaticRelease|x64.ActiveCfg = ReleaseSEXE|x64
+        {$(my.uuid:upper)}.StaticRelease|x64.Build.0 = ReleaseSEXE|x64
+.endmacro emit_binary_crossproduct
+.
+.macro emit_solution_properties()
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
+.endmacro emit_solution_properties
+.
+.endtemplate
+.template 0
+###############################################################################
+# Generation
+###############################################################################
+function generate_solutions()
+    for generate.repository as _repository by _repository.name
+        require(_repository, "repository", "name")
+        define my.absolute_path = "$(global.root)/$(_repository.name)"
+        define my.solution_path = solution_relative_path(_repository.name)
+        define my.solution_filename = "$(my.solution_path)//$(_repository.name).sln"
+
+        create_directory(my.solution_path)
+        notify(my.solution_filename)
+        output(my.solution_filename)
+        emit_solution(_repository)
+        close
+    endfor _repository
+endfunction # generate_solutions
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_solutions()
+
+.endtemplate
