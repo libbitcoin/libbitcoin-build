@@ -136,11 +136,17 @@ function append_prefix(base, subdir)
 endfunction
 
 function append_win_path(base, subdir)
-    return "$(my.base)\\$(my.subdir)"
+    if (!is_empty(my.base))
+        return "$(my.base)\\$(my.subdir)"
+    endif
+    return "$(my.subdir)"
 endfunction
 
 function append_path(base, subdir)
-    return "$(my.base)$(my.subdir)"
+    if (!is_empty(my.base))
+        return "$(my.base)$(my.subdir)"
+    endif
+    return "$(my.subdir)"
 endfunction
 
 ###
@@ -245,8 +251,8 @@ function is_option_tests(product)
     return defined(my.product.option) & (my.product.option = "tests")
 endfunction
 
-function get_msbuild_version(product)
-    define my.product = get_msbuild_version.product
+function msbuild_version(product)
+    define my.product = msbuild_version.product
     if (is_product_library(my.product))
         return "12.0"
     endif
@@ -473,7 +479,7 @@ function emit_project(nuget_registry, repository, product, project_path)
 
     emit_xml_declaration()
     xml_copyleft(my.repository.name)
-    emit_project_open(my.project_path, get_msbuild_version(my.product))
+    emit_project_open(msbuild_version(my.product))
 
     emit_property_group_globals(my.product, my.repository.name)
     emit_item_group_product_configurations(my.product)
@@ -537,7 +543,7 @@ endfunction emit_project
 <?xml version="1.0" encoding="utf-8"?>
 .endmacro emit_xml_declaration
 .
-.macro emit_project_open(project_path, version)
+.macro emit_project_open(version)
 <Project DefaultTargets="Build" ToolsVersion="$(my.version)" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 .endmacro emit_project_open
 .
