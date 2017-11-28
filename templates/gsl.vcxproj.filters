@@ -23,6 +23,51 @@ function uuid_inc(uuid)
     return my.uuid + 1
 endfunction
 
+function to_hex(value)
+    define my.hex_value = math.mod(my.value, 16)
+
+    if (my.hex_value >= 0 & my.hex_value <= 9)
+        return conv.string(my.hex_value)
+    elsif (my.hex_value = 10)
+        return "a"
+    elsif (my.hex_value = 11)
+        return "b"
+    elsif (my.hex_value = 12)
+        return "c"
+    elsif (my.hex_value = 13)
+        return "d"
+    elsif (my.hex_value = 14)
+        return "e"
+    elsif (my.hex_value = 15)
+        return "f"
+    else
+        abort("")
+    endif
+endfunction
+
+function to_uuid(value)
+    define my.wip = "0"
+
+    while (my.value > 0)
+        my.wip += to_hex(my.value)
+        my.value = math.floor(my.value / 16)
+    endwhile
+
+    # NOTE: should vary this?
+    define my.uuid = "0f0f0f0f-f0f0-0f0f-f0f0-"
+    define my.iter = 0
+
+    # NOTE: supports at most 0x0fffffffffff
+    while ((my.iter - string.length(my.wip)) < 12)
+        my.uuid += 0
+        my.iter +=1
+    endwhile
+
+    my.uuid += my.wip
+
+    return my.uuid
+endfunction
+
 ###
 ### vcxproj related string generators
 ###
@@ -182,7 +227,7 @@ function emit_declare_filters_item_group(directories)
     emit_item_group_open()
 
     for my.directories.row as _row by _row.name
-        echo("   Name: $(_row.name) --- $(_row.value)")
+#        echo("   Name: $(_row.name) --- $(_row.value)")
         emit_filter_declaration(_row.name, _row.value)
     endfor
 
@@ -363,7 +408,7 @@ endfunction
 .
 .macro emit_filter_declaration(name, uuid)
     <Filter Include="$(my.name)">
-      <UniqueIdentifier>{$(my.uuid)}</UniqueIdentifier>
+      <UniqueIdentifier>{$(to_uuid(my.uuid):upper)}</UniqueIdentifier>
     </Filter>
 .endmacro emit_filter_declaration
 .
@@ -439,7 +484,7 @@ function generate_filter()
 
             define my.proj_file = project_file(_product, _repository.name)
 
-            echo("$(_repository.name) UUID: $(_product.uuid)")
+#            echo("$(_repository.name) UUID: $(_product.uuid)")
             create_directory(my.proj_dir_name)
             notify(my.proj_file)
             output(my.proj_file)
