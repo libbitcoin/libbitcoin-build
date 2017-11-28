@@ -60,6 +60,11 @@ function is_product_library(product)
     return (my.product.prefix = "lib")
 endfunction
 
+function is_uuid_defined(product)
+    define my.product = is_uuid_defined.product
+    return defined(my.product.uuid) & !is_empty(my.product.uuid)
+endfunction
+
 ###
 ### functional artifact emission
 ###
@@ -67,7 +72,8 @@ function emit_projects(repository)
     define my.repository = emit_projects.repository
     require(my.repository, "repository", "name")
 
-    for my.repository->make.product as _product where defined(_product.uuid)
+    for my.repository->make.product as _product where is_uuid_defined(_product)
+
         define my.project_name = project_base(_product, my.repository.name)
         define my.project_path = "$(my.project_name)\\$(my.project_name).vcxproj"
 
@@ -81,7 +87,9 @@ function emit_postsolution(repository)
 
     emit_global_postsolution_open()
 
-    for my.repository->make.product as _product where defined(_product.uuid)
+    for my.repository->make.product as _product where defined(_product.uuid) &\
+        !is_empty(_product.uuid)
+
         define my.project_name = project_base(_product, my.repository.name)
         define my.project_path = "$(my.project_name)\\$(my.project_name).vcxproj"
 
