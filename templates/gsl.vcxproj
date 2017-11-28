@@ -810,7 +810,8 @@ function generate_vcxproj()
         define my.nuget_registry = generate->nuget_registry
 
         for _repository->make.product as _product where \
-            (defined(_product.uuid) & defined(_product.path))
+            defined(_product.uuid) & !is_empty(_product.uuid) &\
+            defined(_product.path)
 
             define my.proj_dir_name = project_build_dir_relative_path(\
                 _product, _repository.name)
