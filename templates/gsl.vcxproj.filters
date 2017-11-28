@@ -45,7 +45,7 @@ function to_hex(value)
     endif
 endfunction
 
-function to_uuid(value)
+function to_uuid(seed, value)
     define my.wip = "0"
 
     while (my.value > 0)
@@ -54,11 +54,12 @@ function to_uuid(value)
     endwhile
 
     # NOTE: should vary this?
-    define my.uuid = "0f0f0f0f-f0f0-0f0f-f0f0-"
+    define my.uuid = left(my.seed, 19)
+    my.uuid += "0000-"
     define my.iter = 0
 
     # NOTE: supports at most 0x0fffffffffff
-    while ((my.iter - string.length(my.wip)) < 12)
+    while ((my.iter + string.length(my.wip)) < 12)
         my.uuid += 0
         my.iter +=1
     endwhile
@@ -221,14 +222,14 @@ endfunction
 ###
 ### functional artifact emission
 ###
-function emit_declare_filters_item_group(directories)
+function emit_declare_filters_item_group(directories, uuid_seed)
     define my.directories = emit_declare_filters_item_group.directories
 
     emit_item_group_open()
 
     for my.directories.row as _row by _row.name
 #        echo("   Name: $(_row.name) --- $(_row.value)")
-        emit_filter_declaration(_row.name, _row.value)
+        emit_filter_declaration(_row.name, to_uuid(my.uuid_seed, _row.value))
     endfor
 
     emit_item_group_close()
@@ -369,7 +370,7 @@ function emit_filter(repository, product, project_path)
                 my.uuid = filter_add(_directories, "src\\external", my.uuid)
             endif
 
-            emit_declare_filters_item_group(_directories)
+            emit_declare_filters_item_group(_directories, my.product.uuid)
             emit_item_group_compiler(_files, my.repository, my.product)
             emit_item_group_includes(_files)
             emit_item_group_none(_files)
@@ -408,7 +409,7 @@ endfunction
 .
 .macro emit_filter_declaration(name, uuid)
     <Filter Include="$(my.name)">
-      <UniqueIdentifier>{$(to_uuid(my.uuid):upper)}</UniqueIdentifier>
+      <UniqueIdentifier>{$(my.uuid:upper)}</UniqueIdentifier>
     </Filter>
 .endmacro emit_filter_declaration
 .
