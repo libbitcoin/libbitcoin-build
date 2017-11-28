@@ -241,6 +241,14 @@ function is_product_library(product)
     return (my.product.prefix = "lib")
 endfunction
 
+function is_compiler_ctp(product)
+    define my.product = is_compiler_ctp.product
+    return is_product_library(my.product) |\
+        (is_product_binary(my.product) & !is_option_tests(my.product)) |\
+        (is_product_binary(my.product) & is_option_tests(my.product) &\
+            (my.product.name = "libbitcoin_consensus_test"))
+endfunction
+
 function is_option_console(product)
     define my.product = is_option_console.product
     return defined(my.product.option) & (my.product.option = "console")
@@ -607,7 +615,11 @@ endfunction emit_project
 .   if (is_product_binary(my.product))
     <ConfigurationType>Application</ConfigurationType>
 .   endif
+.   if (is_compiler_ctp(my.product))
     <PlatformToolset>CTP_Nov2013</PlatformToolset>
+.   else
+    <PlatformToolset>v120</PlatformToolset>
+.   endif
     <ProjectGuid>{$(my.product.uuid:upper)}</ProjectGuid>
     <ProjectName>$(project_base(my.product, my.repository_name))</ProjectName>
   </PropertyGroup>
