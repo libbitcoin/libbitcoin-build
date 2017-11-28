@@ -1,4 +1,4 @@
-﻿.template 0
+.template 0
 ###############################################################################
 # Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
@@ -10,36 +10,414 @@
 # Functions
 ###############################################################################
 
+###
+### uuid manipulation
+###
+function uuid_init(repository, product)
+    define my.repository = uuid_init.repository
+    define my.product = uuid_init.product
+    return 0
+endfunction
+
+function uuid_inc(uuid)
+    return my.uuid + 1
+endfunction
+
+###
+### vcxproj related string generators
+###
+function project_base(product, repository_name)
+    define my.product = project_base.product
+    require(my.product, "product", "prefix")
+
+    if (is_product_library(my.product))
+        return "$(my.repository_name)"
+    elsif (is_product_binary(my.product))
+        if (defined(my.product.option))
+            if (defined(my.product.msvc_name))
+                return "$(my.product.msvc_name)"
+            else
+                return "$(my.repository_name)-$(my.product.option)"
+            endif
+        else
+            require(my.product, "product", "option")
+        endif
+    else
+        abort("Unrecognized product prefix: $(my.product.prefix)")
+    endif
+endfunction
+
+function project_build_dir_relative_path(product, repository_name)
+    define my.product = project_build_dir_relative_path.product
+    define my.proj_name = project_base(my.product, my.repository_name)
+    return "$(my.repository_name)/builds/msvc/vs2013/$(my.proj_name)"
+endfunction
+
+function project_file(product, repository_name)
+    define my.product = project_file.product
+    define my.proj_relative_path = project_build_dir_relative_path(my.product,\
+        my.repository_name)
+    define my.proj_name = project_base(my.product, my.repository_name)
+    return "$(my.proj_relative_path)/$(my.proj_name).vcxproj.filters"
+endfunction
+
+function append_win_path(base, subdir)
+    if (!is_empty(my.base))
+        return "$(my.base)\\$(my.subdir)"
+    endif
+    return "$(my.subdir)"
+endfunction
+
+function append_path(base, subdir)
+    if (!is_empty(my.base))
+        return "$(my.base)$(my.subdir)"
+    endif
+    return "$(my.subdir)"
+endfunction
+
+function msbuild_version(product)
+    define my.product = msbuild_version.product
+    if (is_product_library(my.product))
+        return "12.0"
+    endif
+    return "4.0"
+endfunction
+
+###
+### generic assistance functions
+###
+function discover_files(data, directory, path_prefix, win_path, recurse)
+    define my.data = discover_files.data
+    define my.directory = discover_files.directory
+
+    for my.directory.file as _file by _file.name
+        table_add(my.data, append_win_path(\
+            append_win_path(my.path_prefix, my.win_path), _file.name),\
+            my.win_path)
+    endfor
+
+    if (is_true(my.recurse))
+        for my.directory.directory as _directory by _directory.name
+            define my.subdir = open_directory(append_path(my.directory.path,\
+                _directory.name))
+            define my.sub_path = append_win_path(my.win_path, _directory.name)
+
+            discover_files(my.data, my.subdir, my.path_prefix, my.sub_path,\
+                my.recurse)
+        endfor
+    endif
+endfunction
+
+function discover_directories(data, directory, win_path, uuid)
+    define my.data = discover_directories.data
+    define my.directory = discover_directories.directory
+
+    for my.directory.directory as _dir by _dir.name
+        table_add(my.data, append_win_path(my.win_path, _dir.name), my.uuid)
+        my.uuid = uuid_inc(my.uuid)
+    endfor
+
+    for my.directory.directory as _dir by _dir.name
+        define my.subdir = open_directory(append_path(my.directory.path,\
+            _dir.name))
+        define my.sub_path = append_win_path(my.win_path, _dir.name)
+
+        my.uuid = discover_directories(my.data, my.subdir, my.sub_path, my.uuid)
+    endfor
+
+    return my.uuid
+endfunction
+
+function matches_filetype(file_name, extension)
+    return (regexp.match("(^.)(.*)\\.$(my.extension)$", my.file_name) > 0)
+endfunction
+
+function is_compiled_type(name)
+    return matches_filetype(my.name, "cpp") |\
+        matches_filetype(my.name, "c")
+endfunction
+
+function is_included_type(name)
+    return matches_filetype(my.name, "hpp") |\
+        matches_filetype(my.name, "h")
+endfunction
+
+function is_none_type(name)
+    return matches_filetype(my.name, "ipp")
+endfunction
+
+function is_resources_type(name)
+    return matches_filetype(my.name, "rc")
+endfunction
+
+function is_product_binary(product)
+    define my.product = is_product_binary.product
+    require(my.product, "product", "prefix")
+    return (my.product.prefix = "bin")
+endfunction
+
+function is_product_library(product)
+    define my.product = is_product_library.product
+    require(my.product, "product", "prefix")
+    return (my.product.prefix = "lib")
+endfunction
+
+function is_option_tests(product)
+    define my.product = is_option_tests.product
+    return defined(my.product.option) & (my.product.option = "tests")
+endfunction
+
+function filter_add(filters, item, uuid)
+    define my.filters = filter_add.filters
+    table_add(my.filters, my.item, my.uuid)
+    return uuid_inc(my.uuid)
+endfunction
+
+###
+### functional artifact emission
+###
+function emit_declare_filters_item_group(directories)
+    define my.directories = emit_declare_filters_item_group.directories
+
+    emit_item_group_open()
+
+    for my.directories.row as _row by _row.name
+        echo("   Name: $(_row.name) --- $(_row.value)")
+        emit_filter_declaration(_row.name, _row.value)
+    endfor
+
+    emit_item_group_close()
+endfunction
+
+function emit_item_group_compiler(files, repository, product)
+    define my.files = emit_item_group_compiler.files
+    define my.repository = emit_item_group_compiler.repository
+    define my.product = emit_item_group_compiler.product
+
+    if ((my.repository.name = "libbitcoin") |\
+        count(my.files.row, is_compiled_type(count.name)) > 0)
+
+        emit_item_group_open()
+
+        if (my.repository.name = "libbitcoin" & is_product_library(my.product))
+            emit_item_compile_threadsafe_statistics()
+        endif
+
+        for my.files.row as _row by _row.name
+            if (is_compiled_type(_row.name))
+                emit_item_compile_filtered(_row.name, _row.value)
+            endif
+        endfor
+
+        emit_item_group_close()
+    endif
+endfunction
+
+function emit_item_group_includes(files)
+    define my.files = emit_item_group_includes.files
+
+    if (count(my.files.row, is_included_type(count.name)) > 0)
+        emit_item_group_open()
+
+        for my.files.row as _row by _row.name
+            if (is_included_type(_row.name))
+                emit_item_include_filtered(_row.name, _row.value)
+            endif
+        endfor
+
+        emit_item_group_close()
+    endif
+endfunction
+
+function emit_item_group_none(files)
+    define my.files = emit_item_group_none.files
+
+    emit_item_group_open()
+
+    for my.files.row as _row by _row.name
+        if (is_none_type(_row.name))
+            emit_item_none_filtered(_row.name, _row.value)
+        endif
+    endfor
+
+    new row as _row
+        _row.name = "packages.config"
+        emit_item_none(_row.name)
+    endnew
+
+    emit_item_group_close()
+endfunction
+
+function emit_item_group_resources(files)
+    define my.files = emit_item_group_resources.files
+
+    if (count(my.files.row, is_resources_type(count.name)) > 0)
+        emit_item_group_open()
+
+        for my.files.row as _row by _row.name
+            if (is_resources_type(_row.name))
+                emit_item_resource_filtered(_row.name, _row.value)
+            endif
+        endfor
+
+        emit_item_group_close()
+    endif
+endfunction
+
+function emit_filter(repository, product, project_path)
+    define my.repository = emit_filter.repository
+    define my.product = emit_filter.product
+    require(my.product, "product", "path")
+    require(my.product, "product", "uuid")
+
+    emit_xml_declaration()
+    xml_copyleft(my.repository.name)
+    emit_project_open(msbuild_version(my.product))
+
+    new directories as _directories
+        new files as _files
+            define my.product_prefix = "..\\..\\..\\.."
+            define my.product_path = "$(my.project_path)/$(my.product.path)"
+            define my.product_dir = open_directory(my.product_path)
+            define my.product_winpath = "$(my.product.path)"
+            define my.uuid = uuid_init(my.repository, my.product)
+
+            my.uuid = filter_add(_directories, my.product_winpath, my.uuid)
+
+            my.uuid = discover_directories(_directories, my.product_dir,\
+                my.product_winpath, my.uuid)
+
+            discover_files(_files, my.product_dir, my.product_prefix,\
+                my.product_winpath, "true")
+
+            if (is_product_library(my.product))
+                define my.include_prefix = "..\\..\\..\\.."
+                define my.include_path = "$(my.project_path)/include"
+                define my.include_dir = open_directory(my.include_path)
+                define my.include_winpath = "include"
+
+                my.uuid = filter_add(_directories, my.include_winpath, my.uuid)
+
+                my.uuid = discover_directories(_directories, my.include_dir,\
+                    my.include_winpath, my.uuid)
+
+                discover_files(_files, my.include_dir, my.include_prefix,\
+                    my.include_winpath, "true")
+            endif
+
+
+            if (is_product_library(my.product) |\
+                (is_product_binary(my.product) & !is_option_tests(my.product)))
+
+                define my.resources_prefix = "..\\.."
+                define my.resources_path = "$(my.project_path)/builds/msvc"
+                define my.resources_dir = open_directory(my.resources_path)
+                define my.resources_winpath = "resource"
+
+                my.uuid = filter_add(_directories, my.resources_winpath, my.uuid)
+
+                discover_files(_files, my.resources_dir, my.resources_prefix,\
+                    my.resources_winpath, "false")
+            endif
+
+            if (my.repository.name = "libbitcoin" & is_product_library(my.product))
+                my.uuid = filter_add(_directories, "src\\external", my.uuid)
+            endif
+
+            emit_declare_filters_item_group(_directories)
+            emit_item_group_compiler(_files, my.repository, my.product)
+            emit_item_group_includes(_files)
+            emit_item_group_none(_files)
+            emit_item_group_resources(_files)
+        endnew
+    endnew
+
+    emit_project_close()
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
 .endtemplate
 .template 1
 .
-.macro render_filter(compile, include, uuid)
+.macro emit_xml_declaration()
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+.endmacro emit_xml_declaration
+.
+.macro emit_project_open(version)
+<Project DefaultTargets="Build" ToolsVersion="$(my.version)" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+.endmacro emit_project_open
+.
+.macro emit_project_close()
+</Project>
+.endmacro emit_project_close
+.
+.macro emit_item_group_open()
   <ItemGroup>
-    <Filter Include="src">
+.endmacro emit_item_group_open
+.
+.macro emit_item_group_close()
+  </ItemGroup>
+.endmacro emit_item_group_close
+.
+.macro emit_filter_declaration(name, uuid)
+    <Filter Include="$(my.name)">
       <UniqueIdentifier>{$(my.uuid)}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\..\$(my.files)">
-      <Filter>$(my.folder)</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="..\..\resource.rc" />
-  </ItemGroup>
-</Project>
+.endmacro emit_filter_declaration
+.
+.macro emit_item_filter(name)
+      <Filter>$(my.name)</Filter>
 .endmacro
+.
+.macro emit_item_compile_filtered(include, filter_path)
+.   emit_item_filtered("ClCompile", my.include, my.filter_path)
+.endmacro emit_item_compile_filtered
+.
+.macro emit_item_include_filtered(include, filter_path)
+.   emit_item_filtered("ClInclude", my.include, my.filter_path)
+.endmacro emit_item_include_filtered
+.
+.macro emit_item_none_filtered(include, filter_path)
+.   emit_item_filtered("None", my.include, my.filter_path)
+.endmacro emit_item_none_filtered
+.
+.macro emit_item_resource_filtered(include, filter_path)
+.   emit_item_filtered("ResourceCompile", my.include, my.filter_path)
+.endmacro emit_item_resource_filtered
+.
+.macro emit_item_filtered(type, include, filter_path)
+    <$(my.type) Include="$(my.include)">
+.   emit_item_filter(my.filter_path)
+    </$(my.type)>
+.endmacro emit_item_filtered
+.
+.macro emit_item_compile(include)
+.   emit_item("ClCompile", my.include)
+.endmacro emit_item_compile
+.
+.macro emit_item_include(include)
+.   emit_item("ClInclude", my.include)
+.endmacro emit_item_include
+.
+.macro emit_item_none(include)
+.   emit_item("None", my.include)
+.endmacro emit_item_none
+.
+.macro emit_item_resource(include)
+.   emit_item("ResourceCompile", my.include)
+.endmacro emit_item_resource
+.
+.macro emit_item(type, include)
+    <$(my.type) Include="$(my.include)" />
+.endmacro emit_item
+.
+.macro emit_item_compile_threadsafe_statistics()
+.   define my.item = "\$(VC_CTP_Nov2013_InstallDir)\\crt\\src\\threadsafestatics.cpp"
+.   define my.filter = "src\\external"
+.   emit_item_compile_filtered(my.item, my.filter)
+.endmacro emit_compile_item_threadsafe_statistics
 .
 .endtemplate
 .template 0
@@ -47,23 +425,31 @@
 # Generation
 ###############################################################################
 function generate_filter()
-    for generate.repository by name as _repository
-        for _repository.make as _make
-            for _make.product as _product
-                  create_directory(my.project)
-                  define my.out_file = "$(my.project)/$(my.primary).vcxproj.filters"
-                  notify(my.out_file)
-                  output(my.out_file)
+    for generate.repository as _repository by _repository.name\
+        where defined(_repository->make)
 
-                  c_copyleft(_repository.name)
+        require(_repository, "repository", "name")
+        define my.absolute_project_path = "$(global.root)/$(_repository.name)"
 
-                  render_filter("","")
+        for _repository->make.product as _product where \
+            (defined(_product.uuid) & defined(_product.path))
 
-                close
-            endfor _product
-        endfor _make
+            define my.proj_dir_name = project_build_dir_relative_path(\
+                _product, _repository.name)
+
+            define my.proj_file = project_file(_product, _repository.name)
+
+            echo("$(_repository.name) UUID: $(_product.uuid)")
+            create_directory(my.proj_dir_name)
+            notify(my.proj_file)
+            output(my.proj_file)
+
+            emit_filter(_repository, _product, my.absolute_project_path)
+
+            close
+        endfor
     endfor _repository
-endfunction # generate_filter
+endfunction # generate_vcxproj
 .endtemplate
 .template 0
 ###############################################################################
