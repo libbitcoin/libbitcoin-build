@@ -125,7 +125,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 .endmacro emit_version
 .
 .macro emit_project(project_name, project_path, uuid)
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(my.project_name)", "$(my.project_path)", "{$(my.uuid)}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "$(my.project_name)", "$(my.project_path)", "{$(my.uuid:upper)}"
 EndProject
 .endmacro emit_project
 .
@@ -155,25 +155,25 @@ EndGlobal
 .endmacro emit_global_postsolution_close
 .
 .macro emit_library_crossproduct(uuid)
-        {$(my.uuid)}.StaticDebug|Win32.ActiveCfg = DebugLIB|Win32
-        {$(my.uuid)}.StaticDebug|Win32.Build.0 = DebugLIB|Win32
-        {$(my.uuid)}.StaticDebug|x64.ActiveCfg = DebugLIB|x64
-        {$(my.uuid)}.StaticDebug|x64.Build.0 = DebugLIB|x64
-        {$(my.uuid)}.StaticRelease|Win32.ActiveCfg = ReleaseLIB|Win32
-        {$(my.uuid)}.StaticRelease|Win32.Build.0 = ReleaseLIB|Win32
-        {$(my.uuid)}.StaticRelease|x64.ActiveCfg = ReleaseLIB|x64
-        {$(my.uuid)}.StaticRelease|x64.Build.0 = ReleaseLIB|x64
+        {$(my.uuid:upper)}.StaticDebug|Win32.ActiveCfg = DebugLIB|Win32
+        {$(my.uuid:upper)}.StaticDebug|Win32.Build.0 = DebugLIB|Win32
+        {$(my.uuid:upper)}.StaticDebug|x64.ActiveCfg = DebugLIB|x64
+        {$(my.uuid:upper)}.StaticDebug|x64.Build.0 = DebugLIB|x64
+        {$(my.uuid:upper)}.StaticRelease|Win32.ActiveCfg = ReleaseLIB|Win32
+        {$(my.uuid:upper)}.StaticRelease|Win32.Build.0 = ReleaseLIB|Win32
+        {$(my.uuid:upper)}.StaticRelease|x64.ActiveCfg = ReleaseLIB|x64
+        {$(my.uuid:upper)}.StaticRelease|x64.Build.0 = ReleaseLIB|x64
 .endmacro emit_library_crossproduct
 .
 .macro emit_binary_crossproduct(uuid)
-        {$(my.uuid)}.StaticDebug|Win32.ActiveCfg = DebugSEXE|Win32
-        {$(my.uuid)}.StaticDebug|Win32.Build.0 = DebugSEXE|Win32
-        {$(my.uuid)}.StaticDebug|x64.ActiveCfg = DebugSEXE|x64
-        {$(my.uuid)}.StaticDebug|x64.Build.0 = DebugSEXE|x64
-        {$(my.uuid)}.StaticRelease|Win32.ActiveCfg = ReleaseSEXE|Win32
-        {$(my.uuid)}.StaticRelease|Win32.Build.0 = ReleaseSEXE|Win32
-        {$(my.uuid)}.StaticRelease|x64.ActiveCfg = ReleaseSEXE|x64
-        {$(my.uuid)}.StaticRelease|x64.Build.0 = ReleaseSEXE|x64
+        {$(my.uuid:upper)}.StaticDebug|Win32.ActiveCfg = DebugSEXE|Win32
+        {$(my.uuid:upper)}.StaticDebug|Win32.Build.0 = DebugSEXE|Win32
+        {$(my.uuid:upper)}.StaticDebug|x64.ActiveCfg = DebugSEXE|x64
+        {$(my.uuid:upper)}.StaticDebug|x64.Build.0 = DebugSEXE|x64
+        {$(my.uuid:upper)}.StaticRelease|Win32.ActiveCfg = ReleaseSEXE|Win32
+        {$(my.uuid:upper)}.StaticRelease|Win32.Build.0 = ReleaseSEXE|Win32
+        {$(my.uuid:upper)}.StaticRelease|x64.ActiveCfg = ReleaseSEXE|x64
+        {$(my.uuid:upper)}.StaticRelease|x64.Build.0 = ReleaseSEXE|x64
 .endmacro emit_binary_crossproduct
 .
 .macro emit_solution_properties()

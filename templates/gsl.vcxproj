@@ -602,7 +602,7 @@ endfunction emit_project
     <ConfigurationType>Application</ConfigurationType>
 .   endif
     <PlatformToolset>CTP_Nov2013</PlatformToolset>
-    <ProjectGuid>{$(my.product.uuid)}</ProjectGuid>
+    <ProjectGuid>{$(my.product.uuid:upper)}</ProjectGuid>
     <ProjectName>$(project_base(my.product, my.repository_name))</ProjectName>
   </PropertyGroup>
 .endmacro emit_property_group_globals
@@ -774,7 +774,7 @@ endfunction emit_project
 .
 .macro emit_item_group_project_reference_item(name, uuid)
     <ProjectReference Include="..\\$(my.name)\\$(my.name).vcxproj">
-      <Project>{$(my.uuid)}</Project>
+      <Project>{$(my.uuid:upper)}</Project>
     </ProjectReference>
 .endmacro emit_item_group_project_reference_item
 .
