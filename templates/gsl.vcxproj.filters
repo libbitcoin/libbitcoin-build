@@ -156,12 +156,12 @@ function discover_files(data, directory, path_prefix, win_path, value_path, recu
     endif
 endfunction
 
-function discover_directories(data, directory, win_path, uuid)
+function discover_directories(data, directory, win_path, value_path, uuid)
     define my.data = discover_directories.data
     define my.directory = discover_directories.directory
 
     for my.directory.directory as _dir by _dir.name
-        table_add(my.data, sanitize_win_path(append_path(my.win_path,\
+        table_add(my.data, sanitize_win_path(append_path(my.value_path,\
             _dir.name)), my.uuid)
         my.uuid = uuid_inc(my.uuid)
     endfor
@@ -170,8 +170,10 @@ function discover_directories(data, directory, win_path, uuid)
         define my.subdir = open_directory(append_path(my.directory.path,\
             _dir.name))
         define my.sub_path = append_path(my.win_path, _dir.name)
+        define my.sub_value_path = append_path(my.value_path, _dir.name)
 
-        my.uuid = discover_directories(my.data, my.subdir, my.sub_path, my.uuid)
+        my.uuid = discover_directories(my.data, my.subdir, my.sub_path,\
+            my.sub_value_path, my.uuid)
     endfor
 
     return my.uuid
@@ -331,13 +333,13 @@ function emit_filter(repository, product, project_path)
             define my.product_winpath = "$(my.product.path)"
             define my.uuid = uuid_init(my.repository, my.product)
 
-            my.uuid = filter_add(_directories, my.product_winpath, my.uuid)
+            my.uuid = filter_add(_directories, "src", my.uuid)
 
             my.uuid = discover_directories(_directories, my.product_dir,\
-                my.product_winpath, my.uuid)
+                my.product_winpath, "src", my.uuid)
 
             discover_files(_files, my.product_dir, my.product_prefix,\
-                my.product_winpath, my.product_winpath, "true")
+                my.product_winpath, "src", "true")
 
             if (is_product_library(my.product))
                 define my.include_prefix = "../../../.."
@@ -348,7 +350,7 @@ function emit_filter(repository, product, project_path)
                 my.uuid = filter_add(_directories, my.include_winpath, my.uuid)
 
                 my.uuid = discover_directories(_directories, my.include_dir,\
-                    my.include_winpath, my.uuid)
+                    my.include_winpath, my.include_winpath, my.uuid)
 
                 discover_files(_files, my.include_dir, my.include_prefix,\
                     my.include_winpath, my.include_winpath, "true")
