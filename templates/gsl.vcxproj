@@ -135,16 +135,17 @@ function append_prefix(base, subdir)
     return "$(my.subdir)"
 endfunction
 
-function append_win_path(base, subdir)
-    if (!is_empty(my.base))
-        return "$(my.base)\\$(my.subdir)"
-    endif
-    return "$(my.subdir)"
+function sanitize_win_path(path)
+    return string.replace(my.path, "/|\\")
 endfunction
 
 function append_path(base, subdir)
     if (!is_empty(my.base))
-        return "$(my.base)$(my.subdir)"
+        if (!ends_with(my.base, "/") & !ends_with(my.base, "\\"))
+            return "$(my.base)/$(my.subdir)"
+        else
+            return "$(my.base)$(my.subdir)"
+        endif
     endif
     return "$(my.subdir)"
 endfunction
@@ -159,8 +160,8 @@ function discover_files(file_data, directory, win_path, prefix, recurse)
 #    echo("Listing directory $(my.directory.path)")
     for my.directory.file as _file by _file.name
 #        echo("    $(_file.name)")
-        add_file_element(my.file_data, append_win_path(my.win_path,\
-            _file.name), my.prefix, _file.name)
+        add_file_element(my.file_data, sanitize_win_path(\
+            append_path(my.win_path, _file.name)), my.prefix, _file.name)
     endfor
 
     if (is_true(my.recurse))
@@ -168,7 +169,7 @@ function discover_files(file_data, directory, win_path, prefix, recurse)
             define my.subdir_path = append_path(my.directory.path,\
                 _directory.name)
             define my.subdir = open_directory(my.subdir_path)
-            define my.subdir_win_path = append_win_path(my.win_path,\
+            define my.subdir_win_path = append_path(my.win_path,\
                 _directory.name)
             define my.subdir_prefix = append_prefix(my.prefix, _directory.name)
 
@@ -285,7 +286,7 @@ endfunction
 
 function nuget_package_targets_path(package)
     define my.package = nuget_package_targets_path.package
-    return "build\\native\\$(my.package.name).targets"
+    return "build/native/$(my.package.name).targets"
 endfunction
 
 ###
@@ -483,7 +484,7 @@ function emit_project(nuget_registry, repository, product, project_path)
     require(my.product, "product", "uuid")
     define my.product_path = "$(my.project_path)/$(my.product.path)"
     define my.product_dir = open_directory(my.product_path)
-    define my.product_offset = "..\\..\\..\\..\\$(my.product.path)"
+    define my.product_offset = "../../../../$(my.product.path)"
 
     emit_xml_declaration()
     xml_copyleft(my.repository.name)
@@ -507,7 +508,7 @@ function emit_project(nuget_registry, repository, product, project_path)
             if (is_product_library(my.product))
                 define my.include_path = "$(my.project_path)/include"
                 define my.include_dir = open_directory(my.include_path)
-                define my.headers_offset = "..\\..\\..\\..\\include"
+                define my.headers_offset = "../../../../include"
 
                 discover_files(_files, my.include_dir, my.headers_offset,\
                     "include", "true")
@@ -519,7 +520,7 @@ function emit_project(nuget_registry, repository, product, project_path)
 
                 define my.resources_path = "$(my.project_path)/builds/msvc"
                 define my.resources_dir = open_directory(my.resources_path)
-                discover_files(_files, my.resources_dir, "..\\..",\
+                discover_files(_files, my.resources_dir, "../..",\
                     "build", "false")
             endif
 
@@ -578,35 +579,41 @@ endfunction emit_project
 .   define my.file_record = emit_compile_item.file_record
 .
 .   if (!exists_collision(my.collisions, my.file_record.file_name))
-    <ClCompile Include="$(my.file_record.build_path)" />
+.       emit_item("ClCompile", my.file_record)
 .   else
-.       define my.object_base_name = object_base_from_element(my.file_record)
-    <ClCompile Include="$(my.file_record.build_path)">
-      <ObjectFileName>\$(IntDir)$(my.file_record.path_prefix)_$(my.object_base_name).obj</ObjectFileName>
-    </ClCompile>
+.       emit_item_with_object("ClCompile", my.file_record)
 .   endif
 .endmacro emit_compile_item
 .
 .macro emit_include_item(file_record)
 .   define my.file_record = emit_include_item.file_record
-.
-    <ClInclude Include="$(my.file_record.build_path)" />
-.
+.   emit_item("ClInclude", my.file_record)
 .endmacro emit_include_item
 .
 .macro emit_none_item(file_record)
 .   define my.file_record = emit_none_item.file_record
-.
-    <None Include="$(my.file_record.build_path)" />
-.
+.   emit_item("None", my.file_record)
 .endmacro emit_none_item
 .
 .macro emit_resources_item(file_record)
 .   define my.file_record = emit_resources_item.file_record
-.
-    <ResourceCompile Include="$(my.file_record.build_path)" />
-.
+.   emit_item("ResourceCompile", my.file_record)
 .endmacro emit_none_item
+.
+.macro emit_item(type, file_record)
+.   define my.file_record = emit_item.file_record
+    <$(my.type) Include="$(sanitize_win_path(my.file_record.build_path))" />
+.endmacro emit_item
+.
+.macro emit_item_with_object(type, file_record)
+.   define my.file_record = emit_item_with_object.file_record
+.   define my.obj_base_name = object_base_from_element(my.file_record)
+.   define my.obj_full_name = "$(my.file_record.path_prefix)_$(my.obj_base_name).obj"
+    <$(my.type) Include="$(sanitize_win_path(my.file_record.build_path))">
+      <ObjectFileName>\$(IntDir)$(my.obj_full_name)</ObjectFileName>
+    </$(my.type)>
+
+.endmacro emit_item_with_object
 .
 .macro emit_property_group_globals(product, repository_name)
 .   define my.product = emit_property_group_globals.product
@@ -769,8 +776,10 @@ endfunction emit_project
 .
 .macro emit_import_project_nuget(package)
 .   define my.package = emit_import_project_nuget.package
-.   define my.target = "..\\..\\..\\..\\..\\..\\nuget\\$(nuget_package_name(my.package))\\$(nuget_package_targets_path(my.package))"
-    <Import Project="$(my.target)" Condition="Exists('$(my.target)')" />
+.   define my.prefix = "../../../../../../nuget"
+.   define my.target = "$(my.prefix)/$(nuget_package_name(my.package))/$(nuget_package_targets_path(my.package))"
+.   define my.sanitized = sanitize_win_path(my.target)
+    <Import Project="$(my.sanitized)" Condition="Exists('$(my.sanitized)')" />
 .endmacro emit_import_project_nuget
 .
 .macro emit_target_ensure_nuget_imports_open()
@@ -786,8 +795,10 @@ endfunction emit_project
 .
 .macro emit_error_condition_nuget(package)
 .   define my.package = emit_error_condition_nuget.package
-.   define my.target = "..\\..\\..\\..\\..\\..\\nuget\\$(nuget_package_name(my.package))\\$(nuget_package_targets_path(my.package))"
-    <Error Condition="!Exists('$(my.target)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.target)'))" />
+.   define my.prefix = "../../../../../../nuget"
+.   define my.target = "$(my.prefix)/$(nuget_package_name(my.package))/$(nuget_package_targets_path(my.package))"
+.   define my.sanitized = sanitize_win_path(my.target)
+    <Error Condition="!Exists('$(my.sanitized)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.sanitized)'))" />
 .endmacro emit_error_condition_nuget
 .
 .macro emit_item_group_project_reference_item(name, uuid)

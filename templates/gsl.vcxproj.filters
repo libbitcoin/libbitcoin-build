@@ -107,16 +107,17 @@ function project_file(product, repository_name)
     return "$(my.proj_relative_path)/$(my.proj_name).vcxproj.filters"
 endfunction
 
-function append_win_path(base, subdir)
-    if (!is_empty(my.base))
-        return "$(my.base)\\$(my.subdir)"
-    endif
-    return "$(my.subdir)"
+function sanitize_win_path(path)
+    return string.replace(my.path, "/|\\")
 endfunction
 
 function append_path(base, subdir)
     if (!is_empty(my.base))
-        return "$(my.base)$(my.subdir)"
+        if (!ends_with(my.base, "/") & !ends_with(my.base, "\\"))
+            return "$(my.base)/$(my.subdir)"
+        else
+            return "$(my.base)$(my.subdir)"
+        endif
     endif
     return "$(my.subdir)"
 endfunction
@@ -137,8 +138,8 @@ function discover_files(data, directory, path_prefix, win_path, recurse)
     define my.directory = discover_files.directory
 
     for my.directory.file as _file by _file.name
-        table_add(my.data, append_win_path(\
-            append_win_path(my.path_prefix, my.win_path), _file.name),\
+        table_add(my.data, sanitize_win_path(append_path(\
+            append_path(my.path_prefix, my.win_path), _file.name)),\
             my.win_path)
     endfor
 
@@ -146,7 +147,7 @@ function discover_files(data, directory, path_prefix, win_path, recurse)
         for my.directory.directory as _directory by _directory.name
             define my.subdir = open_directory(append_path(my.directory.path,\
                 _directory.name))
-            define my.sub_path = append_win_path(my.win_path, _directory.name)
+            define my.sub_path = append_path(my.win_path, _directory.name)
 
             discover_files(my.data, my.subdir, my.path_prefix, my.sub_path,\
                 my.recurse)
@@ -159,14 +160,15 @@ function discover_directories(data, directory, win_path, uuid)
     define my.directory = discover_directories.directory
 
     for my.directory.directory as _dir by _dir.name
-        table_add(my.data, append_win_path(my.win_path, _dir.name), my.uuid)
+        table_add(my.data, sanitize_win_path(append_path(my.win_path,\
+            _dir.name)), my.uuid)
         my.uuid = uuid_inc(my.uuid)
     endfor
 
     for my.directory.directory as _dir by _dir.name
         define my.subdir = open_directory(append_path(my.directory.path,\
             _dir.name))
-        define my.sub_path = append_win_path(my.win_path, _dir.name)
+        define my.sub_path = append_path(my.win_path, _dir.name)
 
         my.uuid = discover_directories(my.data, my.subdir, my.sub_path, my.uuid)
     endfor
@@ -228,8 +230,8 @@ function emit_declare_filters_item_group(directories, uuid_seed)
     emit_item_group_open()
 
     for my.directories.row as _row by _row.name
-#        echo("   Name: $(_row.name) --- $(_row.value)")
-        emit_filter_declaration(_row.name, to_uuid(my.uuid_seed, _row.value))
+        emit_filter_declaration(sanitize_win_path(_row.name),\
+            to_uuid(my.uuid_seed, _row.value))
     endfor
 
     emit_item_group_close()
@@ -322,7 +324,7 @@ function emit_filter(repository, product, project_path)
 
     new directories as _directories
         new files as _files
-            define my.product_prefix = "..\\..\\..\\.."
+            define my.product_prefix = "../../../.."
             define my.product_path = "$(my.project_path)/$(my.product.path)"
             define my.product_dir = open_directory(my.product_path)
             define my.product_winpath = "$(my.product.path)"
@@ -337,7 +339,7 @@ function emit_filter(repository, product, project_path)
                 my.product_winpath, "true")
 
             if (is_product_library(my.product))
-                define my.include_prefix = "..\\..\\..\\.."
+                define my.include_prefix = "../../../.."
                 define my.include_path = "$(my.project_path)/include"
                 define my.include_dir = open_directory(my.include_path)
                 define my.include_winpath = "include"
@@ -355,7 +357,7 @@ function emit_filter(repository, product, project_path)
             if (is_product_library(my.product) |\
                 (is_product_binary(my.product) & !is_option_tests(my.product)))
 
-                define my.resources_prefix = "..\\.."
+                define my.resources_prefix = "../.."
                 define my.resources_path = "$(my.project_path)/builds/msvc"
                 define my.resources_dir = open_directory(my.resources_path)
                 define my.resources_winpath = "resource"
@@ -367,7 +369,7 @@ function emit_filter(repository, product, project_path)
             endif
 
             if (my.repository.name = "libbitcoin" & is_product_library(my.product))
-                my.uuid = filter_add(_directories, "src\\external", my.uuid)
+                my.uuid = filter_add(_directories, "src/external", my.uuid)
             endif
 
             emit_declare_filters_item_group(_directories, my.product.uuid)
@@ -434,8 +436,8 @@ endfunction
 .endmacro emit_item_resource_filtered
 .
 .macro emit_item_filtered(type, include, filter_path)
-    <$(my.type) Include="$(my.include)">
-.   emit_item_filter(my.filter_path)
+    <$(my.type) Include="$(sanitize_win_path(my.include))">
+.   emit_item_filter(sanitize_win_path(my.filter_path))
     </$(my.type)>
 .endmacro emit_item_filtered
 .
@@ -460,8 +462,8 @@ endfunction
 .endmacro emit_item
 .
 .macro emit_item_compile_threadsafe_statistics()
-.   define my.item = "\$(VC_CTP_Nov2013_InstallDir)\\crt\\src\\threadsafestatics.cpp"
-.   define my.filter = "src\\external"
+.   define my.item = "\$(VC_CTP_Nov2013_InstallDir)/crt/src/threadsafestatics.cpp"
+.   define my.filter = "src/external"
 .   emit_item_compile_filtered(my.item, my.filter)
 .endmacro emit_compile_item_threadsafe_statistics
 .
@@ -485,7 +487,6 @@ function generate_filter()
 
             define my.proj_file = project_file(_product, _repository.name)
 
-#            echo("$(_repository.name) UUID: $(_product.uuid)")
             create_directory(my.proj_dir_name)
             notify(my.proj_file)
             output(my.proj_file)
