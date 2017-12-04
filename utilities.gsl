@@ -90,6 +90,17 @@ function global.normalize_directory(folder)
     return my.directory.path
 endfunction
 
+function global.append_path(base, subdir)
+    if (!is_empty(my.base))
+        if (!ends_with(my.base, "/") & !ends_with(my.base, "\\"))
+            return "$(my.base)/$(my.subdir)"
+        else
+            return "$(my.base)$(my.subdir)"
+        endif
+    endif
+    return "$(my.subdir)"
+endfunction
+
 #------------------------------------------------------------------------------
 # Library utilities.
 #------------------------------------------------------------------------------
