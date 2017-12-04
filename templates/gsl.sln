@@ -11,15 +11,23 @@
 ###############################################################################
 
 ###
-### packages.config related string generators
+### generic assistance functions
+###
+function is_uuid_defined(product)
+    define my.product = is_uuid_defined.product
+    return defined(my.product.uuid) & !is_empty(my.product.uuid)
+endfunction
+
+###
+### sln related string generators
 ###
 function project_base(product, repository_name)
     define my.product = project_base.product
     require(my.product, "product", "prefix")
 
-    if (is_product_library(my.product))
+    if (is_library(my.product))
         return "$(my.repository_name)"
-    elsif (is_product_binary(my.product))
+    elsif (is_program(my.product))
         if (defined(my.product.option))
             if (defined(my.product.msvc_name))
                 return "$(my.product.msvc_name)"
@@ -34,35 +42,14 @@ function project_base(product, repository_name)
     endif
 endfunction
 
-function solution_relative_path(repository_name)
-    return "$(my.repository_name)/builds/msvc/vs2013"
+function solution_relative_path(repository_name, subpath)
+    return append_path(my.repository_name, my.subpath)
 endfunction
 
-function packages_config_file(product, repository_name)
-    define my.product = packages_config_file.product
-    define my.proj_relative_path = project_build_dir_relative_path(my.product,\
-        my.repository_name)
-    return "$(my.proj_relative_path)/packages.config"
-endfunction
-
-###
-### generic assistance functions
-###
-function is_product_binary(product)
-    define my.product = is_product_binary.product
-    require(my.product, "product", "prefix")
-    return (my.product.prefix = "bin")
-endfunction
-
-function is_product_library(product)
-    define my.product = is_product_library.product
-    require(my.product, "product", "prefix")
-    return (my.product.prefix = "lib")
-endfunction
-
-function is_uuid_defined(product)
-    define my.product = is_uuid_defined.product
-    return defined(my.product.uuid) & !is_empty(my.product.uuid)
+function solution_file(repository_name, subpath)
+    define my.relative_path = solution_relative_path(my.repository_name,\
+        my.subpath)
+    return append_path(my.relative_path, "$(my.repository_name).sln")
 endfunction
 
 ###
@@ -93,9 +80,9 @@ function emit_postsolution(repository)
         define my.project_name = project_base(_product, my.repository.name)
         define my.project_path = "$(my.project_name)\\$(my.project_name).vcxproj"
 
-        if (is_product_binary(_product))
+        if (is_program(_product))
             emit_binary_crossproduct(_product.uuid)
-        elsif (is_product_library(_product))
+        elsif (is_library(_product))
             emit_library_crossproduct(_product.uuid)
         else
             abort("Unrecognized product type.")
@@ -195,12 +182,15 @@ EndGlobal
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_solutions()
-    for generate.repository as _repository by _repository.name
+function generate_solutions(generate, subpath)
+    define my.generate = generate_solutions.generate
+    for my.generate.repository as _repository by _repository.name
         require(_repository, "repository", "name")
-        define my.absolute_path = "$(global.root)/$(_repository.name)"
-        define my.solution_path = solution_relative_path(_repository.name)
-        define my.solution_filename = "$(my.solution_path)//$(_repository.name).sln"
+        define my.absolute_path = append_path(global.root, _repository.name)
+        define my.solution_path = solution_relative_path(_repository.name,\
+            my.subpath)
+        define my.solution_filename = solution_file(_repository.name,\
+            my.subpath)
 
         create_directory(my.solution_path)
         notify(my.solution_filename)
@@ -209,21 +199,4 @@ function generate_solutions()
         close
     endfor _repository
 endfunction # generate_solutions
-.endtemplate
-.template 0
-###############################################################################
-# Execution
-###############################################################################
-[global].root = ".."
-[global].trace = 0
-[gsl].ignorecase = 0
-
-# Note: expected context root libbitcoin-build directory
-gsl from "library/math.gsl"
-gsl from "library/string.gsl"
-gsl from "library/collections.gsl"
-gsl from "utilities.gsl"
-
-generate_solutions()
-
 .endtemplate
