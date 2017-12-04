@@ -93,41 +93,19 @@ function project_base(product, repository_name)
     endif
 endfunction
 
-function project_build_dir_relative_path(product, repository_name)
+function project_build_dir_relative_path(product, repository_name, subpath)
     define my.product = project_build_dir_relative_path.product
     define my.proj_name = project_base(my.product, my.repository_name)
-    return "$(my.repository_name)/builds/msvc/vs2013/$(my.proj_name)"
+    return append_path(\
+        append_path(my.repository_name, my.subpath), my.proj_name)
 endfunction
 
-function project_file(product, repository_name)
+function project_file(product, repository_name, subpath)
     define my.product = project_file.product
     define my.proj_relative_path = project_build_dir_relative_path(my.product,\
-        my.repository_name)
+        my.repository_name, my.subpath)
     define my.proj_name = project_base(my.product, my.repository_name)
-    return "$(my.proj_relative_path)/$(my.proj_name).vcxproj.filters"
-endfunction
-
-function sanitize_win_path(path)
-    return string.replace(my.path, "/|\\")
-endfunction
-
-function append_path(base, subdir)
-    if (!is_empty(my.base))
-        if (!ends_with(my.base, "/") & !ends_with(my.base, "\\"))
-            return "$(my.base)/$(my.subdir)"
-        else
-            return "$(my.base)$(my.subdir)"
-        endif
-    endif
-    return "$(my.subdir)"
-endfunction
-
-function msbuild_version(product)
-    define my.product = msbuild_version.product
-    if (is_product_library(my.product))
-        return "12.0"
-    endif
-    return "4.0"
+    return append_path(my.proj_relative_path, "$(my.proj_name).vcxproj.filters")
 endfunction
 
 ###
@@ -138,7 +116,7 @@ function discover_files(data, directory, path_prefix, win_path, value_path, recu
     define my.directory = discover_files.directory
 
     for my.directory.file as _file by _file.name
-        table_add(my.data, sanitize_win_path(append_path(\
+        table_add(my.data, make_win_path(append_path(\
             append_path(my.path_prefix, my.win_path), _file.name)),\
             my.value_path)
     endfor
@@ -161,7 +139,7 @@ function discover_directories(data, directory, win_path, value_path, uuid)
     define my.directory = discover_directories.directory
 
     for my.directory.directory as _dir by _dir.name
-        table_add(my.data, sanitize_win_path(append_path(my.value_path,\
+        table_add(my.data, make_win_path(append_path(my.value_path,\
             _dir.name)), my.uuid)
         my.uuid = uuid_inc(my.uuid)
     endfor
@@ -233,7 +211,7 @@ function emit_declare_filters_item_group(directories, uuid_seed)
     emit_item_group_open()
 
     for my.directories.row as _row by _row.name
-        emit_filter_declaration(sanitize_win_path(_row.name),\
+        emit_filter_declaration(make_win_path(_row.name),\
             to_uuid(my.uuid_seed, _row.value))
     endfor
 
@@ -371,7 +349,7 @@ function emit_filter(repository, product, project_path)
                     "", my.resources_winpath, "false")
             endif
 
-            if (my.repository.name = "libbitcoin" & is_product_library(my.product))
+            if (my.repository.name = "libbitcoin" & is_library(my.product))
                 my.uuid = filter_add(_directories, "src/external", my.uuid)
             endif
 
@@ -439,8 +417,8 @@ endfunction
 .endmacro emit_item_resource_filtered
 .
 .macro emit_item_filtered(type, include, filter_path)
-    <$(my.type) Include="$(sanitize_win_path(my.include))">
-.   emit_item_filter(sanitize_win_path(my.filter_path))
+    <$(my.type) Include="$(make_win_path(my.include))">
+.   emit_item_filter(make_win_path(my.filter_path))
     </$(my.type)>
 .endmacro emit_item_filtered
 .
@@ -464,31 +442,28 @@ endfunction
     <$(my.type) Include="$(my.include)" />
 .endmacro emit_item
 .
-.macro emit_item_compile_threadsafe_statistics()
-.   define my.item = "\$(VC_CTP_Nov2013_InstallDir)/crt/src/threadsafestatics.cpp"
-.   define my.filter = "src/external"
-.   emit_item_compile_filtered(my.item, my.filter)
-.endmacro emit_compile_item_threadsafe_statistics
-.
 .endtemplate
 .template 0
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_filter()
-    for generate.repository as _repository by _repository.name\
+function generate_filter(generate, subpath)
+    define my.generate = generate_filter.generate
+    for my.generate.repository as _repository by _repository.name\
         where defined(_repository->make)
 
         require(_repository, "repository", "name")
-        define my.absolute_project_path = "$(global.root)/$(_repository.name)"
+        define my.absolute_project_path = append_path(global.root,\
+            _repository.name)
 
         for _repository->make.product as _product where \
             (defined(_product.uuid) & defined(_product.path))
 
             define my.proj_dir_name = project_build_dir_relative_path(\
-                _product, _repository.name)
+                _product, _repository.name, my.subpath)
 
-            define my.proj_file = project_file(_product, _repository.name)
+            define my.proj_file = project_file(_product, _repository.name,\
+                my.subpath)
 
             create_directory(my.proj_dir_name)
             notify(my.proj_file)
@@ -500,21 +475,4 @@ function generate_filter()
         endfor
     endfor _repository
 endfunction # generate_vcxproj
-.endtemplate
-.template 0
-###############################################################################
-# Execution
-###############################################################################
-[global].root = ".."
-[global].trace = 0
-[gsl].ignorecase = 0
-
-# Note: expected context root libbitcoin-build directory
-gsl from "library/math.gsl"
-gsl from "library/string.gsl"
-gsl from "library/collections.gsl"
-gsl from "utilities.gsl"
-
-generate_filter()
-
 .endtemplate
