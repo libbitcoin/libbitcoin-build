@@ -1,0 +1,70 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin Makefile.am.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+#
+# variable version utilities
+#
+function msbuild_version(product)
+    define my.product = msbuild_version.product
+    if (is_library(my.product))
+        return "12.0"
+    endif
+    return "4.0"
+endfunction
+
+function platform_toolset(product)
+    define my.product = platform_toolset.product
+    if (is_compiler_ctp(my.product))
+        return "CTP_Nov2013"
+    endif
+    return "v120"
+endfunction
+
+function is_compiler_ctp(product)
+    define my.product = is_compiler_ctp.product
+    return is_library(my.product) |\
+        (is_program(my.product) & !is_option_tests(my.product)) |\
+        (is_program(my.product) & is_option_tests(my.product) &\
+            (my.product.name = "libbitcoin_consensus_test"))
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_compile_item_threadsafe_statistics()
+    <ClCompile Include="\$(VC_CTP_Nov2013_InstallDir)\\crt\\src\\threadsafestatics.cpp">
+      <ExcludedFromBuild Condition="\$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
+    </ClCompile>
+.endmacro emit_compile_item_threadsafe_statistics
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+gsl from "templates/gsl.vcxproj"
+
+generate_vcxproj(generate, "builds/msvc/vs2013")
+
+.endtemplate
