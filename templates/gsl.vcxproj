@@ -11,6 +11,124 @@
 ###############################################################################
 
 ###
+### vcxproj related string generators
+###
+function project_base(product, repository_name)
+    define my.product = project_base.product
+    require(my.product, "product", "prefix")
+
+    if (is_library(my.product))
+        return "$(my.repository_name)"
+    elsif (is_program(my.product))
+        if (defined(my.product.option))
+            if (defined(my.product.msvc_name))
+                return "$(my.product.msvc_name)"
+            else
+                return "$(my.repository_name)-$(my.product.option)"
+            endif
+        else
+            require(my.product, "product", "option")
+        endif
+    else
+        abort("Unrecognized product prefix: $(my.product.prefix)")
+    endif
+endfunction
+
+function project_build_dir_relative_path(product, repository_name, subpath)
+    define my.product = project_build_dir_relative_path.product
+    define my.proj_name = project_base(my.product, my.repository_name)
+    return append_path(\
+        append_path(my.repository_name, my.subpath), my.proj_name)
+endfunction
+
+function project_file(product, repository_name, subpath)
+    define my.product = project_file.product
+    define my.proj_relative_path = project_build_dir_relative_path(my.product,\
+        my.repository_name, my.subpath)
+    define my.proj_name = project_base(my.product, my.repository_name)
+    return append_path(my.proj_relative_path, "$(my.proj_name).vcxproj")
+endfunction
+
+function nuget_package_name(package)
+    define my.package = nuget_package_name.package
+    return "$(my.package.name).$(my.package.version)"
+endfunction
+
+function nuget_package_targets_path(package)
+    define my.package = nuget_package_targets_path.package
+    return "build/native/$(my.package.name).targets"
+endfunction
+
+###
+### utilities
+###
+function append_prefix(base, subdir)
+    if (!is_empty(my.base))
+        return "$(my.base)_$(my.subdir)"
+    endif
+    return "$(my.subdir)"
+endfunction
+
+function nuget_entry(nuget_registry, name)
+    define my.nuget_registry = nuget_entry.nuget_registry
+    return my.nuget_registry->nuget(_nuget.build_name = my.name, _nuget)
+endfunction
+
+function repository_library_uuid(repository)
+    define my.repository = repository_library_uuid.repository
+    return my.repository->make->product(is_library(_product), _product).uuid
+endfunction
+
+function is_compiled_type(element)
+    define my.element = is_compiled_type.element
+    return matches_filetype(my.element.file_name, "cpp") |\
+        matches_filetype(my.element.file_name, "c")
+endfunction
+
+function is_included_type(element)
+    define my.element = is_included_type.element
+    return matches_filetype(my.element.file_name, "hpp") |\
+        matches_filetype(my.element.file_name, "h")
+endfunction
+
+function is_none_type(element)
+    define my.element = is_none_type.element
+    return matches_filetype(my.element.file_name, "ipp")
+endfunction
+
+function is_resources_type(element)
+    define my.element = is_resources_type.element
+    return matches_filetype(my.element.file_name, "rc")
+endfunction
+
+function object_base_from_element(element)
+    define my.element = object_base_from_element.element
+    if (matches_filetype(my.element.file_name, "cpp"))
+        return global.left(my.element.file_name,\
+            string.length(my.element.file_name) - 4)
+    elsif (matches_filetype(my.element.file_name, "c"))
+        return global.left(my.element.file_name,\
+            string.length(my.element.file_name) - 2)
+    endif
+
+    return my.element.file_name
+endfunction
+
+function matches_filetype(file_name, extension)
+    return (regexp.match("(^.)(.*)\\.$(my.extension)$", my.file_name) > 0)
+endfunction
+
+function is_option_console(product)
+    define my.product = is_option_console.product
+    return defined(my.product.option) & (my.product.option = "console")
+endfunction
+
+function is_option_tests(product)
+    define my.product = is_option_tests.product
+    return defined(my.product.option) & (my.product.option = "tests")
+endfunction
+
+###
 ### File element-related string data storage/query
 ###
 function match_file_element_build_path(element, build_path)
@@ -91,76 +209,14 @@ function add_collision(root, file_name)
 endfunction
 
 ###
-### vcxproj related string generators
-###
-function project_base(product, repository_name)
-    define my.product = project_base.product
-    require(my.product, "product", "prefix")
-
-    if (is_product_library(my.product))
-        return "$(my.repository_name)"
-    elsif (is_product_binary(my.product))
-        if (defined(my.product.option))
-            if (defined(my.product.msvc_name))
-                return "$(my.product.msvc_name)"
-            else
-                return "$(my.repository_name)-$(my.product.option)"
-            endif
-        else
-            require(my.product, "product", "option")
-        endif
-    else
-        abort("Unrecognized product prefix: $(my.product.prefix)")
-    endif
-endfunction
-
-function project_build_dir_relative_path(product, repository_name)
-    define my.product = project_build_dir_relative_path.product
-    define my.proj_name = project_base(my.product, my.repository_name)
-    return "$(my.repository_name)/builds/msvc/vs2013/$(my.proj_name)"
-endfunction
-
-function project_file(product, repository_name)
-    define my.product = project_file.product
-    define my.proj_relative_path = project_build_dir_relative_path(my.product,\
-        my.repository_name)
-    define my.proj_name = project_base(my.product, my.repository_name)
-    return "$(my.proj_relative_path)/$(my.proj_name).vcxproj"
-endfunction
-
-function append_prefix(base, subdir)
-    if (!is_empty(my.base))
-        return "$(my.base)_$(my.subdir)"
-    endif
-    return "$(my.subdir)"
-endfunction
-
-function sanitize_win_path(path)
-    return string.replace(my.path, "/|\\")
-endfunction
-
-function append_path(base, subdir)
-    if (!is_empty(my.base))
-        if (!ends_with(my.base, "/") & !ends_with(my.base, "\\"))
-            return "$(my.base)/$(my.subdir)"
-        else
-            return "$(my.base)$(my.subdir)"
-        endif
-    endif
-    return "$(my.subdir)"
-endfunction
-
-###
 ### generic assistance functions
 ###
 function discover_files(file_data, directory, win_path, prefix, recurse)
     define my.file_data = discover_files.file_data
     define my.directory = discover_files.directory
 
-#    echo("Listing directory $(my.directory.path)")
     for my.directory.file as _file by _file.name
-#        echo("    $(_file.name)")
-        add_file_element(my.file_data, sanitize_win_path(\
+        add_file_element(my.file_data, make_win_path(\
             append_path(my.win_path, _file.name)), my.prefix, _file.name)
     endfor
 
@@ -191,104 +247,6 @@ function populate_collisions(collisions, file_data)
     endfor
 endfunction
 
-function is_compiled_type(element)
-    define my.element = is_compiled_type.element
-    return matches_filetype(my.element.file_name, "cpp") |\
-        matches_filetype(my.element.file_name, "c")
-endfunction
-
-function is_included_type(element)
-    define my.element = is_included_type.element
-    return matches_filetype(my.element.file_name, "hpp") |\
-        matches_filetype(my.element.file_name, "h")
-endfunction
-
-function is_none_type(element)
-    define my.element = is_none_type.element
-    return matches_filetype(my.element.file_name, "ipp")
-endfunction
-
-function is_resources_type(element)
-    define my.element = is_resources_type.element
-    return matches_filetype(my.element.file_name, "rc")
-endfunction
-
-function object_base_from_element(element)
-    define my.element = object_base_from_element.element
-    if (matches_filetype(my.element.file_name, "cpp"))
-        return global.left(my.element.file_name,\
-            string.length(my.element.file_name) - 4)
-    elsif (matches_filetype(my.element.file_name, "c"))
-        return global.left(my.element.file_name,\
-            string.length(my.element.file_name) - 2)
-    endif
-
-    return my.element.file_name
-endfunction
-
-function matches_filetype(file_name, extension)
-    return (regexp.match("(^.)(.*)\\.$(my.extension)$", my.file_name) > 0)
-endfunction
-
-function is_product_binary(product)
-    define my.product = is_product_binary.product
-    require(my.product, "product", "prefix")
-    return (my.product.prefix = "bin")
-endfunction
-
-function is_product_library(product)
-    define my.product = is_product_library.product
-    require(my.product, "product", "prefix")
-    return (my.product.prefix = "lib")
-endfunction
-
-function is_compiler_ctp(product)
-    define my.product = is_compiler_ctp.product
-    return is_product_library(my.product) |\
-        (is_product_binary(my.product) & !is_option_tests(my.product)) |\
-        (is_product_binary(my.product) & is_option_tests(my.product) &\
-            (my.product.name = "libbitcoin_consensus_test"))
-endfunction
-
-function is_option_console(product)
-    define my.product = is_option_console.product
-    return defined(my.product.option) & (my.product.option = "console")
-endfunction
-
-function is_option_tests(product)
-    define my.product = is_option_tests.product
-    return defined(my.product.option) & (my.product.option = "tests")
-endfunction
-
-function msbuild_version(product)
-    define my.product = msbuild_version.product
-    if (is_product_library(my.product))
-        return "12.0"
-    endif
-    return "4.0"
-endfunction
-
-function get_nuget_entry(nuget_registry, name)
-    define my.nuget_registry = get_nuget_entry.nuget_registry
-    # echo "   Looking for nuget $(my.name)..."
-    return my.nuget_registry->nuget(_nuget.build_name = my.name, _nuget)
-endfunction
-
-function get_repository_library_uuid(repository)
-    define my.repository = get_repository_library_uuid.repository
-    return my.repository->make->product(is_product_library(_product), _product).uuid
-endfunction
-
-function nuget_package_name(package)
-    define my.package = nuget_package_name.package
-    return "$(my.package.name).$(my.package.version)"
-endfunction
-
-function nuget_package_targets_path(package)
-    define my.package = nuget_package_targets_path.package
-    return "build/native/$(my.package.name).targets"
-endfunction
-
 ###
 ### functional artifact emission
 ###
@@ -303,13 +261,12 @@ function emit_item_group_compiler(repository, product, file_data, collisions)
 
         emit_item_group_open()
 
-        if (my.repository.name = "libbitcoin" & is_product_library(my.product))
+        if (my.repository.name = "libbitcoin" & is_library(my.product))
             emit_compile_item_threadsafe_statistics()
         endif
 
         for my.file_data.element as _element by _element.build_path
             if (is_compiled_type(_element))
-                #echo("    $(_element.build_path)")
                 emit_compile_item(my.collisions, _element)
             endif
         endfor
@@ -377,9 +334,9 @@ endfunction
 
 function emit_item_group_product_configurations(product)
     define my.product = emit_item_group_product_configurations.product
-    if (is_product_binary(my.product))
+    if (is_program(my.product))
         emit_item_group_product_configurations_binary()
-    elsif (is_product_library(my.product))
+    elsif (is_library(my.product))
         emit_item_group_product_configurations_library()
     else
         abort("Product type not recognized: $(my.product.prefix)")
@@ -388,7 +345,7 @@ endfunction
 
 function emit_propery_group_configuration(product)
     define my.product = emit_propery_group_configuration.product
-    if (is_product_library(my.product))
+    if (is_library(my.product))
         emit_propery_group_configuration_library()
     endif
 endfunction
@@ -408,8 +365,8 @@ function emit_import_group_extension_settings(nuget_registry, repository,\
     for my.repository->install.build as _build where defined(_build.nuget) &\
         (_build.nuget = "true")
 
-        define nuget_entry = get_nuget_entry(my.nuget_registry, _build.name)
-        for nuget_entry.package as _package
+        define entry = nuget_entry(my.nuget_registry, _build.name)
+        for entry.package as _package
             require(_package, "package", "label")
             require(_package, "package", "name")
             require(_package, "package", "version")
@@ -418,7 +375,6 @@ function emit_import_group_extension_settings(nuget_registry, repository,\
                 ((_package.label = "test") & is_true(my.product.test)))
                 emit_import_project_nuget(_package)
             endif
-
         endfor
     endfor
 
@@ -440,8 +396,8 @@ function emit_target_ensure_nuget_imports(nuget_registry, repository,\
     for my.repository->install.build as _build where defined(_build.nuget) &\
         (_build.nuget = "true")
 
-        define nuget_entry = get_nuget_entry(my.nuget_registry, _build.name)
-        for nuget_entry.package as _package
+        define entry = nuget_entry(my.nuget_registry, _build.name)
+        for entry.package as _package
             require(_package, "package", "label")
             require(_package, "package", "name")
             require(_package, "package", "version")
@@ -450,7 +406,6 @@ function emit_target_ensure_nuget_imports(nuget_registry, repository,\
                 ((_package.label = "test") & is_true(my.product.test)))
                 emit_error_condition_nuget(_package)
             endif
-
         endfor
     endfor
 
@@ -465,10 +420,10 @@ function emit_item_group_project_references(repository, product)
     require(my.product, "product", "prefix")
     require(my.product, "product", "uuid")
 
-    if (!is_product_library(my.product))
+    if (!is_library(my.product))
         emit_item_group_open()
         emit_item_group_project_reference_item(my.repository.name,\
-            get_repository_library_uuid(my.repository))
+            repository_library_uuid(my.repository))
         emit_item_group_close()
     endif
 
@@ -505,7 +460,7 @@ function emit_project(nuget_registry, repository, product, project_path)
             populate_collisions(_map, _files)
 
             # TODO: consider providing this relationship in xml
-            if (is_product_library(my.product))
+            if (is_library(my.product))
                 define my.include_path = "$(my.project_path)/include"
                 define my.include_dir = open_directory(my.include_path)
                 define my.headers_offset = "../../../../include"
@@ -515,8 +470,8 @@ function emit_project(nuget_registry, repository, product, project_path)
             endif
 
 
-            if (is_product_library(my.product) |\
-                (is_product_binary(my.product) & !is_option_tests(my.product)))
+            if (is_library(my.product) |\
+                (is_program(my.product) & !is_option_tests(my.product)))
 
                 define my.resources_path = "$(my.project_path)/builds/msvc"
                 define my.resources_dir = open_directory(my.resources_path)
@@ -568,122 +523,18 @@ endfunction emit_project
   </ItemGroup>
 .endmacro emit_item_group_close
 .
-.macro emit_compile_item_threadsafe_statistics()
-    <ClCompile Include="\$(VC_CTP_Nov2013_InstallDir)\\crt\\src\\threadsafestatics.cpp">
-      <ExcludedFromBuild Condition="\$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
-    </ClCompile>
-.endmacro emit_compile_item_threadsafe_statistics
-.
-.macro emit_compile_item(collisions, file_record)
-.   define my.collisions = emit_compile_item.collisions
-.   define my.file_record = emit_compile_item.file_record
-.
-.   if (!exists_collision(my.collisions, my.file_record.file_name))
-.       emit_item("ClCompile", my.file_record)
-.   else
-.       emit_item_with_object("ClCompile", my.file_record)
-.   endif
-.endmacro emit_compile_item
-.
-.macro emit_include_item(file_record)
-.   define my.file_record = emit_include_item.file_record
-.   emit_item("ClInclude", my.file_record)
-.endmacro emit_include_item
-.
-.macro emit_none_item(file_record)
-.   define my.file_record = emit_none_item.file_record
-.   emit_item("None", my.file_record)
-.endmacro emit_none_item
-.
-.macro emit_resources_item(file_record)
-.   define my.file_record = emit_resources_item.file_record
-.   emit_item("ResourceCompile", my.file_record)
-.endmacro emit_none_item
-.
-.macro emit_item(type, file_record)
-.   define my.file_record = emit_item.file_record
-    <$(my.type) Include="$(sanitize_win_path(my.file_record.build_path))" />
-.endmacro emit_item
-.
-.macro emit_item_with_object(type, file_record)
-.   define my.file_record = emit_item_with_object.file_record
-.   define my.obj_base_name = object_base_from_element(my.file_record)
-.   define my.obj_full_name = "$(my.file_record.path_prefix)_$(my.obj_base_name).obj"
-    <$(my.type) Include="$(sanitize_win_path(my.file_record.build_path))">
-      <ObjectFileName>\$(IntDir)$(my.obj_full_name)</ObjectFileName>
-    </$(my.type)>
-
-.endmacro emit_item_with_object
-.
 .macro emit_property_group_globals(product, repository_name)
 .   define my.product = emit_property_group_globals.product
 .   require(my.product, "product", "uuid")
   <PropertyGroup Label="Globals">
-.   if (is_product_binary(my.product))
+.   if (is_program(my.product))
     <ConfigurationType>Application</ConfigurationType>
 .   endif
-.   if (is_compiler_ctp(my.product))
-    <PlatformToolset>CTP_Nov2013</PlatformToolset>
-.   else
-    <PlatformToolset>v120</PlatformToolset>
-.   endif
+    <PlatformToolset>$(platform_toolset(my.product))</PlatformToolset>
     <ProjectGuid>{$(my.product.uuid:upper)}</ProjectGuid>
     <ProjectName>$(project_base(my.product, my.repository_name))</ProjectName>
   </PropertyGroup>
 .endmacro emit_property_group_globals
-.
-.macro emit_item_group_product_configurations_binary()
-  <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="DebugDEXE|Win32">
-      <Configuration>DebugDEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseDEXE|Win32">
-      <Configuration>ReleaseDEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugDEXE|x64">
-      <Configuration>DebugDEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseDEXE|x64">
-      <Configuration>ReleaseDEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugLEXE|Win32">
-      <Configuration>DebugLEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseLEXE|Win32">
-      <Configuration>ReleaseLEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugLEXE|x64">
-      <Configuration>DebugLEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseLEXE|x64">
-      <Configuration>ReleaseLEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugSEXE|Win32">
-      <Configuration>DebugSEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseSEXE|Win32">
-      <Configuration>ReleaseSEXE</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="DebugSEXE|x64">
-      <Configuration>DebugSEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ReleaseSEXE|x64">
-      <Configuration>ReleaseSEXE</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-  </ItemGroup>
-.endmacro emict_item_group_product_configurations
 .
 .macro emit_item_group_product_configurations_library()
   <ItemGroup Label="ProjectConfigurations">
@@ -745,6 +596,112 @@ endfunction emit_project
   </PropertyGroup>
 .endmacro emit_propery_group_configuration_library
 .
+.macro emit_item_group_product_configurations_binary()
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugDEXE|Win32">
+      <Configuration>DebugDEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDEXE|Win32">
+      <Configuration>ReleaseDEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugDEXE|x64">
+      <Configuration>DebugDEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDEXE|x64">
+      <Configuration>ReleaseDEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLEXE|Win32">
+      <Configuration>DebugLEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLEXE|Win32">
+      <Configuration>ReleaseLEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLEXE|x64">
+      <Configuration>DebugLEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLEXE|x64">
+      <Configuration>ReleaseLEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugSEXE|Win32">
+      <Configuration>DebugSEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseSEXE|Win32">
+      <Configuration>ReleaseSEXE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugSEXE|x64">
+      <Configuration>DebugSEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseSEXE|x64">
+      <Configuration>ReleaseSEXE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+.endmacro emit_item_group_product_configurations_binary
+.
+.macro emit_item_group_product_configurations_library()
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugDLL|Win32">
+      <Configuration>DebugDLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDLL|Win32">
+      <Configuration>ReleaseDLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugDLL|x64">
+      <Configuration>DebugDLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDLL|x64">
+      <Configuration>ReleaseDLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLTCG|Win32">
+      <Configuration>DebugLTCG</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLTCG|Win32">
+      <Configuration>ReleaseLTCG</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLTCG|x64">
+      <Configuration>DebugLTCG</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLTCG|x64">
+      <Configuration>ReleaseLTCG</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLIB|Win32">
+      <Configuration>DebugLIB</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLIB|Win32">
+      <Configuration>ReleaseLIB</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLIB|x64">
+      <Configuration>DebugLIB</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLIB|x64">
+      <Configuration>ReleaseLIB</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+.endmacro emit_item_group_product_configurations_library
+.
 .macro emit_import_props()
   <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.Default.props" />
   <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.props" />
@@ -774,12 +731,52 @@ endfunction emit_project
   </ImportGroup>
 .endmacro emit_import_group_extension_settings_close
 .
+.macro emit_compile_item(collisions, file_record)
+.   define my.collisions = emit_compile_item.collisions
+.   define my.file_record = emit_compile_item.file_record
+.
+.   if (!exists_collision(my.collisions, my.file_record.file_name))
+.       emit_item("ClCompile", my.file_record)
+.   else
+.       emit_item_with_object("ClCompile", my.file_record)
+.   endif
+.endmacro emit_compile_item
+.
+.macro emit_include_item(file_record)
+.   define my.file_record = emit_include_item.file_record
+.   emit_item("ClInclude", my.file_record)
+.endmacro emit_include_item
+.
+.macro emit_none_item(file_record)
+.   define my.file_record = emit_none_item.file_record
+.   emit_item("None", my.file_record)
+.endmacro emit_none_item
+.
+.macro emit_resources_item(file_record)
+.   define my.file_record = emit_resources_item.file_record
+.   emit_item("ResourceCompile", my.file_record)
+.endmacro emit_none_item
+.
+.macro emit_item(type, file_record)
+.   define my.file_record = emit_item.file_record
+    <$(my.type) Include="$(make_win_path(my.file_record.build_path))" />
+.endmacro emit_item
+.
+.macro emit_item_with_object(type, file_record)
+.   define my.file_record = emit_item_with_object.file_record
+.   define my.obj_base_name = object_base_from_element(my.file_record)
+.   define my.obj_full_name = "$(my.file_record.path_prefix)_$(my.obj_base_name).obj"
+    <$(my.type) Include="$(make_win_path(my.file_record.build_path))">
+      <ObjectFileName>\$(IntDir)$(my.obj_full_name)</ObjectFileName>
+    </$(my.type)>
+.endmacro emit_item_with_object
+.
 .macro emit_import_project_nuget(package)
 .   define my.package = emit_import_project_nuget.package
 .   define my.prefix = "../../../../../../nuget"
 .   define my.target = "$(my.prefix)/$(nuget_package_name(my.package))/$(nuget_package_targets_path(my.package))"
-.   define my.sanitized = sanitize_win_path(my.target)
-    <Import Project="$(my.sanitized)" Condition="Exists('$(my.sanitized)')" />
+.   define my.win_path = make_win_path(my.target)
+    <Import Project="$(my.win_path)" Condition="Exists('$(my.win_path)')" />
 .endmacro emit_import_project_nuget
 .
 .macro emit_target_ensure_nuget_imports_open()
@@ -797,8 +794,8 @@ endfunction emit_project
 .   define my.package = emit_error_condition_nuget.package
 .   define my.prefix = "../../../../../../nuget"
 .   define my.target = "$(my.prefix)/$(nuget_package_name(my.package))/$(nuget_package_targets_path(my.package))"
-.   define my.sanitized = sanitize_win_path(my.target)
-    <Error Condition="!Exists('$(my.sanitized)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.sanitized)'))" />
+.   define my.win_path = make_win_path(my.target)
+    <Error Condition="!Exists('$(my.win_path)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.win_path)'))" />
 .endmacro emit_error_condition_nuget
 .
 .macro emit_item_group_project_reference_item(name, uuid)
@@ -812,12 +809,15 @@ endfunction emit_project
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_vcxproj()
-    for generate.repository as _repository by _repository.name\
+function generate_vcxproj(generate, subpath)
+    define my.generate = generate_vcxproj.generate
+    for my.generate.repository as _repository by _repository.name\
         where defined(_repository->make)
 
         require(_repository, "repository", "name")
-        define my.absolute_proj_path = "$(global.root)/$(_repository.name)"
+        define my.absolute_proj_path = append_path(global.root,\
+            _repository.name)
+
         define my.nuget_registry = generate->nuget_registry
 
         for _repository->make.product as _product where \
@@ -825,9 +825,10 @@ function generate_vcxproj()
             defined(_product.path)
 
             define my.proj_dir_name = project_build_dir_relative_path(\
-                _product, _repository.name)
+                _product, _repository.name, my.subpath)
 
-            define my.proj_file = project_file(_product, _repository.name)
+            define my.proj_file = project_file(_product, _repository.name,\
+                my.subpath)
 
             create_directory(my.proj_dir_name)
             notify(my.proj_file)
@@ -840,21 +841,4 @@ function generate_vcxproj()
         endfor
     endfor _repository
 endfunction # generate_vcxproj
-.endtemplate
-.template 0
-###############################################################################
-# Execution
-###############################################################################
-[global].root = ".."
-[global].trace = 0
-[gsl].ignorecase = 0
-
-# Note: expected context root libbitcoin-build directory
-gsl from "library/math.gsl"
-gsl from "library/string.gsl"
-gsl from "library/collections.gsl"
-gsl from "utilities.gsl"
-
-generate_vcxproj()
-
 .endtemplate
