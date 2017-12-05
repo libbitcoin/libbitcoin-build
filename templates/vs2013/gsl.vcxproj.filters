@@ -7,21 +7,6 @@
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-# Functions
-###############################################################################
-
-###
-### variable version utilities
-###
-function msbuild_version(product)
-    define my.product = msbuild_version.product
-    if (is_library(my.product))
-        return "12.0"
-    endif
-    return "4.0"
-endfunction
-
-###############################################################################
 # Macros
 ###############################################################################
 .endtemplate
@@ -47,8 +32,9 @@ gsl from "library/math.gsl"
 gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
+gsl from "templates/vs2013/common.gsl"
 gsl from "templates/gsl.vcxproj.filters"
 
-generate_filter(generate, "builds/msvc/vs2013")
+generate_filter(generate, "vs2013")
 
 .endtemplate

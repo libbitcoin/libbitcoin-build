@@ -2,7 +2,7 @@
 ###############################################################################
 # Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
-# GSL generate libbitcoin Makefile.am.
+# GSL generate libbitcoin vcxproj.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
@@ -34,17 +34,18 @@ function project_base(product, repository_name)
     endif
 endfunction
 
-function project_build_dir_relative_path(product, repository_name, subpath)
+function project_build_dir_relative_path(product, repository_name, vs_version)
     define my.product = project_build_dir_relative_path.product
     define my.proj_name = project_base(my.product, my.repository_name)
+    define my.subpath = "builds/msvc/$(my.vs_version)"
     return append_path(\
         append_path(my.repository_name, my.subpath), my.proj_name)
 endfunction
 
-function project_file(product, repository_name, subpath)
+function project_file(product, repository_name, vs_version)
     define my.product = project_file.product
     define my.proj_relative_path = project_build_dir_relative_path(my.product,\
-        my.repository_name, my.subpath)
+        my.repository_name, my.vs_version)
     define my.proj_name = project_base(my.product, my.repository_name)
     return append_path(my.proj_relative_path, "$(my.proj_name).vcxproj")
 endfunction
@@ -71,7 +72,8 @@ endfunction
 
 function nuget_entry(nuget_registry, name)
     define my.nuget_registry = nuget_entry.nuget_registry
-    return my.nuget_registry->nuget(_nuget.build_name = my.name, _nuget)
+    return my.nuget_registry->nuget(_nuget.build_name = my.name &\
+        _nuget.compiler = platform_compiler(), _nuget)
 endfunction
 
 function repository_library_uuid(repository)
@@ -809,7 +811,7 @@ endfunction emit_project
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_vcxproj(generate, subpath)
+function generate_vcxproj(generate, vs_version)
     define my.generate = generate_vcxproj.generate
     for my.generate.repository as _repository by _repository.name\
         where defined(_repository->make)
@@ -825,10 +827,10 @@ function generate_vcxproj(generate, subpath)
             defined(_product.path)
 
             define my.proj_dir_name = project_build_dir_relative_path(\
-                _product, _repository.name, my.subpath)
+                _product, _repository.name, my.vs_version)
 
             define my.proj_file = project_file(_product, _repository.name,\
-                my.subpath)
+                my.vs_version)
 
             create_directory(my.proj_dir_name)
             notify(my.proj_file)

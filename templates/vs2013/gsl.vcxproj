@@ -2,41 +2,10 @@
 ###############################################################################
 # Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
-# GSL generate libbitcoin Makefile.am.
+# GSL generate libbitcoin vcxproj.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
-###############################################################################
-# Functions
-###############################################################################
-
-#
-# variable version utilities
-#
-function msbuild_version(product)
-    define my.product = msbuild_version.product
-    if (is_library(my.product))
-        return "12.0"
-    endif
-    return "4.0"
-endfunction
-
-function platform_toolset(product)
-    define my.product = platform_toolset.product
-    if (is_compiler_ctp(my.product))
-        return "CTP_Nov2013"
-    endif
-    return "v120"
-endfunction
-
-function is_compiler_ctp(product)
-    define my.product = is_compiler_ctp.product
-    return is_library(my.product) |\
-        (is_program(my.product) & !is_option_tests(my.product)) |\
-        (is_program(my.product) & is_option_tests(my.product) &\
-            (my.product.name = "libbitcoin_consensus_test"))
-endfunction
-
 ###############################################################################
 # Macros
 ###############################################################################
@@ -63,8 +32,9 @@ gsl from "library/math.gsl"
 gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
+gsl from "templates/vs2013/common.gsl"
 gsl from "templates/gsl.vcxproj"
 
-generate_vcxproj(generate, "builds/msvc/vs2013")
+generate_vcxproj(generate, "vs2013")
 
 .endtemplate
