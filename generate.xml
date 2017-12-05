@@ -1860,8 +1860,8 @@
   </repository>
 
   <nuget_registry>
-    <nuget build_name="boost">
-      <package label="boost"           name="boost"                           version="1.57.0.0" />
+    <nuget build_name="boost" compiler="vc120" >
+      <package label="boost"           name="boost-vc120"                     version="1.57.0.0" />
       <package label="chrono"          name="boost_chrono-vc120"              version="1.57.0.0" />
       <package label="date_time"       name="boost_date_time-vc120"           version="1.57.0.0" />
       <package label="filesystem"      name="boost_filesystem-vc120"          version="1.57.0.0" />
@@ -1875,11 +1875,55 @@
       <package label="thread"          name="boost_thread-vc120"              version="1.57.0.0" />
       <package label="test"            name="boost_unit_test_framework-vc120" version="1.57.0.0" />
     </nuget>
-    <nuget build_name="secp256k1">
+    <nuget build_name="boost" compiler="vc140" >
+      <package label="boost"           name="boost-vc140"                     version="1.59.0.0" />
+      <package label="chrono"          name="boost_chrono-vc140"              version="1.59.0.0" />
+      <package label="date_time"       name="boost_date_time-vc140"           version="1.59.0.0" />
+      <package label="filesystem"      name="boost_filesystem-vc140"          version="1.59.0.0" />
+      <package label="iostreams"       name="boost_iostreams-vc140"           version="1.59.0.0" />
+      <package label="locale"          name="boost_locale-vc140"              version="1.59.0.0" />
+      <package label="log"             name="boost_log-vc140"                 version="1.59.0.0" />
+      <package label="log_setup"       name="boost_log_setup-vc140"           version="1.59.0.0" />
+      <package label="program_options" name="boost_program_options-vc140"     version="1.59.0.0" />
+      <package label="regex"           name="boost_regex-vc140"               version="1.59.0.0" />
+      <package label="system"          name="boost_system-vc140"              version="1.59.0.0" />
+      <package label="thread"          name="boost_thread-vc140"              version="1.59.0.0" />
+      <package label="test"            name="boost_unit_test_framework-vc140" version="1.59.0.0" />
+    </nuget>
+    <nuget build_name="boost" compiler="vc141" >
+      <package label="boost"           name="boost-vc141"                     version="1.64.0.0" />
+      <package label="chrono"          name="boost_chrono-vc141"              version="1.64.0.0" />
+      <package label="date_time"       name="boost_date_time-vc141"           version="1.64.0.0" />
+      <package label="filesystem"      name="boost_filesystem-vc141"          version="1.64.0.0" />
+      <package label="iostreams"       name="boost_iostreams-vc141"           version="1.64.0.0" />
+      <package label="locale"          name="boost_locale-vc141"              version="1.64.0.0" />
+      <package label="log"             name="boost_log-vc141"                 version="1.64.0.0" />
+      <package label="log_setup"       name="boost_log_setup-vc141"           version="1.64.0.0" />
+      <package label="program_options" name="boost_program_options-vc141"     version="1.64.0.0" />
+      <package label="regex"           name="boost_regex-vc141"               version="1.64.0.0" />
+      <package label="system"          name="boost_system-vc141"              version="1.64.0.0" />
+      <package label="thread"          name="boost_thread-vc141"              version="1.64.0.0" />
+      <package label="test"            name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+    </nuget>
+    <nuget build_name="secp256k1" compiler="vc120" >
       <package label="secp256k1"       name="secp256k1_vc120"                 version="0.1.0.14" />
     </nuget>
-    <nuget build_name="zmq">
+    <nuget build_name="secp256k1" compiler="vc140" >
+      <package label="secp256k1"       name="secp256k1_vc140"                 version="0.1.0.14" />
+    </nuget>
+    <nuget build_name="secp256k1" compiler="vc141" >
+      <package label="secp256k1"       name="secp256k1_vc141"                 version="0.1.0.14" />
+    </nuget>
+    <nuget build_name="zmq" compiler="vc120">
       <package label="zmq"             name="libzmq_vc120"                    version="4.2.20.1" />
     </nuget>
+    <!--
+    <nuget build_name="zmq" compiler="vc140">
+      <package label="zmq"             name="libzmq_vc140"                    version="4.2.20.1" />
+    </nuget>
+    <nuget build_name="zmq" compiler="vc141">
+      <package label="zmq"             name="libzmq_vc141"                    version="4.2.20.1" />
+    </nuget>
+    -->
   </nuget_registry>
 </generate>

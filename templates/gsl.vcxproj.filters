@@ -76,9 +76,9 @@ function project_base(product, repository_name)
     define my.product = project_base.product
     require(my.product, "product", "prefix")
 
-    if (is_product_library(my.product))
+    if (is_library(my.product))
         return "$(my.repository_name)"
-    elsif (is_product_binary(my.product))
+    elsif (is_program(my.product))
         if (defined(my.product.option))
             if (defined(my.product.msvc_name))
                 return "$(my.product.msvc_name)"
@@ -93,17 +93,18 @@ function project_base(product, repository_name)
     endif
 endfunction
 
-function project_build_dir_relative_path(product, repository_name, subpath)
+function project_build_dir_relative_path(product, repository_name, vs_version)
     define my.product = project_build_dir_relative_path.product
     define my.proj_name = project_base(my.product, my.repository_name)
+    define my.subpath = "builds/msvc/$(my.vs_version)"
     return append_path(\
         append_path(my.repository_name, my.subpath), my.proj_name)
 endfunction
 
-function project_file(product, repository_name, subpath)
+function project_file(product, repository_name, vs_version)
     define my.product = project_file.product
     define my.proj_relative_path = project_build_dir_relative_path(my.product,\
-        my.repository_name, my.subpath)
+        my.repository_name, my.vs_version)
     define my.proj_name = project_base(my.product, my.repository_name)
     return append_path(my.proj_relative_path, "$(my.proj_name).vcxproj.filters")
 endfunction
@@ -179,18 +180,6 @@ function is_resources_type(name)
     return matches_filetype(my.name, "rc")
 endfunction
 
-function is_product_binary(product)
-    define my.product = is_product_binary.product
-    require(my.product, "product", "prefix")
-    return (my.product.prefix = "bin")
-endfunction
-
-function is_product_library(product)
-    define my.product = is_product_library.product
-    require(my.product, "product", "prefix")
-    return (my.product.prefix = "lib")
-endfunction
-
 function is_option_tests(product)
     define my.product = is_option_tests.product
     return defined(my.product.option) & (my.product.option = "tests")
@@ -228,7 +217,7 @@ function emit_item_group_compiler(files, repository, product)
 
         emit_item_group_open()
 
-        if (my.repository.name = "libbitcoin" & is_product_library(my.product))
+        if (my.repository.name = "libbitcoin" & is_library(my.product))
             emit_item_compile_threadsafe_statistics()
         endif
 
@@ -319,7 +308,7 @@ function emit_filter(repository, product, project_path)
             discover_files(_files, my.product_dir, my.product_prefix,\
                 my.product_winpath, "src", "true")
 
-            if (is_product_library(my.product))
+            if (is_library(my.product))
                 define my.include_prefix = "../../../.."
                 define my.include_path = "$(my.project_path)/include"
                 define my.include_dir = open_directory(my.include_path)
@@ -335,8 +324,8 @@ function emit_filter(repository, product, project_path)
             endif
 
 
-            if (is_product_library(my.product) |\
-                (is_product_binary(my.product) & !is_option_tests(my.product)))
+            if (is_library(my.product) |\
+                (is_program(my.product) & !is_option_tests(my.product)))
 
                 define my.resources_prefix = "../.."
                 define my.resources_path = "$(my.project_path)/builds/msvc"
@@ -447,7 +436,7 @@ endfunction
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_filter(generate, subpath)
+function generate_filter(generate, vs_version)
     define my.generate = generate_filter.generate
     for my.generate.repository as _repository by _repository.name\
         where defined(_repository->make)
@@ -460,10 +449,10 @@ function generate_filter(generate, subpath)
             (defined(_product.uuid) & defined(_product.path))
 
             define my.proj_dir_name = project_build_dir_relative_path(\
-                _product, _repository.name, my.subpath)
+                _product, _repository.name, my.vs_version)
 
             define my.proj_file = project_file(_product, _repository.name,\
-                my.subpath)
+                my.vs_version)
 
             create_directory(my.proj_dir_name)
             notify(my.proj_file)
