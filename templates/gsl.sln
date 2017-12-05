@@ -115,7 +115,7 @@ endfunction emit_solution
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 .endmacro emit_version
 .
@@ -133,48 +133,48 @@ EndGlobal
 .endmacro emit_global_close
 .
 .macro emit_presolution()
-        GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                StaticDebug|Win32 = StaticDebug|Win32
-                StaticDebug|x64 = StaticDebug|x64
-                StaticRelease|Win32 = StaticRelease|Win32
-                StaticRelease|x64 = StaticRelease|x64
-        EndGlobalSection
+\tGlobalSection(SolutionConfigurationPlatforms) = preSolution
+\t\tStaticDebug|Win32 = StaticDebug|Win32
+\t\tStaticDebug|x64 = StaticDebug|x64
+\t\tStaticRelease|Win32 = StaticRelease|Win32
+\t\tStaticRelease|x64 = StaticRelease|x64
+\tEndGlobalSection
 .endmacro emit_presolution
 .
 .macro emit_global_postsolution_open()
-    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+\tGlobalSection(ProjectConfigurationPlatforms) = postSolution
 .endmacro emit_global_postsolution_open
 .
 .macro emit_global_postsolution_close()
-    EndGlobalSection
+\tEndGlobalSection
 .endmacro emit_global_postsolution_close
 .
 .macro emit_library_crossproduct(uuid)
-                {$(my.uuid:upper)}.StaticDebug|Win32.ActiveCfg = DebugLIB|Win32
-                {$(my.uuid:upper)}.StaticDebug|Win32.Build.0 = DebugLIB|Win32
-                {$(my.uuid:upper)}.StaticDebug|x64.ActiveCfg = DebugLIB|x64
-                {$(my.uuid:upper)}.StaticDebug|x64.Build.0 = DebugLIB|x64
-                {$(my.uuid:upper)}.StaticRelease|Win32.ActiveCfg = ReleaseLIB|Win32
-                {$(my.uuid:upper)}.StaticRelease|Win32.Build.0 = ReleaseLIB|Win32
-                {$(my.uuid:upper)}.StaticRelease|x64.ActiveCfg = ReleaseLIB|x64
-                {$(my.uuid:upper)}.StaticRelease|x64.Build.0 = ReleaseLIB|x64
+\t\t{$(my.uuid:upper)}.StaticDebug|Win32.ActiveCfg = DebugLIB|Win32
+\t\t{$(my.uuid:upper)}.StaticDebug|Win32.Build.0 = DebugLIB|Win32
+\t\t{$(my.uuid:upper)}.StaticDebug|x64.ActiveCfg = DebugLIB|x64
+\t\t{$(my.uuid:upper)}.StaticDebug|x64.Build.0 = DebugLIB|x64
+\t\t{$(my.uuid:upper)}.StaticRelease|Win32.ActiveCfg = ReleaseLIB|Win32
+\t\t{$(my.uuid:upper)}.StaticRelease|Win32.Build.0 = ReleaseLIB|Win32
+\t\t{$(my.uuid:upper)}.StaticRelease|x64.ActiveCfg = ReleaseLIB|x64
+\t\t{$(my.uuid:upper)}.StaticRelease|x64.Build.0 = ReleaseLIB|x64
 .endmacro emit_library_crossproduct
 .
 .macro emit_binary_crossproduct(uuid)
-                {$(my.uuid:upper)}.StaticDebug|Win32.ActiveCfg = DebugSEXE|Win32
-                {$(my.uuid:upper)}.StaticDebug|Win32.Build.0 = DebugSEXE|Win32
-                {$(my.uuid:upper)}.StaticDebug|x64.ActiveCfg = DebugSEXE|x64
-                {$(my.uuid:upper)}.StaticDebug|x64.Build.0 = DebugSEXE|x64
-                {$(my.uuid:upper)}.StaticRelease|Win32.ActiveCfg = ReleaseSEXE|Win32
-                {$(my.uuid:upper)}.StaticRelease|Win32.Build.0 = ReleaseSEXE|Win32
-                {$(my.uuid:upper)}.StaticRelease|x64.ActiveCfg = ReleaseSEXE|x64
-                {$(my.uuid:upper)}.StaticRelease|x64.Build.0 = ReleaseSEXE|x64
+\t\t{$(my.uuid:upper)}.StaticDebug|Win32.ActiveCfg = DebugSEXE|Win32
+\t\t{$(my.uuid:upper)}.StaticDebug|Win32.Build.0 = DebugSEXE|Win32
+\t\t{$(my.uuid:upper)}.StaticDebug|x64.ActiveCfg = DebugSEXE|x64
+\t\t{$(my.uuid:upper)}.StaticDebug|x64.Build.0 = DebugSEXE|x64
+\t\t{$(my.uuid:upper)}.StaticRelease|Win32.ActiveCfg = ReleaseSEXE|Win32
+\t\t{$(my.uuid:upper)}.StaticRelease|Win32.Build.0 = ReleaseSEXE|Win32
+\t\t{$(my.uuid:upper)}.StaticRelease|x64.ActiveCfg = ReleaseSEXE|x64
+\t\t{$(my.uuid:upper)}.StaticRelease|x64.Build.0 = ReleaseSEXE|x64
 .endmacro emit_binary_crossproduct
 .
 .macro emit_solution_properties()
-    GlobalSection(SolutionProperties) = preSolution
-        HideSolutionNode = FALSE
-    EndGlobalSection
+\tGlobalSection(SolutionProperties) = preSolution
+\t\tHideSolutionNode = FALSE
+\tEndGlobalSection
 .endmacro emit_solution_properties
 .
 .endtemplate
