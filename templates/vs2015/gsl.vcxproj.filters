@@ -1,0 +1,40 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin.vcxproj.filters.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_item_compile_threadsafe_statistics()
+.   define my.item = "\$(VC_CTP_Nov2013_InstallDir)/crt/src/threadsafestatics.cpp"
+.   define my.filter = "src/external"
+.   emit_item_compile_filtered(my.item, my.filter)
+.endmacro emit_item_compile_threadsafe_statistics
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+gsl from "templates/vs2015/common.gsl"
+gsl from "templates/gsl.vcxproj.filters"
+
+generate_filter(generate, "vs2015")
+
+.endtemplate
