@@ -42,13 +42,14 @@ function project_base(product, repository_name)
     endif
 endfunction
 
-function solution_relative_path(repository_name, subpath)
+function solution_relative_path(repository_name, vs_version)
+    define my.subpath = "builds/msvc/$(my.vs_version)"
     return append_path(my.repository_name, my.subpath)
 endfunction
 
-function solution_file(repository_name, subpath)
+function solution_file(repository_name, vs_version)
     define my.relative_path = solution_relative_path(my.repository_name,\
-        my.subpath)
+        my.vs_version)
     return append_path(my.relative_path, "$(my.repository_name).sln")
 endfunction
 
@@ -113,10 +114,10 @@ endfunction emit_solution
 .
 .macro emit_version()
 
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
-MinimumVisualStudioVersion = 10.0.40219.1
+Microsoft Visual Studio Solution File, Format Version $(format_version())
+# Visual Studio $(visual_studio_year())
+VisualStudioVersion = $(visual_studio_version())
+MinimumVisualStudioVersion = $(visual_studio_version_min())
 .endmacro emit_version
 .
 .macro emit_project(project_name, project_path, uuid)
@@ -182,15 +183,15 @@ EndGlobal
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_solutions(generate, subpath)
+function generate_solutions(generate, vs_version)
     define my.generate = generate_solutions.generate
     for my.generate.repository as _repository by _repository.name
         require(_repository, "repository", "name")
         define my.absolute_path = append_path(global.root, _repository.name)
         define my.solution_path = solution_relative_path(_repository.name,\
-            my.subpath)
+            my.vs_version)
         define my.solution_filename = solution_file(_repository.name,\
-            my.subpath)
+            my.vs_version)
 
         create_directory(my.solution_path)
         notify(my.solution_filename)
