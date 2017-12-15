@@ -99,7 +99,7 @@ call :pending "Building respository %~1..."
 call :depends "%~1"
 .   emit_error_handler("Initializing dependencies %~1 failed.")
 call cd /d "%path_base%\\%~1\\builds\\msvc\\vs2013"
-call %msbuild_exe% %msbuild_args% %~1.sln
+call "%msbuild_exe%" %msbuild_args% %~1.sln
 .   emit_error_handler("%msbuild_exe% %msbuild_args% %~1.sln failed.")
 call :success "Building repository %~1 execution complete."
 call cd /d "%path_base%"
@@ -112,7 +112,7 @@ call :pending "Building respository project %~1..."
 call :depends %~1
 .   emit_error_handler("Initializing dependencies %~1 failed.")
 call cd /d "%path_base%\\%~1\\builds\\msvc\\vs2013"
-call %msbuild_exe% %msbuild_args% /target:%~1:Rebuild %~1.sln
+call "%msbuild_exe%" %msbuild_args% /target:%~1:Rebuild %~1.sln
 .   emit_error_handler("%msbuild_exe% %msbuild_args% /target:%~1:Rebuild %~1.sln")
 call :success "Building repository project %~1 execution complete."
 call cd /d "%path_base%"
@@ -149,8 +149,8 @@ SET parent=%~dp0
 SET path_base=%~1
 SET nuget_pkg_path=%~1\\..\\nuget
 SET msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3
-SET msbuild_exe=msbuild
-IF EXIST "%~4" SET msbuild_exe=%~4
+SET "msbuild_exe=msbuild"
+IF EXIST "%~4" SET "msbuild_exe=%~4"
 .endmacro #initialize_batch_script
 .
 .endtemplate
