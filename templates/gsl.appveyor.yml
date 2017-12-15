@@ -155,7 +155,7 @@ before_build:
 .   emit_ctp_installation()
 
 build_script:
-  - c:\\git\\$(_repository.name)\\build.cmd c:\\git %PLATFORM% %CONFIGURATION%
+  - c:\\git\\$(_repository.name)\\build.cmd c:\\git %PLATFORM% %CONFIGURATION% vs2013
 .#  - powershell c:\\git\\$(_repository.name)\\build.ps1 -PATH c:\\git -PLATFORM %PLATFORM% -CONFIGURATION %CONFIGURATION%
   - cd /d %APPVEYOR_BUILD_FOLDER%
 
