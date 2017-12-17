@@ -26,9 +26,7 @@ REM Do everything relative to this file location.
 pushd %~dp0
 
 REM Clean directories for generated build artifacts.
-.   for buildgen->repositories.repository by name as _repo
-rmdir /s /q $(_repo.name) 2>NUL
-.   endfor
+rmdir /s /q "output" 2>NUL
 
 REM Generate build artifacts.
 .   for buildgen->templates.template as _template
@@ -39,7 +37,7 @@ if %errorlevel% neq 0 goto error
 
 REM Copy outputs to all repositories.
 .   for buildgen->repositories.repository by name as _repo
-xcopy /s /y $(_repo.name)\\* ..\\$(_repo.name)\\
+xcopy /s /y output\\$(_repo.name)\\* ..\\$(_repo.name)\\
 .   endfor
 
 REM Generate bindings from generated binding generators.

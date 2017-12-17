@@ -9,11 +9,12 @@
 ###############################################################################
 # Generation
 ###############################################################################
-.macro generate_autogen()
+.macro generate_autogen(path_prefix)
 .   for generate.repository by name as _repository
 .       require(_repository, "repository", "name")
-.       create_directory(_repository.name)
-.       define my.out_file = "$(_repository.name)/autogen.sh"
+.       my.output_path = join(my.path_prefix, _repository.name)
+.       create_directory(my.output_path)
+.       define my.out_file = "$(my.output_path)/autogen.sh"
 .       notify(my.out_file)
 .       output(my.out_file)
 .
@@ -40,6 +41,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_autogen()
+generate_autogen("output")
 
 .endtemplate
