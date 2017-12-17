@@ -39,10 +39,7 @@ declare -a generator=( \\
 
 cleanup_local_files()
 {
-    for proj in "\${project[@]}"
-    do
-        eval rm -rf "\$proj"
-    done
+    eval rm -rf "output"
 }
 
 generate_artifacts()
@@ -55,18 +52,20 @@ generate_artifacts()
 
 mark_executables()
 {
-    for proj in "\${project[@]}"
-    do
-        eval chmod +x "\$proj/*.sh"
-    done
+    eval chmod +x "output/*/*.sh"
+#    for proj in "\${project[@]}"
+#    do
+#        eval chmod +x "output/\$proj/*.sh"
+#    done
 }
 
 overwrite_project_files()
 {
-    for proj in "\${project[@]}"
-    do
-        eval cp -rf "\$proj/." "../$\proj"
-    done
+    eval cp -rf "output/." "../"
+#    for proj in "\${project[@]}"
+#    do
+#        eval cp -rf "output\$proj/." "../$\proj"
+#    done
 }
 
 # Do everything relative to this file location.

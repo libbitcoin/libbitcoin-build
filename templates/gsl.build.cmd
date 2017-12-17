@@ -161,11 +161,12 @@ IF EXIST "%~5" SET "msbuild_exe=%~5"
 ###############################################################################
 .endtemplate
 .template 1
-.macro generate_build_cmd()
+.macro generate_build_cmd(path_prefix)
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
-.   create_directory(_repository.name)
-.   define my.out_file = "$(_repository.name)/build.cmd"
+.   my.output_path = join(my.path_prefix, _repository.name)
+.   create_directory(my.output_path)
+.   define my.out_file = "$(my.output_path)/build.cmd"
 .   notify(my.out_file)
 .   output(my.out_file)
 .   bat_copyleft(_repository.name)
@@ -203,6 +204,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_build_cmd()
+generate_build_cmd("output")
 
 .endtemplate

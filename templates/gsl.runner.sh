@@ -46,7 +46,7 @@ BOOST_UNIT_TEST_OPTIONS=\\
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_runner()
+function generate_runner(path_prefix)
 for generate.repository by name as _repository\
     where (defined(_repository->make))
     require(_repository, "repository", "name")
@@ -54,8 +54,9 @@ for generate.repository by name as _repository\
         where (defined(_product->runner))
 
         require(_product, "product", "name")
-        create_directory(_repository.name)
-        define my.out_file = "$(_repository.name)/$(_product.name)_runner.sh"
+        my.output_path = join(my.path_prefix, _repository.name)
+        create_directory(my.output_path)
+        define my.out_file = "$(my.output_path)/$(_product.name)_runner.sh"
         notify(my.out_file)
         output(my.out_file)
 
@@ -91,6 +92,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_runner()
+generate_runner("output")
 
 .endtemplate

@@ -725,13 +725,14 @@ endfunction
 # Generation
 ###############################################################################
 
-function generate_automake()
+function generate_automake(path_prefix)
 for generate.repository as _repository by _repository.name\
     where (defined(_repository->make))
 
     require(_repository, "repository", "name")
-    create_directory("$(_repository.name)")
-    define my.out_file = "$(_repository.name)/Makefile.am"
+    my.output_path = join(my.path_prefix, _repository.name)
+    create_directory(my.output_path)
+    define my.out_file = "$(my.output_path)/Makefile.am"
     notify(my.out_file)
     output(my.out_file)
 
@@ -785,6 +786,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_automake()
+generate_automake("output")
 
 .endtemplate

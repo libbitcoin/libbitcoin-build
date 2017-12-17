@@ -55,7 +55,7 @@ endfunction
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_version()
+function generate_version(path_prefix)
     for generate.repository by name as _repository
         define my.primary = bitcoin_to_include(_repository.name)
         define my.upper_repository = "$(_repository.name:c,upper)"
@@ -65,7 +65,8 @@ function generate_version()
                 for _product.files as _files
 
                     # We are writing into local primary includes (not installdir).
-                    define my.include = join(_repository.name, _files.path)
+                    define my.include = join(join(my.path_prefix,\
+                        _repository.name), _files.path)
                     define my.path = "$(my.include)/$(my.primary)"
                     create_directory(my.path)
 
@@ -97,6 +98,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_version()
+generate_version("output")
 
 .endtemplate
