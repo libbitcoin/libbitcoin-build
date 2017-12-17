@@ -93,18 +93,18 @@ function project_base(product, repository_name)
     endif
 endfunction
 
-function project_build_dir_relative_path(product, repository_name, vs_version)
+function project_build_dir_relative_path(product, path_prefix, repository_name, vs_version)
     define my.product = project_build_dir_relative_path.product
     define my.proj_name = project_base(my.product, my.repository_name)
     define my.subpath = "builds/msvc/$(my.vs_version)"
-    return append_path(\
-        append_path(my.repository_name, my.subpath), my.proj_name)
+    return append_path(append_path(append_path(\
+        my.path_prefix, my.repository_name), my.subpath), my.proj_name)
 endfunction
 
-function project_file(product, repository_name, vs_version)
+function project_file(product, path_prefix, repository_name, vs_version)
     define my.product = project_file.product
     define my.proj_relative_path = project_build_dir_relative_path(my.product,\
-        my.repository_name, my.vs_version)
+        my.path_prefix, my.repository_name, my.vs_version)
     define my.proj_name = project_base(my.product, my.repository_name)
     return append_path(my.proj_relative_path, "$(my.proj_name).vcxproj.filters")
 endfunction
@@ -436,7 +436,7 @@ endfunction
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_filter(generate, vs_version)
+function generate_filter(path_prefix, generate, vs_version)
     define my.generate = generate_filter.generate
     for my.generate.repository as _repository by _repository.name\
         where defined(_repository->make)
@@ -449,10 +449,10 @@ function generate_filter(generate, vs_version)
             (defined(_product.uuid) & defined(_product.path))
 
             define my.proj_dir_name = project_build_dir_relative_path(\
-                _product, _repository.name, my.vs_version)
+                _product, my.path_prefix, _repository.name, my.vs_version)
 
-            define my.proj_file = project_file(_product, _repository.name,\
-                my.vs_version)
+            define my.proj_file = project_file(_product, my.path_prefix,\
+                _repository.name, my.vs_version)
 
             create_directory(my.proj_dir_name)
             notify(my.proj_file)

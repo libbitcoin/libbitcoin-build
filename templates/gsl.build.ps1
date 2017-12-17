@@ -161,11 +161,12 @@ function execute_cmd(\$command) {
 ###############################################################################
 .endtemplate
 .template 1
-.macro generate_build_ps1()
+.macro generate_build_ps1(path_prefix)
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
-.   create_directory(_repository.name)
-.   define my.out_file = "$(_repository.name)/build.ps1"
+.   my.output_path = join(path_prefix, _repository.name)
+.   create_directory(my.output_path)
+.   define my.out_file = "$(my.output_path)/build.ps1"
 .   notify(my.out_file)
 .   output(my.out_file)
 .   copyleft(_repository.name)
@@ -204,6 +205,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_build_ps1()
+generate_build_ps1("output")
 
 .endtemplate

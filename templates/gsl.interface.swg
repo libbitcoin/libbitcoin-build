@@ -21,11 +21,12 @@
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_interface()
+function generate_interface(path_prefix)
 for generate.repository by name as _repository
     define my.library = bitcoin_to_include(_repository.name)
     require(_repository, "repository", "name")
-    define my.path = "$(_repository.name)/bindings"
+    my.output_path = join(path_prefix, _repository.name)
+    define my.path = join(my.output_path, "bindings")
     create_directory(my.path)
     define my.out_file = "$(my.path)/$(my.library).swg"
     notify(my.out_file)
@@ -53,6 +54,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_interface()
+generate_interface("output")
 
 .endtemplate
