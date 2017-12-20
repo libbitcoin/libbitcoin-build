@@ -51,5 +51,5 @@ generate_updaters
 execute_updaters
 
 # Copy outputs to all repositories.
-#overwrite_project_files
+overwrite_project_files
 
