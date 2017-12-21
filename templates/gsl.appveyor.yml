@@ -124,11 +124,12 @@ endfunction
 ###############################################################################
 .endtemplate
 .template 1
-.macro generate_appveyor_yml()
+.macro generate_appveyor_yml(path_prefix)
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
-.   create_directory(_repository.name)
-.   define my.out_file = "$(_repository.name)/appveyor.yml"
+.   my.output_path = join(my.path_prefix, _repository.name)
+.   create_directory(my.output_path)
+.   define my.out_file = "$(my.output_path)/appveyor.yml"
 .   notify(my.out_file)
 .   output(my.out_file)
 .   copyleft(_repository.name)
@@ -155,7 +156,7 @@ before_build:
 .   emit_ctp_installation()
 
 build_script:
-  - c:\\git\\$(_repository.name)\\build.cmd c:\\git %PLATFORM% %CONFIGURATION%
+  - c:\\git\\$(_repository.name)\\build.cmd c:\\git %PLATFORM% %CONFIGURATION% vs2013
 .#  - powershell c:\\git\\$(_repository.name)\\build.ps1 -PATH c:\\git -PLATFORM %PLATFORM% -CONFIGURATION %CONFIGURATION%
   - cd /d %APPVEYOR_BUILD_FOLDER%
 
@@ -180,6 +181,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_appveyor_yml()
+generate_appveyor_yml("output")
 
 .endtemplate

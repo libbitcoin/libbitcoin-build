@@ -14,9 +14,30 @@ REM ###########################################################################
 REM Do everything relative to this file location.
 pushd %~dp0
 
-REM Generate libbitcoin-build project artifacts.
+REM Clean directories for generated build artifacts.
+rmdir /s /q "output" 2>NUL
+
+REM Generate second-stage artifact generators.
 gsl -q -script:gsl_update_repository_artifacts.cmd buildgen.xml
 gsl -q -script:gsl_update_repository_artifacts.sh buildgen.xml
+gsl -q -script:gsl_update_seeded_artifacts.cmd generate.xml
+gsl -q -script:gsl_update_seeded_artifacts.sh generate.xml
 
 REM Generate repository project artifacts.
+call update_seeded_artifacts.cmd
 call update_repository_artifacts.cmd
+
+REM Copy outputs to all repositories.
+xcopy /s /y output\* ..\
+
+REM Delay for manual confirmation.
+call pause
+
+REM Generate bindings from generated binding generators.
+REM The path to swig.exe must be in our path.
+REM .   for buildgen->repositories.repository by name as _repo
+REM call ..\\$(_repo.name)\\bindings.bat
+REM .   endfor
+
+REM Restore directory.
+popd

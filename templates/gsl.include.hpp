@@ -112,7 +112,7 @@ endfunction
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_include()
+function generate_include(path_prefix)
     for generate.repository by name as _repository
         define my.primary = bitcoin_to_include(_repository.name)
         define my.absolute = "$(global.root)/$(_repository.name)"
@@ -120,7 +120,8 @@ function generate_include()
         for _repository.make as _make
             for _make.product as _product where is_headers(_product)
                 for _product.files as _files
-                    define my.include = join(_repository.name, _files.path)
+                    define my.include = join(join(my.path_prefix,\
+                        _repository.name), _files.path)
                     create_directory(my.include)
                     define my.out_file = "$(my.include)/$(my.primary).hpp"
                     notify(my.out_file)
@@ -156,6 +157,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_include()
+generate_include("output")
 
 .endtemplate

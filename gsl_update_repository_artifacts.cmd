@@ -2,17 +2,14 @@
 ###############################################################################
 # Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
-# GSL generate version.hpp.
+# GSL generate update_repository_artifacts.cmd.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-[global].root = ".."
-[global].trace = 0
-[gsl].ignorecase = 0
-
-gsl from "utilities.gsl"
-
+###############################################################################
+# Macros
+###############################################################################
 .endtemplate
 .template 1
 .macro generate_artifact()
@@ -25,27 +22,11 @@ gsl from "utilities.gsl"
 REM Do everything relative to this file location.
 pushd %~dp0
 
-REM Clean directories for generated build artifacts.
-.   for buildgen->repositories.repository by name as _repo
-rmdir /s /q $(_repo.name) 2>NUL
-.   endfor
-
 REM Generate build artifacts.
 .   for buildgen->templates.template as _template
 gsl -q -script:templates\\$(_template.name) generate.xml
 if %errorlevel% neq 0 goto error
 
-.   endfor
-
-REM Copy outputs to all repositories.
-.   for buildgen->repositories.repository by name as _repo
-xcopy /s /y $(_repo.name)\\* ..\\$(_repo.name)\\
-.   endfor
-
-REM Generate bindings from generated binding generators.
-REM The path to swig.exe must be in our path.
-.   for buildgen->repositories.repository by name as _repo
-REM call ..\\$(_repo.name)\\bindings.bat
 .   endfor
 
 echo --- OKAY, generation completed.
@@ -58,12 +39,21 @@ echo *** ERROR, generation terminated early.
 REM Restore directory.
 popd
 
-REM Delay for manual confirmation.
-pause
-
 .endmacro generate_artifact
 .endtemplate
 .template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
 
 generate_artifact()
 

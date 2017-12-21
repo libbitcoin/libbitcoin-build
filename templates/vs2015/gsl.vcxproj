@@ -1,0 +1,37 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin vcxproj.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_compile_item_threadsafe_statistics()
+.endmacro emit_compile_item_threadsafe_statistics
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+gsl from "templates/vs2015/common.gsl"
+gsl from "templates/gsl.vcxproj"
+
+generate_vcxproj("output", generate, "vs2015")
+
+.endtemplate
