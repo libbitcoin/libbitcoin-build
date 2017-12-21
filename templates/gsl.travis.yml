@@ -291,7 +291,8 @@ matrix:
     # Download and install packages.
 .   for my.matrix.job as _job where is_travis_job(_job) & count(_job.get) > 0
 .       for _job.get as _get
-.           if (_job.system = "osx")
+.           if (_get.name = "boost")
+.           elsif (_job.system = "osx")
     - $(condition(job_predicate(_job))) $(apt_get(_get.name, _job.system)); fi
 .           elsif (_job.system = "linux")
 .           else
