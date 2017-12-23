@@ -98,9 +98,9 @@ exit /b 0
 call :pending "Building respository %~1..."
 call :depends "%~1"
 .   emit_error_handler("Initializing dependencies %~1 failed.")
-call cd /d "%path_base%\\%~1\\builds\\msvc\\vs2013"
-call msbuild %msbuild_args% %~1.sln
-.   emit_error_handler("msbuild %msbuild_args% %~1.sln failed.")
+call cd /d "%path_base%\\%~1\\builds\\msvc\\%proj_version%"
+call "%msbuild_exe%" %msbuild_args% %~1.sln
+.   emit_error_handler("%msbuild_exe% %msbuild_args% %~1.sln failed.")
 call :success "Building repository %~1 execution complete."
 call cd /d "%path_base%"
 exit /b 0
@@ -111,9 +111,9 @@ exit /b 0
 call :pending "Building respository project %~1..."
 call :depends %~1
 .   emit_error_handler("Initializing dependencies %~1 failed.")
-call cd /d "%path_base%\\%~1\\builds\\msvc\\vs2013"
-call msbuild %msbuild_args% /target:%~1:Rebuild %~1.sln
-.   emit_error_handler("msbuildl %msbuild_args% /target:%~1:Rebuild %~1.sln")
+call cd /d "%path_base%\\%~1\\builds\\msvc\\%proj_version%"
+call "%msbuild_exe%" %msbuild_args% /target:%~1:Rebuild %~1.sln
+.   emit_error_handler("%msbuild_exe% %msbuild_args% /target:%~1:Rebuild %~1.sln")
 call :success "Building repository project %~1 execution complete."
 call cd /d "%path_base%"
 exit /b 0
@@ -122,7 +122,7 @@ exit /b 0
 .macro emit_lib_init_dependencies()
 :depends
 call :pending "nuget restoring dependencies for %~1..."
-call nuget restore "%path_base%\\%~1\\builds\\msvc\\vs2013\\%~1.sln" -Outputdir "%nuget_pkg_path%"
+call nuget restore "%path_base%\\%~1\\builds\\msvc\\%proj_version%\\%~1.sln" -Outputdir "%nuget_pkg_path%"
 .   emit_error_handler("nuget restore failed.")
 call :success "nuget restoration for %~1 complete."
 exit /b 0
@@ -145,10 +145,13 @@ exit /b 0
 .macro initialize_batch_script
 @echo off
 SETLOCAL ENABLEEXTENSIONS
-SET parent=%~dp0
-SET path_base=%~1
-SET nuget_pkg_path=%~1\\..\\nuget
-SET msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3
+SET "parent=%~dp0"
+SET "path_base=%~1"
+SET "nuget_pkg_path=%~1\\..\\nuget"
+SET "msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3"
+SET "proj_version=%~4"
+SET "msbuild_exe=msbuild"
+IF EXIST "%~5" SET "msbuild_exe=%~5"
 .endmacro #initialize_batch_script
 .
 .endtemplate
@@ -158,11 +161,12 @@ SET msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3
 ###############################################################################
 .endtemplate
 .template 1
-.macro generate_build_cmd()
+.macro generate_build_cmd(path_prefix)
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
-.   create_directory(_repository.name)
-.   define my.out_file = "$(_repository.name)/build.cmd"
+.   my.output_path = join(my.path_prefix, _repository.name)
+.   create_directory(my.output_path)
+.   define my.out_file = "$(my.output_path)/build.cmd"
 .   notify(my.out_file)
 .   output(my.out_file)
 .   bat_copyleft(_repository.name)
@@ -200,6 +204,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_build_cmd()
+generate_build_cmd("output")
 
 .endtemplate
