@@ -21,7 +21,7 @@ function get_test_list(product)
         my.tests = join(my.tests, _run.test, ",")
     endfor
     return my.tests
-endfunction 
+endfunction
 
 ###############################################################################
 # Macros
@@ -46,35 +46,52 @@ BOOST_UNIT_TEST_OPTIONS=\\
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_runner()
+function generate_runner(path_prefix)
 for generate.repository by name as _repository\
     where (defined(_repository->make))
     require(_repository, "repository", "name")
     for _repository->make.product as _product\
         where (defined(_product->runner))
-        
+
         require(_product, "product", "name")
-        create_directory(_repository.name)
-        define my.out_file = "$(_repository.name)/$(_product.name)_runner.sh"
+        my.output_path = join(my.path_prefix, _repository.name)
+        create_directory(my.output_path)
+        define my.out_file = "$(my.output_path)/$(_product.name)_runner.sh"
         notify(my.out_file)
         output(my.out_file)
-        
+
         shebang("sh")
         copyleft(_repository.name)
-        
+
         define my.runner = _product->runner
         define my.path = "$(_product.path)/$(_product.name)"
         define my.tests = get_test_list(_product)
-        
+
         heading1("Define tests and options.")
         write_test_options(my.tests)
-        
+
         heading1("Run tests.")
         write_test_run(my.path)
-        
+
         close
     endfor _product
 endfor _repository
 endfunction # generate_runner
+.endtemplate
+.template 0
 ###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_runner("output")
+
 .endtemplate

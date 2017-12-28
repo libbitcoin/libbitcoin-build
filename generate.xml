@@ -1,6 +1,6 @@
 <?xml version = "1.0" ?>
 <!-- Copyright (c) 2014-2016 libbitcoin developers (see COPYING). -->
-<generate script="generate.gsl" language="en-us" >
+<generate language="en-us" >
 
   <repository name="libbitcoin" version="3.4.0" email="eric@voskuil.org" >
 
@@ -52,14 +52,14 @@
 
       <!-- boost -->
       <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      
+
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
       <flag name="Wno-long-long" comment="Allow use of C99 'long long' type." context="c" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
-      
+
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
@@ -115,7 +115,7 @@
         <headers path="include" />
         <sources path="examples" />
       </product>
-      <product prefix="bin" path="test" name="libbitcoin_test" test="true" option="tests" uuid="51a424a9-2c12-4211-8d40-e49d1534c541" >
+      <product prefix="bin" path="test" name="libbitcoin_test" test="true" option="tests" uuid="51a424a9-2c12-4211-8d40-e49d1534c541" msvc_name="libbitcoin-test" >
         <runner/>
         <flag substitute="icu" />
         <flag substitute="png" />
@@ -148,7 +148,7 @@
       </build>
       <build name="qrencode" version="3.4.4" parallel="true" >
       </build>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -161,7 +161,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -185,7 +185,7 @@
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" >
+      <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--with-icu" />
         <option value="--with-png" />
         <option value="--with-qrencode" />
@@ -217,7 +217,8 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
-      </job> 
+        <option value="--disable-static" />
+      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--with-icu" />
         <option value="--build-icu" />
@@ -230,7 +231,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -298,7 +299,7 @@
         <headers path="include" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="test" name="libbitcoin_blockchain_test" test="true" option="tests" uuid="cec6de45-b67a-487f-b3ad-3d14e83ad032" >
+      <product prefix="bin" path="test" name="libbitcoin_blockchain_test" test="true" option="tests" uuid="cec6de45-b67a-487f-b3ad-3d14e83ad032" msvc_name="libbitcoin-blockchain-test" >
         <runner/>
         <library name="bitcoin-blockchain" />
         <library name="boost_unit_test_framework" />
@@ -316,7 +317,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -329,7 +330,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -364,7 +365,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" >
+      <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -381,6 +382,7 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -392,7 +394,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -457,7 +459,7 @@
         <headers path="include" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="test" name="libbitcoin_client_test" test="true" option="tests" uuid="a56a00c6-669b-4535-9dc2-772a931b04c2" >
+      <product prefix="bin" path="test" name="libbitcoin_client_test" test="true" option="tests" uuid="a56a00c6-669b-4535-9dc2-772a931b04c2" msvc_name="libbitcoin-client-test" >
         <runner/>
         <library name="bitcoin-client" />
         <library name="boost_unit_test_framework" />
@@ -480,7 +482,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -496,7 +498,7 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+     <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -524,7 +526,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" >
+      <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -541,6 +543,7 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -552,7 +555,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -651,7 +654,7 @@
         <headers path="src/clone" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="test" name="libbitcoin_consensus_test" test="true" option="tests" uuid="d282ef8c-6217-483c-ac47-864b2fba50fd" >
+      <product prefix="bin" path="test" name="libbitcoin_consensus_test" test="true" option="tests" uuid="d282ef8c-6217-483c-ac47-864b2fba50fd" msvc_name="libbitcoin-consensus-test" >
         <runner/>
         <library name="bitcoin-consensus" />
         <library name="boost" />
@@ -689,11 +692,11 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -711,7 +714,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" >
+      <job system="linux" compiler="clang" link="static" version="3.4" >
         <get name="swig" />
         <option value="--with-python" />
         <option value="--disable-shared" />
@@ -734,6 +737,7 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="swig" />
+        <option value="--disable-static" />
         <option value="--with-python" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
@@ -746,7 +750,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <get name="swig" />
         <option value="--with-java" />
         <option value="--with-python" />
@@ -809,19 +813,19 @@
         <file path="NEWS" />
         <file path="README" />
       </product>
-      <product prefix="lib" path="src" name="bitcoin-database" uuid="{62d7fbee-4d52-424a-8938-59756e13d9f5}" >
+      <product prefix="lib" path="src" name="bitcoin-database" uuid="62d7fbee-4d52-424a-8938-59756e13d9f5" >
         <library name="bitcoin" />
         <headers path="include" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="test" name="libbitcoin_database_test" test="true" option="tests" uuid="{5c4da53a-8c06-4da6-a2a8-3c30f338ed70}" >
+      <product prefix="bin" path="test" name="libbitcoin_database_test" test="true" option="tests" uuid="5c4da53a-8c06-4da6-a2a8-3c30f338ed70" msvc_name="libbitcoin-database-test" >
         <runner/>
         <library name="bitcoin-database" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
-      <product prefix="bin" path="tools/initchain" name="initchain" install="false" option="tools" uuid="" >
+      <product prefix="bin" path="tools/initchain" name="initchain" install="false" option="tools" uuid="005f2a86-f937-4ab5-b041-0f21b67eec66" msvc_name="libbitcoin-database-tools" >
         <library name="bitcoin-database" />
         <headers path="include" />
         <sources path="tools/initchain" />
@@ -832,7 +836,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -845,7 +849,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -868,7 +872,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" >
+      <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -885,6 +889,7 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -896,7 +901,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -970,13 +975,13 @@
         <headers path="include" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="console" name="bx" option="console" uuid="098a91f3-291c-4a0d-ae5a-bc5f9f5693ed" >
+      <product prefix="bin" path="console" name="bx" option="console" uuid="098a91f3-291c-4a0d-ae5a-bc5f9f5693ed" msvc_name="bx" >
         <flag define="sysconfdir" />
         <library name="bitcoin-explorer" />
         <headers path="include" />
         <sources path="console" />
       </product>
-      <product prefix="bin" path="test" name="libbitcoin_explorer_test" test="true" option="tests" uuid="1a0e5edd-e803-4268-9dfb-044eb80bb0f1" >
+      <product prefix="bin" path="test" name="libbitcoin_explorer_test" test="true" option="tests" uuid="1a0e5edd-e803-4268-9dfb-044eb80bb0f1" msvc_name="libbitcoin-explorer-test" >
         <runner>
           <run test="generated" />
           <!--<run test="network" />-->
@@ -1020,7 +1025,7 @@
       </build>
       <build name="qrencode" version="3.4.4" parallel="true" >
       </build>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1036,12 +1041,12 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
-      <!-- version4
+      <!-- version5
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
       -->
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1086,7 +1091,7 @@
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" >
+      <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--with-png" />
         <option value="--with-qrencode" />
         <option value="--build-png" />
@@ -1115,6 +1120,7 @@
         <get name="boost" />
         <get name="bash-completion" />
         <option value="--with-bash-completiondir" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--with-png" />
@@ -1130,7 +1136,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <get name="bash-completion" />
         <option value="--with-png" />
         <option value="--with-qrencode" />
@@ -1196,7 +1202,7 @@
         <headers path="include" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="test" name="libbitcoin_network_test" test="true" option="tests" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff" >
+      <product prefix="bin" path="test" name="libbitcoin_network_test" test="true" option="tests" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff" msvc_name="libbitcoin-network-test" >
         <runner>
           <run test="empty_tests" />
           <!--<run test="p2p_tests" />-->
@@ -1212,7 +1218,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1225,7 +1231,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1248,7 +1254,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" >
+      <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1265,6 +1271,7 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -1276,7 +1283,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1307,7 +1314,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="3.4.0" />
-	  <dependency name="bitcoin-network" version="3.4.0" />
+      <dependency name="bitcoin-network" version="3.4.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1346,14 +1353,14 @@
         <headers path="include" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="test" name="libbitcoin_node_test" test="true" option="tests" uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8" >
+      <product prefix="bin" path="test" name="libbitcoin_node_test" test="true" option="tests" uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8" msvc_name="libbitcoin-node-test" >
         <runner/>
         <library name="bitcoin-node" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
-      <product prefix="bin" path="console" name="bn" option="console" uuid="d3404804-c83f-46ce-a5a6-3a39ef93de46" >
+      <product prefix="bin" path="console" name="bn" option="console" uuid="d3404804-c83f-46ce-a5a6-3a39ef93de46" msvc_name="bn" >
         <library name="bitcoin-node" />
         <headers path="include" />
         <sources path="console" />
@@ -1370,7 +1377,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1383,7 +1390,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1429,7 +1436,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" >
+      <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1449,6 +1456,7 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
+        <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
@@ -1461,7 +1469,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <get name="bash-completion" />
         <option value="--without-consensus" />
         <option value="--disable-static" />
@@ -1491,6 +1499,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.2.0" />
+      <!--<dependency name="protobuf" version="2.6.0" unprefixed="true" /> -->
       <dependency name="bitcoin" version="3.4.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1529,7 +1538,7 @@
         <headers path="include" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="test" name="libbitcoin_protocol_test" test="true" option="tests" uuid="c42be17b-063d-44f1-a5bb-9f8295144b70" >
+      <product prefix="bin" path="test" name="libbitcoin_protocol_test" test="true" option="tests" uuid="c42be17b-063d-44f1-a5bb-9f8295144b70" msvc_name="libbitcoin-protocol-test" >
         <runner/>
         <library name="bitcoin-protocol" />
         <library name="boost_unit_test_framework" />
@@ -1542,7 +1551,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1558,7 +1567,7 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1580,7 +1589,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" >
+      <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1598,6 +1607,7 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -1609,7 +1619,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1680,14 +1690,14 @@
         <headers path="include" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="test" name="libbitcoin_server_test" test="true" option="tests" uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea" >
+      <product prefix="bin" path="test" name="libbitcoin_server_test" test="true" option="tests" uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea" msvc_name="libbitcoin-server-test" >
         <runner/>
         <library name="bitcoin-server" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
-      <product prefix="bin" path="console" name="bs" option="console" uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe" >
+      <product prefix="bin" path="console" name="bs" option="console" uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe" msvc_name="bs" >
         <library name="bitcoin-server" />
         <headers path="include" />
         <sources path="console" />
@@ -1704,7 +1714,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" >
+      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -1720,7 +1730,7 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1778,7 +1788,7 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" >
+      <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1798,6 +1808,7 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
+        <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
@@ -1810,7 +1821,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="dynamic" sudo="false" >
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <get name="bash-completion" />
         <option value="--without-consensus" />
         <option value="--disable-static" />
@@ -1826,4 +1837,71 @@
 
   </repository>
 
+  <nuget_registry>
+    <nuget build_name="boost" compiler="vc120" >
+      <package label="boost"           name="boost"                           version="1.57.0.0" />
+      <package label="chrono"          name="boost_chrono-vc120"              version="1.57.0.0" />
+      <package label="date_time"       name="boost_date_time-vc120"           version="1.57.0.0" />
+      <package label="filesystem"      name="boost_filesystem-vc120"          version="1.57.0.0" />
+      <package label="iostreams"       name="boost_iostreams-vc120"           version="1.57.0.0" />
+      <package label="locale"          name="boost_locale-vc120"              version="1.57.0.0" />
+      <package label="log"             name="boost_log-vc120"                 version="1.57.0.0" />
+      <package label="log_setup"       name="boost_log_setup-vc120"           version="1.57.0.0" />
+      <package label="program_options" name="boost_program_options-vc120"     version="1.57.0.0" />
+      <package label="regex"           name="boost_regex-vc120"               version="1.57.0.0" />
+      <package label="system"          name="boost_system-vc120"              version="1.57.0.0" />
+      <package label="thread"          name="boost_thread-vc120"              version="1.57.0.0" />
+      <package label="test"            name="boost_unit_test_framework-vc120" version="1.57.0.0" />
+    </nuget>
+    <nuget build_name="boost" compiler="vc140" >
+      <package label="boost"           name="boost"                           version="1.64.0.0" />
+      <package label="atomic"          name="boost_atomic-vc140"              version="1.64.0.0" />
+      <package label="chrono"          name="boost_chrono-vc140"              version="1.64.0.0" />
+      <package label="date_time"       name="boost_date_time-vc140"           version="1.64.0.0" />
+      <package label="filesystem"      name="boost_filesystem-vc140"          version="1.64.0.0" />
+      <package label="iostreams"       name="boost_iostreams-vc140"           version="1.64.0.0" />
+      <package label="locale"          name="boost_locale-vc140"              version="1.64.0.0" />
+      <package label="log"             name="boost_log-vc140"                 version="1.64.0.0" />
+      <package label="log_setup"       name="boost_log_setup-vc140"           version="1.64.0.0" />
+      <package label="program_options" name="boost_program_options-vc140"     version="1.64.0.0" />
+      <package label="regex"           name="boost_regex-vc140"               version="1.64.0.0" />
+      <package label="system"          name="boost_system-vc140"              version="1.64.0.0" />
+      <package label="thread"          name="boost_thread-vc140"              version="1.64.0.0" />
+      <package label="test"            name="boost_unit_test_framework-vc140" version="1.64.0.0" />
+    </nuget>
+    <nuget build_name="boost" compiler="vc141" >
+      <package label="boost"           name="boost"                           version="1.64.0.0" />
+      <package label="atomic"          name="boost_atomic-vc141"              version="1.64.0.0" />
+      <package label="chrono"          name="boost_chrono-vc141"              version="1.64.0.0" />
+      <package label="date_time"       name="boost_date_time-vc141"           version="1.64.0.0" />
+      <package label="filesystem"      name="boost_filesystem-vc141"          version="1.64.0.0" />
+      <package label="iostreams"       name="boost_iostreams-vc141"           version="1.64.0.0" />
+      <package label="locale"          name="boost_locale-vc141"              version="1.64.0.0" />
+      <package label="log"             name="boost_log-vc141"                 version="1.64.0.0" />
+      <package label="log_setup"       name="boost_log_setup-vc141"           version="1.64.0.0" />
+      <package label="program_options" name="boost_program_options-vc141"     version="1.64.0.0" />
+      <package label="regex"           name="boost_regex-vc141"               version="1.64.0.0" />
+      <package label="system"          name="boost_system-vc141"              version="1.64.0.0" />
+      <package label="thread"          name="boost_thread-vc141"              version="1.64.0.0" />
+      <package label="test"            name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+    </nuget>
+    <nuget build_name="secp256k1" compiler="vc120" >
+      <package label="secp256k1"       name="secp256k1_vc120"                 version="0.1.0.16" />
+    </nuget>
+    <nuget build_name="secp256k1" compiler="vc140" >
+      <package label="secp256k1"       name="secp256k1_vc140"                 version="0.1.0.15" />
+    </nuget>
+    <nuget build_name="secp256k1" compiler="vc141" >
+      <package label="secp256k1"       name="secp256k1_vc141"                 version="0.1.0.16" />
+    </nuget>
+    <nuget build_name="zmq" compiler="vc120">
+      <package label="zmq"             name="libzmq_vc120"                    version="4.2.30" />
+    </nuget>
+    <nuget build_name="zmq" compiler="vc140">
+      <package label="zmq"             name="libzmq_vc140"                    version="4.2.30" />
+    </nuget>
+    <nuget build_name="zmq" compiler="vc141">
+      <package label="zmq"             name="libzmq_vc141"                    version="4.2.30" />
+    </nuget>
+  </nuget_registry>
 </generate>

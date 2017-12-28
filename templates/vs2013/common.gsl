@@ -1,0 +1,60 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin common vs2013 artifacts helper functions.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+#
+# variable version utilities
+#
+function msbuild_version(product)
+    define my.product = msbuild_version.product
+    if (is_library(my.product))
+        return "12.0"
+    endif
+    return "4.0"
+endfunction
+
+function platform_compiler()
+    return "vc120"
+endfunction
+
+function platform_toolset(product)
+    define my.product = platform_toolset.product
+    if (is_compiler_ctp(my.product))
+        return "CTP_Nov2013"
+    endif
+    return "v120"
+endfunction
+
+function is_compiler_ctp(product)
+    define my.product = is_compiler_ctp.product
+    return is_library(my.product) |\
+        (is_program(my.product) & !is_option_tests(my.product)) |\
+        (is_program(my.product) & is_option_tests(my.product) &\
+            (my.product.name = "libbitcoin_consensus_test"))
+endfunction
+
+function format_version()
+    return "12.00"
+endfunction
+
+function visual_studio_version()
+    return "12.0.30723.0"
+endfunction
+
+function visual_studio_version_min()
+    return "10.0.40219.1"
+endfunction
+
+function visual_studio_year()
+    return "2013"
+endfunction
+
+.endtemplate

@@ -90,6 +90,21 @@ function global.normalize_directory(folder)
     return my.directory.path
 endfunction
 
+function global.append_path(base, subdir)
+    if (!is_empty(my.base))
+        if (!ends_with(my.base, "/") & !ends_with(my.base, "\\"))
+            return "$(my.base)/$(my.subdir)"
+        else
+            return "$(my.base)$(my.subdir)"
+        endif
+    endif
+    return "$(my.subdir)"
+endfunction
+
+function global.make_win_path(path)
+    return string.replace(my.path, "/|\\")
+endfunction
+
 #------------------------------------------------------------------------------
 # Library utilities.
 #------------------------------------------------------------------------------
@@ -217,7 +232,7 @@ endfunction
 function get_flags_variable(flag)
     define my.flag = get_flags_variable.flag
     if (is_cpp_flag(my.flag))
-        return "CPPFLAGS"    
+        return "CPPFLAGS"
     elsif (is_ccc_flag(my.flag))
         return "CFLAGS"
     elsif (is_cxx_flag(my.flag))
@@ -661,6 +676,15 @@ REM #
 REM #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 REM #
 REM ###########################################################################
+.endmacro
+.
+.macro global.xml_copyleft(name)
+<!--
+ |  Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
+ |
+ |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+ |
+ -->
 .endmacro
 .
 .endtemplate

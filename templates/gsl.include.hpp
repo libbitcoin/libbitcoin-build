@@ -94,7 +94,7 @@ endfunction
 #define LIBBITCOIN_$(my.upper_include)_HPP
 
 /**
- * API Users: Include only this header. Direct use of other headers is fragile 
+ * API Users: Include only this header. Direct use of other headers is fragile
  * and unsupported as header organization is subject to change.
  *
  * Maintainers: Do not include this header internal to this library.
@@ -112,7 +112,7 @@ endfunction
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_include()
+function generate_include(path_prefix)
     for generate.repository by name as _repository
         define my.primary = bitcoin_to_include(_repository.name)
         define my.absolute = "$(global.root)/$(_repository.name)"
@@ -120,7 +120,8 @@ function generate_include()
         for _repository.make as _make
             for _make.product as _product where is_headers(_product)
                 for _product.files as _files
-                    define my.include = join(_repository.name, _files.path)
+                    define my.include = join(join(my.path_prefix,\
+                        _repository.name), _files.path)
                     create_directory(my.include)
                     define my.out_file = "$(my.include)/$(my.primary).hpp"
                     notify(my.out_file)
@@ -142,4 +143,20 @@ function generate_include()
     endfor _repository
 endfunction # generate_include
 .endtemplate
+.template 0
 ###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_include("output")
+
+.endtemplate

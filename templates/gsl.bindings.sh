@@ -48,14 +48,15 @@ swig -c++ -python -outdir "bindings/python/proxy" -o "bindings/python/wrap/$(my.
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_bindings_sh()
+function generate_bindings_sh(path_prefix)
 for generate.repository by name as _repository
     require(_repository, "repository", "name")
-    create_directory(_repository.name)
-    define my.out_file = "$(_repository.name)/bindings.sh"
+    my.output_path = join(path_prefix, _repository.name)
+    create_directory(my.output_path)
+    define my.out_file = "$(my.output_path)/bindings.sh"
     notify(my.out_file)
     output(my.out_file)
-    
+
     shebang("sh")
     copyleft(_repository.name)
     define my.interface = bitcoin_to_include(_repository.name)
@@ -65,7 +66,20 @@ for generate.repository by name as _repository
 endfor _repository
 endfunction # generate_bindings_sh
 .endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
 
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
 
+generate_bindings_sh("output")
 
-
+.endtemplate
