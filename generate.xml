@@ -161,7 +161,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -330,7 +330,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -498,7 +498,7 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+     <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -696,7 +696,7 @@
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -849,7 +849,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1041,12 +1041,12 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
-      <!-- version4
+      <!-- version5
       <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
         <option value="--enable-silent-rules" />
       </build>
       -->
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1231,7 +1231,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1314,7 +1314,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="3.4.0" />
-	  <dependency name="bitcoin-network" version="3.4.0" />
+      <dependency name="bitcoin-network" version="3.4.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -1390,7 +1390,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1499,6 +1499,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.2.0" />
+      <!--<dependency name="protobuf" version="2.6.0" unprefixed="true" /> -->
       <dependency name="bitcoin" version="3.4.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1566,7 +1567,7 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -1729,7 +1730,7 @@
       <!-- TODO: move zmq to a packaged version 4.2 dependency. -->
       <build name="zmq" github="zeromq" repository="libzmq" branch="master" parallel="true" nuget="true" >
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version4" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
