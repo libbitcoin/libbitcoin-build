@@ -28,7 +28,9 @@ The artifacts generated for each library are as follows. Package names coincide 
 
 ```
 .travis.yml
+appveyor.yml
 autogen.sh
+build.cmd
 configure.ac
 install.sh
 [library].pc.in
@@ -36,11 +38,19 @@ install.sh
 Makefile.am
 include/bitcoin/[library].hpp
 include/bitcoin/[library]/version.hpp
+builds/msvc/[edition]/[library]/[library].props
+builds/msvc/[edition]/[library]/[library].vcxproj
+builds/msvc/[edition]/[library]/[library].vcxproj.filters
+builds/msvc/[edition]/[library]/[library].xml
+builds/msvc/[edition]/[library]/packages.config
+builds/msvc/[edition]/[library].import.props
+builds/msvc/[edition]/[library].import.xml
+builds/msvc/[edition]/[library].sln
 ```
 
 These artifacts are merged into their respective repositories by libbitcoin maintainers. There is no need to build libbitcoin-build if you are not a maintainer in the process of applying a build configuration change.
 
-The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl). There are Linux/OSX and Visual Studio builds of GSL. A recent version is recommended. There is also a Windows single file executable available for [download](https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe).
+The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl), recently moved to the [ZeroMQ repository](https://github.com/zeromq/gsl). There are Linux/OSX and Visual Studio builds of GSL. A recent version is recommended. There is also a Windows single file executable available for [download](https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe).
 
 ![Dependencies](https://raw.githubusercontent.com/libbitcoin/libbitcoin-build/master/img/dependencies.png)
 
