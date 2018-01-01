@@ -31,9 +31,9 @@ declare -a generator=( \\
     )
 
 # Generate build artifacts.
-for gen in "\${generator[@]}"
+for generate in "\${generator[@]}"
 do
-    eval gsl -q -script:templates/\$gen generate.xml
+    eval gsl -q -script:templates/\$generate generate.xml
 done
 
 # Make generated scripts executable.
