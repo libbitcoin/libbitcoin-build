@@ -594,7 +594,7 @@ function generate_configure(path_prefix)
 for generate.repository by name as _repository
 
     require(_repository, "repository", "name")
-    my.output_path = join(my.path_prefix, _repository.name)
+    define my.output_path = join(my.path_prefix, _repository.name)
     create_directory(my.output_path)
     define my.out_file = "$(my.output_path)/configure.ac"
     notify(my.out_file)

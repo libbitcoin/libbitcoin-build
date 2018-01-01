@@ -86,5 +86,5 @@ git clone https://github.com/libbitcoin/libbitcoin-server.git
 # Run the libbitcoin-build generation script.
 # Newly generated build files are copied to the cloned repos.
 cd libbitcoin-build
-./update_codegen.sh
+./generate.sh
 ```
