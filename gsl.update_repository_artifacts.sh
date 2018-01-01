@@ -1,18 +1,17 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
 #
 # GSL generate update_repository_artifacts.sh.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-###############################################################################
-# Macros
+# Generation
 ###############################################################################
 .endtemplate
 .template 1
-.macro generate_artifact()
+.macro generate_artifacts()
 .   define out_file = "update_repository_artifacts.sh"
 .   notify(out_file)
 .   output(out_file)
@@ -21,12 +20,6 @@
 
 # Exit this script on the first build error.
 set -e
-
-declare -a project=( \\
-.   for generate->repositories.repository by name as _repo
-    "$(_repo.name)" \\
-.   endfor
-    )
 
 declare -a generator=( \\
 .   for generate->templates.template as _template
@@ -56,7 +49,7 @@ generate_artifacts
 # Make generated scripts executable.
 mark_executables
 
-.endmacro generate_artifact
+.endmacro generate_artifacts
 .endtemplate
 .template 0
 ###############################################################################
@@ -72,6 +65,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_artifact()
+generate_artifacts()
 
 .endtemplate
