@@ -23,9 +23,9 @@ overwrite_project_files()
 
 generate_updaters()
 {
-    eval gsl -q -script:gsl.update_repository_artifacts.cmd generate.xml
-    eval gsl -q -script:gsl.update_repository_artifacts.sh generate.xml
-    eval chmod +x update_repository_artifacts.sh
+    eval gsl -q -script:gsl.generate_artifacts.cmd generate.xml
+    eval gsl -q -script:gsl.generate_artifacts.sh generate.xml
+    eval chmod +x generate_artifacts.sh
     eval gsl -q -script:gsl.copy_properties.cmd generate.xml
     eval gsl -q -script:gsl.copy_properties.sh generate.xml
     eval chmod +x copy_properties.sh
@@ -35,7 +35,7 @@ generate_updaters()
 execute_updaters()
 {
     eval ./copy_properties.sh
-    eval ./update_repository_artifacts.sh
+    eval ./generate_artifacts.sh
 }
 
 # Do everything relative to this file location.
