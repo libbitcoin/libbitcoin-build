@@ -26,14 +26,15 @@ generate_updaters()
     eval gsl -q -script:gsl.update_repository_artifacts.cmd generate.xml
     eval gsl -q -script:gsl.update_repository_artifacts.sh generate.xml
     eval chmod +x update_repository_artifacts.sh
-    eval gsl -q -script:gsl.update_seeded_artifacts.cmd generate.xml
-    eval gsl -q -script:gsl.update_seeded_artifacts.sh generate.xml
-    eval chmod +x update_seeded_artifacts.sh
+    eval gsl -q -script:gsl.copy_properties.cmd generate.xml
+    eval gsl -q -script:gsl.copy_properties.sh generate.xml
+    eval chmod +x copy_properties.sh
+
 }
 
 execute_updaters()
 {
-    eval ./update_seeded_artifacts.sh
+    eval ./copy_properties.sh
     eval ./update_repository_artifacts.sh
 }
 

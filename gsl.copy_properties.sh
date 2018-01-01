@@ -2,7 +2,7 @@
 ###############################################################################
 # Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
-# GSL generate update_seeded_artifacts.sh.
+# GSL generate copy_properties.sh.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
@@ -50,7 +50,7 @@ declare -a vs_version=( \\
 # Generation
 ###############################################################################
 function generate_artifacts(path_prefix)
-    define out_file = "update_seeded_artifacts.sh"
+    define out_file = "copy_properties.sh"
     notify(out_file)
     output(out_file)
     shebang("bash")
