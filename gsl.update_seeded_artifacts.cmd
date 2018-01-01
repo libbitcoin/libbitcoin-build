@@ -24,7 +24,7 @@ pushd %~dp0
 if not exist "$(my.msvc_path)" call mkdir "$(my.msvc_path)"
 .   emit_error_handler("Failed to create directory.")
 call :pending "Seeding imports $(my.msvc_path)"
-call xcopy /y "import\\$(my.import_name).import.*" $(my.msvc_path)
+call xcopy /y "props\\import\\$(my.import_name).import.*" $(my.msvc_path)
 .   emit_error_handler("Failed to copy import files.")
 .endmacro emit_import_copy_project
 .
@@ -38,7 +38,7 @@ REM Copy $(my.import_name) imports for $(my.repository_name)
 .macro emit_project_props_copy_project(output, repository_name, vs_version)
 .   define my.msvc_path = "$(my.output)\\$(my.repository_name)\\builds\\msvc\\$(my.vs_version)"
 call :pending "Seeding props $(my.msvc_path)"
-call xcopy /s /y "seed_projects\\$(my.repository_name)\\*" $(my.msvc_path)
+call xcopy /s /y "props\\project\\$(my.repository_name)\\*" $(my.msvc_path)
 .   emit_error_handler("Failed to copy import files.")
 .endmacro
 .

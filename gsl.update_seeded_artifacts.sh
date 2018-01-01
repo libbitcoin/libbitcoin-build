@@ -32,7 +32,7 @@ declare -a vs_version=( \\
     for version in "\${vs_version[@]}"
     do
         mkdir -p $(my.output)/$(my.repository_name)/builds/msvc/\$version/
-        eval cp -f import/$(my.import_name).import.* $(my.output)/$(my.repository_name)/builds/msvc/\$version/
+        eval cp -f props/import/$(my.import_name).import.* $(my.output)/$(my.repository_name)/builds/msvc/\$version/
     done
 
 .endmacro
@@ -41,7 +41,7 @@ declare -a vs_version=( \\
     for version in "\${vs_version[@]}"
     do
         mkdir -p $(my.output)/$(my.repository_name)/builds/msvc/\$version/
-        eval cp -rf seed_projects/$(my.repository_name)/* $(my.output)/$(my.repository_name)/builds/msvc/\$version/
+        eval cp -rf props/project/$(my.repository_name)/* $(my.output)/$(my.repository_name)/builds/msvc/\$version/
     done
 
 .endmacro
