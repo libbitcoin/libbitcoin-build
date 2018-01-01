@@ -18,10 +18,10 @@ REM Clean directories for generated build artifacts.
 rmdir /s /q "output" 2>NUL
 
 REM Generate second-stage artifact generators.
-gsl -q -script:gsl_update_repository_artifacts.cmd buildgen.xml
-gsl -q -script:gsl_update_repository_artifacts.sh buildgen.xml
-gsl -q -script:gsl_update_seeded_artifacts.cmd generate.xml
-gsl -q -script:gsl_update_seeded_artifacts.sh generate.xml
+gsl -q -script:gsl.update_repository_artifacts.cmd buildgen.xml
+gsl -q -script:gsl.update_repository_artifacts.sh buildgen.xml
+gsl -q -script:gsl.update_seeded_artifacts.cmd generate.xml
+gsl -q -script:gsl.update_seeded_artifacts.sh generate.xml
 
 REM Generate repository project artifacts.
 call update_seeded_artifacts.cmd

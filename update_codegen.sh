@@ -23,11 +23,11 @@ overwrite_project_files()
 
 generate_updaters()
 {
-    eval gsl -q -script:gsl_update_repository_artifacts.cmd buildgen.xml
-    eval gsl -q -script:gsl_update_repository_artifacts.sh buildgen.xml
+    eval gsl -q -script:gsl.update_repository_artifacts.cmd buildgen.xml
+    eval gsl -q -script:gsl.update_repository_artifacts.sh buildgen.xml
     eval chmod +x update_repository_artifacts.sh
-    eval gsl -q -script:gsl_update_seeded_artifacts.cmd generate.xml
-    eval gsl -q -script:gsl_update_seeded_artifacts.sh generate.xml
+    eval gsl -q -script:gsl.update_seeded_artifacts.cmd generate.xml
+    eval gsl -q -script:gsl.update_seeded_artifacts.sh generate.xml
     eval chmod +x update_seeded_artifacts.sh
 }
 
