@@ -21,33 +21,23 @@
 # Exit this script on the first build error.
 set -e
 
+# Do everything relative to this file location.
+cd `dirname "$0"`
+
 declare -a generator=( \\
 .   for generate->templates.template as _template
     "$(_template.name)" \\
 .   endfor
     )
 
-generate_artifacts()
-{
-    for gen in "\${generator[@]}"
-    do
-        eval gsl -q -script:templates/\$gen generate.xml
-    done
-}
-
-mark_executables()
-{
-    eval chmod +x "output/*/*.sh"
-}
-
-# Do everything relative to this file location.
-cd `dirname "$0"`
-
 # Generate build artifacts.
-generate_artifacts
+for gen in "\${generator[@]}"
+do
+    eval gsl -q -script:templates/\$gen generate.xml
+done
 
 # Make generated scripts executable.
-mark_executables
+eval chmod +x "output/*/*.sh"
 
 .endmacro generate_artifacts
 .endtemplate

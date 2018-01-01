@@ -11,45 +11,31 @@
 # Exit this script on the first build error.
 set -e
 
-cleanup_local_files()
-{
-    eval rm -rf "output"
-}
-
-overwrite_project_files()
-{
-    eval cp -rf "output/." "../"
-}
-
-generate_updaters()
-{
-    eval gsl -q -script:gsl.generate_artifacts.cmd generate.xml
-    eval gsl -q -script:gsl.generate_artifacts.sh generate.xml
-    eval chmod +x generate_artifacts.sh
-    eval gsl -q -script:gsl.copy_properties.cmd generate.xml
-    eval gsl -q -script:gsl.copy_properties.sh generate.xml
-    eval chmod +x copy_properties.sh
-
-}
-
-execute_updaters()
-{
-    eval ./copy_properties.sh
-    eval ./generate_artifacts.sh
-}
-
 # Do everything relative to this file location.
 cd `dirname "$0"`
 
 # Clean directories for generated build artifacts.
-cleanup_local_files
+eval rm -rf "output"
 
-# Generate second-stage artifact generators.
-generate_updaters
+# Generate property copiers and artifact generators.
+eval gsl -q -script:gsl.copy_properties.sh generate.xml
+# eval gsl -q -script:gsl.copy_properties.cmd generate.xml
+eval gsl -q -script:gsl.generate_artifacts.sh generate.xml
+# eval gsl -q -script:gsl.generate_artifacts.cmd generate.xml
 
-# Execute second-stage artifact generation.
-execute_updaters
+# Generate bindings from generated binding generators.
+# The path to swig must be in our path.
+# for generate.repository by name as _repo
+#     eval ../$(_repo.name)/bindings.sh
+# endfor
+
+# Make property copiers and artifact generators executable.
+eval chmod +x copy_properties.sh
+eval chmod +x generate_artifacts.sh
+
+# Execute property copiers and artifact generators.
+eval ./copy_properties.sh
+eval ./generate_artifacts.sh
 
 # Copy outputs to all repositories.
-overwrite_project_files
-
+eval cp -rf "output/." "../"
