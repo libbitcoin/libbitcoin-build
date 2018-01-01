@@ -11,8 +11,7 @@
 ###############################################################################
 .endtemplate
 .template 1
-.macro generate_artifact(root, path_prefix)
-.   define my.root = generate_artifact.root
+.macro generate_artifact(path_prefix)
 .   define out_file = "update_seeded_artifacts.sh"
 .   notify(out_file)
 .   output(out_file)
@@ -30,7 +29,7 @@ declare -a vs_proj_ver=( \\
 
 seed_imports()
 {
-.   for my.root.repository by name as _repository
+.   for generate.repository by name as _repository
 .       echo(" Evaluating repository: $(_repository.name)")
 .        for _repository->install.build as _build where\
              defined(_build.repository) & starts_with(_build.repository, "libbitcoin")
@@ -41,7 +40,7 @@ seed_imports()
 
 seed_projects()
 {
-.   for my.root.repository by name as _repository
+.   for generate.repository by name as _repository
 .       emit_project_props_copy(my.path_prefix, _repository.name)
 .   endfor
 }
@@ -88,6 +87,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_artifact(generate, "output")
+generate_artifact("output")
 
 .endtemplate

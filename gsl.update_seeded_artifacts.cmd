@@ -9,8 +9,7 @@
 ###############################################################################
 # Functions
 ###############################################################################
-function generate_artifact(root, path_prefix)
-    define my.root = generate_artifact.root
+function generate_artifact(path_prefix)
     define out_file = "update_seeded_artifacts.cmd"
     notify(out_file)
     output(out_file)
@@ -19,7 +18,7 @@ function generate_artifact(root, path_prefix)
 
     emit_initialize()
 
-    for my.root.repository by name as _repository
+    for generate.repository by name as _repository
          for _repository->install.build as _build where\
              defined(_build.repository) & starts_with(_build.repository, "libbitcoin")
              emit_import_copy(my.path_prefix, _repository.name, _build.repository)
