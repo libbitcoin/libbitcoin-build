@@ -23,13 +23,13 @@
 set -e
 
 declare -a project=( \\
-.   for buildgen->repositories.repository by name as _repo
+.   for generate->repositories.repository by name as _repo
     "$(_repo.name)" \\
 .   endfor
     )
 
 declare -a generator=( \\
-.   for buildgen->templates.template as _template
+.   for generate->templates.template as _template
     "$(_template.name)" \\
 .   endfor
     )

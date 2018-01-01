@@ -23,7 +23,7 @@ REM Do everything relative to this file location.
 pushd %~dp0
 
 REM Generate build artifacts.
-.   for buildgen->templates.template as _template
+.   for generate->templates.template as _template
 gsl -q -script:templates\\$(_template.name) generate.xml
 if %errorlevel% neq 0 goto error
 

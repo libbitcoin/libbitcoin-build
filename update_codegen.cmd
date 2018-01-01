@@ -18,8 +18,8 @@ REM Clean directories for generated build artifacts.
 rmdir /s /q "output" 2>NUL
 
 REM Generate second-stage artifact generators.
-gsl -q -script:gsl.update_repository_artifacts.cmd buildgen.xml
-gsl -q -script:gsl.update_repository_artifacts.sh buildgen.xml
+gsl -q -script:gsl.update_repository_artifacts.cmd generate.xml
+gsl -q -script:gsl.update_repository_artifacts.sh generate.xml
 gsl -q -script:gsl.update_seeded_artifacts.cmd generate.xml
 gsl -q -script:gsl.update_seeded_artifacts.sh generate.xml
 
@@ -35,7 +35,7 @@ call pause
 
 REM Generate bindings from generated binding generators.
 REM The path to swig.exe must be in our path.
-REM .   for buildgen->repositories.repository by name as _repo
+REM .   for generate.repository by name as _repo
 REM call ..\\$(_repo.name)\\bindings.bat
 REM .   endfor
 
