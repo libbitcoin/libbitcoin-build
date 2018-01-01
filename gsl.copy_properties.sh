@@ -45,6 +45,7 @@ declare -a vs_version=( \\
     done
 
 .endmacro
+.endtemplate
 .template 0
 ###############################################################################
 # Generation
