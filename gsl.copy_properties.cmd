@@ -26,6 +26,7 @@ if not exist "$(my.msvc_path)" call mkdir "$(my.msvc_path)"
 call :pending "Seeding imports $(my.msvc_path)"
 call xcopy /y "props\\import\\$(my.import_name).import.*" $(my.msvc_path)
 .   emit_error_handler("Failed to copy import files.")
+
 .endmacro emit_import_copy_project
 .
 .macro emit_import_copy(output, repository_name, import_name)
@@ -40,6 +41,7 @@ REM Copy $(my.import_name) imports for $(my.repository_name)
 call :pending "Seeding props $(my.msvc_path)"
 call xcopy /s /y "props\\project\\$(my.repository_name)\\*" $(my.msvc_path)
 .   emit_error_handler("Failed to copy import files.")
+
 .endmacro
 .
 .macro emit_project_props_copy(output, repository_name)
@@ -55,7 +57,7 @@ call :success "Completed population of $(my.repository_name) artifacts."
 .
 .macro emit_error_handler(message)
 .   define my.message = emit_error_handler.message
-IF %ERRORLEVEL% NEQ 0 (
+if %ERRORLEVEL% NEQ 0 (
   call :failure "$(my.message)"
   call :cleanup
   exit /b 1
