@@ -2,7 +2,7 @@
 ###############################################################################
 # Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
-# GSL generate update_repository_artifacts.cmd.
+# GSL generate generate_artifacts.cmd.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
@@ -12,7 +12,7 @@
 .endtemplate
 .template 1
 .macro generate_artifact()
-.   define out_file = "update_repository_artifacts.cmd"
+.   define out_file = "generate_artifacts.cmd"
 .   notify(out_file)
 .   output(out_file)
 .   batch_no_echo()
