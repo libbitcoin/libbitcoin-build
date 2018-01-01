@@ -20,11 +20,11 @@ rmdir /s /q "output" 2>NUL
 REM Generate second-stage artifact generators.
 gsl -q -script:gsl.update_repository_artifacts.cmd generate.xml
 gsl -q -script:gsl.update_repository_artifacts.sh generate.xml
-gsl -q -script:gsl.update_seeded_artifacts.cmd generate.xml
-gsl -q -script:gsl.update_seeded_artifacts.sh generate.xml
+gsl -q -script:gsl.copy_properties.cmd generate.xml
+gsl -q -script:gsl.copy_properties.sh generate.xml
 
 REM Generate repository project artifacts.
-call update_seeded_artifacts.cmd
+call copy_properties.cmd
 call update_repository_artifacts.cmd
 
 REM Copy outputs to all repositories.
