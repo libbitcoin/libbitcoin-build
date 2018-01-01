@@ -7,8 +7,7 @@
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-###############################################################################
-# Macros
+# Generation
 ###############################################################################
 .endtemplate
 .template 1
