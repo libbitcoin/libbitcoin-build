@@ -1,45 +1,45 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
 #
-# GSL generate update_repository_artifacts.cmd.
+# GSL generate generate_artifacts.sh.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-###############################################################################
-# Macros
+# Generation
 ###############################################################################
 .endtemplate
 .template 1
-.macro generate_artifact()
-.   define out_file = "update_repository_artifacts.cmd"
+.macro generate_artifacts()
+.   define out_file = "generate_artifacts.sh"
 .   notify(out_file)
 .   output(out_file)
-.   batch_no_echo()
-.   bat_copyleft("libbitcoin-build")
+.   shebang("bash")
+.   copyleft("libbitcoin-build")
 
-REM Do everything relative to this file location.
-pushd %~dp0
+# Exit this script on the first build error.
+set -e
 
-REM Generate build artifacts.
-.   for buildgen->templates.template as _template
-gsl -q -script:templates\\$(_template.name) generate.xml
-if %errorlevel% neq 0 goto error
+# Do everything relative to this file location.
+cd `dirname "$0"`
 
+declare -a generator=( \\
+.   for generate->templates.template as _template
+    "$(_template.name)" \\
 .   endfor
+    )
 
-echo --- OKAY, generation completed.
-goto end
+# Generate build artifacts.
+for generate in "\${generator[@]}"
+do
+    eval gsl -q -script:templates/\$generate generate.xml
+done
 
-:error
-echo *** ERROR, generation terminated early.
+# Make generated scripts executable.
+eval chmod +x "output/*/*.sh"
 
-:end
-REM Restore directory.
-popd
-
-.endmacro generate_artifact
+.endmacro generate_artifacts
 .endtemplate
 .template 0
 ###############################################################################
@@ -55,6 +55,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_artifact()
+generate_artifacts()
 
 .endtemplate

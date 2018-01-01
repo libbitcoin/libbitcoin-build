@@ -2,59 +2,41 @@
 ###############################################################################
 # Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
-# GSL generate update_repository_artifacts.sh.
+# GSL generate generate_artifacts.cmd.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-###############################################################################
-# Macros
+# Generation
 ###############################################################################
 .endtemplate
 .template 1
 .macro generate_artifact()
-.   define out_file = "update_repository_artifacts.sh"
+.   define out_file = "generate_artifacts.cmd"
 .   notify(out_file)
 .   output(out_file)
-.   shebang("bash")
-.   copyleft("libbitcoin-build")
+.   batch_no_echo()
+.   bat_copyleft("libbitcoin-build")
 
-# Exit this script on the first build error.
-set -e
+REM Do everything relative to this file location.
+pushd %~dp0
 
-declare -a project=( \\
-.   for buildgen->repositories.repository by name as _repo
-    "$(_repo.name)" \\
+REM Generate build artifacts.
+.   for generate->templates.template as _template
+gsl -q -script:templates\\$(_template.name) generate.xml
+if %errorlevel% neq 0 goto error
+
 .   endfor
-    )
 
-declare -a generator=( \\
-.   for buildgen->templates.template as _template
-    "$(_template.name)" \\
-.   endfor
-    )
+echo --- OKAY, generation completed.
+goto end
 
-generate_artifacts()
-{
-    for gen in "\${generator[@]}"
-    do
-        eval gsl -q -script:templates/\$gen generate.xml
-    done
-}
+:error
+echo *** ERROR, generation terminated early.
 
-mark_executables()
-{
-    eval chmod +x "output/*/*.sh"
-}
-
-# Do everything relative to this file location.
-cd `dirname "$0"`
-
-# Generate build artifacts.
-generate_artifacts
-
-# Make generated scripts executable.
-mark_executables
+:end
+REM Restore directory.
+popd
 
 .endmacro generate_artifact
 .endtemplate
