@@ -129,7 +129,7 @@ endfunction
 .   require(_repository, "repository", "name")
 .   my.output_path = join(my.path_prefix, _repository.name)
 .   create_directory(my.output_path)
-.   define my.out_file = "$(my.output_path)/appveyor.yml"
+.   define my.out_file = "$(my.output_path)/.appveyor.yml"
 .   notify(my.out_file)
 .   output(my.out_file)
 .   copyleft(_repository.name)
