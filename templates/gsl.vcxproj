@@ -34,8 +34,8 @@ function project_base(product, repository_name)
     endif
 endfunction
 
-function project_build_dir_relative_path(product, path_prefix, repository_name, vs_version)
-    define my.product = project_build_dir_relative_path.product
+function project_build_relative_path(product, path_prefix, repository_name, vs_version)
+    define my.product = project_build_relative_path.product
     define my.proj_name = project_base(my.product, my.repository_name)
     define my.subpath = "builds/msvc/$(my.vs_version)"
     return append_path(append_path(append_path(my.path_prefix,\
@@ -44,20 +44,10 @@ endfunction
 
 function project_file(product, path_prefix, repository_name, vs_version)
     define my.product = project_file.product
-    define my.proj_relative_path = project_build_dir_relative_path(my.product,\
+    define my.project_relative_path = project_build_relative_path(my.product,\
         my.path_prefix, my.repository_name, my.vs_version)
     define my.proj_name = project_base(my.product, my.repository_name)
-    return append_path(my.proj_relative_path, "$(my.proj_name).vcxproj")
-endfunction
-
-function nuget_package_name(package)
-    define my.package = nuget_package_name.package
-    return "$(my.package.name).$(my.package.version)"
-endfunction
-
-function nuget_package_targets_path(package)
-    define my.package = nuget_package_targets_path.package
-    return "build/native/$(my.package.name).targets"
+    return append_path(my.project_relative_path, "$(my.proj_name).vcxproj")
 endfunction
 
 ###
@@ -218,7 +208,7 @@ function discover_files(file_data, directory, win_path, prefix, recurse)
     define my.directory = discover_files.directory
 
     for my.directory.file as _file by _file.name
-        add_file_element(my.file_data, make_win_path(\
+        add_file_element(my.file_data, make_windows_path(\
             append_path(my.win_path, _file.name)), my.prefix, _file.name)
     endfor
 
@@ -761,24 +751,23 @@ endfunction emit_project
 .
 .macro emit_item(type, file_record)
 .   define my.file_record = emit_item.file_record
-    <$(my.type) Include="$(make_win_path(my.file_record.build_path))" />
+    <$(my.type) Include="$(make_windows_path(my.file_record.build_path))" />
 .endmacro emit_item
 .
 .macro emit_item_with_object(type, file_record)
 .   define my.file_record = emit_item_with_object.file_record
 .   define my.obj_base_name = object_base_from_element(my.file_record)
 .   define my.obj_full_name = "$(my.file_record.path_prefix)_$(my.obj_base_name).obj"
-    <$(my.type) Include="$(make_win_path(my.file_record.build_path))">
+    <$(my.type) Include="$(make_windows_path(my.file_record.build_path))">
       <ObjectFileName>\$(IntDir)$(my.obj_full_name)</ObjectFileName>
     </$(my.type)>
 .endmacro emit_item_with_object
 .
 .macro emit_import_project_nuget(package)
 .   define my.package = emit_import_project_nuget.package
-.   define my.prefix = "../../../../../../nuget"
-.   define my.target = "$(my.prefix)/$(nuget_package_name(my.package))/$(nuget_package_targets_path(my.package))"
-.   define my.win_path = make_win_path(my.target)
-    <Import Project="$(my.win_path)" Condition="Exists('$(my.win_path)')" />
+.   define my.target = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)/build/native/$(my.package.name).targets"
+.   define my.windows_path = make_windows_path(my.target)
+    <Import Project="$(my.windows_path)" Condition="Exists('$(my.windows_path)')" />
 .endmacro emit_import_project_nuget
 .
 .macro emit_target_ensure_nuget_imports_open()
@@ -794,10 +783,9 @@ endfunction emit_project
 .
 .macro emit_error_condition_nuget(package)
 .   define my.package = emit_error_condition_nuget.package
-.   define my.prefix = "../../../../../../nuget"
-.   define my.target = "$(my.prefix)/$(nuget_package_name(my.package))/$(nuget_package_targets_path(my.package))"
-.   define my.win_path = make_win_path(my.target)
-    <Error Condition="!Exists('$(my.win_path)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.win_path)'))" />
+.   define my.target = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)/build/native/$(my.package.name).targets"
+.   define my.windows_path = make_windows_path(my.target)
+    <Error Condition="!Exists('$(my.windows_path)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.windows_path)'))" />
 .endmacro emit_error_condition_nuget
 .
 .macro emit_item_group_project_reference_item(name, uuid)
@@ -817,7 +805,7 @@ function generate_vcxproj(path_prefix, generate, vs_version)
         where defined(_repository->make)
 
         require(_repository, "repository", "name")
-        define my.absolute_proj_path = append_path(global.root,\
+        define my.absolute_project_path = append_path(global.root,\
             _repository.name)
 
         define my.nuget_registry = generate->nuget_registry
@@ -826,18 +814,18 @@ function generate_vcxproj(path_prefix, generate, vs_version)
             defined(_product.uuid) & !is_empty(_product.uuid) &\
             defined(_product.path)
 
-            define my.proj_dir_name = project_build_dir_relative_path(\
+            define my.project_directory_name = project_build_relative_path(\
                 _product, my.path_prefix, _repository.name, my.vs_version)
 
-            define my.proj_file = project_file(_product, my.path_prefix,\
+            define my.project_file = project_file(_product, my.path_prefix,\
                 _repository.name, my.vs_version)
 
-            create_directory(my.proj_dir_name)
-            notify(my.proj_file)
-            output(my.proj_file)
+            create_directory(my.project_directory_name)
+            notify(my.project_file)
+            output(my.project_file)
 
             emit_project(my.nuget_registry, _repository, _product,\
-                my.absolute_proj_path)
+                my.absolute_project_path)
 
             close
         endfor
