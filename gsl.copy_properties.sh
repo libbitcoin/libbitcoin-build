@@ -43,6 +43,16 @@ declare -a vs_version=( \\
         mkdir -p $(my.output)/$(my.repository_name)/builds/msvc/\$version/
         eval cp -rf props/project/$(my.repository_name)/* $(my.output)/$(my.repository_name)/builds/msvc/\$version/
     done
+    eval cp -rf props/nuget.config $(my.output)/$(my.repository_name)/builds/msvc/
+
+.endmacro
+.
+.macro emit_nuget_config_copy(output, repository_name)
+    for version in "\${vs_version[@]}"
+    do
+        mkdir -p $(my.output)/$(my.repository_name)/builds/msvc/
+        eval cp -rf props/nuget.config $(my.output)/$(my.repository_name)/builds/msvc/
+    done
 
 .endmacro
 .endtemplate

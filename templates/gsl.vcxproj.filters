@@ -117,7 +117,7 @@ function discover_files(data, directory, path_prefix, win_path, value_path, recu
     define my.directory = discover_files.directory
 
     for my.directory.file as _file by _file.name
-        table_add(my.data, make_win_path(append_path(\
+        table_add(my.data, make_windows_path(append_path(\
             append_path(my.path_prefix, my.win_path), _file.name)),\
             my.value_path)
     endfor
@@ -140,7 +140,7 @@ function discover_directories(data, directory, win_path, value_path, uuid)
     define my.directory = discover_directories.directory
 
     for my.directory.directory as _dir by _dir.name
-        table_add(my.data, make_win_path(append_path(my.value_path,\
+        table_add(my.data, make_windows_path(append_path(my.value_path,\
             _dir.name)), my.uuid)
         my.uuid = uuid_inc(my.uuid)
     endfor
@@ -200,7 +200,7 @@ function emit_declare_filters_item_group(directories, uuid_seed)
     emit_item_group_open()
 
     for my.directories.row as _row by _row.name
-        emit_filter_declaration(make_win_path(_row.name),\
+        emit_filter_declaration(make_windows_path(_row.name),\
             to_uuid(my.uuid_seed, _row.value))
     endfor
 
@@ -406,8 +406,8 @@ endfunction
 .endmacro emit_item_resource_filtered
 .
 .macro emit_item_filtered(type, include, filter_path)
-    <$(my.type) Include="$(make_win_path(my.include))">
-.   emit_item_filter(make_win_path(my.filter_path))
+    <$(my.type) Include="$(make_windows_path(my.include))">
+.   emit_item_filter(make_windows_path(my.filter_path))
     </$(my.type)>
 .endmacro emit_item_filtered
 .
