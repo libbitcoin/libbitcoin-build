@@ -35,7 +35,8 @@ REM Copy $(my.import_name) imports for $(my.repository_name)
 .   emit_import_copy_project(my.output, my.repository_name, my.import_name, "vs2013")
 .   emit_import_copy_project(my.output, my.repository_name, my.import_name, "vs2015")
 .   emit_import_copy_project(my.output, my.repository_name, my.import_name, "vs2017")
-call xcopy /y "props\\nuget.config" "$(my.output)\\$(my.repository_name)\\builds\\msvc"
+call xcopy /y "props\\nuget.config" "$(my.output)\\$(my.repository_name)\\builds\\msvc\\"
+call xcopy /y "props\\build\\build_base.bat" "$(my.output)\\$(my.repository_name)\\builds\\msvc\\build\\"
 .   emit_error_handler("Failed to copy nuget.config.")
 
 .endmacro

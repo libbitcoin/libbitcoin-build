@@ -44,6 +44,7 @@ declare -a vs_version=( \\
         eval cp -rf props/project/$(my.repository_name)/* $(my.output)/$(my.repository_name)/builds/msvc/\$version/
     done
     eval cp -rf props/nuget.config $(my.output)/$(my.repository_name)/builds/msvc/
+    eval cp -rf props/build/build_base.bat $(my.output)/$(my.repository_name)/builds/msvc/build/
 
 .endmacro
 .
