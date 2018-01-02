@@ -23,6 +23,7 @@ pushd %~dp0
 .   define my.msvc_path = "$(my.output)\\$(my.repository_name)\\builds\\msvc\\$(my.vs_version)"
 if not exist "$(my.msvc_path)" call mkdir "$(my.msvc_path)"
 .   emit_error_handler("Failed to create directory.")
+
 call :pending "Seeding imports $(my.msvc_path)"
 call xcopy /y "props\\import\\$(my.import_name).import.*" $(my.msvc_path)
 .   emit_error_handler("Failed to copy import files.")
@@ -34,6 +35,15 @@ REM Copy $(my.import_name) imports for $(my.repository_name)
 .   emit_import_copy_project(my.output, my.repository_name, my.import_name, "vs2013")
 .   emit_import_copy_project(my.output, my.repository_name, my.import_name, "vs2015")
 .   emit_import_copy_project(my.output, my.repository_name, my.import_name, "vs2017")
+.   define my.msvc_path = "$(my.output)\\$(my.repository_name)\\builds\\msvc"
+if not exist "$(my.msvc_path)\\build\\" call mkdir "$(my.msvc_path)\\build\\"
+.   emit_error_handler("Failed to create build directory.")
+call xcopy /y "props\\nuget.config" "$(my.msvc_path)"
+.   emit_error_handler("Failed to copy nuget.config.")
+
+call xcopy /y "props\\build\\build_base.bat" "$(my.msvc_path)\\build\\"
+.   emit_error_handler("Failed to copy build_base.bat.")
+
 .endmacro
 .
 .macro emit_project_props_copy_project(output, repository_name, vs_version)
