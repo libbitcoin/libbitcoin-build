@@ -329,6 +329,11 @@ function global.is_qrencode_build(build)
     return starts_with(my.build.name, "qrencode")
 endfunction
 
+function global.is_zmq_build(build)
+    define my.build = is_zmq_build.build
+    return starts_with(my.build.name, "zmq")
+endfunction
+
 function global.is_boost_build(build)
     define my.build = is_boost_build.build
     return my.build.name = "boost"
