@@ -968,7 +968,7 @@ build_from_travis()
 .endmacro # build_qrencode
 .
 .macro build_from_tarball_zmq()
-    build_from_tarball $ZMQ_URL $ZMQ_ARCHIVE xz . $PARALLEL "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
+    build_from_tarball $ZMQ_URL $ZMQ_ARCHIVE gzip . $PARALLEL "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
 .endmacro # build_zmq
 .
 .macro build_boost()
