@@ -497,7 +497,7 @@
       </build>
       <build name="zmq" version="4.2.3" parallel="true" nuget="true" >
       </build>
-     <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -523,17 +523,20 @@
       <job system="osx" compiler="clang" link="static" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -548,6 +551,7 @@
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -557,6 +561,7 @@
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
@@ -1039,11 +1044,6 @@
       </build>
       <build name="zmq" version="4.2.3" parallel="true" nuget="true" >
       </build>
-      <!-- version5
-      <build name="protobuf" github="libbitcoin" repository="protobuf" branch="2.6.0" parallel="false" >
-        <option value="--enable-silent-rules" />
-      </build>
-      -->
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
@@ -1086,6 +1086,7 @@
         <option value="--build-png" />
         <option value="--build-qrencode" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
@@ -1095,6 +1096,7 @@
         <option value="--build-png" />
         <option value="--build-qrencode" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
@@ -1107,6 +1109,7 @@
         <option value="--build-png" />
         <option value="--build-qrencode" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1117,6 +1120,7 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
+        <option value="--build-zmq" />
         <option value="--with-bash-completiondir" />
         <option value="--disable-static" />
       </job>
@@ -1128,6 +1132,7 @@
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1141,6 +1146,7 @@
         <option value="--build-png" />
         <option value="--build-qrencode" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-static" />
         <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1497,7 +1503,6 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.2.3" />
-      <!--<dependency name="protobuf" version="2.6.0" unprefixed="true" /> -->
       <dependency name="bitcoin" version="3.4.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1531,7 +1536,6 @@
       </product>
       <product prefix="lib" path="src" name="bitcoin-protocol" uuid="6b94e2a5-c054-4790-963d-a7be493259b0" >
         <library name="zmq" />
-        <!--<library name="protobuf" />-->
         <library name="bitcoin" />
         <headers path="include" />
         <sources path="src" />
@@ -1584,11 +1588,13 @@
       <job system="osx" compiler="clang" link="static" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -1596,6 +1602,7 @@
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <exclude path="interface.pb.*" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1604,12 +1611,14 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--build-zmq" />
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1619,6 +1628,7 @@
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
@@ -1782,11 +1792,13 @@
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" version="3.4" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -1794,6 +1806,7 @@
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1804,6 +1817,7 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
+        <option value="--build-zmq" />
         <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
       </job>
@@ -1811,6 +1825,7 @@
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1822,6 +1837,7 @@
         <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
