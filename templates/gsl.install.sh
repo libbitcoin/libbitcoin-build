@@ -431,8 +431,8 @@ fi
 # Set the prefix-based package config directory.
 PREFIX_PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
 
-# Augment PKG_CONFIG_PATH search path with our prefix.
-export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX_PKG_CONFIG_DIR"
+# Prioritize prefix package config in PKG_CONFIG_PATH search path.
+export PKG_CONFIG_PATH="$PREFIX_PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
 
 # Set a package config save path that can be passed via our builds.
 with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
@@ -968,7 +968,7 @@ build_from_travis()
 .endmacro # build_qrencode
 .
 .macro build_from_tarball_zmq()
-    build_from_tarball $ZMQ_URL $ZMQ_ARCHIVE xz . $PARALLEL "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
+    build_from_tarball $ZMQ_URL $ZMQ_ARCHIVE gzip . $PARALLEL "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
 .endmacro # build_zmq
 .
 .macro build_boost()
