@@ -25,18 +25,76 @@
       <!-- https://svn.boost.org/trac/boost/ticket/8973 [gcc, 1.54] -->
       <!-- https://svn.boost.org/trac/boost/ticket/6851 [gcc, 1.50-1.53] -->
       <!-- [log rotation derivation for customization]  [???? 1.56] -->
-      <dependency name="boost" version="1.57.0" />
-      <dependency name="boost_chrono" />
-      <dependency name="boost_date_time" />
-      <dependency name="boost_filesystem" />
-      <dependency name="boost_iostreams" />
-      <dependency name="boost_locale" />
-      <dependency name="boost_log" />
-      <dependency name="boost_program_options" />
-      <dependency name="boost_regex" />
-      <dependency name="boost_system" />
-      <dependency name="boost_thread" />
-      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="boost" version="1.57.0">
+          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_atomic">
+          <nuget compiler="vc120" name="boost_atomic-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_atomic-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_atomic-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_chrono">
+          <nuget compiler="vc120" name="boost_chrono-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_chrono-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_chrono-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_date_time">
+          <nuget compiler="vc120" name="boost_date_time-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_date_time-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_date_time-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_filesystem">
+          <nuget compiler="vc120" name="boost_filesystem-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_filesystem-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_filesystem-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_iostreams">
+          <nuget compiler="vc120" name="boost_iostreams-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_iostreams-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_iostreams-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_locale">
+          <nuget compiler="vc120" name="boost_locale-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_locale-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_locale-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_log_setup">
+          <nuget compiler="vc120" name="boost_log_setup-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_log_setup-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_log_setup-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_log">
+          <nuget compiler="vc120" name="boost_log-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_log-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_log-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_program_options">
+          <nuget compiler="vc120" name="boost_program_options-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_program_options-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_program_options-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_regex">
+          <nuget compiler="vc120" name="boost_regex-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_regex-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_regex-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_system">
+          <nuget compiler="vc120" name="boost_system-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_system-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_system-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_thread">
+          <nuget compiler="vc120" name="boost_thread-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_thread-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_thread-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_unit_test_framework" option="tests">
+          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+      </dependency>
       <dependency name="pthread" />
       <dependency name="rt" function="clock_gettime" system="linux" />
       <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
@@ -46,7 +104,11 @@
       <!--<dependency name="zlib" version="1.2.9" option="png" />-->
       <dependency name="png" version="1.6.29" option="png" />
       <dependency name="qrencode" version="3.4.4" option="qrencode" />
-      <dependency name="secp256k1" version="0.0.1" />
+      <dependency name="secp256k1" version="0.0.1">
+          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.16" />
+          <nuget compiler="vc140" name="secp256k1_vc140" version="0.1.0.15" />
+          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.16" />
+      </dependency>
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -258,8 +320,16 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0" />
-      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="boost" version="1.57.0">
+          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_unit_test_framework" option="tests">
+          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+      </dependency>
       <dependency name="bitcoin-database" version="3.4.0" />
       <dependency name="bitcoin-consensus" version="3.4.0" option="consensus" />
 
@@ -419,8 +489,16 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0" />
-      <dependency name="boost_unit_test_framework" option="tests" />
+     <dependency name="boost" version="1.57.0">
+          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_unit_test_framework" option="tests">
+          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+      </dependency>
       <dependency name="bitcoin" version="3.4.0" />
       <dependency name="bitcoin-protocol" version="3.4.0" />
 
@@ -620,8 +698,21 @@
 
       <dependency name="boost" compiler="gcc" version="1.55.0" option="tests" />
       <dependency name="boost" compiler="clang" version="1.57.0" option="tests" />
-      <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="secp256k1" version="0.0.1" />
+      <dependency name="boost" compiler="msvc" version="1.57.0" option="tests">
+          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_unit_test_framework" option="tests">
+          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+      </dependency>
+      <dependency name="secp256k1" version="0.0.1">
+          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.16" />
+          <nuget compiler="vc140" name="secp256k1_vc140" version="0.1.0.15" />
+          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.16" />
+      </dependency>
       <dependency name="java" option="java" />
       <dependency name="python" version="2.7" option="python" />
 
@@ -784,8 +875,16 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0" />
-      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="boost" version="1.57.0">
+          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_unit_test_framework" option="tests">
+          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+      </dependency>
       <dependency name="bitcoin" version="3.4.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -931,8 +1030,16 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0" />
-      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="boost" version="1.57.0">
+          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_unit_test_framework" option="tests">
+          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+      </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="3.4.0" />
       <dependency name="bitcoin-network" version="3.4.0" />
@@ -1172,8 +1279,16 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0" />
-      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="boost" version="1.57.0">
+          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_unit_test_framework" option="tests">
+          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+      </dependency>
       <dependency name="bitcoin" version="3.4.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1315,8 +1430,16 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0" />
-      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="boost" version="1.57.0">
+          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_unit_test_framework" option="tests">
+          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+      </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="3.4.0" />
       <dependency name="bitcoin-network" version="3.4.0" />
@@ -1500,10 +1623,22 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0" />
-      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="boost" version="1.57.0">
+          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_unit_test_framework" option="tests">
+          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+      </dependency>
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
-      <dependency name="zmq" version="4.2.3" />
+      <dependency name="zmq" version="4.2.3">
+          <nuget compiler="vc120" name="libzmq_vc120" version="4.2.30" />
+          <nuget compiler="vc140" name="libzmq_vc140" version="4.2.30" />
+          <nuget compiler="vc141" name="libzmq_vc141" version="4.2.30" />
+      </dependency>
       <dependency name="bitcoin" version="3.4.0" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1654,8 +1789,16 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0" />
-      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="boost" version="1.57.0">
+          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+      </dependency>
+      <dependency name="boost_unit_test_framework" option="tests">
+          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+      </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
       <dependency name="bitcoin-node" version="3.4.0" />
@@ -1881,71 +2024,4 @@
     <!-- <template name="gsl.gitignore" /> -->
   </templates>
 
-  <nuget_registry>
-    <nuget build_name="boost" compiler="vc120" >
-      <package label="boost"           name="boost"                           version="1.57.0.0" />
-      <package label="chrono"          name="boost_chrono-vc120"              version="1.57.0.0" />
-      <package label="date_time"       name="boost_date_time-vc120"           version="1.57.0.0" />
-      <package label="filesystem"      name="boost_filesystem-vc120"          version="1.57.0.0" />
-      <package label="iostreams"       name="boost_iostreams-vc120"           version="1.57.0.0" />
-      <package label="locale"          name="boost_locale-vc120"              version="1.57.0.0" />
-      <package label="log"             name="boost_log-vc120"                 version="1.57.0.0" />
-      <package label="log_setup"       name="boost_log_setup-vc120"           version="1.57.0.0" />
-      <package label="program_options" name="boost_program_options-vc120"     version="1.57.0.0" />
-      <package label="regex"           name="boost_regex-vc120"               version="1.57.0.0" />
-      <package label="system"          name="boost_system-vc120"              version="1.57.0.0" />
-      <package label="thread"          name="boost_thread-vc120"              version="1.57.0.0" />
-      <package label="test"            name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-    </nuget>
-    <nuget build_name="boost" compiler="vc140" >
-      <package label="boost"           name="boost"                           version="1.64.0.0" />
-      <package label="atomic"          name="boost_atomic-vc140"              version="1.64.0.0" />
-      <package label="chrono"          name="boost_chrono-vc140"              version="1.64.0.0" />
-      <package label="date_time"       name="boost_date_time-vc140"           version="1.64.0.0" />
-      <package label="filesystem"      name="boost_filesystem-vc140"          version="1.64.0.0" />
-      <package label="iostreams"       name="boost_iostreams-vc140"           version="1.64.0.0" />
-      <package label="locale"          name="boost_locale-vc140"              version="1.64.0.0" />
-      <package label="log"             name="boost_log-vc140"                 version="1.64.0.0" />
-      <package label="log_setup"       name="boost_log_setup-vc140"           version="1.64.0.0" />
-      <package label="program_options" name="boost_program_options-vc140"     version="1.64.0.0" />
-      <package label="regex"           name="boost_regex-vc140"               version="1.64.0.0" />
-      <package label="system"          name="boost_system-vc140"              version="1.64.0.0" />
-      <package label="thread"          name="boost_thread-vc140"              version="1.64.0.0" />
-      <package label="test"            name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-    </nuget>
-    <nuget build_name="boost" compiler="vc141" >
-      <package label="boost"           name="boost"                           version="1.64.0.0" />
-      <package label="atomic"          name="boost_atomic-vc141"              version="1.64.0.0" />
-      <package label="chrono"          name="boost_chrono-vc141"              version="1.64.0.0" />
-      <package label="date_time"       name="boost_date_time-vc141"           version="1.64.0.0" />
-      <package label="filesystem"      name="boost_filesystem-vc141"          version="1.64.0.0" />
-      <package label="iostreams"       name="boost_iostreams-vc141"           version="1.64.0.0" />
-      <package label="locale"          name="boost_locale-vc141"              version="1.64.0.0" />
-      <package label="log"             name="boost_log-vc141"                 version="1.64.0.0" />
-      <package label="log_setup"       name="boost_log_setup-vc141"           version="1.64.0.0" />
-      <package label="program_options" name="boost_program_options-vc141"     version="1.64.0.0" />
-      <package label="regex"           name="boost_regex-vc141"               version="1.64.0.0" />
-      <package label="system"          name="boost_system-vc141"              version="1.64.0.0" />
-      <package label="thread"          name="boost_thread-vc141"              version="1.64.0.0" />
-      <package label="test"            name="boost_unit_test_framework-vc141" version="1.64.0.0" />
-    </nuget>
-    <nuget build_name="secp256k1" compiler="vc120" >
-      <package label="secp256k1"       name="secp256k1_vc120"                 version="0.1.0.16" />
-    </nuget>
-    <nuget build_name="secp256k1" compiler="vc140" >
-      <package label="secp256k1"       name="secp256k1_vc140"                 version="0.1.0.15" />
-    </nuget>
-    <nuget build_name="secp256k1" compiler="vc141" >
-      <package label="secp256k1"       name="secp256k1_vc141"                 version="0.1.0.16" />
-    </nuget>
-    <nuget build_name="zmq" compiler="vc120">
-      <package label="zmq"             name="libzmq_vc120"                    version="4.2.30" />
-    </nuget>
-    <nuget build_name="zmq" compiler="vc140">
-      <package label="zmq"             name="libzmq_vc140"                    version="4.2.30" />
-    </nuget>
-    <nuget build_name="zmq" compiler="vc141">
-      <package label="zmq"             name="libzmq_vc141"                    version="4.2.30" />
-    </nuget>
-  </nuget_registry>
 </generate>

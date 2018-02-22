@@ -60,12 +60,6 @@ function append_prefix(base, subdir)
     return "$(my.subdir)"
 endfunction
 
-function nuget_entry(nuget_registry, name)
-    define my.nuget_registry = nuget_entry.nuget_registry
-    return my.nuget_registry->nuget(_nuget.build_name = my.name &\
-        _nuget.compiler = platform_compiler(), _nuget)
-endfunction
-
 function repository_library_uuid(repository)
     define my.repository = repository_library_uuid.repository
     return my.repository->make->product(is_library(_product), _product).uuid
@@ -342,9 +336,7 @@ function emit_propery_group_configuration(product)
     endif
 endfunction
 
-function emit_import_group_extension_settings(nuget_registry, repository,\
-    product)
-    define my.nuget_registry = emit_import_group_extension_settings.nuget_registry
+function emit_import_group_extension_settings(repository, product)
     define my.repository = emit_import_group_extension_settings.repository
     require(my.repository, "repository", "name")
     define my.product = emit_import_group_extension_settings.product
@@ -354,28 +346,30 @@ function emit_import_group_extension_settings(nuget_registry, repository,\
 
     emit_import_group_extension_settings_open()
 
-    for my.repository->install.build as _build where defined(_build.nuget) &\
-        (_build.nuget = "true")
+    new nuget_dependencies as _nuget
+        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+            platform_compiler())
 
-        define entry = nuget_entry(my.nuget_registry, _build.name)
-        for entry.package as _package
-            require(_package, "package", "label")
-            require(_package, "package", "name")
-            require(_package, "package", "version")
+        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+            platform_compiler(), my.product.option)
 
-            if (!(_package.label = "test") |\
-                ((_package.label = "test") & is_true(my.product.test)))
-                emit_import_project_nuget(_package)
-            endif
+        if (!defined(my.product.option))
+            get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+                platform_compiler(), "consensus")
+        endif
+
+        for _nuget.element as _element
+            require(_element, "element", "name")
+            require(_element, "element", "version")
+
+            emit_import_project_nuget(_element)
         endfor
-    endfor
+    endnew
 
     emit_import_group_extension_settings_close()
 endfunction
 
-function emit_target_ensure_nuget_imports(nuget_registry, repository,\
-    product)
-    define my.nuget_registry = emit_target_ensure_nuget_imports.nuget_registry
+function emit_target_ensure_nuget_imports(repository, product)
     define my.repository = emit_target_ensure_nuget_imports.repository
     require(my.repository, "repository", "name")
     define my.product = emit_target_ensure_nuget_imports.product
@@ -385,21 +379,25 @@ function emit_target_ensure_nuget_imports(nuget_registry, repository,\
 
     emit_target_ensure_nuget_imports_open()
 
-    for my.repository->install.build as _build where defined(_build.nuget) &\
-        (_build.nuget = "true")
+    new nuget_dependencies as _nuget
+        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+            platform_compiler())
 
-        define entry = nuget_entry(my.nuget_registry, _build.name)
-        for entry.package as _package
-            require(_package, "package", "label")
-            require(_package, "package", "name")
-            require(_package, "package", "version")
+        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+            platform_compiler(), my.product.option)
 
-            if (!(_package.label = "test") |\
-                ((_package.label = "test") & is_true(my.product.test)))
-                emit_error_condition_nuget(_package)
-            endif
+        if (!defined(my.product.option))
+            get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+                platform_compiler(), "consensus")
+        endif
+
+        for _nuget.element as _element
+            require(_element, "element", "name")
+            require(_element, "element", "version")
+
+            emit_error_condition_nuget(_element)
         endfor
-    endfor
+    endnew
 
     emit_target_ensure_nuget_imports_close()
 endfunction
@@ -421,8 +419,7 @@ function emit_item_group_project_references(repository, product)
 
 endfunction
 
-function emit_project(nuget_registry, repository, product, project_path)
-    define my.nuget_registry = emit_project.nuget_registry
+function emit_project(repository, product, project_path)
     define my.repository = emit_project.repository
     require(my.repository, "repository", "name")
     define my.product = emit_project.product
@@ -480,10 +477,8 @@ function emit_project(nuget_registry, repository, product, project_path)
 
     emit_import_targets()
     emit_import_group_extension_targets()
-    emit_import_group_extension_settings(my.nuget_registry, my.repository,\
-        my.product)
-    emit_target_ensure_nuget_imports(my.nuget_registry, my.repository,\
-        my.product)
+    emit_import_group_extension_settings(my.repository, my.product)
+    emit_target_ensure_nuget_imports(my.repository, my.product)
     emit_item_group_project_references(my.repository, my.product)
 
     emit_project_close()
@@ -808,8 +803,6 @@ function generate_vcxproj(path_prefix, generate, vs_version)
         define my.absolute_project_path = append_path(global.root,\
             _repository.name)
 
-        define my.nuget_registry = generate->nuget_registry
-
         for _repository->make.product as _product where \
             defined(_product.uuid) & !is_empty(_product.uuid) &\
             defined(_product.path)
@@ -824,7 +817,7 @@ function generate_vcxproj(path_prefix, generate, vs_version)
             notify(my.project_file)
             output(my.project_file)
 
-            emit_project(my.nuget_registry, _repository, _product,\
+            emit_project(_repository, _product,\
                 my.absolute_project_path)
 
             close
