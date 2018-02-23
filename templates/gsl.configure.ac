@@ -623,7 +623,7 @@ for generate.repository by name as _repository
 
     if (defined(my.configure->dependency))
         heading1("Check dependencies.")
-        for my.configure.dependency as _dependency
+        for my.configure.dependency as _dependency where has_m4(_dependency)
             if (is_boost_dependency(_dependency))
                 check_boost(_dependency)
             elsif (is_boost_lib_dependency(_dependency))
