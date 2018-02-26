@@ -567,6 +567,11 @@ function global.get_all_product_files(files, folder, trim, product)
     endfor
 endfunction
 
+function global.has_uuid(product)
+    define my.product = has_uuid.product
+    return defined(my.product.uuid) & !is_empty(my.product.uuid)
+endfunction
+
 #------------------------------------------------------------------------------
 # Package utilities.
 #------------------------------------------------------------------------------
