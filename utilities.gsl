@@ -203,6 +203,12 @@ function global.is_bitcoin_dependency(dependency)
     return starts_with(my.dependency.name, "bitcoin")
 endfunction
 
+function global.has_m4(dependency)
+    define my.dependency = has_m4.dependency
+    return !defined(my.dependency.m4) |\
+        (defined(my.dependency.m4) & !(my.dependency.m4 = "none"))
+endfunction
+
 # Test for a flag context.
 function global.match_flag_context(flag, context)
     define my.flag = match_flag_context.flag?
