@@ -521,23 +521,19 @@ create_directory()
 
 display_heading_message()
 {
-    local MESSAGE="$1"
-
     echo
-    echo "********************** $MESSAGE **********************"
+    echo "********************** $@ **********************"
     echo
 }
 
 display_message()
 {
-    local MESSAGE="$1"
-    echo "$MESSAGE"
+    echo "$@"
 }
 
 display_error()
 {
-    local MESSAGE="$1"
-    >&2 echo "$MESSAGE"
+    >&2 echo "$@"
 }
 
 initialize_git()
@@ -803,7 +799,6 @@ build_from_tarball_boost()
     local JOBS=$5
     local BUILD=$6
     shift 6
-    local OPTIONS="$@"
 
     if [[ !($BUILD) ]]; then
         return
@@ -844,7 +839,7 @@ build_from_tarball_boost()
     display_message "-q                    : [stop at the first error]"
     display_message "--reconfigure         : [ignore cached configuration]"
     display_message "--prefix              : $PREFIX"
-    display_message "BOOST_OPTIONS         : $OPTIONS"
+    display_message "BOOST_OPTIONS         : $@"
     display_message "--------------------------------------------------------------------"
 
     # boost_iostreams
@@ -876,7 +871,7 @@ build_from_tarball_boost()
         "-q" \\
         "--reconfigure" \\
         "--prefix=$PREFIX" \\
-        "$OPTIONS"
+        "$@"
 
     pop_directory
     pop_directory
