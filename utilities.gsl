@@ -110,10 +110,12 @@ endfunction
 #------------------------------------------------------------------------------
 
 # Get the product with the given library name.
-function global.find_library_product(name, make)
+function global.find_library_product(name, make, repository)
     define my.make = find_library_product.make
+    define my.repository = find_library_product.repository
+    define my.product_name = "lib$(my.name)"
     return my.make->product(is_library(product) &\
-        match_name(product, my.name))
+        target_name(product, my.repository) = my.product_name)
 endfunction
 
 # Accepts [lib]bitcoin[-include] and returns include.
@@ -570,6 +572,31 @@ endfunction
 function global.has_uuid(product)
     define my.product = has_uuid.product
     return defined(my.product.uuid) & !is_empty(my.product.uuid)
+endfunction
+
+function global.target_name(product, repository)
+    define my.product = target_name.product
+    define my.repository = target_name.repository
+    require(my.repository, "repository", "name")
+
+    if (defined(my.product.target_name))
+        return "$(my.product.target_name)"
+    elsif (defined(my.product.option))
+        return "$(my.repository.name)-$(my.product.option)"
+    else
+        return "$(my.repository.name)"
+    endif
+endfunction
+
+function global.project_name(product, repository)
+    define my.product = project_name.product
+    define my.repository = project_name.repository
+
+    if (defined(my.product.project_name))
+        return "$(my.product.project_name)"
+    else
+        return target_name(my.product, my.repository)
+    endif
 endfunction
 
 #------------------------------------------------------------------------------

@@ -50,16 +50,17 @@ function initialize_package_variables(variables)
     my.variables.requires_private = ""
 endfunction
 
-function define_library_variables(variables, library, make, configure)
+function define_library_variables(variables, library, make, configure, repository)
     define my.variables = define_library_variables.variables
     define my.library = define_library_variables.library
     define my.make = define_library_variables.make
     define my.configure = define_library_variables.configure
+    define my.repository = define_library_variables.repository
     require(my.library, "library", "name")
     define my.name = my.library.name
     define my.cname = "$(my.name:c)"
 
-    define my.product = find_library_product(my.name, my.make)?
+    define my.product = find_library_product(my.name, my.make, my.repository)?
     if (defined(my.product))
         if (is_no_install(my.product))
             abort "Package-referenced library is not installed: $(my.name)"
@@ -99,13 +100,13 @@ function define_library_variables(variables, library, make, configure)
 endfunction
 
 # Define Cflags, Libs|Libs.private and Requires|Requires.private variables.
-function define_package_variables(variables, package, make, configure)
+function define_package_variables(variables, package, make, configure, repository)
     define my.variables = define_package_variables.variables
     define my.package = define_package_variables.package
     define my.make = define_package_variables.make
     define my.configure = define_package_variables.configure
+    define my.repository = define_package_variables.repository
     require(my.package, "package", "library")
-    define my.name = my.package.library
     initialize_package_variables(_variables)
 
     # Add explicit package.flag declarations.
@@ -115,18 +116,21 @@ function define_package_variables(variables, package, make, configure)
     format_libs(my.variables, my.package)
 
     # Get the lib product that corresponds to the package.
-    define my.product = find_library_product(my.name, my.make)?
+    define my.product = find_library_product(my.package.library, my.make,\
+        my.repository)?
+
     if (!defined(my.product))
         #abort "Packaged library is not a product: $(my.name)"
         return
     elsif (is_no_install(my.product))
         abort "Packaged library is not installed: $(my.name)"
     endif
-    my.variables.libs += " -l$(my.name)"
+    my.variables.libs += " -l$(my.package.library)"
 
     # Get the dependency libs of the product and their flags.
     for my.product.library as _library
-        define_library_variables(my.variables, _library, my.make, my.configure)
+        define_library_variables(my.variables, _library, my.make,\
+            my.configure, my.repository)
     endfor
 endfunction
 
@@ -199,7 +203,8 @@ for generate.repository by name as _repository\
 
         heading1("Variables")
         new variables as _variables
-            define_package_variables(_variables, _package, my.make, my.configure)
+            define_package_variables(_variables, _package, my.make,\
+                my.configure, _repository)
 
             heading2("Dependencies that publish package configuration.")
             write_public_variable("Requires", _variables.requires)

@@ -13,40 +13,25 @@
 ###
 ### vcxproj related string generators
 ###
-function project_base(product, repository_name)
-    define my.product = project_base.product
-    require(my.product, "product", "prefix")
+function project_build_relative_path(repository, product, path_prefix,\
+    vs_version)
 
-    if (is_library(my.product))
-        return "$(my.repository_name)"
-    elsif (is_program(my.product))
-        if (defined(my.product.option))
-            if (defined(my.product.msvc_name))
-                return "$(my.product.msvc_name)"
-            else
-                return "$(my.repository_name)-$(my.product.option)"
-            endif
-        else
-            require(my.product, "product", "option")
-        endif
-    else
-        abort("Unrecognized product prefix: $(my.product.prefix)")
-    endif
-endfunction
-
-function project_build_relative_path(product, path_prefix, repository_name, vs_version)
+    define my.repository = project_build_relative_path.repository
+    require(my.repository, "repository", "name")
     define my.product = project_build_relative_path.product
-    define my.proj_name = project_base(my.product, my.repository_name)
+    define my.proj_name = project_name(my.product, my.repository)
     define my.subpath = "builds/msvc/$(my.vs_version)"
     return append_path(append_path(append_path(my.path_prefix,\
-        my.repository_name), my.subpath), my.proj_name)
+        my.repository.name), my.subpath), my.proj_name)
 endfunction
 
-function project_file(product, path_prefix, repository_name, vs_version)
+function project_file(repository, product, path_prefix, vs_version)
+    define my.repository = project_file.repository
     define my.product = project_file.product
-    define my.project_relative_path = project_build_relative_path(my.product,\
-        my.path_prefix, my.repository_name, my.vs_version)
-    define my.proj_name = project_base(my.product, my.repository_name)
+    define my.project_relative_path = project_build_relative_path(\
+        my.repository, my.product, my.path_prefix, my.vs_version)
+
+    define my.proj_name = project_name(my.product, my.repository)
     return append_path(my.project_relative_path, "$(my.proj_name).vcxproj")
 endfunction
 
@@ -434,7 +419,7 @@ function emit_project(repository, product, project_path)
     xml_copyleft(my.repository.name)
     emit_project_open(msbuild_version(my.product))
 
-    emit_property_group_globals(my.product, my.repository.name)
+    emit_property_group_globals(my.product, my.repository)
     emit_item_group_product_configurations(my.product)
     emit_propery_group_configuration(my.product)
     emit_import_props()
@@ -510,16 +495,17 @@ endfunction emit_project
   </ItemGroup>
 .endmacro emit_item_group_close
 .
-.macro emit_property_group_globals(product, repository_name)
+.macro emit_property_group_globals(product, repository)
 .   define my.product = emit_property_group_globals.product
+.   define my.repository = emit_property_group_globals.repository
 .   require(my.product, "product", "uuid")
   <PropertyGroup Label="Globals">
 .   if (is_program(my.product))
     <ConfigurationType>Application</ConfigurationType>
 .   endif
-    <PlatformToolset>$(platform_toolset(my.product))</PlatformToolset>
+    <PlatformToolset>$(platform_toolset(my.product, my.repository))</PlatformToolset>
     <ProjectGuid>{$(my.product.uuid:upper)}</ProjectGuid>
-    <ProjectName>$(project_base(my.product, my.repository_name))</ProjectName>
+    <ProjectName>$(project_name(my.product, my.repository))</ProjectName>
   </PropertyGroup>
 .endmacro emit_property_group_globals
 .
@@ -807,10 +793,10 @@ function generate_vcxproj(path_prefix, generate, vs_version)
             has_uuid(_product) & defined(_product.path)
 
             define my.project_directory_name = project_build_relative_path(\
-                _product, my.path_prefix, _repository.name, my.vs_version)
+                _repository, _product, my.path_prefix, my.vs_version)
 
-            define my.project_file = project_file(_product, my.path_prefix,\
-                _repository.name, my.vs_version)
+            define my.project_file = project_file(_repository, _product,\
+                my.path_prefix, my.vs_version)
 
             create_directory(my.project_directory_name)
             notify(my.project_file)
