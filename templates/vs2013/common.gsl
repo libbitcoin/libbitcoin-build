@@ -25,20 +25,24 @@ function platform_compiler()
     return "vc120"
 endfunction
 
-function platform_toolset(product)
+function platform_toolset(product, repository)
     define my.product = platform_toolset.product
-    if (is_compiler_ctp(my.product))
+    define my.repository = platform_toolset.repository
+    if (is_compiler_ctp(my.product, my.repository))
         return "CTP_Nov2013"
     endif
     return "v120"
 endfunction
 
-function is_compiler_ctp(product)
+function is_compiler_ctp(product, repository)
     define my.product = is_compiler_ctp.product
+    define my.repository = is_compiler_ctp.repository
+    require(my.repository, "repository", "name")
+
     return is_library(my.product) |\
         (is_program(my.product) & !is_option_tests(my.product)) |\
         (is_program(my.product) & is_option_tests(my.product) &\
-            (my.product.name = "libbitcoin_consensus_test"))
+            (my.repository.name = "libbitcoin-consensus"))
 endfunction
 
 function format_version()

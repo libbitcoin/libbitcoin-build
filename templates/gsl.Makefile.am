@@ -124,36 +124,39 @@ endfunction
 # Get Product/Runner Path
 #------------------------------------------------------------------------------
 
-# Normalize the library name (as "[lib]name[.la]").
-function get_archive_name(library)
+# Normalize the library name (as "name[.la]").
+function get_archive_name(library, repository)
     define my.library = get_archive_name.library
-    define my.prefix = is_true(my.library.unprefixed) ?? "" ? "lib"
-    return "$(my.prefix)$(my.library.name).la"
+    define my.repository = get_archive_name.repository
+    return "$(target_name(my.library, my.repository)).la"
 endfunction
 
 # Normalize the product name.
-function get_product_name(product)
+function get_product_name(product, repository)
     define my.product = get_product_name.product
+    define my.repository = get_product_name.repository
     if (is_program(my.product))
-        return my.product.name
+        return target_name(my.product, my.repository)
     elsif (is_library(my.product))
-        return get_archive_name(my.product)
+        return get_archive_name(my.product, my.repository)
     endif
     return ""
 endfunction
 
 # Create the product path.
-function get_product_path(product)
+function get_product_path(product, repository)
     define my.product = get_product_path.product
-    return join(my.product.path, get_product_name(my.product))
+    define my.repository = get_product_path.repository
+    return join(my.product.path, get_product_name(my.product, my.repository))
 endfunction
 
 # Get the command to execute the test runner. If there is a runner element the
 # test runner is a generated script ${sourcedir}/[product.name]_runner.sh.
 # Otherwise the runner is ${sourcedir}/[product.path]/[product.name].
-function get_runner_path(product)
+function get_runner_path(product, repository)
     define my.product = get_runner_path.product
-    define my.name = get_product_name(my.product)
+    define my.repository = get_runner_path.repository
+    define my.name = get_product_name(my.product, my.repository)
     if (defined(my.product->runner))
         return "$(my.name)_runner.sh"
     endif
@@ -227,19 +230,21 @@ endfunction
 # Render CPP Variables
 #------------------------------------------------------------------------------
 
-function get_tests_variable(product, mapper)
-    define my.product = get_tests_variable.product
+function get_tests_variable(mapper, product, repository)
     define my.mapper = get_tests_variable.mapper
-    define my.path = get_runner_path(my.product)
+    define my.product = get_tests_variable.product
+    define my.repository = get_tests_variable.repository
+    define my.path = get_runner_path(my.product, my.repository)
     define my.variable = "TESTS"
     define my.operator = get_assignment_operator(my.mapper, my.variable)
     return "$(my.variable) $(my.operator) $(my.path)"
 endfunction
 
-function get_binaries_variable(product, mapper)
-    define my.product = get_binaries_variable.product
+function get_binaries_variable(mapper, product, repository)
     define my.mapper = get_binaries_variable.mapper
-    define my.path = get_product_path(my.product)
+    define my.product = get_binaries_variable.product
+    define my.repository = get_binaries_variable.repository
+    define my.path = get_product_path(my.product, my.repository)
     define my.variable = get_automake_variable(my.product)
     define my.operator = get_assignment_operator(my.mapper, my.variable)
     return "$(my.variable) $(my.operator) $(my.path)"
@@ -258,12 +263,14 @@ endfunction
 # For each library of this product that references another product,
 # copy the other product's library elements into this product element.
 # This function is not idempotent, call only once for a given product.
-function chase_libraries(product, make)
+function chase_libraries(product, make, repository)
     define my.product = chase_libraries.product
     define my.make = chase_libraries.make
+    define my.repository = chase_libraries.repository
     define my.cursor = set_cursor_end(my.product)
     for my.product.library as _library
-        define my.chase_product = find_library_product(_library.name, my.make)?
+        define my.chase_product = find_library_product(_library.name,\
+            my.make, my.repository)?
         if (defined(my.chase_product))
             for my.chase_product.library as _chase_library
                 copy _chase_library before my.cursor
@@ -302,23 +309,25 @@ function define_cpp_flag_variable(variables, flag)
     endif
 endfunction
 
-function define_cpp_lib_variables(variables, library, make, configure)
+function define_cpp_lib_variables(variables, library, make, configure, repository)
     define my.variables = define_cpp_lib_variables.variables
     define my.library = define_cpp_lib_variables.library
     define my.make = define_cpp_lib_variables.make
     define my.configure = define_cpp_lib_variables.configure
+    define my.repository = define_cpp_lib_variables.repository
     require(my.library, "library", "name")
-    define my.name = my.library.name
-    define my.product = find_library_product(my.name, my.make)?
+    define my.product = find_library_product(my.library.name, my.make,\
+        my.repository)?
     if (defined(my.product))
-        define my.archive_name = get_archive_name(my.product)
+        define my.archive_name = get_archive_name(my.product, my.repository)
         my.archive_path = join(my.product.path, my.archive_name)
         my.variables.libs += " $(my.archive_path)"
     else
-        define my.cname = "$(my.name:c)"
-        define my.dependency = find_dependency_by_name(my.name, my.configure)?
+        define my.cname = "$(my.library.name:c)"
+        define my.dependency = find_dependency_by_name(my.library.name,\
+            my.configure)?
         if (!defined(my.dependency))
-            abort "The product library has no dependency: $(my.name)"
+            abort "The product library has no dependency: $(my.library.name)"
         endif
         define my.is_package = is_package_dependency(my.dependency)
         define my.is_function = is_function_dependency(my.dependency)
@@ -358,10 +367,11 @@ function get_library_add(product)
     abort "Unknown library type: '$(my.product.prefix)'"
 endfunction
 
-function write_cpp_variables(variables, product)
-    define my.product = write_cpp_variables.product
+function write_cpp_variables(variables, product, repository)
     define my.variables = write_cpp_variables.variables
-    define my.cpath = "$(get_product_path(my.product):c)"
+    define my.product = write_cpp_variables.product
+    define my.repository = write_cpp_variables.repository
+    define my.cpath = "$(get_product_path(my.product, my.repository):c)"
     if (defined(my.variables.tests))
         write_line("$(my.variables.tests)\n")
     endif
@@ -401,14 +411,16 @@ function render_cpp_variables(product, root, repository, mapper)
         define my.root_length = string.length(my.root)
         new variables as _variables
         initialize_cpp_variables(_variables)
-        chase_libraries(my.product, my.make)
+        chase_libraries(my.product, my.make, my.repository)
 
         # Define _PROGRAMS|_[LT]LIBRARIES variables.
-        _variables.binaries = get_binaries_variable(my.product, my.mapper)
+        _variables.binaries = get_binaries_variable(my.mapper, my.product,\
+            my.repository)
 
         # Define TESTS variable.
         if (is_test(my.product))
-            _variables.tests = get_tests_variable(my.product, my.mapper)
+            _variables.tests = get_tests_variable(my.mapper, my.product,\
+                my.repository)
         endif
 
         # Define _LDFLAGS from an override of Libtool default naming.
@@ -430,7 +442,7 @@ function render_cpp_variables(product, root, repository, mapper)
         # Define _LIBS|_LDFLAGS|C??FLAGS variables from libraries.
         for my.product.library as _library
             define_cpp_lib_variables(_variables, _library, my.make,\
-                my.configure)
+                my.configure, my.repository)
         endfor
 
         # <sources>
@@ -442,7 +454,7 @@ function render_cpp_variables(product, root, repository, mapper)
                 my.product)
         endfor
 
-        write_cpp_variables(_variables, my.product)
+        write_cpp_variables(_variables, my.product, my.repository)
         endnew
     endif
 endfunction
@@ -554,11 +566,12 @@ endfunction
 #------------------------------------------------------------------------------
 
 # Get a product description for comments.
-function get_product_description(product, container)
+function get_product_description(repository, product, container)
     define my.product = get_product_description.product
+    define my.repository = get_product_description.repository
     define my.target = get_target(my.product)
     if (is_cpp(my.product))
-        define my.path = get_product_path(my.product)
+        define my.path = get_product_path(my.product, my.repository)
         if (is_check(my.product) | is_no_install(my.product))
             return "local: $(my.path)"
         endif
@@ -645,11 +658,12 @@ endfunction
 
 # For each non-test product that is not a test, accumulate the product's
 # option (name) and path (value) in the targets table.
-function define_make_targets(make, targets)
+function define_make_targets(repository, make, targets)
+    define my.repository = define_make_targets.repository
     define my.make = define_make_targets.make
     define my.targets = define_make_targets.targets
     for my.make.product as _product where is_custom_target(_product)
-        define my.path = get_product_path(_product)
+        define my.path = get_product_path(_product, my.repository)
         if (!is_empty(my.path))
             table_add(my.targets, _product.option, my.path)
         endif
@@ -712,15 +726,6 @@ function get_assignment_operator(mapper, variable)
     return my.found ?? "+=" ? "="
 endfunction
 
-#------------------------------------------------------------------------------
-# Initialize
-#------------------------------------------------------------------------------
-
-function initialize_automake()
-    heading2("Look for macros in the m4 subdirectory.")
-    write_line("ACLOCAL_AMFLAGS = -I m4\n")
-endfunction
-
 ###############################################################################
 # Generation
 ###############################################################################
@@ -755,13 +760,13 @@ for generate.repository as _repository by _repository.name\
 
         heading1("Distribute, make and install products.")
         for my.make.product as _product
-            heading2(get_product_description(_product))
+            heading2(get_product_description(_repository, _product))
             render_product(_product, my.base, _repository, _mapper)
         endfor
     endnew _mapper
 
     new targets as _targets
-        define_make_targets(my.make, _targets)
+        define_make_targets(_repository, my.make, _targets)
         if (!table_empty(_targets))
             heading1("Custom make targets.")
             render_make_targets(_targets)
