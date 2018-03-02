@@ -221,7 +221,9 @@ endfunction
 ###
 ### functional artifact emission
 ###
-function emit_item_group_compiler(repository, product, file_data, collisions)
+function emit_item_group_compiler(repository, product, vs_version, file_data,\
+    collisions)
+
     define my.repository = emit_item_group_compiler.repository
     define my.product = emit_item_group_compiler.product
     define my.file_data = emit_item_group_compiler.file_data
@@ -231,10 +233,8 @@ function emit_item_group_compiler(repository, product, file_data, collisions)
         count(my.file_data.element, is_compiled_type(count)) > 0)
 
         emit_item_group_open()
-
-        if (my.repository.name = "libbitcoin" & is_library(my.product))
-            emit_compile_item_threadsafe_statistics()
-        endif
+        emit_compile_item_threadsafe_statistics(my.repository, my.product,\
+            my.vs_version)
 
         for my.file_data.element as _element by _element.build_path
             if (is_compiled_type(_element))
@@ -404,7 +404,7 @@ function emit_item_group_project_references(repository, product)
 
 endfunction
 
-function emit_project(repository, product, project_path)
+function emit_project(repository, product, vs_version, project_path)
     define my.repository = emit_project.repository
     require(my.repository, "repository", "name")
     define my.product = emit_project.product
@@ -453,7 +453,9 @@ function emit_project(repository, product, project_path)
                     "build", "false")
             endif
 
-            emit_item_group_compiler(my.repository, my.product, _files, _map)
+            emit_item_group_compiler(my.repository, my.product, my.vs_version,\
+                _files, _map)
+
             emit_item_group_includes(_files, _map)
             emit_item_group_none(_files, _map)
             emit_item_group_resources(_files, _map)
@@ -775,6 +777,16 @@ endfunction emit_project
     </ProjectReference>
 .endmacro emit_item_group_project_reference_item
 .
+.macro emit_compile_item_threadsafe_statistics(repository, product, vs_version)
+.   define my.repository = emit_compile_item_threadsafe_statistics.repository
+.   define my.product = emit_compile_item_threadsafe_statistics.product
+.   if (requires_threadsafe_statistics(my.repository, my.product, my.vs_version))
+    <ClCompile Include="\$(VC_CTP_Nov2013_InstallDir)\\crt\\src\\threadsafestatics.cpp">
+      <ExcludedFromBuild Condition="\$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
+    </ClCompile>
+.   endif
+.endmacro emit_compile_item_threadsafe_statistics
+.
 .endtemplate
 .template 0
 ###############################################################################
@@ -802,7 +814,7 @@ function generate_vcxproj(path_prefix, generate, vs_version)
             notify(my.project_file)
             output(my.project_file)
 
-            emit_project(_repository, _product,\
+            emit_project(_repository, _product, my.vs_version,\
                 my.absolute_project_path)
 
             close

@@ -192,7 +192,7 @@ function emit_declare_filters_item_group(directories, uuid_seed)
     emit_item_group_close()
 endfunction
 
-function emit_item_group_compiler(files, repository, product)
+function emit_item_group_compiler(files, repository, product, vs_version)
     define my.files = emit_item_group_compiler.files
     define my.repository = emit_item_group_compiler.repository
     define my.product = emit_item_group_compiler.product
@@ -201,10 +201,8 @@ function emit_item_group_compiler(files, repository, product)
         count(my.files.row, is_compiled_type(count.name)) > 0)
 
         emit_item_group_open()
-
-        if (my.repository.name = "libbitcoin" & is_library(my.product))
-            emit_item_compile_threadsafe_statistics()
-        endif
+        emit_item_compile_threadsafe_statistics(my.repository, my.product,\
+            my.vs_version)
 
         for my.files.row as _row by _row.name
             if (is_compiled_type(_row.name))
@@ -267,7 +265,7 @@ function emit_item_group_resources(files)
     endif
 endfunction
 
-function emit_filter(repository, product, project_path)
+function emit_filter(repository, product, vs_version, project_path)
     define my.repository = emit_filter.repository
     define my.product = emit_filter.product
     require(my.product, "product", "path")
@@ -323,12 +321,16 @@ function emit_filter(repository, product, project_path)
                     "", my.resources_winpath, "false")
             endif
 
-            if (my.repository.name = "libbitcoin" & is_library(my.product))
+            if (requires_threadsafe_statistics(my.repository, my.product,\
+                my.vs_version))
+
                 my.uuid = filter_add(_directories, "src/external", my.uuid)
             endif
 
             emit_declare_filters_item_group(_directories, my.product.uuid)
-            emit_item_group_compiler(_files, my.repository, my.product)
+            emit_item_group_compiler(_files, my.repository, my.product,\
+                my.vs_version)
+
             emit_item_group_includes(_files)
             emit_item_group_none(_files)
             emit_item_group_resources(_files)
@@ -416,6 +418,16 @@ endfunction
     <$(my.type) Include="$(my.include)" />
 .endmacro emit_item
 .
+.macro emit_item_compile_threadsafe_statistics(repository, product, vs_version)
+.   define my.repository = emit_item_compile_threadsafe_statistics.repository
+.   define my.product = emit_item_compile_threadsafe_statistics.product
+.   define my.item = "\$(VC_CTP_Nov2013_InstallDir)/crt/src/threadsafestatics.cpp"
+.   define my.filter = "src/external"
+.   if (requires_threadsafe_statistics(my.repository, my.product, my.vs_version))
+.       emit_item_compile_filtered(my.item, my.filter)
+.   endif
+.endmacro emit_item_compile_threadsafe_statistics
+.
 .endtemplate
 .template 0
 ###############################################################################
@@ -443,7 +455,8 @@ function generate_filter(path_prefix, generate, vs_version)
             notify(my.proj_file)
             output(my.proj_file)
 
-            emit_filter(_repository, _product, my.absolute_project_path)
+            emit_filter(_repository, _product, my.vs_version,\
+                my.absolute_project_path)
 
             close
         endfor
