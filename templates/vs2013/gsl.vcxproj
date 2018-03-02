@@ -7,20 +7,6 @@
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-# Macros
-###############################################################################
-.endtemplate
-.template 1
-.
-.macro emit_compile_item_threadsafe_statistics()
-    <ClCompile Include="\$(VC_CTP_Nov2013_InstallDir)\\crt\\src\\threadsafestatics.cpp">
-      <ExcludedFromBuild Condition="\$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
-    </ClCompile>
-.endmacro emit_compile_item_threadsafe_statistics
-.
-.endtemplate
-.template 0
-###############################################################################
 # Execution
 ###############################################################################
 [global].root = ".."
