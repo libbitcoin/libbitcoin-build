@@ -319,6 +319,7 @@ QRENCODE_URL="$(my.url)"
 QRENCODE_ARCHIVE="$(get_qrencode_file(my.install))"
 
 .endmacro # define_qrencode
+.
 .macro define_zmq(install)
 .   define my.install = define_zmq.install
 .   define my.url = get_zmq_url(my.install)?
