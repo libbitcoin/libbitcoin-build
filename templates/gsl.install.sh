@@ -156,6 +156,37 @@ function get_qrencode_url(install)
     return my.url
 endfunction
 
+# Functions with specific knowledge of ZMQ archive file name and URL structure.
+
+function get_zmq_file(install)
+    define my.install = get_zmq_file.install
+    define my.version = get_archive_version(my.install, "zmq")?
+    if (!defined(my.version))
+        trace1("get_zmq_file:get_archive_version() = []")
+        return
+    endif
+    return "zeromq-$(my.version).tar.gz"
+endfunction
+
+function get_zmq_url(install)
+    trace1("get_zmq_url()")
+    define my.install = get_zmq_url.install
+    define my.version = get_archive_version(my.install, "zmq")?
+    if (!defined(my.version))
+        trace1("get_zmq_url:get_archive_version() = []")
+        return
+    endif
+    define my.archive = get_zmq_file(my.install)?
+    if (!defined(my.archive))
+        trace1("get_zmq_url:get_zmq_file() = []")
+        return
+    endif
+    define my.base_url = "https\://github.com/zeromq/libzmq/releases/download"
+    define my.url = "$(my.base_url)/v$(my.version)/$(my.archive)"
+    trace1("get_zmq_url = $(my.url)")
+    return my.url
+endfunction
+
 # Functions with specific knowledge of Boost archive file name and URL structure.
 
 function get_boost_file(install)
@@ -289,6 +320,19 @@ QRENCODE_ARCHIVE="$(get_qrencode_file(my.install))"
 
 .endmacro # define_qrencode
 .
+.macro define_zmq(install)
+.   define my.install = define_zmq.install
+.   define my.url = get_zmq_url(my.install)?
+.   if (!defined(my.url))
+.       #abort "A version of ZMQ is not defined."
+.       return
+.   endif
+.   heading2("ZMQ archive.")
+ZMQ_URL="$(my.url)"
+ZMQ_ARCHIVE="$(get_zmq_file(my.install))"
+
+.endmacro # define_zmq
+.
 .macro define_boost(install)
 .   define my.install = define_boost.install
 .   define my.url = get_boost_url(my.install)?
@@ -348,6 +392,7 @@ for OPTION in "$@"; do
         (--build-zlib)     BUILD_ZLIB="yes";;
         (--build-png)      BUILD_PNG="yes";;
         (--build-qrencode) BUILD_QRENCODE="yes";;
+        (--build-zmq)      BUILD_ZMQ="yes";;
         (--build-boost)    BUILD_BOOST="yes";;
         (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
 
@@ -422,6 +467,7 @@ display_message "BUILD_ICU             : $BUILD_ICU"
 display_message "BUILD_ZLIB            : $BUILD_ZLIB"
 display_message "BUILD_PNG             : $BUILD_PNG"
 display_message "BUILD_QRENCODE        : $BUILD_QRENCODE"
+display_message "BUILD_ZMQ             : $BUILD_ZMQ"
 display_message "BUILD_BOOST           : $BUILD_BOOST"
 display_message "PREFIX                : $PREFIX"
 display_message "BUILD_DIR             : $BUILD_DIR"
@@ -922,6 +968,10 @@ build_from_travis()
     build_from_tarball $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 . $PARALLEL "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}" "$@"
 .endmacro # build_qrencode
 .
+.macro build_from_tarball_zmq()
+    build_from_tarball $ZMQ_URL $ZMQ_ARCHIVE gzip . $PARALLEL "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
+.endmacro # build_zmq
+.
 .macro build_boost()
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE bzip2 . $PARALLEL "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
 .endmacro # build_boost
@@ -957,6 +1007,8 @@ build_all()
 .               build_from_tarball_png()
 .           elsif (is_qrencode_build(_build))
 .               build_from_tarball_qrencode()
+.           elsif (is_zmq_build(_build))
+.               build_from_tarball_zmq()
 .           elsif (is_boost_build(_build))
 .               build_boost()
 .           elsif (is_github_build(_build))
@@ -1008,6 +1060,7 @@ for generate.repository by name as _repository
     define_zlib(my.install)
     define_png(my.install)
     define_qrencode(my.install)
+    define_zmq(my.install)
     define_boost(my.install)
 
     heading1("Define utility functions.")
