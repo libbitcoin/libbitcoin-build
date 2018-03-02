@@ -105,4 +105,11 @@ function global.get_dependencies_nuget(result, repositories, configure,\
     endfor
 endfunction
 
+function requires_threadsafe_statistics(repository, product, vs_version)
+    define my.repository = requires_threadsafe_statistics.repository
+    define my.product = requires_threadsafe_statistics.product
+    return (my.vs_version = "vs2013") & is_library(my.product) &\
+        (target_name(my.product, my.repository) = "libbitcoin")
+endfunction
+
 .endtemplate
