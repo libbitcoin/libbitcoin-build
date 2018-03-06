@@ -72,40 +72,25 @@ endfunction
 ###
 ### vcxproj related string generators
 ###
-function project_base(product, repository_name)
-    define my.product = project_base.product
-    require(my.product, "product", "prefix")
+function project_build_dir_relative_path(repository, product, path_prefix,\
+    vs_version)
 
-    if (is_library(my.product))
-        return "$(my.repository_name)"
-    elsif (is_program(my.product))
-        if (defined(my.product.option))
-            if (defined(my.product.msvc_name))
-                return "$(my.product.msvc_name)"
-            else
-                return "$(my.repository_name)-$(my.product.option)"
-            endif
-        else
-            require(my.product, "product", "option")
-        endif
-    else
-        abort("Unrecognized product prefix: $(my.product.prefix)")
-    endif
-endfunction
-
-function project_build_dir_relative_path(product, path_prefix, repository_name, vs_version)
+    define my.repository = project_build_dir_relative_path.repository
+    require(my.repository, "repository", "name")
     define my.product = project_build_dir_relative_path.product
-    define my.proj_name = project_base(my.product, my.repository_name)
+    define my.proj_name = project_name(my.product, my.repository)
     define my.subpath = "builds/msvc/$(my.vs_version)"
     return append_path(append_path(append_path(\
-        my.path_prefix, my.repository_name), my.subpath), my.proj_name)
+        my.path_prefix, my.repository.name), my.subpath), my.proj_name)
 endfunction
 
-function project_file(product, path_prefix, repository_name, vs_version)
+function project_file(repository, product, path_prefix, vs_version)
+    define my.repository = project_file.repository
     define my.product = project_file.product
-    define my.proj_relative_path = project_build_dir_relative_path(my.product,\
-        my.path_prefix, my.repository_name, my.vs_version)
-    define my.proj_name = project_base(my.product, my.repository_name)
+    define my.proj_relative_path = project_build_dir_relative_path(\
+        my.repository, my.product, my.path_prefix, my.vs_version)
+
+    define my.proj_name = project_name(my.product, my.repository)
     return append_path(my.proj_relative_path, "$(my.proj_name).vcxproj.filters")
 endfunction
 
@@ -207,7 +192,7 @@ function emit_declare_filters_item_group(directories, uuid_seed)
     emit_item_group_close()
 endfunction
 
-function emit_item_group_compiler(files, repository, product)
+function emit_item_group_compiler(files, repository, product, vs_version)
     define my.files = emit_item_group_compiler.files
     define my.repository = emit_item_group_compiler.repository
     define my.product = emit_item_group_compiler.product
@@ -216,10 +201,8 @@ function emit_item_group_compiler(files, repository, product)
         count(my.files.row, is_compiled_type(count.name)) > 0)
 
         emit_item_group_open()
-
-        if (my.repository.name = "libbitcoin" & is_library(my.product))
-            emit_item_compile_threadsafe_statistics()
-        endif
+        emit_item_compile_threadsafe_statistics(my.repository, my.product,\
+            my.vs_version)
 
         for my.files.row as _row by _row.name
             if (is_compiled_type(_row.name))
@@ -282,7 +265,7 @@ function emit_item_group_resources(files)
     endif
 endfunction
 
-function emit_filter(repository, product, project_path)
+function emit_filter(repository, product, vs_version, project_path)
     define my.repository = emit_filter.repository
     define my.product = emit_filter.product
     require(my.product, "product", "path")
@@ -338,12 +321,16 @@ function emit_filter(repository, product, project_path)
                     "", my.resources_winpath, "false")
             endif
 
-            if (my.repository.name = "libbitcoin" & is_library(my.product))
+            if (requires_threadsafe_statistics(my.repository, my.product,\
+                my.vs_version))
+
                 my.uuid = filter_add(_directories, "src/external", my.uuid)
             endif
 
             emit_declare_filters_item_group(_directories, my.product.uuid)
-            emit_item_group_compiler(_files, my.repository, my.product)
+            emit_item_group_compiler(_files, my.repository, my.product,\
+                my.vs_version)
+
             emit_item_group_includes(_files)
             emit_item_group_none(_files)
             emit_item_group_resources(_files)
@@ -431,6 +418,16 @@ endfunction
     <$(my.type) Include="$(my.include)" />
 .endmacro emit_item
 .
+.macro emit_item_compile_threadsafe_statistics(repository, product, vs_version)
+.   define my.repository = emit_item_compile_threadsafe_statistics.repository
+.   define my.product = emit_item_compile_threadsafe_statistics.product
+.   define my.item = "\$(VC_CTP_Nov2013_InstallDir)/crt/src/threadsafestatics.cpp"
+.   define my.filter = "src/external"
+.   if (requires_threadsafe_statistics(my.repository, my.product, my.vs_version))
+.       emit_item_compile_filtered(my.item, my.filter)
+.   endif
+.endmacro emit_item_compile_threadsafe_statistics
+.
 .endtemplate
 .template 0
 ###############################################################################
@@ -446,19 +443,20 @@ function generate_filter(path_prefix, generate, vs_version)
             _repository.name)
 
         for _repository->make.product as _product where \
-            (defined(_product.uuid) & defined(_product.path))
+            has_uuid(_product) & defined(_product.path)
 
             define my.proj_dir_name = project_build_dir_relative_path(\
-                _product, my.path_prefix, _repository.name, my.vs_version)
+                _repository, _product, my.path_prefix, my.vs_version)
 
-            define my.proj_file = project_file(_product, my.path_prefix,\
-                _repository.name, my.vs_version)
+            define my.proj_file = project_file(_repository, _product,\
+                my.path_prefix, my.vs_version)
 
             create_directory(my.proj_dir_name)
             notify(my.proj_file)
             output(my.proj_file)
 
-            emit_filter(_repository, _product, my.absolute_project_path)
+            emit_filter(_repository, _product, my.vs_version,\
+                my.absolute_project_path)
 
             close
         endfor

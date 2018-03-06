@@ -9,6 +9,37 @@
 ###############################################################################
 # Functions
 ###############################################################################
+function is_job_debug(job)
+    define my.job = is_job_debug.job
+    define my.symbol = "--disable-ndebug"
+    return (count(my.job.option, (count.value = my.symbol)) > 0)
+endfunction
+
+function sanitized_link(job)
+    define my.job = sanitized_link.job
+    require(my.job, "job", "link")
+    define my.static = "static"
+    define my.sanitized_static = "Static"
+
+    if (my.job.link = my.static)
+        return my.sanitized_static
+    endif
+
+    abort("Unrecognized link option: $(my.job.link)")
+endfunction
+
+function sanitized_debug(job)
+    define my.job = sanitized_debug.job
+    define my.debug = "Debug"
+    define my.release = "Release"
+
+    if (is_job_debug(my.job))
+        return my.debug
+    endif
+
+    return my.release
+endfunction
+
 function get_test_list(product)
     define my.product = get_test_list.product
     define my.tests = ""
@@ -101,7 +132,7 @@ endfunction
 .macro emit_job(job, repository)
 .   define my.job = emit_job.job
 .   define my.repository = emit_job.repository
-    - configuration: $(my.job.link)
+    - configuration: $(sanitized_link(my.job))$(sanitized_debug(my.job))
       platform: $(my.job.compiler)
 .     emit_unit_test_options(my.repository)
 .endmacro # emit_job
@@ -109,10 +140,15 @@ endfunction
 .macro emit_matrix(matrix, repository)
 .   define my.matrix = emit_matrix.matrix
 .   define my.repository = emit_matrix.repository
-.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_windows(_job) & is_platform_x64(_job)
+.   for my.matrix.job as _job\
+        by "$(_job.compiler)-$(_job.link)-$(sanitized_debug(_job))"\
+        where is_system_windows(_job) & is_platform_x64(_job)
+.
 .       emit_job(_job, my.repository)
 .   endfor _job
-.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_windows(_job) & is_platform_Win32(_job)
+.   for my.matrix.job by "$(compiler)-$(link)" as _job where\
+        is_system_windows(_job) & is_platform_Win32(_job)
+.
 .       emit_job(_job, my.repository)
 .   endfor _job
 .endmacro # emit_matrix

@@ -7,17 +7,6 @@
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
-# Macros
-###############################################################################
-.endtemplate
-.template 1
-.
-.macro emit_item_compile_threadsafe_statistics()
-.endmacro emit_item_compile_threadsafe_statistics
-.
-.endtemplate
-.template 0
-###############################################################################
 # Execution
 ###############################################################################
 [global].root = ".."
@@ -30,6 +19,7 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 gsl from "templates/vs2017/common.gsl"
+gsl from "templates/common_msvc_artifacts.gsl"
 gsl from "templates/gsl.vcxproj.filters"
 
 generate_filter("output", generate, "vs2017")

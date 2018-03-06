@@ -13,40 +13,25 @@
 ###
 ### vcxproj related string generators
 ###
-function project_base(product, repository_name)
-    define my.product = project_base.product
-    require(my.product, "product", "prefix")
+function project_build_relative_path(repository, product, path_prefix,\
+    vs_version)
 
-    if (is_library(my.product))
-        return "$(my.repository_name)"
-    elsif (is_program(my.product))
-        if (defined(my.product.option))
-            if (defined(my.product.msvc_name))
-                return "$(my.product.msvc_name)"
-            else
-                return "$(my.repository_name)-$(my.product.option)"
-            endif
-        else
-            require(my.product, "product", "option")
-        endif
-    else
-        abort("Unrecognized product prefix: $(my.product.prefix)")
-    endif
-endfunction
-
-function project_build_relative_path(product, path_prefix, repository_name, vs_version)
+    define my.repository = project_build_relative_path.repository
+    require(my.repository, "repository", "name")
     define my.product = project_build_relative_path.product
-    define my.proj_name = project_base(my.product, my.repository_name)
+    define my.proj_name = project_name(my.product, my.repository)
     define my.subpath = "builds/msvc/$(my.vs_version)"
     return append_path(append_path(append_path(my.path_prefix,\
-        my.repository_name), my.subpath), my.proj_name)
+        my.repository.name), my.subpath), my.proj_name)
 endfunction
 
-function project_file(product, path_prefix, repository_name, vs_version)
+function project_file(repository, product, path_prefix, vs_version)
+    define my.repository = project_file.repository
     define my.product = project_file.product
-    define my.project_relative_path = project_build_relative_path(my.product,\
-        my.path_prefix, my.repository_name, my.vs_version)
-    define my.proj_name = project_base(my.product, my.repository_name)
+    define my.project_relative_path = project_build_relative_path(\
+        my.repository, my.product, my.path_prefix, my.vs_version)
+
+    define my.proj_name = project_name(my.product, my.repository)
     return append_path(my.project_relative_path, "$(my.proj_name).vcxproj")
 endfunction
 
@@ -58,12 +43,6 @@ function append_prefix(base, subdir)
         return "$(my.base)_$(my.subdir)"
     endif
     return "$(my.subdir)"
-endfunction
-
-function nuget_entry(nuget_registry, name)
-    define my.nuget_registry = nuget_entry.nuget_registry
-    return my.nuget_registry->nuget(_nuget.build_name = my.name &\
-        _nuget.compiler = platform_compiler(), _nuget)
 endfunction
 
 function repository_library_uuid(repository)
@@ -242,7 +221,9 @@ endfunction
 ###
 ### functional artifact emission
 ###
-function emit_item_group_compiler(repository, product, file_data, collisions)
+function emit_item_group_compiler(repository, product, vs_version, file_data,\
+    collisions)
+
     define my.repository = emit_item_group_compiler.repository
     define my.product = emit_item_group_compiler.product
     define my.file_data = emit_item_group_compiler.file_data
@@ -252,10 +233,8 @@ function emit_item_group_compiler(repository, product, file_data, collisions)
         count(my.file_data.element, is_compiled_type(count)) > 0)
 
         emit_item_group_open()
-
-        if (my.repository.name = "libbitcoin" & is_library(my.product))
-            emit_compile_item_threadsafe_statistics()
-        endif
+        emit_compile_item_threadsafe_statistics(my.repository, my.product,\
+            my.vs_version)
 
         for my.file_data.element as _element by _element.build_path
             if (is_compiled_type(_element))
@@ -342,9 +321,7 @@ function emit_propery_group_configuration(product)
     endif
 endfunction
 
-function emit_import_group_extension_settings(nuget_registry, repository,\
-    product)
-    define my.nuget_registry = emit_import_group_extension_settings.nuget_registry
+function emit_import_group_extension_settings(repository, product)
     define my.repository = emit_import_group_extension_settings.repository
     require(my.repository, "repository", "name")
     define my.product = emit_import_group_extension_settings.product
@@ -354,28 +331,30 @@ function emit_import_group_extension_settings(nuget_registry, repository,\
 
     emit_import_group_extension_settings_open()
 
-    for my.repository->install.build as _build where defined(_build.nuget) &\
-        (_build.nuget = "true")
+    new nuget_dependencies as _nuget
+        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+            platform_compiler())
 
-        define entry = nuget_entry(my.nuget_registry, _build.name)
-        for entry.package as _package
-            require(_package, "package", "label")
-            require(_package, "package", "name")
-            require(_package, "package", "version")
+        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+            platform_compiler(), my.product.option)
 
-            if (!(_package.label = "test") |\
-                ((_package.label = "test") & is_true(my.product.test)))
-                emit_import_project_nuget(_package)
-            endif
+        if (!defined(my.product.option))
+            get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+                platform_compiler(), "consensus")
+        endif
+
+        for _nuget.element as _element
+            require(_element, "element", "name")
+            require(_element, "element", "version")
+
+            emit_import_project_nuget(_element)
         endfor
-    endfor
+    endnew
 
     emit_import_group_extension_settings_close()
 endfunction
 
-function emit_target_ensure_nuget_imports(nuget_registry, repository,\
-    product)
-    define my.nuget_registry = emit_target_ensure_nuget_imports.nuget_registry
+function emit_target_ensure_nuget_imports(repository, product)
     define my.repository = emit_target_ensure_nuget_imports.repository
     require(my.repository, "repository", "name")
     define my.product = emit_target_ensure_nuget_imports.product
@@ -385,21 +364,25 @@ function emit_target_ensure_nuget_imports(nuget_registry, repository,\
 
     emit_target_ensure_nuget_imports_open()
 
-    for my.repository->install.build as _build where defined(_build.nuget) &\
-        (_build.nuget = "true")
+    new nuget_dependencies as _nuget
+        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+            platform_compiler())
 
-        define entry = nuget_entry(my.nuget_registry, _build.name)
-        for entry.package as _package
-            require(_package, "package", "label")
-            require(_package, "package", "name")
-            require(_package, "package", "version")
+        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+            platform_compiler(), my.product.option)
 
-            if (!(_package.label = "test") |\
-                ((_package.label = "test") & is_true(my.product.test)))
-                emit_error_condition_nuget(_package)
-            endif
+        if (!defined(my.product.option))
+            get_dependencies_nuget(_nuget, generate, my.repository->configure,\
+                platform_compiler(), "consensus")
+        endif
+
+        for _nuget.element as _element
+            require(_element, "element", "name")
+            require(_element, "element", "version")
+
+            emit_error_condition_nuget(_element)
         endfor
-    endfor
+    endnew
 
     emit_target_ensure_nuget_imports_close()
 endfunction
@@ -421,8 +404,7 @@ function emit_item_group_project_references(repository, product)
 
 endfunction
 
-function emit_project(nuget_registry, repository, product, project_path)
-    define my.nuget_registry = emit_project.nuget_registry
+function emit_project(repository, product, vs_version, project_path)
     define my.repository = emit_project.repository
     require(my.repository, "repository", "name")
     define my.product = emit_project.product
@@ -437,7 +419,7 @@ function emit_project(nuget_registry, repository, product, project_path)
     xml_copyleft(my.repository.name)
     emit_project_open(msbuild_version(my.product))
 
-    emit_property_group_globals(my.product, my.repository.name)
+    emit_property_group_globals(my.product, my.repository)
     emit_item_group_product_configurations(my.product)
     emit_propery_group_configuration(my.product)
     emit_import_props()
@@ -471,7 +453,9 @@ function emit_project(nuget_registry, repository, product, project_path)
                     "build", "false")
             endif
 
-            emit_item_group_compiler(my.repository, my.product, _files, _map)
+            emit_item_group_compiler(my.repository, my.product, my.vs_version,\
+                _files, _map)
+
             emit_item_group_includes(_files, _map)
             emit_item_group_none(_files, _map)
             emit_item_group_resources(_files, _map)
@@ -480,10 +464,8 @@ function emit_project(nuget_registry, repository, product, project_path)
 
     emit_import_targets()
     emit_import_group_extension_targets()
-    emit_import_group_extension_settings(my.nuget_registry, my.repository,\
-        my.product)
-    emit_target_ensure_nuget_imports(my.nuget_registry, my.repository,\
-        my.product)
+    emit_import_group_extension_settings(my.repository, my.product)
+    emit_target_ensure_nuget_imports(my.repository, my.product)
     emit_item_group_project_references(my.repository, my.product)
 
     emit_project_close()
@@ -515,16 +497,17 @@ endfunction emit_project
   </ItemGroup>
 .endmacro emit_item_group_close
 .
-.macro emit_property_group_globals(product, repository_name)
+.macro emit_property_group_globals(product, repository)
 .   define my.product = emit_property_group_globals.product
+.   define my.repository = emit_property_group_globals.repository
 .   require(my.product, "product", "uuid")
   <PropertyGroup Label="Globals">
 .   if (is_program(my.product))
     <ConfigurationType>Application</ConfigurationType>
 .   endif
-    <PlatformToolset>$(platform_toolset(my.product))</PlatformToolset>
+    <PlatformToolset>$(platform_toolset(my.product, my.repository))</PlatformToolset>
     <ProjectGuid>{$(my.product.uuid:upper)}</ProjectGuid>
-    <ProjectName>$(project_base(my.product, my.repository_name))</ProjectName>
+    <ProjectName>$(project_name(my.product, my.repository))</ProjectName>
   </PropertyGroup>
 .endmacro emit_property_group_globals
 .
@@ -794,6 +777,16 @@ endfunction emit_project
     </ProjectReference>
 .endmacro emit_item_group_project_reference_item
 .
+.macro emit_compile_item_threadsafe_statistics(repository, product, vs_version)
+.   define my.repository = emit_compile_item_threadsafe_statistics.repository
+.   define my.product = emit_compile_item_threadsafe_statistics.product
+.   if (requires_threadsafe_statistics(my.repository, my.product, my.vs_version))
+    <ClCompile Include="\$(VC_CTP_Nov2013_InstallDir)\\crt\\src\\threadsafestatics.cpp">
+      <ExcludedFromBuild Condition="\$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
+    </ClCompile>
+.   endif
+.endmacro emit_compile_item_threadsafe_statistics
+.
 .endtemplate
 .template 0
 ###############################################################################
@@ -808,23 +801,20 @@ function generate_vcxproj(path_prefix, generate, vs_version)
         define my.absolute_project_path = append_path(global.root,\
             _repository.name)
 
-        define my.nuget_registry = generate->nuget_registry
-
         for _repository->make.product as _product where \
-            defined(_product.uuid) & !is_empty(_product.uuid) &\
-            defined(_product.path)
+            has_uuid(_product) & defined(_product.path)
 
             define my.project_directory_name = project_build_relative_path(\
-                _product, my.path_prefix, _repository.name, my.vs_version)
+                _repository, _product, my.path_prefix, my.vs_version)
 
-            define my.project_file = project_file(_product, my.path_prefix,\
-                _repository.name, my.vs_version)
+            define my.project_file = project_file(_repository, _product,\
+                my.path_prefix, my.vs_version)
 
             create_directory(my.project_directory_name)
             notify(my.project_file)
             output(my.project_file)
 
-            emit_project(my.nuget_registry, _repository, _product,\
+            emit_project(_repository, _product, my.vs_version,\
                 my.absolute_project_path)
 
             close

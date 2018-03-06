@@ -69,7 +69,8 @@ function get_package_files(repository)
     define my.make = my.repository->make
     define my.packages = ""
     for my.repository.package as _package where defined(_package.library)
-        define my.product = find_library_product(_package.library, my.make)?
+        define my.product = find_library_product(_package.library, my.make,\
+            my.repository)?
         #if (defined(my.product))
             # TODO: define package name conditionally in configure.ac.
             #if (is_optional_element(my.product))
@@ -623,7 +624,7 @@ for generate.repository by name as _repository
 
     if (defined(my.configure->dependency))
         heading1("Check dependencies.")
-        for my.configure.dependency as _dependency
+        for my.configure.dependency as _dependency where has_m4(_dependency)
             if (is_boost_dependency(_dependency))
                 check_boost(_dependency)
             elsif (is_boost_lib_dependency(_dependency))

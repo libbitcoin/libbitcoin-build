@@ -1,0 +1,115 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin msvc artifact utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+function global.is_compiler_msvc(dependency)
+    define my.dependency = is_compiler_msvc.dependency
+    return !defined(my.dependency.compiler) |\
+        (defined(my.dependency.compiler) & (my.dependency.compiler = "msvc"))
+endfunction
+
+function global.has_function(dependency)
+    define my.dependency = has_function.dependency
+    return defined(my.dependency) & defined(my.dependency.function)
+endfunction
+
+function global.has_optionXXX(dependency)
+    define my.dependency = has_optionXXX.dependency
+    return defined(my.dependency) & defined(my.dependency.optionXXX)
+endfunction
+
+function global.is_dependency_pthread(dependency)
+    define my.dependency = is_dependency_pthread.dependency
+    return defined(my.dependency) & (my.dependency.name = "pthread")
+endfunction
+
+function global.matches_option(dependency, option)
+    define my.dependency = matches_option.dependency
+    return defined(my.dependency) &\
+        ((!defined(my.option) & !defined(my.dependency.option)) |\
+        (defined(my.option) & defined(my.dependency.option) &\
+        (my.option = my.dependency.option)))
+endfunction
+
+function global.is_dependency_nuget(dependency, compiler)
+    define my.dependency = is_dependency_nuget.dependency
+
+    return defined(my.dependency) &\
+        is_compiler_msvc(my.dependency) &\
+        (count(my.dependency.nuget, count.compiler = my.compiler) > 0)
+endfunction
+
+function global.is_dependency_repository(dependency, compiler)
+    define my.dependency = is_dependency_repository.dependency
+    return defined(my.dependency) &\
+        is_compiler_msvc(my.dependency) &\
+        !is_dependency_nuget(my.dependency, my.compiler) &\
+        !has_optionXXX(my.dependency) &\
+        !has_function(my.dependency) &\
+        !is_dependency_pthread(my.dependency)
+endfunction
+
+function global.match_element_by_name(element, name)
+    define my.element = match_element_by_name.element
+    return defined(my.element) & (my.element.name = my.name)
+endfunction
+
+function global.detect_collision_by_name(collection, name)
+    define my.collection = detect_collision_by_name.collection
+    return count(my.collection.element, match_element_by_name(count, my.name)) > 0
+endfunction
+
+function global.get_dependencies_nuget(result, repositories, configure,\
+    compiler, option)
+    define my.result = get_dependencies_nuget.result
+    define my.repositories = get_dependencies_nuget.repositories
+    define my.configure = get_dependencies_nuget.configure
+
+    for my.configure.dependency as _dependency where is_dependency_nuget(\
+        _dependency, my.compiler) & matches_option(_dependency, my.option)
+
+        define my.entry = _dependency->nuget(_nuget.compiler = my.compiler, _nuget)
+
+        # could replace with computation of name, would require more
+        # context embedding
+        if (defined(my.result) & defined(my.entry.name) &\
+            !detect_collision_by_name(my.result, my.entry.name))
+
+            new my.result.element as _element
+                _element.name = my.entry.name
+                _element.version = my.entry.version
+            endnew
+        endif
+    endfor
+
+    for my.configure.dependency as _dependency where is_dependency_repository(\
+        _dependency, my.compiler) & matches_option(_dependency, my.option)
+
+        # embedded prefix
+        define my.name = "lib$(_dependency.name)"
+        define my.repository = my.repositories->repository(\
+            _repository.name = my.name, _repository)
+
+        if (defined(my.repository))
+            get_dependencies_nuget(my.result, my.repositories,\
+                my.repository->configure, my.compiler, my.option)
+        endif
+    endfor
+endfunction
+
+function requires_threadsafe_statistics(repository, product, vs_version)
+    define my.repository = requires_threadsafe_statistics.repository
+    define my.product = requires_threadsafe_statistics.product
+    return (my.vs_version = "vs2013") & is_library(my.product) &\
+        (target_name(my.product, my.repository) = "libbitcoin")
+endfunction
+
+.endtemplate

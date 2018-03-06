@@ -11,47 +11,23 @@
 ###############################################################################
 
 ###
-### generic assistance functions
-###
-function is_uuid_defined(product)
-    define my.product = is_uuid_defined.product
-    return defined(my.product.uuid) & !is_empty(my.product.uuid)
-endfunction
-
-###
 ### sln related string generators
 ###
-function project_base(product, repository_name)
-    define my.product = project_base.product
-    require(my.product, "product", "prefix")
-
-    if (is_library(my.product))
-        return "$(my.repository_name)"
-    elsif (is_program(my.product))
-        if (defined(my.product.option))
-            if (defined(my.product.msvc_name))
-                return "$(my.product.msvc_name)"
-            else
-                return "$(my.repository_name)-$(my.product.option)"
-            endif
-        else
-            require(my.product, "product", "option")
-        endif
-    else
-        abort("Unrecognized product prefix: $(my.product.prefix)")
-    endif
-endfunction
-
-function solution_relative_path(path_prefix, repository_name, vs_version)
+function solution_relative_path(repository, path_prefix, vs_version)
+    define my.repository = solution_relative_path.repository
+    require(my.repository, "repository", "name")
     define my.subpath = "builds/msvc/$(my.vs_version)"
-    return append_path(append_path(my.path_prefix, my.repository_name),\
+    return append_path(append_path(my.path_prefix, my.repository.name),\
         my.subpath)
 endfunction
 
-function solution_file(path_prefix, repository_name, vs_version)
-    define my.relative_path = solution_relative_path(my.path_prefix,\
-        my.repository_name, my.vs_version)
-    return append_path(my.relative_path, "$(my.repository_name).sln")
+function solution_file(repository, path_prefix, vs_version)
+    define my.repository = solution_file.repository
+    require(my.repository, "repository", "name")
+    define my.relative_path = solution_relative_path(my.repository,\
+        my.path_prefix, my.vs_version)
+
+    return append_path(my.relative_path, "$(my.repository.name).sln")
 endfunction
 
 ###
@@ -61,9 +37,9 @@ function emit_projects(repository)
     define my.repository = emit_projects.repository
     require(my.repository, "repository", "name")
 
-    for my.repository->make.product as _product where is_uuid_defined(_product)
+    for my.repository->make.product as _product where has_uuid(_product)
 
-        define my.project_name = project_base(_product, my.repository.name)
+        define my.project_name = project_name(_product, my.repository)
         define my.project_path = "$(my.project_name)\\$(my.project_name).vcxproj"
 
         emit_project(my.project_name, my.project_path, _product.uuid)
@@ -76,10 +52,8 @@ function emit_postsolution(repository)
 
     emit_global_postsolution_open()
 
-    for my.repository->make.product as _product where defined(_product.uuid) &\
-        !is_empty(_product.uuid)
-
-        define my.project_name = project_base(_product, my.repository.name)
+    for my.repository->make.product as _product where has_uuid(_product)
+        define my.project_name = project_name(_product, my.repository)
         define my.project_path = "$(my.project_name)\\$(my.project_name).vcxproj"
 
         if (is_program(_product))
@@ -190,10 +164,12 @@ function generate_solutions(path_prefix, generate, vs_version)
         require(_repository, "repository", "name")
         define my.absolute_path = join(join(global.root, my.path_prefix),\
             _repository.name)
-        define my.solution_path = solution_relative_path(my.path_prefix,\
-            _repository.name, my.vs_version)
-        define my.solution_filename = solution_file(my.path_prefix,\
-            _repository.name, my.vs_version)
+
+        define my.solution_path = solution_relative_path(_repository,\
+            my.path_prefix, my.vs_version)
+
+        define my.solution_filename = solution_file(_repository,\
+            my.path_prefix, my.vs_version)
 
         create_directory(my.solution_path)
         notify(my.solution_filename)

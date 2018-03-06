@@ -53,10 +53,10 @@ for generate.repository by name as _repository\
     for _repository->make.product as _product\
         where (defined(_product->runner))
 
-        require(_product, "product", "name")
+        define target_name = target_name(_product, _repository)
         my.output_path = join(my.path_prefix, _repository.name)
         create_directory(my.output_path)
-        define my.out_file = "$(my.output_path)/$(_product.name)_runner.sh"
+        define my.out_file = "$(my.output_path)/$(target_name)_runner.sh"
         notify(my.out_file)
         output(my.out_file)
 
@@ -64,7 +64,7 @@ for generate.repository by name as _repository\
         copyleft(_repository.name)
 
         define my.runner = _product->runner
-        define my.path = "$(_product.path)/$(_product.name)"
+        define my.path = "$(_product.path)/$(target_name)"
         define my.tests = get_test_list(_product)
 
         heading1("Define tests and options.")
