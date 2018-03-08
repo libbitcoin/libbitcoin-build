@@ -225,6 +225,66 @@ endfunction
 .endtemplate
 .template 1
 .
+.macro define_install_help(repository)
+.   define my.repo = define_install_help.repository
+display_install_help()
+{
+    display_message "Usage: ./install.sh [OPTION]..."
+    display_message "Manage the installation of $(my.repository.name)."
+    display_message "Script options:"
+.   if (!(my.repo.name = "libbitcoin-consensus"))
+    display_message "  --with-icu               Compile with International Components for Unicode."
+    display_message "                             Since the addition of BIP-39 and later BIP-38 "
+    display_message "                             support, libbitcoin conditionally incorporates ICU "
+    display_message "                              to provide BIP-38 and BIP-39 passphrase "
+    display_message "                             normalization features. Currently "
+    display_message "                             libbitcoin-explorer is the only other library that "
+    display_message "                             accesses this feature, so if you do not intend to "
+    display_message "                             use passphrase normalization this dependency can "
+    display_message "                             be avoided."
+    display_message "  --with-qrencode          Compile with QR Code Support"
+    display_message "                             Since the addition of qrcode support, libbitcoin "
+    display_message "                             conditionally incorporates qrencode. Currently "
+    display_message "                             libbitcoin-explorer is the only other library that "
+    display_message "                             accesses this feature, so if you do not intend to "
+    display_message "                             use qrcode this dependency can be avoided."
+    display_message "  --with-png               Compile with QR Code PNG Output Support"
+    display_message "                             Since the addition of png support, libbitcoin "
+    display_message "                             conditionally incorporates libpng (which in turn "
+    display_message "                             requires zlib). Currently libbitcoin-explorer is "
+    display_message "                             the only other library that accesses this feature, "
+    display_message "                             so if you do not intend to use png this dependency "
+    display_message "                             can be avoided."
+.   endif
+.   if (have_build(my.repo->install, "icu"))
+    display_message "  --build-icu              Builds ICU libraries."
+.   endif
+.   if (have_build(my.repo->install, "zlib"))
+    display_message "  --build-zlib             Builds ZLib libraries."
+.   endif
+.   if (have_build(my.repo->install, "png"))
+    display_message "  --build-png              Builds PNG libraries."
+.   endif
+.   if (have_build(my.repo->install, "qrencode"))
+    display_message "  --build-qrencode         Builds QREncode libraries."
+.   endif
+.   if (have_build(my.repo->install, "boost"))
+    display_message "  --build-boost            Builds Boost libraries."
+.   endif
+.   if (have_build(my.repo->install, "zmq"))
+    display_message "  --build-zmq              Build ZeroMQ libraries."
+.   endif
+    display_message "  --build-dir=<path>       Location of downloaded and intermediate files."
+    display_message "  --prefix=<absolute-path> Library install location (defaults to /usr/local)."
+    display_message "  --disable-shared         Disables shared library builds."
+    display_message "  --disable-static         Disables static library builds."
+    display_message "  --help                   Display usage, overriding script execution."
+    display_message ""
+    display_message "All unrecognized options provided shall be passed as configuration options for "
+    display_message "all dependencies."
+}
+.endmacro # define_install_help
+.
 .macro install_documentation(repository)
 .   define my.repo = install_documentation.repository
 # Script to build and install $(my.repo.name).
@@ -405,6 +465,9 @@ for OPTION in "$@"; do
         (--with-icu)       WITH_ICU="yes";;
         (--with-png)       WITH_PNG="yes";;
         (--with-qrencode)  WITH_QRENCODE="yes";;
+
+        # Standard script options.
+        (--help)           DISPLAY_HELP="yes";;
     esac
 done
 
@@ -450,36 +513,40 @@ if [[ $BUILD_BOOST ]]; then
     with_boost="--with-boost=$PREFIX"
 fi
 
-.   heading2("Echo generated values.")
-display_message "Libbitcoin installer configuration."
-display_message "--------------------------------------------------------------------"
-display_message "OS                    : $OS"
-display_message "PARALLEL              : $PARALLEL"
-display_message "CC                    : $CC"
-display_message "CXX                   : $CXX"
-display_message "CPPFLAGS              : $CPPFLAGS"
-display_message "CFLAGS                : $CFLAGS"
-display_message "CXXFLAGS              : $CXXFLAGS"
-display_message "LDFLAGS               : $LDFLAGS"
-display_message "LDLIBS                : $LDLIBS"
-display_message "WITH_ICU              : $WITH_ICU"
-display_message "WITH_PNG              : $WITH_PNG"
-display_message "WITH_QRENCODE         : $WITH_QRENCODE"
-display_message "BUILD_ICU             : $BUILD_ICU"
-display_message "BUILD_ZLIB            : $BUILD_ZLIB"
-display_message "BUILD_PNG             : $BUILD_PNG"
-display_message "BUILD_QRENCODE        : $BUILD_QRENCODE"
-display_message "BUILD_ZMQ             : $BUILD_ZMQ"
-display_message "BUILD_BOOST           : $BUILD_BOOST"
-display_message "PREFIX                : $PREFIX"
-display_message "BUILD_DIR             : $BUILD_DIR"
-display_message "DISABLE_SHARED        : $DISABLE_SHARED"
-display_message "DISABLE_STATIC        : $DISABLE_STATIC"
-display_message "with_boost            : ${with_boost}"
-display_message "with_pkgconfigdir     : ${with_pkgconfigdir}"
-display_message "--------------------------------------------------------------------"
-
 .endmacro # define_initialize
+.
+.macro define_display_configuration()
+display_configuration()
+{
+    display_message "Libbitcoin installer configuration."
+    display_message "--------------------------------------------------------------------"
+    display_message "OS                    : $OS"
+    display_message "PARALLEL              : $PARALLEL"
+    display_message "CC                    : $CC"
+    display_message "CXX                   : $CXX"
+    display_message "CPPFLAGS              : $CPPFLAGS"
+    display_message "CFLAGS                : $CFLAGS"
+    display_message "CXXFLAGS              : $CXXFLAGS"
+    display_message "LDFLAGS               : $LDFLAGS"
+    display_message "LDLIBS                : $LDLIBS"
+    display_message "WITH_ICU              : $WITH_ICU"
+    display_message "WITH_PNG              : $WITH_PNG"
+    display_message "WITH_QRENCODE         : $WITH_QRENCODE"
+    display_message "BUILD_ICU             : $BUILD_ICU"
+    display_message "BUILD_ZLIB            : $BUILD_ZLIB"
+    display_message "BUILD_PNG             : $BUILD_PNG"
+    display_message "BUILD_QRENCODE        : $BUILD_QRENCODE"
+    display_message "BUILD_ZMQ             : $BUILD_ZMQ"
+    display_message "BUILD_BOOST           : $BUILD_BOOST"
+    display_message "PREFIX                : $PREFIX"
+    display_message "BUILD_DIR             : $BUILD_DIR"
+    display_message "DISABLE_SHARED        : $DISABLE_SHARED"
+    display_message "DISABLE_STATIC        : $DISABLE_STATIC"
+    display_message "with_boost            : ${with_boost}"
+    display_message "with_pkgconfigdir     : ${with_pkgconfigdir}"
+    display_message "--------------------------------------------------------------------"
+}
+.endmacro # define_display_configuration
 .
 .macro define_build_options(build)
 .   define my.build = define_build_options.build
@@ -1026,11 +1093,16 @@ build_all()
 .endmacro # define_build_all
 .
 .macro define_invoke()
-create_directory "$BUILD_DIR"
-push_directory "$BUILD_DIR"
-initialize_git
-pop_directory
-time build_all "${CONFIGURE_OPTIONS[@]}"
+if [[ $DISPLAY_HELP ]]; then
+    display_install_help
+else
+    display_configuration
+    create_directory "$BUILD_DIR"
+    push_directory "$BUILD_DIR"
+    initialize_git
+    pop_directory
+    time build_all "${CONFIGURE_OPTIONS[@]}"
+fi
 .endmacro # define_invoke
 .
 .endtemplate
@@ -1066,6 +1138,8 @@ for generate.repository by name as _repository
 
     heading1("Initialize the build environment.")
     define_initialize()
+    define_display_configuration()
+    define_install_help(_repository)
 
     heading1("Define build options.")
     for my.install.build as _build where count(_build.option) > 0
