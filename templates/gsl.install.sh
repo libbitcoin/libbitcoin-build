@@ -232,6 +232,7 @@ display_install_help()
     display_message "Usage: ./install.sh [OPTION]..."
     display_message "Manage the installation of $(my.repository.name)."
     display_message "Script options:"
+.   if (!(my.repo.name = "libbitcoin-consensus"))
     display_message "  --with-icu               Compile with International Components for Unicode."
     display_message "                             Since the addition of BIP-39 and later BIP-38 "
     display_message "                             support, libbitcoin conditionally incorporates ICU "
@@ -254,6 +255,7 @@ display_install_help()
     display_message "                             the only other library that accesses this feature, "
     display_message "                             so if you do not intend to use png this dependency "
     display_message "                             can be avoided."
+.   endif
 .   if (have_build(my.repo->install, "icu"))
     display_message "  --build-icu              Builds ICU libraries."
 .   endif
