@@ -95,8 +95,8 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
       </dependency>
-      <dependency name="pthread" />
-      <dependency name="rt" function="clock_gettime" system="linux" />
+      <dependency name="pthread" system_exclude="android" />
+      <dependency name="rt" function="clock_gettime" system="linux" system_exclude="android" />
       <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
       <!-- -ldl is missing from icu package config -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />

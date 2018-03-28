@@ -367,43 +367,96 @@ AS_CASE([${$(my.symbol)}], [yes],
 .#-----------------------------------------------------------------------------
 .# AX_PTHREAD
 .#-----------------------------------------------------------------------------
-.# This could be more general than pthread.
-.macro check_pthread(dependency, configure)
-.   define my.dependency = check_pthread.dependency
-.   define my.configure = check_pthread.configure
+.macro emit_m4_ax_cpp_libs_macro(dependency, configure, indent_length, trailing_indicator, wrap)
+.   define my.dependency = emit_m4_ax_cpp_libs_macro.dependency
+.   define my.configure = emit_m4_ax_cpp_libs_macro.configure
 .   require(my.dependency, "dependency", "name")
 .
 .   define my.cname = "$(my.dependency.name:c)"
 .   define my.uname = "$(my.cname:upper)"
+.   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
+.   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
+.   define my.indent_prefix = ""
+.   while ((my.indent_length > 0) & (my.indent_length > string.length(my.indent_prefix)))
+.       my.indent_prefix = " $(my.indent_prefix)"
+.   endwhile
+.
+$(my.indent_prefix)$(my.prefix_bracket)AX_$(my.uname)(
+    $(my.indent_prefix)[AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.uname)_CPPFLAGS}])
+.   if (my.cname = "pthread")
+     $(my.indent_prefix)AC_SUBST([$(my.cname)_LIBS], [-lpthread])
+.   else
+     $(my.indent_prefix)AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIBS}])
+.   endif
+     $(my.indent_prefix)AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
+     $(my.indent_prefix)AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
+    $(my.indent_prefix)[AC_MSG_ERROR([$(my.cname) library is required but was not found.])])$(my.suffix_bracket)$(my.trailing_indicator)
+.
+.endmacro # emit_m4_ax_cpp_libs_macro
+.
+.macro check_m4_cpp_libs_conditional(dependency, configure)
+.   define my.dependency = check_m4_cpp_libs_conditional.dependency
+.   define my.configure = check_m4_cpp_libs_conditional.configure
+.   require(my.dependency, "dependency", "name")
+.
+.   define my.cname = "$(my.dependency.name:c)"
+.   define my.uname = "$(my.cname:upper)"
+.   define my.system_pattern = is_empty(my.dependency.system) ?? "*" ? "*$(my.dependency.system)*"
+.   define my.system_exclude_pattern = is_empty(my.dependency.system_exclude) ?? "*" ? "*$(my.dependency.system_exclude)*"
 .   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+.
 .   define my.show_option = !is_empty(my.symbol) ?? " if --$(my.symbol)" ? ""
-.   heading2("Require $(my.cname)$(my.show_option) and output ${$(my.cname)_CPPFLAGS/LIBS}.")
+.   define my.show_system = is_empty(my.dependency.system) ?? "" ? " if on $(my.dependency.system)"
+.   define my.show_system_exclude = is_empty(my.dependency.system_exclude) ?? "" ? " if not on $(my.dependency.system_exclude)"
+.   heading2("Require $(my.cname)$(my.show_option)$(my.show_system)$(my.show_system_exclude) and output ${$(my.cname)_CPPFLAGS/LIBS}.")
+.
 .   if (!is_empty(my.dependency.comment))
 .       heading3("$(my.dependency.comment)")
 .   endif
-.   if (is_empty(my.symbol))
-AX_$(my.uname)(
-    [AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.uname)_CPPFLAGS}])
-     AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIBS}])
-     AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
-     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
-    [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])
-.   else
+.
+.   if (my.cname = "pthread")
+.       heading3("Hard wired -lpthread because AX_PTHREAD does not do it.")
+.   endif
+.
+.   define my.optional = !is_empty(my.symbol)
+.   define my.has_system = !(my.system_pattern = "*")
+.   define my.has_system_exclude = !(my.system_exclude_pattern = "*")
+.   if (   !my.optional & !my.has_system & !my.has_system_exclude)
+.       emit_m4_ax_cpp_libs_macro(my.dependency, my.configure, 0, "")
+.   elsif (!my.optional)
+AS_CASE([${host_os}],
+.       if (my.has_system_exclude)
+    [$(my.system_exclude_pattern)],
+    [AC_SUBST([$(my.cname)_LIBS], [])],
+.       endif
+.       if (my.has_system)
+    [$(my.system_pattern)],
+.       endif
+.       emit_m4_ax_cpp_libs_macro(my.dependency, my.configure, 4, my.has_system ?? "," ? ")", "true")
+.       if (my.has_system)
+    [AC_SUBST([$(my.cname)_LIBS], [])])
+.       endif
+.   elsif ( my.optional & !my.has_system & !my.has_system_exclude)
 AS_CASE([${$(my.symbol)}], [yes],
-    [AX_$(my.uname)(
-        [AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.uname)_CPPFLAGS}])
-         AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIBS}])
-         AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
-         AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}]),
-        [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])],
+.       emit_m4_ax_cpp_libs_macro(my.dependency, my.configure, 4, ",", "true")
+    [AC_SUBST([$(my.cname)_LIBS], [])])
+.   elsif ( my.optional &  my.has_system |  my.has_system_exclude)
+AS_CASE([${$(my.symbol)}], [yes],
+    [AS_CASE([${host_os}],
+.       if (my.has_system_exclude)
+        [$(my.system_exclude_pattern)],
+        [AC_SUBST([$(my.cname)_LIBS], [])],
+.       endif
+.       if (my.has_system)
+        [$(my.system_pattern)],
+.       endif
+.       emit_m4_ax_cpp_libs_macro(my.dependency, my.configure, 8, my.has_system ?? "," ? ")", "true")
+.       if (my.has_system)
+        [AC_SUBST([$(my.cname)_LIBS], [])])],
+.       endif
     [AC_SUBST([$(my.cname)_LIBS], [])])
 .   endif
-.   if (my.cname = "pthread")
-# Hard wired -lpthread because AX_PTHREAD does not do it.
-AC_SUBST([pthread_LIBS], [-lpthread])
-.   endif
-
-.endmacro
+.endmacro # check_m4_cpp_libs_conditional
 .
 .#-----------------------------------------------------------------------------
 .# AC_CHECK_LIB
@@ -636,7 +689,7 @@ for generate.repository by name as _repository
             elsif (is_package_dependency(_dependency))
                 check_package(_dependency, my.configure)
             elsif (is_pthread_dependency(_dependency))
-                check_pthread(_dependency, my.configure)
+                check_m4_cpp_libs_conditional(_dependency, my.configure)
             elsif (is_iconv_dependency(_dependency))
                 check_iconv(_dependency, my.configure)
             else
