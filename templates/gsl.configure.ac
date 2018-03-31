@@ -94,6 +94,66 @@ function render_define_item(item)
     endif
 endfunction
 
+function matches_element_name(collection, name)
+    define my.collection = matches_element_name.collection
+    return (count(my.collection.element, (count.name = my.name)) > 0)
+endfunction
+
+function discover_systems(repository, systems)
+    define my.repository = discover_systems.repository
+    define my.root = discover_systems.systems
+
+    for my.repository->configure.dependency as _dependency\
+        where defined(_dependency.system)
+
+        define my.name = _dependency.system
+        if (!matches_element_name(my.root, my.name))
+            new my.root.element as _element
+                _element.name = my.name
+            endnew
+        endif
+    endfor
+
+    for my.repository->configure.dependency as _dependency\
+        where defined(_dependency.system_exclude)
+
+        define my.name = _dependency.system_exclude
+        if (!matches_element_name(my.root, my.name))
+            new my.root.element as _element
+                _element.name = my.name
+            endnew
+        endif
+    endfor
+endfunction
+
+function initialize_systems_flags(repository)
+    define my.repository = initialize_systems_flags.repository
+    define my.sentinel = "*"
+
+    new systems as _systems
+        discover_systems(my.repository, _systems)
+
+        if (count(_systems.element, 1) > 0)
+            emit_initialize_platforms_declaration(_systems, my.sentinel)
+            emit_initialize_platforms_case(_systems, my.sentinel)
+        endif
+    endnew
+endfunction
+
+function get_platform_test(dependency)
+    define my.dependency = get_platform_test.dependency
+    return is_empty(my.dependency.system)\
+        ?? ""\
+        ?  "test \"\$platform_$(my.dependency.system:c)\" = \"yes\""
+endfunction
+
+function get_platform_exclude_test(dependency)
+    define my.dependency = get_platform_exclude_test.dependency
+    return is_empty(my.dependency.system_exclude)\
+        ?? ""\
+        ?  "test \"\$platform_$(my.dependency.system_exclude:c)\" = \"no\""
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -159,6 +219,31 @@ PKG_PROG_PKG_CONFIG
 AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
 AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
 AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
+
+.endmacro
+.
+.macro emit_initialize_platforms_declaration(systems, sentinel)
+.   define my.systems = emit_initialize_platforms_declaration.systems
+# Platform indicators
+.   for my.systems.element as _element
+.       if (!(_element.name = my.sentinel))
+platform_$(_element.name:c)="no"
+.       endif
+.   endfor
+
+.endmacro
+.
+.macro emit_initialize_platforms_case(systems, sentinel)
+.   define my.systems = emit_initialize_platforms_case.systems
+.
+AS_CASE([${host_os}],
+.   for my.systems.element as _element
+.       if (!(_element.name = my.sentinel))
+    [*$(_element.name)*],
+    [platform_$(_element.name:c)="yes"],
+.       endif
+.   endfor
+    [])
 
 .endmacro
 .
@@ -367,71 +452,295 @@ AS_CASE([${$(my.symbol)}], [yes],
 .#-----------------------------------------------------------------------------
 .# AX_PTHREAD
 .#-----------------------------------------------------------------------------
-.# This could be more general than pthread.
-.macro check_pthread(dependency, configure)
-.   define my.dependency = check_pthread.dependency
-.   define my.configure = check_pthread.configure
+.macro emit_m4_ax_cpp_libs_macro(dependency, indent_length, trailing_indicator,\
+    wrap)
+.
+.   define my.dependency = emit_m4_ax_cpp_libs_macro.dependency
+.   require(my.dependency, "dependency", "name")
+.
+.   define my.cname = "$(my.dependency.name:c)"
+.   define my.uname = "$(my.cname:upper)"
+.   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
+.   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
+.   define my.indent_prefix = ""
+.   while (my.indent_length > string.length(my.indent_prefix))
+.       my.indent_prefix = " $(my.indent_prefix)"
+.   endwhile
+.
+$(my.indent_prefix)$(my.prefix_bracket)AX_$(my.uname)(
+    $(my.indent_prefix)[AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.uname)_CPPFLAGS}])
+.   if (my.cname = "pthread")
+     $(my.indent_prefix)AC_SUBST([$(my.cname)_LIBS], [-lpthread])
+.   else
+     $(my.indent_prefix)AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIBS}])
+.   endif
+     $(my.indent_prefix)AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])],
+    $(my.indent_prefix)[AC_MSG_ERROR([$(my.cname) library is required but was not found.])])$(my.suffix_bracket)$(my.trailing_indicator)
+.endmacro # emit_m4_ax_cpp_libs_macro
+.
+.macro emit_m4_ax_cpp_libs_conditional_platform_exclude(dependency,\
+    indent_length, trailing_indicator, wrap)
+.
+.   define my.dependency = emit_m4_ax_cpp_libs_conditional_platform_exclude.dependency
+.   require(my.dependency, "dependency", "name")
+.
+.   define my.name = "$(my.dependency.name)"
+.   define my.platform_exclude_test = get_platform_exclude_test(my.dependency)
+.
+.   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
+.   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
+.   define my.indent_prefix = ""
+.   while (my.indent_length > string.length(my.indent_prefix))
+.       my.indent_prefix = " $(my.indent_prefix)"
+.   endwhile
+.
+.   if (is_empty(my.platform_exclude_test))
+.       emit_m4_ax_cpp_libs_macro(my.dependency,\
+            my.indent_length, my.trailing_indicator, my.wrap)
+.   else
+$(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_exclude_test)],
+.       emit_m4_ax_cpp_libs_macro(my.dependency, my.indent_length + 4, ",",\
+            "true")
+    $(my.indent_prefix)[AC_MSG_NOTICE([host_os: ${host_os} excludes $(my.name)])
+     $(my.indent_prefix)AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
+.   endif
+.endmacro # emit_m4_ax_cpp_libs_conditional_platform_exclude
+.
+.macro emit_m4_ax_cpp_libs_conditional_platform(dependency, indent_length,\
+    trailing_indicator, wrap)
+.
+.   define my.dependency = emit_m4_ax_cpp_libs_conditional_platform.dependency
+.   require(my.dependency, "dependency", "name")
+.
+.   define my.name = "$(my.dependency.name)"
+.   define my.platform_test = get_platform_test(my.dependency)
+.
+.   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
+.   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
+.   define my.indent_prefix = ""
+.   while (my.indent_length > string.length(my.indent_prefix))
+.       my.indent_prefix = " $(my.indent_prefix)"
+.   endwhile
+.
+.   if (is_empty(my.platform_test))
+.       emit_m4_ax_cpp_libs_conditional_platform_exclude(my.dependency,\
+            my.indent_length, my.trailing_indicator, my.wrap)
+.   else
+$(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_test)],
+.       emit_m4_ax_cpp_libs_conditional_platform_exclude(my.dependency,\
+            my.indent_length + 4, ",", "true")
+    $(my.indent_prefix)[AC_MSG_NOTICE([host_os: ${host_os} excludes $(my.name)])
+     $(my.indent_prefix)AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
+.   endif
+.endmacro # emit_m4_ax_cpp_libs_conditional_platform
+.
+.macro emit_m4_ax_cpp_libs_conditional_option(dependency, configure,\
+    indent_length, trailing_indicator, wrap)
+.
+.   define my.dependency = emit_m4_ax_cpp_libs_conditional_option.dependency
+.   define my.configure = emit_m4_ax_cpp_libs_conditional_option.configure
+.   require(my.dependency, "dependency", "name")
+.
+.   define my.name = "$(my.dependency.name)"
+.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+
+.
+.   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
+.   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
+.   define my.indent_prefix = ""
+.   while (my.indent_length > string.length(my.indent_prefix))
+.       my.indent_prefix = " $(my.indent_prefix)"
+.   endwhile
+.
+.   if (is_empty(my.symbol))
+.       emit_m4_ax_cpp_libs_conditional_platform(\
+            my.dependency, my.indent_length, my.trailing_indicator, my.wrap)
+.   else
+$(my.indent_prefix)$(my.prefix_bracket)AS_CASE([${$(my.symbol)}], [yes],
+.       emit_m4_ax_cpp_libs_conditional_platform(\
+            my.dependency, my.indent_length + 4, ",", "true")
+    $(my.indent_prefix)[AC_MSG_NOTICE([$(my.symbol) value excludes $(my.name)])
+     $(my.indent_prefix)[AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
+.   endif
+.endmacro # emit_m4_ax_cpp_libs_conditional_option
+.
+.macro check_m4_cpp_libs_conditional(dependency, configure)
+.   define my.dependency = check_m4_cpp_libs_conditional.dependency
+.   define my.configure = check_m4_cpp_libs_conditional.configure
 .   require(my.dependency, "dependency", "name")
 .
 .   define my.cname = "$(my.dependency.name:c)"
 .   define my.uname = "$(my.cname:upper)"
 .   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+.   define my.platform_test = get_platform_test(my.dependency)
+.
 .   define my.show_option = !is_empty(my.symbol) ?? " if --$(my.symbol)" ? ""
-.   heading2("Require $(my.cname)$(my.show_option) and output ${$(my.cname)_CPPFLAGS/LIBS}.")
+.   define my.show_system = is_empty(my.dependency.system) ?? "" ?\
+        " if on $(my.dependency.system)"
+.
+.   define my.show_system_exclude = is_empty(my.dependency.system_exclude)\
+        ?? "" ? " if not on $(my.dependency.system_exclude)"
+.
+.   heading2("Require $(my.cname)$(my.show_option)$(my.show_system)$(my.show_system_exclude) and output ${$(my.cname)_CPPFLAGS/LIBS}.")
+.
 .   if (!is_empty(my.dependency.comment))
 .       heading3("$(my.dependency.comment)")
 .   endif
-.   if (is_empty(my.symbol))
-AX_$(my.uname)(
-    [AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.uname)_CPPFLAGS}])
-     AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIBS}])
-     AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
-     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
-    [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])
-.   else
-AS_CASE([${$(my.symbol)}], [yes],
-    [AX_$(my.uname)(
-        [AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.uname)_CPPFLAGS}])
-         AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIBS}])
-         AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
-         AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}]),
-        [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])],
-    [AC_SUBST([$(my.cname)_LIBS], [])])
-.   endif
+.
 .   if (my.cname = "pthread")
-# Hard wired -lpthread because AX_PTHREAD does not do it.
-AC_SUBST([pthread_LIBS], [-lpthread])
+.       heading3("Hard wired -lpthread because AX_PTHREAD does not do it.")
 .   endif
+.
+.   emit_m4_ax_cpp_libs_conditional_option(\
+        my.dependency, my.configure, 0, "", "false")
 
-.endmacro
+AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
+
+.endmacro # check_m4_cpp_libs_conditional
 .
 .#-----------------------------------------------------------------------------
 .# AC_CHECK_LIB
 .#-----------------------------------------------------------------------------
-.macro check_dependency(dependency)
-.   define my.dependency = check_dependency.dependency
+.macro emit_check_libs_macro(dependency, indent_length,\
+    trailing_indicator, wrap)
+.
+.   define my.dependency = emit_check_libs_macro.dependency
 .   require(my.dependency, "dependency", "name")
 .
-.   define my.name = my.dependency.name
-.   define my.cname = "$(my.name:c)"
-.   define my.show_system = is_empty(my.dependency.system) ?? "" ? " if on $(my.dependency.system)"
-.   define my.output = is_empty(my.dependency.function) ?? "" ? " and output ${$(my.cname)_LIBS}"
-.   define my.system_pattern = is_empty(my.dependency.system) ?? "*" ? "*$(my.dependency.system)*"
-.   heading2("Require $(my.name)$(my.show_system)$(my.output).")
+.   define my.cname = "$(my.dependency.name:c)"
+.   define my.uname = "$(my.cname:upper)"
+.   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
+.   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
+.   define my.indent_prefix = ""
+.   while (my.indent_length > string.length(my.indent_prefix))
+.       my.indent_prefix = " $(my.indent_prefix)"
+.   endwhile
+.
+.   if (!is_empty(my.dependency.function))
+$(my.indent_prefix)$(my.prefix_bracket)AC_CHECK_LIB([$(my.cname)], [$(my.dependency.function)],
+    $(my.indent_prefix)[AC_SUBST([$(my.cname)_LIBS], [-l$(my.cname)])],
+    $(my.indent_prefix)[AC_MSG_ERROR([$(my.cname) library is required but was not found.])])$(my.suffix_bracket)$(my.trailing_indicator)
+.   endif
+.endmacro # emit_check_libs_macro
+.
+.macro emit_check_libs_conditional_platform_exclude(dependency,\
+    indent_length, trailing_indicator, wrap)
+.
+.   define my.dependency = emit_check_libs_conditional_platform_exclude.dependency
+.   require(my.dependency, "dependency", "name")
+.
+.   define my.name = "$(my.dependency.name)"
+.   define my.platform_exclude_test = get_platform_exclude_test(my.dependency)
+.
+.   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
+.   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
+.   define my.indent_prefix = ""
+.   while (my.indent_length > string.length(my.indent_prefix))
+.       my.indent_prefix = " $(my.indent_prefix)"
+.   endwhile
+.
+.   if (is_empty(my.platform_exclude_test))
+.       emit_check_libs_macro(my.dependency,\
+            my.indent_length, my.trailing_indicator, my.wrap)
+.   else
+$(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_exclude_test)],
+.       emit_check_libs_macro(my.dependency, my.indent_length + 4, ",",\
+            "true")
+    $(my.indent_prefix)[AC_MSG_NOTICE([host_os: ${host_os} excludes $(my.name)])
+     $(my.indent_prefix)AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
+.   endif
+.endmacro # emit_check_libs_conditional_platform_exclude
+.
+.macro emit_check_libs_conditional_platform(dependency, indent_length,\
+    trailing_indicator, wrap)
+.
+.   define my.dependency = emit_check_libs_conditional_platform.dependency
+.   require(my.dependency, "dependency", "name")
+.
+.   define my.name = "$(my.dependency.name)"
+.   define my.platform_test = get_platform_test(my.dependency)
+.
+.   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
+.   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
+.   define my.indent_prefix = ""
+.   while (my.indent_length > string.length(my.indent_prefix))
+.       my.indent_prefix = " $(my.indent_prefix)"
+.   endwhile
+.
+.   if (is_empty(my.platform_test))
+.       emit_check_libs_conditional_platform_exclude(my.dependency,\
+            my.indent_length, my.trailing_indicator, my.wrap)
+.   else
+$(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_test)],
+.       emit_check_libs_conditional_platform_exclude(my.dependency,\
+            my.indent_length + 4, ",", "true")
+    $(my.indent_prefix)[AC_MSG_NOTICE([host_os: ${host_os} excludes $(my.name)])
+     $(my.indent_prefix)AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
+.   endif
+.endmacro # emit_check_libs_conditional_platform
+.
+.macro emit_check_libs_conditional_option(dependency, configure,\
+    indent_length, trailing_indicator, wrap)
+.
+.   define my.dependency = emit_check_libs_conditional_option.dependency
+.   define my.configure = emit_check_libs_conditional_option.configure
+.   require(my.dependency, "dependency", "name")
+.
+.   define my.name = "$(my.dependency.name)"
+.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+
+.
+.   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
+.   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
+.   define my.indent_prefix = ""
+.   while (my.indent_length > string.length(my.indent_prefix))
+.       my.indent_prefix = " $(my.indent_prefix)"
+.   endwhile
+.
+.   if (is_empty(my.symbol))
+.       emit_check_libs_conditional_platform(\
+            my.dependency, my.indent_length, my.trailing_indicator, my.wrap)
+.   else
+$(my.indent_prefix)$(my.prefix_bracket)AS_CASE([${$(my.symbol)}], [yes],
+.       emit_check_libs_conditional_platform(\
+            my.dependency, my.indent_length + 4, ",", "true")
+    $(my.indent_prefix)[AC_MSG_NOTICE([$(my.symbol) value excludes $(my.name)])
+     $(my.indent_prefix)[AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
+.   endif
+.endmacro # emit_check_libs_conditional_option
+.
+.macro check_lib_dependency_conditional(dependency, configure)
+.   define my.dependency = check_lib_dependency_conditional.dependency
+.   define my.configure = check_lib_dependency_conditional.configure
+.   require(my.dependency, "dependency", "name")
+.
+.   define my.cname = "$(my.dependency.name:c)"
+.   define my.uname = "$(my.cname:upper)"
+.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+.   define my.platform_test = get_platform_test(my.dependency)
+.
+.   define my.show_option = !is_empty(my.symbol) ?? " if --$(my.symbol)" ? ""
+.   define my.show_system = is_empty(my.dependency.system) ?? "" ?\
+        " if on $(my.dependency.system)"
+.
+.   define my.show_system_exclude = is_empty(my.dependency.system_exclude)\
+        ?? "" ? " if not on $(my.dependency.system_exclude)"
+.
+.   define my.output = is_empty(my.dependency.function) ?? "" ?\
+        " and output ${$(my.cname)_LIBS}"
+.
+.   heading2("Require $(my.cname)$(my.show_option)$(my.show_system)$(my.show_system_exclude)$(my.output).")
+.
 .   if (!is_empty(my.dependency.comment))
 .       heading3("$(my.dependency.comment)")
 .   endif
 .
-.   if (!is_empty(my.dependency.function))
-AS_CASE([${host_os}], [$(my.system_pattern)],
-    [AC_CHECK_LIB([$(my.cname)], [$(my.dependency.function)],
-        [AC_SUBST([$(my.cname)_LIBS], [-l$(my.cname)])
-         AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
-        [AC_MSG_ERROR([$(my.cname) library is required but was not found.])])],
-    [AC_SUBST([$(my.cname)_LIBS], [])])
-.   endif
+.   emit_check_libs_conditional_option(\
+        my.dependency, my.configure, 0, "", "false")
 
-.endmacro
+AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
+
+.endmacro # check_lib_dependency_conditional
 .
 .#-----------------------------------------------------------------------------
 .# AX_BOOST_BASE
@@ -607,6 +916,7 @@ for generate.repository by name as _repository
     heading1("Standard declarations.")
     initialize_configure(_repository)
     require_stdcxx11(_repository)
+    initialize_systems_flags(_repository)
 
     if (defined(my.configure->option))
         heading1("Process options.")
@@ -636,11 +946,11 @@ for generate.repository by name as _repository
             elsif (is_package_dependency(_dependency))
                 check_package(_dependency, my.configure)
             elsif (is_pthread_dependency(_dependency))
-                check_pthread(_dependency, my.configure)
+                check_m4_cpp_libs_conditional(_dependency, my.configure)
             elsif (is_iconv_dependency(_dependency))
                 check_iconv(_dependency, my.configure)
             else
-                check_dependency(_dependency)
+                check_lib_dependency_conditional(_dependency, my.configure)
             endif
         endfor
     endif
