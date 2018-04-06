@@ -154,6 +154,18 @@ function get_platform_exclude_test(dependency)
         ?  "test \"\$platform_$(my.dependency.system_exclude:c)\" = \"no\""
 endfunction
 
+function get_case_platform(dependency, sentinel)
+    define my.dependency = get_case_platform.dependency
+    return is_empty(my.dependency.system)\
+        ?? my.sentinel ?  "*$(my.dependency.system:c)*"
+endfunction
+
+function get_case_platform_exclude(dependency, sentinel)
+    define my.dependency = get_case_platform_exclude.dependency
+    return is_empty(my.dependency.system_exclude)\
+        ?? my.sentinel ?  "*$(my.dependency.system_exclude:c)*"
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -478,34 +490,6 @@ $(my.indent_prefix)$(my.prefix_bracket)AX_$(my.uname)(
     $(my.indent_prefix)[AC_MSG_ERROR([$(my.cname) library is required but was not found.])])$(my.suffix_bracket)$(my.trailing_indicator)
 .endmacro # emit_m4_ax_cpp_libs_macro
 .
-.macro emit_m4_ax_cpp_libs_conditional_platform_exclude(dependency,\
-    indent_length, trailing_indicator, wrap)
-.
-.   define my.dependency = emit_m4_ax_cpp_libs_conditional_platform_exclude.dependency
-.   require(my.dependency, "dependency", "name")
-.
-.   define my.name = "$(my.dependency.name)"
-.   define my.platform_exclude_test = get_platform_exclude_test(my.dependency)
-.
-.   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
-.   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
-.   define my.indent_prefix = ""
-.   while (my.indent_length > string.length(my.indent_prefix))
-.       my.indent_prefix = " $(my.indent_prefix)"
-.   endwhile
-.
-.   if (is_empty(my.platform_exclude_test))
-.       emit_m4_ax_cpp_libs_macro(my.dependency,\
-            my.indent_length, my.trailing_indicator, my.wrap)
-.   else
-$(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_exclude_test)],
-.       emit_m4_ax_cpp_libs_macro(my.dependency, my.indent_length + 4, ",",\
-            "true")
-    $(my.indent_prefix)[AC_MSG_NOTICE([host_os: ${host_os} excludes $(my.name)])
-     $(my.indent_prefix)AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
-.   endif
-.endmacro # emit_m4_ax_cpp_libs_conditional_platform_exclude
-.
 .macro emit_m4_ax_cpp_libs_conditional_platform(dependency, indent_length,\
     trailing_indicator, wrap)
 .
@@ -513,7 +497,8 @@ $(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_exclude_test)],
 .   require(my.dependency, "dependency", "name")
 .
 .   define my.name = "$(my.dependency.name)"
-.   define my.platform_test = get_platform_test(my.dependency)
+.   define my.platform = get_case_platform(my.dependency, "")
+.   define my.platform_exclude = get_case_platform_exclude(my.dependency, "")
 .
 .   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
 .   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
@@ -522,15 +507,24 @@ $(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_exclude_test)],
 .       my.indent_prefix = " $(my.indent_prefix)"
 .   endwhile
 .
-.   if (is_empty(my.platform_test))
-.       emit_m4_ax_cpp_libs_conditional_platform_exclude(my.dependency,\
-            my.indent_length, my.trailing_indicator, my.wrap)
+.   if (is_empty(my.platform) & is_empty(my.platform_exclude))
+.       emit_m4_ax_cpp_libs_macro(my.dependency, my.indent_length,\
+            my.trailing_indicator, my.wrap)
 .   else
-$(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_test)],
-.       emit_m4_ax_cpp_libs_conditional_platform_exclude(my.dependency,\
-            my.indent_length + 4, ",", "true")
-    $(my.indent_prefix)[AC_MSG_NOTICE([host_os: ${host_os} excludes $(my.name)])
-     $(my.indent_prefix)AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
+$(my.indent_prefix)$(my.prefix_bracket)AS_CASE([${host_os}],
+.       if (!is_empty(my.platform_exclude))
+    $(my.indent_prefix)[$(my.platform_exclude)],
+    $(my.indent_prefix)[AC_SUBST([$(my.name:c)_LIBS], [])],
+.       endif
+.       if (!is_empty(my.platform))
+    $(my.indent_prefix)[$(my.platform)],
+.           emit_m4_ax_cpp_libs_macro(my.dependency, my.indent_length + 4,\
+                ",", "true")
+    $(my.indent_prefix)[AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
+.       else
+.           emit_m4_ax_cpp_libs_macro(my.dependency, my.indent_length + 4,\
+                ")$(my.suffix_bracket)$(my.trailing_indicator)", "true")
+.       endif
 .   endif
 .endmacro # emit_m4_ax_cpp_libs_conditional_platform
 .
@@ -543,7 +537,6 @@ $(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_test)],
 .
 .   define my.name = "$(my.dependency.name)"
 .   define my.symbol = find_option_symbol(my.dependency, my.configure)?
-
 .
 .   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
 .   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
@@ -623,34 +616,6 @@ $(my.indent_prefix)$(my.prefix_bracket)AC_CHECK_LIB([$(my.cname)], [$(my.depende
 .   endif
 .endmacro # emit_check_libs_macro
 .
-.macro emit_check_libs_conditional_platform_exclude(dependency,\
-    indent_length, trailing_indicator, wrap)
-.
-.   define my.dependency = emit_check_libs_conditional_platform_exclude.dependency
-.   require(my.dependency, "dependency", "name")
-.
-.   define my.name = "$(my.dependency.name)"
-.   define my.platform_exclude_test = get_platform_exclude_test(my.dependency)
-.
-.   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
-.   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
-.   define my.indent_prefix = ""
-.   while (my.indent_length > string.length(my.indent_prefix))
-.       my.indent_prefix = " $(my.indent_prefix)"
-.   endwhile
-.
-.   if (is_empty(my.platform_exclude_test))
-.       emit_check_libs_macro(my.dependency,\
-            my.indent_length, my.trailing_indicator, my.wrap)
-.   else
-$(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_exclude_test)],
-.       emit_check_libs_macro(my.dependency, my.indent_length + 4, ",",\
-            "true")
-    $(my.indent_prefix)[AC_MSG_NOTICE([host_os: ${host_os} excludes $(my.name)])
-     $(my.indent_prefix)AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
-.   endif
-.endmacro # emit_check_libs_conditional_platform_exclude
-.
 .macro emit_check_libs_conditional_platform(dependency, indent_length,\
     trailing_indicator, wrap)
 .
@@ -658,7 +623,8 @@ $(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_exclude_test)],
 .   require(my.dependency, "dependency", "name")
 .
 .   define my.name = "$(my.dependency.name)"
-.   define my.platform_test = get_platform_test(my.dependency)
+.   define my.platform = get_case_platform(my.dependency, "")
+.   define my.platform_exclude = get_case_platform_exclude(my.dependency, "")
 .
 .   define my.prefix_bracket = is_true(my.wrap) ?? "[" ? ""
 .   define my.suffix_bracket = is_true(my.wrap) ?? "]" ? ""
@@ -667,15 +633,24 @@ $(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_exclude_test)],
 .       my.indent_prefix = " $(my.indent_prefix)"
 .   endwhile
 .
-.   if (is_empty(my.platform_test))
-.       emit_check_libs_conditional_platform_exclude(my.dependency,\
-            my.indent_length, my.trailing_indicator, my.wrap)
+.   if (is_empty(my.platform) & is_empty(my.platform_exclude))
+.       emit_check_libs_macro(my.dependency, my.indent_length,\
+            my.trailing_indicator, my.wrap)
 .   else
-$(my.indent_prefix)$(my.prefix_bracket)AS_IF([$(my.platform_test)],
-.       emit_check_libs_conditional_platform_exclude(my.dependency,\
-            my.indent_length + 4, ",", "true")
-    $(my.indent_prefix)[AC_MSG_NOTICE([host_os: ${host_os} excludes $(my.name)])
-     $(my.indent_prefix)AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
+$(my.indent_prefix)$(my.prefix_bracket)AS_CASE([${host_os}],
+.       if (!is_empty(my.platform_exclude))
+    $(my.indent_prefix)[$(my.platform_exclude)],
+    $(my.indent_prefix)[AC_SUBST([$(my.name:c)_LIBS], [])],
+.       endif
+.       if (!is_empty(my.platform))
+    $(my.indent_prefix)[$(my.platform)],
+.           emit_check_libs_macro(my.dependency, my.indent_length + 4,\
+                ",", "true")
+    $(my.indent_prefix)[AC_SUBST([$(my.name:c)_LIBS], [])])$(my.suffix_bracket)$(my.trailing_indicator)
+.       else
+.           emit_check_libs_macro(my.dependency, my.indent_length + 4,\
+                ")$(my.suffix_bracket)$(my.trailing_indicator)", "true")
+.       endif
 .   endif
 .endmacro # emit_check_libs_conditional_platform
 .
@@ -916,7 +891,6 @@ for generate.repository by name as _repository
     heading1("Standard declarations.")
     initialize_configure(_repository)
     require_stdcxx11(_repository)
-    initialize_systems_flags(_repository)
 
     if (defined(my.configure->option))
         heading1("Process options.")
