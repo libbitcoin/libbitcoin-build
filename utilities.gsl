@@ -105,10 +105,6 @@ function global.make_windows_path(path)
     return string.replace(my.path, "/|\\")
 endfunction
 
-function global.make_prefix(path)
-    return string.replace(my.path, "/|_")
-endfunction
-
 #------------------------------------------------------------------------------
 # Library utilities.
 #------------------------------------------------------------------------------
@@ -483,6 +479,7 @@ function global.is_not_covered(product)
         is_cpp(my.product)
 endfunction
 
+
 # Is the product a check target.
 function global.is_check(product)
     define my.product = is_check.product
@@ -570,43 +567,6 @@ function global.get_all_product_files(files, folder, trim, product)
         define my.subfolder = "$(_directory.path)$(_directory.name)"
         get_all_product_files(my.files, my.subfolder, my.trim, my.product)
     endfor
-endfunction
-
-function global.get_files(files, directory, relative_path, tag, recurse,\
-    ignore_hidden_dirs, ignore_hidden_files)
-    define my.files = get_files.files
-    define my.directory = get_files.directory
-
-    for my.directory.file as _file by _file.name
-        if (!(is_true(my.ignore_hidden_files) & starts_with(_file.name, ".")))
-            new my.files.file as _element
-                _element.name = _file.name
-                _element.full_path = _file.path
-                _element.relative_path = my.relative_path
-                _element.relative_name = append_path(my.relative_path, _file.name)
-                _element.tag = my.tag
-            endnew
-        endif
-    endfor
-
-    if (is_true(my.recurse))
-        for my.directory.directory as _directory by _directory.name
-            define my.subdir_path = append_path(my.directory.path,\
-                _directory.name)
-            define my.subdir = open_directory(my.subdir_path)
-            define my.sub_relative_path = append_path(my.relative_path,\
-                _directory.name)
-            define my.sub_tag = append_path(my.tag, _directory.name)
-
-            if (!(is_true(my.ignore_hidden_dirs) &\
-                starts_with(_directory.name, ".")))
-
-                get_files(my.files, my.subdir, my.sub_relative_path,\
-                    my.sub_tag, my.recurse, my.ignore_hidden_dirs,\
-                    my.ignore_hidden_files)
-            endif
-        endfor
-    endif
 endfunction
 
 function global.has_uuid(product)
