@@ -52,41 +52,41 @@ endfunction
 
 function is_compiled_type(element)
     define my.element = is_compiled_type.element
-    return matches_filetype(my.element.file_name, "cpp") |\
-        matches_filetype(my.element.file_name, "c")
+    return matches_filetype(my.element.name, "cpp") |\
+        matches_filetype(my.element.name, "c")
 endfunction
 
 function is_included_type(element)
     define my.element = is_included_type.element
-    return matches_filetype(my.element.file_name, "hpp") |\
-        matches_filetype(my.element.file_name, "h")
+    return matches_filetype(my.element.name, "hpp") |\
+        matches_filetype(my.element.name, "h")
 endfunction
 
 function is_none_type(element)
     define my.element = is_none_type.element
-    return matches_filetype(my.element.file_name, "ipp")
+    return matches_filetype(my.element.name, "ipp")
 endfunction
 
 function is_resources_type(element)
     define my.element = is_resources_type.element
-    return matches_filetype(my.element.file_name, "rc")
+    return matches_filetype(my.element.name, "rc")
 endfunction
 
 function object_base_from_element(element)
     define my.element = object_base_from_element.element
-    if (matches_filetype(my.element.file_name, "cpp"))
-        return global.left(my.element.file_name,\
-            string.length(my.element.file_name) - 4)
-    elsif (matches_filetype(my.element.file_name, "c"))
-        return global.left(my.element.file_name,\
+    if (matches_filetype(my.element.name, "cpp"))
+        return global.left(my.element.name,\
+            string.length(my.element.name) - 4)
+    elsif (matches_filetype(my.element.name, "c"))
+        return global.left(my.element.name,\
             string.length(my.element.file_name) - 2)
     endif
 
-    return my.element.file_name
+    return my.element.name
 endfunction
 
-function matches_filetype(file_name, extension)
-    return (regexp.match("(^.)(.*)\\.$(my.extension)$", my.file_name) > 0)
+function matches_filetype(name, extension)
+    return (regexp.match("(^.)(.*)\\.$(my.extension)$", my.name) > 0)
 endfunction
 
 function is_option_console(product)
@@ -100,120 +100,40 @@ function is_option_tests(product)
 endfunction
 
 ###
-### File element-related string data storage/query
-###
-function match_file_element_build_path(element, build_path)
-    define my.element = match_file_element_build_path.element
-    return defined(my.element) & (my.element.build_path = my.build_path)
-endfunction
-
-function match_file_element_path_prefix(element, path_prefix)
-    define my.element = match_file_element_path_prefix.element
-    return defined(my.element) &\
-        ((!defined(my.element.path_prefix) & !defined(my.path_prefix)) |\
-        (my.element.path_prefix = my.path_prefix))
-endfunction
-
-function match_file_element_file_name(element, file_name)
-    define my.element = match_file_element_file_name.element
-    return defined(my.element) & (my.element.file_name = my.file_name)
-endfunction
-
-function match_file_element(element, build_path, path_prefix, file_name)
-    define my.element = match_file_element.element
-    return defined(my.element) &\
-        match_file_element_build_path(my.element, my.build_path) &\
-        match_file_element_path_prefix(my.element, my.path_prefix) &\
-        match_file_element_file_name(my.element, my.file_name)
-endfunction
-
-function exists_file_element(root, build_path, path_prefix, file_name)
-    define my.root = exists_file_element.root
-    return count(my.root.element, match_file_element(count, my.build_path,\
-        my.path_prefix, my.file_name)) > 0
-endfunction
-
-function collides_file_element_file_name(root, file_name)
-    define my.root = collides_file_element_file_name.root
-    return count(my.root.element,\
-        match_file_element_file_name(count, my.file_name)) > 1
-endfunction
-
-function add_file_element(root, build_path, path_prefix, file_name)
-    define my.root = add_file_element.root
-    if (defined(my.root) & !exists_file_element(my.root, my.build_path,\
-        my.prefix_path, my.file_name))
-
-        new my.root.element as _element
-            _element.build_path = my.build_path
-            if (!is_empty(my.path_prefix))
-                _element.path_prefix = my.path_prefix
-            endif
-            _element.file_name = my.file_name
-        endnew
-    endif
-    return my.root
-endfunction
-
-###
-### File name collision-related data storage/query
-###
-function match_collision(collision, file_name)
-    define my.collision = match_collision.collision
-    return defined(my.collision) &\
-        (my.collision.file_name = my.file_name)
-endfunction
-
-function exists_collision(root, file_name)
-    define my.root = exists_collision.root
-    return count(my.root.collision, match_collision(count, my.file_name)) > 0
-endfunction
-
-function add_collision(root, file_name)
-    define my.root = add_collision.root
-    if (defined(my.root) & !exists_collision(my.root, my.file_name))
-        new my.root.collision as _collision
-            _collision.file_name = my.file_name
-        endnew
-    endif
-    return my.root
-endfunction
-
-###
 ### generic assistance functions
 ###
-function discover_files(file_data, directory, win_path, prefix, recurse)
-    define my.file_data = discover_files.file_data
-    define my.directory = discover_files.directory
+function match_name(element, name)
+    define my.element = match_name.element
+    return defined(my.element) & (my.element.name = my.name)
+endfunction
 
-    for my.directory.file as _file by _file.name
-        add_file_element(my.file_data, make_windows_path(\
-            append_path(my.win_path, _file.name)), my.prefix, _file.name)
-    endfor
+function exists_collision(root, name)
+    define my.root = exists_collision.root
+    return count(my.root.collision, match_name(count, my.name)) > 0
+endfunction
 
-    if (is_true(my.recurse))
-        for my.directory.directory as _directory by _directory.name
-            define my.subdir_path = append_path(my.directory.path,\
-                _directory.name)
-            define my.subdir = open_directory(my.subdir_path)
-            define my.subdir_win_path = append_path(my.win_path,\
-                _directory.name)
-            define my.subdir_prefix = append_prefix(my.prefix, _directory.name)
-
-            discover_files(my.file_data, my.subdir, my.subdir_win_path,\
-                my.subdir_prefix, my.recurse)
-        endfor
+function add_collision(root, name)
+    define my.root = add_collision.root
+    if (defined(my.root) & !exists_collision(my.root, my.name))
+        new my.root.collision as _collision
+            _collision.name = my.name
+        endnew
     endif
+    return my.root
+endfunction
 
+function collides_file_name(root, name)
+    define my.root = collides_file_name.root
+    return count(my.root.file, match_name(count, my.name)) > 1
 endfunction
 
 function populate_collisions(collisions, file_data)
     define my.collisions = populate_collisions.collisions
     define my.file_data = populate_collisions.file_data
 
-    for my.file_data.element as _element
-        if (collides_file_element_file_name(my.file_data, _element.file_name))
-            add_collision(my.collisions, _element.file_name)
+    for my.file_data.file as _file
+        if (collides_file_name(my.file_data, _file.name))
+            add_collision(my.collisions, _file.name)
         endif
     endfor
 endfunction
@@ -230,15 +150,15 @@ function emit_item_group_compiler(repository, product, vs_version, file_data,\
     define my.collisions = emit_item_group_compiler.collisions
 
     if ((my.repository.name = "libbitcoin") |\
-        count(my.file_data.element, is_compiled_type(count)) > 0)
+        count(my.file_data.file, is_compiled_type(count)) > 0)
 
         emit_item_group_open()
         emit_compile_item_threadsafe_statistics(my.repository, my.product,\
             my.vs_version)
 
-        for my.file_data.element as _element by _element.build_path
-            if (is_compiled_type(_element))
-                emit_compile_item(my.collisions, _element)
+        for my.file_data.file as _file by _file.relative_name
+            if (is_compiled_type(_file))
+                emit_compile_item(my.collisions, _file)
             endif
         endfor
 
@@ -250,13 +170,12 @@ function emit_item_group_includes(file_data, collisions)
     define my.file_data = emit_item_group_includes.file_data
     define my.collisions = emit_item_group_includes.collisions
 
-    if (count(my.file_data.element, is_included_type(count)) > 0)
+    if (count(my.file_data.file, is_included_type(count)) > 0)
         emit_item_group_open()
 
-        for my.file_data.element as _element by _element.build_path
-            if (is_included_type(_element))
-                #echo("    $(_element.build_path)")
-                emit_include_item(_element)
+        for my.file_data.file as _file by _file.relative_name
+            if (is_included_type(_file))
+                emit_include_item(_file)
             endif
         endfor
 
@@ -270,15 +189,17 @@ function emit_item_group_none(file_data, collisions)
 
     emit_item_group_open()
 
-    for my.file_data.element as _element by _element.build_path
-        if (is_none_type(_element))
-            #echo("    $(_element.build_path)")
-            emit_none_item(_element)
+    for my.file_data.file as _file by _file.relative_name
+        if (is_none_type(_file))
+            emit_none_item(_file)
         endif
     endfor
 
     new element as _element
-        _element.build_path = "packages.config"
+        _element.name = "packages.config"
+        _element.relative_name = "packages.config"
+        _element.relative_path = ""
+        _element.tag = ""
         emit_none_item(_element)
     endnew
 
@@ -289,13 +210,12 @@ function emit_item_group_resources(file_data, collisions)
     define my.file_data = emit_item_group_resources.file_data
     define my.collisions = emit_item_group_resources.collisions
 
-    if (count(my.file_data.element, is_resources_type(count)) > 0)
+    if (count(my.file_data.file, is_resources_type(count)) > 0)
         emit_item_group_open()
 
-        for my.file_data.element as _element by _element.build_path
-            if (is_resources_type(_element))
-                #echo("    $(_element.build_path)")
-                emit_resources_item(_element)
+        for my.file_data.file as _file by _file.relative_name
+            if (is_resources_type(_file))
+                emit_resources_item(_file)
             endif
         endfor
 
@@ -427,8 +347,8 @@ function emit_project(repository, product, vs_version, project_path)
 
     # scan files (product, conditionally 'includes', build relative resources)
     new encountered_files as _files
-        discover_files(_files, my.product_dir, my.product_offset,\
-            my.product.path, "true")
+        get_files(_files, my.product_dir, my.product_offset, my.product.path,\
+            "true", "true", "true")
 
         new collisions as _map
             populate_collisions(_map, _files)
@@ -439,8 +359,8 @@ function emit_project(repository, product, vs_version, project_path)
                 define my.include_dir = open_directory(my.include_path)
                 define my.headers_offset = "../../../../include"
 
-                discover_files(_files, my.include_dir, my.headers_offset,\
-                    "include", "true")
+                get_files(_files, my.include_dir, my.headers_offset,\
+                    "include", "true", "true", "true")
             endif
 
 
@@ -449,8 +369,9 @@ function emit_project(repository, product, vs_version, project_path)
 
                 define my.resources_path = "$(my.project_path)/builds/msvc"
                 define my.resources_dir = open_directory(my.resources_path)
-                discover_files(_files, my.resources_dir, "../..",\
-                    "build", "false")
+
+                get_files(_files, my.resources_dir, "../../", "build", "false",\
+                    "true", "true")
             endif
 
             emit_item_group_compiler(my.repository, my.product, my.vs_version,\
@@ -710,7 +631,7 @@ endfunction emit_project
 .   define my.collisions = emit_compile_item.collisions
 .   define my.file_record = emit_compile_item.file_record
 .
-.   if (!exists_collision(my.collisions, my.file_record.file_name))
+.   if (!exists_collision(my.collisions, my.file_record.name))
 .       emit_item("ClCompile", my.file_record)
 .   else
 .       emit_item_with_object("ClCompile", my.file_record)
@@ -734,14 +655,14 @@ endfunction emit_project
 .
 .macro emit_item(type, file_record)
 .   define my.file_record = emit_item.file_record
-    <$(my.type) Include="$(make_windows_path(my.file_record.build_path))" />
+    <$(my.type) Include="$(make_windows_path(my.file_record.relative_name))" />
 .endmacro emit_item
 .
 .macro emit_item_with_object(type, file_record)
 .   define my.file_record = emit_item_with_object.file_record
 .   define my.obj_base_name = object_base_from_element(my.file_record)
-.   define my.obj_full_name = "$(my.file_record.path_prefix)_$(my.obj_base_name).obj"
-    <$(my.type) Include="$(make_windows_path(my.file_record.build_path))">
+.   define my.obj_full_name = "$(make_prefix(my.file_record.tag))_$(my.obj_base_name).obj"
+    <$(my.type) Include="$(make_windows_path(my.file_record.relative_name))">
       <ObjectFileName>\$(IntDir)$(my.obj_full_name)</ObjectFileName>
     </$(my.type)>
 .endmacro emit_item_with_object
