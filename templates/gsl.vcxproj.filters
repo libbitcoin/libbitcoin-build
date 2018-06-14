@@ -198,7 +198,7 @@ function emit_item_group_compiler(files, repository, product, vs_version)
     define my.product = emit_item_group_compiler.product
 
     if ((my.repository.name = "libbitcoin") |\
-        count(my.files.row, is_compiled_type(count.name)) > 0)
+        count(my.files.file, is_compiled_type(count.name)) > 0)
 
         emit_item_group_open()
         emit_item_compile_threadsafe_statistics(my.repository, my.product,\
