@@ -97,37 +97,16 @@ endfunction
 ###
 ### generic assistance functions
 ###
-function discover_files(data, directory, path_prefix, win_path, value_path, recurse)
-    define my.data = discover_files.data
-    define my.directory = discover_files.directory
-
-    for my.directory.file as _file by _file.name
-        table_add(my.data, make_windows_path(append_path(\
-            append_path(my.path_prefix, my.win_path), _file.name)),\
-            my.value_path)
-    endfor
-
-    if (is_true(my.recurse))
-        for my.directory.directory as _directory by _directory.name
-            define my.subdir = open_directory(append_path(my.directory.path,\
-                _directory.name))
-            define my.sub_path = append_path(my.win_path, _directory.name)
-            define my.sub_value_path = append_path(my.value_path, _directory.name)
-
-            discover_files(my.data, my.subdir, my.path_prefix, my.sub_path,\
-                my.sub_value_path, my.recurse)
-        endfor
-    endif
-endfunction
-
 function discover_directories(data, directory, win_path, value_path, uuid)
     define my.data = discover_directories.data
     define my.directory = discover_directories.directory
 
     for my.directory.directory as _dir by _dir.name
-        table_add(my.data, make_windows_path(append_path(my.value_path,\
-            _dir.name)), my.uuid)
-        my.uuid = uuid_inc(my.uuid)
+        if (!starts_with(_dir.name, "."))
+            table_add(my.data, make_windows_path(append_path(my.value_path,\
+                _dir.name)), my.uuid)
+            my.uuid = uuid_inc(my.uuid)
+        endif
     endfor
 
     for my.directory.directory as _dir by _dir.name
@@ -136,8 +115,10 @@ function discover_directories(data, directory, win_path, value_path, uuid)
         define my.sub_path = append_path(my.win_path, _dir.name)
         define my.sub_value_path = append_path(my.value_path, _dir.name)
 
-        my.uuid = discover_directories(my.data, my.subdir, my.sub_path,\
-            my.sub_value_path, my.uuid)
+        if (!starts_with(_dir.name, "."))
+            my.uuid = discover_directories(my.data, my.subdir, my.sub_path,\
+                my.sub_value_path, my.uuid)
+        endif
     endfor
 
     return my.uuid
@@ -204,9 +185,9 @@ function emit_item_group_compiler(files, repository, product, vs_version)
         emit_item_compile_threadsafe_statistics(my.repository, my.product,\
             my.vs_version)
 
-        for my.files.row as _row by _row.name
-            if (is_compiled_type(_row.name))
-                emit_item_compile_filtered(_row.name, _row.value)
+        for my.files.file as _file by _file.relative_name
+            if (is_compiled_type(_file.name))
+                emit_item_compile_filtered(_file.relative_name, _file.tag)
             endif
         endfor
 
@@ -217,12 +198,12 @@ endfunction
 function emit_item_group_includes(files)
     define my.files = emit_item_group_includes.files
 
-    if (count(my.files.row, is_included_type(count.name)) > 0)
+    if (count(my.files.file, is_included_type(count.name)) > 0)
         emit_item_group_open()
 
-        for my.files.row as _row by _row.name
-            if (is_included_type(_row.name))
-                emit_item_include_filtered(_row.name, _row.value)
+        for my.files.file as _file by _file.relative_name
+            if (is_included_type(_file.name))
+                emit_item_include_filtered(_file.relative_name, _file.tag)
             endif
         endfor
 
@@ -235,16 +216,13 @@ function emit_item_group_none(files)
 
     emit_item_group_open()
 
-    for my.files.row as _row by _row.name
-        if (is_none_type(_row.name))
-            emit_item_none_filtered(_row.name, _row.value)
+    for my.files.file as _file by _file.relative_name
+        if (is_none_type(_file.name))
+            emit_item_none_filtered(_file.relative_name, _file.tag)
         endif
     endfor
 
-    new row as _row
-        _row.name = "packages.config"
-        emit_item_none(_row.name)
-    endnew
+    emit_item_none("packages.config")
 
     emit_item_group_close()
 endfunction
@@ -252,12 +230,12 @@ endfunction
 function emit_item_group_resources(files)
     define my.files = emit_item_group_resources.files
 
-    if (count(my.files.row, is_resources_type(count.name)) > 0)
+    if (count(my.files.file, is_resources_type(count.name)) > 0)
         emit_item_group_open()
 
-        for my.files.row as _row by _row.name
-            if (is_resources_type(_row.name))
-                emit_item_resource_filtered(_row.name, _row.value)
+        for my.files.file as _file by _file.relative_name
+            if (is_resources_type(_file.name))
+                emit_item_resource_filtered(_file.relative_name, _file.tag)
             endif
         endfor
 
@@ -277,7 +255,7 @@ function emit_filter(repository, product, vs_version, project_path)
 
     new directories as _directories
         new files as _files
-            define my.product_prefix = "../../../.."
+            define my.product_prefix = "../../../../$(my.product.path)"
             define my.product_path = "$(my.project_path)/$(my.product.path)"
             define my.product_dir = open_directory(my.product_path)
             define my.product_winpath = "$(my.product.path)"
@@ -288,11 +266,11 @@ function emit_filter(repository, product, vs_version, project_path)
             my.uuid = discover_directories(_directories, my.product_dir,\
                 my.product_winpath, "src", my.uuid)
 
-            discover_files(_files, my.product_dir, my.product_prefix,\
-                my.product_winpath, "src", "true")
+            get_files(_files, my.product_dir, my.product_prefix, "src",\
+                "true", "true", "true")
 
             if (is_library(my.product))
-                define my.include_prefix = "../../../.."
+                define my.include_prefix = "../../../../include"
                 define my.include_path = "$(my.project_path)/include"
                 define my.include_dir = open_directory(my.include_path)
                 define my.include_winpath = "include"
@@ -302,8 +280,8 @@ function emit_filter(repository, product, vs_version, project_path)
                 my.uuid = discover_directories(_directories, my.include_dir,\
                     my.include_winpath, my.include_winpath, my.uuid)
 
-                discover_files(_files, my.include_dir, my.include_prefix,\
-                    my.include_winpath, my.include_winpath, "true")
+                get_files(_files, my.include_dir, my.include_prefix,\
+                    my.include_winpath, "true", "true", "true")
             endif
 
 
@@ -317,8 +295,8 @@ function emit_filter(repository, product, vs_version, project_path)
 
                 my.uuid = filter_add(_directories, my.resources_winpath, my.uuid)
 
-                discover_files(_files, my.resources_dir, my.resources_prefix,\
-                    "", my.resources_winpath, "false")
+                get_files(_files, my.resources_dir, my.resources_prefix,\
+                    my.resources_winpath, "false", "true", "true")
             endif
 
             if (requires_threadsafe_statistics(my.repository, my.product,\
