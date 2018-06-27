@@ -112,19 +112,24 @@
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
-      <!-- boost -->
-      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-
       <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
-      <flag name="Wno-long-long" comment="Allow use of C99 'long long' type." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
+      <flag name="Wno-long-long" comment="Allow use of C99 'long long' type." context="c" />
+      <flag name="Wno-comment" comment="Allow for multi-line commenting." context="c++" />
+      <flag name="Wno-type-limits" comment="Disallow warning always true conditions related to types (allows generalization related to constants)." context="c++" />
+
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
       <flag name="fno-var-tracking-assignments" compiler="gcc" comment="Limit delays and warnings." context="c++" />
 
@@ -341,18 +346,23 @@
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" />
+      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
+      <!-- <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
@@ -513,17 +523,22 @@
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
+      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
@@ -730,15 +745,20 @@
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
@@ -905,18 +925,23 @@
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" />
+      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
+      <!-- <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
@@ -1067,20 +1092,25 @@
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
+      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
 
       <!-- bx -->
       <flag name="Wno-unused-parameter" comment="Clean up bx generated code." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
@@ -1317,14 +1347,19 @@
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
@@ -1475,18 +1510,23 @@
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" />
+      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
+      <!-- <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
@@ -1675,17 +1715,22 @@
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
+      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
@@ -1843,18 +1888,23 @@
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
       <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
 
       <!-- boost -->
-      <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" />
-      <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" />
+      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
+      <!-- <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <flag name="fvisibility-hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
