@@ -454,7 +454,7 @@ AS_CASE([${$(my.symbol)}], [yes],
 .   if (is_empty(my.symbol))
 AM_ICONV
 AC_SUBST([iconv_CPPFLAGS], [${INCICONV}])
-AC_SUBST([iconv_SYS_CPPFLAGS], [$(substitute_system_include("INCICONV"))])
+AC_SUBST([iconv_ISYS_CPPFLAGS], [$(substitute_system_include("INCICONV"))])
 AC_SUBST([iconv_LIBS], [${LIBICONV}])
 AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
 AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
@@ -462,7 +462,7 @@ AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
 AS_CASE([${$(my.symbol)}], [yes],
     AM_ICONV
     AC_SUBST([iconv_CPPFLAGS], [${INCICONV}])
-    AC_SUBST([iconv_SYS_CPPFLAGS], [$(substitute_system_include("INCICONV"))])
+    AC_SUBST([iconv_ISYS_CPPFLAGS], [$(substitute_system_include("INCICONV"))])
     AC_SUBST([iconv_LIBS], [${LIBICONV}])
     AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}]))
@@ -490,7 +490,7 @@ AS_CASE([${$(my.symbol)}], [yes],
 .
 $(my.indent_prefix)$(my.prefix_bracket)AX_$(my.uname)(
     $(my.indent_prefix)[AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.uname)_CPPFLAGS}])
-     $(my.indent_prefix)AC_SUBST([$(my.cname)_SYS_CPPFLAGS], [$(substitute_system_include("$(my.uname)_CPPFLAGS"))])
+     $(my.indent_prefix)AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [$(substitute_system_include("$(my.uname)_CPPFLAGS"))])
 .   if (my.cname = "pthread")
      $(my.indent_prefix)AC_SUBST([$(my.cname)_LIBS], [-lpthread])
 .   else
@@ -745,7 +745,7 @@ AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
 AS_CASE([${CC}], [$(my.compiler_pattern)],
     [AX_BOOST_BASE([$(my.version)],
         [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
-         AC_SUBST([boost_SYS_CPPFLAGS], [$(substitute_system_include("BOOST_CPPFLAGS"))])
+         AC_SUBST([boost_ISYS_CPPFLAGS], [$(substitute_system_include("BOOST_CPPFLAGS"))])
          AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
          AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
          AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
@@ -804,30 +804,51 @@ AS_CASE([${$(my.symbol)}], [yes],
 .   endif
 .
 .   if (is_empty(my.symbol))
-PKG_CHECK_MODULES([$(my.cname)], [$(my.check)])
+PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
+    [$(my.cname)_INCLUDEDIR="`pkg-config --variable=includedir "$(my.check)" 2>/dev/null`"
+     $(my.cname)_OTHER_CFLAGS="`pkg-config --cflags-only-other "$(my.check)" 2>/dev/null`"],
+    [$(my.cname)_INCLUDEDIR=""
+     $(my.cname)_OTHER_CFLAGS=""])
 AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
 AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
-AC_SUBST([$(my.cname)_SYS_CPPFLAGS], [$(substitute_system_include("$(my.cname)_CFLAGS"))])
+AS_IF([test x${$(my.cname)_INCLUDEDIR} != "x"],
+    [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [-isystem${$(my.cname)_INCLUDEDIR} ${$(my.cname)_OTHER_CFLAGS}])],
+    [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [${$(my.cname)_OTHER_CFLAGS}])])
 AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
+AC_MSG_NOTICE([$(my.cname)_ISYS_CPPFLAGS : ${$(my.cname)_ISYS_CPPFLAGS}])
 AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
 .   elsif (is_empty(my.dependency.extract))
 AS_CASE([${$(my.symbol)}], [yes],
-    [PKG_CHECK_MODULES([$(my.cname)], [$(my.check)])
+    [PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
+        [$(my.cname)_INCLUDEDIR="`pkg-config --variable=includedir "$(my.check)" 2>/dev/null`"
+         $(my.cname)_OTHER_CFLAGS="`pkg-config --cflags-only-other "$(my.check)" 2>/dev/null`"],
+        [$(my.cname)_INCLUDEDIR=""
+         $(my.cname)_OTHER_CFLAGS=""])
      AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
      AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
-     AC_SUBST([$(my.cname)_SYS_CPPFLAGS], [$(substitute_system_include("$(my.cname)_CFLAGS"))])
+     AS_IF([test x${$(my.cname)_INCLUDEDIR} != "x"],
+        [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [-isystem${$(my.cname)_INCLUDEDIR} ${$(my.cname)_OTHER_CFLAGS}])],
+        [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [${$(my.cname)_OTHER_CFLAGS}])])
      AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
+     AC_MSG_NOTICE([$(my.cname)_ISYS_CPPFLAGS : ${$(my.cname)_ISYS_CPPFLAGS}])
      AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
     [AC_SUBST([$(my.cname)_PKG], [])])
 .   else
 AS_CASE([${$(my.symbol)}], [yes],
     [PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
-        [$(my.symbol)="`pkg-config --variable=$(my.dependency.extract) $(my.name)`"],
-        [$(my.symbol)="$(my.default)"])
+        [$(my.cname)_INCLUDEDIR="`pkg-config --variable=includedir "$(my.check)" 2>/dev/null`"
+         $(my.cname)_OTHER_CFLAGS="`pkg-config --cflags-only-other "$(my.check)" 2>/dev/null`"
+         $(my.symbol)="`pkg-config --variable=$(my.dependency.extract) "$(my.check)" 2>/dev/null`"],
+        [$(my.cname)_INCLUDEDIR=""
+         $(my.cname)_OTHER_CFLAGS=""
+         $(my.symbol)="$(my.default)"])
      AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
      AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
-     AC_SUBST([$(my.cname)_SYS_CPPFLAGS], [$(substitute_system_include("$(my.cname)_CFLAGS"))])
+     AS_IF([test x${$(my.cname)_INCLUDEDIR} != "x"],
+        [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [-isystem${$(my.cname)_INCLUDEDIR} ${$(my.cname)_OTHER_CFLAGS}])],
+        [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [${$(my.cname)_OTHER_CFLAGS}])])
      AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
+     AC_MSG_NOTICE([$(my.cname)_ISYS_CPPFLAGS : ${$(my.cname)_ISYS_CPPFLAGS}])
      AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
     [AC_SUBST([$(my.cname)_PKG], [])])
 .   endif
