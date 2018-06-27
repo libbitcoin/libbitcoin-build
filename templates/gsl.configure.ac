@@ -10,6 +10,10 @@
 # Functions
 ###############################################################################
 
+function substitute_system_include(variable_name)
+    return "`echo ${$(my.variable_name)} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`"
+endfunction
+
 function format_template_files(configure)
     define my.configure = format_template_files.configure
     define my.template_files = ""
@@ -217,6 +221,9 @@ AC_PROG_CXX
 
 # Enable shared libraries if available, and static if they don't conflict.
 AC_PROG_LIBTOOL
+
+# Enable sed for substitution.
+AC_PROG_SED
 
 # Compute the canonical host-system type variable host, including host_os.
 AC_CANONICAL_HOST
@@ -447,6 +454,7 @@ AS_CASE([${$(my.symbol)}], [yes],
 .   if (is_empty(my.symbol))
 AM_ICONV
 AC_SUBST([iconv_CPPFLAGS], [${INCICONV}])
+AC_SUBST([iconv_SYS_CPPFLAGS], [$(substitute_system_include("INCICONV"))])
 AC_SUBST([iconv_LIBS], [${LIBICONV}])
 AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
 AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
@@ -454,6 +462,7 @@ AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
 AS_CASE([${$(my.symbol)}], [yes],
     AM_ICONV
     AC_SUBST([iconv_CPPFLAGS], [${INCICONV}])
+    AC_SUBST([iconv_SYS_CPPFLAGS], [$(substitute_system_include("INCICONV"))])
     AC_SUBST([iconv_LIBS], [${LIBICONV}])
     AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}]))
@@ -481,6 +490,7 @@ AS_CASE([${$(my.symbol)}], [yes],
 .
 $(my.indent_prefix)$(my.prefix_bracket)AX_$(my.uname)(
     $(my.indent_prefix)[AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.uname)_CPPFLAGS}])
+     $(my.indent_prefix)AC_SUBST([$(my.cname)_SYS_CPPFLAGS], [$(substitute_system_include("$(my.uname)_CPPFLAGS"))])
 .   if (my.cname = "pthread")
      $(my.indent_prefix)AC_SUBST([$(my.cname)_LIBS], [-lpthread])
 .   else
@@ -735,6 +745,7 @@ AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
 AS_CASE([${CC}], [$(my.compiler_pattern)],
     [AX_BOOST_BASE([$(my.version)],
         [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
+         AC_SUBST([boost_SYS_CPPFLAGS], [$(substitute_system_include("BOOST_CPPFLAGS"))])
          AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
          AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
          AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
@@ -796,6 +807,7 @@ AS_CASE([${$(my.symbol)}], [yes],
 PKG_CHECK_MODULES([$(my.cname)], [$(my.check)])
 AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
 AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
+AC_SUBST([$(my.cname)_SYS_CPPFLAGS], [$(substitute_system_include("$(my.cname)_CFLAGS"))])
 AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
 AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
 .   elsif (is_empty(my.dependency.extract))
@@ -803,6 +815,7 @@ AS_CASE([${$(my.symbol)}], [yes],
     [PKG_CHECK_MODULES([$(my.cname)], [$(my.check)])
      AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
      AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
+     AC_SUBST([$(my.cname)_SYS_CPPFLAGS], [$(substitute_system_include("$(my.cname)_CFLAGS"))])
      AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
      AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
     [AC_SUBST([$(my.cname)_PKG], [])])
@@ -813,6 +826,7 @@ AS_CASE([${$(my.symbol)}], [yes],
         [$(my.symbol)="$(my.default)"])
      AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
      AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
+     AC_SUBST([$(my.cname)_SYS_CPPFLAGS], [$(substitute_system_include("$(my.cname)_CFLAGS"))])
      AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
      AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
     [AC_SUBST([$(my.cname)_PKG], [])])
