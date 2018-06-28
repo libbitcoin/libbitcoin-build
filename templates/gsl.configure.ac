@@ -233,6 +233,9 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Check for pkg-config.
 PKG_PROG_PKG_CONFIG
+AS_IF([test -n "$PKG_CONFIG"], [],
+    [AC_MSG_ERROR([pkg-config is required but was not found.])])
+
 
 .heading2("Declare environment variables that affect the build.")
 AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
@@ -457,6 +460,7 @@ AC_SUBST([iconv_CPPFLAGS], [${INCICONV}])
 AC_SUBST([iconv_ISYS_CPPFLAGS], [$(substitute_system_include("INCICONV"))])
 AC_SUBST([iconv_LIBS], [${LIBICONV}])
 AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
+AC_MSG_NOTICE([$(my.cname)_ISYS_CPPFLAGS : ${$(my.cname)_ISYS_CPPFLAGS}])
 AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
 .   else
 AS_CASE([${$(my.symbol)}], [yes],
@@ -465,6 +469,7 @@ AS_CASE([${$(my.symbol)}], [yes],
     AC_SUBST([iconv_ISYS_CPPFLAGS], [$(substitute_system_include("INCICONV"))])
     AC_SUBST([iconv_LIBS], [${LIBICONV}])
     AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
+    AC_MSG_NOTICE([$(my.cname)_ISYS_CPPFLAGS : ${$(my.cname)_ISYS_CPPFLAGS}])
     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}]))
 .   endif
 
@@ -496,7 +501,8 @@ $(my.indent_prefix)$(my.prefix_bracket)AX_$(my.uname)(
 .   else
      $(my.indent_prefix)AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIBS}])
 .   endif
-     $(my.indent_prefix)AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])],
+     $(my.indent_prefix)AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
+     $(my.indent_prefix)AC_MSG_NOTICE([$(my.cname)_ISYS_CPPFLAGS : ${$(my.cname)_ISYS_CPPFLAGS}])],
     $(my.indent_prefix)[AC_MSG_ERROR([$(my.cname) library is required but was not found.])])$(my.suffix_bracket)$(my.trailing_indicator)
 .endmacro # emit_m4_ax_cpp_libs_macro
 .
@@ -748,6 +754,7 @@ AS_CASE([${CC}], [$(my.compiler_pattern)],
          AC_SUBST([boost_ISYS_CPPFLAGS], [$(substitute_system_include("BOOST_CPPFLAGS"))])
          AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
          AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
+         AC_MSG_NOTICE([boost_ISYS_CPPFLAGS : ${boost_ISYS_CPPFLAGS}])
          AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
         [AC_MSG_ERROR([Boost $(my.version) or later is required but was not found.])])])
 
@@ -805,8 +812,8 @@ AS_CASE([${$(my.symbol)}], [yes],
 .
 .   if (is_empty(my.symbol))
 PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
-    [$(my.cname)_INCLUDEDIR="`pkg-config --variable=includedir "$(my.check)" 2>/dev/null`"
-     $(my.cname)_OTHER_CFLAGS="`pkg-config --cflags-only-other "$(my.check)" 2>/dev/null`"],
+    [$(my.cname)_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "$(my.check)" 2>/dev/null`"
+     $(my.cname)_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "$(my.check)" 2>/dev/null`"],
     [$(my.cname)_INCLUDEDIR=""
      $(my.cname)_OTHER_CFLAGS=""])
 AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
@@ -820,8 +827,8 @@ AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
 .   elsif (is_empty(my.dependency.extract))
 AS_CASE([${$(my.symbol)}], [yes],
     [PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
-        [$(my.cname)_INCLUDEDIR="`pkg-config --variable=includedir "$(my.check)" 2>/dev/null`"
-         $(my.cname)_OTHER_CFLAGS="`pkg-config --cflags-only-other "$(my.check)" 2>/dev/null`"],
+        [$(my.cname)_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "$(my.check)" 2>/dev/null`"
+         $(my.cname)_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "$(my.check)" 2>/dev/null`"],
         [$(my.cname)_INCLUDEDIR=""
          $(my.cname)_OTHER_CFLAGS=""])
      AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
@@ -836,9 +843,9 @@ AS_CASE([${$(my.symbol)}], [yes],
 .   else
 AS_CASE([${$(my.symbol)}], [yes],
     [PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
-        [$(my.cname)_INCLUDEDIR="`pkg-config --variable=includedir "$(my.check)" 2>/dev/null`"
-         $(my.cname)_OTHER_CFLAGS="`pkg-config --cflags-only-other "$(my.check)" 2>/dev/null`"
-         $(my.symbol)="`pkg-config --variable=$(my.dependency.extract) "$(my.check)" 2>/dev/null`"],
+        [$(my.cname)_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "$(my.check)" 2>/dev/null`"
+         $(my.cname)_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "$(my.check)" 2>/dev/null`"
+         $(my.symbol)="`$PKG_CONFIG --variable=$(my.dependency.extract) "$(my.check)" 2>/dev/null`"],
         [$(my.cname)_INCLUDEDIR=""
          $(my.cname)_OTHER_CFLAGS=""
          $(my.symbol)="$(my.default)"])
