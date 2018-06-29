@@ -396,13 +396,21 @@ AC_CHECK_HEADERS([$(my.define.header)],
 .   if (is_empty(my.symbol))
 AX_JAVA_DEVEL
 AC_SUBST([$(my.cname)_CPPFLAGS], [${JAVA_CPPFLAGS}])
+AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [$(substitute_system_include("JAVA_CPPFLAGS"))])
 AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
 .   else
 AS_CASE([${$(my.symbol)}], [yes],
     [AX_JAVA_DEVEL
      AC_SUBST([$(my.cname)_CPPFLAGS], [${JAVA_CPPFLAGS}])
+     AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [$(substitute_system_include("JAVA_CPPFLAGS"))])
      AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])])
 .   endif
+
+AS_CASE([${enable_isystem}],[yes],
+    [AC_SUBST([$(my.cname)_BUILD_CPPFLAGS], [${$(my.cname)_ISYS_CPPFLAGS}])],
+    [AC_SUBST([$(my.cname)_BUILD_CPPFLAGS], [${$(my.cname)_CPPFLAGS}])])
+
+AC_MSG_NOTICE([$(my.cname)_BUILD_CPPFLAGS : ${$(my.cname)_BUILD_CPPFLAGS}])
 
 .endmacro
 .
@@ -427,14 +435,22 @@ AS_CASE([${$(my.symbol)}], [yes],
 AM_PATH_PYTHON([$(my.version)],
     [AX_PYTHON_DEVEL
      AC_SUBST([$(my.cname)_CPPFLAGS], [${PYTHON_CPPFLAGS}])
+     AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [$(substitute_system_include("PYTHON_CPPFLAGS"))])
      AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])])
 .   else
 AS_CASE([${$(my.symbol)}], [yes],
     [AM_PATH_PYTHON([$(my.version)],
         [AX_PYTHON_DEVEL
          AC_SUBST([$(my.cname)_CPPFLAGS], [${PYTHON_CPPFLAGS}])
+         AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [$(substitute_system_include("PYTHON_CPPFLAGS"))])
          AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])])])
 .   endif
+
+AS_CASE([${enable_isystem}],[yes],
+    [AC_SUBST([$(my.cname)_BUILD_CPPFLAGS], [${$(my.cname)_ISYS_CPPFLAGS}])],
+    [AC_SUBST([$(my.cname)_BUILD_CPPFLAGS], [${$(my.cname)_CPPFLAGS}])])
+
+AC_MSG_NOTICE([$(my.cname)_BUILD_CPPFLAGS : ${$(my.cname)_BUILD_CPPFLAGS}])
 
 .endmacro
 .
