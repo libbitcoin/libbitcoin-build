@@ -74,7 +74,7 @@ function job_install(job, restrict_parallel)
     define my.parallel = job_install.restrict_parallel ?? "PARALLEL=1 " ? ""
     define my.sudo = is_true(my.job.sudo) ?? "sudo " ? ""
     define my.compiler = "CC=$CC CXX=$CXX "
-    return "$(my.sudo)$(my.compiler)$(my.parallel)./install.sh $(job_options(my.job))"
+    return "$(my.sudo)$(my.compiler)$(my.parallel)./install.sh --enable-isystem $(job_options(my.job))"
 endfunction
 
 function job_predicate_link(job)
