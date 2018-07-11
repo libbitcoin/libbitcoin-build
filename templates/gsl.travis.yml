@@ -21,6 +21,15 @@ function apt_get(name, system)
     return my.get
 endfunction
 
+function fetch_prefix_value(job)
+    define my.job = fetch_prefix_value.job
+    define my.match_option = my.job->option(starts_with(option.value, "--prefix="))?
+    if (defined(my.match_option))
+        define my.value_length = string.length(my.match_option.value)
+        return right(my.match_option.value, my.value_length - 9)
+    endif
+endfunction
+
 # We must do this because lcov is uses exclusions only.
 function job_coverage_exclusions(job, repository)
     define my.job = job_coverage_exclusions.job
@@ -74,7 +83,7 @@ function job_install(job, restrict_parallel)
     define my.parallel = job_install.restrict_parallel ?? "PARALLEL=1 " ? ""
     define my.sudo = is_true(my.job.sudo) ?? "sudo " ? ""
     define my.compiler = "CC=$CC CXX=$CXX "
-    return "$(my.sudo)$(my.compiler)$(my.parallel)./install.sh $(job_options(my.job))"
+    return "$(my.sudo)$(my.compiler)$(my.parallel)./install.sh --enable-isystem $(job_options(my.job))"
 endfunction
 
 function job_predicate_link(job)
@@ -183,9 +192,8 @@ endfunction
 .macro initialize_job(job)
 .   define my.job = initialize_job.job
 .   define has_addons = (my.job.system = "linux") &\
-        ((is_versioned_compiler(my.job) | is_coverage_job(my.job) |\
-        count(my.job.get) > 0) | (is_compiler_clang(my.job) &\
-        is_versioned_compiler(my.job)))
+        ((is_versioned_compiler(my.job) | count(my.job.get) > 0) |\
+         (is_compiler_clang(my.job) & is_versioned_compiler(my.job)))
         - os: $(my.job.system)
           compiler: $(my.job.compiler)
           env: LINK=$(my.job.link)
@@ -196,13 +204,10 @@ endfunction
               sources:
                 - sourceline: 'ppa:h-rayflood/llvm'
 .       endif
-.       if (is_versioned_compiler(my.job) | is_coverage_job(my.job) | count(my.job.get) > 0)
+.       if (is_versioned_compiler(my.job) | count(my.job.get) > 0)
               packages:
 .           if (is_versioned_compiler(my.job))
                 - $(compiler_package_name(my.job))-$(get_compiler_version(my.job))
-.           endif
-.           if (is_coverage_job(my.job))
-                - lcov
 .           endif
 .           for my.job.get as _get
                 - $(_get.name)
@@ -255,7 +260,15 @@ matrix:
 .macro code_coverage(repository)
 .   define my.repository = code_coverage.repository
 .   if (count_matrix_coverage_job(my.repository->matrix) > 0)
-    # Install coveralls and current lcov.
+    # Download and unpack lcov > 1.10
+.      for my.repository->matrix.job as _job where is_coverage_job(_job)
+.           define my.job_condition = condition(job_predicate(_job))
+    - $(my.job_condition) wget https://github.com/linux-test-project/lcov/releases/download/v1.12/lcov-1.12.tar.gz; fi
+    - $(my.job_condition) tar xzf lcov-1.12.tar.gz; fi
+    - $(my.job_condition) cd lcov-1.12; PREFIX="$(fetch_prefix_value(_job))" make install; cd ..; fi
+.      endfor
+
+    # Install coveralls.
 .      for my.repository->matrix.job as _job where is_coverage_job(_job)
 .           define my.job_condition = condition(job_predicate(_job))
     - $(my.job_condition) gem install coveralls-lcov; fi
@@ -265,9 +278,9 @@ matrix:
 .      for my.repository->matrix.job as _job where is_coverage_job(_job)
 .           define my.job_condition = condition(job_predicate(_job))
 .           define my.exclusions = job_coverage_exclusions(_job, my.repository)
-    - $(my.job_condition) lcov --directory . --capture --output-file coverage.info; fi
-    - $(my.job_condition) lcov --remove coverage.info $(my.exclusions) --output-file coverage.info; fi
-    - $(my.job_condition) lcov --list coverage.info; fi
+    - $(my.job_condition) $(fetch_prefix_value(_job))/usr/bin/lcov --directory . --capture --output-file coverage.info; fi
+    - $(my.job_condition) $(fetch_prefix_value(_job))/usr/bin/lcov --remove coverage.info $(my.exclusions) --output-file coverage.info; fi
+    - $(my.job_condition) $(fetch_prefix_value(_job))/usr/bin/lcov --list coverage.info; fi
 .       endfor
 
     # Upload coverage info to coveralls service (--repo-token <private coveralls repo token>).

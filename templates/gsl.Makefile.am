@@ -345,7 +345,7 @@ function define_cpp_lib_variables(variables, library, make, configure, repositor
             my.variables.libs += " ${$(my.cname)_LIBS}"
         endif
         if (my.is_boost | my.is_common | my.is_language | my.is_package)
-            my.variables.cpp_flags += " ${$(my.cname)_CPPFLAGS}"
+            my.variables.cpp_flags += " ${$(my.cname)_BUILD_CPPFLAGS}"
         endif
         if (0)
             my.variables.ccc_flags += " ${$(my.cname)_CFLAGS}"
