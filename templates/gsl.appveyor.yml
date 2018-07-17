@@ -170,10 +170,9 @@ endfunction
 .   output(my.out_file)
 .   copyleft(_repository.name)
 .   define my.matrix = _repository->matrix
-version: 3.0.0.{build}-{branch}
+version: $(_repository.version).{build}-{branch}
 
-os:
-  - Visual Studio 2013
+image: Visual Studio 2013
 
 clone_folder: c:\\git\\$(_repository.name)
 skip_tags: true
