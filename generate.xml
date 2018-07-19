@@ -110,6 +110,7 @@
           <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.16" />
       </dependency>
 
+      <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -121,19 +122,18 @@
       <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
 
-      <flag name="Wno-long-long" comment="Allow use of C99 'long long' type." context="c" />
-      <flag name="Wno-comment" comment="Allow for multi-line commenting." context="c++" />
-      <flag name="Wno-type-limits" comment="Disallow warning always true conditions related to types (allows generalization related to constants)." context="c++" />
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
-      <flag name="fno-var-tracking-assignments" compiler="gcc" comment="Limit delays and warnings." context="c++" />
 
-      <!--<template name="CompileMe.am" />-->
+      <!-- Project specific flags -->
+      <flag name="Wno-long-long" comment="Allow use of C99 'long long' type." context="c" />
+      <flag name="Wno-type-limits" comment="Ignore always true or false conditions due to the limited range of the data type." context="c++" />
+      <flag name="fno-var-tracking-assignments" compiler="gcc" comment="Limit delays and warnings." context="c++" />
     </configure>
 
     <make>
@@ -345,6 +345,7 @@
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
+      <!-- General flags -->
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
@@ -354,16 +355,13 @@
       <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
 
-      <!-- boost -->
-      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
-      <!-- <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" /> -->
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
     <make>
@@ -520,6 +518,7 @@
       <dependency name="bitcoin" version="4.0.0" />
       <dependency name="bitcoin-protocol" version="4.0.0" />
 
+      <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -531,15 +530,13 @@
       <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
 
-      <!-- boost -->
-      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
     <make>
@@ -742,6 +739,7 @@
       <dependency name="java" option="java" />
       <dependency name="python" version="2.7" option="python" />
 
+      <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -753,13 +751,13 @@
       <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
 
-      <!-- boost -->
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
+
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
     <make>
@@ -922,6 +920,7 @@
       </dependency>
       <dependency name="bitcoin" version="4.0.0" />
 
+      <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -933,16 +932,13 @@
       <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
 
-      <!-- boost -->
-      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
-      <!-- <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" /> -->
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
     <make>
@@ -1089,6 +1085,7 @@
       <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
 
+      <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -1100,18 +1097,16 @@
       <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
-
-      <!-- boost -->
-      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
-
-      <!-- bx -->
-      <flag name="Wno-unused-parameter" comment="Clean up bx generated code." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
+
+      <!-- Project specific flags -->
+      <flag name="Wno-unused-parameter" comment="Clean up bx generated code." context="c++" />
     </configure>
 
     <make>
@@ -1344,6 +1339,7 @@
       </dependency>
       <dependency name="bitcoin" version="4.0.0" />
 
+      <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -1355,12 +1351,13 @@
       <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
     <make>
@@ -1507,6 +1504,7 @@
       <dependency name="bitcoin-blockchain" version="4.0.0"  />
       <dependency name="bitcoin-network" version="4.0.0"  />
 
+      <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -1518,16 +1516,13 @@
       <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
 
-      <!-- boost -->
-      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
-      <!-- <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" /> -->
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
     <make>
@@ -1712,6 +1707,7 @@
       </dependency>
       <dependency name="bitcoin" version="4.0.0"  />
 
+      <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -1723,15 +1719,13 @@
       <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
 
-      <!-- boost -->
-      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
     <make>
@@ -1885,6 +1879,7 @@
       <dependency name="bitcoin-node" version="4.0.0" />
       <dependency name="bitcoin-protocol" version="4.0.0" />
 
+      <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
@@ -1896,16 +1891,13 @@
       <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
 
-      <!-- boost -->
-      <!-- <flag name="Wno-deprecated-declarations" compiler="gcc" comment="Clean up boost 1.55 headers." context="c++" /> -->
-      <!-- <flag name="Wno-redeclared-class-member" compiler="clang" comment="Clean up boost 1.55 headers." context="c++" /> -->
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-      <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
     </configure>
 
     <make>
