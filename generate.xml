@@ -1906,6 +1906,14 @@
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
       <flag name="fvisibility-inlines-hidden" compiler="gcc" comment="Hide inlines from external libs." context="c++" />
+
+      <!-- mbedtls and mongoose build support -->
+      <flag name="std=c99" comment="Clean up mbedtls and mongoose build." context="c" />
+      <flag name="Wno-pedantic" comment="Clean up mbedtls and mongoose build." context="c" />
+      <flag name="Wno-format" comment="Clean up mbedtls and mongoose build." context="c" />
+      <flag name="Wno-comment" comment="Clean up mbedtls and mongoose build." context="c" />
+      <flag name="Wno-long-long" comment="Clean up mbedtls and mongoose build." context="c" />
+      <flag name="Wno-overlength-strings" comment="Clean up mbedtls and mongoose build." context="c" />
     </configure>
 
     <make>
@@ -1925,6 +1933,9 @@
         <library name="bitcoin-protocol" />
         <library name="bitcoin-node" />
         <headers path="include" />
+        <!-- for mbedtls and mongoose C project support -->
+        <headers path="src/web/external/mbedtls/include" />
+        <option value="CFLAGS='-std=c99 -Wno-pedantic -Wno-format -Wno-comment -Wno-long-long -Wno-overlength-strings'" />
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-server-test" test="true" option="tests" uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea" >
