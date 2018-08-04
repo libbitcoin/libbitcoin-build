@@ -321,6 +321,30 @@ endfunction
 # Build utilities.
 #------------------------------------------------------------------------------
 
+function global.cumulative_install(list, repositories, repository)
+    define my.list = cumulative_install.list
+    define my.repositories = cumulative_install.repositories
+    define my.repository = cumulative_install.repository
+
+    for my.repository->install.build as _build
+        for my.repositories.repository as _repository
+            if (!(_repository.name = my.repository.name) &\
+                 (_repository->package.library = _build.name))
+                cumulative_install(my.list, my.repositories, _repository)
+            endif
+        endfor
+
+        if (count(my.list.build, (count.name = _build.name)) = 0)
+            copy _build to my.list
+        endif
+    endfor
+endfunction
+
+function global.have_build(install, name)
+    define my.install = have_build.install
+    return defined(my.install->build(starts_with(build.name, my.name)))
+endfunction
+
 function global.is_icu_build(build)
     define my.build = is_icu_build.build
     return starts_with(my.build.name, "icu")
