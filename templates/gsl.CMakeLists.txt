@@ -244,7 +244,8 @@ function emit_product_target(repository, product)
             define my.product_path = append_path(my.repository_path,\
                 my.product.path)
             define my.product_dir = open_directory(my.product_path)
-            get_files(_files, my.product_dir, my.product.path, "true")
+            get_files(_files, my.product_dir, my.product.path, "true", "true",\
+                "true")
         endif
 
         emit_source_project(my.repository, my.product, _files, "../../",\
@@ -657,7 +658,7 @@ $(my.line_prefix)target_include_directories( $(my.target_name) PRIVATE
 .   define my.libraries = emit_include_directories.libraries
 .
 .   if (count(my.libraries.library, !is_boost_lib_dependency(count)) > 0)
-include_directories(
+include_directories( SYSTEM
 .       for my.libraries.library as _library\
             where !is_boost_lib_dependency(_library)
 .
@@ -715,7 +716,7 @@ $(my.line_prefix)target_link_libraries( $(my.target_name)
 add_definitions(
 .       for my.definitions.element as _define
 .
-    $(_devine.value)$(last() ?? " )" ? "")
+    $(_define.value)$(last() ?? " )" ? "")
 .       endfor
 
 .   endif
