@@ -223,9 +223,8 @@ function emit_products(repository)
         endif
     endfor
 
-    # emit 'test'
-    # for my.repository->make.product as _product where defined(_product.path)
-    # endfor
+    # emit install
+    emit_install(my.repository)
 endfunction
 
 function emit_product_target(repository, product)
@@ -395,6 +394,7 @@ function emit_target_property_initialization(repository)
     # NOTE: this is an assumption that all projects generated include a library
     # which is linked by all included projects.  Generalization requires
     # chasing dependencies.
+    emit_configure_files(my.repository)
     emit_include_directories(my.library)
     emit_link_directories(my.library)
     emit_library_params(my.repository, my.library)
@@ -452,6 +452,13 @@ if (MSVC)
 else ()
   set( CANONICAL_LIB_NAME $(my.package.library) )
   find_package( PkgConfig REQUIRED )
+
+  set( prefix "${CMAKE_PREFIX_PATH}" )
+  set( exec_prefix "\\\${prefix}" )
+  set( libdir "\\\${exec_prefix}/lib" )
+  set( includedir "\\\${exec_prefix}/include" )
+
+  set( PACKAGE_VERSION "$(my.repository.version)" )
 endif ()
 
 .
@@ -610,6 +617,27 @@ $(my.line_prefix)add_test( NAME $(target_name(my.product, my.repository)) COMMAN
 .   endif
 .endmacro # emit_source_project
 .
+.macro emit_product_install(repository, product)
+.   define my.repository = emit_product_install.repository
+.   define my.product = emit_product_install.product
+.   define my.option = find_option_symbol(my.product, my.repository->configure)?
+.
+.   if (!defined(my.option))
+.       if ((my.product.prefix = "lib") & (my.product.path = "src"))
+install( TARGETS \${CANONICAL_LIB_NAME}
+.       elsif ((my.product.prefix = "lib") | (my.product.prefix = "bin"))
+install( TARGETS $(target_name(my.product, my.repository))
+.       else
+.           abort("Unexpected product.prefix : $(my.product.prefix)")
+.       endif
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    PUBLIC_HEADER DESTINATION include )
+
+.   endif
+.endmacro # emit_product_install
+.
 .macro emit_public_target_include_directories(repository, product, target_name,\
     path_prefix, line_prefix)
 .   define my.repository = emit_public_target_include_directories.repository
@@ -653,6 +681,15 @@ $(my.line_prefix)target_include_directories( $(my.target_name) PRIVATE
 
 .   endif
 .endmacro # emit_private_target_include_directories
+.
+.macro emit_configure_files(repository)
+.   define my.repository = emit_configure_files.repository
+.
+configure_file(
+  "../../$(my.repository.name).pc.in"
+  "$(my.repository.name).pc" @ONLY )
+
+.endmacro # emit_configure_files
 .
 .macro emit_include_directories(libraries)
 .   define my.libraries = emit_include_directories.libraries
@@ -734,6 +771,34 @@ target_compile_definitions( $(target_name) PUBLIC
 
 .   endif
 .endmacro # emit_target_definitions
+.
+.macro emit_install(repository)
+.   define my.repository = emit_install.repository
+.
+install( FILES
+    "\${CMAKE_CURRENT_BINARY_DIR}/$(my.repository.name).pc"
+    DESTINATION lib/pkgconfig )
+
+.# TODO: construct from product doc in loop below
+install( FILES
+    "../../AUTHORS"
+    "../../ChangeLog"
+    "../../COPYING"
+    "../../INSTALL"
+    "../../NEWS"
+    "../../README"
+    DESTINATION share/doc/$(my.repository.name) )
+
+install( DIRECTORY ../../include/
+    DESTINATION include )
+
+.   for my.repository->make.product as _product
+.       if ((_product.prefix = "bin") | (_product.prefix = "lib"))
+.           emit_product_install(my.repository, _product)
+.       endif
+.   endfor
+.
+.endmacro # emit_install
 .
 .endtemplate
 .template 0
