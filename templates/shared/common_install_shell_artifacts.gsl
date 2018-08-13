@@ -766,7 +766,7 @@ make_tests()
 
     # Build and run unit tests relative to the primary directory.
     # VERBOSE=1 ensures test runner output sent to console (gcc).
-    make_jobs $JOBS check "VERBOSE=1"
+    make_jobs false $JOBS check "VERBOSE=1"
     local RESULT=$?
 
     # Test runners emit to the test.log file.
@@ -948,7 +948,7 @@ build_from_tarball()
 
     push_obj_directory "$TARGET"
     configure_options "$PROJ_CONFIG_DIR" "${CONFIGURATION[@]}"
-    make_jobs $JOBS --silent
+    make_jobs true $JOBS --silent
     make install
     configure_links
 
@@ -1018,7 +1018,7 @@ build_from_github()
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
-  display_heading_message "Prepairing to build $REPO"
+    display_heading_message "Prepairing to build $REPO"
 
     # Build the local repository clone.
     make_project_directory "$REPO" $JOBS $TEST "${CONFIGURATION[@]}"
