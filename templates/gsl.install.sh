@@ -90,9 +90,7 @@ make_jobs()
     local JOBS=$2
     shift 2
 
-    #if [[ $PRECLEAN ]]; then
-    #    make clean
-    #fi
+    # ignore PRECLEAN parameter.
 
     # Avoid setting -j1 (causes problems on Travis).
     if [[ $JOBS > $SEQUENTIAL ]]; then
