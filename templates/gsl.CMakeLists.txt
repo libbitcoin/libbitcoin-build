@@ -568,9 +568,11 @@ find_package( $(my.dependency.name) $(my.dependency.version) )
 .
 .   if (is_empty(my.symbol))
 pkg_check_modules( $(my.dependency.name) REQUIRED "$(my.package_name) >= $(my.dependency.version)" )
+set( $(my.dependency.name)_PKG "$(my.package_name) >= $(my.dependency.version)" )
 .   else
 if ($(my.symbol))
     pkg_check_modules( $(my.dependency.name) REQUIRED "$(my.package_name) >= $(my.dependency.version)" )
+    set( $(my.dependency.name)_PKG "$(my.package_name) >= $(my.dependency.version)" )
 endif()
 .   endif
 
@@ -580,8 +582,16 @@ endif()
 .   define my.dependency = emit_pthread_dependency.dependency
 .   define my.configure = emit_pthread_dependency.configure
 .
+set( CMAKE_THREAD_PREFER_PTHREAD ON )
+set( THREADS_PREFER_PTHREAD_FLAG ON )
 find_package( Threads )
-set( pthread_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} )
+
+if ( Threads_FOUND )
+    # TODO: find proper detection - documentation on FindThreads appears incorrect.
+    set( pthread_CPPFLAGS "" )
+    set( pthread_LIBRARIES "-lpthread" )
+    set( pthread_LIBS "-lpthread" )
+endif()
 
 .endmacro # emit_pthread_dependency
 .
