@@ -550,10 +550,24 @@ find_package( $(my.dependency.name:neat) $(my.dependency.version) REQUIRED COMPO
     $(_element.name)$(last() ?? " )" ? "")
 .       endfor
 
+.       for my.features.element as _element
+set( $(my.dependency.name)_$(_element.name)_LIBS "-l$(my.dependency.name)_$(_element.name)" )
+.       endfor
+
 .   else
 find_package( $(my.dependency.name) $(my.dependency.version) )
 
 .   endif
+
+if (enable_ndebug)
+    set( $(my.dependency.name:neat)_LIBRARY_DIR "\${$(my.dependency.name:neat)_LIBRARY_DIR_DEBUG}" )
+else ()
+    set( $(my.dependency.name:neat)_LIBRARY_DIR "\${$(my.dependency.name:neat)_LIBRARY_DIR_RELEASE}" )
+endif()
+
+set( $(my.dependency.name)_CPPFLAGS "-I\${$(my.dependency.name:neat)_INCLUDE_DIR}" )
+set( $(my.dependency.name)_LDFLAGS "-L\${$(my.dependency.name:neat)_LIBRARY_DIR}" )
+
 .endmacro # emit_find_package_dependency
 .
 .macro emit_pkg_config_dependency(dependency, configure)
