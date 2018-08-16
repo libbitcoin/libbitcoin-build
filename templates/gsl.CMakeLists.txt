@@ -582,11 +582,11 @@ set( $(my.dependency.name)_LDFLAGS "-L\${$(my.dependency.name:neat)_LIBRARY_DIR}
 .
 .   if (is_empty(my.symbol))
 pkg_check_modules( $(my.dependency.name) REQUIRED "$(my.package_name) >= $(my.dependency.version)" )
-set( $(my.dependency.name)_PKG "$(my.package_name) >= $(my.dependency.version)" )
+set( $(my.dependency.name:c)_PKG "$(my.package_name) >= $(my.dependency.version)" )
 .   else
 if ($(my.symbol))
     pkg_check_modules( $(my.dependency.name) REQUIRED "$(my.package_name) >= $(my.dependency.version)" )
-    set( $(my.dependency.name)_PKG "$(my.package_name) >= $(my.dependency.version)" )
+    set( $(my.dependency.name:c)_PKG "$(my.package_name) >= $(my.dependency.version)" )
 endif()
 .   endif
 
