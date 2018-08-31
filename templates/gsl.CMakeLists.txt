@@ -34,6 +34,62 @@ function boost_component(name)
     endif
 endfunction
 
+function get_cmake_system_from_name(name, sentinel)
+    define my.result = my.sentinel
+
+    if (defined(my.name))
+        if (my.name = "android")
+            my.result = "ANDROID"
+        elsif (my.name = "linux")
+            my.result = "(${CMAKE_SYSTEM_NAME} MATCHES \"Linux\")"
+        elsif (my.name = "osx")
+            my.result = "(${CMAKE_SYSTEM_NAME} MATCHES \"Darwin\")"
+        elsif (my.name = "windows")
+            # NOTE: using compiler in place of system identifier
+            my.result = "MSVC"
+        endif
+    endif
+
+    return my.result
+endfunction
+
+function get_case_platform_include(dependency, sentinel)
+    define my.dependency = get_case_platform_include.dependency
+    define my.system_name = get_cmake_system_from_name(\
+        my.dependency.system, "")
+
+    return is_empty(my.system_name)\
+        ?? my.sentinel ?  "$(my.system_name)"
+endfunction
+
+function get_case_platform_exclude(dependency, sentinel)
+    define my.dependency = get_case_platform_exclude.dependency
+    define my.system_name = get_cmake_system_from_name(\
+        my.dependency.system_exclude, "")
+
+    return is_empty(my.system_name)\
+        ?? my.sentinel ?  "NOT $(my.system_name)"
+endfunction
+
+function get_case_platform(dependency, sentinel)
+    define my.dependency = get_case_platform.dependency
+    define my.system_include = get_case_platform_include(my.dependency, "")
+    define my.system_exclude = get_case_platform_exclude(my.dependency, "")
+    define my.case = my.sentinel
+
+    if (is_empty(my.system_include) & is_empty(my.system_exclude))
+        my.case = my.sentinel
+    elsif (is_empty(my.system_exclude))
+        my.case = my.system_include
+    elsif (is_empty(my.system_include))
+        my.case = my.system_exclude
+    else
+        my.case = "$(my.system_include) AND $(my.system_exclude)"
+    endif
+
+    return my.case
+endfunction
+
 ###
 ### utilities
 ###
@@ -184,11 +240,12 @@ function emit_dependencies(repository)
         elsif (is_java_dependency(_dependency))
         elsif (is_python_dependency(_dependency))
         elsif (is_package_dependency(_dependency))
-            emit_pkg_config_dependency(_dependency, my.repository->configure)
+            emit_find_dependency_option(_dependency, my.repository->configure, "")
         elsif (is_pthread_dependency(_dependency))
             emit_pthread_dependency(_dependency, my.repository->configure)
+        elsif (is_iconv_dependency(_dependency))
         else
-            # check_lib_dependency_conditional(_dependency, my.configure)
+            emit_find_dependency_option(_dependency, my.repository->configure, "")
         endif
     endfor
 endfunction
@@ -437,6 +494,8 @@ project($(my.repository.name) LANGUAGES C CXX)
 
 enable_testing()
 
+list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 .endmacro # emit_project_initialization
@@ -570,37 +629,21 @@ set( $(my.dependency.name)_LDFLAGS "-L\${$(my.dependency.name:neat)_LIBRARY_DIR}
 
 .endmacro # emit_find_package_dependency
 .
-.macro emit_pkg_config_dependency(dependency, configure)
-.   define my.dependency = emit_pkg_config_dependency.dependency
-.   define my.configure = emit_pkg_config_dependency.configure
-.   require(my.dependency, "dependency", "name")
-.   require(my.dependency, "dependency", "version")
-.
-.   define my.prefix = is_true(my.dependency.unprefixed) ?? "" ? "lib"
-.   define my.package_name = "$(my.prefix)$(my.dependency.name)"
-.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
-.
-.   if (is_empty(my.symbol))
-pkg_check_modules( $(my.dependency.name) REQUIRED "$(my.package_name) >= $(my.dependency.version)" )
-set( $(my.dependency.name:c)_PKG "$(my.package_name) >= $(my.dependency.version)" )
-.   else
-if ($(my.symbol))
-    pkg_check_modules( $(my.dependency.name) REQUIRED "$(my.package_name) >= $(my.dependency.version)" )
-    set( $(my.dependency.name:c)_PKG "$(my.package_name) >= $(my.dependency.version)" )
-endif()
-.   endif
-
-.endmacro # emit_pkg_config_dependency
-.
 .macro emit_pthread_dependency(dependency, configure)
 .   define my.dependency = emit_pthread_dependency.dependency
 .   define my.configure = emit_pthread_dependency.configure
 .
+.   define my.case = get_case_platform(my.dependency, "")
 set( CMAKE_THREAD_PREFER_PTHREAD ON )
 set( THREADS_PREFER_PTHREAD_FLAG ON )
-find_package( Threads )
-
-if ( Threads_FOUND )
+.
+.   new dependency as _dependency
+.       copy my.dependency to _dependency
+.       _dependency.name = "threads"
+.       emit_find_dependency_option(_dependency, my.configure, "")
+.   endnew
+.
+if ( Threads_FOUND $(is_empty(my.case) ?? "" ? "AND $(my.case) "))
     # TODO: find proper detection - documentation on FindThreads appears incorrect.
     set( pthread_CPPFLAGS "" )
     set( pthread_LIBRARIES "-lpthread" )
@@ -608,6 +651,54 @@ if ( Threads_FOUND )
 endif()
 
 .endmacro # emit_pthread_dependency
+.
+.macro emit_find_dependency(dependency, configure, indent)
+.   define my.dependency = emit_find_dependency.dependency
+.   define my.configure = emit_find_dependency.configure
+.   define my.version = defined(my.dependency.version) ?? my.dependency.version ? ""
+.
+$(my.indent)find_package( $(my.dependency.name:neat) $(my.version) REQUIRED )
+.   if (is_empty(my.indent))
+
+.   endif
+.endmacro # emit_find_dependency
+.
+.macro emit_find_dependency_platform(dependency, configure, indent)
+.   define my.dependency = emit_find_dependency_platform.dependency
+.   define my.configure = emit_find_dependency_platform.configure
+.
+.   define my.case = get_case_platform(my.dependency, "")
+.
+.   if (is_empty(my.case))
+.       emit_find_dependency(my.dependency, my.configure, my.indent)
+.   else
+$(my.indent)if ($(my.case))
+.       emit_find_dependency(my.dependency, my.configure, "    $(my.indent)")
+$(my.indent)endif()
+.       if (is_empty(my.indent))
+
+.       endif
+.   endif
+.endmacro # emit_find_dependency_platform
+.
+.macro emit_find_dependency_option(dependency, configure, indent)
+.   define my.dependency = emit_find_dependency_option.dependency
+.   define my.configure = emit_find_dependency_option.configure
+.
+.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+.
+.   if (is_empty(my.symbol))
+.       emit_find_dependency_platform(my.dependency, my.configure, my.indent)
+.   else
+$(my.indent)if ($(my.symbol))
+.       emit_find_dependency_platform(my.dependency, my.configure,\
+            "    $(my.indent)")
+$(my.indent)endif()
+.       if (is_empty(my.indent))
+
+.       endif
+.   endif
+.endmacro # emit_find_dependency_option
 .
 .macro emit_source_project(repository, product, files, path_prefix, line_prefix)
 .   define my.repository = emit_source_project.repository
