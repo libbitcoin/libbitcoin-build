@@ -1853,13 +1853,16 @@
 
   <repository name="libbitcoin-server" version="4.0.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
+    <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server">
+      <flag value="@mbedtls@" />
+    </package>
 
     <configure>
       <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
+      <option type="with" name="mbedtls" default="no" substitute="true" value="-DWITH_MBEDTLS" description="Compile with MBEDTLS." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -1877,6 +1880,9 @@
 
       <dependency name="bitcoin-node" version="4.0.0" />
       <dependency name="bitcoin-protocol" version="4.0.0" />
+      <dependency name="mbedx509" version="2.12.0" option="mbedtls" />
+      <dependency name="mbedcrypto" version="2.12.0" option="mbedtls" />
+      <dependency name="mbedtls" version="2.12.0" option="mbedtls" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1926,6 +1932,12 @@
         <sources path="test" />
       </product>
       <product prefix="bin" path="console" target_name="bs" option="console" uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe" >
+        <flag substitute="mbedtls" />
+        <!-- NOTE: mbedtls is 1 package with 3 required output
+             libraries; best way to handle? -->
+        <library name="mbedx509" />
+        <library name="mbedcrypto" />
+        <library name="mbedtls" />
         <library name="bitcoin-server" />
         <headers path="include" />
         <sources path="console" />
@@ -1957,6 +1969,8 @@
         <option value="--with-test" />
       </build>
       <build name="zmq" version="4.2.5" parallel="true" nuget="true" >
+      </build>
+      <build name="mbedtls" version="2.12.0" parallel="true" nuget="true" >
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
@@ -2029,6 +2043,7 @@
         <get name="bash-completion" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
+        <option value="--build-mbedtls" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -2040,6 +2055,7 @@
         <get name="boost" />
         <get name="bash-completion" />
         <option value="--build-zmq" />
+        <option value="--build-mbedtls" />
         <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
       </job>
@@ -2048,6 +2064,7 @@
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--build-zmq" />
+        <option value="--build-mbedtls" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />

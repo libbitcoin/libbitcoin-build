@@ -370,6 +370,11 @@ function global.is_zmq_build(build)
     return starts_with(my.build.name, "zmq")
 endfunction
 
+function global.is_mbedtls_build(build)
+    define my.build = is_mbedtls_build.build
+    return starts_with(my.build.name, "mbedtls")
+endfunction
+
 function global.is_boost_build(build)
     define my.build = is_boost_build.build
     return my.build.name = "boost"
