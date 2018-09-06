@@ -467,8 +467,8 @@ function extract_include_directories(params, repository, libraries,\
 #            endnew
         else
             new my.params.element as _element
-                _element.shared = "\$\{$(_library.name)_$(my.suffix_shared)\}"
-                _element.static = "\$\{$(_library.name)_$(my.suffix_static)\}"
+                _element.shared = "\$\{$(_library.name:c)_$(my.suffix_shared)\}"
+                _element.static = "\$\{$(_library.name:c)_$(my.suffix_static)\}"
             endnew
         endif
     endfor
@@ -491,8 +491,8 @@ function extract_link_directories(params, repository, libraries)
         elsif (_library.name = my.repository->package.library)
         else
             new my.params.element as _element
-                _element.shared = "\$\{$(_library.name)_$(my.suffix_shared)\}"
-                _element.static = "\$\{$(_library.name)_$(my.suffix_static)\}"
+                _element.shared = "\$\{$(_library.name:c)_$(my.suffix_shared)\}"
+                _element.static = "\$\{$(_library.name:c)_$(my.suffix_static)\}"
             endnew
         endif
     endfor
@@ -520,8 +520,8 @@ function extract_link_libraries(params, repository, libraries)
             endnew
         else
             new my.params.element as _element
-                _element.shared = "\$\{$(_library.name)_$(my.suffix_shared)\}"
-                _element.static = "\$\{$(_library.name)_$(my.suffix_static)\}"
+                _element.shared = "\$\{$(_library.name:c)_$(my.suffix_shared)\}"
+                _element.static = "\$\{$(_library.name:c)_$(my.suffix_static)\}"
             endnew
         endif
     endfor
