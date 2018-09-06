@@ -330,9 +330,6 @@ function emit_products(repository, path_prefix)
             emit_product_target(my.repository, _product, my.path_prefix)
         endif
     endfor
-
-    # emit install
-    emit_install(my.repository)
 endfunction
 
 function emit_product_target(repository, product, path_prefix)
@@ -696,6 +693,8 @@ function emit_cmakelists(repository)
     emit_target_property_initialization(my.repository, "../../")
 
     emit_products(my.repository, "../../")
+
+    emit_install(my.repository)
 endfunction
 
 ###############################################################################
@@ -1000,14 +999,13 @@ $(my.indent)add_test( NAME $(target_name(my.product, my.repository)) COMMAND $(t
 .   define my.product = emit_product_install.product
 .   define my.option = find_option_symbol(my.product, my.repository->configure)?
 .
-.   if (!defined(my.option))
-.       if ((my.product.prefix = "lib") & (my.product.path = "src"))
-install( TARGETS \${CANONICAL_LIB_NAME}
-.       elsif ((my.product.prefix = "lib") | (my.product.prefix = "bin"))
-install( TARGETS $(target_name(my.product, my.repository))
-.       else
-.           abort("Unexpected product.prefix : $(my.product.prefix)")
-.       endif
+.   define my.target = target_name(my.product, my.repository)
+.   if (my.target = my.repository.name)
+.       my.target = "\${CANONICAL_LIB_NAME}"
+.   endif
+.
+.   if (!is_no_install(my.product) & !is_check(my.product))
+install( TARGETS $(my.target)
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
