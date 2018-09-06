@@ -559,7 +559,8 @@ function emit_include_directories(repository, libraries, project_include_path)
         extract_include_directories(_params, my.repository, my.libraries,\
             my.project_include_path)
 
-        emit_shared_static_params("include_directories", "", _params, "")
+        # NOTE: SYSTEM target suppresses warnings from included files.
+        emit_shared_static_params("include_directories", "SYSTEM", _params, "")
         if (count(_params.element) > 0)
             write_line("")
         endif
