@@ -281,6 +281,30 @@ function emit_options(repository)
     endfor
 endfunction
 
+function emit_defines(repository)
+    define my.repository = emit_defines.repository
+
+    new headers as _headers
+        for my.repository->configure.define as _define\
+            where !is_empty(_define.header)
+
+            if (count(_headers.element, count.name = _define.header) = 0)
+                new _headers.element as _element
+                    _element.name = _define.header
+                endnew
+            endif
+        endfor
+
+        for _headers.element as _element
+            emit_header(_element)
+        endfor
+    endnew
+
+    for my.repository->configure.define as _define
+        emit_define(_define)
+    endfor
+endfunction
+
 function emit_dependencies(repository)
     define my.repository = emit_dependencies.repository
 
@@ -585,15 +609,17 @@ function emit_private_target_include_directories(repository, product,\
     define my.product = emit_private_target_include_directories.product
 
     new include_dirs_params as _params
+        if (defined(my.product->headers))
+            for my.product.headers as _headers where !is_empty(_headers.path)
+                new _params.element as _element
+                    _element.universal = "\"$(append_path(my.path_prefix,\
+                        _headers.path))\""
+                endnew
+            endfor
+        endif
+
         extract_include_directories(_params, my.repository, my.product,\
             my.project_include_path)
-
-        if (defined(my.product->headers) & !is_empty(my.product->headers.path))
-            new _params.element as _element
-                _element.universal = "\"$(append_path(my.path_prefix,\
-                    my.product->headers.path))\""
-            endnew
-        endif
 
         emit_shared_static_params(\
             "target_include_directories", "$(my.target_name) PRIVATE",\
@@ -688,6 +714,8 @@ function emit_cmakelists(repository)
 
     emit_options(my.repository)
 
+    emit_defines(my.repository)
+
     emit_dependencies(my.repository)
 
     emit_target_property_initialization(my.repository, "../../")
@@ -714,6 +742,8 @@ project($(my.repository.name) LANGUAGES C CXX)
 enable_testing()
 
 list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
+include(CheckIncludeFiles)
+include(CheckSymbolExists)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -858,6 +888,38 @@ endif()
 .   endif
 .
 .endmacro # emit_option
+.
+.macro emit_header(header)
+.   define my.header = emit_header.header
+.   define my.uname = "$(my.header.name:upper,c)"
+.
+.   heading2("Initialize HAVE_$(my.uname) variable checking for $(my.header.name)")
+check_include_files( "$(my.header.name)" HAVE_$(my.uname) )
+if (!HAVE_$(my.uname))
+    set( HAVE_$(my.uname) 0 )
+endif()
+
+add_definitions( -DHAVE_$(my.uname)=${HAVE_$(my.uname)} )
+
+.endmacro # emit_header
+.
+.macro emit_define(define)
+.   define my.define = emit_define.define
+.   require(my.define, "define", "header")
+.   require(my.define, "define", "export")
+.
+.   define my.header_uname = "$(my.define.header:upper,c)"
+.   define my.export = "$(my.define.export)"
+.   define my.export_uname = "$(my.define.export:upper,c)"
+.
+.   heading2("On HAVE_$(my.header_uname), test for ")
+.
+if (HAVE_$(my.header_uname))
+    check_symbol_exists( "$(my.export)" "$(my.define.header)" HAVE_DECL_$(my.export_uname) )
+    add_definitions( -DHAVE_DECL_$(my.export_uname)=${HAVE_DECL_$(my.export_uname)} )
+endif()
+
+.endmacro # emit_define
 .
 .macro emit_find_package_dependency(dependency, features)
 .   define my.dependency = emit_find_package_dependency.dependency
@@ -1005,11 +1067,19 @@ $(my.indent)add_test( NAME $(target_name(my.product, my.repository)) COMMAND $(t
 .   endif
 .
 .   if (!is_no_install(my.product) & !is_check(my.product))
-install( TARGETS $(my.target)
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    PUBLIC_HEADER DESTINATION include )
+.       define my.indent = defined(my.option) ?? "    " ? ""
+.
+.       if (defined(my.option))
+if ($(my.option))
+.       endif
+$(my.indent)install( TARGETS $(my.target)
+    $(my.indent)RUNTIME DESTINATION bin
+    $(my.indent)LIBRARY DESTINATION lib
+    $(my.indent)ARCHIVE DESTINATION lib
+    $(my.indent)PUBLIC_HEADER DESTINATION include )
+.       if (defined(my.option))
+endif()
+.       endif
 
 .   endif
 .endmacro # emit_product_install
