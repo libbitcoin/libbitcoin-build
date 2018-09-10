@@ -313,6 +313,7 @@ function emit_dependencies(repository)
             emit_boost_dependency(_dependency, my.repository->configure)
         elsif (is_boost_lib_dependency(_dependency))
         elsif (is_java_dependency(_dependency))
+            emit_java_dependency_option(_dependency, my.repository->configure, "")
         elsif (is_python_dependency(_dependency))
         elsif (is_package_dependency(_dependency))
             emit_find_dependency_option(_dependency, my.repository->configure, "")
@@ -1023,6 +1024,72 @@ $(my.indent)endif()
 .       endif
 .   endif
 .endmacro # emit_find_dependency_option
+.
+.
+.macro emit_java_dependency(dependency, configure, indent)
+.   define my.dependency = emit_java_dependency.dependency
+.   define my.configure = emit_java_dependency.configure
+.   define my.version = defined(my.dependency.version) ?? my.dependency.version ? ""
+.
+$(my.indent)find_package( Java REQUIRED )
+$(my.indent)find_package( JNI $(my.version) REQUIRED )
+$(my.indent)set( java_INCLUDE_DIRS "${JNI_INCLUDE_DIRS}" )
+$(my.indent)set( java_STATIC_INCLUDE_DIRS "${JNI_INCLUDE_DIRS}" )
+.#$(my.indent)message( "Java_FOUND : ${Java_FOUND}" )
+.#$(my.indent)message( "Java_INCLUDE_DIRS : ${Java_INCLUDE_DIRS}" )
+.#$(my.indent)message( "Java_LIBRARIES : ${Java_LIBRARIES}" )
+.#$(my.indent)message( "JNI_INCLUDE_DIRS : ${JNI_INCLUDE_DIRS}" )
+.#$(my.indent)message( "JNI_LIBRARIES : ${JNI_LIBRARIES}" )
+.#$(my.indent)message( "JNI_FOUND : ${JNI_FOUND}" )
+.#$(my.indent)message( "JAVA_AWT_LIBRARY : ${JAVA_AWT_LIBRARY}" )
+.#$(my.indent)message( "JAVA_JVM_LIBRARY : ${JAVA_JVM_LIBRARY}" )
+.#$(my.indent)message( "JAVA_INCLUDE_PATH : ${JAVA_INCLUDE_PATH}" )
+.#$(my.indent)message( "JAVA_INCLUDE_PATH2 : ${JAVA_INCLUDE_PATH2}" )
+.#$(my.indent)message( "JAVA_AWT_INCLUDE_PATH : ${JAVA_AWT_INCLUDE_PATH}" )
+
+.   if (is_empty(my.indent))
+
+.   endif
+.endmacro # emit_java_dependency
+.
+.macro emit_java_dependency_platform(dependency, configure, indent)
+.   define my.dependency = emit_java_dependency_platform.dependency
+.   define my.configure = emit_java_dependency_platform.configure
+.
+.   define my.case = get_case_platform(my.dependency, "")
+.
+.   if (is_empty(my.case))
+.       emit_java_dependency(my.dependency, my.configure, my.indent)
+.   else
+$(my.indent)if ($(my.case))
+.       emit_java_dependency(my.dependency, my.configure, "    $(my.indent)")
+$(my.indent)endif()
+.       if (is_empty(my.indent))
+
+.       endif
+.   endif
+.endmacro # emit_java_dependency_platform
+.
+.macro emit_java_dependency_option(dependency, configure, indent)
+.   define my.dependency = emit_java_dependency_option.dependency
+.   define my.configure = emit_java_dependency_option.configure
+.
+.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+.
+.   heading2("Find $(my.dependency.name)")
+.   if (is_empty(my.symbol))
+.       emit_java_dependency_platform(my.dependency, my.configure, my.indent)
+.   else
+$(my.indent)if ($(my.symbol))
+.       emit_java_dependency_platform(my.dependency, my.configure,\
+            "    $(my.indent)")
+$(my.indent)endif()
+.       if (is_empty(my.indent))
+
+.       endif
+.   endif
+.
+.endmacro # emit_java_dependency_option
 .
 .macro emit_source_project(repository, product, files, path_prefix, indent)
 .   define my.repository = emit_source_project.repository
