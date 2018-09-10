@@ -695,11 +695,34 @@ function emit_target_property_initialization(repository, path_prefix)
     # NOTE: this is an assumption that all projects generated include a library
     # which is linked by all included projects.  Generalization requires
     # chasing dependencies.
-    emit_configure_files(my.repository)
     emit_include_directories(my.repository, my.library, my.path_prefix)
     emit_link_directories(my.repository, my.library)
     emit_library_params(my.repository, my.library)
     emit_flags_params(my.repository, my.library)
+endfunction
+
+function emit_install(repository, path_prefix)
+    define my.repository = emit_install.repository
+
+    for my.repository->make.product as _product
+        if (is_check(_product))
+            # skip
+        elsif (is_no_distribute(_product))
+            # skip
+        elsif (is_no_install(_product))
+            # skip
+        elsif (match_prefix(_product, "bin") | match_prefix(_product, "lib"))
+            emit_product_install(my.repository, _product, my.path_prefix)
+        elsif (match_prefix(_product, "doc"))
+            emit_doc_install(my.repository, _product, my.path_prefix)
+        elsif (match_prefix(_product, "include"))
+            emit_include_install(my.repository, _product, my.path_prefix)
+        elsif (match_prefix(_product, "pkgconfig"))
+            emit_pkgconfig_install(my.repository, _product, my.path_prefix)
+        else
+            # explicitly distribute, unhandled prefix
+        endif
+    endfor
 endfunction
 
 function emit_cmakelists(repository)
@@ -723,7 +746,7 @@ function emit_cmakelists(repository)
 
     emit_products(my.repository, "../../")
 
-    emit_install(my.repository)
+    emit_install(my.repository, "../../")
 endfunction
 
 ###############################################################################
@@ -1123,7 +1146,7 @@ $(my.indent)add_test( NAME $(target_name(my.product, my.repository)) COMMAND $(t
 .   endif
 .endmacro # emit_source_project
 .
-.macro emit_product_install(repository, product)
+.macro emit_product_install(repository, product, path_prefix)
 .   define my.repository = emit_product_install.repository
 .   define my.product = emit_product_install.product
 .   define my.option = find_option_symbol(my.product, my.repository->configure)?
@@ -1133,60 +1156,100 @@ $(my.indent)add_test( NAME $(target_name(my.product, my.repository)) COMMAND $(t
 .       my.target = "\${CANONICAL_LIB_NAME}"
 .   endif
 .
-.   if (!is_no_install(my.product) & !is_check(my.product))
-.       define my.indent = defined(my.option) ?? "    " ? ""
+.   define my.indent = defined(my.option) ?? "    " ? ""
 .
-.       if (defined(my.option))
+.   if (defined(my.option))
 if ($(my.option))
-.       endif
+.   endif
 $(my.indent)install( TARGETS $(my.target)
     $(my.indent)RUNTIME DESTINATION bin
     $(my.indent)LIBRARY DESTINATION lib
     $(my.indent)ARCHIVE DESTINATION lib
     $(my.indent)PUBLIC_HEADER DESTINATION include )
+.   if (defined(my.option))
+endif()
+.   endif
+
+.endmacro # emit_product_install
+.
+.macro emit_doc_install(repository, product, path_prefix)
+.   define my.repository = emit_doc_install.repository
+.   define my.product = emit_doc_install.product
+.   define my.option = find_option_symbol(my.product, my.repository->configure)?
+.
+.   if (count(my.product.file, defined(count.path)) > 0)
+.       define my.destination = "share/doc/$(my.repository.name)"
+.       define my.indent = defined(my.option) ?? "    " ? ""
+.
+.       if (defined(my.option))
+if ($(my.option))
+.       endif
+$(my.indent)install( FILES
+.       for my.product.file as _file where defined(_file.path)
+    $(my.indent)"$(append_path(my.path_prefix, _file.path))"
+.       endfor
+    $(my.indent)DESTINATION $(my.destination) )
 .       if (defined(my.option))
 endif()
 .       endif
 
 .   endif
-.endmacro # emit_product_install
+.endmacro # emit_doc_install
 .
-.macro emit_configure_files(repository)
-.   define my.repository = emit_configure_files.repository
+.macro emit_pkgconfig_install(repository, product, path_prefix)
+.   define my.repository = emit_pkgconfig_install.repository
+.   define my.product = emit_pkgconfig_install.product
+.   define my.option = find_option_symbol(my.product, my.repository->configure)?
 .
-configure_file(
-  "../../$(my.repository.name).pc.in"
-  "$(my.repository.name).pc" @ONLY )
-
-.endmacro # emit_configure_files
+.   if (count(my.product.file, defined(count.path)) > 0)
+.       define my.destination = "lib/pkgconfig"
+.       define my.indent = defined(my.option) ?? "    " ? ""
 .
-.macro emit_install(repository)
-.   define my.repository = emit_install.repository
-.
-install( FILES
-    "\${CMAKE_CURRENT_BINARY_DIR}/$(my.repository.name).pc"
-    DESTINATION lib/pkgconfig )
-
-.# TODO: construct from product doc in loop below
-install( FILES
-    "../../AUTHORS"
-    "../../ChangeLog"
-    "../../COPYING"
-    "../../INSTALL"
-    "../../NEWS"
-    "../../README"
-    DESTINATION share/doc/$(my.repository.name) )
-
-install( DIRECTORY ../../include/
-    DESTINATION include )
-
-.   for my.repository->make.product as _product
-.       if ((_product.prefix = "bin") | (_product.prefix = "lib"))
-.           emit_product_install(my.repository, _product)
+.       if (defined(my.option))
+if ($(my.option))
 .       endif
-.   endfor
+.       for my.product.file as _file where defined(_file.path)
+$(my.indent)configure_file(
+  $(my.indent)"$(append_path(my.path_prefix, _file.path)).in"
+  $(my.indent)"$(_file.path)" @ONLY )
+
+.       endfor
 .
-.endmacro # emit_install
+$(my.indent)install( FILES
+.       for my.product.file as _file where defined(_file.path)
+    $(my.indent)"\${CMAKE_CURRENT_BINARY_DIR}/$(_file.path)"
+.       endfor
+    $(my.indent)DESTINATION $(my.destination) )
+.       if (defined(my.option))
+endif()
+.       endif
+
+.   endif
+.endmacro # emit_pkgconfig_install
+.
+.macro emit_include_install(repository, product, path_prefix)
+.   define my.repository = emit_include_install.repository
+.   define my.product = emit_include_install.product
+.   define my.option = find_option_symbol(my.product, my.repository->configure)?
+.
+.   if (count(my.product.files, !is_empty(count.path)) > 0)
+.       define my.indent = defined(my.option) ?? "    " ? ""
+.
+.       for my.product.files as _files where !is_empty(_files.path)
+.           define my.destination = "include"
+.
+.           if (defined(my.option))
+if ($(my.option))
+.           endif
+$(my.indent)install( DIRECTORY "$(append_path(my.path_prefix, _files.path))"
+    $(my.indent)DESTINATION $(my.destination) )
+.           if (defined(my.option))
+endif()
+.           endif
+
+.       endfor
+.   endif
+.endmacro # emit_include_install
 .
 .endtemplate
 .template 0
