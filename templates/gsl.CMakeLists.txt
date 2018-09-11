@@ -364,6 +364,11 @@ function emit_product_target(repository, product, path_prefix)
     define my.option = find_option_symbol(my.product, my.repository->configure)?
     define my.indent = defined(my.option) ?? "    " ? ""
 
+    define my.target_name = (my.product.prefix = "lib" & my.product.path = "src") ??\
+        "\${CANONICAL_LIB_NAME}" ? target_name(my.product, my.repository)
+
+    heading2("Define $(my.target_name) project.")
+
     if (defined(my.option))
         write_line("if ($(my.option))")
     endif
@@ -566,8 +571,9 @@ function emit_library_params(repository, libraries)
 
         extract_link_libraries(_params, my.repository, my.libraries)
 
-        emit_shared_static_params("link_libraries", "", _params, "")
         if (count(_params.element) > 0)
+            heading2("Define project common libraries/linker flags.")
+            emit_shared_static_params("link_libraries", "", _params, "")
             write_line("")
         endif
     endnew
@@ -582,8 +588,9 @@ function emit_include_directories(repository, libraries, project_include_path)
             my.project_include_path)
 
         # NOTE: SYSTEM target suppresses warnings from included files.
-        emit_shared_static_params("include_directories", "SYSTEM", _params, "")
         if (count(_params.element) > 0)
+            heading2("Define project common includes directories")
+            emit_shared_static_params("include_directories", "SYSTEM", _params, "")
             write_line("")
         endif
     endnew
@@ -595,9 +602,10 @@ function emit_link_directories(repository, libraries)
 
     new library_dirs_params as _params
         extract_link_directories(_params, my.repository, my.libraries)
-        emit_shared_static_params("link_directories", "", _params, "")
 
         if (count(_params.element) > 0)
+            heading2("Define project common library directories")
+            emit_shared_static_params("link_directories", "", _params, "")
             write_line("")
         endif
     endnew
@@ -622,11 +630,12 @@ function emit_private_target_include_directories(repository, product,\
         extract_include_directories(_params, my.repository, my.product,\
             my.project_include_path)
 
-        emit_shared_static_params(\
-            "target_include_directories", "$(my.target_name) PRIVATE",\
-            _params, my.indent)
-
         if (count(_params.element) > 0)
+            heading2("$(my.indent)$(my.target_name) project specific include directories.")
+            emit_shared_static_params(\
+                "target_include_directories", "$(my.target_name) PRIVATE",\
+                _params, my.indent)
+
             write_line("")
         endif
     endnew
@@ -652,10 +661,12 @@ function emit_target_link_libraries(repository, product, target_name, indent)
 
     new link_libraries as _params
         extract_link_libraries(_params, my.repository, my.product)
-        emit_shared_static_params("target_link_libraries", my.target_name,\
-            _params, my.indent)
 
         if (count(_params.element) > 0)
+            heading2("$(my.indent)$(my.target_name) project specific libraries/linker flags.")
+            emit_shared_static_params("target_link_libraries", my.target_name,\
+                _params, my.indent)
+
             write_line("")
         endif
     endnew
@@ -721,6 +732,7 @@ function emit_install(repository, path_prefix)
             emit_pkgconfig_install(my.repository, _product, my.path_prefix)
         else
             # explicitly distribute, unhandled prefix
+            emit_data_install(my.repository, _product, my.path_prefix)
         endif
     endfor
 endfunction
@@ -759,6 +771,7 @@ endfunction
 .   define my.repository = emit_project_initialization.repository
 .   require(my.repository, "repository", "name")
 
+.   heading2("$(my.repository.name) project configuration.")
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 project($(my.repository.name) LANGUAGES C CXX)
@@ -805,6 +818,7 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 .macro emit_add_compile_options(options)
 .   define my.options = emit_add_compile_options.options
 .
+.   heading2("Add compiler options")
 .   for my.options.flag as _flag by defined(_flag.compiler) ?? _flag.compiler ? ""
 .       if (defined(_flag.compiler))
 # $(_flag.comment)
@@ -936,7 +950,7 @@ add_definitions( -DHAVE_$(my.uname)=${HAVE_$(my.uname)} )
 .   define my.export = "$(my.define.export)"
 .   define my.export_uname = "$(my.define.export:upper,c)"
 .
-.   heading2("On HAVE_$(my.header_uname), test for ")
+.   heading2("On HAVE_$(my.header_uname), test for $(my.export)")
 .
 if (HAVE_$(my.header_uname))
     check_symbol_exists( "$(my.export)" "$(my.define.header)" HAVE_DECL_$(my.export_uname) )
@@ -1158,6 +1172,7 @@ $(my.indent)add_test( NAME $(target_name(my.product, my.repository)) COMMAND $(t
 .
 .   define my.indent = defined(my.option) ?? "    " ? ""
 .
+.   heading2("Manage $(my.target) installation.")
 .   if (defined(my.option))
 if ($(my.option))
 .   endif
@@ -1181,6 +1196,7 @@ endif()
 .       define my.destination = "share/doc/$(my.repository.name)"
 .       define my.indent = defined(my.option) ?? "    " ? ""
 .
+.   heading2("Manage installation of docs.")
 .       if (defined(my.option))
 if ($(my.option))
 .       endif
@@ -1205,6 +1221,7 @@ endif()
 .       define my.destination = "lib/pkgconfig"
 .       define my.indent = defined(my.option) ?? "    " ? ""
 .
+.       heading2("Manage pkgconfig installation.")
 .       if (defined(my.option))
 if ($(my.option))
 .       endif
@@ -1235,6 +1252,7 @@ endif()
 .   if (count(my.product.files, !is_empty(count.path)) > 0)
 .       define my.indent = defined(my.option) ?? "    " ? ""
 .
+.       heading2("Manage include installation.")
 .       for my.product.files as _files where !is_empty(_files.path)
 .           define my.destination = "include"
 .
@@ -1250,6 +1268,31 @@ endif()
 .       endfor
 .   endif
 .endmacro # emit_include_install
+.
+.macro emit_data_install(repository, product, path_prefix)
+.   define my.repository = emit_data_install.repository
+.   define my.product = emit_data_install.product
+.   define my.option = find_option_symbol(my.product, my.repository->configure)?
+.
+.   if (count(my.product.file, !is_empty(count.path)) > 0)
+.       define my.destination = "etc/libbitcoin"
+.       define my.indent = defined(my.option) ?? "    " ? ""
+.
+.       heading2("Manage data installation for $(my.product.prefix) prefixed product.")
+.       if (defined(my.option))
+if ($(my.option))
+.       endif
+$(my.indent)install( FILES
+.       for my.product.file as _file where !is_empty(_file.path)
+    $(my.indent)"$(append_path(my.path_prefix, _file.path))"
+.       endfor
+    $(my.indent)DESTINATION $(my.destination) )
+.       if (defined(my.option))
+endif()
+.       endif
+
+.   endif
+.endmacro # emit_data_install
 .
 .endtemplate
 .template 0
