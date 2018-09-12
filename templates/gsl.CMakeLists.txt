@@ -355,6 +355,14 @@ function emit_products(repository, path_prefix)
             emit_product_target(my.repository, _product, my.path_prefix)
         endif
     endfor
+
+    # emit 'jar'
+    define my.javaexec = my.repository->make->product(prefix = "javaexec")?
+    define my.jarexec = my.repository->make->product(prefix = "jarexec")?
+
+    if (defined(my.javaexec) & defined(my.jarexec))
+        emit_jar_product(my.repository, my.javaexec, my.jarexec, my.path_prefix)
+    endif
 endfunction
 
 function emit_product_target(repository, product, path_prefix)
@@ -388,6 +396,44 @@ function emit_product_target(repository, product, path_prefix)
 
     emit_project_properties(my.repository, my.product,\
         my.path_prefix, my.indent)
+
+    if (defined(my.option))
+        write_line("endif()")
+        write_line("")
+    endif
+endfunction
+
+function emit_jar_product(repository, javaexec, jarexec, path_prefix)
+    define my.repository = emit_jar_product.repository
+    define my.javaexec = emit_jar_product.javaexec
+    define my.jarexec = emit_jar_product.jarexec
+    define my.repository_path = append_path(global.root, my.repository.name)
+    define my.option = find_option_symbol(my.jarexec, my.repository->configure)?
+    define my.indent = defined(my.option) ?? "    " ? ""
+
+    define my.target_name = my.jarexec->file.path
+    if (ends_with(my.target_name, ".jar"))
+        my.target_name = left(my.target_name, string.length(my.target_name) - 4)
+    endif
+
+    heading2("Define $(my.target_name) jar project.")
+
+    if (defined(my.option))
+        write_line("if ($(my.option))")
+    endif
+
+    new files as _files
+        if (defined(my.javaexec->files) & !is_empty(my.javaexec->files.path))
+            define my.product_path = append_path(my.repository_path,\
+                my.javaexec->files.path)
+            define my.product_dir = open_directory(my.product_path)
+            get_files(_files, my.product_dir, my.javaexec->files.path, "true",\
+                "true", "true")
+        endif
+
+        emit_jar_project(my.repository, _files, my.target_name, my.path_prefix,\
+            my.indent)
+    endnew
 
     if (defined(my.option))
         write_line("endif()")
@@ -715,14 +761,10 @@ endfunction
 function emit_install(repository, path_prefix)
     define my.repository = emit_install.repository
 
-    for my.repository->make.product as _product
-        if (is_check(_product))
-            # skip
-        elsif (is_no_distribute(_product))
-            # skip
-        elsif (is_no_install(_product))
-            # skip
-        elsif (match_prefix(_product, "bin") | match_prefix(_product, "lib"))
+    for my.repository->make.product as _product where !is_check(_product) \
+        & !is_no_install(_product)
+
+        if (match_prefix(_product, "bin") | match_prefix(_product, "lib"))
             emit_product_install(my.repository, _product, my.path_prefix)
         elsif (match_prefix(_product, "doc"))
             emit_doc_install(my.repository, _product, my.path_prefix)
@@ -730,6 +772,8 @@ function emit_install(repository, path_prefix)
             emit_include_install(my.repository, _product, my.path_prefix)
         elsif (match_prefix(_product, "pkgconfig"))
             emit_pkgconfig_install(my.repository, _product, my.path_prefix)
+        elsif (match_prefix(_product, "jarexec"))
+            emit_jarexec_install(my.repository, _product, my.path_prefix)
         else
             # explicitly distribute, unhandled prefix
             emit_data_install(my.repository, _product, my.path_prefix)
@@ -804,6 +848,7 @@ else ()
   set( includedir "\\\${exec_prefix}/include" )
 
   set( PACKAGE_VERSION "$(my.repository.version)" )
+  set( VERSION "${PACKAGE_VERSION}" )
 endif ()
 
 .
@@ -1072,6 +1117,7 @@ $(my.indent)find_package( Java REQUIRED )
 $(my.indent)find_package( JNI $(my.version) REQUIRED )
 $(my.indent)set( java_INCLUDE_DIRS "${JNI_INCLUDE_DIRS}" )
 $(my.indent)set( java_STATIC_INCLUDE_DIRS "${JNI_INCLUDE_DIRS}" )
+$(my.indent)include( UseJava )
 .#$(my.indent)message( "Java_FOUND : ${Java_FOUND}" )
 .#$(my.indent)message( "Java_INCLUDE_DIRS : ${Java_INCLUDE_DIRS}" )
 .#$(my.indent)message( "Java_LIBRARIES : ${Java_LIBRARIES}" )
@@ -1083,7 +1129,6 @@ $(my.indent)set( java_STATIC_INCLUDE_DIRS "${JNI_INCLUDE_DIRS}" )
 .#$(my.indent)message( "JAVA_INCLUDE_PATH : ${JAVA_INCLUDE_PATH}" )
 .#$(my.indent)message( "JAVA_INCLUDE_PATH2 : ${JAVA_INCLUDE_PATH2}" )
 .#$(my.indent)message( "JAVA_AWT_INCLUDE_PATH : ${JAVA_AWT_INCLUDE_PATH}" )
-
 .   if (is_empty(my.indent))
 
 .   endif
@@ -1159,6 +1204,18 @@ $(my.indent)add_test( NAME $(target_name(my.product, my.repository)) COMMAND $(t
 
 .   endif
 .endmacro # emit_source_project
+.
+.macro emit_jar_project(repository, files, target_name, path_prefix, indent)
+.   define my.repository = emit_jar_project.repository
+.   define my.files = emit_jar_project.files
+.
+$(my.indent)add_jar( $(my.target_name)-jar SOURCES
+.   for my.files.file as _file
+    $(my.indent)"$(append_path(append_path(my.path_prefix, _file.relative_path), _file.name))"
+.   endfor
+    OUTPUT_NAME $(my.target_name) )
+.
+.endmacro # emit_jar_project
 .
 .macro emit_product_install(repository, product, path_prefix)
 .   define my.repository = emit_product_install.repository
@@ -1243,6 +1300,32 @@ endif()
 
 .   endif
 .endmacro # emit_pkgconfig_install
+.
+.macro emit_jarexec_install(repository, product, path_prefix)
+.   define my.repository = emit_jarexec_install.repository
+.   define my.product = emit_jarexec_install.product
+.   define my.option = find_option_symbol(my.product, my.repository->configure)?
+.
+.   if (count(my.product.file, defined(count.path)) > 0)
+.       define my.destination = "share/java"
+.       define my.indent = defined(my.option) ?? "    " ? ""
+.
+.       heading2("Manage jar installation.")
+.       if (defined(my.option))
+if ($(my.option))
+.       endif
+.
+$(my.indent)install( FILES
+.       for my.product.file as _file where defined(_file.path)
+    $(my.indent)"${CMAKE_CURRENT_BINARY_DIR}/$(_file.path)"
+.       endfor
+    $(my.indent)DESTINATION $(my.destination) )
+.       if (defined(my.option))
+endif()
+.       endif
+
+.   endif
+.endmacro # emit_jarexec_install
 .
 .macro emit_include_install(repository, product, path_prefix)
 .   define my.repository = emit_include_install.repository
