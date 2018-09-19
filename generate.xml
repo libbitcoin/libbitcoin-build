@@ -25,7 +25,7 @@
       <!-- https://svn.boost.org/trac/boost/ticket/8973 [gcc, 1.54] -->
       <!-- https://svn.boost.org/trac/boost/ticket/6851 [gcc, 1.50-1.53] -->
       <!-- [log rotation derivation for customization]  [???? 1.56] -->
-      <dependency name="boost" version="1.57.0">
+      <dependency name="boost" version="1.62.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost" version="1.64.0.0" />
           <nuget compiler="vc141" name="boost" version="1.64.0.0" />
@@ -214,7 +214,7 @@
       </build>
       <build name="qrencode" version="3.4.4" parallel="true" >
       </build>
-      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -329,7 +329,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0">
+      <dependency name="boost" version="1.62.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost" version="1.64.0.0" />
           <nuget compiler="vc141" name="boost" version="1.64.0.0" />
@@ -399,7 +399,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -504,7 +504,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-     <dependency name="boost" version="1.57.0">
+     <dependency name="boost" version="1.62.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost" version="1.64.0.0" />
           <nuget compiler="vc141" name="boost" version="1.64.0.0" />
@@ -579,7 +579,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -593,7 +593,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.2.0" parallel="true" nuget="true" >
+      <build name="zmq" version="4.2.5" parallel="true" nuget="true" >
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
@@ -720,7 +720,7 @@
       <define header="sys/endian.h" export="htobe32" />
       <define header="sys/endian.h" export="htobe64" />
 
-      <dependency name="boost" version="1.57.0" option="tests">
+      <dependency name="boost" version="1.62.0" option="tests">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost" version="1.64.0.0" />
           <nuget compiler="vc141" name="boost" version="1.64.0.0" />
@@ -816,7 +816,7 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
@@ -907,7 +907,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0">
+      <dependency name="boost" version="1.62.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost" version="1.64.0.0" />
           <nuget compiler="vc141" name="boost" version="1.64.0.0" />
@@ -975,7 +975,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1068,7 +1068,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0">
+      <dependency name="boost" version="1.62.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost" version="1.64.0.0" />
           <nuget compiler="vc141" name="boost" version="1.64.0.0" />
@@ -1179,7 +1179,7 @@
       </build>
       <build name="qrencode" version="3.4.4" parallel="true" >
       </build>
-      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1193,7 +1193,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.2.0" parallel="true" nuget="true" >
+      <build name="zmq" version="4.2.5" parallel="true" nuget="true" >
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
@@ -1326,7 +1326,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0">
+      <dependency name="boost" version="1.62.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost" version="1.64.0.0" />
           <nuget compiler="vc141" name="boost" version="1.64.0.0" />
@@ -1392,7 +1392,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1489,7 +1489,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0">
+      <dependency name="boost" version="1.62.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost" version="1.64.0.0" />
           <nuget compiler="vc141" name="boost" version="1.64.0.0" />
@@ -1567,7 +1567,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1688,7 +1688,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0">
+      <dependency name="boost" version="1.62.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost" version="1.64.0.0" />
           <nuget compiler="vc141" name="boost" version="1.64.0.0" />
@@ -1699,7 +1699,7 @@
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
       </dependency>
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
-      <dependency name="zmq" version="4.2.0">
+      <dependency name="zmq" version="4.2.5">
           <nuget compiler="vc120" name="libzmq_vc120" version="4.2.30" />
           <nuget compiler="vc140" name="libzmq_vc140" version="4.2.30" />
           <nuget compiler="vc141" name="libzmq_vc141" version="4.2.30" />
@@ -1758,7 +1758,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1772,7 +1772,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.2.0" parallel="true" nuget="true" >
+      <build name="zmq" version="4.2.5" parallel="true" nuget="true" >
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
@@ -1863,7 +1863,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.57.0">
+      <dependency name="boost" version="1.62.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost" version="1.64.0.0" />
           <nuget compiler="vc141" name="boost" version="1.64.0.0" />
@@ -1942,7 +1942,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.57.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1956,7 +1956,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.2.0" parallel="true" nuget="true" >
+      <build name="zmq" version="4.2.5" parallel="true" nuget="true" >
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
