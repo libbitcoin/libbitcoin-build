@@ -183,6 +183,17 @@ function global.is_boost_lib_dependency(dependency)
     return starts_with(my.dependency.name, "boost_")
 endfunction
 
+function global.is_mbedtls_dependency(dependency)
+    define my.dependency = is_mbedtls_dependency.dependency
+    return match_name(my.dependency, "mbedtls")
+endfunction
+
+function global.is_mbedtls_lib_dependency(dependency)
+    define my.dependency = is_mbedtls_lib_dependency.dependency
+    require(my.dependency, "dependency", "name")
+    return starts_with(my.dependency.name, "mbedtls_")
+endfunction
+
 function global.is_java_dependency(dependency)
     define my.dependency = is_java_dependency.dependency
     return match_name(my.dependency, "java")

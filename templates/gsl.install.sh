@@ -168,13 +168,14 @@ build_from_tarball()
 
     if [[ $ARCHIVE == $MBEDTLS_ARCHIVE ]]; then
         make -j $JOBS lib
-        DESTDIR=${PREFIX} make install
+        make DESTDIR=$PREFIX install
     else
         configure_options "${CONFIGURATION[@]}"
         make_jobs $JOBS --silent
         make install
-        configure_links
     fi
+
+    configure_links
 
     # Enable shared only zlib build.
     if [[ $ARCHIVE == $ZLIB_ARCHIVE ]]; then
