@@ -75,7 +75,7 @@ make_current_directory()
 
     ./autogen.sh
     configure_options "$@"
-    make_jobs true $JOBS
+    make_jobs $JOBS
     make install
     configure_links
 }
@@ -86,11 +86,8 @@ make_current_directory()
 # make_jobs jobs [make_options]
 make_jobs()
 {
-    local PRECLEAN=$1
-    local JOBS=$2
-    shift 2
-
-    # ignore PRECLEAN parameter.
+    local JOBS=$1
+    shift 1
 
     # Avoid setting -j1 (causes problems on Travis).
     if [[ $JOBS > $SEQUENTIAL ]]; then
@@ -110,7 +107,7 @@ make_jobs()
 .   define_initialize_git()
 .   define_make_current_directory()
 .   define_make_jobs()
-.   define_make_tests()
+.   define_make_tests("false")
 .   define_push_pop_directory()
 .endmacro # define_utility_functions
 .
