@@ -445,7 +445,9 @@ display_configuration()
 
 .endmacro # define_display_configuration
 .
-.macro define_read_parameters()
+.macro define_read_parameters(repository, install)
+.   define my.repository = define_read_parameters.repository
+.   define my.install = define_read_parameters.install
 .   heading2("Parse command line options that are handled by this script.")
 for OPTION in "$@"; do
     case $OPTION in
@@ -458,17 +460,35 @@ for OPTION in "$@"; do
         (--disable-static)      DISABLE_STATIC="yes";;
 
         # Common project options.
+.   if (have_build(my.install, "icu"))
         (--with-icu)            WITH_ICU="yes";;
+.   endif
+.   if (have_build(my.install, "png"))
         (--with-png)            WITH_PNG="yes";;
+.   endif
+.   if (have_build(my.install, "qrencode"))
         (--with-qrencode)       WITH_QRENCODE="yes";;
+.   endif
 
         # Custom build options (in the form of --build-<option>).
+.   if (have_build(my.install, "icu"))
         (--build-icu)           BUILD_ICU="yes";;
+.   endif
+.   if (have_build(my.install, "zlib"))
         (--build-zlib)          BUILD_ZLIB="yes";;
+.   endif
+.   if (have_build(my.install, "png"))
         (--build-png)           BUILD_PNG="yes";;
+.   endif
+.   if (have_build(my.install, "qrencode"))
         (--build-qrencode)      BUILD_QRENCODE="yes";;
+.   endif
+.   if (have_build(my.install, "zmq"))
         (--build-zmq)           BUILD_ZMQ="yes";;
+.   endif
+.   if (have_build(my.install, "mbedtls"))
         (--build-mbedtls)       BUILD_MBEDTLS="yes";;
+.   endif
         (--build-boost)         BUILD_BOOST="yes";;
 
 .   custom_script_options()

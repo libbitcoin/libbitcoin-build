@@ -333,8 +333,6 @@ function define_cpp_lib_variables(variables, library, make, configure, repositor
         define my.is_function = is_function_dependency(my.dependency)
         define my.is_boost = is_boost_dependency(my.dependency)
         define my.is_boost_lib = is_boost_lib_dependency(my.dependency)
-        define my.is_mbedtls = is_mbedtls_dependency(my.dependency)
-        define my.is_mbedtls_lib = is_mbedtls_lib_dependency(my.dependency)
         define my.is_language = is_java_dependency(my.dependency) |\
             is_python_dependency(my.dependency)
         define my.is_common = is_pthread_dependency(my.dependency) |\
@@ -346,14 +344,8 @@ function define_cpp_lib_variables(variables, library, make, configure, repositor
         if (my.is_boost_lib | my.is_common | my.is_function | my.is_package)
             my.variables.libs += " ${$(my.cname)_LIBS}"
         endif
-        if (my.is_mbedtls_lib | my.is_common | my.is_function | my.is_package)
-            my.variables.libs += " ${$(my.cname)_LIBS} -lmbedtls -lmbedcrypto -lmbedx509"
-        endif
         if (my.is_boost | my.is_common | my.is_language | my.is_package)
             my.variables.cpp_flags += " ${$(my.cname)_BUILD_CPPFLAGS}"
-        endif
-        if (my.is_mbedtls | my.is_common | my.is_language | my.is_package)
-            my.variables.cpp_flags += " ${$(my.cname)_BUILD_CPPFLAGS} -DWITH_MBEDTLS"
         endif
         if (0)
             my.variables.ccc_flags += " ${$(my.cname)_CFLAGS}"

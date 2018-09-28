@@ -505,7 +505,7 @@ for generate.repository by name as _repository
 
     heading1("Initialize the build environment.")
     define_set_exit_on_error()
-    define_read_parameters()
+    define_read_parameters(_repository, my.install)
     define_parallelism()
     define_os_specific_settings()
     define_normalized_configure_options()
