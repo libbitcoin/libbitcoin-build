@@ -913,6 +913,59 @@ AC_MSG_NOTICE([$(my.cname)_BUILD_CPPFLAGS : ${$(my.cname)_BUILD_CPPFLAGS}])
 .endmacro
 .
 .#-----------------------------------------------------------------------------
+.# MBEDTLS
+.#-----------------------------------------------------------------------------
+.macro check_mbedtls(dependency, configure)
+.   define my.dependency = check_mbedtls.dependency
+.   define my.configure = check_mbedtls.configure
+.   require(my.dependency, "dependency", "name")
+.   require(my.dependency, "dependency", "version")
+.
+.   define my.name = my.dependency.name
+.   define my.cname = "$(my.dependency.name:c)"
+.   define my.version = my.dependency.version
+.   define my.default = my.dependency.default ? ""
+.   define my.prefix = is_true(my.dependency.unprefixed) ?? "" ? "lib"
+.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+.   define my.check = "$(my.prefix)$(my.name) >= $(my.version)"
+.   heading2("Require $(my.name) of at least version $(my.version) and output ${$(my.cname)_CPPFLAGS/LIBS/PKG}.")
+.   if (!is_empty(my.dependency.comment))
+.       heading3("$(my.dependency.comment)")
+.   endif
+.
+.   if (is_empty(my.symbol))
+AC_SUBST([$(my.cname)_INCLUDEDIR], [])
+AC_SUBST([$(my.cname)_OTHER_CPPFLAGS], [])
+AC_SUBST([$(my.cname)_CPPFLAGS], [])
+AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [])
+AC_SUBST([$(my.cname)_LIBS], [-lmbedtls -lmbedcrypto -lmbedx509])
+.   elsif (is_empty(my.dependency.extract))
+AS_CASE([${$(my.symbol)}], [yes],
+    [AC_SUBST([$(my.cname)_INCLUDEDIR], [])
+     AC_SUBST([$(my.cname)_OTHER_CPPFLAGS], [])
+     AC_SUBST([$(my.cname)_CPPFLAGS], [])
+     AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [])
+     AC_SUBST([$(my.cname)_LIBS], [-lmbedtls -lmbedcrypto -lmbedx509])],
+    [])
+.   else
+AS_CASE([${$(my.symbol)}], [yes],
+    [AC_SUBST([$(my.cname)_INCLUDEDIR], [])
+     AC_SUBST([$(my.cname)_OTHER_CPPFLAGS], [])
+     AC_SUBST([$(my.cname)_CPPFLAGS], [])
+     AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [])
+     AC_SUBST([$(my.cname)_LIBS], [-lmbedtls -lmbedcrypto -lmbedx509])],
+    [])
+.   endif
+
+AS_CASE([${enable_isystem}],[yes],
+    [AC_SUBST([$(my.cname)_BUILD_CPPFLAGS], [${$(my.cname)_ISYS_CPPFLAGS}])],
+    [AC_SUBST([$(my.cname)_BUILD_CPPFLAGS], [${$(my.cname)_CPPFLAGS}])])
+
+AC_MSG_NOTICE([$(my.cname)_BUILD_CPPFLAGS : ${$(my.cname)_BUILD_CPPFLAGS}])
+
+.endmacro
+.
+.#-----------------------------------------------------------------------------
 .# AX_CHECK_XXX_FLAG
 .#-----------------------------------------------------------------------------
 .macro render_flag(flag)
@@ -1013,6 +1066,8 @@ for generate.repository by name as _repository
                 check_boost(_dependency)
             elsif (is_boost_lib_dependency(_dependency))
                 check_boost_lib(_dependency, my.configure)
+            elsif (is_mbedtls_dependency(_dependency))
+                check_mbedtls(_dependency, my.configure)
             elsif (is_java_dependency(_dependency))
                 check_java(_dependency, my.configure)
             elsif (is_python_dependency(_dependency))
