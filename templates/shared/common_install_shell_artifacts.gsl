@@ -285,6 +285,10 @@ endfunction
 #                            accesses this feature, so if you do not intend to
 #                            use qrcode this dependency can be avoided.
 .   endif
+.   if (have_build(my.install, "mbedtls"))
+# --with-mbedtls          Compile with MbedTLS Support
+#                            Provides a websockets implementation for query.
+.   endif
 .   if (have_build(my.install, "icu"))
 # --build-icu              Builds ICU libraries.
 .   endif
@@ -359,6 +363,10 @@ display_help()
     display_message "                             accesses this feature, so if you do not intend to "
     display_message "                             use qrcode this dependency can be avoided."
 .   endif
+.   if (have_build(my.install, "mbedtls"))
+    display_message "  --with-mbedtls          Compile with MbedTLS Support"
+    display_message "                             Provides a websockets implementation for query."
+.   endif
 .   if (have_build(my.install, "icu"))
     display_message "  --build-icu              Builds ICU libraries."
 .   endif
@@ -376,6 +384,9 @@ display_help()
 .   endif
 .   if (have_build(my.install, "zmq"))
     display_message "  --build-zmq              Build ZeroMQ libraries."
+.   endif
+.   if (have_build(my.install, "mbedtls"))
+    display_message "  --build-mbedtls          Builds MbedTLS libraries."
 .   endif
 .   custom_help(my.repository, my.install, my.script_name)
     display_message "  --prefix=<absolute-path> Library install location (defaults to /usr/local)."
