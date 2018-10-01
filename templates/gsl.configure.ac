@@ -928,7 +928,7 @@ $(my.prefix)AC_SUBST([$(my.cname)_INCLUDEDIR], [])
 $(my.indent)AC_SUBST([$(my.cname)_OTHER_CPPFLAGS], [])
 $(my.indent)AC_SUBST([$(my.cname)_CPPFLAGS], [])
 $(my.indent)AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [])
-$(my.indent)AC_SUBST([$(my.cname)_LIBS], [-lmbedtls -lmbedcrypto -lmbedx509])
+$(my.indent)AC_SUBST([$(my.cname)_LIBS], ["-lmbedtls -lmbedcrypto -lmbedx509"])
 $(my.indent)AC_MSG_NOTICE([$(my.cname) presumed, not detected - absence of -lmbedtls -lmbedcrypto -lmbedx509 may result in link error.])$(my.suffix)
 .endmacro
 .
