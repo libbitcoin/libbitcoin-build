@@ -71,7 +71,8 @@ function define_library_variables(variables, library, make, configure, repositor
         if (!defined(my.dependency))
             abort "The packaged library has no dependency: $(my.name)"
         endif
-        define my.is_package = is_package_dependency(my.dependency)
+        define my.is_mbedtls = is_mbedtls_dependency(my.dependency)
+        define my.is_package = is_package_dependency(my.dependency) & !my.is_mbedtls
         define my.is_function = is_function_dependency(my.dependency)
         define my.is_boost = is_boost_dependency(my.dependency)
         define my.is_boost_lib = is_boost_lib_dependency(my.dependency)
@@ -86,14 +87,14 @@ function define_library_variables(variables, library, make, configure, repositor
         if (my.is_boost)
             my.variables.libs$(my.private) += " @$(my.cname)_LDFLAGS@"
         endif
-        if (my.is_boost_lib | my.is_common | my.is_function)
+        if (my.is_boost_lib | my.is_common | my.is_function | my.is_mbedtls)
             my.variables.libs$(my.private) += " @$(my.cname)_LIBS@"
         endif
         if (my.is_package)
             define my.package = format_conditional_pkg(my.dependency)
             my.variables.requires$(my.private) += " $(my.package)"
         endif
-        if (my.is_boost | my.is_common | my.is_language)
+        if (my.is_boost | my.is_common | my.is_language | my.is_mbedtls)
             my.variables.cflags += " @$(my.cname)_CPPFLAGS@"
         endif
     endif

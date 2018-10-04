@@ -166,9 +166,15 @@ build_from_tarball()
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
-    configure_options "${CONFIGURATION[@]}"
-    make_jobs $JOBS --silent
-    make install
+    if [[ $ARCHIVE == $MBEDTLS_ARCHIVE ]]; then
+        make -j $JOBS lib
+        make DESTDIR=$PREFIX install
+    else
+        configure_options "${CONFIGURATION[@]}"
+        make_jobs $JOBS --silent
+        make install
+    fi
+
     configure_links
 
     # Enable shared only zlib build.
@@ -389,6 +395,10 @@ build_from_travis()
     build_from_tarball $ZMQ_URL $ZMQ_ARCHIVE gzip . $PARALLEL "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
 .endmacro # build_zmq
 .
+.macro build_from_tarball_mbedtls()
+    build_from_tarball $MBEDTLS_URL $MBEDTLS_ARCHIVE gzip . $PARALLEL "$BUILD_MBEDTLS" "${MBEDTLS_OPTIONS[@]}" "$@"
+.endmacro # build_mbedtls
+.
 .macro build_boost()
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE bzip2 . $PARALLEL "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
 .endmacro # build_boost
@@ -426,6 +436,8 @@ build_all()
 .               build_from_tarball_qrencode()
 .           elsif (is_zmq_build(_build))
 .               build_from_tarball_zmq()
+.           elsif (is_mbedtls_build(_build))
+.               build_from_tarball_mbedtls()
 .           elsif (is_boost_build(_build))
 .               build_boost()
 .           elsif (is_github_build(_build))
@@ -484,6 +496,7 @@ for generate.repository by name as _repository
     define_png(my.install)
     define_qrencode(my.install)
     define_zmq(my.install)
+    define_mbedtls(my.install)
     define_boost(my.install)
 
     heading1("Define utility functions.")
@@ -492,7 +505,7 @@ for generate.repository by name as _repository
 
     heading1("Initialize the build environment.")
     define_set_exit_on_error()
-    define_read_parameters()
+    define_read_parameters(_repository, my.install)
     define_parallelism()
     define_os_specific_settings()
     define_normalized_configure_options()

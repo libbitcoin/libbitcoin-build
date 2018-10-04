@@ -183,6 +183,11 @@ function global.is_boost_lib_dependency(dependency)
     return starts_with(my.dependency.name, "boost_")
 endfunction
 
+function global.is_mbedtls_dependency(dependency)
+    define my.dependency = is_mbedtls_dependency.dependency
+    return match_name(my.dependency, "mbedtls")
+endfunction
+
 function global.is_java_dependency(dependency)
     define my.dependency = is_java_dependency.dependency
     return match_name(my.dependency, "java")
@@ -368,6 +373,11 @@ endfunction
 function global.is_zmq_build(build)
     define my.build = is_zmq_build.build
     return starts_with(my.build.name, "zmq")
+endfunction
+
+function global.is_mbedtls_build(build)
+    define my.build = is_mbedtls_build.build
+    return starts_with(my.build.name, "mbedtls")
 endfunction
 
 function global.is_boost_build(build)

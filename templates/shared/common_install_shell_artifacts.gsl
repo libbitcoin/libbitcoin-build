@@ -182,6 +182,37 @@ function get_zmq_url(install)
     return my.url
 endfunction
 
+# Functions with specific knowledge of MBEDTLS archive file name and URL structure.
+
+function get_mbedtls_file(install)
+    define my.install = get_mbedtls_file.install
+    define my.version = get_archive_version(my.install, "mbedtls")?
+    if (!defined(my.version))
+        trace1("get_mbedtls_file:get_archive_version() = []")
+        return
+    endif
+    return "mbedtls-$(my.version)-apache.tgz"
+endfunction
+
+function get_mbedtls_url(install)
+    trace1("get_mbedtls_url()")
+    define my.install = get_mbedtls_url.install
+    define my.version = get_archive_version(my.install, "mbedtls")?
+    if (!defined(my.version))
+        trace1("get_mbedtls_url:get_archive_version() = []")
+        return
+    endif
+    define my.archive = get_mbedtls_file(my.install)?
+    if (!defined(my.archive))
+        trace1("get_mbedtls_url:get_mbedtls_file() = []")
+        return
+    endif
+    define my.base_url = "https\://tls.mbed.org/download"
+    define my.url = "$(my.base_url)/$(my.archive)"
+    trace1("get_mbedtls_url = $(my.url)")
+    return my.url
+endfunction
+
 # Functions with specific knowledge of Boost archive file name and URL structure.
 
 function get_boost_file(install)
@@ -254,6 +285,10 @@ endfunction
 #                            accesses this feature, so if you do not intend to
 #                            use qrcode this dependency can be avoided.
 .   endif
+.   if (have_build(my.install, "mbedtls"))
+# --with-mbedtls          Compile with MbedTLS Support
+#                            Provides a websockets implementation for query.
+.   endif
 .   if (have_build(my.install, "icu"))
 # --build-icu              Builds ICU libraries.
 .   endif
@@ -271,6 +306,9 @@ endfunction
 .   endif
 .   if (have_build(my.install, "zmq"))
 # --build-zmq              Builds ZeroMQ libraries.
+.   endif
+.   if (have_build(my.install, "mbedtls"))
+# --build-mbedtls          Builds MbedTLS libraries.
 .   endif
 .   custom_documentation(my.repository, my.install)
 # --prefix=<absolute-path> Library install location (defaults to /usr/local).
@@ -325,6 +363,10 @@ display_help()
     display_message "                             accesses this feature, so if you do not intend to "
     display_message "                             use qrcode this dependency can be avoided."
 .   endif
+.   if (have_build(my.install, "mbedtls"))
+    display_message "  --with-mbedtls          Compile with MbedTLS Support"
+    display_message "                             Provides a websockets implementation for query."
+.   endif
 .   if (have_build(my.install, "icu"))
     display_message "  --build-icu              Builds ICU libraries."
 .   endif
@@ -342,6 +384,9 @@ display_help()
 .   endif
 .   if (have_build(my.install, "zmq"))
     display_message "  --build-zmq              Build ZeroMQ libraries."
+.   endif
+.   if (have_build(my.install, "mbedtls"))
+    display_message "  --build-mbedtls          Builds MbedTLS libraries."
 .   endif
 .   custom_help(my.repository, my.install, my.script_name)
     display_message "  --prefix=<absolute-path> Library install location (defaults to /usr/local)."
@@ -394,6 +439,9 @@ display_configuration()
 .   if (have_build(my.install, "zmq"))
     display_message "BUILD_ZMQ             : $BUILD_ZMQ"
 .   endif
+.   if (have_build(my.install, "mbedtls"))
+    display_message "BUILD_MBEDTLS         : $BUILD_MBEDTLS"
+.   endif
 .   if (have_build(my.install, "boost"))
     display_message "BUILD_BOOST           : $BUILD_BOOST"
 .   endif
@@ -408,7 +456,9 @@ display_configuration()
 
 .endmacro # define_display_configuration
 .
-.macro define_read_parameters()
+.macro define_read_parameters(repository, install)
+.   define my.repository = define_read_parameters.repository
+.   define my.install = define_read_parameters.install
 .   heading2("Parse command line options that are handled by this script.")
 for OPTION in "$@"; do
     case $OPTION in
@@ -421,16 +471,35 @@ for OPTION in "$@"; do
         (--disable-static)      DISABLE_STATIC="yes";;
 
         # Common project options.
+.   if (have_build(my.install, "icu"))
         (--with-icu)            WITH_ICU="yes";;
+.   endif
+.   if (have_build(my.install, "png"))
         (--with-png)            WITH_PNG="yes";;
+.   endif
+.   if (have_build(my.install, "qrencode"))
         (--with-qrencode)       WITH_QRENCODE="yes";;
+.   endif
 
         # Custom build options (in the form of --build-<option>).
+.   if (have_build(my.install, "icu"))
         (--build-icu)           BUILD_ICU="yes";;
+.   endif
+.   if (have_build(my.install, "zlib"))
         (--build-zlib)          BUILD_ZLIB="yes";;
+.   endif
+.   if (have_build(my.install, "png"))
         (--build-png)           BUILD_PNG="yes";;
+.   endif
+.   if (have_build(my.install, "qrencode"))
         (--build-qrencode)      BUILD_QRENCODE="yes";;
+.   endif
+.   if (have_build(my.install, "zmq"))
         (--build-zmq)           BUILD_ZMQ="yes";;
+.   endif
+.   if (have_build(my.install, "mbedtls"))
+        (--build-mbedtls)       BUILD_MBEDTLS="yes";;
+.   endif
         (--build-boost)         BUILD_BOOST="yes";;
 
 .   custom_script_options()
@@ -503,6 +572,19 @@ ZMQ_URL="$(my.url)"
 ZMQ_ARCHIVE="$(get_zmq_file(my.install))"
 
 .endmacro # define_zmq
+.
+.macro define_mbedtls(install)
+.   define my.install = define_mbedtls.install
+.   define my.url = get_mbedtls_url(my.install)?
+.   if (!defined(my.url))
+.       #abort "A version of MBEDTLS is not defined."
+.       return
+.   endif
+.   heading2("MBEDTLS archive.")
+MBEDTLS_URL="$(my.url)"
+MBEDTLS_ARCHIVE="$(get_mbedtls_file(my.install))"
+
+.endmacro # define_mbedtls
 .
 .macro define_boost(install)
 .   define my.install = define_boost.install
