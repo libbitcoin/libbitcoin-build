@@ -755,7 +755,12 @@ initialize_git()
 
 .endmacro # define_initialize_git
 .
-.macro define_make_tests()
+.macro define_make_tests(has_preclean_option)
+.   define my.make_jobs_preclean = is_true(my.has_preclean_option) \
+        ?? "make_jobs true" ? "make_jobs"
+.   define my.make_jobs_noclean = is_true(my.has_preclean_option) \
+        ?? "make_jobs false" ? "make_jobs"
+.
 # make_tests jobs
 make_tests()
 {
@@ -766,7 +771,7 @@ make_tests()
 
     # Build and run unit tests relative to the primary directory.
     # VERBOSE=1 ensures test runner output sent to console (gcc).
-    make_jobs $JOBS check "VERBOSE=1"
+    $(my.make_jobs_noclean) $JOBS check "VERBOSE=1"
     local RESULT=$?
 
     # Test runners emit to the test.log file.
@@ -846,10 +851,15 @@ clean_zlib_build()
 
 .endmacro # define_clean_zlib_build
 .
-.macro define_tarball_functions()
+.macro define_tarball_functions(has_preclean_option)
 .   define_initialize_icu_packages()
 .   define_patch_zlib_configuration()
 .   define_clean_zlib_build()
+.
+.   define my.make_jobs_preclean = is_true(my.has_preclean_option) \
+        ?? "make_jobs true" ? "make_jobs"
+.   define my.make_jobs_noclean = is_true(my.has_preclean_option) \
+        ?? "make_jobs false" ? "make_jobs"
 .
 extract_from_tarball()
 {
@@ -948,7 +958,7 @@ build_from_tarball()
 
     push_obj_directory "$TARGET"
     configure_options "$PROJ_CONFIG_DIR" "${CONFIGURATION[@]}"
-    make_jobs $JOBS --silent
+    $(my.make_jobs_preclean) $JOBS --silent
     make install
     configure_links
 
@@ -1018,7 +1028,7 @@ build_from_github()
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
-  display_heading_message "Prepairing to build $REPO"
+    display_heading_message "Prepairing to build $REPO"
 
     # Build the local repository clone.
     make_project_directory "$REPO" $JOBS $TEST "${CONFIGURATION[@]}"

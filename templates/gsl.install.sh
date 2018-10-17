@@ -107,7 +107,7 @@ make_jobs()
 .   define_initialize_git()
 .   define_make_current_directory()
 .   define_make_jobs()
-.   define_make_tests()
+.   define_make_tests("false")
 .   define_push_pop_directory()
 .endmacro # define_utility_functions
 .
