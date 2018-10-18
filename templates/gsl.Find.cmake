@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2016 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
 #
 # GSL generate Find<pkg-config dependency>.cmake.
 #

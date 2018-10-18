@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
 #
 # GSL generate copy_properties.sh.
 #
@@ -25,7 +25,7 @@ declare -a vs_version=( \\
     "vs2015" \\
     "vs2017" \\
     )
-    
+
 .endmacro
 .
 .macro emit_import_copy(output, repository_name, import_name)
