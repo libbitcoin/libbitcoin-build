@@ -1,0 +1,73 @@
+###############################################################################
+#  Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+#
+###############################################################################
+# FindMbedtls
+#
+# Use this module by invoking find_package with the form::
+#
+#   find_package( Mbedtls
+#     [version]           # Minimum version (ignored)
+#     [REQUIRED]          # Fail with error if mbedtls is not found
+#   )
+#
+#   Defines the following for use:
+#
+#   mbedtls_FOUND         - true if headers and requested libraries were found
+#   mbedtls_LIBRARIES     - mbedtls libraries to be linked
+#   mbedtls_LIBS          - mbedtls libraries to be linked
+#
+
+if (DEFINED Mbedtls_FIND_VERSION)
+    message( SEND_ERROR
+        "Library 'mbedtls' unable to process version: ${Mbedtls_FIND_VERSION}" )
+endif()
+
+
+if (MSVC)
+    if ( Mbedtls_FIND_REQUIRED )
+        set( _mbedtls_MSG_STATUS "SEND_ERROR" )
+    else ()
+        set( _mbedtls_MSG_STATUS "STATUS" )
+    endif()
+
+    set( mbedtls_FOUND false )
+    message( ${_mbedtls_MSG_STATUS}
+        "MSVC environment detection for 'mbedtls' not currently supported." )
+else ()
+    # required
+    if ( Mbedtls_FIND_REQUIRED )
+        set( _mbedtls_REQUIRED "REQUIRED" )
+    endif()
+
+    # conditionally include static library suffix
+    if (BUILD_SHARED_LIBS)
+        set( _mbedtls_lib_name "mbedtls" )
+        set( _mbedcrypto_lib_name "mbedcrypto" )
+        set( _mbedx509_lib_name "mbedx509" )
+    else ()
+        set( _mbedtls_lib_name "mbedtls.a" )
+        set( _mbedcrypto_lib_name "mbedcrypto.a" )
+        set( _mbedx509_lib_name "mbedx509.a" )
+    endif()
+
+    find_library( tls_LIBRARIES     ${_mbedtls_lib_name} )
+    find_library( crypto_LIBRARIES  ${_mbedcrypto_lib_name} )
+    find_library( x509_LIBRARIES    ${_mbedx509_lib_name} )
+
+    if (tls_LIBRARIES-NOTFOUND OR crypto_LIBRARIES-NOTFOUND OR x509_LIBRARIES-NOTFOUND)
+        set( mbedtls_FOUND false )
+    else ()
+        set( mbedtls_FOUND true )
+        set( mbedtls_LIBRARIES "${tls_LIBRARIES} ${crypto_LIBRARIES} ${x509_LIBRARIES}" )
+        set( mbedtls_LIBS "-lmbedtls -lmbedcrypto -lmbedx509" )
+    endif()
+
+    if (BUILD_SHARED_LIBS)
+        set( mbedtls_STATIC_LIBRARIES "${mbedtls_LIBRARIES}" )
+    endif()
+endif()
+
+if ( Mbedtls_FIND_REQUIRED AND ( NOT mbedtls_FOUND ) )
+    message( SEND_ERROR "Library 'mbedtls'  not found." )
+endif()

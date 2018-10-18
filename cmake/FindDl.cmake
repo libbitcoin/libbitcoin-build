@@ -1,3 +1,7 @@
+###############################################################################
+#  Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+#
+###############################################################################
 # Finddl
 #
 # Use this module by invoking find_package with the form::

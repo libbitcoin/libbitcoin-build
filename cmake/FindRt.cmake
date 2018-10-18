@@ -1,3 +1,7 @@
+###############################################################################
+#  Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+#
+###############################################################################
 # Findrt
 #
 # Use this module by invoking find_package with the form::
@@ -14,14 +18,19 @@
 #
 
 if (DEFINED rt_FIND_VERSION)
-    message( SEND_ERROR "Library 'rt' unable to process specified version: ${rt_FIND_VERSION}" )
+    message( SEND_ERROR
+        "Library 'rt' unable to process version: ${rt_FIND_VERSION}" )
 endif()
 
 if (MSVC)
-    message( STATUS "MSVC environment detection for rt not currently supported." )
+    message( STATUS
+        "MSVC environment detection for rt not currently supported." )
+
     set( rt_FOUND false )
 elseif (ANDROID)
-    message( STATUS "ANDROID enviornment detection for rt skipped, provided by libc." )
+    message( STATUS
+        "ANDROID enviornment detection for rt skipped, provided by libc." )
+
     set( rt_FOUND true )
 else ()
     # required
