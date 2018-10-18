@@ -265,29 +265,40 @@ endfunction
 # Option utilities.
 #------------------------------------------------------------------------------
 
-function global.get_option_symbol(option)
-    define my.option = get_option_symbol.option
+function global.get_option_symbol_generic(option, seperator)
+    define my.option = get_option_symbol_generic.option
     if (defined(my.option))
         require(my.option, "option", "type")
         require(my.option, "option", "name")
         define my.prefix = ""
         if (!is_true(my.option.unprefixed))
-            my.prefix = "$(my.option.type:c)_"
+            my.prefix = "$(my.option.type:c)$(my.seperator)"
         endif
         return "$(my.prefix)$(my.option.name:c)"
+    endif
+endfunction
+
+function global.get_option_symbol(option)
+    define my.option = get_option_symbol.option
+    return get_option_symbol_generic(my.option, "_")
+endfunction
+
+function global.find_option_symbol_generic(element, configure, seperator)
+    define my.element = find_option_symbol_generic.element
+    define my.configure = find_option_symbol_generic.configure
+    if (is_optional_element(my.element))
+        define my.opt = my.configure->option(option.name = my.element.option)?
+        if (defined(my.opt))
+            return get_option_symbol_generic(my.opt, my.seperator)
+        endif
+        abort "Symbol not defined for option: $(my.element.option)"
     endif
 endfunction
 
 function global.find_option_symbol(element, configure)
     define my.element = find_option_symbol.element
     define my.configure = find_option_symbol.configure
-    if (is_optional_element(my.element))
-        define my.opt = my.configure->option(option.name = my.element.option)?
-        if (defined(my.opt))
-            return get_option_symbol(my.opt)
-        endif
-        abort "Symbol not defined for option: $(my.element.option)"
-    endif
+    return find_option_symbol_generic(my.element, my.configure, "_")
 endfunction
 
 #------------------------------------------------------------------------------

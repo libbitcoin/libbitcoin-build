@@ -315,6 +315,8 @@ function emit_dependencies(repository)
         elsif (is_java_dependency(_dependency))
             emit_java_dependency_option(_dependency, my.repository->configure, "")
         elsif (is_python_dependency(_dependency))
+        elsif (is_mbedtls_dependency(_dependency))
+            emit_find_mbedtls_option(_dependency, my.repository->configure, "")
         elsif (is_package_dependency(_dependency))
             emit_find_dependency_option(_dependency, my.repository->configure, "")
         elsif (is_pthread_dependency(_dependency))
@@ -369,7 +371,9 @@ function emit_product_target(repository, product, path_prefix)
     define my.repository = emit_product_target.repository
     define my.product = emit_product_target.product
     define my.repository_path = append_path(global.root, my.repository.name)
-    define my.option = find_option_symbol(my.product, my.repository->configure)?
+    define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-")?
+
     define my.indent = defined(my.option) ?? "    " ? ""
 
     define my.target_name = (my.product.prefix = "lib" & my.product.path = "src") ??\
@@ -408,7 +412,9 @@ function emit_jar_product(repository, javaexec, jarexec, path_prefix)
     define my.javaexec = emit_jar_product.javaexec
     define my.jarexec = emit_jar_product.jarexec
     define my.repository_path = append_path(global.root, my.repository.name)
-    define my.option = find_option_symbol(my.jarexec, my.repository->configure)?
+    define my.option = find_option_symbol_generic(my.jarexec,\
+        my.repository->configure, "-")?
+
     define my.indent = defined(my.option) ?? "    " ? ""
 
     define my.target_name = my.jarexec->file.path
@@ -940,7 +946,7 @@ $(my.indent)$(my.name)( $(my.target_name)
 .   require(my.option, "option", "type")
 .
 .   define my.type = get_option_type(my.option)
-.   define my.symbol = get_option_symbol(my.option)
+.   define my.symbol = get_option_symbol_generic(my.option, "-")
 .   define my.data_type = get_option_data_type(my.option)
 .
 .   define my.implement = is_true(inherited) ?? "Inherit" ? "Implement"
@@ -1009,7 +1015,7 @@ endif()
 .   define my.features = emit_find_package_dependency.features
 .   require(my.dependency, "dependency", "name")
 .
-.   heading2("Find boost")
+.   heading2("Find $(my.dependency.name)")
 .   if (count(my.features.element) > 0)
 find_package( $(my.dependency.name:neat) $(my.dependency.version) REQUIRED COMPONENTS
 .       for my.features.element as _element
@@ -1023,7 +1029,8 @@ set( $(my.dependency.name)_$(_element.name)_LIBS "-l$(my.dependency.name)_$(_ele
 find_package( $(my.dependency.name) $(my.dependency.version) )
 .   endif
 
-if (enable_ndebug)
+.# NOTE: enable-ndebug hardcoded match to configuration option
+if (enable-ndebug)
     set( $(my.dependency.name:neat)_LIBRARY_DIR "\${$(my.dependency.name:neat)_LIBRARY_DIR_DEBUG}" )
 else ()
     set( $(my.dependency.name:neat)_LIBRARY_DIR "\${$(my.dependency.name:neat)_LIBRARY_DIR_RELEASE}" )
@@ -1043,10 +1050,10 @@ set( CMAKE_THREAD_PREFER_PTHREAD ON )
 set( THREADS_PREFER_PTHREAD_FLAG ON )
 
 .
-.   new dependency as _dependency
-.       copy my.dependency to _dependency
-.       _dependency.name = "threads"
-.       emit_find_dependency_option(_dependency, my.configure, "")
+.   new configure as _dependencies
+.       copy my.dependency to _dependencies as dependency
+.       _dependencies->dependency.name = "threads"
+.       emit_find_dependency_option(_dependencies->dependency, my.configure, "")
 .   endnew
 .
 if ( Threads_FOUND $(is_empty(my.case) ?? "" ? "AND $(my.case) "))
@@ -1061,9 +1068,13 @@ endif()
 .macro emit_find_dependency(dependency, configure, indent)
 .   define my.dependency = emit_find_dependency.dependency
 .   define my.configure = emit_find_dependency.configure
-.   define my.version = defined(my.dependency.version) ?? my.dependency.version ? ""
+.   define my.version = ""
 .
-$(my.indent)find_package( $(my.dependency.name:neat) $(my.version) REQUIRED )
+.   if (defined(my.dependency.version) & !is_empty(my.dependency.version))
+.       my.version = " $(my.dependency.version)"
+.   endif
+.
+$(my.indent)find_package( $(my.dependency.name:neat)$(my.version) REQUIRED )
 .   if (is_empty(my.indent))
 
 .   endif
@@ -1091,7 +1102,8 @@ $(my.indent)endif()
 .   define my.dependency = emit_find_dependency_option.dependency
 .   define my.configure = emit_find_dependency_option.configure
 .
-.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+.   define my.symbol = find_option_symbol_generic(my.dependency,\
+        my.configure, "-")?
 .
 .   heading2("Find $(my.dependency.name)")
 .   if (is_empty(my.symbol))
@@ -1107,6 +1119,20 @@ $(my.indent)endif()
 .   endif
 .endmacro # emit_find_dependency_option
 .
+.macro emit_find_mbedtls_option(dependency, configure, indent)
+.   define my.dependency = emit_find_mbedtls_option.dependency
+.   define my.configure = emit_find_mbedtls_option.configure
+.
+.   new configure as _dependencies
+.       copy my.dependency to _dependencies
+.       if (defined(_dependencies->dependency.version))
+.           _dependencies->dependency.version = ""
+.       endif
+.
+.       emit_find_dependency_option(_dependencies->dependency, my.configure,\
+            my.indent)
+.   endnew
+.endmacro # emit_find_mbedtls_option
 .
 .macro emit_java_dependency(dependency, configure, indent)
 .   define my.dependency = emit_java_dependency.dependency
@@ -1156,7 +1182,8 @@ $(my.indent)endif()
 .   define my.dependency = emit_java_dependency_option.dependency
 .   define my.configure = emit_java_dependency_option.configure
 .
-.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
+.   define my.symbol = find_option_symbol_generic(my.dependency,\
+        my.configure, "-")?
 .
 .   heading2("Find $(my.dependency.name)")
 .   if (is_empty(my.symbol))
@@ -1220,7 +1247,8 @@ $(my.indent)add_jar( $(my.target_name)-jar SOURCES
 .macro emit_product_install(repository, product, path_prefix)
 .   define my.repository = emit_product_install.repository
 .   define my.product = emit_product_install.product
-.   define my.option = find_option_symbol(my.product, my.repository->configure)?
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-")?
 .
 .   define my.target = target_name(my.product, my.repository)
 .   if (my.target = my.repository.name)
@@ -1247,7 +1275,8 @@ endif()
 .macro emit_doc_install(repository, product, path_prefix)
 .   define my.repository = emit_doc_install.repository
 .   define my.product = emit_doc_install.product
-.   define my.option = find_option_symbol(my.product, my.repository->configure)?
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-")?
 .
 .   if (count(my.product.file, defined(count.path)) > 0)
 .       define my.destination = "share/doc/$(my.repository.name)"
@@ -1272,7 +1301,8 @@ endif()
 .macro emit_pkgconfig_install(repository, product, path_prefix)
 .   define my.repository = emit_pkgconfig_install.repository
 .   define my.product = emit_pkgconfig_install.product
-.   define my.option = find_option_symbol(my.product, my.repository->configure)?
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-")?
 .
 .   if (count(my.product.file, defined(count.path)) > 0)
 .       define my.destination = "lib/pkgconfig"
@@ -1304,7 +1334,8 @@ endif()
 .macro emit_jarexec_install(repository, product, path_prefix)
 .   define my.repository = emit_jarexec_install.repository
 .   define my.product = emit_jarexec_install.product
-.   define my.option = find_option_symbol(my.product, my.repository->configure)?
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-")?
 .
 .   if (count(my.product.file, defined(count.path)) > 0)
 .       define my.destination = "share/java"
@@ -1330,7 +1361,8 @@ endif()
 .macro emit_include_install(repository, product, path_prefix)
 .   define my.repository = emit_include_install.repository
 .   define my.product = emit_include_install.product
-.   define my.option = find_option_symbol(my.product, my.repository->configure)?
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-")?
 .
 .   if (count(my.product.files, !is_empty(count.path)) > 0)
 .       define my.indent = defined(my.option) ?? "    " ? ""
@@ -1355,7 +1387,8 @@ endif()
 .macro emit_data_install(repository, product, path_prefix)
 .   define my.repository = emit_data_install.repository
 .   define my.product = emit_data_install.product
-.   define my.option = find_option_symbol(my.product, my.repository->configure)?
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-")?
 .
 .   if (count(my.product.file, !is_empty(count.path)) > 0)
 .       define my.destination = "etc/libbitcoin"
