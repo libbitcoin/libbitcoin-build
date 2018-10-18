@@ -265,31 +265,39 @@ endfunction
 # Option utilities.
 #------------------------------------------------------------------------------
 
-function global.get_option_symbol_generic(option, seperator)
+function global.get_option_symbol_generic(option, seperator, cstyle)
     define my.option = get_option_symbol_generic.option
     if (defined(my.option))
         require(my.option, "option", "type")
         require(my.option, "option", "name")
         define my.prefix = ""
-        if (!is_true(my.option.unprefixed))
-            my.prefix = "$(my.option.type:c)$(my.seperator)"
+        define my.name = "$(my.option.name:lower)"
+        define my.type = "$(my.option.type:lower)"
+
+        if (is_true(my.cstyle))
+            my.name = "$(my.option.name:c)"
+            my.type = "$(my.option.type:c)"
         endif
-        return "$(my.prefix)$(my.option.name:c)"
+
+        if (!is_true(my.option.unprefixed))
+            my.prefix = "$(my.type)$(my.seperator)"
+        endif
+        return "$(my.prefix)$(my.name)"
     endif
 endfunction
 
 function global.get_option_symbol(option)
     define my.option = get_option_symbol.option
-    return get_option_symbol_generic(my.option, "_")
+    return get_option_symbol_generic(my.option, "_", "true")
 endfunction
 
-function global.find_option_symbol_generic(element, configure, seperator)
+function global.find_option_symbol_generic(element, configure, seperator, cstyle)
     define my.element = find_option_symbol_generic.element
     define my.configure = find_option_symbol_generic.configure
     if (is_optional_element(my.element))
         define my.opt = my.configure->option(option.name = my.element.option)?
         if (defined(my.opt))
-            return get_option_symbol_generic(my.opt, my.seperator)
+            return get_option_symbol_generic(my.opt, my.seperator, my.cstyle)
         endif
         abort "Symbol not defined for option: $(my.element.option)"
     endif
@@ -298,7 +306,7 @@ endfunction
 function global.find_option_symbol(element, configure)
     define my.element = find_option_symbol.element
     define my.configure = find_option_symbol.configure
-    return find_option_symbol_generic(my.element, my.configure, "_")
+    return find_option_symbol_generic(my.element, my.configure, "_", "true")
 endfunction
 
 #------------------------------------------------------------------------------

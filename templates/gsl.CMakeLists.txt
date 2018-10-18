@@ -372,7 +372,7 @@ function emit_product_target(repository, product, path_prefix)
     define my.product = emit_product_target.product
     define my.repository_path = append_path(global.root, my.repository.name)
     define my.option = find_option_symbol_generic(my.product,\
-        my.repository->configure, "-")?
+        my.repository->configure, "-", "false")?
 
     define my.indent = defined(my.option) ?? "    " ? ""
 
@@ -413,7 +413,7 @@ function emit_jar_product(repository, javaexec, jarexec, path_prefix)
     define my.jarexec = emit_jar_product.jarexec
     define my.repository_path = append_path(global.root, my.repository.name)
     define my.option = find_option_symbol_generic(my.jarexec,\
-        my.repository->configure, "-")?
+        my.repository->configure, "-", "false")?
 
     define my.indent = defined(my.option) ?? "    " ? ""
 
@@ -946,7 +946,7 @@ $(my.indent)$(my.name)( $(my.target_name)
 .   require(my.option, "option", "type")
 .
 .   define my.type = get_option_type(my.option)
-.   define my.symbol = get_option_symbol_generic(my.option, "-")
+.   define my.symbol = get_option_symbol_generic(my.option, "-", "false")
 .   define my.data_type = get_option_data_type(my.option)
 .
 .   define my.implement = is_true(inherited) ?? "Inherit" ? "Implement"
@@ -1103,7 +1103,7 @@ $(my.indent)endif()
 .   define my.configure = emit_find_dependency_option.configure
 .
 .   define my.symbol = find_option_symbol_generic(my.dependency,\
-        my.configure, "-")?
+        my.configure, "-", "false")?
 .
 .   heading2("Find $(my.dependency.name)")
 .   if (is_empty(my.symbol))
@@ -1183,7 +1183,7 @@ $(my.indent)endif()
 .   define my.configure = emit_java_dependency_option.configure
 .
 .   define my.symbol = find_option_symbol_generic(my.dependency,\
-        my.configure, "-")?
+        my.configure, "-", "false")?
 .
 .   heading2("Find $(my.dependency.name)")
 .   if (is_empty(my.symbol))
@@ -1248,7 +1248,7 @@ $(my.indent)add_jar( $(my.target_name)-jar SOURCES
 .   define my.repository = emit_product_install.repository
 .   define my.product = emit_product_install.product
 .   define my.option = find_option_symbol_generic(my.product,\
-        my.repository->configure, "-")?
+        my.repository->configure, "-", "false")?
 .
 .   define my.target = target_name(my.product, my.repository)
 .   if (my.target = my.repository.name)
@@ -1276,7 +1276,7 @@ endif()
 .   define my.repository = emit_doc_install.repository
 .   define my.product = emit_doc_install.product
 .   define my.option = find_option_symbol_generic(my.product,\
-        my.repository->configure, "-")?
+        my.repository->configure, "-", "false")?
 .
 .   if (count(my.product.file, defined(count.path)) > 0)
 .       define my.destination = "share/doc/$(my.repository.name)"
@@ -1302,7 +1302,7 @@ endif()
 .   define my.repository = emit_pkgconfig_install.repository
 .   define my.product = emit_pkgconfig_install.product
 .   define my.option = find_option_symbol_generic(my.product,\
-        my.repository->configure, "-")?
+        my.repository->configure, "-", "false")?
 .
 .   if (count(my.product.file, defined(count.path)) > 0)
 .       define my.destination = "lib/pkgconfig"
@@ -1335,7 +1335,7 @@ endif()
 .   define my.repository = emit_jarexec_install.repository
 .   define my.product = emit_jarexec_install.product
 .   define my.option = find_option_symbol_generic(my.product,\
-        my.repository->configure, "-")?
+        my.repository->configure, "-", "false")?
 .
 .   if (count(my.product.file, defined(count.path)) > 0)
 .       define my.destination = "share/java"
@@ -1362,7 +1362,7 @@ endif()
 .   define my.repository = emit_include_install.repository
 .   define my.product = emit_include_install.product
 .   define my.option = find_option_symbol_generic(my.product,\
-        my.repository->configure, "-")?
+        my.repository->configure, "-", "false")?
 .
 .   if (count(my.product.files, !is_empty(count.path)) > 0)
 .       define my.indent = defined(my.option) ?? "    " ? ""
@@ -1388,7 +1388,7 @@ endif()
 .   define my.repository = emit_data_install.repository
 .   define my.product = emit_data_install.product
 .   define my.option = find_option_symbol_generic(my.product,\
-        my.repository->configure, "-")?
+        my.repository->configure, "-", "false")?
 .
 .   if (count(my.product.file, !is_empty(count.path)) > 0)
 .       define my.destination = "etc/libbitcoin"
