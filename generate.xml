@@ -684,8 +684,8 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." />
-      <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." />
+      <!-- <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." /> -->
+      <!-- <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." /> -->
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -735,8 +735,8 @@
           <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.16" />
           <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.16" />
       </dependency>
-      <dependency name="java" option="java" />
-      <dependency name="python" version="2.7" option="python" />
+      <!-- <dependency name="java" option="java" /> -->
+      <!-- <dependency name="python" version="2.7" option="python" /> -->
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -791,27 +791,27 @@
       <product prefix="include" container="bitcoin" >
         <files path="include/bitcoin" />
       </product>
-      <product prefix="lib" path="bindings/java/wrap" target_name="libbitcoin-consensus-jni" option="java" >
+      <!-- <product prefix="lib" path="bindings/java/wrap" target_name="libbitcoin-consensus-jni" option="java" >
         <library name="bitcoin-consensus" />
         <library name="java" />
         <headers path="include" />
         <sources path="bindings/java/wrap" />
-      </product>
-      <product prefix="javaexec" distribute="true" install="false" option="java" >
+      </product> -->
+      <!-- <product prefix="javaexec" distribute="true" install="false" option="java" >
         <files path="bindings/java/proxy/org/libbitcoin/consensus" />
-      </product>
-      <product prefix="jarexec" distribute="false" install="true" option="java" >
+      </product> -->
+      <!-- <product prefix="jarexec" distribute="false" install="true" option="java" >
         <file path="org.libbitcoin.consensus-${VERSION}.jar" />
-      </product>
-      <product prefix="pkgpyexec" path="bindings/python/wrap" target_name="_bitcoin-consensus" unprefixed="true" option="python" >
+      </product> -->
+      <!-- <product prefix="pkgpyexec" path="bindings/python/wrap" target_name="_bitcoin-consensus" unprefixed="true" option="python" >
         <library name="bitcoin-consensus" />
         <library name="python" />
         <headers path="include" />
         <sources path="bindings/python/wrap" />
-      </product>
-      <product prefix="pkgpython" option="python" >
+      </product> -->
+      <!-- <product prefix="pkgpython" option="python" >
         <files path="bindings/python/proxy" />
-      </product>
+      </product> -->
     </make>
 
     <install>
@@ -832,15 +832,15 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <get name="swig" />
-        <option value="--with-java" />
+        <!-- <get name="swig" /> -->
+        <!-- <option value="--with-java" /> -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" version="3.4" >
-        <get name="swig" />
-        <option value="--with-python" />
+        <!-- <get name="swig" /> -->
+        <!-- <option value="--with-python" /> -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -849,8 +849,8 @@
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <exclude path="clone/*" />
-        <get name="swig" />
-        <option value="--with-java" />
+        <!-- <get name="swig" /> -->
+        <!-- <option value="--with-java" /> -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--build-dir=my-build" />
@@ -860,9 +860,9 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
-        <get name="swig" />
+        <!-- <get name="swig" /> -->
         <option value="--disable-static" />
-        <option value="--with-python" />
+        <!-- <option value="--with-python" /> -->
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -875,9 +875,9 @@
         <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <get name="swig" />
-        <option value="--with-java" />
-        <option value="--with-python" />
+        <!-- <get name="swig" /> -->
+        <!-- <option value="--with-java" /> -->
+        <!-- <option value="--with-python" /> -->
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
