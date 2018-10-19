@@ -952,7 +952,7 @@ $(my.indent)$(my.name)( $(my.target_name)
 .   define my.implement = is_true(inherited) ?? "Inherit" ? "Implement"
 .   define my.output = is_true(my.option.substitute) ?? " and output ${$(my.option.name:c)}" ? ""
 .   define my.defines = defined(my.option.define) ?? " and define $(my.option.define:upper,c)" ? ""
-.   define my.conditional = is_true(my.option.conditional) ?? " and declare $(my.symbol:upper)" ? ""
+.   define my.conditional = is_true(my.option.conditional) ?? " and declare $(my.symbol)" ? ""
 .   heading2("$(my.implement) --$(my.type)-$(my.option.name)$(my.defines)$(my.output)$(my.conditional).")
 .
 .   if (!is_true(my.option.inherited))
@@ -1305,7 +1305,7 @@ endif()
         my.repository->configure, "-", "false")?
 .
 .   if (count(my.product.file, defined(count.path)) > 0)
-.       define my.destination = "lib/pkgconfig"
+.       define my.destination = "${pkgconfigdir}"
 .       define my.indent = defined(my.option) ?? "    " ? ""
 .
 .       heading2("Manage pkgconfig installation.")
@@ -1323,7 +1323,7 @@ $(my.indent)install( FILES
 .       for my.product.file as _file where defined(_file.path)
     $(my.indent)"\${CMAKE_CURRENT_BINARY_DIR}/$(_file.path)"
 .       endfor
-    $(my.indent)DESTINATION $(my.destination) )
+    $(my.indent)DESTINATION \"$(my.destination)\" )
 .       if (defined(my.option))
 endif()
 .       endif

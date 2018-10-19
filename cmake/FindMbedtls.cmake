@@ -25,14 +25,8 @@ endif()
 
 
 if (MSVC)
-    if ( Mbedtls_FIND_REQUIRED )
-        set( _mbedtls_MSG_STATUS "SEND_ERROR" )
-    else ()
-        set( _mbedtls_MSG_STATUS "STATUS" )
-    endif()
-
     set( mbedtls_FOUND false )
-    message( ${_mbedtls_MSG_STATUS}
+    message( STATUS
         "MSVC environment detection for 'mbedtls' not currently supported." )
 else ()
     # required
@@ -42,20 +36,20 @@ else ()
 
     # conditionally include static library suffix
     if (BUILD_SHARED_LIBS)
-        set( _mbedtls_lib_name "mbedtls" )
         set( _mbedcrypto_lib_name "mbedcrypto" )
+        set( _mbedtls_lib_name "mbedtls" )
         set( _mbedx509_lib_name "mbedx509" )
     else ()
-        set( _mbedtls_lib_name "mbedtls.a" )
         set( _mbedcrypto_lib_name "mbedcrypto.a" )
+        set( _mbedtls_lib_name "mbedtls.a" )
         set( _mbedx509_lib_name "mbedx509.a" )
     endif()
 
-    find_library( tls_LIBRARIES     ${_mbedtls_lib_name} )
-    find_library( crypto_LIBRARIES  ${_mbedcrypto_lib_name} )
-    find_library( x509_LIBRARIES    ${_mbedx509_lib_name} )
+    find_library( crypto_LIBRARIES  "${_mbedcrypto_lib_name}" )
+    find_library( tls_LIBRARIES     "${_mbedtls_lib_name}" )
+    find_library( x509_LIBRARIES    "${_mbedx509_lib_name}" )
 
-    if (tls_LIBRARIES-NOTFOUND OR crypto_LIBRARIES-NOTFOUND OR x509_LIBRARIES-NOTFOUND)
+    if (crypto_LIBRARIES-NOTFOUND OR tls_LIBRARIES-NOTFOUND OR x509_LIBRARIES-NOTFOUND)
         set( mbedtls_FOUND false )
     else ()
         set( mbedtls_FOUND true )
@@ -68,6 +62,14 @@ else ()
     endif()
 endif()
 
-if ( Mbedtls_FIND_REQUIRED AND ( NOT mbedtls_FOUND ) )
-    message( SEND_ERROR "Library 'mbedtls'  not found." )
+message( "Library 'mbedtls' : ${mbedtls_FOUND}" )
+
+if (NOT mbedtls_FOUND)
+    if ( Mbedtls_FIND_REQUIRED )
+        set( _mbedtls_MSG_STATUS "SEND_ERROR" )
+    else ()
+        set( _mbedtls_MSG_STATUS "STATUS" )
+    endif()
+
+    message( _mbedtls_MSG_STATUS "Library 'mbedtls'  not found (${_mbedtls_MSG_STATUS})." )
 endif()
