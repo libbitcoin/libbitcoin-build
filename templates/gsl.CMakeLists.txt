@@ -950,10 +950,10 @@ $(my.indent)$(my.name)( $(my.target_name)
 .   define my.data_type = get_option_data_type(my.option)
 .
 .   define my.implement = is_true(inherited) ?? "Inherit" ? "Implement"
-.   define my.output = is_true(my.option.substitute) ?? " and output ${$(my.option.name:c)}" ? ""
+.   define my.output = is_true(my.option.substitute) ?? " and output ${$(my.option.name)}" ? ""
 .   define my.defines = defined(my.option.define) ?? " and define $(my.option.define:upper,c)" ? ""
 .   define my.conditional = is_true(my.option.conditional) ?? " and declare $(my.symbol)" ? ""
-.   heading2("$(my.implement) --$(my.type)-$(my.option.name)$(my.defines)$(my.output)$(my.conditional).")
+.   heading2("$(my.implement) -D$(my.symbol)$(my.defines)$(my.output)$(my.conditional).")
 .
 .   if (!is_true(my.option.inherited))
 set( $(my.symbol) "$(get_option_default(my.option))" CACHE $(my.data_type:upper) "$(my.option.description)" )
