@@ -65,6 +65,8 @@ mkdir -p $work_directory
 cd $work_directory
 
 # Clone, build and install the gsl dependency.
+# gsl requires pcre package (e.g. libpcre3-dev)
+# On Ubuntu: sudo apt-get install libpcre3-dev
 git clone https://github.com/imatix/gsl.git
 cd gsl/src
 make && sudo make install
