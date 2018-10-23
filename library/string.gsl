@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
 #
 # GSL libbitcoin string utilities in the 'global' scope.
 #
@@ -47,7 +47,7 @@ function global.is_true(value)
     return ((my.value ? "false") = "true")
 endfunction
 
-# Return true if the text ends with the suffix. 
+# Return true if the text ends with the suffix.
 function global.ends_with(text, suffix)
     # return string.suffixed(my.text, my.suffix)
     return regexp.match("^(.*)$(my.suffix)$", my.text ? "")
@@ -88,15 +88,15 @@ function global.right(text, length)
     return string.substr(my.text, my.start_position, my.text_length - 1)
 endfunction
 
-# Return true if the text starts with the prefix. 
+# Return true if the text starts with the prefix.
 function global.starts_with(text, prefix)
     return string.prefixed(my.text, my.prefix)
 endfunction
 
 # Remove whitespace from the left side of the text.
-# BUGBUG: this cannot match across lines (but can remove leading /r/n 
+# BUGBUG: this cannot match across lines (but can remove leading /r/n
 # whitespace). We need PCRE options to make regexp() more flexible.
-# See: https://github.com/imatix/gsl/issues/84 
+# See: https://github.com/imatix/gsl/issues/84
 function global.trim_left(text)
     define my.extracted = ""
     regexp.match("^[ \t\r\n]+(.*)$", my.text, my.extracted)

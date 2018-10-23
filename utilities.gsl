@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
 #
 # GSL libbitcoin utilities in the 'global' scope.
 #
@@ -265,29 +265,48 @@ endfunction
 # Option utilities.
 #------------------------------------------------------------------------------
 
-function global.get_option_symbol(option)
-    define my.option = get_option_symbol.option
+function global.get_option_symbol_generic(option, seperator, cstyle)
+    define my.option = get_option_symbol_generic.option
     if (defined(my.option))
         require(my.option, "option", "type")
         require(my.option, "option", "name")
         define my.prefix = ""
-        if (!is_true(my.option.unprefixed))
-            my.prefix = "$(my.option.type:c)_"
+        define my.name = "$(my.option.name:lower)"
+        define my.type = "$(my.option.type:lower)"
+
+        if (is_true(my.cstyle))
+            my.name = "$(my.option.name:c)"
+            my.type = "$(my.option.type:c)"
         endif
-        return "$(my.prefix)$(my.option.name:c)"
+
+        if (!is_true(my.option.unprefixed))
+            my.prefix = "$(my.type)$(my.seperator)"
+        endif
+        return "$(my.prefix)$(my.name)"
+    endif
+endfunction
+
+function global.get_option_symbol(option)
+    define my.option = get_option_symbol.option
+    return get_option_symbol_generic(my.option, "_", "true")
+endfunction
+
+function global.find_option_symbol_generic(element, configure, seperator, cstyle)
+    define my.element = find_option_symbol_generic.element
+    define my.configure = find_option_symbol_generic.configure
+    if (is_optional_element(my.element))
+        define my.opt = my.configure->option(option.name = my.element.option)?
+        if (defined(my.opt))
+            return get_option_symbol_generic(my.opt, my.seperator, my.cstyle)
+        endif
+        abort "Symbol not defined for option: $(my.element.option)"
     endif
 endfunction
 
 function global.find_option_symbol(element, configure)
     define my.element = find_option_symbol.element
     define my.configure = find_option_symbol.configure
-    if (is_optional_element(my.element))
-        define my.opt = my.configure->option(option.name = my.element.option)?
-        if (defined(my.opt))
-            return get_option_symbol(my.opt)
-        endif
-        abort "Symbol not defined for option: $(my.element.option)"
-    endif
+    return find_option_symbol_generic(my.element, my.configure, "_", "true")
 endfunction
 
 #------------------------------------------------------------------------------
@@ -770,7 +789,7 @@ $(my.text ? "")
 .
 .macro global.copyleft(name)
 ###############################################################################
-#  Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
+#  Copyright (c) 2014-2018 $(my.name) developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -779,7 +798,7 @@ $(my.text ? "")
 .
 .macro global.c_copyleft(name)
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
+// Copyright (c) 2014-2018 $(my.name) developers (see COPYING).
 //
 //        GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 //
@@ -788,7 +807,7 @@ $(my.text ? "")
 .
 .macro global.bat_copyleft(name)
 REM ###########################################################################
-REM #  Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
+REM #  Copyright (c) 2014-2018 $(my.name) developers (see COPYING).
 REM #
 REM #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 REM #
@@ -797,7 +816,7 @@ REM ###########################################################################
 .
 .macro global.xml_copyleft(name)
 <!--
- |  Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
+ |  Copyright (c) 2014-2018 $(my.name) developers (see COPYING).
  |
  |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
  |

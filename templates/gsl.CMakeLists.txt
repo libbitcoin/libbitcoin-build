@@ -1,0 +1,1452 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin build.cmd.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+###
+### string generators
+###
+function project_relative_build_path()
+    return "builds/cmake"
+endfunction
+
+function compiler_id(name)
+    if (my.name = "clang")
+        return "Clang"
+    elsif (my.name = "gcc")
+        return "GNU"
+    else
+        abort("Unsupported compiler: $(my.name)")
+    endif
+endfunction
+
+function boost_component(name)
+    if (starts_with(my.name, "boost_"))
+        define length = (string.length(my.name) - 6)
+        return right(my.name, length)
+    endif
+endfunction
+
+function get_cmake_system_from_name(name, sentinel)
+    define my.result = my.sentinel
+
+    if (defined(my.name))
+        if (my.name = "android")
+            my.result = "ANDROID"
+        elsif (my.name = "linux")
+            my.result = "(${CMAKE_SYSTEM_NAME} MATCHES \"Linux\")"
+        elsif (my.name = "osx")
+            my.result = "(${CMAKE_SYSTEM_NAME} MATCHES \"Darwin\")"
+        elsif (my.name = "windows")
+            # NOTE: using compiler in place of system identifier
+            my.result = "MSVC"
+        endif
+    endif
+
+    return my.result
+endfunction
+
+function get_case_platform_include(dependency, sentinel)
+    define my.dependency = get_case_platform_include.dependency
+    define my.system_name = get_cmake_system_from_name(\
+        my.dependency.system, "")
+
+    return is_empty(my.system_name)\
+        ?? my.sentinel ?  "$(my.system_name)"
+endfunction
+
+function get_case_platform_exclude(dependency, sentinel)
+    define my.dependency = get_case_platform_exclude.dependency
+    define my.system_name = get_cmake_system_from_name(\
+        my.dependency.system_exclude, "")
+
+    return is_empty(my.system_name)\
+        ?? my.sentinel ?  "NOT $(my.system_name)"
+endfunction
+
+function get_case_platform(dependency, sentinel)
+    define my.dependency = get_case_platform.dependency
+    define my.system_include = get_case_platform_include(my.dependency, "")
+    define my.system_exclude = get_case_platform_exclude(my.dependency, "")
+    define my.case = my.sentinel
+
+    if (is_empty(my.system_include) & is_empty(my.system_exclude))
+        my.case = my.sentinel
+    elsif (is_empty(my.system_exclude))
+        my.case = my.system_include
+    elsif (is_empty(my.system_include))
+        my.case = my.system_exclude
+    else
+        my.case = "$(my.system_include) AND $(my.system_exclude)"
+    endif
+
+    return my.case
+endfunction
+
+function is_static_suffixed(library)
+    define my.library = is_static_suffixed.library
+
+    return !match_name(my.library, "dl") &\
+        !match_name(my.library, "pthread") &\
+        !match_name(my.library, "rt")
+endfunction
+
+function get_suffix_include_dirs(library, static)
+    define my.library = get_suffix_include_dirs.library
+    define my.result = "INCLUDE_DIR"
+
+    if (is_true(my.static) & is_static_suffixed(my.library))
+        my.result = "STATIC_$(my.result)"
+    endif
+
+    if (!is_boost_dependency(my.library))
+        my.result = "$(my.result)S"
+    endif
+
+    return my.result
+endfunction
+
+function get_suffix_library_dirs(library, static)
+    define my.library = get_suffix_library_dirs.library
+    define my.result = "LIBRARY_DIRS"
+
+    if (is_true(my.static) & is_static_suffixed(my.library))
+        my.result = "STATIC_$(my.result)"
+    endif
+
+    return my.result
+endfunction
+
+function get_suffix_libraries(library, static)
+    define my.library = get_suffix_libraries.library
+    define my.result = ""
+
+    if (is_true(my.static) & is_static_suffixed(my.library))
+        my.result = "STATIC_$(my.result)"
+    endif
+
+    if (is_boost_lib_dependency(my.library))
+        my.result = "$(my.result)LIBRARY"
+    else
+        my.result = "$(my.result)LIBRARIES"
+    endif
+
+    return my.result
+endfunction
+
+###
+### utilities
+###
+function get_test_list(product)
+    define my.product = get_test_list.product
+    define my.tests = ""
+    for my.product->runner.run as _run
+        my.tests = join(my.tests, _run.test, ",")
+    endfor
+    return my.tests
+endfunction
+
+function get_cmake_variable_prefix(named_element)
+    define my.named_element = get_cmake_variable_prefix.named_element
+
+    if (is_boost_dependency(my.named_element))
+        return "$(my.named_element.name:neat)"
+    elsif (is_boost_lib_dependency(my.named_element))
+        return "Boost_$(my.named_element.name:upper)"
+    else
+        return my.named_element.name
+    endif
+endfunction
+
+function find_flag_name(configure, value)
+    define my.configure = find_flag_name.configure
+    define my.found = my.configure->flag(flag.name = my.value)?
+    return defined(my.found)
+endfunction
+
+function get_option_type(option)
+    define my.option = get_option_type.option
+    require(my.option, "option", "type")
+    if (my.option.type = "enable" | my.option.type = "with")
+        return my.option.type
+    endif
+    abort "Invalid repository.option.type: $(my.option.type)."
+endfunction
+
+function is_option_boolean(option)
+    define my.option = is_option_boolean.option
+    return defined(my.option.data_type) & (my.option.data_type = "bool")
+endfunction
+
+function is_option_filepath(option)
+    define my.option = is_option_filepath.option
+    return defined(my.option.data_type) & (my.option.data_type = "filepath")
+endfunction
+
+function is_option_internal(option)
+    define my.option = is_option_internal.option
+    return defined(my.option.data_type) & (my.option.data_type = "internal")
+endfunction
+
+function is_option_path(option)
+    define my.option = is_option_path.option
+    return defined(my.option.data_type) & (my.option.data_type = "path")
+endfunction
+
+function is_option_string(option)
+    define my.option = is_option_string.option
+    return defined(my.option.data_type) & (my.option.data_type = "string")
+endfunction
+
+function get_option_data_type(option)
+    define my.option = get_option_data_type.option
+
+    if (!defined(my.option.data_type))
+        return "BOOL"
+    elsif (is_option_boolean(my.option))
+        return "BOOL"
+    elsif (is_option_filepath(my.option))
+        return "FILEPATH"
+    elsif (is_option_internal(my.option))
+        return "INTERNAL"
+    elsif (is_option_path(my.option))
+        return "PATH"
+    elsif (is_option_string(my.option))
+        return "STRING"
+    endif
+
+    abort("Unrecognized data_type : $(my.option.data_type)")
+endfunction
+
+function get_option_default_boolean(option)
+    define my.option = get_option_default_boolean.option
+
+    if (defined(my.option.default))
+        if (my.option.default = "yes")
+            return "ON"
+        elsif (my.option.default = "no")
+            return "OFF"
+        else
+            abort("Invalid default for boolean option: $(my.option.default)")
+        endif
+    endif
+
+    abort("No default for boolean option: $(my.option.name)")
+endfunction
+
+function get_option_default(option)
+    define my.option = get_option_default.option
+
+    if (is_option_boolean(my.option))
+        return get_option_default_boolean(my.option)
+    endif
+
+    if (defined(my.option.default))
+        return my.option.default
+    endif
+
+    abort("No default for option: $(my.option.name)")
+endfunction
+
+function get_option_define_clause(option, symbol)
+    define my.option = get_option_define_clause.option
+
+    if (!defined(my.option.inherited))
+        return my.symbol
+    endif
+
+    if (my.option.name = "ndebug")
+        return "NOT CMAKE_BUILD_TYPE MATCHES Debug"
+    endif
+
+    if (my.option.name = "shared")
+        return "BUILD_SHARED_LIBS"
+    endif
+
+    abort "Unrecognized inherited option, cannot form clause: $(my.option.name)"
+endfunction
+
+function emit_options(repository)
+    define my.repository = emit_options.repository
+
+    for my.repository->configure.option as _option
+        emit_option(_option)
+    endfor
+endfunction
+
+function emit_defines(repository)
+    define my.repository = emit_defines.repository
+
+    new headers as _headers
+        for my.repository->configure.define as _define\
+            where !is_empty(_define.header)
+
+            if (count(_headers.element, count.name = _define.header) = 0)
+                new _headers.element as _element
+                    _element.name = _define.header
+                endnew
+            endif
+        endfor
+
+        for _headers.element as _element
+            emit_header(_element)
+        endfor
+    endnew
+
+    for my.repository->configure.define as _define
+        emit_define(_define)
+    endfor
+endfunction
+
+function emit_dependencies(repository)
+    define my.repository = emit_dependencies.repository
+
+    for my.repository->configure.dependency as _dependency
+        if (is_boost_dependency(_dependency))
+            emit_boost_dependency(_dependency, my.repository->configure)
+        elsif (is_boost_lib_dependency(_dependency))
+        elsif (is_java_dependency(_dependency))
+            emit_java_dependency_option(_dependency, my.repository->configure, "")
+        elsif (is_python_dependency(_dependency))
+        elsif (is_mbedtls_dependency(_dependency))
+            emit_find_mbedtls_option(_dependency, my.repository->configure, "")
+        elsif (is_package_dependency(_dependency))
+            emit_find_dependency_option(_dependency, my.repository->configure, "")
+        elsif (is_pthread_dependency(_dependency))
+            emit_pthread_dependency(_dependency, my.repository->configure)
+        elsif (is_iconv_dependency(_dependency))
+        else
+            emit_find_dependency_option(_dependency, my.repository->configure, "")
+        endif
+    endfor
+endfunction
+
+function emit_boost_dependency(dependency, configure)
+    define my.dependency = emit_boost_dependency.dependency
+    define my.configure = emit_boost_dependency.configure
+
+    new features as _features
+        # locate boost components
+        for my.configure.dependency as _dependency
+            define my.component_name = boost_component(_dependency.name)?
+            if (!is_empty(my.component_name))
+                new _features.element as _element
+                    _element.name = my.component_name
+                endnew
+            endif
+        endfor
+
+        # emit
+        emit_find_package_dependency(my.dependency, _features)
+    endnew
+endfunction
+
+function emit_products(repository, path_prefix)
+    define my.repository = emit_products.repository
+
+    # emit 'lib'
+    for my.repository->make.product as _product
+        if ((_product.prefix = "bin") | (_product.prefix = "lib"))
+            emit_product_target(my.repository, _product, my.path_prefix)
+        endif
+    endfor
+
+    # emit 'jar'
+    define my.javaexec = my.repository->make->product(prefix = "javaexec")?
+    define my.jarexec = my.repository->make->product(prefix = "jarexec")?
+
+    if (defined(my.javaexec) & defined(my.jarexec))
+        emit_jar_product(my.repository, my.javaexec, my.jarexec, my.path_prefix)
+    endif
+endfunction
+
+function emit_product_target(repository, product, path_prefix)
+    define my.repository = emit_product_target.repository
+    define my.product = emit_product_target.product
+    define my.repository_path = append_path(global.root, my.repository.name)
+    define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-", "false")?
+
+    define my.indent = defined(my.option) ?? "    " ? ""
+
+    define my.target_name = (my.product.prefix = "lib" & my.product.path = "src") ??\
+        "\${CANONICAL_LIB_NAME}" ? target_name(my.product, my.repository)
+
+    heading2("Define $(my.target_name) project.")
+
+    if (defined(my.option))
+        write_line("if ($(my.option))")
+    endif
+
+    new files as _files
+        if (defined(my.product.path) & !is_empty(my.product.path))
+            define my.product_path = append_path(my.repository_path,\
+                my.product.path)
+            define my.product_dir = open_directory(my.product_path)
+            get_files(_files, my.product_dir, my.product.path, "true", "true",\
+                "true")
+        endif
+
+        emit_source_project(my.repository, my.product, _files, my.path_prefix,\
+            my.indent)
+    endnew
+
+    emit_project_properties(my.repository, my.product,\
+        my.path_prefix, my.indent)
+
+    if (defined(my.option))
+        write_line("endif()")
+        write_line("")
+    endif
+endfunction
+
+function emit_jar_product(repository, javaexec, jarexec, path_prefix)
+    define my.repository = emit_jar_product.repository
+    define my.javaexec = emit_jar_product.javaexec
+    define my.jarexec = emit_jar_product.jarexec
+    define my.repository_path = append_path(global.root, my.repository.name)
+    define my.option = find_option_symbol_generic(my.jarexec,\
+        my.repository->configure, "-", "false")?
+
+    define my.indent = defined(my.option) ?? "    " ? ""
+
+    define my.target_name = my.jarexec->file.path
+    if (ends_with(my.target_name, ".jar"))
+        my.target_name = left(my.target_name, string.length(my.target_name) - 4)
+    endif
+
+    heading2("Define $(my.target_name) jar project.")
+
+    if (defined(my.option))
+        write_line("if ($(my.option))")
+    endif
+
+    new files as _files
+        if (defined(my.javaexec->files) & !is_empty(my.javaexec->files.path))
+            define my.product_path = append_path(my.repository_path,\
+                my.javaexec->files.path)
+            define my.product_dir = open_directory(my.product_path)
+            get_files(_files, my.product_dir, my.javaexec->files.path, "true",\
+                "true", "true")
+        endif
+
+        emit_jar_project(my.repository, _files, my.target_name, my.path_prefix,\
+            my.indent)
+    endnew
+
+    if (defined(my.option))
+        write_line("endif()")
+        write_line("")
+    endif
+endfunction
+
+function emit_definitions(definitions)
+    define my.definitions = emit_definitions.definitions
+
+    emit_value_params("add_definitions", "", my.definitions, "")
+    if (count(my.definitions.element) > 0)
+        write_line("")
+    endif
+endfunction
+
+function emit_target_definitions(target_name, definitions)
+    define my.definitions = emit_target_definitions.definitions
+
+    emit_value_params("target_compile_definitions", my.target_name,\
+        my.definitions, "")
+
+    if (count(my.definitions.element) > 0)
+        write_line("")
+    endif
+endfunction
+
+function emit_project_properties(repository, product, path_prefix, indent)
+    define my.repository = emit_project_properties.repository
+    define my.product = emit_project_properties.product
+    define my.target_name = (my.product.prefix = "lib" & my.product.path = "src") ??\
+        "\${CANONICAL_LIB_NAME}" ? target_name(my.product, my.repository)
+
+    emit_private_target_include_directories(my.repository, my.product,\
+        my.target_name, my.path_prefix, my.indent)
+
+    if ((my.product.prefix = "lib" & my.product.path = "src"))
+        emit_public_target_include_directories(my.repository, my.product,\
+            my.target_name, my.path_prefix, my.indent)
+    endif
+
+    emit_target_link_libraries(my.repository, my.product, my.target_name,\
+        my.indent)
+endfunction
+
+function emit_flags(repository)
+    define my.repository = emit_flags.repository
+
+    if (count(my.repository->configure.flag, count.name = "std=c++11") > 0)
+        emit_cxx_standard("11")
+    endif
+
+    new compile_options as _options
+        # add_compile_options
+        for my.repository->configure.flag as _flag
+            if (_flag.name = "std=c++11")
+                next
+            endif
+
+            if ((_flag.context = "c") | (_flag.context = "c++"))
+                copy _flag to _options
+            endif
+        endfor
+
+        emit_add_compile_options(_options)
+    endnew
+endfunction
+
+function include_dir_variable_prefix(library)
+    define my.library = include_dir_variable_prefix.library
+    define my.value = "$(get_cmake_variable_prefix(_library))"
+
+    if (is_boost_dependency(my.library) | is_boost_lib_dependency(my.library))
+        my.value = "Boost"
+    endif
+
+    return my.value
+endfunction
+
+function library_variable_prefix(library)
+    define my.library = library_variable_prefix.library
+    return "$(get_cmake_variable_prefix(_library))"
+endfunction
+
+function extract_include_directories(params, repository, libraries,\
+    project_include_path)
+
+    define my.params = extract_include_directories.params
+    define my.repository = extract_include_directories.repository
+    define my.libraries = extract_include_directories.libraries
+
+    for my.libraries.library as _library
+        define my.suffix_shared = get_suffix_include_dirs(_library, "false")
+        define my.suffix_static = get_suffix_include_dirs(_library, "true")
+
+        if (is_boost_dependency(_library))
+            new my.params.element as _element
+                _element.universal = "\$\{Boost_$(my.suffix_shared)\}"
+            endnew
+        elsif (is_boost_lib_dependency(_library))
+        elsif (_library.name = my.repository->package.library)
+#            new my.params.element as _element
+#                _element.universal = "\"$(my.project_include_path)\""
+#            endnew
+        else
+            new my.params.element as _element
+                _element.shared = "\$\{$(_library.name:c)_$(my.suffix_shared)\}"
+                _element.static = "\$\{$(_library.name:c)_$(my.suffix_static)\}"
+            endnew
+        endif
+    endfor
+endfunction
+
+function extract_link_directories(params, repository, libraries)
+    define my.params = extract_link_directories.params
+    define my.repository = extract_link_directories.repository
+    define my.libraries = extract_link_directories.libraries
+
+    for my.libraries.library as _library
+        define my.suffix_shared = get_suffix_library_dirs(_library, "false")
+        define my.suffix_static = get_suffix_library_dirs(_library, "true")
+
+        if (is_boost_dependency(_library))
+            new my.params.element as _element
+                _element.universal = "\$\{Boost_$(my.suffix_shared)\}"
+            endnew
+        elsif (is_boost_lib_dependency(_library))
+        elsif (_library.name = my.repository->package.library)
+        else
+            new my.params.element as _element
+                _element.shared = "\$\{$(_library.name:c)_$(my.suffix_shared)\}"
+                _element.static = "\$\{$(_library.name:c)_$(my.suffix_static)\}"
+            endnew
+        endif
+    endfor
+endfunction
+
+function extract_link_libraries(params, repository, libraries)
+    define my.params = extract_link_libraries.params
+    define my.repository = extract_link_libraries.repository
+    define my.libraries = extract_link_libraries.libraries
+
+    for my.libraries.library as _library
+        define my.suffix_shared = get_suffix_libraries(_library, "false")
+        define my.suffix_static = get_suffix_libraries(_library, "true")
+
+        if (is_boost_dependency(_library))
+        elsif (is_boost_lib_dependency(_library))
+            define my.name = "Boost_$(boost_component(_library.name):upper)"
+
+            new my.params.element as _element
+                _element.universal = "\$\{$(my.name)_$(my.suffix_shared)\}"
+            endnew
+        elsif (_library.name = my.repository->package.library)
+            new my.params.element as _element
+                _element.universal = "\$\{CANONICAL_LIB_NAME\}"
+            endnew
+        else
+            new my.params.element as _element
+                _element.shared = "\$\{$(_library.name:c)_$(my.suffix_shared)\}"
+                _element.static = "\$\{$(_library.name:c)_$(my.suffix_static)\}"
+            endnew
+        endif
+    endfor
+endfunction
+
+function emit_library_params(repository, libraries)
+    define my.repository = emit_library_params.repository
+    define my.libraries = emit_library_params.libraries
+
+    new link_library_params as _params
+        for my.repository->configure.flag as _flag where _flag.context = "link"
+            if (defined(_flag.compiler))
+                abort("Unable to limit link flag $(_flag.name) by compiler.")
+            endif
+
+            new _params.element as _element
+                _element.universal = "\"-$(_flag.name)\""
+            endnew
+        endfor
+
+        extract_link_libraries(_params, my.repository, my.libraries)
+
+        if (count(_params.element) > 0)
+            heading2("Define project common libraries/linker flags.")
+            emit_shared_static_params("link_libraries", "", _params, "")
+            write_line("")
+        endif
+    endnew
+endfunction
+
+function emit_include_directories(repository, libraries, project_include_path)
+    define my.repository = emit_include_directories.repository
+    define my.libraries = emit_include_directories.libraries
+
+    new include_dirs_params as _params
+        extract_include_directories(_params, my.repository, my.libraries,\
+            my.project_include_path)
+
+        # NOTE: SYSTEM target suppresses warnings from included files.
+        if (count(_params.element) > 0)
+            heading2("Define project common includes directories")
+            emit_shared_static_params("include_directories", "SYSTEM", _params, "")
+            write_line("")
+        endif
+    endnew
+endfunction
+
+function emit_link_directories(repository, libraries)
+    define my.repository = emit_link_directories.repository
+    define my.libraries = emit_link_directories.libraries
+
+    new library_dirs_params as _params
+        extract_link_directories(_params, my.repository, my.libraries)
+
+        if (count(_params.element) > 0)
+            heading2("Define project common library directories")
+            emit_shared_static_params("link_directories", "", _params, "")
+            write_line("")
+        endif
+    endnew
+endfunction
+
+function emit_private_target_include_directories(repository, product,\
+    target_name, path_prefix, indent)
+
+    define my.repository = emit_private_target_include_directories.repository
+    define my.product = emit_private_target_include_directories.product
+
+    new include_dirs_params as _params
+        if (defined(my.product->headers))
+            for my.product.headers as _headers where !is_empty(_headers.path)
+                new _params.element as _element
+                    _element.universal = "\"$(append_path(my.path_prefix,\
+                        _headers.path))\""
+                endnew
+            endfor
+        endif
+
+        extract_include_directories(_params, my.repository, my.product,\
+            my.project_include_path)
+
+        if (count(_params.element) > 0)
+            heading2("$(my.indent)$(my.target_name) project specific include directories.")
+            emit_shared_static_params(\
+                "target_include_directories", "$(my.target_name) PRIVATE",\
+                _params, my.indent)
+
+            write_line("")
+        endif
+    endnew
+endfunction
+
+.
+function emit_public_target_include_directories(repository, product,\
+    target_name, path_prefix, indent)
+
+    define my.repository = emit_public_target_include_directories.repository
+    define my.product = emit_public_target_include_directories.product
+
+    if (defined(my.product->headers) & !is_empty(my.product->headers.path))
+        write_line("$(my.indent)target_include_directories( $(my.target_name) PUBLIC")
+        write_line("$(my.indent)\"$(append_path(my.path_prefix, my.product->headers.path))\" )")
+        write_line("")
+    endif
+endfunction
+
+function emit_target_link_libraries(repository, product, target_name, indent)
+    define my.repository = emit_target_link_libraries.repository
+    define my.product = emit_target_link_libraries.product
+
+    new link_libraries as _params
+        extract_link_libraries(_params, my.repository, my.product)
+
+        if (count(_params.element) > 0)
+            heading2("$(my.indent)$(my.target_name) project specific libraries/linker flags.")
+            emit_shared_static_params("target_link_libraries", my.target_name,\
+                _params, my.indent)
+
+            write_line("")
+        endif
+    endnew
+endfunction
+
+function get_flag(flag)
+    define my.flag = get_flag.flag
+    if (defined(my.flag.value))
+        return "-$(my.flag.value)"
+    elsif (defined(my.flag.define))
+         return "-D$(my.flag.define:upper)=\\\"${$(my.flag.define)}\\\""
+    elsif (defined(my.flag.substitute))
+        return "${$(my.flag.substitute)}"
+    endif
+    abort "Required attribute missing: flag.value|define|substitute"
+endfunction
+
+function emit_flags_params(repository, library)
+    define my.repository = emit_flags_params.repository
+    define my.library = emit_flags_params.library
+
+    new flag_params as _params
+        for my.library.flag as _flag
+            new _params.element as _element
+                _element.value = get_flag(_flag)
+            endnew
+        endfor
+
+        emit_definitions(_params)
+    endnew
+endfunction
+
+function emit_target_property_initialization(repository, path_prefix)
+    define my.repository = emit_target_property_initialization.repository
+    define my.library = my.repository->make->product(prefix = "lib" & path = "src")
+
+    # NOTE: this is an assumption that all projects generated include a library
+    # which is linked by all included projects.  Generalization requires
+    # chasing dependencies.
+    emit_include_directories(my.repository, my.library, my.path_prefix)
+    emit_link_directories(my.repository, my.library)
+    emit_library_params(my.repository, my.library)
+    emit_flags_params(my.repository, my.library)
+endfunction
+
+function emit_install(repository, path_prefix)
+    define my.repository = emit_install.repository
+
+    for my.repository->make.product as _product where !is_check(_product) \
+        & !is_no_install(_product)
+
+        if (match_prefix(_product, "bin") | match_prefix(_product, "lib"))
+            emit_product_install(my.repository, _product, my.path_prefix)
+        elsif (match_prefix(_product, "doc"))
+            emit_doc_install(my.repository, _product, my.path_prefix)
+        elsif (match_prefix(_product, "include"))
+            emit_include_install(my.repository, _product, my.path_prefix)
+        elsif (match_prefix(_product, "pkgconfig"))
+            emit_pkgconfig_install(my.repository, _product, my.path_prefix)
+        elsif (match_prefix(_product, "jarexec"))
+            emit_jarexec_install(my.repository, _product, my.path_prefix)
+        else
+            # explicitly distribute, unhandled prefix
+            emit_data_install(my.repository, _product, my.path_prefix)
+        endif
+    endfor
+endfunction
+
+function emit_cmakelists(repository)
+    define my.repository = emit_cmakelists.repository
+
+    copyleft(my.repository.name)
+
+    emit_project_initialization(my.repository)
+
+    emit_canonical_library_name(my.repository)
+
+    emit_flags(my.repository)
+
+    emit_options(my.repository)
+
+    emit_defines(my.repository)
+
+    emit_dependencies(my.repository)
+
+    emit_target_property_initialization(my.repository, "../../")
+
+    emit_products(my.repository, "../../")
+
+    emit_install(my.repository, "../../")
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_project_initialization(repository)
+.   define my.repository = emit_project_initialization.repository
+.   require(my.repository, "repository", "name")
+
+.   heading2("$(my.repository.name) project configuration.")
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+
+project($(my.repository.name) LANGUAGES C CXX)
+
+enable_testing()
+
+list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
+include(CheckIncludeFiles)
+include(CheckSymbolExists)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+.endmacro # emit_project_initialization
+.
+.macro emit_canonical_library_name(repository)
+.   define my.repository = emit_canonical_library_name.repository
+.   define my.package = my.repository->package
+.   require(my.repository, "repository", "name")
+.   require(my.package, "package", "library")
+.
+if (MSVC)
+  set( CANONICAL_LIB_NAME $(my.repository.name) )
+else ()
+  set( CANONICAL_LIB_NAME $(my.package.library) )
+  find_package( PkgConfig REQUIRED )
+
+  set( prefix "${CMAKE_PREFIX_PATH}" )
+  set( exec_prefix "\\\${prefix}" )
+  set( libdir "\\\${exec_prefix}/lib" )
+  set( includedir "\\\${exec_prefix}/include" )
+
+  set( PACKAGE_VERSION "$(my.repository.version)" )
+  set( VERSION "${PACKAGE_VERSION}" )
+endif ()
+
+.
+.endmacro # emit_canonical_library_name
+.
+.macro emit_cxx_standard(value)
+set( CMAKE_CXX_STANDARD $(my.value) )
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+
+.endmacro # emit_cxx_standard
+.
+.macro emit_add_compile_options(options)
+.   define my.options = emit_add_compile_options.options
+.
+.   heading2("Add compiler options")
+.   for my.options.flag as _flag by defined(_flag.compiler) ?? _flag.compiler ? ""
+.       if (defined(_flag.compiler))
+# $(_flag.comment)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "$(compiler_id(_flag.compiler))")
+    add_compile_options( "-$(_flag.name)" )
+endif()
+
+.       else
+# $(_flag.comment)
+add_compile_options( "-$(_flag.name)" )
+
+.       endif
+.   endfor
+.endmacro # emit_add_compile_options
+.
+.macro emit_shared_static_params_specific(name, target_name, params, type,\
+    indent)
+.
+.   define my.params = emit_shared_static_params_specific.params
+.
+$(my.indent)$(my.name)( $(my.target_name)
+.   for my.params.element as _element where !is_empty(_element.universal)\
+        | (my.type = "shared" & !is_empty(_element.shared))\
+        | (my.type = "static" & !is_empty(_element.static))
+.
+.       if (!is_empty(_element.universal))
+    $(my.indent)$(_element.universal)$(last() ?? " )" ? "")
+.       elsif (my.type = "shared" & !is_empty(_element.shared))
+    $(my.indent)$(_element.shared)$(last() ?? " )" ? "")
+.       elsif (my.type = "static" & !is_empty(_element.static))
+    $(my.indent)$(_element.static)$(last() ?? " )" ? "")
+.       endif
+.   endfor
+.
+.endmacro # emit_shared_static_params_specific
+.
+.macro emit_shared_static_params(name, target_name, params, indent)
+.   define my.params = emit_shared_static_params.params
+.
+.   if (count(my.params.element) > 0)
+.       if (count(my.params.element,\
+            defined(count.shared) | defined(count.static)) > 0)
+$(my.indent)if (BUILD_SHARED_LIBS)
+.           emit_shared_static_params_specific(my.name, my.target_name,\
+                my.params, "shared", "    $(my.indent)")
+$(my.indent)else()
+.           emit_shared_static_params_specific(my.name, my.target_name,\
+                my.params, "static", "    $(my.indent)")
+$(my.indent)endif()
+.       else
+.           emit_shared_static_params_specific(my.name, my.target_name,\
+                my.params, "", my.indent)
+.       endif
+.   endif
+.
+.endmacro # emit_shared_static_params
+.
+.macro emit_value_params(name, target_name, params, indent)
+.   define my.params = emit_value_params.params
+.
+.   if (count(my.params.element) > 0)
+$(my.indent)$(my.name)( $(my.target_name)
+.       for my.params.element as _element where !is_empty(_element.value)
+    $(my.indent)$(_element.value)$(last() ?? " )" ? "")
+.       endfor
+.   endif
+.
+.endmacro # emit_value_params
+.
+.macro emit_option(option)
+.   define my.option = emit_option.option
+.   require(my.option, "option", "description")
+.   require(my.option, "option", "name")
+.   require(my.option, "option", "type")
+.
+.   define my.type = get_option_type(my.option)
+.   define my.symbol = get_option_symbol_generic(my.option, "-", "false")
+.   define my.data_type = get_option_data_type(my.option)
+.
+.   define my.implement = is_true(inherited) ?? "Inherit" ? "Implement"
+.   define my.output = is_true(my.option.substitute) ?? " and output ${$(my.option.name)}" ? ""
+.   define my.defines = defined(my.option.define) ?? " and define $(my.option.define:upper,c)" ? ""
+.   define my.conditional = is_true(my.option.conditional) ?? " and declare $(my.symbol)" ? ""
+.   heading2("$(my.implement) -D$(my.symbol)$(my.defines)$(my.output)$(my.conditional).")
+.
+.   if (!is_true(my.option.inherited))
+set( $(my.symbol) "$(get_option_default(my.option))" CACHE $(my.data_type:upper) "$(my.option.description)" )
+
+.   endif
+.
+.   if (!is_empty(my.option.define))
+.       define my.define_clause = get_option_define_clause(my.option, my.symbol)
+.
+if ($(my.define_clause))
+    add_definitions( -D$(my.option.define) )
+endif()
+
+.   endif
+.
+.   if (is_true(my.option.substitute) & defined(my.option.value))
+if ($(my.symbol))
+    set( $(my.option.name:c) "$(my.option.value)" )
+endif()
+
+.   endif
+.
+.endmacro # emit_option
+.
+.macro emit_header(header)
+.   define my.header = emit_header.header
+.   define my.uname = "$(my.header.name:upper,c)"
+.
+.   heading2("Initialize HAVE_$(my.uname) variable checking for $(my.header.name)")
+check_include_files( "$(my.header.name)" HAVE_$(my.uname) )
+if (!HAVE_$(my.uname))
+    set( HAVE_$(my.uname) 0 )
+endif()
+
+add_definitions( -DHAVE_$(my.uname)=${HAVE_$(my.uname)} )
+
+.endmacro # emit_header
+.
+.macro emit_define(define)
+.   define my.define = emit_define.define
+.   require(my.define, "define", "header")
+.   require(my.define, "define", "export")
+.
+.   define my.header_uname = "$(my.define.header:upper,c)"
+.   define my.export = "$(my.define.export)"
+.   define my.export_uname = "$(my.define.export:upper,c)"
+.
+.   heading2("On HAVE_$(my.header_uname), test for $(my.export)")
+.
+if (HAVE_$(my.header_uname))
+    check_symbol_exists( "$(my.export)" "$(my.define.header)" HAVE_DECL_$(my.export_uname) )
+    add_definitions( -DHAVE_DECL_$(my.export_uname)=${HAVE_DECL_$(my.export_uname)} )
+endif()
+
+.endmacro # emit_define
+.
+.macro emit_find_package_dependency(dependency, features)
+.   define my.dependency = emit_find_package_dependency.dependency
+.   define my.features = emit_find_package_dependency.features
+.   require(my.dependency, "dependency", "name")
+.
+.   heading2("Find $(my.dependency.name)")
+.   if (count(my.features.element) > 0)
+find_package( $(my.dependency.name:neat) $(my.dependency.version) REQUIRED COMPONENTS
+.       for my.features.element as _element
+    $(_element.name)$(last() ?? " )" ? "")
+.       endfor
+
+.       for my.features.element as _element
+set( $(my.dependency.name)_$(_element.name)_LIBS "-l$(my.dependency.name)_$(_element.name)" )
+.       endfor
+.   else
+find_package( $(my.dependency.name) $(my.dependency.version) )
+.   endif
+
+.# NOTE: enable-ndebug hardcoded match to configuration option
+if (enable-ndebug)
+    set( $(my.dependency.name:neat)_LIBRARY_DIR "\${$(my.dependency.name:neat)_LIBRARY_DIR_DEBUG}" )
+else ()
+    set( $(my.dependency.name:neat)_LIBRARY_DIR "\${$(my.dependency.name:neat)_LIBRARY_DIR_RELEASE}" )
+endif()
+
+set( $(my.dependency.name)_CPPFLAGS "-I\${$(my.dependency.name:neat)_INCLUDE_DIR}" )
+set( $(my.dependency.name)_LDFLAGS "-L\${$(my.dependency.name:neat)_LIBRARY_DIR}" )
+
+.endmacro # emit_find_package_dependency
+.
+.macro emit_pthread_dependency(dependency, configure)
+.   define my.dependency = emit_pthread_dependency.dependency
+.   define my.configure = emit_pthread_dependency.configure
+.
+.   define my.case = get_case_platform(my.dependency, "")
+set( CMAKE_THREAD_PREFER_PTHREAD ON )
+set( THREADS_PREFER_PTHREAD_FLAG ON )
+
+.
+.   new configure as _dependencies
+.       copy my.dependency to _dependencies as dependency
+.       _dependencies->dependency.name = "threads"
+.       emit_find_dependency_option(_dependencies->dependency, my.configure, "")
+.   endnew
+.
+if ( Threads_FOUND $(is_empty(my.case) ?? "" ? "AND $(my.case) "))
+    # TODO: find proper detection - documentation on FindThreads appears incorrect.
+    set( pthread_CPPFLAGS "" )
+    set( pthread_LIBRARIES "-lpthread" )
+    set( pthread_LIBS "-lpthread" )
+endif()
+
+.endmacro # emit_pthread_dependency
+.
+.macro emit_find_dependency(dependency, configure, indent)
+.   define my.dependency = emit_find_dependency.dependency
+.   define my.configure = emit_find_dependency.configure
+.   define my.version = ""
+.
+.   if (defined(my.dependency.version) & !is_empty(my.dependency.version))
+.       my.version = " $(my.dependency.version)"
+.   endif
+.
+$(my.indent)find_package( $(my.dependency.name:neat)$(my.version) REQUIRED )
+.   if (is_empty(my.indent))
+
+.   endif
+.endmacro # emit_find_dependency
+.
+.macro emit_find_dependency_platform(dependency, configure, indent)
+.   define my.dependency = emit_find_dependency_platform.dependency
+.   define my.configure = emit_find_dependency_platform.configure
+.
+.   define my.case = get_case_platform(my.dependency, "")
+.
+.   if (is_empty(my.case))
+.       emit_find_dependency(my.dependency, my.configure, my.indent)
+.   else
+$(my.indent)if ($(my.case))
+.       emit_find_dependency(my.dependency, my.configure, "    $(my.indent)")
+$(my.indent)endif()
+.       if (is_empty(my.indent))
+
+.       endif
+.   endif
+.endmacro # emit_find_dependency_platform
+.
+.macro emit_find_dependency_option(dependency, configure, indent)
+.   define my.dependency = emit_find_dependency_option.dependency
+.   define my.configure = emit_find_dependency_option.configure
+.
+.   define my.symbol = find_option_symbol_generic(my.dependency,\
+        my.configure, "-", "false")?
+.
+.   heading2("Find $(my.dependency.name)")
+.   if (is_empty(my.symbol))
+.       emit_find_dependency_platform(my.dependency, my.configure, my.indent)
+.   else
+$(my.indent)if ($(my.symbol))
+.       emit_find_dependency_platform(my.dependency, my.configure,\
+            "    $(my.indent)")
+$(my.indent)endif()
+.       if (is_empty(my.indent))
+
+.       endif
+.   endif
+.endmacro # emit_find_dependency_option
+.
+.macro emit_find_mbedtls_option(dependency, configure, indent)
+.   define my.dependency = emit_find_mbedtls_option.dependency
+.   define my.configure = emit_find_mbedtls_option.configure
+.
+.   new configure as _dependencies
+.       copy my.dependency to _dependencies
+.       if (defined(_dependencies->dependency.version))
+.           _dependencies->dependency.version = ""
+.       endif
+.
+.       emit_find_dependency_option(_dependencies->dependency, my.configure,\
+            my.indent)
+.   endnew
+.endmacro # emit_find_mbedtls_option
+.
+.macro emit_java_dependency(dependency, configure, indent)
+.   define my.dependency = emit_java_dependency.dependency
+.   define my.configure = emit_java_dependency.configure
+.   define my.version = defined(my.dependency.version) ?? my.dependency.version ? ""
+.
+$(my.indent)find_package( Java REQUIRED )
+$(my.indent)find_package( JNI $(my.version) REQUIRED )
+$(my.indent)set( java_INCLUDE_DIRS "${JNI_INCLUDE_DIRS}" )
+$(my.indent)set( java_STATIC_INCLUDE_DIRS "${JNI_INCLUDE_DIRS}" )
+$(my.indent)include( UseJava )
+.#$(my.indent)message( "Java_FOUND : ${Java_FOUND}" )
+.#$(my.indent)message( "Java_INCLUDE_DIRS : ${Java_INCLUDE_DIRS}" )
+.#$(my.indent)message( "Java_LIBRARIES : ${Java_LIBRARIES}" )
+.#$(my.indent)message( "JNI_INCLUDE_DIRS : ${JNI_INCLUDE_DIRS}" )
+.#$(my.indent)message( "JNI_LIBRARIES : ${JNI_LIBRARIES}" )
+.#$(my.indent)message( "JNI_FOUND : ${JNI_FOUND}" )
+.#$(my.indent)message( "JAVA_AWT_LIBRARY : ${JAVA_AWT_LIBRARY}" )
+.#$(my.indent)message( "JAVA_JVM_LIBRARY : ${JAVA_JVM_LIBRARY}" )
+.#$(my.indent)message( "JAVA_INCLUDE_PATH : ${JAVA_INCLUDE_PATH}" )
+.#$(my.indent)message( "JAVA_INCLUDE_PATH2 : ${JAVA_INCLUDE_PATH2}" )
+.#$(my.indent)message( "JAVA_AWT_INCLUDE_PATH : ${JAVA_AWT_INCLUDE_PATH}" )
+.   if (is_empty(my.indent))
+
+.   endif
+.endmacro # emit_java_dependency
+.
+.macro emit_java_dependency_platform(dependency, configure, indent)
+.   define my.dependency = emit_java_dependency_platform.dependency
+.   define my.configure = emit_java_dependency_platform.configure
+.
+.   define my.case = get_case_platform(my.dependency, "")
+.
+.   if (is_empty(my.case))
+.       emit_java_dependency(my.dependency, my.configure, my.indent)
+.   else
+$(my.indent)if ($(my.case))
+.       emit_java_dependency(my.dependency, my.configure, "    $(my.indent)")
+$(my.indent)endif()
+.       if (is_empty(my.indent))
+
+.       endif
+.   endif
+.endmacro # emit_java_dependency_platform
+.
+.macro emit_java_dependency_option(dependency, configure, indent)
+.   define my.dependency = emit_java_dependency_option.dependency
+.   define my.configure = emit_java_dependency_option.configure
+.
+.   define my.symbol = find_option_symbol_generic(my.dependency,\
+        my.configure, "-", "false")?
+.
+.   heading2("Find $(my.dependency.name)")
+.   if (is_empty(my.symbol))
+.       emit_java_dependency_platform(my.dependency, my.configure, my.indent)
+.   else
+$(my.indent)if ($(my.symbol))
+.       emit_java_dependency_platform(my.dependency, my.configure,\
+            "    $(my.indent)")
+$(my.indent)endif()
+.       if (is_empty(my.indent))
+
+.       endif
+.   endif
+.
+.endmacro # emit_java_dependency_option
+.
+.macro emit_source_project(repository, product, files, path_prefix, indent)
+.   define my.repository = emit_source_project.repository
+.   define my.product = emit_source_project.product
+.   define my.files = emit_source_project.files
+.
+.   if (my.product.prefix = "lib" & my.product.path = "src")
+$(my.indent)add_library( \${CANONICAL_LIB_NAME}
+.   elsif (my.product.prefix = "lib")
+$(my.indent)add_library( $(target_name(my.product, my.repository))
+.   elsif (my.product.prefix = "bin")
+$(my.indent)add_executable( $(target_name(my.product, my.repository))
+.   else
+.       abort("Unexpected product.prefix : $(my.product.prefix)")
+.   endif
+.
+.   for my.files.file as _file
+    $(my.indent)"$(append_path(append_path(my.path_prefix, _file.relative_path), _file.name))"$(last() ?? " )" ? "")
+.   endfor
+
+.   if (is_true(my.product.test))
+.   define my.tests = get_test_list(_product)
+.   define my.run = is_empty(my.tests) ?? "*" ? "$(my.tests)"
+$(my.indent)add_test( NAME $(target_name(my.product, my.repository)) COMMAND $(target_name(my.product, my.repository))
+        $(my.indent)--run_test=$(my.run)
+        $(my.indent)--show_progress=no
+        $(my.indent)--detect_memory_leak=0
+        $(my.indent)--report_level=no
+        $(my.indent)--build_info=yes )
+
+.   endif
+.endmacro # emit_source_project
+.
+.macro emit_jar_project(repository, files, target_name, path_prefix, indent)
+.   define my.repository = emit_jar_project.repository
+.   define my.files = emit_jar_project.files
+.
+$(my.indent)add_jar( $(my.target_name)-jar SOURCES
+.   for my.files.file as _file
+    $(my.indent)"$(append_path(append_path(my.path_prefix, _file.relative_path), _file.name))"
+.   endfor
+    OUTPUT_NAME $(my.target_name) )
+.
+.endmacro # emit_jar_project
+.
+.macro emit_product_install(repository, product, path_prefix)
+.   define my.repository = emit_product_install.repository
+.   define my.product = emit_product_install.product
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-", "false")?
+.
+.   define my.target = target_name(my.product, my.repository)
+.   if (my.target = my.repository.name)
+.       my.target = "\${CANONICAL_LIB_NAME}"
+.   endif
+.
+.   define my.indent = defined(my.option) ?? "    " ? ""
+.
+.   heading2("Manage $(my.target) installation.")
+.   if (defined(my.option))
+if ($(my.option))
+.   endif
+$(my.indent)install( TARGETS $(my.target)
+    $(my.indent)RUNTIME DESTINATION bin
+    $(my.indent)LIBRARY DESTINATION lib
+    $(my.indent)ARCHIVE DESTINATION lib
+    $(my.indent)PUBLIC_HEADER DESTINATION include )
+.   if (defined(my.option))
+endif()
+.   endif
+
+.endmacro # emit_product_install
+.
+.macro emit_doc_install(repository, product, path_prefix)
+.   define my.repository = emit_doc_install.repository
+.   define my.product = emit_doc_install.product
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-", "false")?
+.
+.   if (count(my.product.file, defined(count.path)) > 0)
+.       define my.destination = "share/doc/$(my.repository.name)"
+.       define my.indent = defined(my.option) ?? "    " ? ""
+.
+.   heading2("Manage installation of docs.")
+.       if (defined(my.option))
+if ($(my.option))
+.       endif
+$(my.indent)install( FILES
+.       for my.product.file as _file where defined(_file.path)
+    $(my.indent)"$(append_path(my.path_prefix, _file.path))"
+.       endfor
+    $(my.indent)DESTINATION $(my.destination) )
+.       if (defined(my.option))
+endif()
+.       endif
+
+.   endif
+.endmacro # emit_doc_install
+.
+.macro emit_pkgconfig_install(repository, product, path_prefix)
+.   define my.repository = emit_pkgconfig_install.repository
+.   define my.product = emit_pkgconfig_install.product
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-", "false")?
+.
+.   if (count(my.product.file, defined(count.path)) > 0)
+.       define my.destination = "${pkgconfigdir}"
+.       define my.indent = defined(my.option) ?? "    " ? ""
+.
+.       heading2("Manage pkgconfig installation.")
+.       if (defined(my.option))
+if ($(my.option))
+.       endif
+.       for my.product.file as _file where defined(_file.path)
+$(my.indent)configure_file(
+  $(my.indent)"$(append_path(my.path_prefix, _file.path)).in"
+  $(my.indent)"$(_file.path)" @ONLY )
+
+.       endfor
+.
+$(my.indent)install( FILES
+.       for my.product.file as _file where defined(_file.path)
+    $(my.indent)"\${CMAKE_CURRENT_BINARY_DIR}/$(_file.path)"
+.       endfor
+    $(my.indent)DESTINATION \"$(my.destination)\" )
+.       if (defined(my.option))
+endif()
+.       endif
+
+.   endif
+.endmacro # emit_pkgconfig_install
+.
+.macro emit_jarexec_install(repository, product, path_prefix)
+.   define my.repository = emit_jarexec_install.repository
+.   define my.product = emit_jarexec_install.product
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-", "false")?
+.
+.   if (count(my.product.file, defined(count.path)) > 0)
+.       define my.destination = "share/java"
+.       define my.indent = defined(my.option) ?? "    " ? ""
+.
+.       heading2("Manage jar installation.")
+.       if (defined(my.option))
+if ($(my.option))
+.       endif
+.
+$(my.indent)install( FILES
+.       for my.product.file as _file where defined(_file.path)
+    $(my.indent)"${CMAKE_CURRENT_BINARY_DIR}/$(_file.path)"
+.       endfor
+    $(my.indent)DESTINATION $(my.destination) )
+.       if (defined(my.option))
+endif()
+.       endif
+
+.   endif
+.endmacro # emit_jarexec_install
+.
+.macro emit_include_install(repository, product, path_prefix)
+.   define my.repository = emit_include_install.repository
+.   define my.product = emit_include_install.product
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-", "false")?
+.
+.   if (count(my.product.files, !is_empty(count.path)) > 0)
+.       define my.indent = defined(my.option) ?? "    " ? ""
+.
+.       heading2("Manage include installation.")
+.       for my.product.files as _files where !is_empty(_files.path)
+.           define my.destination = "include"
+.
+.           if (defined(my.option))
+if ($(my.option))
+.           endif
+$(my.indent)install( DIRECTORY "$(append_path(my.path_prefix, _files.path))"
+    $(my.indent)DESTINATION $(my.destination) )
+.           if (defined(my.option))
+endif()
+.           endif
+
+.       endfor
+.   endif
+.endmacro # emit_include_install
+.
+.macro emit_data_install(repository, product, path_prefix)
+.   define my.repository = emit_data_install.repository
+.   define my.product = emit_data_install.product
+.   define my.option = find_option_symbol_generic(my.product,\
+        my.repository->configure, "-", "false")?
+.
+.   if (count(my.product.file, !is_empty(count.path)) > 0)
+.       define my.destination = "etc/libbitcoin"
+.       define my.indent = defined(my.option) ?? "    " ? ""
+.
+.       heading2("Manage data installation for $(my.product.prefix) prefixed product.")
+.       if (defined(my.option))
+if ($(my.option))
+.       endif
+$(my.indent)install( FILES
+.       for my.product.file as _file where !is_empty(_file.path)
+    $(my.indent)"$(append_path(my.path_prefix, _file.path))"
+.       endfor
+    $(my.indent)DESTINATION $(my.destination) )
+.       if (defined(my.option))
+endif()
+.       endif
+
+.   endif
+.endmacro # emit_data_install
+.
+.endtemplate
+.template 0
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 0
+function generate_cmakelists(path_prefix, repositories)
+    define my.repositories = generate_cmakelists.repositories
+    define my.project_path_suffix = project_relative_build_path()
+
+    for my.repositories.repository by name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = append_path(append_path(my.path_prefix,\
+            _repository.name), project_relative_build_path())
+        create_directory(my.output_path)
+        define my.out_file = append_path(my.output_path, "CMakeLists.txt")
+        notify(my.out_file)
+        output(my.out_file)
+        emit_cmakelists(_repository)
+        close
+     endfor _repository
+endfunction # generate_cmakelists
+
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_cmakelists("output", generate)
+
+.endtemplate
