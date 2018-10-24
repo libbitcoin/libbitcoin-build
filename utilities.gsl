@@ -354,13 +354,35 @@ function global.cumulative_install(list, repositories, repository)
         for my.repositories.repository as _repository
             if (!(_repository.name = my.repository.name) &\
                  (_repository->package.library = _build.name))
-                cumulative_install(my.list, my.repositories, _repository)
+                cumulative_install_recurse(my.list, my.repositories, _repository)
             endif
         endfor
     endfor
 
     for my.repository->install.build as _build
         if (count(my.list.build, (count.name = _build.name)) = 0)
+            copy _build to my.list
+        endif
+    endfor
+endfunction
+
+function global.cumulative_install_recurse(list, repositories, repository)
+    define my.list = cumulative_install_recurse.list
+    define my.repositories = cumulative_install_recurse.repositories
+    define my.repository = cumulative_install_recurse.repository
+
+    for my.repository->install.build as _build
+        for my.repositories.repository as _repository
+            if (!(_repository.name = my.repository.name) &\
+                 (_repository->package.library = _build.name))
+                cumulative_install_recurse(my.list, my.repositories, _repository)
+            endif
+        endfor
+    endfor
+
+    for my.repository->install.build as _build
+        if ((count(my.list.build, (count.name = _build.name)) = 0) &\
+            !(my.repository->package.library = _build.name))
             copy _build to my.list
         endif
     endfor
