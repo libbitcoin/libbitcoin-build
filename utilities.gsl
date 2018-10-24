@@ -357,7 +357,9 @@ function global.cumulative_install(list, repositories, repository)
                 cumulative_install(my.list, my.repositories, _repository)
             endif
         endfor
+    endfor
 
+    for my.repository->install.build as _build
         if (count(my.list.build, (count.name = _build.name)) = 0)
             copy _build to my.list
         endif
