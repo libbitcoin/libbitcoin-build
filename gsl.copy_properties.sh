@@ -73,14 +73,14 @@ function generate_artifacts(path_prefix)
 
 # TODO: walk dependency tree, not build list.
 # TODO: build list is for telling installer what to compile.
-   for generate.repository by name as _repository
-       echo(" Evaluating repository: $(_repository.name)")
+    for generate.repository by name as _repository
+        echo(" Evaluating repository: $(_repository.name)")
         for _repository->install.build as _build where\
-             defined(_build.repository) & starts_with(_build.repository, "libbitcoin")
+            defined(_build.repository) & starts_with(_build.repository, "libbitcoin")
             emit_import_copy(my.path_prefix, _repository.name, _build.repository)
-       endfor
-       emit_project_props_copy(my.path_prefix, _repository.name)
-   endfor
+        endfor
+        emit_project_props_copy(my.path_prefix, _repository.name)
+    endfor
 
 endfunction
 ###############################################################################
