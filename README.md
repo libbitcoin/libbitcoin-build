@@ -27,8 +27,8 @@ Notes on Badges
 The artifacts generated for each library are as follows. Package names coincide with libbitcoin repository names.
 
 ```
+.appveyor.yml
 .travis.yml
-appveyor.yml
 autogen.sh
 build.cmd
 configure.ac
@@ -38,6 +38,8 @@ install.sh
 Makefile.am
 include/bitcoin/[library].hpp
 include/bitcoin/[library]/version.hpp
+builds/msvc/nuget.config
+builds/msvc/build/build_base.bat
 builds/msvc/[edition]/[library]/[library].props
 builds/msvc/[edition]/[library]/[library].vcxproj
 builds/msvc/[edition]/[library]/[library].vcxproj.filters
