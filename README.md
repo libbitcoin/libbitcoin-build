@@ -38,6 +38,8 @@ install.sh
 Makefile.am
 include/bitcoin/[library].hpp
 include/bitcoin/[library]/version.hpp
+builds/cmake/CMakeLists.txt
+builds/cmake/modules/[module].cmake
 builds/msvc/nuget.config
 builds/msvc/build/build_base.bat
 builds/msvc/[edition]/[library]/[library].props
