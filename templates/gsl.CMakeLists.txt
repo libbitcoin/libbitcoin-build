@@ -2,7 +2,7 @@
 ###############################################################################
 # Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
 #
-# GSL generate libbitcoin build.cmd.
+# GSL generate libbitcoin CMakeLists.txt.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
@@ -499,7 +499,9 @@ function emit_flags(repository)
                 next
             endif
 
-            if ((_flag.context = "c") | (_flag.context = "c++"))
+            if (((_flag.context = "c") | (_flag.context = "c++")) &\
+                (count(_options.flag, (count.name = _flag.name)) = 0))
+
                 copy _flag to _options
             endif
         endfor
