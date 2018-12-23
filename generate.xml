@@ -1680,11 +1680,14 @@
 
   <repository name="libbitcoin-protocol" version="4.0.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
+    <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol">
+      <flag value="@mbedtls@" />
+    </package>
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="with" name="mbedtls" default="no" substitute="true" value="-DWITH_MBEDTLS" description="Compile with MbedTLS." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -1704,6 +1707,7 @@
           <nuget compiler="vc140" name="libzmq_vc140" version="4.2.30" />
           <nuget compiler="vc141" name="libzmq_vc141" version="4.2.30" />
       </dependency>
+      <dependency name="mbedtls" version="2.12.0" option="mbedtls" />
       <dependency name="bitcoin-system" version="4.0.0"  />
 
       <!-- General flags -->
@@ -1740,12 +1744,15 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" uuid="6b94e2a5-c054-4790-963d-a7be493259b0" >
+        <flag substitute="mbedtls" />
         <library name="zmq" />
+        <library name="mbedtls" />
         <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-protocol-test" test="true" option="tests" uuid="c42be17b-063d-44f1-a5bb-9f8295144b70" >
+        <flag substitute="mbedtls" />
         <runner/>
         <library name="bitcoin-protocol" />
         <library name="boost_unit_test_framework" />
@@ -1773,6 +1780,8 @@
         <option value="--with-test" />
       </build>
       <build name="zmq" version="4.2.5" parallel="true" nuget="true" >
+      </build>
+      <build name="mbedtls" version="2.12.0" parallel="true">
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version5" parallel="true" nuget="true" >
         <option value="--disable-tests" />
@@ -1809,6 +1818,7 @@
         <exclude path="interface.pb.*" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
+        <option value="--build-mbedtls" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1818,6 +1828,7 @@
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--build-zmq" />
+        <option value="--build-mbedtls" />
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
@@ -1825,6 +1836,7 @@
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--build-zmq" />
+        <option value="--build-mbedtls" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
