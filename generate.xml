@@ -235,8 +235,6 @@
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
-        <!-- Replace XX with two consecutive hyphens if not commented. Two consecutive hypens not allowed in comments -->
-        <!--<option value="XXdisable-silent-rules" />-->
       </build>
     </install>
 
@@ -834,16 +832,12 @@
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <!-- <get name="swig" /> -->
-        <!-- Replace XX with two consecutive hyphens if not commented. Two consecutive hypens not allowed in comments -->
-        <!-- <option value="XXwith-java" /> -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" version="3.4" >
         <!-- <get name="swig" /> -->
-        <!-- Replace XX with two consecutive hyphens if not commented. Two consecutive hypens not allowed in comments -->
-        <!-- <option value="XXwith-python" /> -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -853,8 +847,6 @@
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <exclude path="clone/*" />
         <!-- <get name="swig" /> -->
-        <!-- Replace XX with two consecutive hyphens if not commented. Two consecutive hypens not allowed in comments -->
-        <!-- <option value="XXwith-java" /> -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--build-dir=my-build" />
@@ -866,8 +858,6 @@
         <get name="boost" />
         <!-- <get name="swig" /> -->
         <option value="--disable-static" />
-        <!-- Replace XX with two consecutive hyphens if not commented. Two consecutive hypens not allowed in comments -->
-        <!-- <option value="XXwith-python" /> -->
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -881,9 +871,6 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <!-- <get name="swig" /> -->
-        <!-- Replace XX with two consecutive hyphens if not commented. Two consecutive hypens not allowed in comments -->
-        <!-- <option value="XXwith-java" /> -->
-        <!-- <option value="XXwith-python" /> -->
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
