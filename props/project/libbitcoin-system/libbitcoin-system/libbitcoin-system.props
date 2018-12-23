@@ -2,11 +2,11 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <_PropertySheetDisplayName>Libbitcoin Library Common Settings</_PropertySheetDisplayName>
+    <_PropertySheetDisplayName>Libbitcoin System Library Common Settings</_PropertySheetDisplayName>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
-  
+
   <!-- User Interface -->
 
   <ItemGroup Label="BuildOptionsExtension">
@@ -28,7 +28,7 @@
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'StaticLibrary'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
- 
+
   <!-- Dependencies -->
 
   <PropertyGroup Condition="'$(NuGetPackageRoot)' == ''">
