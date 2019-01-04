@@ -66,7 +66,7 @@ function generate_version(path_prefix)
 
                     # We are writing into local primary includes (not installdir).
                     define my.include = join(join(my.path_prefix,\
-                        _repository.name), _files.path)
+                        canonical_path_name(_repository)), _files.path)
                     define my.path = "$(my.include)/$(my.primary)"
                     create_directory(my.path)
 
