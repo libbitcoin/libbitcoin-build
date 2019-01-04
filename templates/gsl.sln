@@ -17,8 +17,8 @@ function solution_relative_path(repository, path_prefix, vs_version)
     define my.repository = solution_relative_path.repository
     require(my.repository, "repository", "name")
     define my.subpath = "builds/msvc/$(my.vs_version)"
-    return append_path(append_path(my.path_prefix, my.repository.name),\
-        my.subpath)
+    return append_path(append_path(my.path_prefix,\
+        canonical_path_name(my.repository)), my.subpath)
 endfunction
 
 function solution_file(repository, path_prefix, vs_version)

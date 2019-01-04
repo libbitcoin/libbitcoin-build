@@ -113,6 +113,12 @@ endfunction
 # Library utilities.
 #------------------------------------------------------------------------------
 
+function global.canonical_path_name(repository)
+    define my.repository = canonical_path_name.repository
+    return defined(my.repository.path) ?? my.repository.path ?\
+        my.repository.name
+endfunction
+
 # Get the product with the given library name.
 function global.find_library_product(name, make, repository)
     define my.make = find_library_product.make

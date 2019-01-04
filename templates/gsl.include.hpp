@@ -115,13 +115,13 @@ endfunction
 function generate_include(path_prefix)
     for generate.repository by name as _repository
         define my.primary = bitcoin_to_include(_repository.name)
-        define my.absolute = "$(global.root)/$(_repository.name)"
+        define my.absolute = "$(global.root)/$(canonical_path_name(_repository))"
         define my.base = normalize_directory(my.absolute)
         for _repository.make as _make
             for _make.product as _product where is_headers(_product)
                 for _product.files as _files
                     define my.include = join(join(my.path_prefix,\
-                        _repository.name), _files.path)
+                        canonical_path_name(_repository)), _files.path)
                     create_directory(my.include)
                     define my.out_file = "$(my.include)/$(my.primary).hpp"
                     notify(my.out_file)
