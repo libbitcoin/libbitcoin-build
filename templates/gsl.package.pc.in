@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2019 libbitcoin developers (see COPYING).
 #
 # GSL generate libbitcoin.pc.in.
 #
@@ -187,7 +187,7 @@ for generate.repository by name as _repository\
 
     for _repository.package as _package
         require(_repository, "repository", "name")
-        my.output_path = join(my.path_prefix, _repository.name)
+        my.output_path = join(my.path_prefix, canonical_path_name(_repository))
         create_directory(my.output_path)
         define my.package_name = get_package_name(_package)
         define my.out_file = "$(my.output_path)/$(my.package_name).pc.in"

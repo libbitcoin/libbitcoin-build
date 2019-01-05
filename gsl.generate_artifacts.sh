@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2019 libbitcoin developers (see COPYING).
 #
 # GSL generate generate_artifacts.sh.
 #

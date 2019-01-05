@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2019 libbitcoin developers (see COPYING).
 #
 # GSL generate autogen.sh.
 #
@@ -12,7 +12,7 @@
 .macro generate_autogen(path_prefix)
 .   for generate.repository by name as _repository
 .       require(_repository, "repository", "name")
-.       my.output_path = join(my.path_prefix, _repository.name)
+.       my.output_path = join(my.path_prefix, canonical_path_name(_repository))
 .       create_directory(my.output_path)
 .       define my.out_file = "$(my.output_path)/autogen.sh"
 .       notify(my.out_file)
