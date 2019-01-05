@@ -110,10 +110,10 @@ endfunction
       Write-Host "CTP Compiler Installation Complete." -ForegroundColor Green;
 .endmacro # emit_ctp_installation
 .
-.macro emit_test_execution()
+.macro emit_test_execution(name)
   - ps: >-
       Write-Host "Locating test executables..." -ForegroundColor Yellow;
-      $BC_TEST_EXES = @(Get-ChildItem -Path "$env:APPVEYOR_BUILD_FOLDER\\bin" -recurse | Where-Object { $_.Name -eq "$env:APPVEYOR_PROJECT_NAME-test.exe" });
+      $BC_TEST_EXES = @(Get-ChildItem -Path "$env:APPVEYOR_BUILD_FOLDER\\bin" -recurse | Where-Object { $_.Name -eq "$(my.name)-test.exe" });
       If ($BC_TEST_EXES.Count -ne 1) {
         Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
         exit 1;
@@ -166,7 +166,7 @@ endfunction
 .macro generate_appveyor_yml(path_prefix)
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
-.   my.output_path = join(my.path_prefix, _repository.name)
+.   my.output_path = join(my.path_prefix, canonical_path_name(_repository))
 .   create_directory(my.output_path)
 .   define my.out_file = "$(my.output_path)/.appveyor.yml"
 .   notify(my.out_file)
@@ -199,7 +199,7 @@ build_script:
   - cd /d %APPVEYOR_BUILD_FOLDER%
 
 test_script:
-.   emit_test_execution()
+.   emit_test_execution(_repository.name)
 .
 .   close
 .endfor _repository

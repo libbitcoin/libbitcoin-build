@@ -80,8 +80,8 @@ function project_build_dir_relative_path(repository, product, path_prefix,\
     define my.product = project_build_dir_relative_path.product
     define my.proj_name = project_name(my.product, my.repository)
     define my.subpath = "builds/msvc/$(my.vs_version)"
-    return append_path(append_path(append_path(\
-        my.path_prefix, my.repository.name), my.subpath), my.proj_name)
+    return append_path(append_path(append_path(my.path_prefix,\
+        canonical_path_name(my.repository)), my.subpath), my.proj_name)
 endfunction
 
 function project_file(repository, product, path_prefix, vs_version)
@@ -418,7 +418,7 @@ function generate_filter(path_prefix, generate, vs_version)
 
         require(_repository, "repository", "name")
         define my.absolute_project_path = append_path(global.root,\
-            _repository.name)
+            canonical_path_name(_repository))
 
         for _repository->make.product as _product where \
             has_uuid(_product) & defined(_product.path)

@@ -54,7 +54,7 @@ for generate.repository by name as _repository\
         where (defined(_product->runner))
 
         define target_name = target_name(_product, _repository)
-        my.output_path = join(my.path_prefix, _repository.name)
+        my.output_path = join(my.path_prefix, canonical_path_name(_repository))
         create_directory(my.output_path)
         define my.out_file = "$(my.output_path)/$(target_name)_runner.sh"
         notify(my.out_file)
