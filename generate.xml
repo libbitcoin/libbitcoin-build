@@ -556,7 +556,14 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-client-test" test="true" option="tests" uuid="a56a00c6-669b-4535-9dc2-772a931b04c2" >
-        <runner/>
+        <runner>
+          <run test="generated" />
+          <!--<run test="network" />-->
+          <run test="obsolete" />
+          <run test="offline" />
+          <run test="config" />
+          <run test="stub" />
+        </runner>
         <library name="bitcoin-client" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
