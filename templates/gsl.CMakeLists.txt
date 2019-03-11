@@ -390,8 +390,8 @@ function emit_product_target(repository, product, path_prefix)
             define my.product_path = append_path(my.repository_path,\
                 my.product.path)
             define my.product_dir = open_directory(my.product_path)
-            get_files(_files, my.product_dir, my.product.path, "true", "true",\
-                "true")
+            get_files(_files, my.product_dir, my.product.path, "", "true", \
+                "true", "true")
         endif
 
         emit_source_project(my.repository, my.product, _files, my.path_prefix,\
@@ -433,8 +433,8 @@ function emit_jar_product(repository, javaexec, jarexec, path_prefix)
             define my.product_path = append_path(my.repository_path,\
                 my.javaexec->files.path)
             define my.product_dir = open_directory(my.product_path)
-            get_files(_files, my.product_dir, my.javaexec->files.path, "true",\
-                "true", "true")
+            get_files(_files, my.product_dir, my.javaexec->files.path, "", \
+                "true", "true", "true")
         endif
 
         emit_jar_project(my.repository, _files, my.target_name, my.path_prefix,\
