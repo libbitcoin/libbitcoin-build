@@ -660,6 +660,18 @@ function global.get_files(files, directory, relative_path, tag, recurse,\
     define my.files = get_files.files
     define my.directory = get_files.directory
 
+    if (!defined(my.recurse))
+        abort("get_files: specify 'recurse' parameter")
+    endif
+
+    if (!defined(my.ignore_hidden_dirs))
+        abort("get_files: specify 'ignore_hidden_dirs' parameter")
+    endif
+
+    if (!defined(my.ignore_hidden_files))
+        abort("get_files: specify 'ignore_hidden_files' parameter")
+    endif
+
     for my.directory.file as _file by _file.name
         if (!(is_true(my.ignore_hidden_files) & starts_with(_file.name, ".")))
             new my.files.file as _element
