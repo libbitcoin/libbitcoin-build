@@ -77,7 +77,7 @@ make && sudo make install
 cd ../../
 
 # Clone all libbitcoin repositories.
-git clone https://github.com/libbitcoin/libbitcoin.git
+git clone https://github.com/libbitcoin/libbitcoin-system.git
 git clone https://github.com/libbitcoin/libbitcoin-blockchain.git
 git clone https://github.com/libbitcoin/libbitcoin-build.git
 git clone https://github.com/libbitcoin/libbitcoin-client.git
