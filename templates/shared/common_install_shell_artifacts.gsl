@@ -261,7 +261,7 @@ endfunction
 # --with-icu               Compile with International Components for Unicode.
 #                            Since the addition of BIP-39 and later BIP-38
 #                            support, libbitcoin conditionally incorporates ICU
-#                             to provide BIP-38 and BIP-39 passphrase
+#                            to provide BIP-38 and BIP-39 passphrase
 #                            normalization features. Currently
 #                            libbitcoin-explorer is the only other library that
 #                            accesses this feature, so if you do not intend to
@@ -339,7 +339,7 @@ display_help()
     display_message "  --with-icu               Compile with International Components for Unicode."
     display_message "                             Since the addition of BIP-39 and later BIP-38 "
     display_message "                             support, libbitcoin conditionally incorporates ICU "
-    display_message "                              to provide BIP-38 and BIP-39 passphrase "
+    display_message "                             to provide BIP-38 and BIP-39 passphrase "
     display_message "                             normalization features. Currently "
     display_message "                             libbitcoin-explorer is the only other library that "
     display_message "                             accesses this feature, so if you do not intend to "
@@ -397,6 +397,7 @@ display_help()
     display_message "All unrecognized options provided shall be passed as configuration options for "
     display_message "all dependencies."
 }
+
 .endmacro # define_help
 .
 .macro define_display_configuration(repository, install)
@@ -456,57 +457,59 @@ display_configuration()
 
 .endmacro # define_display_configuration
 .
-.macro define_read_parameters(repository, install)
-.   define my.repository = define_read_parameters.repository
-.   define my.install = define_read_parameters.install
-.   heading2("Parse command line options that are handled by this script.")
-for OPTION in "$@"; do
-    case $OPTION in
-        # Standard script options.
-        (--help)                DISPLAY_HELP="yes";;
+.macro define_parse_command_line_options(repository, install)
+.   define my.repository = define_parse_command_line_options.repository
+.   define my.install = define_parse_command_line_options.install
+parse_command_line_options()
+{
+    for OPTION in "$@"; do
+        case $OPTION in
+            # Standard script options.
+            (--help)                DISPLAY_HELP="yes";;
 
-        # Standard build options.
-        (--prefix=*)            PREFIX="${OPTION#*=}";;
-        (--disable-shared)      DISABLE_SHARED="yes";;
-        (--disable-static)      DISABLE_STATIC="yes";;
+            # Standard build options.
+            (--prefix=*)            PREFIX="${OPTION#*=}";;
+            (--disable-shared)      DISABLE_SHARED="yes";;
+            (--disable-static)      DISABLE_STATIC="yes";;
 
-        # Common project options.
+            # Common project options.
 .   if (have_build(my.install, "icu"))
-        (--with-icu)            WITH_ICU="yes";;
+            (--with-icu)            WITH_ICU="yes";;
 .   endif
 .   if (have_build(my.install, "png"))
-        (--with-png)            WITH_PNG="yes";;
+            (--with-png)            WITH_PNG="yes";;
 .   endif
 .   if (have_build(my.install, "qrencode"))
-        (--with-qrencode)       WITH_QRENCODE="yes";;
+            (--with-qrencode)       WITH_QRENCODE="yes";;
 .   endif
 
-        # Custom build options (in the form of --build-<option>).
+            # Custom build options (in the form of --build-<option>).
 .   if (have_build(my.install, "icu"))
-        (--build-icu)           BUILD_ICU="yes";;
+            (--build-icu)           BUILD_ICU="yes";;
 .   endif
 .   if (have_build(my.install, "zlib"))
-        (--build-zlib)          BUILD_ZLIB="yes";;
+            (--build-zlib)          BUILD_ZLIB="yes";;
 .   endif
 .   if (have_build(my.install, "png"))
-        (--build-png)           BUILD_PNG="yes";;
+            (--build-png)           BUILD_PNG="yes";;
 .   endif
 .   if (have_build(my.install, "qrencode"))
-        (--build-qrencode)      BUILD_QRENCODE="yes";;
+            (--build-qrencode)      BUILD_QRENCODE="yes";;
 .   endif
 .   if (have_build(my.install, "zmq"))
-        (--build-zmq)           BUILD_ZMQ="yes";;
+            (--build-zmq)           BUILD_ZMQ="yes";;
 .   endif
 .   if (have_build(my.install, "mbedtls"))
-        (--build-mbedtls)       BUILD_MBEDTLS="yes";;
+            (--build-mbedtls)       BUILD_MBEDTLS="yes";;
 .   endif
-        (--build-boost)         BUILD_BOOST="yes";;
+            (--build-boost)         BUILD_BOOST="yes";;
 
 .   custom_script_options()
-    esac
-done
+        esac
+    done
+}
 
-.endmacro # define_read_parameters
+.endmacro # define_parse_command_line_options
 .
 .macro define_icu(install)
 .   define my.install = define_icu.install
@@ -599,118 +602,164 @@ BOOST_ARCHIVE="$(get_boost_file(my.install))"
 
 .endmacro # define_boost
 .
-.macro define_set_exit_on_error()
-.   heading2("Exit this script on the first build error.")
-set -e
+.macro define_configure_build_parallelism()
+configure_build_parallelism()
+{
+    OS=\$(uname -s)
+    if [[ $PARALLEL ]]; then
+        display_message "Using shell-defined PARALLEL value."
+    elif [[ $OS == Linux ]]; then
+        PARALLEL=\$(nproc)
+    elif [[ ($OS == Darwin) || ($OS == OpenBSD) ]]; then
+        PARALLEL=\$(sysctl -n hw.ncpu)
+    else
+        display_error "Unsupported system: $OS"
+        display_error "  Explicit shell-definition of PARALLEL will avoid system detection."
+        display_error ""
+        display_help
+        exit 1
+    fi
+}
 
-.endmacro # define_set_exit_on_error
+.endmacro # define_configure_build_parallelism
 .
-.macro define_parallelism()
-.   heading2("Configure build parallelism.")
-SEQUENTIAL=1
-OS=`uname -s`
-if [[ $PARALLEL ]]; then
-    display_message "Using shell-defined PARALLEL value."
-elif [[ $OS == Linux ]]; then
-    PARALLEL=`nproc`
-elif [[ ($OS == Darwin) || ($OS == OpenBSD) ]]; then
-    PARALLEL=`sysctl -n hw.ncpu`
-else
-    display_error "Unsupported system: $OS"
-    display_error "  Explicit shell-definition of PARALLEL will avoid system detection."
-    display_error ""
-    display_help
-    exit 1
-fi
+.macro define_operating_system_specific_settings()
+define_operating_system_specific_settings()
+{
+    if [[ $OS == Darwin ]]; then
+        export CC="clang"
+        export CXX="clang++"
+        STDLIB="c++"
+    elif [[ $OS == OpenBSD ]]; then
+        make() { gmake "$@"; }
+        export CC="egcc"
+        export CXX="eg++"
+        STDLIB="estdc++"
+    else # Linux
+        STDLIB="stdc++"
+    fi
+}
 
-.endmacro # define_parallelism
+.endmacro # define_operating_system_specific_settings
 .
-.macro define_os_specific_settings()
-.   heading2("Define operating system specific settings.")
-if [[ $OS == Darwin ]]; then
-    export CC="clang"
-    export CXX="clang++"
-    STDLIB="c++"
-elif [[ $OS == OpenBSD ]]; then
-    make() { gmake "$@"; }
-    export CC="egcc"
-    export CXX="eg++"
-    STDLIB="estdc++"
-else # Linux
-    STDLIB="stdc++"
-fi
+.macro define_link_to_standard_library_in_nondefault_scenarios()
+link_to_standard_library_in_nondefault_scenarios()
+{
+    if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
+        export LDLIBS="-l$STDLIB $LDLIBS"
+        export CXXFLAGS="-stdlib=lib$STDLIB $CXXFLAGS"
+    fi
+}
 
-.   heading2("Link to appropriate standard library in non-default scnearios.")
-if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
-    export LDLIBS="-l$STDLIB $LDLIBS"
-    export CXXFLAGS="-stdlib=lib$STDLIB $CXXFLAGS"
-fi
-
-.endmacro # define_os_specific_settings
+.endmacro #define_link_to_standard_library_in_nondefault_scenarios
 .
-.macro define_normalized_configure_options()
-.   heading2("Normalize of static and shared options.")
-if [[ $DISABLE_SHARED ]]; then
-    CONFIGURE_OPTIONS=("$@" "--enable-static")
-elif [[ $DISABLE_STATIC ]]; then
-    CONFIGURE_OPTIONS=("$@" "--enable-shared")
-else
-    CONFIGURE_OPTIONS=("$@" "--enable-shared")
-    CONFIGURE_OPTIONS=("$@" "--enable-static")
-fi
+.macro define_write_configure_options()
+write_configure_options()
+{
+    CONFIGURE_OPTIONS=("$@")
+    normalize_static_and_shared_options
+    remove_build_options_from_configure_options
+}
 
-.   heading2("Purge custom build options so they don't break configure.")
-CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
+normalize_static_and_shared_options()
+{
+    if [[ $DISABLE_SHARED ]]; then
+        CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]}" "--enable-static")
+    elif [[ $DISABLE_STATIC ]]; then
+        CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]}" "--enable-shared")
+    else
+        CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]}" "--enable-shared")
+        CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]}" "--enable-static")
+    fi
+}
 
-.endmacro # define_normalized_configure_options
+remove_build_options_from_configure_options()
+{
+    # Purge custom build options so they don't break configure.
+    #------------------------------------------------------------------------------
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
+}
+
+.endmacro # define_write_configure_options
 .
-.macro define_prefix()
-.   heading2("Always set a prefix (required on OSX and for lib detection).")
-if [[ !($PREFIX) ]]; then
-    PREFIX="/usr/local"
-    CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=$PREFIX")
-else
-    # Incorporate the custom libdir into each object, for runtime resolution.
-    export LD_RUN_PATH="$PREFIX/lib"
-fi
+.macro define_handle_a_prefix()
+handle_a_prefix()
+{
+    set_prefix
+    incorporate_the_prefix
+}
 
-.endmacro # define_prefix
+set_prefix()
+{
+    if [[ ! ($PREFIX) ]]; then
+        PREFIX="/usr/local"
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=$PREFIX")
+    else
+        # Incorporate the custom libdir into each object, for runtime resolution.
+        export LD_RUN_PATH="$PREFIX/lib"
+    fi
+}
+
+incorporate_the_prefix()
+{
+    # Set the prefix-based package config directory.
+    PREFIX_PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
+
+    # Prioritize prefix package config in PKG_CONFIG_PATH search path.
+    export PKG_CONFIG_PATH="$PREFIX_PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
+
+    # Set a package config save path that can be passed via our builds.
+    with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
+
+    if [[ $BUILD_BOOST ]]; then
+        # Boost has no pkg-config, m4 searches in the following order:
+        # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
+        # We use --with-boost to prioritize the --prefix path when we build it.
+        # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
+        # ax_boost_base.m4 appends /include and adds to BOOST_CPPFLAGS
+        # ax_boost_base.m4 searches for /lib /lib64 and adds to BOOST_LDFLAGS
+        with_boost="--with-boost=$PREFIX"
+    fi
+}
+
+.endmacro #define_handle_a_prefix
 .
-.macro define_pkgconfigdir()
-.   heading2("Incorporate the prefix.")
-# Set the prefix-based package config directory.
-PREFIX_PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
-
-# Prioritize prefix package config in PKG_CONFIG_PATH search path.
-export PKG_CONFIG_PATH="$PREFIX_PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
-
-# Set a package config save path that can be passed via our builds.
-with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
-
-.endmacro # define_pkgconfigdir
+.macro define_build_options(install)
+.   my.install = define_build_options.install
+.   define_build_options_main_function(my.install)
+.   define_build_options_for_every_github_build(my.install)
+.endmacro #define_build_options(install)
 .
-.macro define_with_boost_prefix()
-if [[ $BUILD_BOOST ]]; then
-    # Boost has no pkg-config, m4 searches in the following order:
-    # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
-    # We use --with-boost to prioritize the --prefix path when we build it.
-    # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
-    # ax_boost_base.m4 appends /include and adds to BOOST_CPPFLAGS
-    # ax_boost_base.m4 searches for /lib /lib64 and adds to BOOST_LDFLAGS
-    with_boost="--with-boost=$PREFIX"
-fi
-
-.endmacro # define_with_boost_prefix
+.macro define_build_options_main_function(install)
+.   my.install = define_build_options.install
+define_github_build_options()
+{
+.   for my.install.build as _build where count(_build.option) > 0
+.       if (is_github_build(_build))
+.           formattedBuildName = string.replace(_build.name, "-|_") 
+    define_$(formattedBuildName:lower)_options
+.       endif
+.   endfor _build  
+}
+.endmacro #define_build_options_main_function
 .
-.macro define_build_options(build)
-.   define my.build = define_build_options.build
-.   heading2("Define $(my.build.name) options.")
-$(my.build.name:upper,c)_OPTIONS=(
-.   for my.build.option as _option
-"$(_option.value)"$(last() ?? ")" ? " \\")
+.macro define_build_options_for_every_github_build(install)
+.   my.install = define_build_options_for_every_github_build.install
+.   for my.install.build as _build where count(_build.option) > 0
+.       if (is_github_build(_build))
+.           formattedBuildName = string.replace(_build.name, "-|_")
+
+define_$(formattedBuildName:lower)_options()
+{
+    $(_build.name:upper,c)_OPTIONS=(
+.   for _build.option as _option
+    "$(_option.value)"$(last() ?? ")" ? " \\")
 .   endfor _option
+}
+.       endif
+.   endfor _build  
 
-.endmacro # define_build_options
+.endmacro #define_build_options_for_specific_build
 .
 .macro define_configure_links()
 configure_links()
@@ -723,55 +772,113 @@ configure_links()
 
 .endmacro # define_configure_links
 .
-.macro define_display_functions()
+.macro define_change_dir_for_build_and_download_and_extract()
+change_dir_for_build_and_download_and_extract()
+{
+    local ARCHIVE=$1
+    local URL=$2
+    local COMPRESSION=$3
+
+    # Use the suffixed archive name as the extraction directory.
+    local EXTRACT="build-$ARCHIVE"
+    push_directory "$BUILD_DIR"
+    create_directory "$EXTRACT"
+    push_directory "$EXTRACT"
+
+    # Extract the source locally.
+    display_heading_message "Download $ARCHIVE"
+    wget --output-document "$ARCHIVE" "$URL"
+    tar --extract --file "$ARCHIVE" --"$COMPRESSION" --strip-components=1
+}
+
+.endmacro #define_change_dir_for_build_and_download_and_extract
+.
+.macro define_enable_exit_on_first_error
+enable_exit_on_first_error()
+{
+    set -e
+}
+
+.endmacro #define_enable_exit_on_first_error
+.
+.macro define_disable_exit_on_first_error
+disable_exit_on_first_error()
+{
+    set +e
+}
+
+.endmacro #define_disable_exit_on_first_error
+.
+.macro define_print_functions()
 display_heading_message()
 {
-    echo
-    echo "********************** $@ **********************"
-    echo
+    printf "\\n********************** %s **********************\\n" "$@"
 }
 
 display_message()
 {
-    echo "$@"
+    printf "%s\\n" "$@"
 }
 
 display_error()
 {
-    >&2 echo "$@"
+    >&2 printf "%s\\n" "$@"
 }
 
-.endmacro # define_display_functions
+.endmacro # define_print_functions
+.
+.macro define_display_boost_configuration()
+display_boost_configuration()
+{
+    display_message "Libbitcoin boost configuration."
+    display_message "--------------------------------------------------------------------"
+    display_message "variant               : release"
+    display_message "threading             : multi"
+    display_message "toolset               : $CC"
+    display_message "cxxflags              : $STDLIB_FLAG"
+    display_message "linkflags             : $STDLIB_FLAG"
+    display_message "link                  : $BOOST_LINK"
+    display_message "boost.locale.iconv    : $BOOST_ICU_ICONV"
+    display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
+    display_message "-sNO_BZIP2            : 1"
+    display_message "-sICU_PATH            : $ICU_PREFIX"
+    display_message "-sICU_LINK            : " "${ICU_LIBS[@]}"
+    display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
+    display_message "-sZLIB_INCLUDE        : $PREFIX/include"
+    display_message "-j                    : $PARALLEL"
+    display_message "-d0                   : [supress informational messages]"
+    display_message "-q                    : [stop at the first error]"
+    display_message "--reconfigure         : [ignore cached configuration]"
+    display_message "--prefix              : $PREFIX"
+    display_message "BOOST_OPTIONS         : " "$@"
+    display_message "--------------------------------------------------------------------"
+}
+
+.endmacro #define_display_boost_configuration
 .
 .macro define_initialize_git()
 initialize_git()
 {
+    create_directory "$BUILD_DIR"
+    push_directory "$BUILD_DIR"
     display_heading_message "Initialize git"
 
     # Initialize git repository at the root of the current directory.
     git init
     git config user.name anonymous
+    pop_directory
 }
 
 .endmacro # define_initialize_git
 .
-.macro define_make_tests(has_preclean_option)
-.   define my.make_jobs_preclean = is_true(my.has_preclean_option) \
-        ?? "make_jobs true" ? "make_jobs"
-.   define my.make_jobs_noclean = is_true(my.has_preclean_option) \
-        ?? "make_jobs false" ? "make_jobs"
-.
-# make_tests jobs
+.macro define_make_tests()
 make_tests()
 {
-    local JOBS=$1
-
-    # Disable exit on error.
-    set +e
+    disable_exit_on_first_error
 
     # Build and run unit tests relative to the primary directory.
     # VERBOSE=1 ensures test runner output sent to console (gcc).
-    $(my.make_jobs_noclean) $JOBS check "VERBOSE=1"
+    make_jobs check "VERBOSE=1"
     local RESULT=$?
 
     # Test runners emit to the test.log file.
@@ -783,11 +890,10 @@ make_tests()
         exit $RESULT
     fi
 
-    # Reenable exit on error.
-    set -e
+    enable_exit_on_first_error
 }
 
-.endmacro # define_make_tests
+.endmacro #define_make_tests
 .
 .macro define_push_pop_directory
 pop_directory()
@@ -1048,8 +1154,8 @@ circumvent_boost_icu_detection()
     local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
     local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
 
-    echo $SUCCESS > $REGEX_TEST
-    echo $SUCCESS > $LOCALE_TEST
+    printf "%s" "$SUCCESS" > $REGEX_TEST
+    printf "%s" "$SUCCESS" > $LOCALE_TEST
 
     # display_message "Hack: ICU detection modified, will always indicate found."
 }
@@ -1090,14 +1196,14 @@ initialize_boost_icu_configuration()
         BOOST_ICU_POSIX="off"
 
         # Extract ICU libs from package config variables and augment with -ldl.
-        ICU_LIBS="`pkg-config icu-i18n --libs` -ldl"
+        ICU_LIBS="\$(pkg-config icu-i18n --libs) -ldl"
 
         # This is a hack for boost m4 scripts that fail with ICU dependency.
         # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
-        export BOOST_ICU_LIBS="${ICU_LIBS[@]}"
+        export BOOST_ICU_LIBS=("${ICU_LIBS[@]}")
 
         # Extract ICU prefix directory from package config variable.
-        ICU_PREFIX=`pkg-config icu-i18n --variable=prefix`
+        ICU_PREFIX=\$(pkg-config icu-i18n --variable=prefix)
     fi
 }
 

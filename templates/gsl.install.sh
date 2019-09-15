@@ -15,6 +15,103 @@
 ###############################################################################
 .endtemplate
 .template 1
+.macro define_main()
+main()
+{        
+    initialize_the_build_environment "$@"
+    build
+}
+.endmacro
+.
+.macro define_intialize_the_build_environemnt()
+
+initialize_the_build_environment()
+{
+    enable_exit_on_first_error
+    parse_command_line_options "$@"
+    handle_help_line_option
+    configure_build_parallelism
+    define_operating_system_specific_settings
+    link_to_standard_library_in_nondefault_scenarios
+    write_configure_options "$@"
+    handle_a_prefix
+    display_configuration
+    initialize_git
+}
+.endmacro 
+.macro define_build(install)
+.   define my.install = define_build.install
+
+build()
+{
+    define_github_build_options
+
+.   for my.install.build as _build
+.       # Unique by build.name
+.       if !defined(my.build_$(_build.name:c))
+.           define my.build_$(_build.name:c) = 0
+.
+.           if (is_icu_build(_build))
+.               define_build_icu_condition()
+.           elsif (!is_github_build(_build))
+.               define_nongithub_buildcall(_build)
+.           elsif (is_github_build(_build))
+.               formattedBuildName = string.replace(_build.name, "-|_")   
+.               if (last())      
+.                   define_last_build_call(_build)  
+.               else 
+.                   define_github_build_call(_build)    
+.               endif
+.           else
+.               abort "Invalid build type: $(_build.name)."
+.           endif
+.       endif
+.   endfor _build
+}  
+.endmacro # define_build_all
+.
+.macro define_build_icu_condition()
+    if [[ $BUILD_ICU ]]; then
+        build_from_tarball_icu
+    else
+        initialize_icu_packages
+    fi
+.endmacro #define_build_icu_condition
+.
+.macro define_nongithub_buildcall(build)
+.   define build = define_nongithub_buildcall.build
+    if [[ "$BUILD_$(build.name:upper)" ]]; then
+        build_from_tarball_$(build.name)
+    fi  
+.endmacro #define_nongithub_builcall
+.
+.macro define_last_build_call(build)
+.   define my.build = define_last_build_call.build
+.   define formattedBuildName = string.replace(my.build.name, "-|_")   
+    if [[ $TRAVIS == true ]]; then
+        # Because Travis alread has downloaded the primary repo.
+        build_from_local_with_tests "${$(formattedBuildName:upper)_OPTIONS[@]}"
+    else
+        build_from_github_with_tests $(my.build.github) $(my.build.repository) $(my.build.branch) "${$(formattedBuildName:upper)_OPTIONS[@]}"
+    fi 
+.endmacro #define_last_build_call
+.
+.macro define_github_build_call(build)
+.   define my.build = define_github_build_call.build
+.   define formattedBuildName = string.replace(my.build.name, "-|_")   
+    build_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "${$(formattedBuildName:upper)_OPTIONS[@]}"
+.endmacro #define_github_build_call
+.
+.macro define_handle_help_line_option()
+handle_help_line_option()
+{  
+    if [[ $DISPLAY_HELP ]]; then     
+        display_help      
+        exit 0
+    fi 
+}
+
+.endmacro # define_handle_help_line_option
 .
 .macro custom_help(repository, install, script_name)
     display_message "  --build-dir=<path>       Location of downloaded and intermediate files."
@@ -29,8 +126,8 @@
 .endmacro # custom_configuration
 .
 .macro custom_script_options()
-        # Unique script options.
-        (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
+            # Unique script options.
+            (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
 .endmacro # custom_script_options
 .
 .macro define_build_directory(repository)
@@ -66,187 +163,216 @@ create_directory()
 
 .endmacro # define_create_directory
 .
-.macro define_make_current_directory()
-# make_current_directory jobs [configure_options]
-make_current_directory()
+.macro define_make_functions()
+configure_and_make_and_install()
 {
-    local JOBS=$1
-    shift 1
+    local OPTIONS=("$@")
+    local CONFIGURATION=("${OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}")    
+
+    configure_options "${CONFIGURATION[@]}"
+    make_jobs --silent
+    make install   
+    configure_links
+}
+
+autogen_and_configure_and_make_and_install()
+{
+    local OPTIONS=("$@")
+    local CONFIGURATION=("${OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}")   
 
     ./autogen.sh
-    configure_options "$@"
-    make_jobs $JOBS
+    configure_options "${CONFIGURATION[@]}"
+    make_jobs
     make install
     configure_links
 }
 
-.endmacro # define_make_current_directory
-.
-.macro define_make_jobs()
-# make_jobs jobs [make_options]
 make_jobs()
 {
-    local JOBS=$1
-    shift 1
+    local JOBS="$PARALLEL"
 
     # Avoid setting -j1 (causes problems on Travis).
+    local SEQUENTIAL=1
     if [[ $JOBS > $SEQUENTIAL ]]; then
-        make -j$JOBS "$@"
+        make -j"$JOBS" "$@"
     else
         make "$@"
     fi
 }
 
-.endmacro # define_make_jobs
+.endmacro #define_make_functions
 .
 .macro define_utility_functions()
+.   define_enable_exit_on_first_error()
+.   define_disable_exit_on_first_error()
 .   define_configure_links()
+.   define_change_dir_for_build_and_download_and_extract()
+.   define_make_functions()
 .   define_configure_options()
+.   define_make_tests()
 .   define_create_directory()
-.   define_display_functions()
-.   define_initialize_git()
-.   define_make_current_directory()
-.   define_make_jobs()
-.   define_make_tests("false")
 .   define_push_pop_directory()
 .endmacro # define_utility_functions
 .
-.macro define_build_from_tarball()
-# Standard build from tarball.
-build_from_tarball()
+.macro define_builds_from_tarball(install)
+.   define my.install = define_builds_from_tarball.install
+.   if defined(my.install->build(name="icu"))
+.        define_build_from_tarball_icu(my.install)
+.   endif
+.    
+.   if defined(my.install->build(name="zlib"))
+.        define_build_from_tarball_zlib(my.install)
+.   endif
+.
+.   if defined(my.install->build(name="png"))
+.       define_build_from_tarball_png(my.install)
+.   endif
+.   if defined(my.install->build(name="qrencode"))
+.       define_build_from_tarball_qrencode(my.install)
+.   endif
+.
+.   if defined(my.install->build(name="boost"))
+.       define_build_from_tarball_boost(my.install)
+.   endif
+.
+.   if defined(my.install->build(name="zmq"))
+.       define_build_from_tarball_zmq(my.install)
+.   endif
+.
+.   if defined(my.install->build(name="mbedtls"))
+.       define_build_from_tarball_mbedlts(my.install)
+.   endif
+.endmacro #define_builds_from_taball
+.
+.macro define_build_from_tarball_icu(install)
+.   define my.install = define_build_from_tarball_icu.install
+build_from_tarball_icu()
 {
-    local URL=$1
-    local ARCHIVE=$2
-    local COMPRESSION=$3
-    local PUSH_DIR=$4
-    local JOBS=$5
-    local BUILD=$6
-    local OPTIONS=$7
-    shift 7
+.   icu_url = get_icu_url(my.install)
+.   icu_file = get_icu_file(my.install)
+    local URL="$(icu_url)"
+    local ARCHIVE="$(icu_file)"
+    local COMPRESSION="gzip"
+.   define my.build = my.install->build(name="icu")
+    local OPTIONS=(
+.   for my.build.option as _option
+    "$(_option.value)"$(last() ?? ")" ? " \\")
+.   endfor _option
 
-    # For some platforms we need to set ICU pkg-config path.
-    if [[ !($BUILD) ]]; then
-        if [[ $ARCHIVE == $ICU_ARCHIVE ]]; then
-            initialize_icu_packages
-        fi
-        return
-    fi
+    local SAVE_LDFLAGS=$LDFLAGS
+    export LDFLAGS="-L$PREFIX/lib $LDFLAGS"    
+
+    change_dir_for_build_and_download_and_extract "$ARCHIVE" "$URL" "$COMPRESSION"   
+    push_directory "source"
+    configure_and_make_and_install "${OPTIONS[@]}"
+
+    pop_directory
+    pop_directory
+    pop_directory
+
+    # Restore flags to prevent side effects.
+    export LDFLAGS=$SAVE_LDFLAGS
+}
+
+.   define_initialize_icu_packages()
+.endmacro #build_from_tarball_icu
+.
+.macro define_build_from_tarball_zlib(install)
+.   define my.install =  define_build_from_tarball_zlib.install
+build_from_tarball_zlib()
+{
+.   zlib_url = get_zlib_url(my.install)
+.   zlib_file = get_zlib_file(my.install)
+    local URL="$(zlib_url)"
+    local ARCHIVE="$(zlib_file)"
+    local COMPRESSION="gzip"    
+
+    change_dir_for_build_and_download_and_extract "$ARCHIVE" "$URL" "$COMPRESSION"   
+    
+    # Enable static only zlib build.
+    patch_zlib_configuration  
+    configure_and_make_and_install  
+
+    clean_zlib_build
+
+    pop_directory
+    pop_directory
+}
+
+.   define_patch_zlib_configuration()
+.   define_clean_zlib_build()
+.endmacro #define_build_from_tarball_zlib
+.
+.macro define_build_from_tarball_png(install)
+.   define my.install = define_build_from_tarball_png.install
+build_from_tarball_png()
+{
+.   png_url = get_png_url(my.install)
+.   png_file = get_png_file(my.install)
+    local URL="$(png_url)"
+    local ARCHIVE="$(png_file)"
+    local COMPRESSION="xz"
 
     # Because libpng doesn't actually use pkg-config to locate zlib.
-    # Because ICU tools don't know how to locate internal dependencies.
-    if [[ ($ARCHIVE == $ICU_ARCHIVE) || ($ARCHIVE == $PNG_ARCHIVE) ]]; then
-        local SAVE_LDFLAGS=$LDFLAGS
-        export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
-    fi
+    local SAVE_LDFLAGS=$LDFLAGS
+    export LDFLAGS="-L$PREFIX/lib $LDFLAGS"    
 
-    # Because libpng doesn't actually use pkg-config to locate zlib.h.
-    if [[ ($ARCHIVE == $PNG_ARCHIVE) ]]; then
-        local SAVE_CPPFLAGS=$CPPFLAGS
-        export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
-    fi
+    # Because libpng doesn't actually use pkg-config to locate zlib.h. 
+    local SAVE_CPPFLAGS=$CPPFLAGS
+    export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"    
 
-    display_heading_message "Download $ARCHIVE"
-
-    # Use the suffixed archive name as the extraction directory.
-    local EXTRACT="build-$ARCHIVE"
-    push_directory "$BUILD_DIR"
-    create_directory "$EXTRACT"
-    push_directory "$EXTRACT"
-
-    # Extract the source locally.
-    wget --output-document $ARCHIVE $URL
-    tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
-    push_directory "$PUSH_DIR"
-
-    # Enable static only zlib build.
-    if [[ $ARCHIVE == $ZLIB_ARCHIVE ]]; then
-        patch_zlib_configuration
-    fi
-
-    # Join generated and command line options.
-    local CONFIGURATION=("${OPTIONS[@]}" "$@")
-
-    if [[ $ARCHIVE == $MBEDTLS_ARCHIVE ]]; then
-        make -j $JOBS lib
-        make DESTDIR=$PREFIX install
-    else
-        configure_options "${CONFIGURATION[@]}"
-        make_jobs $JOBS --silent
-        make install
-    fi
-
-    configure_links
-
-    # Enable shared only zlib build.
-    if [[ $ARCHIVE == $ZLIB_ARCHIVE ]]; then
-        clean_zlib_build
-    fi
+    change_dir_for_build_and_download_and_extract "$ARCHIVE" "$URL" "$COMPRESSION"   
+    configure_and_make_and_install   
 
     pop_directory
     pop_directory
 
     # Restore flags to prevent side effects.
     export LDFLAGS=$SAVE_LDFLAGS
-    export CPPFLAGS=$SAVE_LCPPFLAGS
+    export CPPFLAGS=$SAVE_CPPFLAGS
+}
 
+.endmacro #define_build_from_tarball_png
+.
+.macro define_build_from_tarball_qrencode(install)
+.   define my.install = define_build_from_tarball_qrencode.install
+build_from_tarball_qrencode()
+{
+.   qrencode_url = get_qrencode_url(my.install)
+.   qrencode_file = get_qrencode_file(my.install)
+    local URL="$(qrencode_url)"
+    local ARCHIVE="$(qrencode_file)"
+    local COMPRESSION="bzip2"    
+
+    change_dir_for_build_and_download_and_extract "$ARCHIVE" "$URL" "$COMPRESSION"   
+    configure_and_make_and_install   
+
+    pop_directory
     pop_directory
 }
 
-.endmacro # define_build_from_tarball
+.endmacro #define_build_from_tarball_qrencode
 .
-.macro define_build_from_tarball_boost()
+.macro define_build_from_tarball_boost(install)
+.   define my.install = define_build_from_tarball_boost.install
 # Because boost doesn't use autoconfig.
 build_from_tarball_boost()
 {
-    local URL=$1
-    local ARCHIVE=$2
-    local COMPRESSION=$3
-    local PUSH_DIR=$4
-    local JOBS=$5
-    local BUILD=$6
-    shift 6
+.   boost_url = get_boost_url(my.install)
+.   boost_file = get_boost_file(my.install)
+    local URL="$(boost_url)"
+    local ARCHIVE="$(boost_file)"
+    local COMPRESSION="bzip2"  
+.   define my.build = my.install->build(name="boost")
+    local OPTIONS=(
+.   for my.build.option as _option
+    "$(_option.value)"$(last() ?? ")" ? " \\")
+.   endfor _option
 
-    if [[ !($BUILD) ]]; then
-        return
-    fi
-
-    display_heading_message "Download $ARCHIVE"
-
-    # Use the suffixed archive name as the extraction directory.
-    local EXTRACT="build-$ARCHIVE"
-    push_directory "$BUILD_DIR"
-    create_directory "$EXTRACT"
-    push_directory "$EXTRACT"
-
-    # Extract the source locally.
-    wget --output-document $ARCHIVE $URL
-    tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
-
+    change_dir_for_build_and_download_and_extract "$ARCHIVE" "$URL" "$COMPRESSION"  
     initialize_boost_configuration
     initialize_boost_icu_configuration
-
-    display_message "Libbitcoin boost configuration."
-    display_message "--------------------------------------------------------------------"
-    display_message "variant               : release"
-    display_message "threading             : multi"
-    display_message "toolset               : $CC"
-    display_message "cxxflags              : $STDLIB_FLAG"
-    display_message "linkflags             : $STDLIB_FLAG"
-    display_message "link                  : $BOOST_LINK"
-    display_message "boost.locale.iconv    : $BOOST_ICU_ICONV"
-    display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
-    display_message "-sNO_BZIP2            : 1"
-    display_message "-sICU_PATH            : $ICU_PREFIX"
-    display_message "-sICU_LINK            : ${ICU_LIBS[@]}"
-    display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
-    display_message "-sZLIB_INCLUDE        : $PREFIX/include"
-    display_message "-j                    : $JOBS"
-    display_message "-d0                   : [supress informational messages]"
-    display_message "-q                    : [stop at the first error]"
-    display_message "--reconfigure         : [ignore cached configuration]"
-    display_message "--prefix              : $PREFIX"
-    display_message "BOOST_OPTIONS         : $@"
-    display_message "--------------------------------------------------------------------"
+    display_boost_configuration "${OPTIONS[@]}"  
 
     # boost_iostreams
     # The zlib options prevent boost linkage to system libs in the case where
@@ -272,202 +398,134 @@ build_from_tarball_boost()
         "-sICU_LINK=${ICU_LIBS[@]}" \\
         "-sZLIB_LIBPATH=$PREFIX/lib" \\
         "-sZLIB_INCLUDE=$PREFIX/include" \\
-        "-j $JOBS" \\
+        "-j $PARALLEL" \\
         "-d0" \\
         "-q" \\
         "--reconfigure" \\
         "--prefix=$PREFIX" \\
-        "$@"
+        "${OPTIONS[@]}"
 
     pop_directory
     pop_directory
 }
 
-.endmacro # define_build_from_tarball_boost
+.   define_boost_build_configuration_helpers()
+.endmacro #define_build_from_tarball_boost
 .
-.macro define_build_from_github()
+.macro define_build_from_tarball_zmq(install)
+.   define my.install = define_build_from_tarball_zmq.install
+build_from_tarball_zmq()
+{
+.   zmq_url = get_zmq_url(my.install)
+.   zmq_file = get_zmq_file(my.install)
+    local URL="$(zmq_url)"
+    local ARCHIVE="$(zmq_file)"
+    local COMPRESSION="gzip"    
+
+    change_dir_for_build_and_download_and_extract "$ARCHIVE" "$URL" "$COMPRESSION"   
+    configure_and_make_and_install   
+
+    pop_directory
+    pop_directory
+}
+
+.endmacro #define_build_from_tarball_zmq
+.
+.macro define_build_from_tarball_mbedlts(install)
+.   define my.install = define_build_from_tarball_mbedlts.install
+build_from_tarball_mbedlts()
+{
+.   mbedtls_url = get_mbedtls_url(my.install)
+.   mbedtls_file = get_mbedtls_file(my.install)
+    local URL="$(mbedtls_url)"
+    local ARCHIVE="$(mbedtls_file)"
+    local COMPRESSION="gzip"    
+
+    change_dir_for_build_and_download_and_extract "$ARCHIVE" "$URL" "$COMPRESSION"   
+    make_jobs lib
+    make DESTDIR=$PREFIX install
+
+    pop_directory
+    pop_directory
+}
+
+.endmacro #define_build_from_tarball_mbedlts
+.
+.macro define_github_build_functions()
 # Standard build from github.
 build_from_github()
-{
-    push_directory "$BUILD_DIR"
-
+{  
     local ACCOUNT=$1
     local REPO=$2
     local BRANCH=$3
-    local JOBS=$4
-    local OPTIONS=$5
-    shift 5
+    shift 3
+    local OPTIONS=("$@")
 
     FORK="$ACCOUNT/$REPO"
+    push_directory "$BUILD_DIR"
     display_heading_message "Download $FORK/$BRANCH"
 
     # Clone the repository locally.
-    git clone --depth 1 --branch $BRANCH --single-branch "https://github.com/$FORK"
-
-    # Join generated and command line options.
-    local CONFIGURATION=("${OPTIONS[@]}" "$@")
+    git clone --depth 1 --branch "$BRANCH" --single-branch "https://github.com/$FORK"   
 
     # Build the local repository clone.
     push_directory "$REPO"
-    make_current_directory $JOBS "${CONFIGURATION[@]}"
+    autogen_and_configure_and_make_and_install "${OPTIONS[@]}"
     pop_directory
     pop_directory
 }
 
-.endmacro # define_build_from_github
-.
-.macro define_build_from_local()
+build_from_local_with_tests()
+{
+    local OPTIONS=("$@")
+    build_from_local "Local $TRAVIS_REPO_SLUG" "${OPTIONS[@]}"
+    make_tests
+}
+
 # Standard build of current directory.
 build_from_local()
 {
-    local MESSAGE="$1"
-    local JOBS=$2
-    local OPTIONS=$3
-    shift 3
+    local MESSAGE="$1"    
+    shift 1
+    local OPTIONS=("$@")
 
     display_heading_message "$MESSAGE"
 
-    # Join generated and command line options.
-    local CONFIGURATION=("${OPTIONS[@]}" "$@")
-
     # Build the current directory.
-    make_current_directory $JOBS "${CONFIGURATION[@]}"
+    autogen_and_configure_and_make_and_install "${OPTIONS[@]}"
 }
 
-.endmacro # define_build_from_local
-.
-.macro define_build_from_travis()
-# Because Travis alread has downloaded the primary repo.
-build_from_travis()
+build_from_github_with_tests()
 {
     local ACCOUNT=$1
     local REPO=$2
-    local BRANCH=$3
-    local JOBS=$4
-    local OPTIONS=$5
-    shift 5
+    local BRANCH=$3  
+    shift 3
+    local OPTIONS=("$@")
 
-    # The primary build is not downloaded if we are running in Travis.
-    if [[ $TRAVIS == true ]]; then
-        build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "${OPTIONS[@]}" "$@"
-        make_tests $JOBS
-    else
-        build_from_github $ACCOUNT $REPO $BRANCH $JOBS "${OPTIONS[@]}" "$@"
-        push_directory "$BUILD_DIR"
-        push_directory "$REPO"
-        make_tests $JOBS
-        pop_directory
-        pop_directory
-    fi
-}
-
-.endmacro # define_build_from_travis
-.
-.macro define_build_functions()
-.   define_initialize_icu_packages()
-.   define_patch_zlib_configuration()
-.   define_clean_zlib_build()
-.   define_build_from_tarball()
-.   define_boost_build_configuration_helpers()
-.   define_build_from_tarball_boost()
-.   define_build_from_github()
-.   define_build_from_local()
-.   define_build_from_travis()
-.endmacro # define_build_functions
-.
-.macro build_from_tarball_icu()
-    build_from_tarball $ICU_URL $ICU_ARCHIVE gzip source $PARALLEL "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
-.endmacro # build_icu
-.
-.macro build_from_tarball_zlib()
-    build_from_tarball $ZLIB_URL $ZLIB_ARCHIVE gzip . $PARALLEL "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
-.endmacro # build_zlib
-.
-.macro build_from_tarball_png()
-    build_from_tarball $PNG_URL $PNG_ARCHIVE xz . $PARALLEL "$BUILD_PNG" "${PNG_OPTIONS[@]}" "$@"
-.endmacro # build_png
-.
-.macro build_from_tarball_qrencode()
-    build_from_tarball $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 . $PARALLEL "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}" "$@"
-.endmacro # build_qrencode
-.
-.macro build_from_tarball_zmq()
-    build_from_tarball $ZMQ_URL $ZMQ_ARCHIVE gzip . $PARALLEL "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
-.endmacro # build_zmq
-.
-.macro build_from_tarball_mbedtls()
-    build_from_tarball $MBEDTLS_URL $MBEDTLS_ARCHIVE gzip . $PARALLEL "$BUILD_MBEDTLS" "${MBEDTLS_OPTIONS[@]}" "$@"
-.endmacro # build_mbedtls
-.
-.macro build_boost()
-    build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE bzip2 . $PARALLEL "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
-.endmacro # build_boost
-.
-.macro build_github(build)
-.   define my.build = build_github.build
-.   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
-.   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-    build_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) $(my.parallel) $(my.options) "$@"
-.endmacro # build_github
-.
-.macro build_travis(build)
-.   define my.build = build_travis.build
-.   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
-.   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-    build_from_travis $(my.build.github) $(my.build.repository) $(my.build.branch) $(my.parallel) $(my.options) "$@"
-.endmacro # build_travis
-.
-.macro define_build_all(install)
-.   define my.install = define_build_all.install
-build_all()
-{
-.   for my.install.build as _build
-.       # Unique by build.name
-.       if !defined(my.build_$(_build.name:c))
-.           define my.build_$(_build.name:c) = 0
-.
-.           if (is_icu_build(_build))
-.               build_from_tarball_icu()
-.           elsif (is_zlib_build(_build))
-.               build_from_tarball_zlib()
-.           elsif (is_png_build(_build))
-.               build_from_tarball_png()
-.           elsif (is_qrencode_build(_build))
-.               build_from_tarball_qrencode()
-.           elsif (is_zmq_build(_build))
-.               build_from_tarball_zmq()
-.           elsif (is_mbedtls_build(_build))
-.               build_from_tarball_mbedtls()
-.           elsif (is_boost_build(_build))
-.               build_boost()
-.           elsif (is_github_build(_build))
-.               if (!last())
-.                   build_github(_build)
-.               else
-.                   build_travis(_build)
-.               endif
-.           else
-.               abort "Invalid build type: $(_build.name)."
-.           endif
-.
-.       endif
-.   endfor _build
-}
-
-.endmacro # define_build_all
-.
-.macro define_invoke()
-if [[ $DISPLAY_HELP ]]; then
-    display_help
-else
-    display_configuration
-    create_directory "$BUILD_DIR"
+    build_from_github "$ACCOUNT" "$REPO" "$BRANCH" "${OPTIONS[@]}"
     push_directory "$BUILD_DIR"
-    initialize_git
+    push_directory "$REPO"
+    make_tests
     pop_directory
-    time build_all "${CONFIGURE_OPTIONS[@]}"
-fi
-.endmacro # define_invoke
+    pop_directory
+}
+
+.endmacro #define_github_build_functions
+.
+.macro define_display_functions(repository, install, script_name)
+.   define my.repository = define_display_functions.repository
+.   define my.install = define_display_functions.install
+.   define my.script_name = define_display_functions.script_name
+.   define_print_functions()
+.   define_display_configuration(my.repository, my.install)
+.   define_help(my.repository, my.install, my.script_name) 
+.   define_display_boost_configuration()
+.endmacro #define_display_functions
+.
+.macro define_start_script()
+main "$@"
+.endmacro #define_start_script
 .
 .endtemplate
 .template 0
@@ -490,44 +548,36 @@ for generate.repository by name as _repository
     documentation(_repository, my.install)
 
     heading1("Define constants.")
-    define_build_directory(_repository)
-    define_icu(my.install)
-    define_zlib(my.install)
-    define_png(my.install)
-    define_qrencode(my.install)
-    define_zmq(my.install)
-    define_mbedtls(my.install)
-    define_boost(my.install)
+    define_build_directory(_repository)    
+
+    define_main()
+    define_intialize_the_build_environemnt()
+    define_build(my.install)    
+
+    heading1("Initialize the build environment.")
+    define_parse_command_line_options(_repository, my.install)
+    define_handle_help_line_option()
+    define_configure_build_parallelism()
+    define_operating_system_specific_settings()
+    define_link_to_standard_library_in_nondefault_scenarios()
+    define_write_configure_options()
+    define_handle_a_prefix()
+    define_initialize_git()
+
+    heading1("Define github build options.")
+    define_build_options(my.install)        
+
+    heading1("Define build functions.")
+    define_builds_from_tarball(my.install)
+    define_github_build_functions()
 
     heading1("Define utility functions.")
     define_utility_functions()
-    define_help(_repository, my.install, "install")
 
-    heading1("Initialize the build environment.")
-    define_set_exit_on_error()
-    define_read_parameters(_repository, my.install)
-    define_parallelism()
-    define_os_specific_settings()
-    define_normalized_configure_options()
-    # define_normalize_build_variables()
-    define_prefix()
-    define_pkgconfigdir()
-    define_with_boost_prefix()
-    define_display_configuration(_repository, my.install)
-
-    heading1("Define build options.")
-    for my.install.build as _build where count(_build.option) > 0
-        define_build_options(_build)
-    endfor _build
-
-    heading1("Define build functions.")
-    define_build_functions()
-
-    heading1("The master build function.")
-    define_build_all(my.install)
-
-    heading1("Build the primary library and all dependencies.")
-    define_invoke()
+    heading1("Define display functions.")
+    define_display_functions(_repository, my.install, "install")
+    
+    define_start_script()
 
     close
 endfor _repository
