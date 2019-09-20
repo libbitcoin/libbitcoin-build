@@ -46,7 +46,7 @@ configure_options()
     display_message "configure options:"
     for OPTION in "$@"; do
         if [[ $OPTION ]]; then
-            display_message $OPTION
+            display_message "$OPTION"
         fi
     done
 
@@ -75,7 +75,7 @@ make_current_directory()
 
     ./autogen.sh
     configure_options "$@"
-    make_jobs $JOBS
+    make_jobs "$JOBS"
     make install
     configure_links
 }
@@ -91,7 +91,7 @@ make_jobs()
 
     # Avoid setting -j1 (causes problems on Travis).
     if [[ $JOBS > $SEQUENTIAL ]]; then
-        make -j$JOBS "$@"
+        make -j"$JOBS" "$@"
     else
         make "$@"
     fi
@@ -125,8 +125,8 @@ build_from_tarball()
     shift 7
 
     # For some platforms we need to set ICU pkg-config path.
-    if [[ !($BUILD) ]]; then
-        if [[ $ARCHIVE == $ICU_ARCHIVE ]]; then
+    if [[ ! ($BUILD) ]]; then
+        if [[ $ARCHIVE == "$ICU_ARCHIVE" ]]; then
             initialize_icu_packages
         fi
         return
@@ -134,14 +134,13 @@ build_from_tarball()
 
     # Because libpng doesn't actually use pkg-config to locate zlib.
     # Because ICU tools don't know how to locate internal dependencies.
-    if [[ ($ARCHIVE == $ICU_ARCHIVE) || ($ARCHIVE == $PNG_ARCHIVE) ]]; then
+    if [[ ($ARCHIVE == "$ICU_ARCHIVE") || ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
         local SAVE_LDFLAGS=$LDFLAGS
         export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
     fi
 
     # Because libpng doesn't actually use pkg-config to locate zlib.h.
-    if [[ ($ARCHIVE == $PNG_ARCHIVE) ]]; then
-        local SAVE_CPPFLAGS=$CPPFLAGS
+    if [[ ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
         export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
     fi
 
@@ -154,31 +153,31 @@ build_from_tarball()
     push_directory "$EXTRACT"
 
     # Extract the source locally.
-    wget --output-document $ARCHIVE $URL
-    tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
+    wget --output-document "$ARCHIVE" "$URL"
+    tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
     push_directory "$PUSH_DIR"
 
     # Enable static only zlib build.
-    if [[ $ARCHIVE == $ZLIB_ARCHIVE ]]; then
+    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
         patch_zlib_configuration
     fi
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
-    if [[ $ARCHIVE == $MBEDTLS_ARCHIVE ]]; then
-        make -j $JOBS lib
+    if [[ $ARCHIVE == "$MBEDTLS_ARCHIVE" ]]; then
+        make -j "$JOBS" lib
         make DESTDIR=$PREFIX install
     else
         configure_options "${CONFIGURATION[@]}"
-        make_jobs $JOBS --silent
+        make_jobs "$JOBS" --silent
         make install
     fi
 
     configure_links
 
     # Enable shared only zlib build.
-    if [[ $ARCHIVE == $ZLIB_ARCHIVE ]]; then
+    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
         clean_zlib_build
     fi
 
@@ -198,6 +197,9 @@ build_from_tarball()
 # Because boost doesn't use autoconfig.
 build_from_tarball_boost()
 {
+    local SAVE_IFS="$IFS"
+    IFS=' '
+
     local URL=$1
     local ARCHIVE=$2
     local COMPRESSION=$3
@@ -206,7 +208,7 @@ build_from_tarball_boost()
     local BUILD=$6
     shift 6
 
-    if [[ !($BUILD) ]]; then
+    if [[ ! ($BUILD) ]]; then
         return
     fi
 
@@ -219,8 +221,8 @@ build_from_tarball_boost()
     push_directory "$EXTRACT"
 
     # Extract the source locally.
-    wget --output-document $ARCHIVE $URL
-    tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
+    wget --output-document "$ARCHIVE" "$URL"
+    tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
 
     initialize_boost_configuration
     initialize_boost_icu_configuration
@@ -237,7 +239,7 @@ build_from_tarball_boost()
     display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
     display_message "-sICU_PATH            : $ICU_PREFIX"
-    display_message "-sICU_LINK            : ${ICU_LIBS[@]}"
+    display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
     display_message "-sZLIB_INCLUDE        : $PREFIX/include"
     display_message "-j                    : $JOBS"
@@ -245,7 +247,7 @@ build_from_tarball_boost()
     display_message "-q                    : [stop at the first error]"
     display_message "--reconfigure         : [ignore cached configuration]"
     display_message "--prefix              : $PREFIX"
-    display_message "BOOST_OPTIONS         : $@"
+    display_message "BOOST_OPTIONS         : $*"
     display_message "--------------------------------------------------------------------"
 
     # boost_iostreams
@@ -269,7 +271,7 @@ build_from_tarball_boost()
         "boost.locale.posix=$BOOST_ICU_POSIX" \\
         "-sNO_BZIP2=1" \\
         "-sICU_PATH=$ICU_PREFIX" \\
-        "-sICU_LINK=${ICU_LIBS[@]}" \\
+        "-sICU_LINK=${ICU_LIBS[*]}" \\
         "-sZLIB_LIBPATH=$PREFIX/lib" \\
         "-sZLIB_INCLUDE=$PREFIX/include" \\
         "-j $JOBS" \\
@@ -281,6 +283,8 @@ build_from_tarball_boost()
 
     pop_directory
     pop_directory
+
+    IFS="$SAVE_IFS"
 }
 
 .endmacro # define_build_from_tarball_boost
@@ -302,14 +306,14 @@ build_from_github()
     display_heading_message "Download $FORK/$BRANCH"
 
     # Clone the repository locally.
-    git clone --depth 1 --branch $BRANCH --single-branch "https://github.com/$FORK"
+    git clone --depth 1 --branch "$BRANCH" --single-branch "https://github.com/$FORK"
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
     # Build the local repository clone.
     push_directory "$REPO"
-    make_current_directory $JOBS "${CONFIGURATION[@]}"
+    make_current_directory "$JOBS" "${CONFIGURATION[@]}"
     pop_directory
     pop_directory
 }
@@ -331,7 +335,7 @@ build_from_local()
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
     # Build the current directory.
-    make_current_directory $JOBS "${CONFIGURATION[@]}"
+    make_current_directory "$JOBS" "${CONFIGURATION[@]}"
 }
 
 .endmacro # define_build_from_local
@@ -349,13 +353,13 @@ build_from_travis()
 
     # The primary build is not downloaded if we are running in Travis.
     if [[ $TRAVIS == true ]]; then
-        build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "${OPTIONS[@]}" "$@"
-        make_tests $JOBS
+        build_from_local "Local $TRAVIS_REPO_SLUG" "$JOBS" "${OPTIONS[@]}" "$@"
+        make_tests "$JOBS"
     else
-        build_from_github $ACCOUNT $REPO $BRANCH $JOBS "${OPTIONS[@]}" "$@"
+        build_from_github "$ACCOUNT" "$REPO" "$BRANCH" "$JOBS" "${OPTIONS[@]}" "$@"
         push_directory "$BUILD_DIR"
         push_directory "$REPO"
-        make_tests $JOBS
+        make_tests "$JOBS"
         pop_directory
         pop_directory
     fi
@@ -376,45 +380,45 @@ build_from_travis()
 .endmacro # define_build_functions
 .
 .macro build_from_tarball_icu()
-    build_from_tarball $ICU_URL $ICU_ARCHIVE gzip source $PARALLEL "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
+    build_from_tarball "$ICU_URL" "$ICU_ARCHIVE" gzip source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
 .endmacro # build_icu
 .
 .macro build_from_tarball_zlib()
-    build_from_tarball $ZLIB_URL $ZLIB_ARCHIVE gzip . $PARALLEL "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
+    build_from_tarball "$ZLIB_URL" "$ZLIB_ARCHIVE" gzip . "$PARALLEL" "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
 .endmacro # build_zlib
 .
 .macro build_from_tarball_png()
-    build_from_tarball $PNG_URL $PNG_ARCHIVE xz . $PARALLEL "$BUILD_PNG" "${PNG_OPTIONS[@]}" "$@"
+    build_from_tarball "$PNG_URL" "$PNG_ARCHIVE" xz . "$PARALLEL" "$BUILD_PNG" "${PNG_OPTIONS[@]}" "$@"
 .endmacro # build_png
 .
 .macro build_from_tarball_qrencode()
-    build_from_tarball $QRENCODE_URL $QRENCODE_ARCHIVE bzip2 . $PARALLEL "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}" "$@"
+    build_from_tarball "$QRENCODE_URL" "$QRENCODE_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}" "$@"
 .endmacro # build_qrencode
 .
 .macro build_from_tarball_zmq()
-    build_from_tarball $ZMQ_URL $ZMQ_ARCHIVE gzip . $PARALLEL "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
+    build_from_tarball "$ZMQ_URL" "$ZMQ_ARCHIVE" gzip . "$PARALLEL" "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
 .endmacro # build_zmq
 .
 .macro build_from_tarball_mbedtls()
-    build_from_tarball $MBEDTLS_URL $MBEDTLS_ARCHIVE gzip . $PARALLEL "$BUILD_MBEDTLS" "${MBEDTLS_OPTIONS[@]}" "$@"
+    build_from_tarball "$MBEDTLS_URL" "$MBEDTLS_ARCHIVE" gzip . "$PARALLEL" "$BUILD_MBEDTLS" "${MBEDTLS_OPTIONS[@]}" "$@"
 .endmacro # build_mbedtls
 .
 .macro build_boost()
-    build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE bzip2 . $PARALLEL "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
+    build_from_tarball_boost "$BOOST_URL" "$BOOST_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
 .endmacro # build_boost
 .
 .macro build_github(build)
 .   define my.build = build_github.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-    build_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) $(my.parallel) $(my.options) "$@"
+    build_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.parallel)" "$(my.options)" "$@"
 .endmacro # build_github
 .
 .macro build_travis(build)
 .   define my.build = build_travis.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-    build_from_travis $(my.build.github) $(my.build.repository) $(my.build.branch) $(my.parallel) $(my.options) "$@"
+    build_from_travis $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.parallel)" "$(my.options)" "$@"
 .endmacro # build_travis
 .
 .macro define_build_all(install)

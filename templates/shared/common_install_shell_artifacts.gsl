@@ -608,13 +608,13 @@ set -e
 .macro define_parallelism()
 .   heading2("Configure build parallelism.")
 SEQUENTIAL=1
-OS=`uname -s`
+OS=\$(uname -s)
 if [[ $PARALLEL ]]; then
     display_message "Using shell-defined PARALLEL value."
 elif [[ $OS == Linux ]]; then
-    PARALLEL=`nproc`
+    PARALLEL=\$(nproc)
 elif [[ ($OS == Darwin) || ($OS == OpenBSD) ]]; then
-    PARALLEL=`sysctl -n hw.ncpu`
+    PARALLEL=\$(sysctl -n hw.ncpu)
 else
     display_error "Unsupported system: $OS"
     display_error "  Explicit shell-definition of PARALLEL will avoid system detection."
@@ -666,7 +666,7 @@ CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
 .
 .macro define_prefix()
 .   heading2("Always set a prefix (required on OSX and for lib detection).")
-if [[ !($PREFIX) ]]; then
+if [[ ! ($PREFIX) ]]; then
     PREFIX="/usr/local"
     CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=$PREFIX")
 else
@@ -726,19 +726,17 @@ configure_links()
 .macro define_display_functions()
 display_heading_message()
 {
-    echo
-    echo "********************** $@ **********************"
-    echo
+    printf "\\n********************** %s **********************\\n" "$@"
 }
 
 display_message()
 {
-    echo "$@"
+    printf "%s\\n" "$@"
 }
 
 display_error()
 {
-    >&2 echo "$@"
+    >&2 printf "%s\\n" "$@"
 }
 
 .endmacro # define_display_functions
@@ -771,7 +769,7 @@ make_tests()
 
     # Build and run unit tests relative to the primary directory.
     # VERBOSE=1 ensures test runner output sent to console (gcc).
-    $(my.make_jobs_noclean) $JOBS check "VERBOSE=1"
+    $(my.make_jobs_noclean) "$JOBS" check "VERBOSE=1"
     local RESULT=$?
 
     # Test runners emit to the test.log file.
@@ -872,8 +870,8 @@ extract_from_tarball()
     push_directory "$TARGET_DIR"
 
     # Extract the source locally.
-    wget --output-document $ARCHIVE $URL
-    tar --extract --file $ARCHIVE --$COMPRESSION --strip-components=1
+    wget --output-document "$ARCHIVE" "$URL"
+    tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
 
     pop_directory
 }
@@ -887,7 +885,7 @@ unpack_from_tarball()
 
     display_heading_message "Prepairing to aquire $ARCHIVE"
 
-    if [[ !($BUILD) ]]; then
+    if [[ ! ($BUILD) ]]; then
         display_message "Skipping unpack of $ARCHIVE..."
         return
     fi
@@ -920,8 +918,8 @@ build_from_tarball()
 
     # For some platforms we need to set ICU pkg-config path.
     # TODO: clean this up?
-    if [[ !($BUILD) ]]; then
-        if [[ $ARCHIVE == $ICU_ARCHIVE ]]; then
+    if [[ ! ($BUILD) ]]; then
+        if [[ $ARCHIVE == "$ICU_ARCHIVE" ]]; then
             display_heading_message "Prepairing to build $ARCHIVE"
             initialize_icu_packages
         fi
@@ -932,24 +930,24 @@ build_from_tarball()
 
     # Because libpng doesn't actually use pkg-config to locate zlib.
     # Because ICU tools don't know how to locate internal dependencies.
-    if [[ ($ARCHIVE == $ICU_ARCHIVE) || ($ARCHIVE == $PNG_ARCHIVE) ]]; then
+    if [[ ($ARCHIVE == "$ICU_ARCHIVE") || ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
         local SAVE_LDFLAGS=$LDFLAGS
         export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
     fi
 
     # Because libpng doesn't actually use pkg-config to locate zlib.h.
-    if [[ ($ARCHIVE == $PNG_ARCHIVE) ]]; then
-        local SAVE_CPPFLAGS=$CPPFLAGS
+    if [[ ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
         export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
     fi
 
     local TARGET="build-$ARCHIVE"
     push_directory "$TARGET"
     push_directory "$PUSH_DIR"
-    local PROJ_CONFIG_DIR=\$(pwd)
+    local PROJ_CONFIG_DIR
+    PROJ_CONFIG_DIR=\$(pwd)
 
     # Enable static only zlib build.
-    if [[ $ARCHIVE == $ZLIB_ARCHIVE ]]; then
+    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
         patch_zlib_configuration
     fi
 
@@ -958,12 +956,12 @@ build_from_tarball()
 
     push_obj_directory "$TARGET"
     configure_options "$PROJ_CONFIG_DIR" "${CONFIGURATION[@]}"
-    $(my.make_jobs_preclean) $JOBS --silent
+    $(my.make_jobs_preclean) "$JOBS" --silent
     make install
     configure_links
 
     # Enable shared only zlib build.
-    if [[ $ARCHIVE == $ZLIB_ARCHIVE ]]; then
+    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
         clean_zlib_build
     fi
 
@@ -985,7 +983,7 @@ clone_from_github()
     local BRANCH=$2
 
     # Clone the repository locally.
-    git clone --branch $BRANCH "https://github.com/$FORK"
+    git clone --branch "$BRANCH" "https://github.com/$FORK"
 }
 
 create_from_github()
@@ -1031,7 +1029,7 @@ build_from_github()
     display_heading_message "Prepairing to build $REPO"
 
     # Build the local repository clone.
-    make_project_directory "$REPO" $JOBS $TEST "${CONFIGURATION[@]}"
+    make_project_directory "$REPO" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
 }
 
 .endmacro # define_github_functions
@@ -1048,8 +1046,8 @@ circumvent_boost_icu_detection()
     local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
     local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
 
-    echo $SUCCESS > $REGEX_TEST
-    echo $SUCCESS > $LOCALE_TEST
+    printf "%s" "$SUCCESS" > $REGEX_TEST
+    printf "%s" "$SUCCESS" > $LOCALE_TEST
 
     # display_message "Hack: ICU detection modified, will always indicate found."
 }
@@ -1090,14 +1088,14 @@ initialize_boost_icu_configuration()
         BOOST_ICU_POSIX="off"
 
         # Extract ICU libs from package config variables and augment with -ldl.
-        ICU_LIBS="`pkg-config icu-i18n --libs` -ldl"
+        ICU_LIBS="\$(pkg-config icu-i18n --libs) -ldl"
 
         # This is a hack for boost m4 scripts that fail with ICU dependency.
         # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
-        export BOOST_ICU_LIBS="${ICU_LIBS[@]}"
+        export BOOST_ICU_LIBS=("${ICU_LIBS[@]}")
 
         # Extract ICU prefix directory from package config variable.
-        ICU_PREFIX=`pkg-config icu-i18n --variable=prefix`
+        ICU_PREFIX=\$(pkg-config icu-i18n --variable=prefix)
     fi
 }
 
@@ -1109,12 +1107,15 @@ initialize_boost_icu_configuration()
 # Because boost doesn't use autoconfig.
 build_from_tarball_boost()
 {
+    local SAVE_IFS="$IFS"
+    IFS=' '
+
     local ARCHIVE=$1
     local JOBS=$2
     local BUILD=$3
     shift 3
 
-    if [[ !($BUILD) ]]; then
+    if [[ ! ($BUILD) ]]; then
         return
     fi
 
@@ -1139,7 +1140,7 @@ build_from_tarball_boost()
     display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
     display_message "-sICU_PATH            : $ICU_PREFIX"
-    display_message "-sICU_LINK            : ${ICU_LIBS[@]}"
+    display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
     display_message "-sZLIB_INCLUDE        : $PREFIX/include"
     display_message "-j                    : $JOBS"
@@ -1147,7 +1148,7 @@ build_from_tarball_boost()
     display_message "-q                    : [stop at the first error]"
     display_message "--reconfigure         : [ignore cached configuration]"
     display_message "--prefix              : $PREFIX"
-    display_message "BOOST_OPTIONS         : $@"
+    display_message "BOOST_OPTIONS         : $*"
     display_message "--------------------------------------------------------------------"
 
     # boost_iostreams
@@ -1171,7 +1172,7 @@ build_from_tarball_boost()
         "boost.locale.posix=$BOOST_ICU_POSIX" \\
         "-sNO_BZIP2=1" \\
         "-sICU_PATH=$ICU_PREFIX" \\
-        "-sICU_LINK=${ICU_LIBS[@]}" \\
+        "-sICU_LINK=${ICU_LIBS[*]}" \\
         "-sZLIB_LIBPATH=$PREFIX/lib" \\
         "-sZLIB_INCLUDE=$PREFIX/include" \\
         "-j $JOBS" \\
@@ -1182,6 +1183,8 @@ build_from_tarball_boost()
         "$@"
 
     pop_directory
+
+    IFS="$SAVE_IFS"
 }
 
 .endmacro # define_boost_build_functions
