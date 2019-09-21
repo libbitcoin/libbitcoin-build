@@ -135,12 +135,13 @@ build_from_tarball()
     # Because libpng doesn't actually use pkg-config to locate zlib.
     # Because ICU tools don't know how to locate internal dependencies.
     if [[ ($ARCHIVE == "$ICU_ARCHIVE") || ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
-        local SAVE_LDFLAGS=$LDFLAGS
+        local SAVE_LDFLAGS="$LDFLAGS"
         export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
     fi
 
     # Because libpng doesn't actually use pkg-config to locate zlib.h.
     if [[ ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
+        local SAVE_CPPFLAGS="$CPPFLAGS"
         export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
     fi
 
@@ -186,7 +187,7 @@ build_from_tarball()
 
     # Restore flags to prevent side effects.
     export LDFLAGS=$SAVE_LDFLAGS
-    export CPPFLAGS=$SAVE_LCPPFLAGS
+    export CPPFLAGS=$SAVE_CPPFLAGS
 
     pop_directory
 }
