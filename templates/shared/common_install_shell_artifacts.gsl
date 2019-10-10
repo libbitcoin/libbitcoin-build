@@ -261,7 +261,7 @@ endfunction
 # --with-icu               Compile with International Components for Unicode.
 #                            Since the addition of BIP-39 and later BIP-38
 #                            support, libbitcoin conditionally incorporates ICU
-#                             to provide BIP-38 and BIP-39 passphrase
+#                            to provide BIP-38 and BIP-39 passphrase
 #                            normalization features. Currently
 #                            libbitcoin-explorer is the only other library that
 #                            accesses this feature, so if you do not intend to
@@ -339,7 +339,7 @@ display_help()
     display_message "  --with-icu               Compile with International Components for Unicode."
     display_message "                             Since the addition of BIP-39 and later BIP-38 "
     display_message "                             support, libbitcoin conditionally incorporates ICU "
-    display_message "                              to provide BIP-38 and BIP-39 passphrase "
+    display_message "                             to provide BIP-38 and BIP-39 passphrase "
     display_message "                             normalization features. Currently "
     display_message "                             libbitcoin-explorer is the only other library that "
     display_message "                             accesses this feature, so if you do not intend to "
@@ -507,6 +507,15 @@ for OPTION in "$@"; do
 done
 
 .endmacro # define_read_parameters
+.
+.macro define_handle_help_line_option()
+.   heading2("Handle help line option")
+if [[ $DISPLAY_HELP ]]; then
+    display_help
+    exit 0
+fi
+
+.endmacro #define_handle_help_line_option
 .
 .macro define_icu(install)
 .   define my.install = define_icu.install
