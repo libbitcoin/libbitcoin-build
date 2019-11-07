@@ -462,16 +462,12 @@ build_all()
 .endmacro # define_build_all
 .
 .macro define_invoke()
-if [[ $DISPLAY_HELP ]]; then
-    display_help
-else
-    display_configuration
-    create_directory "$BUILD_DIR"
-    push_directory "$BUILD_DIR"
-    initialize_git
-    pop_directory
-    time build_all "${CONFIGURE_OPTIONS[@]}"
-fi
+display_configuration
+create_directory "$BUILD_DIR"
+push_directory "$BUILD_DIR"
+initialize_git
+pop_directory
+time build_all "${CONFIGURE_OPTIONS[@]}"
 .endmacro # define_invoke
 .
 .endtemplate
@@ -511,6 +507,7 @@ for generate.repository by name as _repository
     heading1("Initialize the build environment.")
     define_set_exit_on_error()
     define_read_parameters(_repository, my.install)
+    define_handle_help_line_option()
     define_parallelism()
     define_os_specific_settings()
     define_normalized_configure_options()
