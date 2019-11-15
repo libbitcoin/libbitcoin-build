@@ -456,6 +456,11 @@ display_configuration()
 
 .endmacro # define_display_configuration
 .
+.macro define_set_enable_exit_on_error()
+enable_exit_on_error
+
+.endmacro # define_set_enable_exit_on_error
+.
 .macro define_read_parameters(repository, install)
 .   define my.repository = define_read_parameters.repository
 .   define my.install = define_read_parameters.install
@@ -608,11 +613,21 @@ BOOST_ARCHIVE="$(get_boost_file(my.install))"
 
 .endmacro # define_boost
 .
-.macro define_set_exit_on_error()
-.   heading2("Exit this script on the first build error.")
-set -e
+.macro define_enable_exit_on_error()
+enable_exit_on_first_error()
+{
+    set -e
+}
 
-.endmacro # define_set_exit_on_error
+.endmacro # define_enable_exit_on_error
+.
+.macro define_disable_exit_on_error()
+disable_exit_on_first_error()
+{
+    set +e
+}
+
+.endmacro # define_disable_exit_on_error
 .
 .macro define_parallelism()
 .   heading2("Configure build parallelism.")
@@ -773,8 +788,7 @@ make_tests()
 {
     local JOBS=$1
 
-    # Disable exit on error.
-    set +e
+    disable_exit_on_first_error
 
     # Build and run unit tests relative to the primary directory.
     # VERBOSE=1 ensures test runner output sent to console (gcc).
@@ -790,8 +804,7 @@ make_tests()
         exit $RESULT
     fi
 
-    # Reenable exit on error.
-    set -e
+    enable_exit_on_first_error
 }
 
 .endmacro # define_make_tests

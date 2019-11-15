@@ -109,6 +109,8 @@ make_jobs()
 .   define_make_jobs()
 .   define_make_tests("false")
 .   define_push_pop_directory()
+.   define_enable_exit_on_error()
+.   define_disable_exit_on_error()
 .endmacro # define_utility_functions
 .
 .macro define_build_from_tarball()
@@ -505,7 +507,7 @@ for generate.repository by name as _repository
     define_help(_repository, my.install, "install")
 
     heading1("Initialize the build environment.")
-    define_set_exit_on_error()
+    define_set_enable_exit_on_error()
     define_read_parameters(_repository, my.install)
     define_handle_help_line_option()
     define_parallelism()
