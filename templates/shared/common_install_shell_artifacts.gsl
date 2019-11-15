@@ -614,7 +614,7 @@ BOOST_ARCHIVE="$(get_boost_file(my.install))"
 .endmacro # define_boost
 .
 .macro define_enable_exit_on_error()
-enable_exit_on_first_error()
+enable_exit_on_error()
 {
     set -e
 }
@@ -622,7 +622,7 @@ enable_exit_on_first_error()
 .endmacro # define_enable_exit_on_error
 .
 .macro define_disable_exit_on_error()
-disable_exit_on_first_error()
+disable_exit_on_error()
 {
     set +e
 }
@@ -788,7 +788,7 @@ make_tests()
 {
     local JOBS=$1
 
-    disable_exit_on_first_error
+    disable_exit_on_error
 
     # Build and run unit tests relative to the primary directory.
     # VERBOSE=1 ensures test runner output sent to console (gcc).
@@ -804,7 +804,7 @@ make_tests()
         exit $RESULT
     fi
 
-    enable_exit_on_first_error
+    enable_exit_on_error
 }
 
 .endmacro # define_make_tests
