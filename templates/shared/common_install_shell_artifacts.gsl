@@ -456,62 +456,65 @@ display_configuration()
 
 .endmacro # define_display_configuration
 .
-.macro define_set_enable_exit_on_error()
+.macro define_initialization_calls()
 enable_exit_on_error
+parse_command_line_options "$@"
 
-.endmacro # define_set_enable_exit_on_error
+.endmacro # define_initialization_calls
 .
-.macro define_read_parameters(repository, install)
-.   define my.repository = define_read_parameters.repository
-.   define my.install = define_read_parameters.install
-.   heading2("Parse command line options that are handled by this script.")
-for OPTION in "$@"; do
-    case $OPTION in
-        # Standard script options.
-        (--help)                DISPLAY_HELP="yes";;
+.macro define_parse_command_line_options(repository, install)
+.   define my.repository = define_parse_command_line_options.repository
+.   define my.install = define_parse_command_line_options.install
+parse_command_line_options()
+{
+    for OPTION in "$@"; do
+        case $OPTION in
+            # Standard script options.
+            (--help)                DISPLAY_HELP="yes";;
 
-        # Standard build options.
-        (--prefix=*)            PREFIX="${OPTION#*=}";;
-        (--disable-shared)      DISABLE_SHARED="yes";;
-        (--disable-static)      DISABLE_STATIC="yes";;
+            # Standard build options.
+            (--prefix=*)            PREFIX="${OPTION#*=}";;
+            (--disable-shared)      DISABLE_SHARED="yes";;
+            (--disable-static)      DISABLE_STATIC="yes";;
 
-        # Common project options.
+            # Common project options.
 .   if (have_build(my.install, "icu"))
-        (--with-icu)            WITH_ICU="yes";;
+            (--with-icu)            WITH_ICU="yes";;
 .   endif
 .   if (have_build(my.install, "png"))
-        (--with-png)            WITH_PNG="yes";;
+            (--with-png)            WITH_PNG="yes";;
 .   endif
 .   if (have_build(my.install, "qrencode"))
-        (--with-qrencode)       WITH_QRENCODE="yes";;
+            (--with-qrencode)       WITH_QRENCODE="yes";;
 .   endif
 
-        # Custom build options (in the form of --build-<option>).
+            # Custom build options (in the form of --build-<option>).
 .   if (have_build(my.install, "icu"))
-        (--build-icu)           BUILD_ICU="yes";;
+            (--build-icu)           BUILD_ICU="yes";;
 .   endif
 .   if (have_build(my.install, "zlib"))
-        (--build-zlib)          BUILD_ZLIB="yes";;
+            (--build-zlib)          BUILD_ZLIB="yes";;
 .   endif
 .   if (have_build(my.install, "png"))
-        (--build-png)           BUILD_PNG="yes";;
+            (--build-png)           BUILD_PNG="yes";;
 .   endif
 .   if (have_build(my.install, "qrencode"))
-        (--build-qrencode)      BUILD_QRENCODE="yes";;
+            (--build-qrencode)      BUILD_QRENCODE="yes";;
 .   endif
 .   if (have_build(my.install, "zmq"))
-        (--build-zmq)           BUILD_ZMQ="yes";;
+            (--build-zmq)           BUILD_ZMQ="yes";;
 .   endif
 .   if (have_build(my.install, "mbedtls"))
-        (--build-mbedtls)       BUILD_MBEDTLS="yes";;
+            (--build-mbedtls)       BUILD_MBEDTLS="yes";;
 .   endif
-        (--build-boost)         BUILD_BOOST="yes";;
+            (--build-boost)         BUILD_BOOST="yes";;
 
 .   custom_script_options()
-    esac
-done
+        esac
+    done
+}
 
-.endmacro # define_read_parameters
+.endmacro # define_parse_command_line_options
 .
 .macro define_handle_help_line_option()
 .   heading2("Handle help line option")
