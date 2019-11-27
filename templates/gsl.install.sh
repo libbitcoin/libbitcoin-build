@@ -29,8 +29,8 @@
 .endmacro # custom_configuration
 .
 .macro custom_script_options()
-        # Unique script options.
-        (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
+            # Unique script options.
+            (--build-dir=*)    BUILD_DIR="${OPTION#*=}";;
 .endmacro # custom_script_options
 .
 .macro define_build_directory(repository)
@@ -506,9 +506,11 @@ for generate.repository by name as _repository
     define_utility_functions()
     define_help(_repository, my.install, "install")
 
+    heading1("Define environment initialization functions")
+    define_parse_command_line_options(_repository, my.install)
+
     heading1("Initialize the build environment.")
-    define_set_enable_exit_on_error()
-    define_read_parameters(_repository, my.install)
+    define_initialization_calls()
     define_handle_help_line_option()
     define_parallelism()
     define_os_specific_settings()
