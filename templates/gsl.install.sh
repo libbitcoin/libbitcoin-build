@@ -89,6 +89,7 @@ make_jobs()
     local JOBS=$1
     shift 1
 
+    SEQUENTIAL=1
     # Avoid setting -j1 (causes problems on Travis).
     if [[ $JOBS > $SEQUENTIAL ]]; then
         make -j"$JOBS" "$@"
@@ -508,12 +509,14 @@ for generate.repository by name as _repository
 
     heading1("Define environment initialization functions")
     define_parse_command_line_options(_repository, my.install)
+    define_handle_help_line_option()
+    define_set_operating_system()
+    define_parallelism()
+    define_set_os_specific_settings()
+    define_link_to_standard_library()
 
     heading1("Initialize the build environment.")
     define_initialization_calls()
-    define_handle_help_line_option()
-    define_parallelism()
-    define_os_specific_settings()
     define_normalized_configure_options()
     # define_normalize_build_variables()
     define_prefix()

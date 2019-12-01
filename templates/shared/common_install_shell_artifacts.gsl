@@ -459,6 +459,11 @@ display_configuration()
 .macro define_initialization_calls()
 enable_exit_on_error
 parse_command_line_options "$@"
+handle_help_line_options
+set_operating_system
+configure_build_parallelism
+set_os_specific_settings
+link_to_standard_library
 
 .endmacro # define_initialization_calls
 .
@@ -517,13 +522,23 @@ parse_command_line_options()
 .endmacro # define_parse_command_line_options
 .
 .macro define_handle_help_line_option()
-.   heading2("Handle help line option")
-if [[ $DISPLAY_HELP ]]; then
-    display_help
-    exit 0
-fi
+handle_help_line_options()
+{
+    if [[ $DISPLAY_HELP ]]; then
+        display_help
+        exit 0
+    fi
+}
 
 .endmacro #define_handle_help_line_option
+.
+.macro define_set_operating_system()
+set_operating_system()
+{
+    OS=\$(uname -s)
+}
+
+.endmacro #define_set_operating_system
 .
 .macro define_icu(install)
 .   define my.install = define_icu.install
@@ -633,47 +648,54 @@ disable_exit_on_error()
 .endmacro # define_disable_exit_on_error
 .
 .macro define_parallelism()
-.   heading2("Configure build parallelism.")
-SEQUENTIAL=1
-OS=\$(uname -s)
-if [[ $PARALLEL ]]; then
-    display_message "Using shell-defined PARALLEL value."
-elif [[ $OS == Linux ]]; then
-    PARALLEL=\$(nproc)
-elif [[ ($OS == Darwin) || ($OS == OpenBSD) ]]; then
-    PARALLEL=\$(sysctl -n hw.ncpu)
-else
-    display_error "Unsupported system: $OS"
-    display_error "  Explicit shell-definition of PARALLEL will avoid system detection."
-    display_error ""
-    display_help
-    exit 1
-fi
+configure_build_parallelism()
+{
+    if [[ $PARALLEL ]]; then
+        display_message "Using shell-defined PARALLEL value."
+    elif [[ $OS == Linux ]]; then
+        PARALLEL=\$(nproc)
+    elif [[ ($OS == Darwin) || ($OS == OpenBSD) ]]; then
+        PARALLEL=\$(sysctl -n hw.ncpu)
+    else
+        display_error "Unsupported system: $OS"
+        display_error "  Explicit shell-definition of PARALLEL will avoid system detection."
+        display_error ""
+        display_help
+        exit 1
+    fi
+}
 
 .endmacro # define_parallelism
 .
-.macro define_os_specific_settings()
-.   heading2("Define operating system specific settings.")
-if [[ $OS == Darwin ]]; then
-    export CC="clang"
-    export CXX="clang++"
-    STDLIB="c++"
-elif [[ $OS == OpenBSD ]]; then
-    make() { gmake "$@"; }
-    export CC="egcc"
-    export CXX="eg++"
-    STDLIB="estdc++"
-else # Linux
-    STDLIB="stdc++"
-fi
+.macro define_set_os_specific_settings()
+set_os_specific_settings()
+{
+    if [[ $OS == Darwin ]]; then
+        export CC="clang"
+        export CXX="clang++"
+        STDLIB="c++"
+    elif [[ $OS == OpenBSD ]]; then
+        make() { gmake "$@"; }
+        export CC="egcc"
+        export CXX="eg++"
+        STDLIB="estdc++"
+    else # Linux
+        STDLIB="stdc++"
+    fi
+}
 
-.   heading2("Link to appropriate standard library in non-default scnearios.")
-if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
-    export LDLIBS="-l$STDLIB $LDLIBS"
-    export CXXFLAGS="-stdlib=lib$STDLIB $CXXFLAGS"
-fi
+.endmacro #define_set_os_specific_settings
+.
+.macro define_link_to_standard_library()
+link_to_standard_library()
+{
+    if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
+        export LDLIBS="-l$STDLIB $LDLIBS"
+        export CXXFLAGS="-stdlib=lib$STDLIB $CXXFLAGS"
+    fi
+}
 
-.endmacro # define_os_specific_settings
+.endmacro # define_link_to_standard_library
 .
 .macro define_normalized_configure_options()
 .   heading2("Normalize of static and shared options.")
