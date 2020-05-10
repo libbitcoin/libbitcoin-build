@@ -1,6 +1,6 @@
 @ECHO OFF
 REM ###########################################################################
-REM  Copyright (c) 2014-2019 libbitcoin developers (see COPYING).
+REM  Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
 REM 
 REM  Test libbitcoin build collection utilities.
 REM 

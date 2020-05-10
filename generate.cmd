@@ -1,6 +1,6 @@
 @echo off
 REM ###########################################################################
-REM  Copyright (c) 2014-2019 libbitcoin developers (see COPYING).
+REM  Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
 REM
 REM  Generate libbitcoin-build artifacts from XML + GSL.
 REM
