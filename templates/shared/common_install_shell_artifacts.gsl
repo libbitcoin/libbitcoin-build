@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2019 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
 #
 # GSL libbitcoin msvc artifact utilities in the 'global' scope.
 #
@@ -51,8 +51,9 @@ function get_icu_url(install)
         trace1("get_icu_url:get_icu_file() = []")
         return
     endif
-    define my.base_url = "http\://download.icu-project.org/files/icu4c"
-    define my.url = "$(my.base_url)/$(my.version)/$(my.archive)"
+    define my.dash_version = string.convch(my.version, ".", "-")
+    define my.base_url = "https\://github.com/unicode-org/icu/releases/download"
+    define my.url = "$(my.base_url)/release-$(my.dash_version)/$(my.archive)"
     trace1("get_icu_url = $(my.url)")
     return my.url
 endfunction
@@ -113,7 +114,7 @@ function get_png_url(install)
         trace1("get_png_url:get_png_file() = []")
         return
     endif
-    define my.base_url = "http://downloads.sourceforge.net/project/libpng/libpng16/older-releases"
+    define my.base_url = "https://sourceforge.net/projects/libpng/files/libpng16"
     define my.url = "$(my.base_url)/$(my.version)/$(my.archive)"
     trace1("get_png_url = $(my.url)")
     return my.url
