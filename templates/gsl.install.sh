@@ -40,6 +40,13 @@ BUILD_DIR="build-$(my.repo.name)"
 
 .endmacro # define_build_directory
 .
+.macro define_handle_custom_options()
+handle_custom_options()
+{
+}
+
+.endmacro # define_handle_custom_options()
+.
 .macro define_configure_options()
 configure_options()
 {
@@ -515,6 +522,7 @@ for generate.repository by name as _repository
     define_set_os_specific_compiler_settings()
     define_link_to_standard_library()
     define_normalized_configure_options()
+    define_handle_custom_options()
     define_remove_build_options()
     define_set_prefix()
     define_set_pkgconfigdir()
