@@ -18,9 +18,6 @@ REM Clean directories for generated build artifacts.
 rmdir /s /q "output" 2>NUL
 
 REM Generate property copiers and artifact generators.
-REM gsl -q -script:gsl.copy_modules.sh generate.xml
-REM gsl -q -script:gsl.copy_properties.sh generate.xml
-REM gsl -q -script:gsl.generate_artifacts.sh generate.xml
 gsl -q -script:gsl.copy_modules.cmd generate.xml
 gsl -q -script:gsl.copy_properties.cmd generate.xml
 gsl -q -script:gsl.generate_artifacts.cmd generate.xml
