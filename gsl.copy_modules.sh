@@ -39,7 +39,7 @@ endfunction
 set -e
 
 # Do everything relative to this file location.
-cd `dirname "$0"`
+cd \$(dirname "$0")
 
 .endmacro
 .
@@ -72,14 +72,14 @@ function generate_copy_modules(path_prefix)
 
     emit_initialize()
 
-   for generate.repository by name as _repository
-       echo(" Evaluating repository: $(_repository.name)")
+    for generate.repository by name as _repository
+        echo(" Evaluating repository: $(_repository.name)")
         emit_repository_initialize(_repository, my.path_prefix)
         for _repository->configure.dependency as _dependency\
             where is_custom_module_find_dependency(_dependency)
             emit_module_copy(_repository, _dependency, my.path_prefix)
-       endfor
-   endfor
+        endfor
+    endfor
 
 endfunction
 ###############################################################################
