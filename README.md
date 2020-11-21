@@ -62,6 +62,7 @@ The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl)
 
 This is similar to the [.travis.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.travis.yml) and is useful for local generation. In addition to `generate.sh` there is a `generate.cmd` for the native Windows environment.
 
+#### Linux
 ```
 # Create a top-level work_directory.
 work_directory=$HOME/work
@@ -93,4 +94,34 @@ git clone https://github.com/libbitcoin/libbitcoin-server.git
 # Newly generated build files are copied to the cloned repos.
 cd libbitcoin-build
 ./generate.sh
+```
+#### Windows
+```
+REM Create a top-level work_directory.
+set work_directory=%USERPROFILE%\work
+if not exist %work_directory% mkdir %work_directory%
+cd %work_directory%
+
+REM Clone all libbitcoin repositories.
+git clone https://github.com/libbitcoin/libbitcoin-system.git
+git clone https://github.com/libbitcoin/libbitcoin-blockchain.git
+git clone https://github.com/libbitcoin/libbitcoin-build.git
+git clone https://github.com/libbitcoin/libbitcoin-client.git
+git clone https://github.com/libbitcoin/libbitcoin-consensus.git
+git clone https://github.com/libbitcoin/libbitcoin-database.git
+git clone https://github.com/libbitcoin/libbitcoin-explorer.git
+git clone https://github.com/libbitcoin/libbitcoin-network.git
+git clone https://github.com/libbitcoin/libbitcoin-node.git
+git clone https://github.com/libbitcoin/libbitcoin-protocol.git
+git clone https://github.com/libbitcoin/libbitcoin-server.git
+
+REM Download the gsl dependency manually from 
+REM https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe.
+REM Copy the gsl.exe manually to the libbitcoin-build folder in your work 
+REM directory. 
+
+REM Run the libbitcoin-build generation script.
+REM Newly generated build files are copied to the cloned repos.
+cd libbitcoin-build
+./generate.cmd
 ```
