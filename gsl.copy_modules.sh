@@ -41,22 +41,49 @@ set -e
 # Do everything relative to this file location.
 cd `dirname "$0"`
 
-.endmacro
+.endmacro # emit_initialize
 .
 .macro emit_repository_initialize(repository, path_prefix)
 .   define my.repository = emit_repository_initialize.repository
 .
-
-    mkdir -p $(my.path_prefix)/$(my.repository.name)/builds/cmake/modules/
+print_pending "Seeding modules for $(my.repository.name)"
+mkdir -p $(my.path_prefix)/$(my.repository.name)/builds/cmake/modules/
 .
-.endmacro
+.endmacro # emit_repository_initialize
 .
 .macro emit_module_copy(repository, dependency, path_prefix)
 .   define my.repository = emit_module_copy.repository
 .   define my.dependency = emit_module_copy.dependency
 .
-    eval cp -f cmake/$(get_find_cmake_name(my.dependency)) $(my.path_prefix)/$(my.repository.name)/builds/cmake/modules/
-.endmacro
+eval cp -f cmake/$(get_find_cmake_name(my.dependency)) $(my.path_prefix)/$(my.repository.name)/builds/cmake/modules/
+.endmacro # emit_module_copy
+.
+.macro emit_repository_completion_message(repository_name)
+print_success "Completed population of $(my.repository_name) artifacts."
+
+.endmacro # emit_repository_completion_message
+.
+.macro emit_completion()
+print_success "Successful duplication of modules to output directory."
+
+.endmacro # emit_completion
+.
+.macro emit_lib_colorized_echos()
+
+print_pending()
+{
+    local YELLOW_COLOR="[93m"
+    local DEFAULT_COLOR="[0m"
+    printf "$YELLOW_COLOR%b$DEFAULT_COLOR\\n" "$1";
+}
+
+print_success()
+{
+    local GREEN_COLOR="[92m"
+    local DEFAULT_COLOR="[0m"
+    printf "$GREEN_COLOR%b$DEFAULT_COLOR\\n" "$1";
+}
+.endmacro # emit_lib_colorized_echos
 .
 .endtemplate
 .template 0
@@ -70,6 +97,7 @@ function generate_copy_modules(path_prefix)
     shebang("bash")
     copyleft("libbitcoin-build")
 
+    emit_lib_colorized_echos()
     emit_initialize()
 
    for generate.repository by name as _repository
@@ -79,8 +107,10 @@ function generate_copy_modules(path_prefix)
             where is_custom_module_find_dependency(_dependency)
             emit_module_copy(_repository, _dependency, my.path_prefix)
        endfor
+        emit_repository_completion_message(_repository.name)
    endfor
 
+    emit_completion()
 endfunction
 ###############################################################################
 # Execution
