@@ -847,6 +847,10 @@ AS_CASE([${$(my.symbol)}], [yes],
 .   define my.prefix = is_true(my.dependency.unprefixed) ?? "" ? "lib"
 .   define my.symbol = find_option_symbol(my.dependency, my.configure)?
 .   define my.check = "$(my.prefix)$(my.name) >= $(my.version)"
+.   if (defined(my.symbol))
+.       define my.option = my.configure->option(option.name = my.dependency.option)
+.       define my.option.type = get_option_type(my.option)
+.   endif
 .   heading2("Require $(my.name) of at least version $(my.version) and output ${$(my.cname)_CPPFLAGS/LIBS/PKG}.")
 .   if (!is_empty(my.dependency.comment))
 .       heading3("$(my.dependency.comment)")
@@ -856,8 +860,7 @@ AS_CASE([${$(my.symbol)}], [yes],
 PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
     [$(my.cname)_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "$(my.check)" 2>/dev/null`"
      $(my.cname)_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "$(my.check)" 2>/dev/null`"],
-    [$(my.cname)_INCLUDEDIR=""
-     $(my.cname)_OTHER_CFLAGS=""])
+    [AC_MSG_ERROR([$(my.check) is required but was not found.])])
 AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
 AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
 AS_IF([test x${$(my.cname)_INCLUDEDIR} != "x"],
@@ -873,8 +876,7 @@ AS_CASE([${$(my.symbol)}], [yes],
     [PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
         [$(my.cname)_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "$(my.check)" 2>/dev/null`"
          $(my.cname)_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "$(my.check)" 2>/dev/null`"],
-        [$(my.cname)_INCLUDEDIR=""
-         $(my.cname)_OTHER_CFLAGS=""])
+        [AC_MSG_ERROR([--$(my.option.type)-$(my.option.name) specified but $(my.check) was not found.])])
      AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
      AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
      AS_IF([test x${$(my.cname)_INCLUDEDIR} != "x"],

@@ -39,7 +39,7 @@ endfunction
 set -e
 
 # Do everything relative to this file location.
-cd `dirname "$0"`
+cd \$(dirname "$0")
 
 .endmacro # emit_initialize
 .
