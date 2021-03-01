@@ -43,6 +43,8 @@ BUILD_DIR="build-$(my.repo.name)"
 .macro define_handle_custom_options()
 handle_custom_options()
 {
+    # bash doesn't like empty functions.
+    FOO="bar"
 }
 
 .endmacro # define_handle_custom_options()
