@@ -138,6 +138,20 @@ function populate_collisions(collisions, file_data)
     endfor
 endfunction
 
+function get_nuget_package_target(package)
+    define my.package = get_nuget_package_target.package
+    define my.target = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)/build/native/$(my.package.name).targets"
+    if (starts_with(my.package.name, "boost"))
+        new version as _version
+            split_version(_version, my.package.version)
+            if ((conv.number(_version.major) >= 1) & (conv.number(_version.minor) >= 67))
+                define my.target = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)/build/$(my.package.name).targets"
+            endif
+        endnew
+    endif
+    return my.target
+endfunction
+
 ###
 ### functional artifact emission
 ###
@@ -669,16 +683,7 @@ endfunction emit_project
 .
 .macro emit_import_project_nuget(package)
 .   define my.package = emit_import_project_nuget.package
-.   define my.target = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)/build/native/$(my.package.name).targets"
-.   if (starts_with(my.package.name, "boost"))
-.       define my.version = ""
-.       new version as _version
-.           split_version(_version, my.package.version)
-.           if ((conv.number(_version.major) >= 1) & (conv.number(_version.minor) >= 67))
-.               define my.target = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)/build/$(my.package.name).targets"
-.           endif
-.       endnew
-.   endif
+.   define my.target = get_nuget_package_target(my.package)
 .   define my.windows_path = make_windows_path(my.target)
     <Import Project="$(my.windows_path)" Condition="Exists('$(my.windows_path)')" />
 .endmacro emit_import_project_nuget
@@ -696,7 +701,7 @@ endfunction emit_project
 .
 .macro emit_error_condition_nuget(package)
 .   define my.package = emit_error_condition_nuget.package
-.   define my.target = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)/build/native/$(my.package.name).targets"
+.   define my.target = get_nuget_package_target(my.package)
 .   define my.windows_path = make_windows_path(my.target)
     <Error Condition="!Exists('$(my.windows_path)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.windows_path)'))" />
 .endmacro emit_error_condition_nuget
