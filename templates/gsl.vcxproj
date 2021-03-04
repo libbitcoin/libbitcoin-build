@@ -670,6 +670,15 @@ endfunction emit_project
 .macro emit_import_project_nuget(package)
 .   define my.package = emit_import_project_nuget.package
 .   define my.target = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)/build/native/$(my.package.name).targets"
+.   if (starts_with(my.package.name, "boost"))
+.       define my.version = ""
+.       new version as _version
+.           split_version(_version, my.package.version)
+.           if ((conv.number(_version.major) >= 1) & (conv.number(_version.minor) >= 67))
+.               define my.target = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)/build/$(my.package.name).targets"
+.           endif
+.       endnew
+.   endif
 .   define my.windows_path = make_windows_path(my.target)
     <Import Project="$(my.windows_path)" Condition="Exists('$(my.windows_path)')" />
 .endmacro emit_import_project_nuget
