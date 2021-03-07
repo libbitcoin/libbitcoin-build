@@ -104,7 +104,7 @@
       <!-- PNG requires zlib, which may not be present in the necessary form. -->
       <!--<dependency name="zlib" version="1.2.11" option="png" />-->
       <dependency name="png" version="1.6.37" option="png" />
-      <dependency name="qrencode" version="3.4.4" option="qrencode" />
+      <dependency name="qrencode" version="4.1.1" option="qrencode" />
       <dependency name="secp256k1" version="0.0.1">
           <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.18" />
           <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.18" />
@@ -213,7 +213,7 @@
       </build>
       <build name="png" version="1.6.37" parallel="true">
       </build>
-      <build name="qrencode" version="3.4.4" parallel="true" >
+      <build name="qrencode" version="4.1.1" parallel="true" >
       </build>
       <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
@@ -231,8 +231,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorr" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="${with_boost}" />
@@ -274,7 +275,7 @@
         BUILD_ICU             : yes (clean 55.2)
         BUILD_ZLIB            : yes (clean 1.2.11)
         BUILD_PNG             : yes (clean 1.6.37)
-        BUILD_QRENCODE        : yes (clean 3.4.4)
+        BUILD_QRENCODE        : yes (clean 4.1.1)
         BUILD_BOOST           : yes (ICU_LINK 1.72.0)
         BUILD_DIR             : build-libbitcoin-system
         PREFIX                : /Users/travis/build/libbitcoin/libbitcoin-system/my-prefix
@@ -343,7 +344,7 @@
         BUILD_ICU             : yes (clean 55.2)
         BUILD_ZLIB            : yes (clean 1.2.11)
         BUILD_PNG             : yes (clean 1.6.37)
-        BUILD_QRENCODE        : yes (clean 3.4.4)
+        BUILD_QRENCODE        : yes (clean 4.1.1)
         BUILD_BOOST           : yes (ICU_LINK 1.72.0)
         BUILD_DIR             : build-libbitcoin-system
         PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
@@ -411,7 +412,7 @@
         BUILD_ICU             : yes (5 warnings, 55.2)
         BUILD_ZLIB            : yes (clean 1.2.11)
         BUILD_PNG             : yes (clean 16)
-        BUILD_QRENCODE        : yes (clean 3.4.4)
+        BUILD_QRENCODE        : yes (clean 4.1.1)
         BUILD_BOOST           : yes (ICU_LINK 1.72.0)
         BUILD_DIR             : my-build
         PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
@@ -663,7 +664,7 @@
         Build success
         -->
       </job>
-      <job system="windows" compiler="Win32" link="static" />
+      <job system="windows" compiler="Win32" link="static">
         <!--
         https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/a1x5j5ygq4whpnyi
         
@@ -678,6 +679,7 @@
         Test execution complete.
         Build success
         -->
+      </job>
     </matrix>
 
   </repository>
@@ -780,8 +782,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorr" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -970,8 +973,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorr" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -1196,8 +1200,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorr" />
       </build>
       <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
         <option value="${with_boost}" />
@@ -1360,8 +1365,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorr" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -1547,7 +1553,7 @@
       </build>
       <build name="png" version="1.6.37" parallel="true">
       </build>
-      <build name="qrencode" version="3.4.4" parallel="true" >
+      <build name="qrencode" version="4.1.1" parallel="true" >
       </build>
       <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
@@ -1567,8 +1573,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorr" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -1779,8 +1786,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorr" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -1955,8 +1963,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorr" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -2158,8 +2167,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorr" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -2346,8 +2356,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-module-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorr" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
