@@ -105,10 +105,11 @@
       <!--<dependency name="zlib" version="1.2.11" option="png" />-->
       <dependency name="png" version="1.6.37" option="png" />
       <dependency name="qrencode" version="4.1.1" option="qrencode" />
-      <dependency name="secp256k1" version="0.0.1">
-          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.18" />
-          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.18" />
-          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.18" />
+      <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
+      <dependency name="secp256k1" version="0.1.0.19">
+          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
+          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.19" />
+          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.19" />
       </dependency>
 
       <!-- General flags -->
@@ -1108,10 +1109,11 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="secp256k1" version="0.0.1">
-          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.18" />
-          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.18" />
-          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.18" />
+      <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
+      <dependency name="secp256k1" version="0.1.0.19">
+          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
+          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.19" />
+          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.19" />
       </dependency>
       <!-- <dependency name="java" option="java" /> -->
       <!-- <dependency name="python" version="2.7" option="python" /> -->
@@ -1135,6 +1137,10 @@
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
+
+      <!-- Project specific flags -->
+      <flag name="Wno-unused-parameter" comment="Suppress frequent warning in cloned files." context="c++" />
+      <flag name="Wno-c++17-extensions" compiler="clang" comment="Suppress frequent warning in cloned files." context="c++" />
     </configure>
 
     <make>
