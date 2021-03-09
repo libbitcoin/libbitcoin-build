@@ -1,5 +1,5 @@
 <?xml version = "1.0" ?>
-<!-- Copyright (c) 2014-2016 libbitcoin developers (see COPYING). -->
+<!-- Copyright (c) 2014-2020 libbitcoin developers (see COPYING). -->
 <generate language="en-us" >
 
   <repository name="libbitcoin" version="3.6.0" email="eric@voskuil.org" path="libbitcoin-system" >
@@ -25,75 +25,76 @@
       <!-- https://svn.boost.org/trac/boost/ticket/8973 [gcc, 1.54] -->
       <!-- https://svn.boost.org/trac/boost/ticket/6851 [gcc, 1.50-1.53] -->
       <!-- [log rotation derivation for customization]  [???? 1.56] -->
-      <dependency name="boost" version="1.62.0">
+      <!-- [compiler failure]                           [vc120 1.62-1.72] -->
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_atomic" m4="none">
           <nuget compiler="vc120" name="boost_atomic-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_atomic-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_atomic-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_atomic-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_atomic-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_chrono">
           <nuget compiler="vc120" name="boost_chrono-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_chrono-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_chrono-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_chrono-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_chrono-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_date_time">
           <nuget compiler="vc120" name="boost_date_time-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_date_time-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_date_time-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_date_time-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_date_time-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_filesystem">
           <nuget compiler="vc120" name="boost_filesystem-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_filesystem-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_filesystem-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_filesystem-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_filesystem-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_iostreams">
           <nuget compiler="vc120" name="boost_iostreams-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_iostreams-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_iostreams-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_iostreams-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_iostreams-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_locale">
           <nuget compiler="vc120" name="boost_locale-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_locale-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_locale-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_locale-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_locale-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_log_setup">
           <nuget compiler="vc120" name="boost_log_setup-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_log_setup-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_log_setup-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_log_setup-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_log_setup-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_log">
           <nuget compiler="vc120" name="boost_log-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_log-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_log-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_log-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_log-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_program_options">
           <nuget compiler="vc120" name="boost_program_options-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_program_options-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_program_options-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_program_options-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_program_options-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_regex">
           <nuget compiler="vc120" name="boost_regex-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_regex-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_regex-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_regex-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_regex-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_system">
           <nuget compiler="vc120" name="boost_system-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_system-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_system-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_system-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_system-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_thread">
           <nuget compiler="vc120" name="boost_thread-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_thread-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_thread-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_thread-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_thread-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="pthread" system_exclude="android" />
       <dependency name="rt" function="clock_gettime" system="linux" system_exclude="android" />
@@ -103,8 +104,9 @@
       <!-- PNG requires zlib, which may not be present in the necessary form. -->
       <!--<dependency name="zlib" version="1.2.11" option="png" />-->
       <dependency name="png" version="1.6.37" option="png" />
-      <dependency name="qrencode" version="3.4.4" option="qrencode" />
-      <dependency name="secp256k1" version="0.0.1">
+      <dependency name="qrencode" version="4.1.1" option="qrencode" />
+      <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
+      <dependency name="secp256k1" version="0.1.0.19">
           <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
           <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.19" />
           <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.19" />
@@ -212,9 +214,9 @@
       </build>
       <build name="png" version="1.6.37" parallel="true">
       </build>
-      <build name="qrencode" version="3.4.4" parallel="true" >
+      <build name="qrencode" version="4.1.1" parallel="true" >
       </build>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -323,21 +325,21 @@
 
     <configure>
       <option type="with" name="consensus" default="yes" define="WITH_CONSENSUS" description="Link libbitcoin-consensus and use for consensus checks." />
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="tools" default="yes" conditional="true" description="Compile with tools." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bitcoin-database" version="3.6.0" />
       <dependency name="bitcoin-consensus" version="3.6.0" option="consensus" />
@@ -399,7 +401,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -498,21 +500,21 @@
     <package library="bitcoin-client" description="Bitcoin Client Query Library" url="https://github.com/libbitcoin/libbitcoin-client" />
 
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="examples" default="yes" conditional="true" description="Compile with examples." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-     <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bitcoin" version="3.6.0" />
       <dependency name="bitcoin-protocol" version="3.6.0" />
@@ -557,7 +559,14 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-client-test" test="true" option="tests" uuid="a56a00c6-669b-4535-9dc2-772a931b04c2" >
-        <runner/>
+        <runner>
+          <run test="generated" />
+          <!--<run test="network" />-->
+          <run test="obsolete" />
+          <run test="offline" />
+          <run test="config" />
+          <run test="stub" />
+        </runner>
         <library name="bitcoin-client" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -579,7 +588,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -593,7 +602,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.3.2" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
@@ -684,8 +693,8 @@
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." />
-      <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." />
+      <!-- <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." /> -->
+      <!-- <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." /> -->
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -720,23 +729,24 @@
       <define header="sys/endian.h" export="htobe32" />
       <define header="sys/endian.h" export="htobe64" />
 
-      <dependency name="boost" version="1.62.0" option="tests">
+      <dependency name="boost" version="1.72.0" option="tests">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="secp256k1" version="0.0.2">
+      <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
+      <dependency name="secp256k1" version="0.1.0.19">
           <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
           <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.19" />
           <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.19" />
       </dependency>
-      <dependency name="java" option="java" />
-      <dependency name="python" version="2.7" option="python" />
+      <!-- <dependency name="java" option="java" /> -->
+      <!-- <dependency name="python" version="2.7" option="python" /> -->
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -757,6 +767,10 @@
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
+
+      <!-- Project specific flags -->
+      <flag name="Wno-unused-parameter" comment="Suppress frequent warning in cloned files." context="c++" />
+      <flag name="Wno-c++17-extensions" compiler="clang" comment="Suppress frequent warning in cloned files." context="c++" />
     </configure>
 
     <make>
@@ -791,32 +805,32 @@
       <product prefix="include" container="bitcoin" >
         <files path="include/bitcoin" />
       </product>
-      <product prefix="lib" path="bindings/java/wrap" target_name="libbitcoin-consensus-jni" option="java" >
+      <!-- <product prefix="lib" path="bindings/java/wrap" target_name="libbitcoin-consensus-jni" option="java" >
         <library name="bitcoin-consensus" />
         <library name="java" />
         <headers path="include" />
         <sources path="bindings/java/wrap" />
-      </product>
-      <product prefix="javaexec" distribute="true" install="false" option="java" >
+      </product> -->
+      <!-- <product prefix="javaexec" distribute="true" install="false" option="java" >
         <files path="bindings/java/proxy/org/libbitcoin/consensus" />
-      </product>
-      <product prefix="jarexec" distribute="false" install="true" option="java" >
+      </product> -->
+      <!-- <product prefix="jarexec" distribute="false" install="true" option="java" >
         <file path="org.libbitcoin.consensus-${VERSION}.jar" />
-      </product>
-      <product prefix="pkgpyexec" path="bindings/python/wrap" target_name="_bitcoin-consensus" unprefixed="true" option="python" >
+      </product> -->
+      <!-- <product prefix="pkgpyexec" path="bindings/python/wrap" target_name="_bitcoin-consensus" unprefixed="true" option="python" >
         <library name="bitcoin-consensus" />
         <library name="python" />
         <headers path="include" />
         <sources path="bindings/python/wrap" />
-      </product>
-      <product prefix="pkgpython" option="python" >
+      </product> -->
+      <!-- <product prefix="pkgpython" option="python" >
         <files path="bindings/python/proxy" />
-      </product>
+      </product> -->
     </make>
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
@@ -832,15 +846,13 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <get name="swig" />
-        <option value="--with-java" />
+        <!-- <get name="swig" /> -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" version="5.0" >
-        <get name="swig" />
-        <option value="--with-python" />
+        <!-- <get name="swig" /> -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -849,8 +861,7 @@
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <exclude path="clone/*" />
-        <get name="swig" />
-        <option value="--with-java" />
+        <!-- <get name="swig" /> -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--build-dir=my-build" />
@@ -860,9 +871,8 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
-        <get name="swig" />
+        <!-- <get name="swig" /> -->
         <option value="--disable-static" />
-        <option value="--with-python" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <!-- This version isn't available in the repository. -->
@@ -875,9 +885,7 @@
         <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <get name="swig" />
-        <option value="--with-java" />
-        <option value="--with-python" />
+        <!-- <get name="swig" /> -->
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -901,21 +909,21 @@
     <package library="bitcoin-database" description="Bitcoin High Performance Blockchain Database" url="https://github.com/libbitcoin/libbitcoin-database" />
 
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="tools" default="yes" conditional="true" description="Compile with tools." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bitcoin" version="3.6.0" />
 
@@ -975,7 +983,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1062,21 +1070,21 @@
 
     <configure>
       <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="3.6.0" />
@@ -1177,9 +1185,9 @@
       </build>
       <build name="png" version="1.6.37" parallel="true">
       </build>
-      <build name="qrencode" version="3.4.4" parallel="true" >
+      <build name="qrencode" version="4.1.1" parallel="true" >
       </build>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1193,7 +1201,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.3.2" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
@@ -1321,20 +1329,20 @@
     <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" />
 
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bitcoin" version="3.6.0" />
 
@@ -1392,7 +1400,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1483,21 +1491,21 @@
 
     <configure>
       <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="3.6.0" />
@@ -1567,7 +1575,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1688,21 +1696,21 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
-      <dependency name="zmq" version="4.3.2">
-          <nuget compiler="vc120" name="libzmq_vc120" version="4.2.30" />
-          <nuget compiler="vc140" name="libzmq_vc140" version="4.2.30" />
-          <nuget compiler="vc141" name="libzmq_vc141" version="4.2.30" />
+      <dependency name="zmq" version="4.3.4">
+          <nuget compiler="vc120" name="libzmq_vc120" version="4.3.2" />
+          <nuget compiler="vc140" name="libzmq_vc140" version="4.3.2" />
+          <nuget compiler="vc141" name="libzmq_vc141" version="4.3.2" />
       </dependency>
       <dependency name="bitcoin" version="3.6.0" />
 
@@ -1758,7 +1766,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1772,7 +1780,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.3.2" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
@@ -1857,21 +1865,21 @@
 
     <configure>
       <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
@@ -1942,7 +1950,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1956,7 +1964,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.3.2" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
