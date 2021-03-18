@@ -144,17 +144,10 @@ build_from_tarball()
         return
     fi
 
-    # Because libpng doesn't actually use pkg-config to locate zlib.
     # Because ICU tools don't know how to locate internal dependencies.
-    if [[ ($ARCHIVE == "$ICU_ARCHIVE") || ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
+    if [[ ($ARCHIVE == "$ICU_ARCHIVE") ]]; then
         local SAVE_LDFLAGS="$LDFLAGS"
         export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
-    fi
-
-    # Because libpng doesn't actually use pkg-config to locate zlib.h.
-    if [[ ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
-        local SAVE_CPPFLAGS="$CPPFLAGS"
-        export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
     fi
 
     display_heading_message "Download $ARCHIVE"
@@ -170,11 +163,6 @@ build_from_tarball()
     tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
     push_directory "$PUSH_DIR"
 
-    # Enable static only zlib build.
-    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
-        patch_zlib_configuration
-    fi
-
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
@@ -188,11 +176,6 @@ build_from_tarball()
     fi
 
     configure_links
-
-    # Enable shared only zlib build.
-    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
-        clean_zlib_build
-    fi
 
     pop_directory
     pop_directory
@@ -253,8 +236,6 @@ build_from_tarball_boost()
     display_message "-sNO_BZIP2            : 1"
     display_message "-sICU_PATH            : $ICU_PREFIX"
   # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
-    display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
-    display_message "-sZLIB_INCLUDE        : $PREFIX/include"
     display_message "-j                    : $JOBS"
     display_message "-d0                   : [supress informational messages]"
     display_message "-q                    : [stop at the first error]"
@@ -266,13 +247,6 @@ build_from_tarball_boost()
     ./bootstrap.sh \\
         "--prefix=$PREFIX" \\
         "--with-icu=$ICU_PREFIX"
-
-    # boost_iostreams:
-    # The zlib options prevent boost linkage to system libs in the case where
-    # we have built zlib in a prefix dir. Disabling zlib in boost is broken in
-    # all versions (through 1.61). There has been a patch pull request since
-    # 2015 but not merged as of 3/5/2021. svn.boost.org/trac/boost/ticket/9156
-    # The bzip2 auto-detection is not implemented, but disabling it works.
 
     # boost_regex:
     # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
@@ -291,8 +265,6 @@ build_from_tarball_boost()
         "boost.locale.posix=$BOOST_ICU_POSIX" \\
         "-sNO_BZIP2=1" \\
         "-sICU_PATH=$ICU_PREFIX" \\
-        "-sZLIB_LIBPATH=$PREFIX/lib" \\
-        "-sZLIB_INCLUDE=$PREFIX/include" \\
         "-j $JOBS" \\
         "-d0" \\
         "-q" \\
@@ -388,8 +360,6 @@ build_from_travis()
 .
 .macro define_build_functions()
 .   define_initialize_icu_packages()
-.   define_patch_zlib_configuration()
-.   define_clean_zlib_build()
 .   define_build_from_tarball()
 .   define_boost_build_configuration_helpers()
 .   define_build_from_tarball_boost()
@@ -401,18 +371,6 @@ build_from_travis()
 .macro build_from_tarball_icu()
     build_from_tarball "$ICU_URL" "$ICU_ARCHIVE" gzip source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
 .endmacro # build_icu
-.
-.macro build_from_tarball_zlib()
-    build_from_tarball "$ZLIB_URL" "$ZLIB_ARCHIVE" gzip . "$PARALLEL" "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
-.endmacro # build_zlib
-.
-.macro build_from_tarball_png()
-    build_from_tarball "$PNG_URL" "$PNG_ARCHIVE" xz . "$PARALLEL" "$BUILD_PNG" "${PNG_OPTIONS[@]}" "$@"
-.endmacro # build_png
-.
-.macro build_from_tarball_qrencode()
-    build_from_tarball "$QRENCODE_URL" "$QRENCODE_ARCHIVE" bzip2 . "$PARALLEL" "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}" "$@"
-.endmacro # build_qrencode
 .
 .macro build_from_tarball_zmq()
     build_from_tarball "$ZMQ_URL" "$ZMQ_ARCHIVE" gzip . "$PARALLEL" "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
@@ -451,12 +409,6 @@ build_all()
 .
 .           if (is_icu_build(_build))
 .               build_from_tarball_icu()
-.           elsif (is_zlib_build(_build))
-.               build_from_tarball_zlib()
-.           elsif (is_png_build(_build))
-.               build_from_tarball_png()
-.           elsif (is_qrencode_build(_build))
-.               build_from_tarball_qrencode()
 .           elsif (is_zmq_build(_build))
 .               build_from_tarball_zmq()
 .           elsif (is_mbedtls_build(_build))
@@ -511,9 +463,6 @@ for generate.repository by name as _repository
     heading1("Define constants.")
     define_build_directory(_repository)
     define_icu(my.install)
-    define_zlib(my.install)
-    define_png(my.install)
-    define_qrencode(my.install)
     define_zmq(my.install)
     define_mbedtls(my.install)
     define_boost(my.install)
