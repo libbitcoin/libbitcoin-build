@@ -6,8 +6,6 @@
 
     <package library="bitcoin-system" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin-system" >
       <flag value="@icu@" />
-      <flag value="@png@" />
-      <flag value="@qrencode@" />
     </package>
 
     <configure>
@@ -15,8 +13,6 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="examples" default="yes" conditional="true" description="Compile with examples." />
       <option type="with" name="icu" default="no" define="BOOST_HAS_ICU" substitute="true" value="-DWITH_ICU" description="Compile with International Components for Unicode." />
-      <option type="with" name="png" default="no" substitute="true" value="-DWITH_PNG" description="Compile with Libpng support." />
-      <option type="with" name="qrencode" default="no" substitute="true" value="-DWITH_QRENCODE" description="Compile with QREncode." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -101,10 +97,6 @@
       <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
       <!-- -ldl is missing from icu package config -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
-      <!-- PNG requires zlib, which may not be present in the necessary form. -->
-      <!--<dependency name="zlib" version="1.2.11" option="png" />-->
-      <dependency name="png" version="1.6.37" option="png" />
-      <dependency name="qrencode" version="4.1.1" option="qrencode" />
       <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
       <dependency name="secp256k1" version="0.1.0.19">
           <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
@@ -151,8 +143,6 @@
       </product>
       <product prefix="lib" path="src" uuid="39f60708-ff48-4c22-952d-43470866f684" >
         <flag substitute="icu" />
-        <flag substitute="png" />
-        <flag substitute="qrencode" />
         <library name="boost" />
         <library name="boost_chrono" />
         <library name="boost_date_time" />
@@ -169,16 +159,12 @@
         <library name="icu-i18n" />
         <!-- -ldl is missing from icu package config -->
         <library name="dl" />
-        <library name="png" />
-        <library name="qrencode" />
         <library name="secp256k1" />
         <headers path="include" />
         <sources path="src" />
       </product>
       <product prefix="bin" path="examples" install="false" option="examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e" >
         <flag substitute="icu" />
-        <flag substitute="png" />
-        <flag substitute="qrencode" />
         <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="examples" />
@@ -186,8 +172,6 @@
       <product prefix="bin" path="test" target_name="libbitcoin-system-test" test="true" option="tests" uuid="51a424a9-2c12-4211-8d40-e49d1534c541" >
         <runner/>
         <flag substitute="icu" />
-        <flag substitute="png" />
-        <flag substitute="qrencode" />
         <library name="bitcoin-system" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -209,12 +193,6 @@
         <option value="--disable-layoutex" />
         <option value="--disable-tests" />
         <option value="--disable-samples" />
-      </build>
-      <build name="zlib" version="1.2.11" parallel="true">
-      </build>
-      <build name="png" version="1.6.37" parallel="true">
-      </build>
-      <build name="qrencode" version="4.1.1" parallel="true" >
       </build>
       <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
@@ -245,12 +223,7 @@
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-zlib" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -271,12 +244,7 @@
         LDFLAGS               : 
         LDLIBS                : 
         WITH_ICU              : yes
-        WITH_PNG              : yes 
-        WITH_QRENCODE         : yes
         BUILD_ICU             : yes (clean 55.2)
-        BUILD_ZLIB            : yes (clean 1.2.11)
-        BUILD_PNG             : yes (clean 1.6.37)
-        BUILD_QRENCODE        : yes (clean 4.1.1)
         BUILD_BOOST           : yes (ICU_LINK 1.72.0)
         BUILD_DIR             : build-libbitcoin-system
         PREFIX                : /Users/travis/build/libbitcoin/libbitcoin-system/my-prefix
@@ -299,8 +267,6 @@
         -sICU_PATH            : /Users/travis/build/libbitcoin/libbitcoin-system/my-prefix
         -sICU_LINK            : 
         -L/Users/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
-        -sZLIB_LIBPATH        : /Users/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib
-        -sZLIB_INCLUDE        : /Users/travis/build/libbitcoin/libbitcoin-system/my-prefix/include
         -j                    : 2
         -d0                   : [supress informational messages]
         -q                    : [stop at the first error]
@@ -312,12 +278,7 @@
       </job>
       <job system="linux" compiler="clang" link="static" version="5.0" >
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-zlib" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -340,12 +301,7 @@
         LDFLAGS               : 
         LDLIBS                : 
         WITH_ICU              : yes
-        WITH_PNG              : yes
-        WITH_QRENCODE         : yes
         BUILD_ICU             : yes (clean 55.2)
-        BUILD_ZLIB            : yes (clean 1.2.11)
-        BUILD_PNG             : yes (clean 1.6.37)
-        BUILD_QRENCODE        : yes (clean 4.1.1)
         BUILD_BOOST           : yes (ICU_LINK 1.72.0)
         BUILD_DIR             : build-libbitcoin-system
         PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
@@ -368,8 +324,6 @@
         -sICU_PATH            : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
         -sICU_LINK            : 
         -L/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
-        -sZLIB_LIBPATH        : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib
-        -sZLIB_INCLUDE        : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix/include
         -j                    : 2
         -d0                   : [supress informational messages]
         -q                    : [stop at the first error]
@@ -382,12 +336,7 @@
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-zlib" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
@@ -408,12 +357,7 @@
         LDFLAGS               : 
         LDLIBS                : 
         WITH_ICU              : yes
-        WITH_PNG              : yes
-        WITH_QRENCODE         : yes
         BUILD_ICU             : yes (5 warnings, 55.2)
-        BUILD_ZLIB            : yes (clean 1.2.11)
-        BUILD_PNG             : yes (clean 16)
-        BUILD_QRENCODE        : yes (clean 4.1.1)
         BUILD_BOOST           : yes (ICU_LINK 1.72.0)
         BUILD_DIR             : my-build
         PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
@@ -436,8 +380,6 @@
         -sICU_PATH            : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
         -sICU_LINK            : 
         -L/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
-        -sZLIB_LIBPATH        : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib
-        -sZLIB_INCLUDE        : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix/include
         -j                    : 2
         -d0                   : [supress informational messages]
         -q                    : [stop at the first error]
@@ -467,12 +409,7 @@
         LDFLAGS               : 
         LDLIBS                : 
         WITH_ICU              : 
-        WITH_PNG              : 
-        WITH_QRENCODE         : 
         BUILD_ICU             : 
-        BUILD_ZLIB            : 
-        BUILD_PNG             : 
-        BUILD_QRENCODE        : 
         BUILD_BOOST           : (no detect, 1.72.0)
         BUILD_DIR             : build-libbitcoin-system
         PREFIX                : /usr/local
@@ -511,12 +448,7 @@
         LDFLAGS               : 
         LDLIBS                : -lstdc++ 
         WITH_ICU              : yes
-        WITH_PNG              : 
-        WITH_QRENCODE         : 
         BUILD_ICU             : yes (clean 55.2)
-        BUILD_ZLIB            : 
-        BUILD_PNG             : 
-        BUILD_QRENCODE        : 
         BUILD_BOOST           : yes (ICU_LINK 1.72.0)
         BUILD_DIR             : build-libbitcoin-system
         PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
@@ -539,8 +471,6 @@
         -sICU_PATH            : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
         -sICU_LINK            : 
         -L/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
-        -sZLIB_LIBPATH        : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib
-        -sZLIB_INCLUDE        : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix/include
         -j                    : 2
         -d0                   : [supress informational messages]
         -q                    : [stop at the first error]
@@ -570,12 +500,7 @@
         LDFLAGS               : 
         LDLIBS                : 
         WITH_ICU              : 
-        WITH_PNG              : 
-        WITH_QRENCODE         : 
         BUILD_ICU             : 
-        BUILD_ZLIB            : 
-        BUILD_PNG             : 
-        BUILD_QRENCODE        : 
         BUILD_BOOST           : yes (clean 1.72.0)
         BUILD_DIR             : build-libbitcoin-system
         PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
@@ -597,8 +522,6 @@
         -sNO_BZIP2            : 1
         -sICU_PATH            : 
         -sICU_LINK            : 
-        -sZLIB_LIBPATH        : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib
-        -sZLIB_INCLUDE        : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix/include
         -j                    : 2
         -d0                   : [supress informational messages]
         -q                    : [stop at the first error]
@@ -1555,12 +1478,6 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="zlib" version="1.2.11" parallel="true">
-      </build>
-      <build name="png" version="1.6.37" parallel="true">
-      </build>
-      <build name="qrencode" version="4.1.1" parallel="true" >
-      </build>
       <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
@@ -1615,21 +1532,13 @@
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-shared" />
@@ -1639,10 +1548,6 @@
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-shared" />
@@ -1660,10 +1565,6 @@
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
@@ -1676,10 +1577,6 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <get name="bash-completion" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-static" />
