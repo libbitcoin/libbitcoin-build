@@ -6,8 +6,6 @@
 
     <package library="bitcoin-system" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin-system" >
       <flag value="@icu@" />
-      <flag value="@png@" />
-      <flag value="@qrencode@" />
     </package>
 
     <configure>
@@ -15,8 +13,6 @@
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="examples" default="yes" conditional="true" description="Compile with examples." />
       <option type="with" name="icu" default="no" define="BOOST_HAS_ICU" substitute="true" value="-DWITH_ICU" description="Compile with International Components for Unicode." />
-      <option type="with" name="png" default="no" substitute="true" value="-DWITH_PNG" description="Compile with Libpng support." />
-      <option type="with" name="qrencode" default="no" substitute="true" value="-DWITH_QRENCODE" description="Compile with QREncode." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -25,89 +21,87 @@
       <!-- https://svn.boost.org/trac/boost/ticket/8973 [gcc, 1.54] -->
       <!-- https://svn.boost.org/trac/boost/ticket/6851 [gcc, 1.50-1.53] -->
       <!-- [log rotation derivation for customization]  [???? 1.56] -->
-      <dependency name="boost" version="1.62.0">
+      <!-- [compiler failure]                           [vc120 1.62-1.72] -->
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_atomic" m4="none">
           <nuget compiler="vc120" name="boost_atomic-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_atomic-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_atomic-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_atomic-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_atomic-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_chrono">
           <nuget compiler="vc120" name="boost_chrono-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_chrono-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_chrono-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_chrono-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_chrono-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_date_time">
           <nuget compiler="vc120" name="boost_date_time-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_date_time-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_date_time-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_date_time-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_date_time-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_filesystem">
           <nuget compiler="vc120" name="boost_filesystem-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_filesystem-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_filesystem-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_filesystem-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_filesystem-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_iostreams">
           <nuget compiler="vc120" name="boost_iostreams-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_iostreams-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_iostreams-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_iostreams-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_iostreams-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_locale">
           <nuget compiler="vc120" name="boost_locale-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_locale-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_locale-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_locale-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_locale-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_log_setup">
           <nuget compiler="vc120" name="boost_log_setup-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_log_setup-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_log_setup-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_log_setup-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_log_setup-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_log">
           <nuget compiler="vc120" name="boost_log-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_log-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_log-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_log-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_log-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_program_options">
           <nuget compiler="vc120" name="boost_program_options-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_program_options-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_program_options-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_program_options-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_program_options-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_regex">
           <nuget compiler="vc120" name="boost_regex-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_regex-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_regex-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_regex-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_regex-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_system">
           <nuget compiler="vc120" name="boost_system-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_system-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_system-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_system-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_system-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_thread">
           <nuget compiler="vc120" name="boost_thread-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_thread-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_thread-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_thread-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_thread-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="pthread" system_exclude="android" />
       <dependency name="rt" function="clock_gettime" system="linux" system_exclude="android" />
       <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
       <!-- -ldl is missing from icu package config -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
-      <!-- PNG requires zlib, which may not be present in the necessary form. -->
-      <!--<dependency name="zlib" version="1.2.11" option="png" />-->
-      <dependency name="png" version="1.6.37" option="png" />
-      <dependency name="qrencode" version="3.4.4" option="qrencode" />
-      <dependency name="secp256k1" version="0.0.1">
-          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.17" />
-          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.17" />
-          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.17" />
+      <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
+      <dependency name="secp256k1" version="0.1.0.19">
+          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
+          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.19" />
+          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.19" />
       </dependency>
 
       <!-- General flags -->
@@ -149,8 +143,6 @@
       </product>
       <product prefix="lib" path="src" uuid="39f60708-ff48-4c22-952d-43470866f684" >
         <flag substitute="icu" />
-        <flag substitute="png" />
-        <flag substitute="qrencode" />
         <library name="boost" />
         <library name="boost_chrono" />
         <library name="boost_date_time" />
@@ -167,16 +159,12 @@
         <library name="icu-i18n" />
         <!-- -ldl is missing from icu package config -->
         <library name="dl" />
-        <library name="png" />
-        <library name="qrencode" />
         <library name="secp256k1" />
         <headers path="include" />
         <sources path="src" />
       </product>
       <product prefix="bin" path="examples" install="false" option="examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e" >
         <flag substitute="icu" />
-        <flag substitute="png" />
-        <flag substitute="qrencode" />
         <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="examples" />
@@ -184,8 +172,6 @@
       <product prefix="bin" path="test" target_name="libbitcoin-system-test" test="true" option="tests" uuid="51a424a9-2c12-4211-8d40-e49d1534c541" >
         <runner/>
         <flag substitute="icu" />
-        <flag substitute="png" />
-        <flag substitute="qrencode" />
         <library name="bitcoin-system" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -208,13 +194,7 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="zlib" version="1.2.11" parallel="true">
-      </build>
-      <build name="png" version="1.6.37" parallel="true">
-      </build>
-      <build name="qrencode" version="3.4.4" parallel="true" >
-      </build>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -228,10 +208,11 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version6" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorrsig" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="${with_boost}" />
@@ -242,49 +223,202 @@
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-zlib" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <!--
+        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563134
+        Apple LLVM version 9.1.0 (clang-902.0.39.2)
+        Target: x86_64-apple-darwin17.7.0
+        Thread model: posix
+        InstalledDir: /Applications/Xcode-9.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+        --------------------------------------------------------------------
+        OS                    : Darwin
+        PARALLEL              : 2
+        CC                    : clang
+        CXX                   : clang++
+        CPPFLAGS              : 
+        CFLAGS                : 
+        CXXFLAGS              : 
+        LDFLAGS               : 
+        LDLIBS                : 
+        WITH_ICU              : yes
+        BUILD_ICU             : yes (clean 55.2)
+        BUILD_BOOST           : yes (ICU_LINK 1.72.0)
+        BUILD_DIR             : build-libbitcoin-system
+        PREFIX                : /Users/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        DISABLE_SHARED        : yes
+        DISABLE_STATIC        : 
+        with_boost            : --with-boost=/Users/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        with_pkgconfigdir     : --with-pkgconfigdir=/Users/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib/pkgconfig
+        --------------------------------------------------------------------       
+        Libbitcoin boost configuration.
+        --------------------------------------------------------------------
+        variant               : release
+        threading             : multi
+        toolset               : clang
+        cxxflags              : 
+        linkflags             : 
+        link                  : static
+        boost.locale.iconv    : off
+        boost.locale.posix    : off
+        -sNO_BZIP2            : 1
+        -sICU_PATH            : /Users/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        -sICU_LINK            : 
+        -L/Users/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
+        -j                    : 2
+        -d0                   : [supress informational messages]
+        -q                    : [stop at the first error]
+        --reconfigure         : [ignore cached configuration]
+        --prefix              : /Users/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        BOOST_OPTIONS         : --with-atomic --with-chrono --with-date_time --with-filesystem --with-iostreams --with-locale --with-log --with-program_options --with-regex --with-system --with-thread --with-test
+        --------------------------------------------------------------------
+        -->
       </job>
       <job system="linux" compiler="clang" link="static" version="5.0" >
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-zlib" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
+        <!--
+        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563136
+        clang version 7.0.0 (tags/RELEASE_700/final)
+        Target: x86_64-unknown-linux-gnu
+        Thread model: posix
+        InstalledDir: /usr/local/clang-7.0.0/bin
+        --------------------------------------------------------------------
+        OS                    : Linux
+        PARALLEL              : 2
+        CC                    : clang-5.0
+        CXX                   : clang++-5.0
+        CPPFLAGS              : 
+        CFLAGS                : 
+        CXXFLAGS              : 
+        LDFLAGS               : 
+        LDLIBS                : 
+        WITH_ICU              : yes
+        BUILD_ICU             : yes (clean 55.2)
+        BUILD_BOOST           : yes (ICU_LINK 1.72.0)
+        BUILD_DIR             : build-libbitcoin-system
+        PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        DISABLE_SHARED        : yes
+        DISABLE_STATIC        : 
+        with_boost            : --with-boost=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        with_pkgconfigdir     : --with-pkgconfigdir=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib/pkgconfig
+        --------------------------------------------------------------------       
+        Libbitcoin boost configuration.
+        --------------------------------------------------------------------
+        variant               : release
+        threading             : multi
+        toolset               : clang-5.0
+        cxxflags              : 
+        linkflags             : 
+        link                  : static
+        boost.locale.iconv    : off
+        boost.locale.posix    : off
+        -sNO_BZIP2            : 1
+        -sICU_PATH            : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        -sICU_LINK            : 
+        -L/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
+        -j                    : 2
+        -d0                   : [supress informational messages]
+        -q                    : [stop at the first error]
+        --reconfigure         : [ignore cached configuration]
+        --prefix              : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        BOOST_OPTIONS         : --with-atomic --with-chrono --with-date_time --with-filesystem --with-iostreams --with-locale --with-log --with-program_options --with-regex --with-system --with-thread --with-test
+        --------------------------------------------------------------------
+        -->
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-zlib" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
+        <!--
+        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563138
+        gcc (Ubuntu 5.4.0-6ubuntu1~16.04.12) 5.4.0 20160609
+        --------------------------------------------------------------------
+        OS                    : Linux
+        PARALLEL              : 2
+        CC                    : gcc
+        CXX                   : g++
+        CPPFLAGS              : 
+        CFLAGS                : 
+        CXXFLAGS              : 
+        LDFLAGS               : 
+        LDLIBS                : 
+        WITH_ICU              : yes
+        BUILD_ICU             : yes (5 warnings, 55.2)
+        BUILD_BOOST           : yes (ICU_LINK 1.72.0)
+        BUILD_DIR             : my-build
+        PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        DISABLE_SHARED        : yes
+        DISABLE_STATIC        : 
+        with_boost            : --with-boost=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        with_pkgconfigdir     : --with-pkgconfigdir=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib/pkgconfig
+        --------------------------------------------------------------------
+        Libbitcoin boost configuration.
+        --------------------------------------------------------------------
+        variant               : release
+        threading             : multi
+        toolset               : gcc
+        cxxflags              : 
+        linkflags             : 
+        link                  : static
+        boost.locale.iconv    : off
+        boost.locale.posix    : off
+        -sNO_BZIP2            : 1
+        -sICU_PATH            : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        -sICU_LINK            : 
+        -L/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
+        -j                    : 2
+        -d0                   : [supress informational messages]
+        -q                    : [stop at the first error]
+        --reconfigure         : [ignore cached configuration]
+        --prefix              : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        BOOST_OPTIONS         : --with-atomic --with-chrono --with-date_time --with-filesystem --with-iostreams --with-locale --with-log --with-program_options --with-regex --with-system --with-thread --with-test
+        --------------------------------------------------------------------
+        -->
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
-        <option value="--disable-static" />
+        <option value="--disable-static" />  
+        <!--
+        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563133
+        Apple LLVM version 9.1.0 (clang-902.0.39.2)
+        Target: x86_64-apple-darwin17.7.0
+        Thread model: posix
+        InstalledDir: /Applications/Xcode-9.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+        --------------------------------------------------------------------
+        OS                    : Darwin
+        PARALLEL              : 2
+        CC                    : clang
+        CXX                   : clang++
+        CPPFLAGS              : 
+        CFLAGS                : 
+        CXXFLAGS              : 
+        LDFLAGS               : 
+        LDLIBS                : 
+        WITH_ICU              : 
+        BUILD_ICU             : 
+        BUILD_BOOST           : (no detect, 1.72.0)
+        BUILD_DIR             : build-libbitcoin-system
+        PREFIX                : /usr/local
+        DISABLE_SHARED        : 
+        DISABLE_STATIC        : yes
+        with_boost            : 
+        with_pkgconfigdir     : --with-pkgconfigdir=/usr/local/lib/pkgconfig
+        --------------------------------------------------------------------
+        -->
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--with-icu" />
@@ -297,6 +431,54 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
+        <!--
+        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563135
+        clang version 7.0.0 (tags/RELEASE_700/final)
+        Target: x86_64-unknown-linux-gnu
+        Thread model: posix
+        InstalledDir: /usr/local/clang-7.0.0/bin
+        --------------------------------------------------------------------
+        OS                    : Linux
+        PARALLEL              : 2
+        CC                    : clang
+        CXX                   : clang++
+        CPPFLAGS              : 
+        CFLAGS                : 
+        CXXFLAGS              : -stdlib=libstdc++ 
+        LDFLAGS               : 
+        LDLIBS                : -lstdc++ 
+        WITH_ICU              : yes
+        BUILD_ICU             : yes (clean 55.2)
+        BUILD_BOOST           : yes (ICU_LINK 1.72.0)
+        BUILD_DIR             : build-libbitcoin-system
+        PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        DISABLE_SHARED        : 
+        DISABLE_STATIC        : yes
+        with_boost            : --with-boost=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        with_pkgconfigdir     : --with-pkgconfigdir=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib/pkgconfig
+        --------------------------------------------------------------------        
+        Libbitcoin boost configuration.
+        --------------------------------------------------------------------
+        variant               : release
+        threading             : multi
+        toolset               : clang
+        cxxflags              : -stdlib=libstdc++
+        linkflags             : -stdlib=libstdc++
+        link                  : shared
+        boost.locale.iconv    : off
+        boost.locale.posix    : off
+        -sNO_BZIP2            : 1
+        -sICU_PATH            : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        -sICU_LINK            : 
+        -L/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
+        -j                    : 2
+        -d0                   : [supress informational messages]
+        -q                    : [stop at the first error]
+        --reconfigure         : [ignore cached configuration]
+        --prefix              : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        BOOST_OPTIONS         : --with-atomic --with-chrono --with-date_time --with-filesystem --with-iostreams --with-locale --with-log --with-program_options --with-regex --with-system --with-thread --with-test
+        --------------------------------------------------------------------
+        -->
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
@@ -304,15 +486,124 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+        <!--
+        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563137
+        gcc (Ubuntu 5.4.0-6ubuntu1~16.04.12) 5.4.0 20160609
+        --------------------------------------------------------------------
+        OS                    : Linux
+        PARALLEL              : 2
+        CC                    : gcc-4.8
+        CXX                   : g++-4.8
+        CPPFLAGS              : 
+        CFLAGS                : 
+        CXXFLAGS              : 
+        LDFLAGS               : 
+        LDLIBS                : 
+        WITH_ICU              : 
+        BUILD_ICU             : 
+        BUILD_BOOST           : yes (clean 1.72.0)
+        BUILD_DIR             : build-libbitcoin-system
+        PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        DISABLE_SHARED        : 
+        DISABLE_STATIC        : yes
+        with_boost            : --with-boost=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        with_pkgconfigdir     : --with-pkgconfigdir=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib/pkgconfig
+        --------------------------------------------------------------------
+        Libbitcoin boost configuration.
+        --------------------------------------------------------------------
+        variant               : release
+        threading             : multi
+        toolset               : gcc-4.8
+        cxxflags              : 
+        linkflags             : 
+        link                  : shared
+        boost.locale.iconv    : on
+        boost.locale.posix    : on
+        -sNO_BZIP2            : 1
+        -sICU_PATH            : 
+        -sICU_LINK            : 
+        -j                    : 2
+        -d0                   : [supress informational messages]
+        -q                    : [stop at the first error]
+        --reconfigure         : [ignore cached configuration]
+        --prefix              : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
+        BOOST_OPTIONS         : --with-atomic --with-chrono --with-date_time --with-filesystem --with-iostreams --with-locale --with-log --with-program_options --with-regex --with-system --with-thread --with-test
+        --------------------------------------------------------------------
+        Clean libbitcoin and test builds.
+        -->
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
+        <!--
+        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/tt4ekbnink1iw5rt
+        Lots of warnings (repro in VS)
+        Test failures but reported success:
+        
+        Running 2371 test cases...
+        Platform: Win32
+        Compiler: Microsoft Visual C++ version 12.0
+        STL     : Dinkumware standard library version 610
+        Boost   : 1.57.0
+        unknown location(0): fatal error in "neutrino__match_filter_2__unrelated_address__return_false": C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\vector(72) : Assertion failed: vector iterator not dereferencable
+        ..\..\..\..\test\utility\neutrino_filter.cpp(3524): last checkpoint
+        ../../../../test/wallet/witness_address.cpp(133): fatal error in "witness_address__convert_bits__zero_version__valid_expected": critical check encode_base16(result) == test.decoded failed [dddd751e76e8199196d454941c45d1b3a323f1433bd6 != 0014751e76e8199196d454941c45d1b3a323f1433bd6]
+        ../../../../test/wallet/witness_address.cpp(172): fatal error in "witness_address__convert_bits__nonzero_version__valid_expected": critical check encode_base16(result) == test.decoded failed [dddd751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6 != 5128751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6]
+        Test execution complete.
+        Build success
+        -->
       </job>
-      <job system="windows" compiler="x64" link="static" />
+      <job system="windows" compiler="x64" link="static">
+        <!--
+        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/ql4lcowk5si0uyoa
+        
+        A few boost safety warnings (repro in VS):
+        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/ql4lcowk5si0uyoa#L104
+        
+        Running 2371 test cases...
+        Platform: Win32
+        Compiler: Microsoft Visual C++ version 12.0
+        STL     : Dinkumware standard library version 610
+        Boost   : 1.57.0
+        Test execution complete.
+        Build success
+        -->
+      </job>
       <job system="windows" compiler="Win32" link="static">
         <option value="--disable-ndebug" />
+        <!--
+        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/tm1gfa15dqu0mobf
+        Lots of warnings (repro in VS)
+        Test failures but reported success:
+        
+        Running 2371 test cases...
+        Platform: Win32
+        Compiler: Microsoft Visual C++ version 12.0
+        STL     : Dinkumware standard library version 610
+        Boost   : 1.57.0
+        unknown location(0): fatal error in "neutrino__match_filter_2__unrelated_address__return_false": C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\vector(72) : Assertion failed: vector iterator not dereferencable
+        ..\..\..\..\test\utility\neutrino_filter.cpp(3524): last checkpoint
+        ../../../../test/wallet/witness_address.cpp(133): fatal error in "witness_address__convert_bits__zero_version__valid_expected": critical check encode_base16(result) == test.decoded failed [dddd751e76e8199196d454941c45d1b3a323f1433bd6 != 0014751e76e8199196d454941c45d1b3a323f1433bd6]
+        ../../../../test/wallet/witness_address.cpp(172): fatal error in "witness_address__convert_bits__nonzero_version__valid_expected": critical check encode_base16(result) == test.decoded failed [dddd751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6 != 5128751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6]
+        Test execution complete.
+        Build success
+        -->
       </job>
-      <job system="windows" compiler="Win32" link="static" />
+      <job system="windows" compiler="Win32" link="static">
+        <!--
+        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/a1x5j5ygq4whpnyi
+        
+        A few boost safety warnings (repro in VS):
+        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/a1x5j5ygq4whpnyi#L104
+        
+        Running 2371 test cases...
+        Platform: Win32
+        Compiler: Microsoft Visual C++ version 12.0
+        STL     : Dinkumware standard library version 610
+        Boost   : 1.57.0
+        Test execution complete.
+        Build success
+        -->
+      </job>
     </matrix>
 
   </repository>
@@ -329,15 +620,15 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bitcoin-database" version="4.0.0" />
       <dependency name="bitcoin-consensus" version="4.0.0" option="consensus" />
@@ -399,7 +690,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -413,10 +704,11 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version6" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorrsig" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -505,15 +797,15 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bitcoin-system" version="4.0.0" />
       <dependency name="bitcoin-protocol" version="4.0.0" />
@@ -587,7 +879,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -601,12 +893,13 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.3.2" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version6" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorrsig" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -729,20 +1022,21 @@
       <define header="sys/endian.h" export="htobe32" />
       <define header="sys/endian.h" export="htobe64" />
 
-      <dependency name="boost" version="1.62.0" option="tests">
+      <dependency name="boost" version="1.72.0" option="tests">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="secp256k1" version="0.0.1">
-          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.17" />
-          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.17" />
-          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.17" />
+      <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
+      <dependency name="secp256k1" version="0.1.0.19">
+          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
+          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.19" />
+          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.19" />
       </dependency>
       <!-- <dependency name="java" option="java" /> -->
       <!-- <dependency name="python" version="2.7" option="python" /> -->
@@ -766,6 +1060,10 @@
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
+
+      <!-- Project specific flags -->
+      <flag name="Wno-unused-parameter" comment="Suppress frequent warning in cloned files." context="c++" />
+      <flag name="Wno-c++17-extensions" compiler="clang" comment="Suppress frequent warning in cloned files." context="c++" />
     </configure>
 
     <make>
@@ -825,14 +1123,15 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version6" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorrsig" />
       </build>
       <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
         <option value="${with_boost}" />
@@ -911,15 +1210,15 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bitcoin-system" version="4.0.0" />
 
@@ -979,7 +1278,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -993,10 +1292,11 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version6" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorrsig" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -1073,15 +1373,15 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="4.0.0" />
@@ -1178,13 +1478,7 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="zlib" version="1.2.11" parallel="true">
-      </build>
-      <build name="png" version="1.6.37" parallel="true">
-      </build>
-      <build name="qrencode" version="3.4.4" parallel="true" >
-      </build>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1198,12 +1492,13 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.3.2" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version6" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorrsig" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -1237,21 +1532,13 @@
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-shared" />
@@ -1261,10 +1548,6 @@
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-shared" />
@@ -1282,10 +1565,6 @@
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <!-- This version isn't available in the repository. -->
         <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
@@ -1298,10 +1577,6 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <get name="bash-completion" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-static" />
@@ -1332,15 +1607,15 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bitcoin-system" version="4.0.0" />
 
@@ -1398,7 +1673,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1412,10 +1687,11 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version6" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorrsig" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -1496,15 +1772,15 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="4.0.0"  />
@@ -1574,7 +1850,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1588,10 +1864,11 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version6" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorrsig" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -1699,18 +1976,18 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
-      <dependency name="zmq" version="4.3.2">
+      <dependency name="zmq" version="4.3.4">
           <nuget compiler="vc120" name="libzmq_vc120" version="4.3.2" />
           <nuget compiler="vc140" name="libzmq_vc140" version="4.3.2" />
           <nuget compiler="vc141" name="libzmq_vc141" version="4.3.2" />
@@ -1773,7 +2050,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1787,14 +2064,15 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.3.2" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
       <build name="mbedtls" version="2.12.0" parallel="true">
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version6" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorrsig" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -1884,15 +2162,15 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.62.0">
+      <dependency name="boost" version="1.72.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.64.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.64.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
@@ -1963,7 +2241,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.62.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -1977,12 +2255,13 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="zmq" version="4.3.2" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version6" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
+        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-endomorphism" />
+        <option value="--enable-module-schnorrsig" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />

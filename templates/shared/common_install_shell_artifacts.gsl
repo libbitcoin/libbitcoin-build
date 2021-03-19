@@ -1114,7 +1114,7 @@ build_from_github()
 .endmacro # define_github_functions
 .
 .macro define_boost_build_configuration_helpers()
-# Because boost ICU detection assumes in incorrect ICU path.
+# Because boost ICU static lib detection assumes in incorrect ICU path.
 circumvent_boost_icu_detection()
 {
     # Boost expects a directory structure for ICU which is incorrect.
@@ -1154,27 +1154,28 @@ initialize_boost_configuration()
 }
 
 # Because boost doesn't use pkg-config.
+# The hacks below are still required as of boost 1.72.0.
 initialize_boost_icu_configuration()
 {
     BOOST_ICU_ICONV="on"
     BOOST_ICU_POSIX="on"
 
     if [[ $WITH_ICU ]]; then
-        circumvent_boost_icu_detection
-
         # Restrict other locale options when compiling boost with icu.
         BOOST_ICU_ICONV="off"
         BOOST_ICU_POSIX="off"
+
+        # Work around boost ICU static lib discovery bug.
+        circumvent_boost_icu_detection
+
+        # Extract ICU prefix directory from package config variable.
+        ICU_PREFIX=\$(pkg-config icu-i18n --variable=prefix)
 
         # Extract ICU libs from package config variables and augment with -ldl.
         ICU_LIBS="\$(pkg-config icu-i18n --libs) -ldl"
 
         # This is a hack for boost m4 scripts that fail with ICU dependency.
-        # See custom edits in ax-boost-locale.m4 and ax_boost_regex.m4.
         export BOOST_ICU_LIBS=("${ICU_LIBS[@]}")
-
-        # Extract ICU prefix directory from package config variable.
-        ICU_PREFIX=\$(pkg-config icu-i18n --variable=prefix)
     fi
 }
 
