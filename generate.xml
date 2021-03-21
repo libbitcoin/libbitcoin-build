@@ -2,21 +2,17 @@
 <!-- Copyright (c) 2014-2020 libbitcoin developers (see COPYING). -->
 <generate language="en-us" >
 
-  <repository name="libbitcoin" version="3.6.0" email="eric@voskuil.org" path="libbitcoin" >
+  <repository name="libbitcoin" version="3.7.0" email="eric@voskuil.org" path="libbitcoin-system" >
 
     <package library="bitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin-system" >
       <flag value="@icu@" />
-      <flag value="@png@" />
-      <flag value="@qrencode@" />
     </package>
 
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="examples" default="yes" conditional="true" description="Compile with examples." />
       <option type="with" name="icu" default="no" define="BOOST_HAS_ICU" substitute="true" value="-DWITH_ICU" description="Compile with International Components for Unicode." />
-      <option type="with" name="png" default="no" substitute="true" value="-DWITH_PNG" description="Compile with Libpng support." />
-      <option type="with" name="qrencode" default="no" substitute="true" value="-DWITH_QRENCODE" description="Compile with QREncode." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -101,10 +97,6 @@
       <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
       <!-- -ldl is missing from icu package config -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
-      <!-- PNG requires zlib, which may not be present in the necessary form. -->
-      <!--<dependency name="zlib" version="1.2.11" option="png" />-->
-      <dependency name="png" version="1.6.37" option="png" />
-      <dependency name="qrencode" version="4.1.1" option="qrencode" />
       <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
       <dependency name="secp256k1" version="0.1.0.19">
           <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
@@ -151,8 +143,6 @@
       </product>
       <product prefix="lib" path="src" uuid="39f60708-ff48-4c22-952d-43470866f684" >
         <flag substitute="icu" />
-        <flag substitute="png" />
-        <flag substitute="qrencode" />
         <library name="boost" />
         <library name="boost_chrono" />
         <library name="boost_date_time" />
@@ -169,16 +159,12 @@
         <library name="icu-i18n" />
         <!-- -ldl is missing from icu package config -->
         <library name="dl" />
-        <library name="png" />
-        <library name="qrencode" />
         <library name="secp256k1" />
         <headers path="include" />
         <sources path="src" />
       </product>
       <product prefix="bin" path="examples" install="false" option="examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e" >
         <flag substitute="icu" />
-        <flag substitute="png" />
-        <flag substitute="qrencode" />
         <library name="bitcoin" />
         <headers path="include" />
         <sources path="examples" />
@@ -186,8 +172,6 @@
       <product prefix="bin" path="test" target_name="libbitcoin-test" test="true" option="tests" uuid="51a424a9-2c12-4211-8d40-e49d1534c541" >
         <runner/>
         <flag substitute="icu" />
-        <flag substitute="png" />
-        <flag substitute="qrencode" />
         <library name="bitcoin" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -210,12 +194,6 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="zlib" version="1.2.11" parallel="true">
-      </build>
-      <build name="png" version="1.6.37" parallel="true">
-      </build>
-      <build name="qrencode" version="4.1.1" parallel="true" >
-      </build>
       <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
@@ -237,31 +215,20 @@
       <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
-        <!--<option value="--disable-silent-rules" />-->
       </build>
     </install>
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-zlib" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" version="5.0" >
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-zlib" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -271,12 +238,7 @@
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-zlib" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
@@ -286,13 +248,11 @@
       </job>
       <job system="osx" compiler="clang" link="dynamic" >
         <get name="boost" />
-        <option value="--disable-static" />
+        <option value="--disable-static" />  
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--with-icu" />
         <option value="--build-icu" />
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -310,16 +270,18 @@
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
       </job>
-      <job system="windows" compiler="x64" link="static" />
+      <job system="windows" compiler="x64" link="static">
+      </job>
       <job system="windows" compiler="Win32" link="static">
         <option value="--disable-ndebug" />
       </job>
-      <job system="windows" compiler="Win32" link="static" />
+      <job system="windows" compiler="Win32" link="static">
+      </job>
     </matrix>
 
   </repository>
 
-  <repository name="libbitcoin-blockchain" version="3.6.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-blockchain" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Library" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
@@ -341,8 +303,8 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="bitcoin-database" version="3.6.0" />
-      <dependency name="bitcoin-consensus" version="3.6.0" option="consensus" />
+      <dependency name="bitcoin-database" version="3.7.0" />
+      <dependency name="bitcoin-consensus" version="3.7.0" option="consensus" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -470,8 +432,6 @@
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -495,7 +455,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-client" version="3.6.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-client" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-client" description="Bitcoin Client Query Library" url="https://github.com/libbitcoin/libbitcoin-client" />
 
@@ -516,8 +476,8 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="bitcoin" version="3.6.0" />
-      <dependency name="bitcoin-protocol" version="3.6.0" />
+      <dependency name="bitcoin" version="3.7.0" />
+      <dependency name="bitcoin-protocol" version="3.7.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -656,8 +616,6 @@
         <option value="--build-zmq" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
@@ -686,12 +644,12 @@
 
   </repository>
 
-  <repository name="libbitcoin-consensus" version="3.6.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-consensus" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-consensus" description="Bitcoin Consensus Library (optional)" url="https://github.com/libbitcoin/libbitcoin-consensus" />
 
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <!-- <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." /> -->
       <!-- <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." /> -->
@@ -875,8 +833,6 @@
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -904,7 +860,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-database" version="3.6.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-database" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-database" description="Bitcoin High Performance Blockchain Database" url="https://github.com/libbitcoin/libbitcoin-database" />
 
@@ -925,7 +881,7 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="bitcoin" version="3.6.0" />
+      <dependency name="bitcoin" version="3.7.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1040,8 +996,6 @@
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -1064,7 +1018,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-explorer" version="3.6.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-explorer" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
 
@@ -1087,8 +1041,8 @@
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-client" version="3.6.0" />
-      <dependency name="bitcoin-network" version="3.6.0" />
+      <dependency name="bitcoin-client" version="3.7.0" />
+      <dependency name="bitcoin-network" version="3.7.0" />
       <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
 
@@ -1181,12 +1135,6 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="zlib" version="1.2.11" parallel="true">
-      </build>
-      <build name="png" version="1.6.37" parallel="true">
-      </build>
-      <build name="qrencode" version="4.1.1" parallel="true" >
-      </build>
       <build name="boost" version="1.72.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
@@ -1239,21 +1187,13 @@
     <matrix>
       <job system="osx" compiler="clang" link="static" >
         <option value="--with-icu" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
         <option value="--build-icu" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-shared" />
@@ -1263,10 +1203,6 @@
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-shared" />
@@ -1284,12 +1220,6 @@
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
@@ -1300,10 +1230,6 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <get name="bash-completion" />
-        <option value="--with-png" />
-        <option value="--with-qrencode" />
-        <option value="--build-png" />
-        <option value="--build-qrencode" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-static" />
@@ -1324,7 +1250,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-network" version="3.6.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-network" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" />
 
@@ -1344,7 +1270,7 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="bitcoin" version="3.6.0" />
+      <dependency name="bitcoin" version="3.7.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1457,8 +1383,6 @@
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -1485,7 +1409,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-node" version="3.6.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-node" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
@@ -1508,8 +1432,8 @@
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-blockchain" version="3.6.0" />
-      <dependency name="bitcoin-network" version="3.6.0" />
+      <dependency name="bitcoin-blockchain" version="3.7.0"  />
+      <dependency name="bitcoin-network" version="3.7.0"  />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1659,8 +1583,6 @@
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -1686,12 +1608,13 @@
 
   </repository>
 
-  <repository name="libbitcoin-protocol" version="3.6.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-protocol" version="3.7.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
+    <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol">
+    </package>
 
     <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." />
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
@@ -1712,7 +1635,7 @@
           <nuget compiler="vc140" name="libzmq_vc140" version="4.3.2" />
           <nuget compiler="vc141" name="libzmq_vc141" version="4.3.2" />
       </dependency>
-      <dependency name="bitcoin" version="3.6.0" />
+      <dependency name="bitcoin" version="3.7.0"  />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1829,8 +1752,6 @@
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
@@ -1859,7 +1780,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-server" version="3.6.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-server" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
 
@@ -1883,8 +1804,8 @@
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
-      <dependency name="bitcoin-node" version="3.6.0" />
-      <dependency name="bitcoin-protocol" version="3.6.0" />
+      <dependency name="bitcoin-node" version="3.7.0" />
+      <dependency name="bitcoin-protocol" version="3.7.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1927,7 +1848,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-server-test" test="true" option="tests" uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea" >
-        <runner/>
+        <runner />
         <library name="bitcoin-server" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -2052,8 +1973,6 @@
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
@@ -2109,7 +2028,6 @@
     <template name="vs2017/gsl.vcxproj" />
     <template name="vs2017/gsl.vcxproj.filters" />
     <template name="vs2017/gsl.sln" />
-    <!-- <template name="gsl.gitignore" /> -->
   </templates>
 
 </generate>
