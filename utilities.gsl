@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
 #
 # GSL libbitcoin utilities in the 'global' scope.
 #
@@ -189,6 +189,11 @@ function global.is_boost_lib_dependency(dependency)
     return starts_with(my.dependency.name, "boost_")
 endfunction
 
+function global.is_mbedtls_dependency(dependency)
+    define my.dependency = is_mbedtls_dependency.dependency
+    return match_name(my.dependency, "mbedtls")
+endfunction
+
 function global.is_java_dependency(dependency)
     define my.dependency = is_java_dependency.dependency
     return match_name(my.dependency, "java")
@@ -266,29 +271,48 @@ endfunction
 # Option utilities.
 #------------------------------------------------------------------------------
 
-function global.get_option_symbol(option)
-    define my.option = get_option_symbol.option
+function global.get_option_symbol_generic(option, seperator, cstyle)
+    define my.option = get_option_symbol_generic.option
     if (defined(my.option))
         require(my.option, "option", "type")
         require(my.option, "option", "name")
         define my.prefix = ""
-        if (!is_true(my.option.unprefixed))
-            my.prefix = "$(my.option.type:c)_"
+        define my.name = "$(my.option.name:lower)"
+        define my.type = "$(my.option.type:lower)"
+
+        if (is_true(my.cstyle))
+            my.name = "$(my.option.name:c)"
+            my.type = "$(my.option.type:c)"
         endif
-        return "$(my.prefix)$(my.option.name:c)"
+
+        if (!is_true(my.option.unprefixed))
+            my.prefix = "$(my.type)$(my.seperator)"
+        endif
+        return "$(my.prefix)$(my.name)"
+    endif
+endfunction
+
+function global.get_option_symbol(option)
+    define my.option = get_option_symbol.option
+    return get_option_symbol_generic(my.option, "_", "true")
+endfunction
+
+function global.find_option_symbol_generic(element, configure, seperator, cstyle)
+    define my.element = find_option_symbol_generic.element
+    define my.configure = find_option_symbol_generic.configure
+    if (is_optional_element(my.element))
+        define my.opt = my.configure->option(option.name = my.element.option)?
+        if (defined(my.opt))
+            return get_option_symbol_generic(my.opt, my.seperator, my.cstyle)
+        endif
+        abort "Symbol not defined for option: $(my.element.option)"
     endif
 endfunction
 
 function global.find_option_symbol(element, configure)
     define my.element = find_option_symbol.element
     define my.configure = find_option_symbol.configure
-    if (is_optional_element(my.element))
-        define my.opt = my.configure->option(option.name = my.element.option)?
-        if (defined(my.opt))
-            return get_option_symbol(my.opt)
-        endif
-        abort "Symbol not defined for option: $(my.element.option)"
-    endif
+    return find_option_symbol_generic(my.element, my.configure, "_", "true")
 endfunction
 
 #------------------------------------------------------------------------------
@@ -336,11 +360,35 @@ function global.cumulative_install(list, repositories, repository)
         for my.repositories.repository as _repository
             if (!(_repository.name = my.repository.name) &\
                  (_repository->package.library = _build.name))
-                cumulative_install(my.list, my.repositories, _repository)
+                cumulative_install_recurse(my.list, my.repositories, _repository)
             endif
         endfor
+    endfor
 
+    for my.repository->install.build as _build
         if (count(my.list.build, (count.name = _build.name)) = 0)
+            copy _build to my.list
+        endif
+    endfor
+endfunction
+
+function global.cumulative_install_recurse(list, repositories, repository)
+    define my.list = cumulative_install_recurse.list
+    define my.repositories = cumulative_install_recurse.repositories
+    define my.repository = cumulative_install_recurse.repository
+
+    for my.repository->install.build as _build
+        for my.repositories.repository as _repository
+            if (!(_repository.name = my.repository.name) &\
+                 (_repository->package.library = _build.name))
+                cumulative_install_recurse(my.list, my.repositories, _repository)
+            endif
+        endfor
+    endfor
+
+    for my.repository->install.build as _build
+        if ((count(my.list.build, (count.name = _build.name)) = 0) &\
+            !(my.repository->package.library = _build.name))
             copy _build to my.list
         endif
     endfor
@@ -374,6 +422,11 @@ endfunction
 function global.is_zmq_build(build)
     define my.build = is_zmq_build.build
     return starts_with(my.build.name, "zmq")
+endfunction
+
+function global.is_mbedtls_build(build)
+    define my.build = is_mbedtls_build.build
+    return starts_with(my.build.name, "mbedtls")
 endfunction
 
 function global.is_boost_build(build)
@@ -607,6 +660,18 @@ function global.get_files(files, directory, relative_path, tag, recurse,\
     define my.files = get_files.files
     define my.directory = get_files.directory
 
+    if (!defined(my.recurse))
+        abort("get_files: specify 'recurse' parameter")
+    endif
+
+    if (!defined(my.ignore_hidden_dirs))
+        abort("get_files: specify 'ignore_hidden_dirs' parameter")
+    endif
+
+    if (!defined(my.ignore_hidden_files))
+        abort("get_files: specify 'ignore_hidden_files' parameter")
+    endif
+
     for my.directory.file as _file by _file.name
         if (!(is_true(my.ignore_hidden_files) & starts_with(_file.name, ".")))
             new my.files.file as _element
@@ -783,7 +848,7 @@ $(my.text ? "")
 .
 .macro global.copyleft(name)
 ###############################################################################
-#  Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
+#  Copyright (c) 2014-2020 $(my.name) developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -792,7 +857,7 @@ $(my.text ? "")
 .
 .macro global.c_copyleft(name)
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
+// Copyright (c) 2014-2020 $(my.name) developers (see COPYING).
 //
 //        GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 //
@@ -801,7 +866,7 @@ $(my.text ? "")
 .
 .macro global.bat_copyleft(name)
 REM ###########################################################################
-REM #  Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
+REM #  Copyright (c) 2014-2020 $(my.name) developers (see COPYING).
 REM #
 REM #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 REM #
@@ -810,7 +875,7 @@ REM ###########################################################################
 .
 .macro global.xml_copyleft(name)
 <!--
- |  Copyright (c) 2014-2015 $(my.name) developers (see COPYING).
+ |  Copyright (c) 2014-2020 $(my.name) developers (see COPYING).
  |
  |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
  |

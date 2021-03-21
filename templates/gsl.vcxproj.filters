@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
 #
 # GSL generate libbitcoin .vcxproj.filters.
 #
@@ -178,7 +178,7 @@ function emit_item_group_compiler(files, repository, product, vs_version)
     define my.repository = emit_item_group_compiler.repository
     define my.product = emit_item_group_compiler.product
 
-    if ((my.repository.name = "libbitcoin") |\
+    if ((my.repository.name = "libbitcoin-system") |\
         count(my.files.file, is_compiled_type(count.name)) > 0)
 
         emit_item_group_open()

@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
 #
 # GSL generate copy_properties.sh.
 #
@@ -31,36 +31,25 @@ declare -a vs_version=( \\
 .macro emit_import_copy(repository, output, import_name)
 .   define my.repository = emit_import_copy.repository
 .
-    for version in "\${vs_version[@]}"
-    do
-        mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
-        eval cp -f props/import/$(my.import_name).import.* $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
-    done
+for version in "\${vs_version[@]}"
+do
+    mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
+    eval cp -f props/import/$(my.import_name).import.* $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
+done
 
 .endmacro
 .
 .macro emit_project_props_copy(repository, output)
 .   define my.repository = emit_project_props_copy.repository
 .
-    for version in "\${vs_version[@]}"
-    do
-        mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
-        eval cp -rf props/project/$(my.repository.name)/* $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
-    done
-    mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/build/
-    eval cp -rf props/nuget.config $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/
-    eval cp -rf props/build/build_base.bat $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/build/
-
-.endmacro
-.
-.macro emit_nuget_config_copy(repository, output)
-.   define my.repository = emit_nuget_config_copy.repository
-.
-    for version in "\${vs_version[@]}"
-    do
-        mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/
-        eval cp -rf props/nuget.config $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/
-    done
+for version in "\${vs_version[@]}"
+do
+    mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
+    eval cp -rf props/project/$(my.repository.name)/* $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
+done
+mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/build/
+eval cp -rf props/nuget.config $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/
+eval cp -rf props/build/build_base.bat $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/build/
 
 .endmacro
 .endtemplate
