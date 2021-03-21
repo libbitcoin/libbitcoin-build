@@ -1,6 +1,6 @@
 @echo off
 REM ###########################################################################
-REM  Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+REM  Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
 REM
 REM  Generate libbitcoin-build artifacts from XML + GSL.
 REM
@@ -18,8 +18,7 @@ REM Clean directories for generated build artifacts.
 rmdir /s /q "output" 2>NUL
 
 REM Generate property copiers and artifact generators.
-REM gsl -q -script:gsl.copy_properties.sh generate.xml
-REM gsl -q -script:gsl.generate_artifacts.sh generate.xml
+gsl -q -script:gsl.copy_modules.cmd generate.xml
 gsl -q -script:gsl.copy_properties.cmd generate.xml
 gsl -q -script:gsl.generate_artifacts.cmd generate.xml
 
@@ -30,6 +29,7 @@ REM     call ..\\$(_repo.name)\\bindings.bat
 REM endfor
 
 REM Execute property copiers and artifact generators.
+call copy_modules.cmd
 call copy_properties.cmd
 call generate_artifacts.cmd
 

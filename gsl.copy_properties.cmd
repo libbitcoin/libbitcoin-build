@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2018 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
 #
 # GSL generate copy_properties.cmd.
 #
@@ -66,7 +66,7 @@ REM Copy project props for $(my.repository.name)
 .endmacro
 .
 .macro emit_repository_completion_message(repository)
-.   my.repository = emit_repository_completion_message
+.   my.repository = emit_repository_completion_message.repository
 call :success "Completed population of $(my.repository.name) artifacts."
 .endmacro emit_repository_completion_message
 .
@@ -120,6 +120,7 @@ function generate_artifacts(path_prefix)
 # TODO: walk dependency tree, not build list.
 # TODO: build list is for telling installer what to compile.
     for generate.repository by name as _repository
+        echo(" Evaluating repository: $(_repository.name)")
         for _repository->install.build as _build where\
             defined(_build.repository) &\
             starts_with(_build.repository, "libbitcoin")

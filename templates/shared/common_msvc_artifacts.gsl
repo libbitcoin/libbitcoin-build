@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
 #
 # GSL libbitcoin msvc artifact utilities in the 'global' scope.
 #
@@ -109,7 +109,7 @@ function requires_threadsafe_statistics(repository, product, vs_version)
     define my.repository = requires_threadsafe_statistics.repository
     define my.product = requires_threadsafe_statistics.product
     return (my.vs_version = "vs2013") & is_library(my.product) &\
-        (target_name(my.product, my.repository) = "libbitcoin")
+        (target_name(my.product, my.repository) = "libbitcoin-system")
 endfunction
 
 .endtemplate
