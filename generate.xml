@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2014-2020 libbitcoin developers (see COPYING). -->
 <generate language="en-us" >
 
-  <repository name="libbitcoin" version="3.7.0" email="eric@voskuil.org" path="libbitcoin-system" >
+  <repository name="libbitcoin-system" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin-system" >
       <flag value="@icu@" />
@@ -165,14 +165,14 @@
       </product>
       <product prefix="bin" path="examples" install="false" option="examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e" >
         <flag substitute="icu" />
-        <library name="bitcoin" />
+        <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="examples" />
       </product>
-      <product prefix="bin" path="test" target_name="libbitcoin-test" test="true" option="tests" uuid="51a424a9-2c12-4211-8d40-e49d1534c541" >
+      <product prefix="bin" path="test" target_name="libbitcoin-system-test" test="true" option="tests" uuid="51a424a9-2c12-4211-8d40-e49d1534c541" >
         <runner/>
         <flag substitute="icu" />
-        <library name="bitcoin" />
+        <library name="bitcoin-system" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
@@ -212,7 +212,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -381,7 +381,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -476,7 +476,7 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="bitcoin" version="3.7.0" />
+      <dependency name="bitcoin-system" version="3.7.0" />
       <dependency name="bitcoin-protocol" version="3.7.0" />
 
       <!-- General flags -->
@@ -513,7 +513,7 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" uuid="475e189d-f147-4122-b5fe-5bcf1153696e" >
-        <library name="bitcoin" />
+        <library name="bitcoin-system" />
         <library name="bitcoin-protocol" />
         <headers path="include" />
         <sources path="src" />
@@ -568,7 +568,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -881,7 +881,7 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="bitcoin" version="3.7.0" />
+      <dependency name="bitcoin-system" version="3.7.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -917,7 +917,7 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" uuid="62d7fbee-4d52-424a-8938-59756e13d9f5" >
-        <library name="bitcoin" />
+        <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="src" />
       </product>
@@ -957,7 +957,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -1118,7 +1118,7 @@
       <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
         <file path="data/bx" />
       </product>
-      <product prefix="sysconf" container="libbitcoin" >
+      <product prefix="sysconf" container="libbitcoin-system" >
         <file path="data/bx.cfg" />
       </product>
     </make>
@@ -1155,7 +1155,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -1270,7 +1270,7 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="bitcoin" version="3.7.0" />
+      <dependency name="bitcoin-system" version="3.7.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1306,7 +1306,7 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" uuid="564eb540-d6b6-425c-b8db-b0bee8970c18" >
-        <library name="bitcoin" />
+        <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="src" />
       </product>
@@ -1344,7 +1344,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -1493,7 +1493,7 @@
       <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
         <file path="data/bn" />
       </product>
-      <product prefix="sysconf" container="libbitcoin" option="console" >
+      <product prefix="sysconf" container="libbitcoin-system" option="console" >
         <file path="data/bn.cfg" />
       </product>
     </make>
@@ -1517,7 +1517,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -1635,7 +1635,7 @@
           <nuget compiler="vc140" name="libzmq_vc140" version="4.3.2" />
           <nuget compiler="vc141" name="libzmq_vc141" version="4.3.2" />
       </dependency>
-      <dependency name="bitcoin" version="3.7.0"  />
+      <dependency name="bitcoin-system" version="3.7.0"  />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1672,7 +1672,7 @@
       </product>
       <product prefix="lib" path="src" uuid="6b94e2a5-c054-4790-963d-a7be493259b0" >
         <library name="zmq" />
-        <library name="bitcoin" />
+        <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="src" />
       </product>
@@ -1709,7 +1709,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
@@ -1865,7 +1865,7 @@
       <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
         <file path="data/bs" />
       </product>
-      <product prefix="sysconf" container="libbitcoin" >
+      <product prefix="sysconf" container="libbitcoin-system" >
         <file path="data/bs.cfg" />
       </product>
     </make>
@@ -1891,7 +1891,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin" github="libbitcoin" repository="libbitcoin" branch="version3" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
