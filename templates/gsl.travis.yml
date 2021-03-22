@@ -83,7 +83,7 @@ function job_install(job, restrict_parallel)
     define my.parallel = job_install.restrict_parallel ?? "PARALLEL=1 " ? ""
     define my.sudo = is_true(my.job.sudo) ?? "sudo " ? ""
     define my.compiler = "CC=$CC CXX=$CXX "
-    return "$(my.sudo)$(my.compiler)$(my.parallel)./install.sh --enable-isystem$(job_options(my.job))"
+    return "$(my.sudo)$(my.compiler)$(my.parallel)./install.sh --enable-isystem $(job_options(my.job))"
 endfunction
 
 function job_predicate_link(job)
@@ -195,6 +195,9 @@ endfunction
         ((is_versioned_compiler(my.job) | count(my.job.get) > 0) |\
          (is_compiler_clang(my.job) & is_versioned_compiler(my.job)))
         - os: $(my.job.system)
+.   if (defined(my.job.image))
+          $(my.job.system)_image: $(my.job.image)
+.   endif
           compiler: $(my.job.compiler)
           env: LINK=$(my.job.link)
 .   if (has_addons)
@@ -249,11 +252,9 @@ matrix:
 
 .endmacro #set_aliases
 .
+. # This is currently empty.
 .macro update_environment(matrix)
 .   define my.matrix = update_environment.matrix
-    # Update homebrew.
-    - if [[ $OSX   && $CLANG             ]]; then brew update; fi
-
 .endmacro #update_environment
 .
 .# The --build-dir install.sh option is not supported by this code coverage tool.
@@ -263,9 +264,9 @@ matrix:
     # Download and unpack lcov > 1.10
 .      for my.repository->matrix.job as _job where is_coverage_job(_job)
 .           define my.job_condition = condition(job_predicate(_job))
-    - $(my.job_condition) wget https://github.com/linux-test-project/lcov/releases/download/v1.12/lcov-1.12.tar.gz; fi
-    - $(my.job_condition) tar xzf lcov-1.12.tar.gz; fi
-    - $(my.job_condition) cd lcov-1.12; PREFIX="$(fetch_prefix_value(_job))" make install; cd ..; fi
+    - $(my.job_condition) wget https://github.com/linux-test-project/lcov/releases/download/v1.15/lcov-1.15.tar.gz; fi
+    - $(my.job_condition) tar xzf lcov-1.15.tar.gz; fi
+    - $(my.job_condition) cd lcov-1.15; PREFIX="$(fetch_prefix_value(_job))" make install; cd ..; fi
 .      endfor
 
     # Install coveralls.
@@ -305,6 +306,7 @@ matrix:
 .   for my.matrix.job as _job where is_travis_job(_job) & count(_job.get) > 0
 .       for _job.get as _get
 .           if (_get.name = "boost")
+.               # <get name="boost" /> is ignored.
 .           elsif (_job.system = "osx")
     - $(condition(job_predicate(_job))) $(apt_get(_get.name, _job.system)); fi
 .           elsif (_job.system = "linux")

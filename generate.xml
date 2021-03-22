@@ -184,7 +184,7 @@
 
     <install>
       <build name="icu" version="55.2" parallel="true" >
-        <!-- Bug in ICU build requires enable-draft. -->
+        <!-- Bug in ICU build requires --enable-draft. -->
         <option value="--enable-draft" />
         <option value="--enable-tools" />
         <option value="--disable-extras" />
@@ -227,54 +227,6 @@
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <!--
-        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563134
-        Apple LLVM version 9.1.0 (clang-902.0.39.2)
-        Target: x86_64-apple-darwin17.7.0
-        Thread model: posix
-        InstalledDir: /Applications/Xcode-9.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
-        --------------------------------------------------------------------
-        OS                    : Darwin
-        PARALLEL              : 2
-        CC                    : clang
-        CXX                   : clang++
-        CPPFLAGS              : 
-        CFLAGS                : 
-        CXXFLAGS              : 
-        LDFLAGS               : 
-        LDLIBS                : 
-        WITH_ICU              : yes
-        BUILD_ICU             : yes (clean 55.2)
-        BUILD_BOOST           : yes (ICU_LINK 1.72.0)
-        BUILD_DIR             : build-libbitcoin-system
-        PREFIX                : /Users/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        DISABLE_SHARED        : yes
-        DISABLE_STATIC        : 
-        with_boost            : --with-boost=/Users/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        with_pkgconfigdir     : --with-pkgconfigdir=/Users/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib/pkgconfig
-        --------------------------------------------------------------------       
-        Libbitcoin boost configuration.
-        --------------------------------------------------------------------
-        variant               : release
-        threading             : multi
-        toolset               : clang
-        cxxflags              : 
-        linkflags             : 
-        link                  : static
-        boost.locale.iconv    : off
-        boost.locale.posix    : off
-        -sNO_BZIP2            : 1
-        -sICU_PATH            : /Users/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        -sICU_LINK            : 
-        -L/Users/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
-        -j                    : 2
-        -d0                   : [supress informational messages]
-        -q                    : [stop at the first error]
-        --reconfigure         : [ignore cached configuration]
-        --prefix              : /Users/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        BOOST_OPTIONS         : --with-atomic --with-chrono --with-date_time --with-filesystem --with-iostreams --with-locale --with-log --with-program_options --with-regex --with-system --with-thread --with-test
-        --------------------------------------------------------------------
-        -->
       </job>
       <job system="linux" compiler="clang" link="static" version="5.0" >
         <option value="--with-icu" />
@@ -284,54 +236,6 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
-        <!--
-        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563136
-        clang version 7.0.0 (tags/RELEASE_700/final)
-        Target: x86_64-unknown-linux-gnu
-        Thread model: posix
-        InstalledDir: /usr/local/clang-7.0.0/bin
-        --------------------------------------------------------------------
-        OS                    : Linux
-        PARALLEL              : 2
-        CC                    : clang-5.0
-        CXX                   : clang++-5.0
-        CPPFLAGS              : 
-        CFLAGS                : 
-        CXXFLAGS              : 
-        LDFLAGS               : 
-        LDLIBS                : 
-        WITH_ICU              : yes
-        BUILD_ICU             : yes (clean 55.2)
-        BUILD_BOOST           : yes (ICU_LINK 1.72.0)
-        BUILD_DIR             : build-libbitcoin-system
-        PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        DISABLE_SHARED        : yes
-        DISABLE_STATIC        : 
-        with_boost            : --with-boost=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        with_pkgconfigdir     : --with-pkgconfigdir=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib/pkgconfig
-        --------------------------------------------------------------------       
-        Libbitcoin boost configuration.
-        --------------------------------------------------------------------
-        variant               : release
-        threading             : multi
-        toolset               : clang-5.0
-        cxxflags              : 
-        linkflags             : 
-        link                  : static
-        boost.locale.iconv    : off
-        boost.locale.posix    : off
-        -sNO_BZIP2            : 1
-        -sICU_PATH            : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        -sICU_LINK            : 
-        -L/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
-        -j                    : 2
-        -d0                   : [supress informational messages]
-        -q                    : [stop at the first error]
-        --reconfigure         : [ignore cached configuration]
-        --prefix              : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        BOOST_OPTIONS         : --with-atomic --with-chrono --with-date_time --with-filesystem --with-iostreams --with-locale --with-log --with-program_options --with-regex --with-system --with-thread --with-test
-        --------------------------------------------------------------------
-        -->
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
@@ -343,142 +247,20 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
-        <!--
-        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563138
-        gcc (Ubuntu 5.4.0-6ubuntu1~16.04.12) 5.4.0 20160609
-        --------------------------------------------------------------------
-        OS                    : Linux
-        PARALLEL              : 2
-        CC                    : gcc
-        CXX                   : g++
-        CPPFLAGS              : 
-        CFLAGS                : 
-        CXXFLAGS              : 
-        LDFLAGS               : 
-        LDLIBS                : 
-        WITH_ICU              : yes
-        BUILD_ICU             : yes (5 warnings, 55.2)
-        BUILD_BOOST           : yes (ICU_LINK 1.72.0)
-        BUILD_DIR             : my-build
-        PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        DISABLE_SHARED        : yes
-        DISABLE_STATIC        : 
-        with_boost            : --with-boost=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        with_pkgconfigdir     : --with-pkgconfigdir=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib/pkgconfig
-        --------------------------------------------------------------------
-        Libbitcoin boost configuration.
-        --------------------------------------------------------------------
-        variant               : release
-        threading             : multi
-        toolset               : gcc
-        cxxflags              : 
-        linkflags             : 
-        link                  : static
-        boost.locale.iconv    : off
-        boost.locale.posix    : off
-        -sNO_BZIP2            : 1
-        -sICU_PATH            : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        -sICU_LINK            : 
-        -L/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
-        -j                    : 2
-        -d0                   : [supress informational messages]
-        -q                    : [stop at the first error]
-        --reconfigure         : [ignore cached configuration]
-        --prefix              : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        BOOST_OPTIONS         : --with-atomic --with-chrono --with-date_time --with-filesystem --with-iostreams --with-locale --with-log --with-program_options --with-regex --with-system --with-thread --with-test
-        --------------------------------------------------------------------
-        -->
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />  
-        <!--
-        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563133
-        Apple LLVM version 9.1.0 (clang-902.0.39.2)
-        Target: x86_64-apple-darwin17.7.0
-        Thread model: posix
-        InstalledDir: /Applications/Xcode-9.4.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
-        --------------------------------------------------------------------
-        OS                    : Darwin
-        PARALLEL              : 2
-        CC                    : clang
-        CXX                   : clang++
-        CPPFLAGS              : 
-        CFLAGS                : 
-        CXXFLAGS              : 
-        LDFLAGS               : 
-        LDLIBS                : 
-        WITH_ICU              : 
-        BUILD_ICU             : 
-        BUILD_BOOST           : (no detect, 1.72.0)
-        BUILD_DIR             : build-libbitcoin-system
-        PREFIX                : /usr/local
-        DISABLE_SHARED        : 
-        DISABLE_STATIC        : yes
-        with_boost            : 
-        with_pkgconfigdir     : --with-pkgconfigdir=/usr/local/lib/pkgconfig
-        --------------------------------------------------------------------
-        -->
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--with-icu" />
         <option value="--build-icu" />
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
-        <!--
-        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563135
-        clang version 7.0.0 (tags/RELEASE_700/final)
-        Target: x86_64-unknown-linux-gnu
-        Thread model: posix
-        InstalledDir: /usr/local/clang-7.0.0/bin
-        --------------------------------------------------------------------
-        OS                    : Linux
-        PARALLEL              : 2
-        CC                    : clang
-        CXX                   : clang++
-        CPPFLAGS              : 
-        CFLAGS                : 
-        CXXFLAGS              : -stdlib=libstdc++ 
-        LDFLAGS               : 
-        LDLIBS                : -lstdc++ 
-        WITH_ICU              : yes
-        BUILD_ICU             : yes (clean 55.2)
-        BUILD_BOOST           : yes (ICU_LINK 1.72.0)
-        BUILD_DIR             : build-libbitcoin-system
-        PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        DISABLE_SHARED        : 
-        DISABLE_STATIC        : yes
-        with_boost            : --with-boost=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        with_pkgconfigdir     : --with-pkgconfigdir=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib/pkgconfig
-        --------------------------------------------------------------------        
-        Libbitcoin boost configuration.
-        --------------------------------------------------------------------
-        variant               : release
-        threading             : multi
-        toolset               : clang
-        cxxflags              : -stdlib=libstdc++
-        linkflags             : -stdlib=libstdc++
-        link                  : shared
-        boost.locale.iconv    : off
-        boost.locale.posix    : off
-        -sNO_BZIP2            : 1
-        -sICU_PATH            : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        -sICU_LINK            : 
-        -L/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib -licui18n -licuuc -licudata -ldl
-        -j                    : 2
-        -d0                   : [supress informational messages]
-        -q                    : [stop at the first error]
-        --reconfigure         : [ignore cached configuration]
-        --prefix              : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        BOOST_OPTIONS         : --with-atomic --with-chrono --with-date_time --with-filesystem --with-iostreams --with-locale --with-log --with-program_options --with-regex --with-system --with-thread --with-test
-        --------------------------------------------------------------------
-        -->
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
@@ -486,123 +268,16 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
-        <!--
-        https://travis-ci.org/github/libbitcoin/libbitcoin-system/jobs/761563137
-        gcc (Ubuntu 5.4.0-6ubuntu1~16.04.12) 5.4.0 20160609
-        --------------------------------------------------------------------
-        OS                    : Linux
-        PARALLEL              : 2
-        CC                    : gcc-4.8
-        CXX                   : g++-4.8
-        CPPFLAGS              : 
-        CFLAGS                : 
-        CXXFLAGS              : 
-        LDFLAGS               : 
-        LDLIBS                : 
-        WITH_ICU              : 
-        BUILD_ICU             : 
-        BUILD_BOOST           : yes (clean 1.72.0)
-        BUILD_DIR             : build-libbitcoin-system
-        PREFIX                : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        DISABLE_SHARED        : 
-        DISABLE_STATIC        : yes
-        with_boost            : --with-boost=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        with_pkgconfigdir     : --with-pkgconfigdir=/home/travis/build/libbitcoin/libbitcoin-system/my-prefix/lib/pkgconfig
-        --------------------------------------------------------------------
-        Libbitcoin boost configuration.
-        --------------------------------------------------------------------
-        variant               : release
-        threading             : multi
-        toolset               : gcc-4.8
-        cxxflags              : 
-        linkflags             : 
-        link                  : shared
-        boost.locale.iconv    : on
-        boost.locale.posix    : on
-        -sNO_BZIP2            : 1
-        -sICU_PATH            : 
-        -sICU_LINK            : 
-        -j                    : 2
-        -d0                   : [supress informational messages]
-        -q                    : [stop at the first error]
-        --reconfigure         : [ignore cached configuration]
-        --prefix              : /home/travis/build/libbitcoin/libbitcoin-system/my-prefix
-        BOOST_OPTIONS         : --with-atomic --with-chrono --with-date_time --with-filesystem --with-iostreams --with-locale --with-log --with-program_options --with-regex --with-system --with-thread --with-test
-        --------------------------------------------------------------------
-        Clean libbitcoin and test builds.
-        -->
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
-        <!--
-        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/tt4ekbnink1iw5rt
-        Lots of warnings (repro in VS)
-        Test failures but reported success:
-        
-        Running 2371 test cases...
-        Platform: Win32
-        Compiler: Microsoft Visual C++ version 12.0
-        STL     : Dinkumware standard library version 610
-        Boost   : 1.57.0
-        unknown location(0): fatal error in "neutrino__match_filter_2__unrelated_address__return_false": C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\vector(72) : Assertion failed: vector iterator not dereferencable
-        ..\..\..\..\test\utility\neutrino_filter.cpp(3524): last checkpoint
-        ../../../../test/wallet/witness_address.cpp(133): fatal error in "witness_address__convert_bits__zero_version__valid_expected": critical check encode_base16(result) == test.decoded failed [dddd751e76e8199196d454941c45d1b3a323f1433bd6 != 0014751e76e8199196d454941c45d1b3a323f1433bd6]
-        ../../../../test/wallet/witness_address.cpp(172): fatal error in "witness_address__convert_bits__nonzero_version__valid_expected": critical check encode_base16(result) == test.decoded failed [dddd751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6 != 5128751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6]
-        Test execution complete.
-        Build success
-        -->
       </job>
       <job system="windows" compiler="x64" link="static">
-        <!--
-        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/ql4lcowk5si0uyoa
-        
-        A few boost safety warnings (repro in VS):
-        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/ql4lcowk5si0uyoa#L104
-        
-        Running 2371 test cases...
-        Platform: Win32
-        Compiler: Microsoft Visual C++ version 12.0
-        STL     : Dinkumware standard library version 610
-        Boost   : 1.57.0
-        Test execution complete.
-        Build success
-        -->
       </job>
       <job system="windows" compiler="Win32" link="static">
         <option value="--disable-ndebug" />
-        <!--
-        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/tm1gfa15dqu0mobf
-        Lots of warnings (repro in VS)
-        Test failures but reported success:
-        
-        Running 2371 test cases...
-        Platform: Win32
-        Compiler: Microsoft Visual C++ version 12.0
-        STL     : Dinkumware standard library version 610
-        Boost   : 1.57.0
-        unknown location(0): fatal error in "neutrino__match_filter_2__unrelated_address__return_false": C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\vector(72) : Assertion failed: vector iterator not dereferencable
-        ..\..\..\..\test\utility\neutrino_filter.cpp(3524): last checkpoint
-        ../../../../test/wallet/witness_address.cpp(133): fatal error in "witness_address__convert_bits__zero_version__valid_expected": critical check encode_base16(result) == test.decoded failed [dddd751e76e8199196d454941c45d1b3a323f1433bd6 != 0014751e76e8199196d454941c45d1b3a323f1433bd6]
-        ../../../../test/wallet/witness_address.cpp(172): fatal error in "witness_address__convert_bits__nonzero_version__valid_expected": critical check encode_base16(result) == test.decoded failed [dddd751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6 != 5128751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6]
-        Test execution complete.
-        Build success
-        -->
       </job>
       <job system="windows" compiler="Win32" link="static">
-        <!--
-        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/a1x5j5ygq4whpnyi
-        
-        A few boost safety warnings (repro in VS):
-        https://ci.appveyor.com/project/pmienk/libbitcoin-system/builds/38078309/job/a1x5j5ygq4whpnyi#L104
-        
-        Running 2371 test cases...
-        Platform: Win32
-        Compiler: Microsoft Visual C++ version 12.0
-        STL     : Dinkumware standard library version 610
-        Boost   : 1.57.0
-        Test execution complete.
-        Build success
-        -->
       </job>
     </matrix>
 
@@ -756,13 +431,11 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -943,14 +616,12 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
         <option value="--build-zmq" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
@@ -1164,14 +835,12 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <!-- <get name="swig" /> -->
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -1332,13 +1001,11 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -1468,7 +1135,7 @@
 
     <install>
       <build name="icu" version="55.2" parallel="true" >
-        <!-- Bug in ICU build requires enable-draft. -->
+        <!-- Bug in ICU build requires --enable-draft. -->
         <option value="--enable-draft" />
         <option value="--enable-tools" />
         <option value="--disable-extras" />
@@ -1557,7 +1224,7 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
         <option value="--build-zmq" />
@@ -1565,8 +1232,6 @@
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
@@ -1727,13 +1392,11 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -1929,15 +1592,13 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
         <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -2112,15 +1773,13 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--build-zmq" />
         <option value="--build-mbedtls" />
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--build-mbedtls" />
@@ -2337,7 +1996,7 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <job system="osx" compiler="clang" link="dynamic" >
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
         <option value="--build-zmq" />
@@ -2345,8 +2004,6 @@
         <option value="--with-bash-completiondir" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <!-- This version isn't available in the repository. -->
-        <!--<get name="boost1.57" />-->
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />

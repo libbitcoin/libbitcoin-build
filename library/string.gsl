@@ -99,7 +99,8 @@ endfunction
 # See: https://github.com/imatix/gsl/issues/84
 function global.trim_left(text)
     define my.extracted = ""
-    regexp.match("^[ \t\r\n]+(.*)$", my.text, my.extracted)
+    regexp.match("^[ ]+(.*)$", my.text, my.extracted)
+    # regexp.match("^[ \t\r\n]+(.*)$", my.text, my.extracted)
     return my.extracted ? my.text
 endfunction
 
