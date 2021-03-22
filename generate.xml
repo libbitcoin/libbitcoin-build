@@ -95,7 +95,8 @@
       <dependency name="pthread" system_exclude="android" />
       <dependency name="rt" function="clock_gettime" system="linux" system_exclude="android" />
       <dependency name="icu-i18n" version="55.2" unprefixed="true" option="icu" />
-      <!-- -ldl is missing from icu package config -->
+      <!-- TODO: verify this with more recent ICU. -->
+      <!-- -ldl is missing from icu package config. -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
       <dependency name="secp256k1" version="0.1.0.19">
@@ -157,7 +158,8 @@
         <library name="pthread" />
         <library name="rt" />
         <library name="icu-i18n" />
-        <!-- -ldl is missing from icu package config -->
+        <!-- TODO: verify this with more recent ICU. -->
+        <!-- -ldl is missing from icu package config. -->
         <library name="dl" />
         <library name="secp256k1" />
         <headers path="include" />
@@ -183,7 +185,9 @@
     </make>
 
     <install>
+      <!-- Building with our minimum (c++11 only) version of ICU. -->
       <build name="icu" version="55.2" parallel="true" >
+        <!-- TODO: verify this with more recent ICU. -->
         <!-- Bug in ICU 55.2 build requires --enable-draft. -->
         <option value="--enable-draft" />
         <option value="--enable-tools" />
@@ -218,9 +222,10 @@
       </build>
     </install>
 
-    <!-- fixed matrix level sudo configuration. -->
     <matrix sudo="false" >
       <job system="osx" compiler="clang" link="static" >
+        <option value="--with-icu" />
+        <option value="--build-icu" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -234,8 +239,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <!-- ICU build fail (Wc++11-extensions) on default Ubuntu (gcc5.4.0), changed to focal. -->
-      <job system="linux" distribution="focal" compiler="gcc" link="static" coverage="true" >
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--with-icu" />
         <option value="--build-icu" />
         <option value="--build-boost" />
@@ -246,17 +250,14 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <!-- ICU include fail (Wc++11-extensions) on default macOS platform (LLVM version 9.1.0). -->
+      <!-- Default boost fails on Travis default macOS platform, so bumped to xcode12.2. -->
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--with-icu" />
         <option value="--build-icu" />
         <option value="--disable-static" />  
       </job>
-      <!-- ICU build fail (Wc++11-extensions) on default Ubuntu (clang), changed to v5.0. -->
       <job system="linux" compiler="clang" link="dynamic" version="5.0" sudo="false" >
-        <option value="--with-icu" />
-        <option value="--build-icu" />
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -1047,7 +1048,8 @@
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="3.7.0" />
       <dependency name="bitcoin-network" version="3.7.0" />
-      <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
+      <!-- TODO: verify this with more recent ICU. -->
+      <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
 
       <!-- General flags -->
@@ -1090,7 +1092,8 @@
         <flag define="sysconfdir" />
         <library name="bitcoin-client" />
         <library name="bitcoin-network" />
-        <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
+        <!-- TODO: verify this with more recent ICU. -->
+        <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
         <library name="dl" />
         <headers path="include" />
         <sources path="src" />
@@ -1203,7 +1206,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <!-- ICU not built because of coverage time cost. -->
+      <!-- Optional epedencies not built because of coverage time cost. -->
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
         <option value="--build-boost" />
@@ -1215,7 +1218,8 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
-      <!-- ICU include fail (Wc++11-extensions) on default macOS platform (LLVM version 9.1.0). -->
+      <!-- Default boost fails on default macOS platform, so bump to xcode12.2. -->
+      <!-- ICU 68.2 include fail (Wc++11-extensions) on default macOS platform, so bump to xcode12.2. -->
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
