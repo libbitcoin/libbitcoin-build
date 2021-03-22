@@ -198,6 +198,9 @@ endfunction
 .   if (defined(my.job.image))
           $(my.job.system)_image: $(my.job.image)
 .   endif
+.   if (defined(my.job.distribution))
+          dist: $(my.job.distribution)
+.   endif
           compiler: $(my.job.compiler)
           env: LINK=$(my.job.link)
 .   if (has_addons)
@@ -261,12 +264,12 @@ matrix:
 .macro code_coverage(repository)
 .   define my.repository = code_coverage.repository
 .   if (count_matrix_coverage_job(my.repository->matrix) > 0)
-    # Download and unpack lcov > 1.10
+    # Download and unpack lcov.
 .      for my.repository->matrix.job as _job where is_coverage_job(_job)
 .           define my.job_condition = condition(job_predicate(_job))
-    - $(my.job_condition) wget https://github.com/linux-test-project/lcov/releases/download/v1.15/lcov-1.15.tar.gz; fi
-    - $(my.job_condition) tar xzf lcov-1.15.tar.gz; fi
-    - $(my.job_condition) cd lcov-1.15; PREFIX="$(fetch_prefix_value(_job))" make install; cd ..; fi
+    - $(my.job_condition) wget https://github.com/linux-test-project/lcov/releases/download/v1.12/lcov-1.12.tar.gz; fi
+    - $(my.job_condition) tar xzf lcov-1.12.tar.gz; fi
+    - $(my.job_condition) cd lcov-1.12; PREFIX="$(fetch_prefix_value(_job))" make install; cd ..; fi
 .      endfor
 
     # Install coveralls.
@@ -345,7 +348,7 @@ matrix:
 .   output(my.out_file)
 .   copyleft(_repository.name)
 .   define my.matrix = _repository->matrix
-.   define my.sudo = is_true(my.matrix->job.sudo) ?? "true" ? "false"
+.   define my.sudo = is_true(my.matrix.sudo) ?? "true" ? "false"
 sudo:
     - $(my.sudo)
 

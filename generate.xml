@@ -94,7 +94,7 @@
       </dependency>
       <dependency name="pthread" system_exclude="android" />
       <dependency name="rt" function="clock_gettime" system="linux" system_exclude="android" />
-      <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
+      <dependency name="icu-i18n" version="55.2" unprefixed="true" option="icu" />
       <!-- -ldl is missing from icu package config -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
@@ -183,8 +183,8 @@
     </make>
 
     <install>
-      <build name="icu" version="68.2" parallel="true" >
-        <!-- Bug in ICU build requires --enable-draft. -->
+      <build name="icu" version="55.2" parallel="true" >
+        <!-- Bug in ICU 55.2 build requires --enable-draft. -->
         <option value="--enable-draft" />
         <option value="--enable-tools" />
         <option value="--disable-extras" />
@@ -218,10 +218,9 @@
       </build>
     </install>
 
-    <matrix>
+    <!-- fixed matrix level sudo configuration. -->
+    <matrix sudo="false" >
       <job system="osx" compiler="clang" link="static" >
-        <option value="--with-icu" />
-        <option value="--build-icu" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -235,22 +234,27 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
+      <!-- ICU build fail (Wc++11-extensions) on default Ubuntu (gcc5.4.0), changed to focal. -->
+      <job system="linux" distribution="focal" compiler="gcc" link="static" coverage="true" >
         <option value="--with-icu" />
         <option value="--build-icu" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
+      <!-- ICU include fail (Wc++11-extensions) on default macOS platform (LLVM version 9.1.0). -->
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
+        <option value="--with-icu" />
+        <option value="--build-icu" />
         <option value="--disable-static" />  
       </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
+      <!-- ICU build fail (Wc++11-extensions) on default Ubuntu (clang), changed to v5.0. -->
+      <job system="linux" compiler="clang" link="dynamic" version="5.0" sudo="false" >
         <option value="--with-icu" />
         <option value="--build-icu" />
         <option value="--build-boost" />
@@ -1125,8 +1129,8 @@
 
     <install>
       <build name="icu" version="68.2" parallel="true" >
-        <!-- Bug in ICU build requires --enable-draft. -->
-        <option value="--enable-draft" />
+        <!-- Bug in ICU 55.2 build requires --enable-draft. -->
+        <!--<option value="--enable-draft" />-->
         <option value="--enable-tools" />
         <option value="--disable-extras" />
         <option value="--disable-icuio" />
@@ -1186,8 +1190,6 @@
 
     <matrix>
       <job system="osx" compiler="clang" link="static" >
-        <option value="--with-icu" />
-        <option value="--build-icu" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-shared" />
@@ -1201,6 +1203,7 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
+      <!-- ICU not built because of coverage time cost. -->
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
         <option value="--build-boost" />
@@ -1212,9 +1215,12 @@
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
+      <!-- ICU include fail (Wc++11-extensions) on default macOS platform (LLVM version 9.1.0). -->
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
+        <option value="--with-icu" />
+        <option value="--build-icu" />
         <option value="--build-zmq" />
         <option value="--with-bash-completiondir" />
         <option value="--disable-static" />
