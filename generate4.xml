@@ -224,13 +224,28 @@
       </build>
     </install>
 
-    <matrix sudo="false" >
+    <matrix>
+      <!-- Default boost fails on Travis default macOS platform, so bumped to xcode12.2. -->
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <option value="--with-icu" />
+        <option value="--build-icu" />
+        <option value="--disable-static" />  
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <option value="--with-icu" />
         <option value="--build-icu" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
+        <option value="--build-boost" />
+        <option value="--disable-ndebug" />
+        <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="clang" link="static" version="5.0" >
         <option value="--with-icu" />
@@ -240,6 +255,13 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
+        <option value="--disable-static" />
+        <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <option value="--with-icu" />
@@ -251,28 +273,6 @@
         <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <!-- Default boost fails on Travis default macOS platform, so bumped to xcode12.2. -->
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--with-icu" />
-        <option value="--build-icu" />
-        <option value="--disable-static" />  
-      </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--build-boost" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-static" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os -s'" />
-        <option value="CXXFLAGS='-Os -s'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -414,36 +414,27 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--without-consensus" />
-        <!-- these allow unused build to complete -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
+      </job>
+      <job system="osx" compiler="clang" link="static" >
+        <option value="--without-consensus" />
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -455,6 +446,14 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <option value="--build-boost" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -598,39 +597,30 @@
     </install>
 
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <option value="--disable-static" />
+        <option value="--build-zmq" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--disable-static" />
-        <option value="--build-zmq" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -642,6 +632,15 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -816,39 +815,29 @@
     </install>
 
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <!-- <get name="swig" /> -->
+        <option value="--disable-static" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <!-- <get name="swig" /> -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <!-- <get name="swig" /> -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <exclude path="clone/*" />
-        <!-- <get name="swig" /> -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <!-- <get name="swig" /> -->
-        <option value="--disable-static" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <!-- <get name="swig" /> -->
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -860,6 +849,16 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <exclude path="clone/*" />
+        <!-- <get name="swig" /> -->
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -985,35 +984,27 @@
     </install>
 
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <option value="--disable-static" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--disable-static" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -1024,6 +1015,14 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <option value="--build-boost" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -1204,32 +1203,6 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <!-- Optional epedencies not built because of coverage time cost. -->
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <get name="bash-completion" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
       <!-- Default boost fails on default macOS platform, so bump to xcode12.2. -->
       <!-- ICU 68.2 include fail (Wc++11-extensions) on default macOS platform, so bump to xcode12.2. -->
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
@@ -1241,11 +1214,25 @@
         <option value="--with-bash-completiondir" />
         <option value="--disable-static" />
       </job>
+      <job system="osx" compiler="clang" link="static" >
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -1259,6 +1246,18 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Og -g'" />
         <option value="CXXFLAGS='-Og -g'" />
+      </job>
+      <!-- Optional depedencies not built because of coverage time cost. -->
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <get name="bash-completion" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -1381,35 +1380,27 @@
     </install>
 
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <option value="--disable-static" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--disable-static" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -1420,6 +1411,14 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <option value="--build-boost" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -1578,6 +1577,12 @@
     </install>
 
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <get name="bash-completion" />
+        <option value="--disable-static" />
+        <option value="--with-bash-completiondir" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <option value="--without-consensus" />
         <!-- these allow unused build to complete -->
@@ -1585,33 +1590,17 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <get name="bash-completion" />
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <get name="bash-completion" />
-        <option value="--disable-static" />
-        <option value="--with-bash-completiondir" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -1625,6 +1614,16 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <get name="bash-completion" />
+        <option value="--build-boost" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -1758,36 +1757,17 @@
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <exclude path="interface.pb.*" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--build-mbedtls" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--build-zmq" />
         <option value="--build-mbedtls" />
         <option value="--disable-static" />
+      </job>
+      <job system="osx" compiler="clang" link="static" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
@@ -1799,6 +1779,14 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -1806,6 +1794,17 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <exclude path="interface.pb.*" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--build-mbedtls" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -1979,6 +1978,13 @@
     </install>
 
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <get name="bash-completion" />
+        <option value="--build-zmq" />
+        <option value="--disable-static" />
+        <option value="--with-bash-completiondir" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <option value="--without-consensus" />
         <!-- these allow unused build to complete -->
@@ -1987,37 +1993,19 @@
         <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <get name="bash-completion" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <get name="bash-completion" />
-        <option value="--build-zmq" />
-        <option value="--disable-static" />
-        <option value="--with-bash-completiondir" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -2032,6 +2020,17 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <get name="bash-completion" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
