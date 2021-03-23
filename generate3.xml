@@ -2,9 +2,9 @@
 <!-- Copyright (c) 2014-2020 libbitcoin developers (see COPYING). -->
 <generate language="en-us" >
 
-  <repository name="libbitcoin-system" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-system" version="3.7.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-system" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin-system" >
+    <package library="bitcoin" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin-system" >
       <flag value="@icu@" />
     </package>
 
@@ -132,7 +132,7 @@
 
     <make>
       <product prefix="pkgconfig" >
-        <file path="libbitcoin-system.pc" />
+        <file path="libbitcoin.pc" />
       </product>
       <product prefix="doc" >
         <file path="AUTHORS" />
@@ -214,11 +214,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
-        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -288,7 +286,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-blockchain" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-blockchain" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Library" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
@@ -310,8 +308,8 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="bitcoin-database" version="4.0.0" />
-      <dependency name="bitcoin-consensus" version="4.0.0" option="consensus" />
+      <dependency name="bitcoin-database" version="3.7.0" />
+      <dependency name="bitcoin-consensus" version="3.7.0" option="consensus" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -386,28 +384,26 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
-        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -464,7 +460,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-client" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-client" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-client" description="Bitcoin Client Query Library" url="https://github.com/libbitcoin/libbitcoin-client" />
 
@@ -485,8 +481,8 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="bitcoin-system" version="4.0.0" />
-      <dependency name="bitcoin-protocol" version="4.0.0" />
+      <dependency name="bitcoin-system" version="3.7.0" />
+      <dependency name="bitcoin-protocol" version="3.7.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -575,23 +571,21 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
-        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -655,7 +649,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-consensus" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-consensus" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-consensus" description="Bitcoin Consensus Library (optional)" url="https://github.com/libbitcoin/libbitcoin-consensus" />
 
@@ -805,11 +799,9 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
-        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -873,7 +865,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-database" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-database" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-database" description="Bitcoin High Performance Blockchain Database" url="https://github.com/libbitcoin/libbitcoin-database" />
 
@@ -894,7 +886,7 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="bitcoin-system" version="4.0.0" />
+      <dependency name="bitcoin-system" version="3.7.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -968,17 +960,15 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
-        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1033,7 +1023,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-explorer" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-explorer" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
 
@@ -1056,9 +1046,9 @@
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-client" version="4.0.0" />
-      <dependency name="bitcoin-network" version="4.0.0" />
-        <!-- TODO: verify this with more recent ICU. -->
+      <dependency name="bitcoin-client" version="3.7.0" />
+      <dependency name="bitcoin-network" version="3.7.0" />
+      <!-- TODO: verify this with more recent ICU. -->
       <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
 
@@ -1170,34 +1160,32 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
-        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="master" parallel="true" >
+      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1272,7 +1260,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-network" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-network" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" />
 
@@ -1292,7 +1280,7 @@
           <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
-      <dependency name="bitcoin-system" version="4.0.0" />
+      <dependency name="bitcoin-system" version="3.7.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1364,17 +1352,15 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
-        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1433,7 +1419,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-node" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-node" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
@@ -1456,8 +1442,8 @@
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-blockchain" version="4.0.0"  />
-      <dependency name="bitcoin-network" version="4.0.0"  />
+      <dependency name="bitcoin-blockchain" version="3.7.0"  />
+      <dependency name="bitcoin-network" version="3.7.0"  />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1539,39 +1525,37 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
-        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version3" parallel="true" >
+        <option value="--without-tests" />
+        <option value="--without-tools" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1634,16 +1618,14 @@
 
   </repository>
 
-  <repository name="libbitcoin-protocol" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-protocol" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol">
-      <flag value="@mbedtls@" />
     </package>
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="with" name="mbedtls" default="no" substitute="true" value="-DWITH_MBEDTLS" description="Compile with MbedTLS." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -1663,8 +1645,7 @@
           <nuget compiler="vc140" name="libzmq_vc140" version="4.3.2" />
           <nuget compiler="vc141" name="libzmq_vc141" version="4.3.2" />
       </dependency>
-      <dependency name="mbedtls" version="2.12.0" option="mbedtls" />
-      <dependency name="bitcoin-system" version="4.0.0"  />
+      <dependency name="bitcoin-system" version="3.7.0"  />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1700,15 +1681,12 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" uuid="6b94e2a5-c054-4790-963d-a7be493259b0" >
-        <flag substitute="mbedtls" />
         <library name="zmq" />
-        <library name="mbedtls" />
         <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-protocol-test" test="true" option="tests" uuid="c42be17b-063d-44f1-a5bb-9f8295144b70" >
-        <flag substitute="mbedtls" />
         <runner/>
         <library name="bitcoin-protocol" />
         <library name="boost_unit_test_framework" />
@@ -1737,21 +1715,17 @@
       </build>
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
-      <build name="mbedtls" version="2.12.0" parallel="true">
-      </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
-        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1776,7 +1750,6 @@
         <exclude path="interface.pb.*" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
-        <option value="--build-mbedtls" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1786,13 +1759,11 @@
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--build-zmq" />
-        <option value="--build-mbedtls" />
         <option value="--disable-static" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--build-zmq" />
-        <option value="--build-mbedtls" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1819,7 +1790,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-server" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-server" version="3.7.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
 
@@ -1843,8 +1814,8 @@
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
-      <dependency name="bitcoin-node" version="4.0.0" />
-      <dependency name="bitcoin-protocol" version="4.0.0" />
+      <dependency name="bitcoin-node" version="3.7.0" />
+      <dependency name="bitcoin-protocol" version="3.7.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1928,51 +1899,49 @@
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
         <option value="--disable-tests" />
-        <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version3" parallel="true" >
+        <option value="--without-tests" />
+        <option value="--without-tools" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-console" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="master" parallel="true" >
+      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="version3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -2041,7 +2010,7 @@
 
   </repository>
 
-  <templates>
+  <templates source="generate3.xml">
     <template name="gsl.version.hpp" />
     <template name="gsl.include.hpp" />
     <!-- <template name="gsl.interface.swg" /> -->
@@ -2069,9 +2038,6 @@
     <template name="vs2017/gsl.vcxproj" />
     <template name="vs2017/gsl.vcxproj.filters" />
     <template name="vs2017/gsl.sln" />
-    <!-- <template name="gsl.Find.cmake" /> -->
-    <template name="gsl.CMakeLists.txt" />
-    <!-- <template name="gsl.gitignore" /> -->
   </templates>
 
 </generate>

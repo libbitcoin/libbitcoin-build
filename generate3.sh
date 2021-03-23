@@ -18,9 +18,9 @@ cd `dirname "$0"`
 eval rm -rf "output"
 
 # Generate property copiers and artifact generators.
-eval gsl -q -script:gsl.copy_modules.sh generate.xml
-eval gsl -q -script:gsl.copy_properties.sh generate.xml
-eval gsl -q -script:gsl.generate_artifacts.sh generate.xml
+eval gsl -q -script:gsl.copy_modules.sh generate3.xml
+eval gsl -q -script:gsl.copy_properties.sh generate3.xml
+eval gsl -q -script:gsl.generate_artifacts.sh generate3.xml
 
 # Generate bindings from generated binding generators.
 # The path to swig must be in our path.

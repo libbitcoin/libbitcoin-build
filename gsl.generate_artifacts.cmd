@@ -23,7 +23,7 @@ pushd %~dp0
 
 REM Generate build artifacts.
 .   for generate->templates.template as _template
-gsl -q -script:templates\\$(_template.name) generate.xml
+gsl -q -script:templates\\$(_template.name)  $(generate->templates.source)
 if %errorlevel% neq 0 goto error
 
 .   endfor
