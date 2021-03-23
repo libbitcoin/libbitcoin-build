@@ -257,7 +257,7 @@
         <option value="--build-icu" />
         <option value="--disable-static" />  
       </job>
-      <job system="linux" compiler="clang" link="dynamic" version="5.0" sudo="false" >
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
@@ -1125,7 +1125,7 @@
       <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
         <file path="data/bx" />
       </product>
-      <product prefix="sysconf" container="libbitcoin-system" >
+      <product prefix="sysconf" container="libbitcoin" option="console">
         <file path="data/bx.cfg" />
       </product>
     </make>
@@ -1503,7 +1503,7 @@
       <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
         <file path="data/bn" />
       </product>
-      <product prefix="sysconf" container="libbitcoin-system" option="console" >
+      <product prefix="sysconf" container="libbitcoin" option="console">
         <file path="data/bn.cfg" />
       </product>
     </make>
@@ -1875,7 +1875,7 @@
       <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
         <file path="data/bs" />
       </product>
-      <product prefix="sysconf" container="libbitcoin-system" >
+      <product prefix="sysconf" container="libbitcoin" option="console">
         <file path="data/bs.cfg" />
       </product>
     </make>
