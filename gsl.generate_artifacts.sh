@@ -33,7 +33,7 @@ declare -a generator=( \\
 # Generate build artifacts.
 for generate in "\${generator[@]}"
 do
-    gsl -q -script:templates/\$generate generate.xml
+    gsl -q -script:templates/\$generate $(generate->templates.source)
 done
 
 # Make generated scripts executable.

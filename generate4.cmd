@@ -18,9 +18,9 @@ REM Clean directories for generated build artifacts.
 rmdir /s /q "output" 2>NUL
 
 REM Generate property copiers and artifact generators.
-gsl -q -script:gsl.copy_modules.cmd generate.xml
-gsl -q -script:gsl.copy_properties.cmd generate.xml
-gsl -q -script:gsl.generate_artifacts.cmd generate.xml
+gsl -q -script:gsl.copy_modules.cmd generate4.xml
+gsl -q -script:gsl.copy_properties.cmd generate4.xml
+gsl -q -script:gsl.generate_artifacts.cmd generate4.xml
 
 REM Generate bindings from generated binding generators.
 REM The path to swig.exe must be in our path.
