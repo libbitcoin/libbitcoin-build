@@ -402,6 +402,7 @@ function emit_project(repository, product, vs_version, project_path)
     emit_import_group_extension_settings(my.repository, my.product)
     emit_target_ensure_nuget_imports(my.repository, my.product)
     emit_item_group_project_references(my.repository, my.product)
+    emit_item_group_natvis_item(my.repository, my.product)
 
     emit_project_close()
 endfunction emit_project
@@ -711,6 +712,12 @@ endfunction emit_project
       <Project>{$(my.uuid:upper)}</Project>
     </ProjectReference>
 .endmacro emit_item_group_project_reference_item
+.
+.macro emit_item_group_natvis_item(name, uuid)
+    <ItemGroup>
+      <Natvis Include="..\\..\\debug.natvis" />
+    </ItemGroup>
+.endmacro emit_item_group_natvis_item
 .
 .macro emit_compile_item_threadsafe_statistics(repository, product, vs_version)
 .   define my.repository = emit_compile_item_threadsafe_statistics.repository
