@@ -10,10 +10,6 @@
 # Functions
 ###############################################################################
 
-function write_test_run(path)
-    write_line("./$(my.path) ${BOOST_UNIT_TEST_OPTIONS} > test.log")
-endfunction
-
 function get_test_list(product)
     define my.product = get_test_list.product
     define my.tests = ""
@@ -28,6 +24,16 @@ endfunction
 ###############################################################################
 .endtemplate
 .template 1
+.
+.macro write_test_run(path)
+.
+# ALlow CI to send errors to standard output
+if [[ $CI == true ]]; then
+    \./$(my.path) ${BOOST_UNIT_TEST_OPTIONS}
+else
+    \./$(my.path) ${BOOST_UNIT_TEST_OPTIONS} > test.log
+fi
+.endmacro
 .
 .macro write_test_options(tests)
 .   define my.run = is_empty(my.tests) ?? "*" ? "$(my.tests)"

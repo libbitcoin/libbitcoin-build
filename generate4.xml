@@ -224,6 +224,38 @@
       </build>
     </install>
 
+    <ci>
+      <!-- image="xcode12.2" equivalent? -->
+      <!-- prefix variance? -->
+      <job system="osx" link="dynamic"
+        icu="with" boost="with" />
+
+      <job system="osx" link="static"
+        icu="build" boost="build" />
+
+      <job system="linux" compiler="clang" link="dynamic"
+        optimization="size" assert="true"
+        boost="build" />
+
+      <job system="linux" compiler="clang" link="static"
+        optimization="size" assert="true"
+        icu="build" boost="build" />
+
+      <job system="linux" compiler="gcc" link="dynamic"
+        optimization="size" assert="true"
+        boost="build" />
+
+      <job system="linux" compiler="gcc" link="static"
+        optimization="debug" assert="false"
+        icu="build" boost="build"
+        coverage="true" />
+
+      <job system="windows" compiler="x64" link="static" assert="false" />
+      <job system="windows" compiler="x64" link="static" assert="true" />
+      <job system="windows" compiler="Win32" link="static" assert="false" />
+      <job system="windows" compiler="Win32" link="static" assert="true" />
+    </ci>
+
     <matrix>
       <!-- Default boost fails on Travis default macOS platform, so bumped to xcode12.2. -->
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
@@ -2059,10 +2091,10 @@
     <template name="gsl.package.pc.in" />
     <template name="gsl.install.sh" />
     <template name="gsl.runner.sh" />
-    <template name="gsl.travis.yml" />
+    <!-- <template name="gsl.travis.yml" /> -->
     <template name="gsl.build.cmd" />
     <!-- <template name="gsl.build.ps1" /> -->
-    <template name="gsl.appveyor.yml" />
+    <!-- <template name="gsl.appveyor.yml" /> -->
     <template name="gsl.debug.natvis" />
     <template name="vs2013/gsl.packages.config" />
     <template name="vs2013/gsl.vcxproj" />
@@ -2079,6 +2111,7 @@
     <!-- <template name="gsl.Find.cmake" /> -->
     <template name="gsl.CMakeLists.txt" />
     <!-- <template name="gsl.gitignore" /> -->
+    <template name="gsl.ci.yml" />
   </templates>
 
 </generate>
