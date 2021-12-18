@@ -99,7 +99,7 @@ make_jobs()
     shift 1
 
     SEQUENTIAL=1
-    # Avoid setting -j1 (causes problems on Travis).
+    # Avoid setting -j1 (causes problems on single threaded systems [TRAVIS]).
     if [[ $JOBS > $SEQUENTIAL ]]; then
         make -j"$JOBS" "$@"
     else
@@ -331,9 +331,9 @@ build_from_local()
 
 .endmacro # define_build_from_local
 .
-.macro define_build_from_travis()
-# Because Travis alread has downloaded the primary repo.
-build_from_travis()
+.macro define_build_from_ci()
+# Because continuous integration services has downloaded the primary repository.
+build_from_ci()
 {
     local ACCOUNT=$1
     local REPO=$2
@@ -342,9 +342,9 @@ build_from_travis()
     local OPTIONS=$5
     shift 5
 
-    # The primary build is not downloaded if we are running in Travis.
-    if [[ $TRAVIS == true ]]; then
-        build_from_local "Local $TRAVIS_REPO_SLUG" "$JOBS" "${OPTIONS[@]}" "$@"
+    # The primary build is not downloaded if we are running on a continuous integration system.
+    if [[ $CI == true ]]; then
+        build_from_local "Local $CI_REPOSITORY" "$JOBS" "${OPTIONS[@]}" "$@"
         make_tests "$JOBS"
     else
         build_from_github "$ACCOUNT" "$REPO" "$BRANCH" "$JOBS" "${OPTIONS[@]}" "$@"
@@ -356,7 +356,7 @@ build_from_travis()
     fi
 }
 
-.endmacro # define_build_from_travis
+.endmacro # define_build_from_ci
 .
 .macro define_build_functions()
 .   define_initialize_icu_packages()
@@ -365,7 +365,7 @@ build_from_travis()
 .   define_build_from_tarball_boost()
 .   define_build_from_github()
 .   define_build_from_local()
-.   define_build_from_travis()
+.   define_build_from_ci()
 .endmacro # define_build_functions
 .
 .macro build_from_tarball_icu()
@@ -391,12 +391,12 @@ build_from_travis()
     build_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.parallel)" "$(my.options)" "$@"
 .endmacro # build_github
 .
-.macro build_travis(build)
-.   define my.build = build_travis.build
+.macro build_ci(build)
+.   define my.build = build_ci.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-    build_from_travis $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.parallel)" "$(my.options)" "$@"
-.endmacro # build_travis
+    build_from_ci $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.parallel)" "$(my.options)" "$@"
+.endmacro # build_ci
 .
 .macro define_build_all(install)
 .   define my.install = define_build_all.install
@@ -419,7 +419,7 @@ build_all()
 .               if (!last())
 .                   build_github(_build)
 .               else
-.                   build_travis(_build)
+.                   build_ci(_build)
 .               endif
 .           else
 .               abort "Invalid build type: $(_build.name)."

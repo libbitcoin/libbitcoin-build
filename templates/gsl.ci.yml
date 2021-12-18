@@ -1,0 +1,309 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2021 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin .travis.yml.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+function workflow_relative_path(repository, path_prefix)
+    define my.repository = workflow_relative_path.repository
+    require(my.repository, "repository", "name")
+    define my.subpath = ".github/workflows"
+    return append_path(append_path(my.path_prefix,\
+        canonical_path_name(my.repository)), my.subpath)
+endfunction
+
+function is_system_linux(job)
+    define my.job = is_system_linux.job
+    return defined(my.job) & my.job.system = "linux"
+endfunction
+
+function get_job_os(job)
+    define my.job = get_job_os.job
+    define my.os = ""
+
+    if (is_empty(my.job.system))
+        abort "get_job_os failed due to missing job.system value."
+    elsif (my.job.system = "linux")
+        my.os = "ubuntu-latest"
+    else
+        abort "get_job_os failed due to unsupported job.system value."
+    endif
+
+    return my.os
+endfunction #get_job_os
+
+function get_job_compiler_package(job)
+    define my.job = get_job_compiler_package.job
+    define my.version = ""
+
+    if (!is_empty(my.job.version))
+        my.version = "-$(my.job.version)"
+    endif
+
+    if (is_empty(my.job.compiler))
+        abort "get_job_compiler_package failed due to missing job.compiler value."
+    elsif !(my.job.compiler = "gcc") & !(my.job.compiler = "clang")
+        abort "get_job_compiler_package failed due to unsupported job.compiler value."
+    endif
+
+    return "$(my.job.compiler)$(my.version)"
+endfunction #get_job_compiler_package
+
+function get_job_assert(job)
+    define my.job = get_job_assert.job
+    define my.parameter = ""
+
+    if (!is_empty(my.job.assert) & (my.job.assert = "false"))
+      my.parameter = "--disable-ndebug"
+    endif
+
+    return my.parameter
+endfunction #get_job_assert
+
+function get_job_cc(job)
+    define my.job = get_job_cc.job
+    define my.version = ""
+
+    if (!is_empty(my.job.version))
+        my.version = "-$(my.job.version)"
+    endif
+
+    if (is_empty(my.job.compiler))
+        abort "get_job_cc failed due to missing job.compiler value."
+    elsif !(my.job.compiler = "gcc") & !(my.job.compiler = "clang")
+        abort "get_job_cc failed due to unsupported job.compiler value."
+    endif
+
+    return "$(my.job.compiler)$(my.version)"
+endfunction #get_job_cc 
+
+function get_job_cxx(job)
+    define my.job = get_job_cxx.job
+    define my.version = ""
+    define my.compiler = ""
+
+    if (!is_empty(my.job.version))
+        my.version = "-$(my.job.version)"
+    endif
+
+    if (is_empty(my.job.compiler))
+        abort "get_job_compiler failed due to missing job.compiler value."
+    elsif (my.job.compiler = "gcc")
+        my.compiler = "g++"
+    elsif (my.job.compiler = "clang")
+        my.compiler = "clang++"
+    else
+        abort "get_job_cxx failed due to unsupported job.compiler value."
+    endif
+
+    return "$(my.compiler)$(my.version)"
+endfunction #get_job_cxx 
+
+function get_job_link(job)
+    define my.job = get_job_link.job
+    define my.option = ""
+
+    if (is_empty(my.job.link))
+        abort "get_job_link failed due to missing job.link value."
+    elsif (my.job.link = "dynamic")
+        my.option = "--disable-static"
+    elsif (my.job.link = "static")
+        my.option = "--disable-shared"
+    else
+        abort "get_job_link failed due to unsupported job.link value."
+    endif
+
+    return my.option
+endfunction #get_job_link
+
+function get_job_cflags(job)
+    define my.job = get_job_cflags.job
+    define my.flags = ""
+
+    if (is_empty(my.job.optimization))
+        abort "get_job_cflags expects job.optimization, no value provided."
+    elsif (my.job.optimization = "size")
+        my.flags = "-Os"
+    elsif (my.job.optimization = "debug")
+        my.flags = "-Og"
+    else
+        abort "get_job_cflags unsupported job.optimization value '$(my.job.optimization)."
+    endif
+
+    if (!is_empty(my.job.coverage) & (my.job.coverage = "true"))
+        my.flags = "$(my.flags) -g --coverage"
+    endif
+
+    return "$(my.flags) -fPIE"
+endfunction #get_job_cflags
+
+function get_job_cxxflags(job)
+    define my.job = get_job_cxxflags.job
+    return get_job_cflags(my.job)
+endfunction #get_job_cxxflags
+
+function get_job_installsh_icu(job)
+    define my.job = get_job_installsh_icu.job
+    define my.flags = ""
+
+    if (is_empty(my.job.icu))
+        my.flags = ""
+    elsif (my.job.icu = "with")
+        my.flags = "--with-icu"
+    elsif (my.job.icu = "build")
+        my.flags = "--build-icu --with-icu"
+    else
+        abort "get_job_installsh_icu unrecognized job.icu value."
+    endif
+
+    return my.flags
+endfunction #get_job_installsh_icu
+
+function get_job_installsh_boost(job)
+    define my.job = get_job_installsh_boost.job
+    define my.flags = ""
+
+    if (is_empty(my.job.boost))
+        my.flags = ""
+    elsif (my.job.boost = "with")
+        my.flags = ""
+    elsif (my.job.boost = "build")
+        my.flags = "--build-boost"
+    else
+        abort "get_job_installsh_boost unrecognized job.boost value."
+    endif
+
+    return my.flags
+endfunction #get_job_installsh_boost
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro initialize_matrix_entry_linux(job)
+.   define my.job = initialize_matrix_entry_linux.job
+.
+          - os: $(get_job_os(my.job))
+            compiler: "$(get_job_compiler_package(my.job))"
+            assert: "$(get_job_assert(my.job))"
+            cc: "$(get_job_cc(my.job))"
+            cflags: "$(get_job_cflags(my.job))"
+            cxx: "$(get_job_cxx(my.job))"
+            cxxflags: "$(get_job_cxxflags(my.job))"
+            link: "$(get_job_link(my.job))"
+            icu: "$(get_job_installsh_icu(my.job))"
+            boost: "$(get_job_installsh_boost(my.job))"
+
+.endmacro # initialize_matrix_entry_linux
+.
+.macro initialize_matrix(matrix)
+.   define my.matrix = initialize_matrix.matrix
+.
+      matrix:
+        include:
+.
+.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_linux(_job)
+.       initialize_matrix_entry_linux(_job)
+.   endfor _job
+.
+.endmacro #initialize_matrix
+.
+.endtemplate
+.template 0
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.macro generate_ci_yml(path_prefix)
+.for generate.repository by name as _repository
+.   require(_repository, "repository", "name")
+.   if (defined(_repository->ci))
+.       my.absolute_path = join(join(global.root, my.path_prefix), _repository.name)
+.       my.output_path = workflow_relative_path(_repository, my.path_prefix)
+.       create_directory(my.output_path)
+.       define my.out_file = "$(my.output_path)/ci.yml"
+.       notify(my.out_file)
+.       output(my.out_file)
+.       copyleft(_repository.name)
+.       define my.matrix = _repository->ci
+
+name: Continuous Integration Build
+
+on: [ pull_request, push, workflow_dispatch ]
+
+jobs:
+  verify-linux-installsh:
+
+    strategy:
+      fail-fast: false
+
+.       if (defined(my.matrix))
+.           initialize_matrix(my.matrix)
+.       endif
+    runs-on: ${{ matrix.os }}
+
+    env:
+      CC: ${{ matrix.cc }}
+      CFLAGS: '${{ matrix.cflags }}'
+      CXX: ${{ matrix.cxx }}
+      CXXFLAGS: '${{ matrix.cxxflags }}'
+      CI_REPOSITORY: '${{ github.repository }}'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Prepare toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install git ${{ matrix.compiler }} build-essential autoconf automake libtool pkg-config
+
+      - name: Execute install.sh
+        run: >
+          ./install.sh
+          ${{ matrix.link }}
+          ${{ matrix.assert }}
+          --enable-isystem
+          ${{ matrix.icu }}
+          ${{ matrix.boost }}
+          --build-dir=${{ github.workspace }}/build/
+          --prefix=${{ github.workspace }}/dependencies/
+
+      - name: Display error logs
+        if: ${{ failure() }}
+        run: |
+          cat ${{ github.workspace }}/build/build-*/bootstrap.log
+          gcc -v
+          clang -v
+
+.       close
+.   endif
+.endfor _repository
+.endmacro # generate_ci_yml
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_ci_yml("output")
+
+.endtemplate
