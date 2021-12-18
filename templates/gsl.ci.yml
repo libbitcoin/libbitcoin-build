@@ -124,14 +124,20 @@ endfunction #get_job_link
 
 function get_job_cflags(job)
     define my.job = get_job_cflags.job
-    define my.flags = "-Os"
+    define my.flags = ""
 
-    if (!is_empty(my.job.debug) & (my.job.debug = "true"))
+    if (is_empty(my.job.optimization))
+        abort "get_job_cflags expects job.optimization, no value provided."
+    elsif (my.job.optimization = "size")
+        my.flags = "-Os"
+    elsif (my.job.optimization = "debug")
         my.flags = "-Og"
+    else
+        abort "get_job_cflags unsupported job.optimization value '$(my.job.optimization)."
     endif
 
     if (!is_empty(my.job.coverage) & (my.job.coverage = "true"))
-        my.flags = "$(my.flags) -g --coverage" #remove '--coverage' for now
+        my.flags = "$(my.flags) -g --coverage"
     endif
 
     return "$(my.flags) -fPIE"
