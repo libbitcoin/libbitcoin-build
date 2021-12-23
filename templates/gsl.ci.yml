@@ -193,6 +193,11 @@ endfunction #get_job_installsh_boost
 .
           - os: $(get_job_os(my.job))
             compiler: "$(get_job_compiler_package(my.job))"
+.   if (!is_empty(my.job.coverage) & (my.job.coverage = "true"))
+            coverage: "$(my.job.coverage)"
+.   else
+            coverage: "false"
+.   endif
             assert: "$(get_job_assert(my.job))"
             cc: "$(get_job_cc(my.job))"
             cflags: "$(get_job_cflags(my.job))"
@@ -285,6 +290,20 @@ jobs:
           gcc -v
           clang -v
 
+      - name: Coveralls Calculation
+        if: ${{ matrix.coverage == 'true' }}
+        run: |
+          sudo apt-get install lcov
+          lcov --directory . --capture --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" "${{ github.workspace }}/dependencies/*" "${{ github.workspace }}/build/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" --output-file coverage.info
+          lcov --list coverage.info
+
+      - name: Coveralls.io Upload
+        if: ${{ matrix.coverage == 'true' }}
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: "./coverage.info"
+          github-token: ${{ secrets.github_token }}
 .       close
 .   endif
 .endfor _repository
