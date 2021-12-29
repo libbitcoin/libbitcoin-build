@@ -23,6 +23,11 @@ function is_system_linux(job)
     return defined(my.job) & my.job.system = "linux"
 endfunction
 
+function is_system_osx(job)
+    define my.job = is_system_osx.job
+    return defined(my.job) & my.job.system = "osx"
+endfunction
+
 function get_job_os(job)
     define my.job = get_job_os.job
     define my.os = ""
@@ -31,12 +36,69 @@ function get_job_os(job)
         abort "get_job_os failed due to missing job.system value."
     elsif (my.job.system = "linux")
         my.os = "ubuntu-latest"
+    elsif (my.job.system = "osx")
+        my.os = "macos-latest"
     else
-        abort "get_job_os failed due to unsupported job.system value."
+        abort "get_job_os failed due to unsupported job.system value '$(my.job.system)'."
     endif
 
     return my.os
 endfunction #get_job_os
+
+function get_job_packager(job)
+    define my.job = get_job_packager.job
+    define my.packager = ""
+
+    if (my.job.system = "linux")
+        my.packager = "apt"
+    elsif (my.job.system = "osx")
+        my.packager = "brew"
+    else
+        abort ("get_job_packager failed due to unsupported job.system value '$(my.job.system)'.")
+    endif
+
+    return my.packager
+endfunction #get_job_packager
+
+function get_job_packages(job)
+    define my.job = get_job_packages.job
+    define my.packages = ""
+
+    if (my.job.system = "osx")
+        if (!is_empty(my.job.boost) & !(my.job.boost = "build"))
+            my.packages = "boost"
+        endif
+    elsif (my.job.system = "linux")
+        my.packages = get_job_compiler_package(my.job)
+    endif
+
+    return "$(my.packages)"
+endfunction #get_job_packages(
+
+function get_job_compiler(job)
+    define my.job = get_job_compiler.job
+    define my.compiler = ""
+
+    if (my.job.system = "osx")
+        my.compiler = "clang"
+
+        if (!is_empty(my.job.compiler))
+            abort "Continuious Integration 'osx' job has extraneous 'compiler' property."
+        endif
+    elsif (my.job.system = "linux")
+        if (is_empty(my.job.compiler))
+            abort "get_job_compiler failed due to missing job.compiler value."
+        elsif ((my.job.compiler = "gcc") | (my.job.compiler = "clang"))
+            my.compiler = "$(my.job.compiler)"
+        else
+            abort "get_job_compiler failed due to unsupported job.compiler value $(my.job.compiler)."
+        endif
+    else
+        abort "get_job_compiler unrecognized system value $(my.job.system)"
+    endif
+
+    return "$(my.compiler)"
+endfunction #get_job_compiler
 
 function get_job_compiler_package(job)
     define my.job = get_job_compiler_package.job
@@ -46,13 +108,7 @@ function get_job_compiler_package(job)
         my.version = "-$(my.job.version)"
     endif
 
-    if (is_empty(my.job.compiler))
-        abort "get_job_compiler_package failed due to missing job.compiler value."
-    elsif !(my.job.compiler = "gcc") & !(my.job.compiler = "clang")
-        abort "get_job_compiler_package failed due to unsupported job.compiler value."
-    endif
-
-    return "$(my.job.compiler)$(my.version)"
+    return "$(get_job_compiler(my.job))$(my.version)"
 endfunction #get_job_compiler_package
 
 function get_job_assert(job)
@@ -69,37 +125,35 @@ endfunction #get_job_assert
 function get_job_cc(job)
     define my.job = get_job_cc.job
     define my.version = ""
+    define my.compiler = get_job_compiler(my.job)
 
     if (!is_empty(my.job.version))
         my.version = "-$(my.job.version)"
     endif
 
-    if (is_empty(my.job.compiler))
-        abort "get_job_cc failed due to missing job.compiler value."
-    elsif !(my.job.compiler = "gcc") & !(my.job.compiler = "clang")
-        abort "get_job_cc failed due to unsupported job.compiler value."
+    if !(my.compiler = "gcc") & !(my.compiler = "clang")
+        abort "get_job_cc failed due to unsupported compiler value."
     endif
 
-    return "$(my.job.compiler)$(my.version)"
+    return "$(my.compiler)$(my.version)"
 endfunction #get_job_cc 
 
 function get_job_cxx(job)
     define my.job = get_job_cxx.job
     define my.version = ""
     define my.compiler = ""
+    define my.specified_compiler = get_job_compiler(my.job)
 
     if (!is_empty(my.job.version))
         my.version = "-$(my.job.version)"
     endif
 
-    if (is_empty(my.job.compiler))
-        abort "get_job_compiler failed due to missing job.compiler value."
-    elsif (my.job.compiler = "gcc")
+    if (my.specified_compiler = "gcc")
         my.compiler = "g++"
-    elsif (my.job.compiler = "clang")
+    elsif (my.specified_compiler = "clang")
         my.compiler = "clang++"
     else
-        abort "get_job_cxx failed due to unsupported job.compiler value."
+        abort "get_job_cxx failed due to unsupported compiler value."
     endif
 
     return "$(my.compiler)$(my.version)"
@@ -188,11 +242,18 @@ endfunction #get_job_installsh_boost
 .endtemplate
 .template 1
 .
-.macro initialize_matrix_entry_linux(job)
-.   define my.job = initialize_matrix_entry_linux.job
+.macro initialize_matrix_entry(job)
+.   define my.job = initialize_matrix_entry.job
 .
           - os: $(get_job_os(my.job))
+            packager: "$(get_job_packager(my.job))"
+            packages: "$(get_job_packages(my.job))"
             compiler: "$(get_job_compiler_package(my.job))"
+.   if (!is_empty(my.job.coverage) & (my.job.coverage = "true"))
+            coverage: "$(my.job.coverage)"
+.   else
+            coverage: "false"
+.   endif
             assert: "$(get_job_assert(my.job))"
             cc: "$(get_job_cc(my.job))"
             cflags: "$(get_job_cflags(my.job))"
@@ -202,19 +263,23 @@ endfunction #get_job_installsh_boost
             icu: "$(get_job_installsh_icu(my.job))"
             boost: "$(get_job_installsh_boost(my.job))"
 
-.endmacro # initialize_matrix_entry_linux
+.endmacro # initialize_matrix_entry
 .
-.macro initialize_matrix(matrix)
-.   define my.matrix = initialize_matrix.matrix
+.macro initialize_verify_matrix(matrix)
+.   define my.matrix = initialize_verify_matrix.matrix
 .
       matrix:
         include:
 .
 .   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_linux(_job)
-.       initialize_matrix_entry_linux(_job)
+.       initialize_matrix_entry(_job)
 .   endfor _job
 .
-.endmacro #initialize_matrix
+.   for my.matrix.job by "$(link)" as _job where is_system_osx(_job)
+.       initialize_matrix_entry(_job)
+.   endfor _job
+.
+.endmacro #initialize_verify_matrix
 .
 .endtemplate
 .template 0
@@ -241,13 +306,13 @@ name: Continuous Integration Build
 on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
-  verify-linux-installsh:
+  verify-installsh:
 
     strategy:
       fail-fast: false
 
-.       if (defined(my.matrix))
-.           initialize_matrix(my.matrix)
+.       if (count(my.matrix.job, (count.system = "linux")) + count(my.matrix.job, (count.system = "osx"))  > 0)
+.           initialize_verify_matrix(my.matrix)
 .       endif
     runs-on: ${{ matrix.os }}
 
@@ -262,10 +327,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Prepare toolchain
+      - name: Prepare toolchain [apt]
+        if: ${{ matrix.packager == 'apt' }}
         run: |
           sudo apt-get update
-          sudo apt-get install git ${{ matrix.compiler }} build-essential autoconf automake libtool pkg-config
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.packages }}
+
+      - name: Prepare toolchain [brew]
+        if: ${{ matrix.packager == 'brew' }}
+        run: |
+          brew install git autoconf automake libtool pkg-config ${{ matrix.packages }}
 
       - name: Execute install.sh
         run: >
@@ -278,12 +349,32 @@ jobs:
           --build-dir=${{ github.workspace }}/build/
           --prefix=${{ github.workspace }}/dependencies/
 
-      - name: Display error logs
+      - name: Coveralls Calculation [apt-only]
+        if: ${{ (matrix.packager == 'apt') && (matrix.coverage == 'true') }}
+        run: |
+          sudo apt-get install lcov
+          lcov --directory . --capture --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" "${{ github.workspace }}/dependencies/*" "${{ github.workspace }}/build/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" --output-file coverage.info
+          lcov --list coverage.info
+
+      - name: Coveralls.io Upload
+        if: ${{ matrix.coverage == 'true' }}
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: "./coverage.info"
+          github-token: ${{ secrets.github_token }}
+
+      - name: Display errors from logs
         if: ${{ failure() }}
         run: |
-          cat ${{ github.workspace }}/build/build-*/bootstrap.log
+          echo "----------------------------------------------------"
+          echo "Error display"
+          echo "Error display"
+          echo "Error display"
+          echo "----------------------------------------------------"
           gcc -v
           clang -v
+          cat ${{ github.workspace }}/build/build-*/bootstrap.log
 
 .       close
 .   endif
