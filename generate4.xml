@@ -230,10 +230,10 @@
       <job system="osx" link="dynamic" optimization="size" icu="with" boost="with" />
       <job system="osx" link="static" optimization="size" icu="build" boost="build" />
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="true" boost="build" />
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false" boost="build" />
       <job system="linux" compiler="clang" link="static" optimization="size" assert="true" icu="build" boost="build" />
       <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true" boost="build" />
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="false" icu="build" boost="build" coverage="true" />
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" icu="build" boost="build" coverage="true" />
 
       <job system="windows" compiler="x64" link="static" assert="false" />
       <job system="windows" compiler="x64" link="static" assert="true" />
@@ -824,6 +824,23 @@
       </build>
     </install>
 
+    <ci>
+      <!-- image="xcode12.2" equivalent? -->
+      <!-- prefix variance? -->
+      <job system="osx" link="dynamic" optimization="size" icu="with" boost="with" />
+      <job system="osx" link="static" optimization="size" icu="build" boost="build" />
+
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false" boost="build" />
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="true" icu="build" boost="build" />
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true" boost="build" />
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" icu="build" boost="build" coverage="true" />
+
+      <job system="windows" compiler="x64" link="static" assert="false" />
+      <job system="windows" compiler="x64" link="static" assert="true" />
+      <job system="windows" compiler="Win32" link="static" assert="false" />
+      <job system="windows" compiler="Win32" link="static" assert="true" />
+    </ci>
+
     <matrix>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
@@ -1388,6 +1405,23 @@
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
+
+    <ci>
+      <!-- image="xcode12.2" equivalent? -->
+      <!-- prefix variance? -->
+      <job system="osx" link="dynamic" optimization="size" icu="with" boost="with" />
+      <job system="osx" link="static" optimization="size" icu="build" boost="build" />
+
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false" boost="build" />
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="true" icu="build" boost="build" />
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true" boost="build" />
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" icu="build" boost="build" coverage="true" />
+
+      <job system="windows" compiler="x64" link="static" assert="false" />
+      <job system="windows" compiler="x64" link="static" assert="true" />
+      <job system="windows" compiler="Win32" link="static" assert="false" />
+      <job system="windows" compiler="Win32" link="static" assert="true" />
+    </ci>
 
     <matrix>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
