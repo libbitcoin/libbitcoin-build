@@ -99,10 +99,11 @@
       <!-- -ldl is missing from icu package config. -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
-      <dependency name="secp256k1" version="0.1.0.19">
+      <dependency name="secp256k1" version="0.1.0.20">
+          <!-- The vc120 secp256k1 nuget package is no longer supported -->
           <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
-          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.19" />
-          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.19" />
+          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.20" />
+          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.20" />
       </dependency>
 
       <!-- General flags -->
