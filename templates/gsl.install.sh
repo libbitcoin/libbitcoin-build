@@ -450,59 +450,62 @@ for generate.repository by name as _repository
     require(_repository, "repository", "name")
     my.output_path = join(my.path_prefix, canonical_path_name(_repository))
     define my.out_file = "$(my.output_path)/install.sh"
-    define my.install = _repository->install
     create_directory(my.output_path)
     notify(my.out_file)
     output(my.out_file)
 
-    shebang("bash")
+    new installation as _install
+        cumulative_install(_install, generate, _repository)
 
-    copyleft(_repository.name)
-    documentation(_repository, my.install)
+        shebang("bash")
 
-    heading1("Define constants.")
-    define_build_directory(_repository)
-    define_icu(my.install)
-    define_zmq(my.install)
-    define_mbedtls(my.install)
-    define_boost(my.install)
+        copyleft(_repository.name)
+        documentation(_repository, _install)
 
-    heading1("Define utility functions.")
-    define_utility_functions()
-    define_help(_repository, my.install, "install")
+        heading1("Define constants.")
+        define_build_directory(_repository)
+        define_icu(_install)
+        define_zmq(_install)
+        define_mbedtls(_install)
+        define_boost(_install)
 
-    heading1("Define environment initialization functions")
-    define_parse_command_line_options(_repository, my.install)
-    define_handle_help_line_option()
-    define_set_operating_system()
-    define_parallelism()
-    define_set_os_specific_compiler_settings()
-    define_link_to_standard_library()
-    define_normalized_configure_options()
-    define_handle_custom_options()
-    define_remove_build_options()
-    define_set_prefix()
-    define_set_pkgconfigdir()
-    define_set_with_boost_prefix()
+        heading1("Define utility functions.")
+        define_utility_functions()
+        define_help(_repository, _install, "install")
 
-    heading1("Initialize the build environment.")
-    define_initialization_calls()
-    define_display_configuration(_repository, my.install)
+        heading1("Define environment initialization functions")
+        define_parse_command_line_options(_repository, _install)
+        define_handle_help_line_option()
+        define_set_operating_system()
+        define_parallelism()
+        define_set_os_specific_compiler_settings()
+        define_link_to_standard_library()
+        define_normalized_configure_options()
+        define_handle_custom_options()
+        define_remove_build_options()
+        define_set_prefix()
+        define_set_pkgconfigdir()
+        define_set_with_boost_prefix()
 
-    heading1("Define build options.")
-    for my.install.build as _build where count(_build.option) > 0
-        define_build_options(_build)
-    endfor _build
+        heading1("Initialize the build environment.")
+        define_initialization_calls()
+        define_display_configuration(_repository, _install)
 
-    heading1("Define build functions.")
-    define_build_functions()
+        heading1("Define build options.")
+        for _install.build as _build where count(_build.option) > 0
+            define_build_options(_build)
+        endfor _build
 
-    heading1("The master build function.")
-    define_build_all(my.install)
+        heading1("Define build functions.")
+        define_build_functions()
 
-    heading1("Build the primary library and all dependencies.")
-    define_invoke()
+        heading1("The master build function.")
+        define_build_all(_install)
 
+        heading1("Build the primary library and all dependencies.")
+        define_invoke()
+
+    endnew _install
     close
 endfor _repository
 endfunction # generate_installer

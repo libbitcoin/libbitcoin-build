@@ -63,10 +63,17 @@ endfunction #get_job_packager
 function get_job_packages(job)
     define my.job = get_job_packages.job
     define my.packages = ""
+    define my.spacer = ""
 
     if (my.job.system = "osx")
         if (!is_empty(my.job.boost) & !(my.job.boost = "build"))
-            my.packages = "boost"
+            my.packages = "$(my.packages)$(my.spacer)boost"
+            my.spacer = " "
+        endif
+
+        if (!is_empty(my.job.icu) & !(my.job.icu = "build"))
+            my.packages = "$(my.packages)$(my.spacer)icu4c"
+            my.spacer = " "
         endif
     elsif (my.job.system = "linux")
         my.packages = get_job_compiler_package(my.job)
