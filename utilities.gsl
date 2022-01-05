@@ -360,53 +360,23 @@ function global.cumulative_install(list, repositories, repository)
         for my.repositories.repository as _repository
             if (!(_repository.name = my.repository.name) &\
                  (_repository->package.library = _build.name))
-                cumulative_install_recurse(my.list, my.repositories, _repository)
+                new install as _dep_steps
+                    cumulative_install(_dep_steps, my.repositories, _repository)
+
+                    for _dep_steps.build as _step
+                        if (count(my.list.build, (count.name = _step.name)) = 0)
+                            copy _step to my.list
+                        endif
+                    endfor
+                endnew
             endif
         endfor
-    endfor
 
-    for my.repository->install.build as _repo_build
-        if (count(my.list.build, (count.name = _repo_build.name)) = 0)
-            copy _repo_build to my.list
-        else
-            for my.list.build as _comp_build where (_comp_build.name = _repo_build.name)
-                for _repo_build.option as _repo_option where (count(_comp_build.option, (count.value = _repo_option.value)) = 0)
-                    new _comp_build.option as _option
-                        _option.value = _repo_option.value
-                    endnew
-                endfor
-            endfor
+        if (defined(my.list->build(name = _build.name)))
+            delete my.list->build(name = _build.name)
         endif
-    endfor
-endfunction
 
-function global.cumulative_install_recurse(list, repositories, repository)
-    define my.list = cumulative_install_recurse.list
-    define my.repositories = cumulative_install_recurse.repositories
-    define my.repository = cumulative_install_recurse.repository
-
-    for my.repository->install.build as _build
-        for my.repositories.repository as _repository
-            if (!(_repository.name = my.repository.name) &\
-                 (_repository->package.library = _build.name))
-                cumulative_install_recurse(my.list, my.repositories, _repository)
-            endif
-        endfor
-    endfor
-
-    for my.repository->install.build as _repo_build
-        if ((count(my.list.build, (count.name = _repo_build.name)) = 0) &\
-            !(my.repository->package.library = _repo_build.name))
-            copy _repo_build to my.list
-        elsif (!(my.repository->package.library = _build.name))
-            for my.list.build as _comp_build where (_comp_build.name = _repo_build.name)
-                for _repo_build.option as _repo_option where (count(_comp_build.option, (count.value = _repo_option.value)) = 0)
-                    new _comp_build.option as _option
-                        _option.value = _repo_option.value
-                    endnew
-                endfor
-            endfor
-        endif
+        copy _build to my.list
     endfor
 endfunction
 
