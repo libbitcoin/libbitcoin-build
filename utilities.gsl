@@ -351,6 +351,36 @@ endfunction
 # Build utilities.
 #------------------------------------------------------------------------------
 
+function global.cumulative_dependencies(list, repositories, repository)
+    define my.list = cumulative_dependencies.list
+    define my.repositories = cumulative_dependencies.repositories
+    define my.repository = cumulative_dependencies.repository
+
+    for my.repository->configure.dependency as _dependency
+        for my.repositories.repository as _repository
+            if (!(_repository.name = my.repository.name) &\
+                 (_repository->package.library = _dependency.name))
+                new configure as _deps
+                    cumulative_dependencies(_deps, my.repositories, _repository)
+
+                    for _deps.dependency as _subdep
+                        if (count(my.list.dependency,\
+                          (count.name = _subdep.name)) = 0)
+                            copy _subdep to my.list
+                        endif
+                    endfor
+                endnew
+            endif
+        endfor
+
+        if (defined(my.list->dependency(name = _dependency.name)))
+            delete my.list->dependency(name = _dependency.name)
+        endif
+
+        copy _dependency to my.list
+    endfor
+endfunction
+
 function global.cumulative_install(list, repositories, repository)
     define my.list = cumulative_install.list
     define my.repositories = cumulative_install.repositories
