@@ -388,40 +388,14 @@
     </make>
 
     <install>
-      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="evoskuil" repository="libbitcoin-database" branch="master" parallel="true" >
         <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
         <option value="--without-tests" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-database" github="evoskuil" repository="libbitcoin-database" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -567,33 +541,7 @@
     </make>
 
     <install>
-      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
-      </build>
-      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -979,26 +927,6 @@
     </make>
 
     <install>
-      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
       <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
@@ -1179,40 +1107,6 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
-      </build>
-      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
       <build name="bitcoin-client" github="evoskuil" repository="libbitcoin-client" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
@@ -1375,26 +1269,6 @@
     </make>
 
     <install>
-      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
       <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
@@ -1410,6 +1284,8 @@
     <ci>
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
+      <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
+      <!-- boost error from asio if from brew -->
       <job system="osx" link="dynamic" optimization="size" icu="with" boost="with" />
       <job system="osx" link="static" optimization="size" icu="build" boost="build" />
 
@@ -1567,43 +1443,6 @@
     </make>
 
     <install>
-      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-database" github="evoskuil" repository="libbitcoin-database" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
       <build name="bitcoin-blockchain" github="evoskuil" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
@@ -1777,29 +1616,9 @@
     </make>
 
     <install>
-      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
       <build name="mbedtls" version="2.12.0" parallel="true">
-      </build>
-      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
       </build>
       <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
@@ -1968,56 +1787,6 @@
     </make>
 
     <install>
-      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
-      </build>
-      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-database" github="evoskuil" repository="libbitcoin-database" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-blockchain" github="evoskuil" repository="libbitcoin-blockchain" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
       <build name="bitcoin-node" github="evoskuil" repository="libbitcoin-node" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-console" />

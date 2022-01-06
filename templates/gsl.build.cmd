@@ -55,7 +55,8 @@ IF %ERRORLEVEL% NEQ 0 (
   )
 .endmacro # emit_error_handler_indent
 .
-.macro emit_instructions(repository)
+.macro emit_instructions(repositories, repository)
+.   define my.repositories = emit_instructions.repositories
 .   define my.repository = emit_instructions.repository
 call :pending "Build initialized..."
 IF NOT EXIST "%nuget_pkg_path%" (
@@ -63,12 +64,15 @@ IF NOT EXIST "%nuget_pkg_path%" (
 .   emit_error_handler_indent("mkdir %nuget_pkg_path% failed.")
 )
 
-.   for my.repository->install.build as _build where is_build_dependency(my.repository, _build)
+.   new install as _cumulative
+.       cumulative_install(_cumulative, my.repositories, my.repository)
+.       for _cumulative.build as _build where is_build_dependency(my.repository, _build)
 .#call :$(_build.repository)
 .#  emit_error_handler("Build failed.")
 call :init $(_build.github) $(_build.repository) $(_build.branch)
-.       emit_error_handler("Initializing repository $(_build.github) $(_build.repository) $(_build.branch) failed.")
-.   endfor
+.           emit_error_handler("Initializing repository $(_build.github) $(_build.repository) $(_build.branch) failed.")
+.       endfor
+.   endnew
 .
 call :bld_repo $(my.repository.name)
 .   emit_error_handler("Building $(my.repository.name) failed.")
@@ -172,7 +176,7 @@ IF EXIST "%~5" SET "msbuild_exe=%~5"
 .   bat_copyleft(_repository.name)
 .   initialize_batch_script()
 
-.   emit_instructions(_repository)
+.   emit_instructions(generate, _repository)
 
 
 

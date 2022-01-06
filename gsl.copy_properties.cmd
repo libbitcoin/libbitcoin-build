@@ -117,16 +117,26 @@ function generate_artifacts(path_prefix)
 
     emit_initialize()
 
-# TODO: walk dependency tree, not build list.
-# TODO: build list is for telling installer what to compile.
     for generate.repository by name as _repository
         echo(" Evaluating repository: $(_repository.name)")
-        for _repository->install.build as _build where\
-            defined(_build.repository) &\
-            starts_with(_build.repository, "libbitcoin")
-            emit_import_copy(_repository, my.path_prefix, _build.repository)
-        endfor
+        new configure as _dependencies
+            cumulative_dependencies(_dependencies, generate, _repository)
+
+            for _dependencies.dependency as _dependency where\
+              (count(generate.repository,\
+                (count->package.library = _dependency.name)) > 0)
+
+                define my.match = generate->repository(\
+                  repository->package.library = _dependency.name)
+
+                emit_import_copy(_repository, my.path_prefix, my.match.name)
+            endfor
+        endnew
+
+        emit_import_copy(_repository, my.path_prefix, _repository.name)
+
         emit_project_props_copy(_repository, my.path_prefix)
+
         emit_repository_completion_message(_repository)
     endfor
 
