@@ -209,39 +209,78 @@ function get_job_cxxflags(job)
     return get_job_cflags(my.job)
 endfunction #get_job_cxxflags
 
-function get_job_installsh_icu(job)
-    define my.job = get_job_installsh_icu.job
-    define my.flags = ""
+function get_job_axis_value(decl, job, axis)
+    define my.decl = get_job_axis_value.decl
+    define my.job = get_job_axis_value.job
+    define my.axis = get_job_axis_value.axis
+    define my.value = ""
 
-    if (is_empty(my.job.icu))
-        my.flags = ""
-    elsif (my.job.icu = "with")
-        my.flags = "--with-icu"
-    elsif (my.job.icu = "build")
-        my.flags = "--build-icu --with-icu"
+    if (!defined(my.axis.value))
+        my.value = get_job_axis_default(my.decl, my.job)
+    elsif (my.axis.value = "build")
+        if (!defined(my.decl.build) | !(my.decl.build = "true"))
+            abort "Disallowed value 'build' provided for axis '$(my.axis.name)'."
+        endif
+
+        if (defined(my.decl.buildwith) & (my.decl.buildwith = "true") &\
+          defined(my.decl.with) & (my.decl.with = "true"))
+            my.value = "--build-$(my.axis.name) --with-$(my.axis.name)"
+        else
+            my.value = "--build-$(my.axis.name)"
+        endif
+    elsif (my.axis.value = "with")
+        if (!defined(my.decl.with) | !(my.decl.with = "true"))
+            abort "Disallowed value 'with' provided for axis '$(my.axis.name)'."
+        endif
+
+        my.value = "--with-$(my.axis.name)"
+    elsif (my.axis.value = "without")
+        if (!defined(my.decl.without) | !(my.decl.without = "true"))
+            abort "Disallowed value 'without' provided for axis '$(my.axis.name)'."
+        endif
+
+        my.value = "--without-$(my.axis.name)"
     else
-        abort "get_job_installsh_icu unrecognized job.icu value."
+        abort "Unrecognized value '$(my.axis.value)' provided for axis '$(my.axis.name)'."
     endif
 
-    return my.flags
-endfunction #get_job_installsh_icu
+    return my.value
+endfunction #get_job_axis_value
 
-function get_job_installsh_boost(job)
-    define my.job = get_job_installsh_boost.job
-    define my.flags = ""
+function get_job_axis_default(decl, job)
+    define my.decl = get_job_axis_default.decl
+    define my.job = get_job_axis_default.job
+    return ""
+endfunction #get_job_axis_default
 
-    if (is_empty(my.job.boost))
-        my.flags = ""
-    elsif (my.job.boost = "with")
-        my.flags = ""
-    elsif (my.job.boost = "build")
-        my.flags = "--build-boost"
+function get_job_installsh_axis_value(job, decl)
+    define my.job =  get_job_installsh_axis_value.job
+    define my.decl =  get_job_installsh_axis_value.decl
+    define my.value = ""
+
+    define my.declared = (count(my.job.axis, (count.name = my.decl.name)) = 1)
+
+    if (my.declared)
+        my.value = get_job_axis_value(my.decl, my.job,\
+          my.job->axis(name = my.decl.name))
     else
-        abort "get_job_installsh_boost unrecognized job.boost value."
+        my.value = get_job_axis_default(my.decl, my.job)
     endif
 
-    return my.flags
-endfunction #get_job_installsh_boost
+    return my.value
+endfunction # get_job_installsh_axis_value
+
+function get_job_coverage(job)
+    define my.job = get_job_coverage.job
+    define my.coverage = "false"
+
+    if (defined(my.job.coverage) & !is_empty(my.job.coverage) &\
+      (my.job.coverage = "true"))
+        my.coverage = "true"
+    endif
+
+    return my.coverage
+endfunction #get_job_coverage
 
 ###############################################################################
 # Macros
@@ -249,26 +288,24 @@ endfunction #get_job_installsh_boost
 .endtemplate
 .template 1
 .
-.macro initialize_matrix_entry(job)
+.macro initialize_matrix_entry(matrix, job)
+.   define my.matrix = initialize_matrix_entry.matrix
 .   define my.job = initialize_matrix_entry.job
 .
           - os: $(get_job_os(my.job))
-            packager: "$(get_job_packager(my.job))"
-            packages: "$(get_job_packages(my.job))"
             compiler: "$(get_job_compiler_package(my.job))"
-.   if (!is_empty(my.job.coverage) & (my.job.coverage = "true"))
-            coverage: "$(my.job.coverage)"
-.   else
-            coverage: "false"
-.   endif
+            link: "$(get_job_link(my.job))"
+.   for my.matrix.axis by "$(name)" as _axis
+            $(_axis.name): "$( get_job_installsh_axis_value(my.job, _axis))"
+.   endfor
             assert: "$(get_job_assert(my.job))"
             cc: "$(get_job_cc(my.job))"
             cflags: "$(get_job_cflags(my.job))"
             cxx: "$(get_job_cxx(my.job))"
             cxxflags: "$(get_job_cxxflags(my.job))"
-            link: "$(get_job_link(my.job))"
-            icu: "$(get_job_installsh_icu(my.job))"
-            boost: "$(get_job_installsh_boost(my.job))"
+            packager: "$(get_job_packager(my.job))"
+            packages: "$(get_job_packages(my.job))"
+            coverage: "$(get_job_coverage(my.job))"
 
 .endmacro # initialize_matrix_entry
 .
@@ -279,11 +316,11 @@ endfunction #get_job_installsh_boost
         include:
 .
 .   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_linux(_job)
-.       initialize_matrix_entry(_job)
+.       initialize_matrix_entry(my.matrix, _job)
 .   endfor _job
 .
 .   for my.matrix.job by "$(link)" as _job where is_system_osx(_job)
-.       initialize_matrix_entry(_job)
+.       initialize_matrix_entry(my.matrix, _job)
 .   endfor _job
 .
 .endmacro #initialize_verify_matrix

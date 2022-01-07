@@ -226,15 +226,40 @@
     </install>
 
     <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" />
+
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size" icu="with" boost="with" />
-      <job system="osx" link="static" optimization="size" icu="build" boost="build" />
+      <job system="osx" link="dynamic" optimization="size">
+        <!-- <axis name="boost" /> -->
+        <axis name="icu" value="with" />
+      </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false" boost="build" />
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="true" icu="build" boost="build" />
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true" boost="build" />
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" icu="build" boost="build" coverage="true" />
+      <job system="osx" link="static" optimization="size">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false" boost="build">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+      </job>
+
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" />
+      </job>
+
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
 
       <job system="windows" compiler="x64" link="static" assert="false" />
       <job system="windows" compiler="x64" link="static" assert="true" />
@@ -774,15 +799,40 @@
     </install>
 
     <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" />
+
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size" icu="with" boost="with" />
-      <job system="osx" link="static" optimization="size" icu="build" boost="build" />
+      <job system="osx" link="dynamic" optimization="size">
+        <!-- <axis name="boost" /> -->
+        <axis name="icu" value="with" />
+      </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false" boost="build" />
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="true" icu="build" boost="build" />
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true" boost="build" />
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" icu="build" boost="build" coverage="true" />
+      <job system="osx" link="static" optimization="size">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+      
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
 
       <job system="windows" compiler="x64" link="static" assert="false" />
       <job system="windows" compiler="x64" link="static" assert="true" />
@@ -1282,17 +1332,42 @@
     </install>
 
     <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" />
+
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
-      <job system="osx" link="dynamic" optimization="size" icu="with" boost="with" />
-      <job system="osx" link="static" optimization="size" icu="build" boost="build" />
+      <job system="osx" link="dynamic" optimization="size">
+        <!-- <axis name="boost" /> -->
+        <axis name="icu" value="with" />
+      </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false" boost="build" />
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="true" icu="build" boost="build" />
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true" boost="build" />
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" icu="build" boost="build" coverage="true" />
+      <job system="osx" link="static" optimization="size">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
 
       <job system="windows" compiler="x64" link="static" assert="false" />
       <job system="windows" compiler="x64" link="static" assert="true" />
