@@ -486,21 +486,21 @@ function generate_installer(path_prefix)
             define_set_prefix()
             define_set_pkgconfigdir()
             define_set_with_boost_prefix()
-
-            heading1("Initialize the build environment.")
-            define_initialization_calls()
             define_display_configuration(_repository, _install)
-
-            heading1("Define build options.")
-            for _install.build as _build where count(_build.option) > 0
-                define_build_options(_build)
-            endfor _build
 
             heading1("Define build functions.")
             define_build_functions()
 
             heading1("The master build function.")
             define_build_all(_install)
+
+            heading1("Initialize the build environment.")
+            define_initialization_calls()
+
+            heading1("Define build options.")
+            for _install.build as _build where count(_build.option) > 0
+                define_build_options(_build)
+            endfor _build
 
             heading1("Build the primary library and all dependencies.")
             define_invoke()
