@@ -87,6 +87,12 @@ function get_job_packages(job)
         endif
     elsif (my.job.system = "linux")
         my.packages = get_job_compiler_package(my.job)
+        my.spacer = " "
+    endif
+
+    if (defined(my.job.coverage) & !(my.job.coverage = "false"))
+        my.packages = "$(my.packages)$(my.spacer)lcov"
+        my.spacer = " "
     endif
 
     return "$(my.packages)"
@@ -117,6 +123,21 @@ function get_job_compiler(job)
     return "$(my.compiler)"
 endfunction #get_job_compiler
 
+function get_job_optimization(job)
+    define my.job = get_job_optimization.job
+    define my.value = ""
+
+    if (!defined(my.job.optimization))
+        abort "get_job_optimization failed due to undefined 'optimization' property."
+    endif
+
+    if (!(my.job.optimization = "debug") & !(my.job.optimization = "size"))
+        abort "get_job_optimization value '$(my.job.optimization)' unrecognized."
+    endif
+
+    return my.job.optimization
+endfunction #get_job_optimization
+
 function get_job_compiler_package(job)
     define my.job = get_job_compiler_package.job
     define my.version = ""
@@ -130,13 +151,13 @@ endfunction #get_job_compiler_package
 
 function get_job_assert(job)
     define my.job = get_job_assert.job
-    define my.parameter = ""
 
-    if (!is_empty(my.job.assert) & (my.job.assert = "false"))
-      my.parameter = "--disable-ndebug"
+    if (defined(my.job.assert) &\
+      (!(my.job.assert = "debug") & !(my.job.assert = "ndebug")))
+      abort "Expected job.assert defined as either 'debug' or 'ndebug'."
     endif
 
-    return my.parameter
+    return my.job.assert ? "ndebug"
 endfunction #get_job_assert
 
 function get_job_cc(job)
@@ -182,15 +203,11 @@ function get_job_link(job)
 
     if (is_empty(my.job.link))
         abort "get_job_link failed due to missing job.link value."
-    elsif (my.job.link = "dynamic")
-        my.option = "--disable-static"
-    elsif (my.job.link = "static")
-        my.option = "--disable-shared"
-    else
+    elsif (!(my.job.link = "dynamic") & !(my.job.link = "static"))
         abort "get_job_link failed due to unsupported job.link value."
     endif
 
-    return my.option
+    return my.job.link
 endfunction #get_job_link
 
 function get_job_cflags(job)
@@ -282,11 +299,11 @@ endfunction # get_job_installsh_axis_value
 
 function get_job_coverage(job)
     define my.job = get_job_coverage.job
-    define my.coverage = "false"
+    define my.coverage = "nocov"
 
     if (defined(my.job.coverage) & !is_empty(my.job.coverage) &\
       (my.job.coverage = "true"))
-        my.coverage = "true"
+        my.coverage = "cov"
     endif
 
     return my.coverage
@@ -303,19 +320,18 @@ endfunction #get_job_coverage
 .   define my.job = initialize_matrix_entry.job
 .
           - os: $(get_job_os(my.job))
-            compiler: "$(get_job_compiler_package(my.job))"
+            cxx: "$(get_job_cxx(my.job))"
             link: "$(get_job_link(my.job))"
+.#          optimization: "$(get_job_optimization(my.job))"
+            assert: "$(get_job_assert(my.job))"
+            coverage: "$(get_job_coverage(my.job))"
 .   for my.matrix.axis by "$(name)" as _axis
             $(_axis.name): "$( get_job_installsh_axis_value(my.job, _axis))"
 .   endfor
-            assert: "$(get_job_assert(my.job))"
             cc: "$(get_job_cc(my.job))"
-            cflags: "$(get_job_cflags(my.job))"
-            cxx: "$(get_job_cxx(my.job))"
-            cxxflags: "$(get_job_cxxflags(my.job))"
+            flags: "$(get_job_cflags(my.job))"
             packager: "$(get_job_packager(my.job))"
             packages: "$(get_job_packages(my.job))"
-            coverage: "$(get_job_coverage(my.job))"
 
 .endmacro # initialize_matrix_entry
 .
@@ -334,6 +350,102 @@ endfunction #get_job_coverage
 .   endfor _job
 .
 .endmacro #initialize_verify_matrix
+.
+.macro emit_step_prepare_toolchain()
+.
+      - name: Prepare toolchain [apt]
+        if: ${{ matrix.packager == 'apt' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.packages }}
+
+      - name: Prepare toolchain [brew]
+        if: ${{ matrix.packager == 'brew' }}
+        run: |
+          brew install git autoconf automake libtool pkg-config ${{ matrix.packages }}
+.
+.endmacro # emit_step_prepare_toolchain
+.
+.macro emit_step_parameter_denormalization()
+.
+      - name: Denormalize parameterization
+        run: |
+.   # assert (ndebug)
+          if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
+            echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
+          else
+            echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
+          fi
+.   # link
+          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
+            echo "LINKAGE=--disable-static" >> $GITHUB_ENV
+          else
+            echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
+          fi
+.#   # compiler flags
+.#          if [[ ${{ matrix.optimization }} == 'debug' ]]; then
+.#            echo "CFLAGS='${{ env.CFLAGS }} -Og'" >> $GITHUB_ENV
+.#            echo "CXXFLAGS='${{ env.CXXFLAGS }} -Og'" >> $GITHUB_ENV
+.#          else if [[ ${{ matrix.optimization }} == 'size' ]]; then
+.#            echo "CFLAGS='${{ env.CFLAGS }} -Os'" >> $GITHUB_ENV
+.#            echo "CXXFLAGS='${{ env.CXXFLAGS }} -Os'" >> $GITHUB_ENV
+.#          fi
+.#          if [[ ${{ matrix.coverage }} == 'true' ]]; then
+.#            echo "CFLAGS='${{ env.CFLAGS }} -g --coverage" >> $GITHUB_ENV
+.#            echo "CXXFLAGS='${{ env.CXXFLAGS }} -g --coverage" >> $GITHUB_ENV
+.#          fi
+.
+.endmacro # emit_step_parameter_denormalization
+.
+.macro emit_step_execute_install(matrix)
+.   define my.matrix = emit_step_execute_install.matrix
+      - name: Execute install.sh
+        run: >
+          ./install.sh
+          --build-dir=${{ github.workspace }}/build
+          --prefix=${{ github.workspace }}/prefixenv
+          ${{ env.LINKAGE }}
+          ${{ env.ASSERT_NDEBUG }}
+.       for my.matrix.axis as _axis
+          ${{ matrix.$(_axis.name) }}
+.       endfor
+.endmacro # emit_step_execute_install
+.
+.macro emit_step_calculate_coverage()
+.
+      - name: Coveralls Calculation
+        if: ${{ matrix.coverage == 'cov' }}
+        run: |
+          lcov --directory . --capture --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" "${{ github.workspace }}/prefixenv/*" "${{ github.workspace }}/build/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" --output-file coverage.info
+          lcov --list coverage.info
+
+      - name: Coveralls.io Upload
+        if: ${{ matrix.coverage == 'cov' }}
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: "./coverage.info"
+          github-token: ${{ secrets.github_token }}
+.
+.endmacro # emit_step_calculate_coverage
+.
+.macro emit_step_failure_output()
+.
+      - name: Failure Display boost bootstrap.log [--build-boost]
+        if: ${{ failure() && (matrix.boost == '--build-boost') }}
+        run: |
+          gcc -v
+          clang -v
+          cat ${{ github.workspace }}/build/build-*/bootstrap.log
+
+      - name: Investigate macos failure
+        if: ${{ failure() && (matrix.os == 'macos-latest') }}
+        run: |
+          otool -L ${{ github.workspace }}/test/.libs/$(_repository.name)-test
+          DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/$(_repository.name)-test
+          env
+.
+.endmacro # emit_step_failure_output
 .
 .endtemplate
 .template 0
@@ -371,65 +483,25 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
-      CC: ${{ matrix.cc }}
-      CFLAGS: '${{ matrix.cflags }}'
-      CXX: ${{ matrix.cxx }}
-      CXXFLAGS: '${{ matrix.cxxflags }}'
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
       CI_REPOSITORY: '${{ github.repository }}'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Prepare toolchain [apt]
-        if: ${{ matrix.packager == 'apt' }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.packages }}
+.       emit_step_prepare_toolchain()
 
-      - name: Prepare toolchain [brew]
-        if: ${{ matrix.packager == 'brew' }}
-        run: |
-          brew install git autoconf automake libtool pkg-config ${{ matrix.packages }}
+.       emit_step_parameter_denormalization()
 
-      - name: Execute install.sh
-        run: >
-          ./install.sh
-          ${{ matrix.link }}
-          ${{ matrix.assert }}
-          ${{ matrix.icu }}
-          ${{ matrix.boost }}
-          --build-dir=${{ github.workspace }}/build
-          --prefix=${{ github.workspace }}/prefixenv
+.       emit_step_execute_install(my.matrix)
 
-      - name: Coveralls Calculation [apt-only]
-        if: ${{ (matrix.packager == 'apt') && (matrix.coverage == 'true') }}
-        run: |
-          sudo apt-get install lcov
-          lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "${{ github.workspace }}/prefixenv/*" "${{ github.workspace }}/build/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" --output-file coverage.info
-          lcov --list coverage.info
-
-      - name: Coveralls.io Upload
-        if: ${{ matrix.coverage == 'true' }}
-        uses: coverallsapp/github-action@master
-        with:
-          path-to-lcov: "./coverage.info"
-          github-token: ${{ secrets.github_token }}
-
-      - name: Display boost bootstrap.log [--build-boost]
-        if: ${{ failure() && (matrix.boost == '--build-boost') }}
-        run: |
-          gcc -v
-          clang -v
-          cat ${{ github.workspace }}/build/build-*/bootstrap.log
-
-.#      - name: Investigate macos failure
-.#        if: ${{ failure() && (matrix.os == 'macos-latest') }}
-.#        run: |
-.#          otool -L ${{ github.workspace }}/test/.libs/$(_repository.name)-test
-.#          DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/$(_repository.name)-test
-.#          env
+.       emit_step_calculate_coverage()
+.       #
+.       #emit_step_failure_output()
 .
 .       close
 .   endif

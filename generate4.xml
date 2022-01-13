@@ -231,40 +231,40 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size">
+      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
       </job>
 
-      <job system="osx" link="static" optimization="size">
+      <job system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false" boost="build">
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="true">
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true">
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
-        <axis name="icu" />
+        <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" coverage="true">
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" link="static" assert="false" />
-      <job system="windows" compiler="x64" link="static" assert="true" />
-      <job system="windows" compiler="Win32" link="static" assert="false" />
-      <job system="windows" compiler="Win32" link="static" assert="true" />
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
     </ci>
 
     <matrix>
@@ -692,10 +692,10 @@
           <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
       </dependency>
       <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
-      <dependency name="secp256k1" version="0.1.0.19">
+      <dependency name="secp256k1" version="0.1.0.20">
           <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
-          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.19" />
-          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.19" />
+          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.20" />
+          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.20" />
       </dependency>
       <!-- <dependency name="java" option="java" /> -->
       <!-- <dependency name="python" version="2.7" option="python" /> -->
@@ -804,40 +804,40 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size">
+      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
       </job>
 
-      <job system="osx" link="static" optimization="size">
+      <job system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false">
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
       
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="true">
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true">
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" coverage="true">
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" link="static" assert="false" />
-      <job system="windows" compiler="x64" link="static" assert="true" />
-      <job system="windows" compiler="Win32" link="static" assert="false" />
-      <job system="windows" compiler="Win32" link="static" assert="true" />
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
     </ci>
 
     <matrix>
@@ -1339,40 +1339,40 @@
       <!-- prefix variance? -->
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
-      <job system="osx" link="dynamic" optimization="size">
+      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
       </job>
 
-      <job system="osx" link="static" optimization="size">
+      <job system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="false">
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="true">
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="true">
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="true" coverage="true">
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" link="static" assert="false" />
-      <job system="windows" compiler="x64" link="static" assert="true" />
-      <job system="windows" compiler="Win32" link="static" assert="false" />
-      <job system="windows" compiler="Win32" link="static" assert="true" />
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
     </ci>
 
     <matrix>
@@ -1708,6 +1708,62 @@
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
+
+    <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="mbedtls" build="true" />
+      <axis name="zmq" build="true" />
+
+      <!-- image="xcode12.2" equivalent? -->
+      <!-- prefix variance? -->
+      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+        <!-- <axis name="boost" /> -->
+        <axis name="icu" value="with" />
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="osx" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <!-- <axis name="mbedtls" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <!-- <axis name="mbedtls" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+        <!-- <axis name="mbedtls" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+    </ci>
 
     <matrix>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
