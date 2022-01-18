@@ -27,18 +27,24 @@
           <nuget compiler="vc140" name="boost" version="1.76.0.0" />
           <nuget compiler="vc141" name="boost" version="1.76.0.0" />
       </dependency>
+      <!-- boost atomic is header-only for lock-free cases. -->
+      <!-- www.boost.org/doc/libs/1_78_0/doc/html/atomic/interface.html
       <dependency name="boost_atomic" m4="none">
           <nuget compiler="vc120" name="boost_atomic-vc120" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost_atomic-vc140" version="1.76.0.0" />
           <nuget compiler="vc141" name="boost_atomic-vc141" version="1.76.0.0" />
       </dependency>
+      -->
       <dependency name="boost_chrono">
           <nuget compiler="vc120" name="boost_chrono-vc120" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost_chrono-vc140" version="1.76.0.0" />
           <nuget compiler="vc141" name="boost_chrono-vc141" version="1.76.0.0" />
       </dependency>
       <dependency name="boost_container" m4="none">
-          <!-- nuget package boost container 1.57.0.0 for vc120 does not exist -->
+          <!-- boost container is a header-only library, except if you use -->
+          <!-- Extended Allocators or some Polymorphic Memory Resources classes. -->
+          <!-- www.boost.org/doc/libs/1_68_0/doc/html/container.html -->
+          <!-- These are required by use of boost json (even as headers only). -->
           <nuget compiler="vc120" name="boost_container-vc120" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost_container-vc140" version="1.76.0.0" />
           <nuget compiler="vc141" name="boost_container-vc141" version="1.76.0.0" />
@@ -58,29 +64,19 @@
           <nuget compiler="vc140" name="boost_iostreams-vc140" version="1.76.0.0" />
           <nuget compiler="vc141" name="boost_iostreams-vc141" version="1.76.0.0" />
       </dependency>
+      <!-- boost json is used in the header-only configuration. -->
+      <!-- www.boost.org/doc/libs/1_78_0/libs/json/doc/html/json/overview.html
       <dependency name="boost_json" m4="none">
-          <!-- nuget package boost json 1.57.0.0 for vc120 does not exist -->
           <nuget compiler="vc120" name="boost_json-vc120" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost_json-vc140" version="1.76.0.0" />
           <nuget compiler="vc141" name="boost_json-vc141" version="1.76.0.0" />
       </dependency>
+      -->
       <dependency name="boost_locale">
           <nuget compiler="vc120" name="boost_locale-vc120" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost_locale-vc140" version="1.76.0.0" />
           <nuget compiler="vc141" name="boost_locale-vc141" version="1.76.0.0" />
       </dependency>
-      <!--
-      <dependency name="boost_log_setup">
-          <nuget compiler="vc120" name="boost_log_setup-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_log_setup-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_log_setup-vc141" version="1.76.0.0" />
-      </dependency>
-      <dependency name="boost_log">
-          <nuget compiler="vc120" name="boost_log-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_log-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_log-vc141" version="1.76.0.0" />
-      </dependency>
-      -->
       <dependency name="boost_program_options">
           <nuget compiler="vc120" name="boost_program_options-vc120" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost_program_options-vc140" version="1.76.0.0" />
@@ -165,7 +161,6 @@
         <library name="boost_filesystem" />
         <library name="boost_iostreams" />
         <library name="boost_locale" />
-        <!--<library name="boost_log" />-->
         <library name="boost_program_options" />
         <library name="boost_regex" />
         <library name="boost_system" />
@@ -214,13 +209,11 @@
         <option value="--disable-samples" />
       </build>
       <build name="boost" version="1.76.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
-        <!--<option value="--with-log" />-->
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
