@@ -65,7 +65,7 @@
           <nuget compiler="vc141" name="boost_iostreams-vc141" version="1.76.0.0" />
       </dependency>
       <!-- boost json is not used in the header-only configuration. -->
-      <dependency name="boost_json" m4="none">
+      <dependency name="boost_json">
           <nuget compiler="vc120" name="boost_json-vc120" version="1.57.0.0" />
           <nuget compiler="vc140" name="boost_json-vc140" version="1.76.0.0" />
           <nuget compiler="vc141" name="boost_json-vc141" version="1.76.0.0" />
@@ -158,6 +158,7 @@
         <library name="boost_date_time" />
         <library name="boost_filesystem" />
         <library name="boost_iostreams" />
+        <library name="boost_json" />
         <library name="boost_locale" />
         <library name="boost_program_options" />
         <library name="boost_regex" />
@@ -211,6 +212,7 @@
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
+        <option value="--with-json" />
         <option value="--with-locale" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
