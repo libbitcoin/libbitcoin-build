@@ -372,9 +372,9 @@ endfunction #get_job_coverage
         run: |
 .   # assert (ndebug)
           if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
-            echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
-          else
             echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
+          else
+            echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
           fi
 .   # link
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
