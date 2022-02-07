@@ -236,6 +236,10 @@
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" />
 
+      <coverage>
+        <exclude path="src/wallet/addresses/qrencode" />
+      </coverage>
+
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job system="osx" link="dynamic" optimization="size" assert="ndebug">

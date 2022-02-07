@@ -28,6 +28,11 @@ function is_system_osx(job)
     return defined(my.job) & my.job.system = "osx"
 endfunction
 
+function is_system_windows(job)
+    define my.job = is_system_windows.job
+    return defined(my.job) & my.job.system = "windows"
+endfunction
+
 function get_job_os(job)
     define my.job = get_job_os.job
     define my.os = ""
@@ -38,6 +43,8 @@ function get_job_os(job)
         my.os = "ubuntu-latest"
     elsif (my.job.system = "osx")
         my.os = "macos-latest"
+    elsif (my.job.system = "windows")
+        my.os = "windows-latest"
     else
         abort "get_job_os failed due to unsupported job.system value '$(my.job.system)'."
     endif
@@ -54,11 +61,54 @@ function get_job_packager(job)
     elsif (my.job.system = "osx")
         my.packager = "brew"
     else
-        abort ("get_job_packager failed due to unsupported job.system value '$(my.job.system)'.")
+        abort "get_job_packager failed due to unsupported job.system value '$(my.job.system)'."
     endif
 
     return my.packager
 endfunction #get_job_packager
+
+function sanitized_link(job)
+    define my.job = sanitized_link.job
+    require(my.job, "job", "link")
+    define my.result = ""
+
+    if (my.job.link = "dynamic")
+        my.result = "Dynamic"
+    elsif (my.job.link = "static")
+        my.result = "Static"
+    else
+        abort "sanitized_link failed due to unsupported job.link value '$(my.job.link)'."
+    endif
+
+    return my.result
+endfunction
+
+function sanitized_assert(job)
+    define my.job = sanitized_assert.job
+    require(my.job, "job", "assert")
+    define my.result = ""
+
+    if (my.job.assert = "debug")
+        my.result = "Debug"
+    elsif (my.job.assert = "ndebug")
+        my.result = "Release"
+    else
+        abort "sanitized_assert failed due to unsupported job.assert value '$(my.job.assert)'."
+    endif
+
+    return my.result
+endfunction
+
+function get_job_windows_configuration(job)
+    define my.job = get_job_windows_configuration.job
+    return "$(sanitized_link(my.job))$(sanitized_assert(my.job))"
+endfunction # get_job_windows_configuration
+
+function get_job_windows_platform(job)
+    define my.job = get_job_windows_platform.job
+    require(my.job, "job", "compiler")
+    return my.job.compiler
+endfunction # get_job_windows_platform
 
 function has_axis_value(job, name, value)
     define my.job = has_axis_value.job
@@ -309,15 +359,44 @@ function get_job_coverage(job)
     return my.coverage
 endfunction #get_job_coverage
 
+function get_coverage_exclusions(matrix)
+    define my.matrix = get_coverage_exclusions.matrix
+
+    # Exclude all system directories.
+    define my.excludes = quote("/usr/*")
+
+    # Exclude prefix directory (fixed in github actions ci)
+    my.excludes += " $(quote("${{ github.workspace }}/prefixenv/*"))"
+
+    # Exclude build directory (fixed in github actions ci)
+    my.excludes += " $(quote("${{ github.workspace }}/build/*"))"
+
+    # Exclude examples directory
+    my.excludes += " $(quote("${{ github.workspace }}/examples/*"))"
+
+    # Exclude test directory
+    my.excludes += " $(quote("${{ github.workspace }}/test/*"))"
+
+    # Exclude explicitly specified workspace relative paths
+    if (defined(my.matrix->coverage) & \
+      (count(my.matrix->coverage.exclude, !is_empty(count.path)) > 0))
+        for my.matrix->coverage.exclude as _exclude
+            my.excludes += " $(quote("${{ github.workspace }}/" + _exclude.path))"
+        endfor _exclude
+    endif
+
+    return my.excludes
+endfunction #get_coverage_exclusions
+
 ###############################################################################
 # Macros
 ###############################################################################
 .endtemplate
 .template 1
 .
-.macro initialize_matrix_entry(matrix, job)
-.   define my.matrix = initialize_matrix_entry.matrix
-.   define my.job = initialize_matrix_entry.job
+.macro initialize_installsh_matrix_entry(matrix, job)
+.   define my.matrix = initialize_installsh_matrix_entry.matrix
+.   define my.job = initialize_installsh_matrix_entry.job
 .
           - os: $(get_job_os(my.job))
             cxx: "$(get_job_cxx(my.job))"
@@ -333,23 +412,46 @@ endfunction #get_job_coverage
             packager: "$(get_job_packager(my.job))"
             packages: "$(get_job_packages(my.job))"
 
-.endmacro # initialize_matrix_entry
+.endmacro # initialize_installsh_matrix_entry
 .
-.macro initialize_verify_matrix(matrix)
-.   define my.matrix = initialize_verify_matrix.matrix
+.macro initialize_installsh_matrix(matrix)
+.   define my.matrix = initialize_installsh_matrix.matrix
 .
       matrix:
         include:
 .
 .   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_linux(_job)
-.       initialize_matrix_entry(my.matrix, _job)
+.       initialize_installsh_matrix_entry(my.matrix, _job)
 .   endfor _job
 .
 .   for my.matrix.job by "$(link)" as _job where is_system_osx(_job)
-.       initialize_matrix_entry(my.matrix, _job)
+.       initialize_installsh_matrix_entry(my.matrix, _job)
 .   endfor _job
 .
-.endmacro #initialize_verify_matrix
+.endmacro #initialize_installsh_matrix
+.
+.macro initialize_sln_matrix_entry(matrix, job)
+.   define my.matrix = initialize_sln_matrix_entry.matrix
+.   define my.job = initialize_sln_matrix_entry.job
+.
+          - os: $(get_job_os(my.job))
+            configuration: "$(get_job_windows_configuration(my.job))"
+            platform: "$(get_job_windows_platform(my.job))"
+            version: "vs2017"
+
+.endmacro # initialize_sln_matrix_entry
+.
+.macro initialize_sln_matrix(matrix)
+.   define my.matrix = initialize_sln_matrix.matrix
+.
+      matrix:
+        include:
+.
+.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_windows(_job)
+.       initialize_sln_matrix_entry(my.matrix, _job)
+.   endfor _job
+.
+.endmacro #initialize_installsh_matrix
 .
 .macro emit_step_prepare_toolchain()
 .
@@ -411,13 +513,15 @@ endfunction #get_job_coverage
 .       endfor
 .endmacro # emit_step_execute_install
 .
-.macro emit_step_calculate_coverage()
+.macro emit_step_calculate_coverage(matrix)
+.   define my.matrix = emit_step_calculate_coverage.matrix
+.   define my.exclusions = get_coverage_exclusions(my.matrix)
 .
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
           lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "${{ github.workspace }}/prefixenv/*" "${{ github.workspace }}/build/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" --output-file coverage.info
+          lcov --remove coverage.info $(my.exclusions) --output-file coverage.info
           lcov --list coverage.info
 
       - name: Coveralls.io Upload
@@ -478,7 +582,7 @@ jobs:
       fail-fast: false
 
 .       if (count(my.matrix.job, (count.system = "linux")) + count(my.matrix.job, (count.system = "osx"))  > 0)
-.           initialize_verify_matrix(my.matrix)
+.           initialize_installsh_matrix(my.matrix)
 .       endif
     runs-on: ${{ matrix.os }}
 
@@ -499,7 +603,7 @@ jobs:
 
 .       emit_step_execute_install(my.matrix)
 
-.       emit_step_calculate_coverage()
+.       emit_step_calculate_coverage(my.matrix)
 .       #
 .       #emit_step_failure_output()
 .
