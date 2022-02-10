@@ -33,6 +33,17 @@ function is_system_windows(job)
     return defined(my.job) & my.job.system = "windows"
 endfunction
 
+function has_installsh_jobs(ci)
+    define my.ci = has_installsh_jobs.ci
+    return (count(my.ci.job, (count.system = "linux")) + count(my.ci.job, \
+        (count.system = "osx"))  > 0)
+endfunction
+
+function has_sln_jobs(ci)
+    define my.ci = has_sln_jobs.ci
+    return (count(my.ci.job, (count.system = "windows"))  > 0)
+endfunction
+
 function get_job_os(job)
     define my.job = get_job_os.job
     define my.os = ""
@@ -551,6 +562,109 @@ endfunction #get_coverage_exclusions
 .
 .endmacro # emit_step_failure_output
 .
+.macro emit_job_verify_installsh(ci)
+.   define my.ci = emit_job_verify_installsh.ci
+.
+.   if (has_installsh_jobs(my.ci))
+  verify-installsh:
+
+    strategy:
+      fail-fast: false
+
+.       initialize_installsh_matrix(my.ci)
+    runs-on: ${{ matrix.os }}
+
+    env:
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
+      CI_REPOSITORY: '${{ github.repository }}'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+.       emit_step_prepare_toolchain()
+
+.       emit_step_parameter_denormalization()
+
+.       emit_step_execute_install(my.ci)
+
+.       emit_step_calculate_coverage(my.ci)
+.       #
+.       #emit_step_failure_output()
+.   endif
+.endmacro # emit_job_verify_installsh
+.
+.macro emit_job_verify_sln(repository, ci)
+.   define my.repository = emit_job_verify_sln.repository
+.   define my.ci = emit_job_verify_sln.ci
+.
+.   if (has_sln_jobs(my.ci))
+  verify-sln:
+    strategy:
+      fail-fast: false
+
+.       initialize_sln_matrix(my.ci)
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Initialize SDK
+        shell: powershell
+        run: |
+          try {
+            Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=323507" -OutFile "sdksetup.exe"
+
+            $FeatureList = "OptionId.WindowsDesktopSoftwareDevelopmentKit OptionId.NetFxSoftwareDevelopmentKit"
+            $Args = "/q /norestart /features $FeatureList"
+            $setup = Start-Process -PassThru -FilePath "sdksetup.exe" -ArgumentList $Args
+
+            $setup.WaitForExit()
+            if ($setup.ExitCode -ne 0) {
+              Write-Host "Test execution failure: " $setup.ExitCode -ForegroundColor Red;
+              exit $setup.ExitCode;
+            }
+          }
+          catch {
+            $ERR = $_;
+            Write-Host "Initialization failure: " $ERR -ForegroundColor Red;
+            exit $ERR;
+          }
+
+      - name: Execute build
+        run: .\\build.cmd .. ${{ matrix.platform }} ${{ matrix.configuration }} ${{ matrix.version }}
+
+      - name: Execute tests
+        shell: powershell
+        run: |
+          Write-Host "Locating test executables..." -ForegroundColor Yellow;
+          $BC_TEST_EXES = @(Get-ChildItem -Path "$env:${{ github.workspace }}\\bin" -recurse | Where-Object { $_.Name -eq "$(my.repository.name)-test.exe" });
+          If ($BC_TEST_EXES.Count -ne 1) {
+            Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
+            exit 1;
+          }
+          Write-Host "Found single test executable: " $BC_TEST_EXES.FullName -ForegroundColor Green;
+          $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
+          Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
+          try {
+            Invoke-Expression "$BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS"
+          }
+          catch {
+            $ERR = $_;
+            Write-Host "Test execution failure: " $ERR -ForegroundColor Red;
+            exit $ERR;
+          }
+          Write-Host "Test execution complete." -ForegroundColor Green;
+.   endif
+.endmacro # emit_job_verify_sln
+.
 .endtemplate
 .template 0
 ###############################################################################
@@ -576,36 +690,13 @@ name: Continuous Integration Build
 on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
-  verify-installsh:
-
-    strategy:
-      fail-fast: false
-
-.       if (count(my.matrix.job, (count.system = "linux")) + count(my.matrix.job, (count.system = "osx"))  > 0)
-.           initialize_installsh_matrix(my.matrix)
+.       emit_job_verify_installsh(my.matrix)
+.
+.       if (has_installsh_jobs(my.matrix) & has_sln_jobs(my.matrix))
+.           write_line("")
 .       endif
-    runs-on: ${{ matrix.os }}
-
-    env:
-      CC: '${{ matrix.cc }}'
-      CXX: '${{ matrix.cxx }}'
-      CFLAGS: '${{ matrix.flags }}'
-      CXXFLAGS: '${{ matrix.flags }}'
-      CI_REPOSITORY: '${{ github.repository }}'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-.       emit_step_prepare_toolchain()
-
-.       emit_step_parameter_denormalization()
-
-.       emit_step_execute_install(my.matrix)
-
-.       emit_step_calculate_coverage(my.matrix)
-.       #
-.       #emit_step_failure_output()
+.
+.       emit_job_verify_sln(_repository, my.matrix)
 .
 .       close
 .   endif
