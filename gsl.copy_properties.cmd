@@ -34,9 +34,9 @@ call xcopy /y "props\\import\\$(my.import_name).import.*" $(my.msvc_path)
 .macro emit_import_copy(repository, output, import_name)
 .   define my.repository = emit_import_copy.repository
 REM Copy $(my.import_name) imports for $(my.repository.name)
-.   emit_import_copy_project(my.repository, my.output, my.import_name, "vs2013")
-.   emit_import_copy_project(my.repository, my.output, my.import_name, "vs2015")
 .   emit_import_copy_project(my.repository, my.output, my.import_name, "vs2017")
+.   emit_import_copy_project(my.repository, my.output, my.import_name, "vs2019")
+.   emit_import_copy_project(my.repository, my.output, my.import_name, "vs2022")
 .   define my.msvc_path = "$(my.output)\\$(canonical_path_name(my.repository))\\builds\\msvc"
 if not exist "$(my.msvc_path)\\build\\" call mkdir "$(my.msvc_path)\\build\\"
 .   emit_error_handler("Failed to create build directory.")

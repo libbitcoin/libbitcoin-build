@@ -21,9 +21,9 @@ set -e
 cd `dirname "$0"`
 
 declare -a vs_version=( \\
-    "vs2013" \\
-    "vs2015" \\
     "vs2017" \\
+    "vs2019" \\
+    "vs2022" \\
     )
 
 .endmacro

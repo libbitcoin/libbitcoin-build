@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2022 libbitcoin developers (see COPYING).
 #
 # GSL generate libbitcoin common vs2013 artifacts helper functions.
 #
@@ -16,33 +16,17 @@
 function msbuild_version(product)
     define my.product = msbuild_version.product
     if (is_library(my.product))
-        return "12.0"
+        return "15.0"
     endif
     return "4.0"
 endfunction
 
 function platform_compiler()
-    return "vc120"
+    return "vc143"
 endfunction
 
 function platform_toolset(product, repository)
-    define my.product = platform_toolset.product
-    define my.repository = platform_toolset.repository
-    if (is_compiler_ctp(my.product, my.repository))
-        return "CTP_Nov2013"
-    endif
-    return "v120"
-endfunction
-
-function is_compiler_ctp(product, repository)
-    define my.product = is_compiler_ctp.product
-    define my.repository = is_compiler_ctp.repository
-    require(my.repository, "repository", "name")
-
-    return is_library(my.product) |\
-        (is_program(my.product) & !is_option_tests(my.product)) |\
-        (is_program(my.product) & is_option_tests(my.product) &\
-            (my.repository.name = "libbitcoin-consensus"))
+    return "v143"
 endfunction
 
 function format_version()
@@ -50,7 +34,7 @@ function format_version()
 endfunction
 
 function visual_studio_version()
-    return "12.0.30723.0"
+    return "15.0.27004.2010"
 endfunction
 
 function visual_studio_version_min()
@@ -58,7 +42,7 @@ function visual_studio_version_min()
 endfunction
 
 function visual_studio_year()
-    return "2013"
+    return "15"
 endfunction
 
 .endtemplate
