@@ -60,9 +60,9 @@ call xcopy /s /y "props\\project\\$(my.repository.name)\\*" $(my.msvc_path)
 .macro emit_project_props_copy(repository, output)
 .   define my.repository = emit_project_props_copy.repository
 REM Copy project props for $(my.repository.name)
-.   emit_project_props_copy_project(my.repository, my.output, "vs2013")
-.   emit_project_props_copy_project(my.repository, my.output, "vs2015")
 .   emit_project_props_copy_project(my.repository, my.output, "vs2017")
+.   emit_project_props_copy_project(my.repository, my.output, "vs2019")
+.   emit_project_props_copy_project(my.repository, my.output, "vs2022")
 .endmacro
 .
 .macro emit_repository_completion_message(repository)
