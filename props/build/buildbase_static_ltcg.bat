@@ -15,7 +15,7 @@ CALL %environment% x86 > nul
 ECHO Platform=x86
 
 ECHO Configuration=LtcgDebug
-msbuild /m /v:n /p:Configuration=LtcgDebug /p:Platform=Win32 %solution% > %log%
+msbuild /m /v:n /p:Configuration=LtcgDebug /p:Platform=Win32 %solution% >> %log%
 IF errorlevel 1 GOTO error
 ECHO Configuration=LtcgRelease
 msbuild /m /v:n /p:Configuration=LtcgRelease /p:Platform=Win32 %solution% >> %log%
