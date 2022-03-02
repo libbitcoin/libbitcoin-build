@@ -1,0 +1,112 @@
+###############################################################################
+#  Copyright (c) 2014-2022 libbitcoin-build developers (see COPYING).
+#
+###############################################################################
+
+name: Continuous Integration Build
+
+on: [ pull_request, push, workflow_dispatch ]
+
+jobs:
+  generate:
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - os: ubuntu-latest
+            script: generate4.sh
+
+          - os: ubuntu-latest
+            script: generate3.sh
+
+          - os: macos-latest
+            script: generate4.sh
+
+          - os: macos-latest
+            script: generate3.sh
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          repository: 'evoskuil/libbitcoin-system'
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          repository: 'evoskuil/libbitcoin-protocol'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'evoskuil/libbitcoin-client'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'evoskuil/libbitcoin-explorer'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'evoskuil/libbitcoin-network'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'evoskuil/libbitcoin-consensus'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'evoskuil/libbitcoin-database'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'evoskuil/libbitcoin-blockchain'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'evoskuil/libbitcoin-node'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'evoskuil/libbitcoin-server'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'zeromq/gsl'
+
+      - name: Prepare toolchain [apt]
+        if: ${{ matrix.packager == 'apt' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install libpcre3-dev
+
+      - name: Prepare toolchain [brew]
+        if: ${{ matrix.packager == 'brew' }}
+        run: |
+          brew install pcre
+
+      - name: Build gsl
+        run: |
+          pushd "${{ env.GITHUB_WORKSPACE }}/../gsl/src"
+          make --silent
+          sudo make install
+          popd
+
+      - name: Execute generation
+        run: |
+          ./${{ matrix.script }}
+
