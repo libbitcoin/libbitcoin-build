@@ -126,7 +126,7 @@ exit /b 0
 .macro emit_lib_init_dependencies()
 :depends
 call :pending "nuget restoring dependencies for %~1..."
-call nuget restore "%path_base%\\%~1\\builds\\msvc\\%proj_version%\\%~1.sln" -Outputdir "%nuget_pkg_path%"
+call nuget restore "%path_base%\\%~1\\builds\\msvc\\%proj_version%\\%~1.sln" -OutputDirectory "%nuget_pkg_path%"
 .   emit_error_handler("nuget restore failed.")
 call :success "nuget restoration for %~1 complete."
 exit /b 0
@@ -150,8 +150,10 @@ exit /b 0
 @echo off
 SETLOCAL ENABLEEXTENSIONS
 SET "parent=%~dp0"
-SET "path_base=%~1"
-SET "nuget_pkg_path=%~1\\.nuget\\packages"
+SET "relative_path_base=%~1"
+call cd /d "%relative_path_base%"
+SET "path_base=%cd%"
+SET "nuget_pkg_path=%path_base%\\.nuget\\packages"
 SET "msbuild_args=/verbosity:minimal /p:Platform=%~2 /p:Configuration=%~3"
 SET "proj_version=%~4"
 SET "msbuild_exe=msbuild"
