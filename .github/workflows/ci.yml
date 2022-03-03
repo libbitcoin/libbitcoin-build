@@ -32,60 +32,74 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          path: 'libbitcoin-build'
+          repository: ${{ github.repository }}
 
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
+          path: 'libbitcoin-system'
           repository: 'evoskuil/libbitcoin-system'
 
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
+          path: 'libbitcoin-protocol'
           repository: 'evoskuil/libbitcoin-protocol'
 
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
+          path: 'libbitcoin-client'
           repository: 'evoskuil/libbitcoin-client'
 
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
+          path: 'libbitcoin-explorer'
           repository: 'evoskuil/libbitcoin-explorer'
 
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
+          path: 'libbitcoin-network'
           repository: 'evoskuil/libbitcoin-network'
 
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
+          path: 'libbitcoin-consensus'
           repository: 'evoskuil/libbitcoin-consensus'
 
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
+          path: 'libbitcoin-database'
           repository: 'evoskuil/libbitcoin-database'
 
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
+          path: 'libbitcoin-blockchain'
           repository: 'evoskuil/libbitcoin-blockchain'
 
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
+          path: 'libbitcoin-node'
           repository: 'evoskuil/libbitcoin-node'
 
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
+          path: 'libbitcoin-server'
           repository: 'evoskuil/libbitcoin-server'
 
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
+          path: 'gsl'
           repository: 'zeromq/gsl'
 
       - name: Prepare toolchain [apt]
@@ -101,12 +115,14 @@ jobs:
 
       - name: Build gsl
         run: |
-          pushd "${{ env.GITHUB_WORKSPACE }}/../gsl/src"
+          pushd "gsl/src"
           make --silent
           sudo make install
           popd
 
       - name: Execute generation
         run: |
+          pushd libbitcoin-build
           ./${{ matrix.script }}
+          popd
 
