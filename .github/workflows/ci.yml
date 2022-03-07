@@ -30,6 +30,12 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Log context GitHub
+        run: echo '${{ toJSON(github) }}'
+
+      - name: Log context env
+        run: echo '${{ toJSON(env) }}'
+
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
