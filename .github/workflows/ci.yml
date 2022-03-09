@@ -27,6 +27,13 @@ jobs:
           - os: macos-latest
             script: generate3.sh
 
+          - os: windows-latest
+            script: generate4.cmd
+
+          - os: windows-latest
+            script: generate3.cmd
+
+
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -120,27 +127,46 @@ jobs:
           path: 'gsl'
           repository: 'zeromq/gsl'
 
-      - name: Prepare toolchain [apt]
-        if: ${{ matrix.packager == 'apt' }}
+      - name: Prepare toolchain [macos]
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        run: |
+          brew install pcre
+
+      - name: Prepare toolchain [ubuntu]
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           sudo apt-get update
           sudo apt-get install libpcre3-dev
 
-      - name: Prepare toolchain [brew]
-        if: ${{ matrix.packager == 'brew' }}
-        run: |
-          brew install pcre
+      - name: Prepare toolchain [windows]
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        uses: microsoft/setup-msbuild@v1.1
 
-      - name: Build gsl
+      - name: Build gsl [macos, ubuntu]
+        if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
         run: |
           pushd "gsl/src"
           make --silent
           sudo make install
           popd
 
-      - name: Execute generation
+      - name: Build gsl [windows]
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        run: |
+          nuget restore "gsl\builds\msvc\vs2012\gsl.sln" -OutputDirectory "${{ github.workspace }}\.nuget\packages"
+          cd /d gsl\builds\msvc\vs2012
+          msbuild /verbosity:minimal /p:Platform=x64 /p:Configuration=StaticRelease gsl.sln
+
+      - name: Execute generation [macos, ubuntu]
+        if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
         run: |
           pushd libbitcoin-build
           ./${{ matrix.script }}
           popd
+
+      - name: Execute generation [windows]
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        run: |
+          cd /d libbitcoin-build
+          .\${{ matrix.script }}
 
