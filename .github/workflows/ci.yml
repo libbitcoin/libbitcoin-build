@@ -161,10 +161,5 @@ jobs:
       - name: Execute generation [windows]
         if: ${{ startsWith(matrix.os, 'windows') }}
         shell: cmd
-        run: |
-          cd
-          dir
-          cd "libbitcoin-build"
-          dir
-          call .\${{ matrix.script }}
+        run: .\libbitcoin-build\${{ matrix.script }}
 
