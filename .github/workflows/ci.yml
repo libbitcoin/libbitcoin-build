@@ -149,7 +149,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'windows') }}
         shell: powershell
         run: |
-          Invoke-WebRequest -Uri "https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe" -OutFile "${{ github.workspace }}/libbitcoin-build/gsl.exe"
+          Invoke-WebRequest -Uri "https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe" -OutFile "${{ github.workspace }}\libbitcoin-build\gsl.exe"
 
       - name: Execute generation [macos, ubuntu]
         if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
@@ -160,7 +160,11 @@ jobs:
 
       - name: Execute generation [windows]
         if: ${{ startsWith(matrix.os, 'windows') }}
+        shell: cmd
         run: |
-          Set-Location -Path '${{ github.workspace }}\libbitcoin-build'
-          .\${{ matrix.script }}
+          cd
+          dir
+          cd "libbitcoin-build"
+          dir
+          call .\${{ matrix.script }}
 
