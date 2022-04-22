@@ -160,32 +160,37 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" version="13" link="dynamic" optimization="size" assert="ndebug">
+      <job system="osx" version="13" link="dynamic" optimization="size" assert="ndebug" build="all">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
       </job>
 
-      <job system="osx" version="13" link="static" optimization="size" assert="ndebug">
+      <job system="osx" version="13" link="static" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug" build="all">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
       
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="auto" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="cmake">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -434,32 +439,37 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" version="13" link="dynamic" optimization="size" assert="ndebug">
+      <job system="osx" version="13" link="dynamic" optimization="size" assert="ndebug" build="all">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
       </job>
 
-      <job system="osx" version="13" link="static" optimization="size" assert="ndebug">
+      <job system="osx" version="13" link="static" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug" build="all">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="auto" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="cmake">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -607,8 +617,8 @@
 
     <install>
       <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -626,32 +636,37 @@
       <!-- prefix variance? -->
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job system="osx" link="dynamic" optimization="size" assert="ndebug" build="all">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
       </job>
 
-      <job system="osx" version="13" link="static" optimization="size" assert="ndebug">
+      <job system="osx" version="13" link="static" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" version="14" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
+      <job system="linux" image="ubuntu-22.04" version="13" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug" build="all">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="auto" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="cmake">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -811,14 +826,14 @@
       <build name="mbedtls" version="2.12.0" parallel="true">
       </build>
       <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
         <!-- until test hang is resolved -->
-        <option value="--without-tests" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -832,42 +847,49 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" version="13" link="dynamic" optimization="size" assert="ndebug">
+      <job system="osx" version="13" link="dynamic" optimization="size" assert="ndebug" build="all">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
         <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="osx" version="13" link="static" optimization="size" assert="ndebug">
+      <job system="osx" version="13" link="static" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug" build="all">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug" build="all">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="auto" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="cmake">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="mbedtls" value="build" />
@@ -1027,8 +1049,8 @@
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
       <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1213,13 +1235,13 @@
         <option value="--disable-samples" />
       </build>
       <build name="bitcoin-client" github="evoskuil" repository="libbitcoin-client" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
-        <option value="--without-tests" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1374,8 +1396,8 @@
 
     <install>
       <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1513,13 +1535,13 @@
 
     <install>
       <build name="bitcoin-database" github="evoskuil" repository="libbitcoin-database" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-tools" cmake="-Dwith-tools=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
-        <option value="--without-tests" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1666,13 +1688,13 @@
 
     <install>
       <build name="bitcoin-blockchain" github="evoskuil" repository="libbitcoin-blockchain" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-tools" cmake="-Dwith-tools=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
-        <option value="--without-tests" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1827,14 +1849,14 @@
 
     <install>
       <build name="bitcoin-node" github="evoskuil" repository="libbitcoin-node" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-console" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-console" cmake="-Dwith-console=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -2059,6 +2081,7 @@
     <template name="gsl.Makefile.am" />
     <template name="gsl.package.pc.in" />
     <template name="gsl.install.sh" />
+    <template name="gsl.install_cmake.sh" />
     <template name="gsl.runner.sh" />
     <!-- <template name="gsl.travis.yml" /> -->
     <template name="gsl.build.cmd" />

@@ -39,6 +39,11 @@ function has_installsh_jobs(ci)
         (count.system = "osx"))  > 0)
 endfunction
 
+function has_install_cmake_jobs(ci)
+    define my.ci = has_install_cmake_jobs.ci
+    return has_installsh_jobs(my.ci)
+endfunction
+
 function has_sln_jobs(ci)
     define my.ci = has_sln_jobs.ci
     return (count(my.ci.job, (count.system = "windows"))  > 0)
@@ -303,11 +308,19 @@ function get_job_cxxflags(job)
     return get_job_cflags(my.job)
 endfunction # get_job_cxxflags
 
-function get_job_axis_value(decl, job, axis)
+function get_job_axis_value(decl, job, axis, cmake)
     define my.decl = get_job_axis_value.decl
     define my.job = get_job_axis_value.job
     define my.axis = get_job_axis_value.axis
     define my.value = ""
+
+    define my.axis_with = "--with-$(my.axis.name)"
+    define my.axis_without = "--without-$(my.axis.name)"
+
+    if defined(my.cmake)
+        my.axis_with = "-Dwith-$(my.axis.name)=yes"
+        my.axis_without = "-Dwith-$(my.axis.name)=no"
+    endif
 
     if (!defined(my.axis.value))
         my.value = get_job_axis_default(my.decl, my.job)
@@ -318,7 +331,7 @@ function get_job_axis_value(decl, job, axis)
 
         if (defined(my.decl.buildwith) & (my.decl.buildwith = "true") &\
           defined(my.decl.with) & (my.decl.with = "true"))
-            my.value = "--build-$(my.axis.name) --with-$(my.axis.name)"
+            my.value = "--build-$(my.axis.name) $(my.axis_with)"
         else
             my.value = "--build-$(my.axis.name)"
         endif
@@ -327,13 +340,13 @@ function get_job_axis_value(decl, job, axis)
             abort "Disallowed value 'with' provided for axis '$(my.axis.name)'."
         endif
 
-        my.value = "--with-$(my.axis.name)"
+        my.value = "$(my.axis_with)"
     elsif (my.axis.value = "without")
         if (!defined(my.decl.without) | !(my.decl.without = "true"))
             abort "Disallowed value 'without' provided for axis '$(my.axis.name)'."
         endif
 
-        my.value = "--without-$(my.axis.name)"
+        my.value = "$(my.axis_without)"
     else
         abort "Unrecognized value '$(my.axis.value)' provided for axis '$(my.axis.name)'."
     endif
@@ -341,28 +354,28 @@ function get_job_axis_value(decl, job, axis)
     return my.value
 endfunction # get_job_axis_value
 
-function get_job_axis_default(decl, job)
+function get_job_axis_default(decl, job, cmake)
     define my.decl = get_job_axis_default.decl
     define my.job = get_job_axis_default.job
     return ""
 endfunction # get_job_axis_default
 
-function get_job_installsh_axis_value(job, decl)
-    define my.job =  get_job_installsh_axis_value.job
-    define my.decl =  get_job_installsh_axis_value.decl
+function get_job_install_axis_value(job, decl, cmake)
+    define my.job =  get_job_install_axis_value.job
+    define my.decl =  get_job_install_axis_value.decl
     define my.value = ""
 
     define my.declared = (count(my.job.axis, (count.name = my.decl.name)) = 1)
 
     if (my.declared)
         my.value = get_job_axis_value(my.decl, my.job,\
-          my.job->axis(name = my.decl.name))
+          my.job->axis(name = my.decl.name), cmake)
     else
-        my.value = get_job_axis_default(my.decl, my.job)
+        my.value = get_job_axis_default(my.decl, my.job, cmake)
     endif
 
     return my.value
-endfunction # get_job_installsh_axis_value
+endfunction # get_job_install_axis_value
 
 function get_job_coverage(job)
     define my.job = get_job_coverage.job
@@ -431,47 +444,56 @@ function get_sln_tests(repository)
     return is_empty(my.tests) ?? "*" ? "$(my.tests)"
 endfunction # get_sln_tests
 
+function is_valid_matrix_entry(job, cmake)
+    define my.job = is_valid_matrix_entry.job
+    return (defined(my.job.build) & (my.job.build = "all")) \
+      | (defined(my.cmake) & defined(my.job.build) & (my.job.build = "cmake")) \
+      | (!defined(my.cmake) & (!defined(my.job.build) | (my.job.build="auto")))
+endfunction #is_valid_matrix_entry
+
 ###############################################################################
 # Macros
 ###############################################################################
 .endtemplate
 .template 1
 .
-.macro initialize_installsh_matrix_entry(matrix, job)
-.   define my.matrix = initialize_installsh_matrix_entry.matrix
-.   define my.job = initialize_installsh_matrix_entry.job
+.macro initialize_install_matrix_entry(matrix, job, cmake)
+.   define my.matrix = initialize_install_matrix_entry.matrix
+.   define my.job = initialize_install_matrix_entry.job
 .
+.   if is_valid_matrix_entry(my.job, my.cmake)
           - os: $(get_job_os(my.job))
             cxx: "$(get_job_cxx(my.job))"
             link: "$(get_job_link(my.job))"
 .#          optimization: "$(get_job_optimization(my.job))"
             assert: "$(get_job_assert(my.job))"
             coverage: "$(get_job_coverage(my.job))"
-.   for my.matrix.axis by "$(name)" as _axis
-            $(_axis.name): "$( get_job_installsh_axis_value(my.job, _axis))"
-.   endfor
+.       for my.matrix.axis by "$(name)" as _axis
+            $(_axis.name): "$( get_job_install_axis_value(my.job, _axis, my.cmake))"
+.       endfor
             cc: "$(get_job_cc(my.job))"
             flags: "$(get_job_cflags(my.job))"
             packager: "$(get_job_packager(my.job))"
             packages: "$(get_job_packages(my.job))"
 
-.endmacro # initialize_installsh_matrix_entry
+.   endif
+.endmacro # initialize_install_matrix_entry
 .
-.macro initialize_installsh_matrix(matrix)
-.   define my.matrix = initialize_installsh_matrix.matrix
+.macro initialize_install_matrix(matrix, cmake)
+.   define my.matrix = initialize_install_matrix.matrix
 .
       matrix:
         include:
 .
 .   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_linux(_job)
-.       initialize_installsh_matrix_entry(my.matrix, _job)
+.       initialize_install_matrix_entry(my.matrix, _job, my.cmake)
 .   endfor _job
 .
 .   for my.matrix.job by "$(link)" as _job where is_system_osx(_job)
-.       initialize_installsh_matrix_entry(my.matrix, _job)
+.       initialize_install_matrix_entry(my.matrix, _job, my.cmake)
 .   endfor _job
 .
-.endmacro #initialize_installsh_matrix
+.endmacro #initialize_install_matrix
 .
 .macro initialize_sln_matrix_entry(repository, matrix, job)
 .   define my.repository = initialize_sln_matrix_entry.repository
@@ -497,7 +519,7 @@ endfunction # get_sln_tests
 .       initialize_sln_matrix_entry(my.repository, my.matrix, _job)
 .   endfor _job
 .
-.endmacro #initialize_installsh_matrix
+.endmacro #initialize_sln_matrix
 .
 .macro emit_step_prepare_toolchain()
 .
@@ -508,21 +530,27 @@ endfunction # get_sln_tests
           sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.packages }}
 
       - name: Prepare toolchain [brew]
-        if: ${{ matrix.packager == 'brew' }}
+        if: ${{ matrix.packager == 'brew' }} 
         run: |
           brew install autoconf automake libtool pkg-config ${{ matrix.packages }}
 .
 .endmacro # emit_step_prepare_toolchain
 .
-.macro emit_step_parameter_denormalization()
+.macro emit_step_parameter_denormalization(cmake)
 .
       - name: Denormalize parameterization
         run: |
 .   # assert (ndebug)
           if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
+.   if defined(my.cmake)
+            echo "ASSERT_NDEBUG=--enable-ndebug -Denable-ndebug=yes" >> $GITHUB_ENV
+          else
+            echo "ASSERT_NDEBUG=--disable-ndebug -Denable-ndebug=no" >> $GITHUB_ENV
+.   else
             echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
           else
             echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
+.   endif
           fi
 .   # link
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
@@ -549,11 +577,12 @@ endfunction # get_sln_tests
 .
 .endmacro # emit_step_parameter_denormalization
 .
-.macro emit_step_execute_install(matrix)
+.macro emit_step_execute_install(matrix, cmake)
 .   define my.matrix = emit_step_execute_install.matrix
-      - name: Execute install.sh
+.   define my.suffix = defined(my.cmake) ?? "-cmake.sh" ? ".sh"
+      - name: Execute install$(my.suffix)
         run: >
-          ./install.sh
+          ./install$(my.suffix)
           --build-dir=${{ github.workspace }}/build
           --prefix=${{ github.workspace }}/prefixenv
           ${{ env.LINKAGE }}
@@ -638,7 +667,7 @@ endfunction # get_sln_tests
     strategy:
       fail-fast: false
 
-.       initialize_installsh_matrix(my.ci)
+.       initialize_install_matrix(my.ci)
     runs-on: ${{ matrix.os }}
 
     env:
@@ -663,6 +692,41 @@ endfunction # get_sln_tests
 .       emit_step_failure_output()
 .   endif
 .endmacro # emit_job_verify_installsh
+.
+.macro emit_job_verify_install_cmake(ci)
+.   define my.ci = emit_job_verify_install_cmake.ci
+.
+.   if (has_install_cmake_jobs(my.ci))
+  verify-install-cmake:
+
+    strategy:
+      fail-fast: false
+
+.       initialize_install_matrix(my.ci, "cmake")
+    runs-on: ${{ matrix.os }}
+
+    env:
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
+      CI_REPOSITORY: '${{ github.repository }}'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+.       emit_step_prepare_toolchain()
+
+.       emit_step_parameter_denormalization("cmake")
+
+.       emit_step_execute_install(my.ci, "cmake")
+
+.       emit_step_calculate_coverage(my.ci)
+.       #
+.       #emit_step_failure_output()
+.   endif
+.endmacro # emit_job_verify_install_cmake
 .
 .macro emit_job_verify_sln(repository, ci)
 .   define my.repository = emit_job_verify_sln.repository
@@ -758,6 +822,8 @@ on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
 .       emit_job_verify_installsh(my.matrix)
+
+.       emit_job_verify_install_cmake(my.matrix)
 .
 .       if (has_installsh_jobs(my.matrix) & has_sln_jobs(my.matrix))
 .           write_line("")

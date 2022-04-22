@@ -528,7 +528,7 @@ set_prefix()
 
 .endmacro # define_set_prefix
 .
-.macro define_set_pkgconfigdir()
+.macro define_set_pkgconfigdir(enable_cmake)
 set_pkgconfigdir()
 {
     # Set the prefix-based package config directory.
@@ -538,12 +538,16 @@ set_pkgconfigdir()
     export PKG_CONFIG_PATH="$PREFIX_PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
 
     # Set a package config save path that can be passed via our builds.
+.   if !defined(my.enable_cmake)
     with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
+.   else
+    with_pkgconfigdir="-Dpkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
+.   endif
 }
 
 .endmacro # define_set_pkgconfigdir
 .
-.macro define_set_with_boost_prefix()
+.macro define_set_with_boost_prefix(include_cmake)
 set_with_boost_prefix()
 {
     if [[ $BUILD_BOOST ]]; then
@@ -553,18 +557,28 @@ set_with_boost_prefix()
         # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
         # ax_boost_base.m4 appends /include and adds to BOOST_CPPFLAGS
         # ax_boost_base.m4 searches for /lib /lib64 and adds to BOOST_LDFLAGS
+.   if defined(my.include_cmake)
+        #
+        # cmake does not process this argument, so it has been zeroed out.
+        with_boost=""
+.   else
         with_boost="--with-boost=$PREFIX"
+.   endif
     fi
 }
 
 .endmacro # define_set_with_boost_prefix
 .
-.macro define_build_options(build)
+.macro define_build_options(build, cmake)
 .   define my.build = define_build_options.build
 .   heading2("Define $(my.build.name) options.")
 $(my.build.name:upper,c)_OPTIONS=(
 .   for my.build.option as _option
+.       if (defined(my.cmake) & defined(_option.cmake))
+"$(_option.cmake)"$(last() ?? ")" ? " \\")
+.       else
 "$(_option.value)"$(last() ?? ")" ? " \\")
+.       endif
 .   endfor _option
 
 .endmacro # define_build_options
@@ -598,6 +612,32 @@ display_error()
 
 .endmacro # define_display_functions
 .
+.macro define_create_directory(simple)
+create_directory()
+{
+    local DIRECTORY="$1"
+
+.   if !defined(define_create_directory.simple)
+    if [[ -d "$DIRECTORY" ]]; then
+        if [[ $(test_perform_sync()) ]]; then
+            display_message "Reinitializing directory $DIRECTORY..."
+            rm -rf "$DIRECTORY"
+            mkdir "$DIRECTORY"
+        else
+            display_message "Reusing directory $DIRECTORY..."
+        fi
+    else
+        display_message "Initializing directory $DIRECTORY..."
+        mkdir "$DIRECTORY"
+    fi
+.   else
+    rm -rf "$DIRECTORY"
+    mkdir "$DIRECTORY"
+.   endif
+}
+
+.endmacro # define_create_directory
+.
 .macro define_initialize_git()
 initialize_git()
 {
@@ -609,6 +649,40 @@ initialize_git()
 }
 
 .endmacro # define_initialize_git
+.
+.macro define_configure_options(simple)
+configure_options()
+{
+.   if !defined(define_configure_options.simple)
+    local PROJ_CONFIG_DIR=$1
+    shift
+
+.   endif
+    display_message "configure options:"
+    for OPTION in "$@"; do
+        if [[ $OPTION ]]; then
+            display_message "$OPTION"
+        fi
+    done
+
+.   if !defined(define_configure_options.simple)
+    if [[ -f "Makefile" ]]; then
+        if [[ $(test_perform_configure()) ]]; then
+            display_message "Reconfiguring $PROJ_CONFIG_DIR..."
+            "$PROJ_CONFIG_DIR/configure" "$@"
+        else
+            display_message "Reusing configuration for $PROJ_CONFIG_DIR..."
+        fi
+    else
+        display_message "Configuring $PROJ_CONFIG_DIR..."
+        "$PROJ_CONFIG_DIR/configure" "$@"
+    fi
+.   else
+    ./configure "$@"
+.   endif
+}
+
+.endmacro # define_configure_options
 .
 .macro define_make_tests(has_preclean_option)
 .   define my.make_jobs_preclean = is_true(my.has_preclean_option) \
@@ -678,7 +752,7 @@ initialize_icu_packages()
 
 .endmacro # define_initialize_icu_packages
 .
-.macro define_tarball_functions(has_preclean_option)
+.macro define_tarball_functions(has_preclean_option, simple)
 .   define_initialize_icu_packages()
 .
 .   define my.make_jobs_preclean = is_true(my.has_preclean_option) \
@@ -750,7 +824,7 @@ build_from_tarball()
     # TODO: clean this up?
     if [[ ! ($BUILD) ]]; then
         if [[ $ARCHIVE == "$ICU_ARCHIVE" ]]; then
-            display_heading_message "Prepairing to build $ARCHIVE"
+            display_heading_message "Rationalize ICU detection."
             initialize_icu_packages
         fi
         return
@@ -766,27 +840,37 @@ build_from_tarball()
     local TARGET="build-$ARCHIVE"
     push_directory "$TARGET"
     push_directory "$PUSH_DIR"
+.   if !defined(define_tarball_functions.simple)
     local PROJ_CONFIG_DIR
     PROJ_CONFIG_DIR=\$(pwd)
 
     push_obj_directory "$TARGET"
+.   endif
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
     if [[ $ARCHIVE == "$MBEDTLS_ARCHIVE" ]]; then
+.   if !defined(define_tarball_functions.simple)
         cp -r "$PROJ_CONFIG_DIR"/* .
+.   endif
         make -j "$JOBS" lib
         make DESTDIR=$PREFIX install
     else
+.   if !defined(define_tarball_functions.simple)
         configure_options "$PROJ_CONFIG_DIR" "${CONFIGURATION[@]}"
+.   else
+        configure_options "${CONFIGURATION[@]}"
+.   endif
         $(my.make_jobs_preclean) "$JOBS" --silent
         make install
     fi
 
     configure_links
 
+.   if !defined(define_tarball_functions.simple)
     pop_obj_directory
+.   endif
     pop_directory
     pop_directory
 
@@ -797,14 +881,14 @@ build_from_tarball()
 
 .endmacro # define_tarball_functions
 .
-.macro define_github_functions
+.macro define_github_functions()
 clone_from_github()
 {
     local FORK=$1
     local BRANCH=$2
 
     # Clone the repository locally.
-    git clone --branch "$BRANCH" "https://github.com/$FORK"
+    git clone $GIT_CLONE_PARAMS --branch "$BRANCH" "https://github.com/$FORK"
 }
 
 create_from_github()
@@ -961,6 +1045,7 @@ build_from_tarball_boost()
     display_message "boost.locale.iconv    : $BOOST_ICU_ICONV"
     display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
+    display_message "-sNO_ZSTD             : 1"
     display_message "-sICU_PATH            : $ICU_PREFIX"
   # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-j                    : $JOBS"
@@ -992,6 +1077,7 @@ build_from_tarball_boost()
         "boost.locale.iconv=$BOOST_ICU_ICONV" \\
         "boost.locale.posix=$BOOST_ICU_POSIX" \\
         "-sNO_BZIP2=1" \\
+        "-sNO_ZSTD=1" \\
         "-sICU_PATH=$ICU_PREFIX" \\
         "-j $JOBS" \\
         "-d0" \\
@@ -1027,5 +1113,22 @@ initialize_object_directory()
 }
 
 .endmacro # define_initialize_object_directory
+.
+.
+.macro define_build_variables(repository)
+.   define my.repository = define_build_variables.repository
+.
+.   heading2("Sentinel for comparison of sequential build.")
+SEQUENTIAL=1
+
+.   heading2("Git clone parameters.")
+if [[ $GIT_CLONE_PARAMS ]]; then
+    display_message "Using shell-defined GIT_CLONE_PARAMS value."
+else
+    GIT_CLONE_PARAMS=""
+fi
+
+.   define_build_variables_custom(my.repository)
+.endmacro # define_build_variables
 .
 .endtemplate
