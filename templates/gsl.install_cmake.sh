@@ -329,7 +329,11 @@ make_jobs()
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
     create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch)
+.   if (is_bitcoin_dependency(my.build))
+    build_from_github_cmake $(my.build.repository) "$(my.parallel)" false "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+.   else
     build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.options)" $CUMULATIVE_FILTERED_ARGS
+.   endif
 .endmacro # build_github
 .
 .macro build_github_cmake(build)

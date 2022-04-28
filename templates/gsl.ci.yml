@@ -33,15 +33,29 @@ function is_system_windows(job)
     return defined(my.job) & my.job.system = "windows"
 endfunction
 
-function has_installsh_jobs(ci)
-    define my.ci = has_installsh_jobs.ci
-    return (count(my.ci.job, (count.system = "linux")) + count(my.ci.job, \
-        (count.system = "osx"))  > 0)
+function is_job_autotools(job)
+    define my.job = is_job_autotools.job
+    return !defined(my.job.build) \
+      | (my.job.build = "auto") \
+      | (my.job.build = "all")
 endfunction
 
-function has_install_cmake_jobs(ci)
-    define my.ci = has_install_cmake_jobs.ci
-    return has_installsh_jobs(my.ci)
+function is_job_cmake(job)
+    define my.job = is_job_cmake.job
+    return defined(my.job.build) & \
+        ((my.job.build = "cmake") | (my.job.build = "all"))
+endfunction
+
+function has_shell_jobs(ci)
+    define my.ci = has_shell_jobs.ci
+    return (count(my.ci.job, (count.system = "linux") & is_job_autotools(count)) \
+        + count(my.ci.job, (count.system = "osx") & is_job_autotools(count))  > 0)
+endfunction
+
+function has_cmake_jobs(ci)
+    define my.ci = has_cmake_jobs.ci
+    return (count(my.ci.job, (count.system = "linux") & is_job_cmake(count)) \
+        + count(my.ci.job, (count.system = "osx") & is_job_cmake(count)) > 0)
 endfunction
 
 function has_sln_jobs(ci)
@@ -446,9 +460,8 @@ endfunction # get_sln_tests
 
 function is_valid_matrix_entry(job, cmake)
     define my.job = is_valid_matrix_entry.job
-    return (defined(my.job.build) & (my.job.build = "all")) \
-      | (defined(my.cmake) & defined(my.job.build) & (my.job.build = "cmake")) \
-      | (!defined(my.cmake) & (!defined(my.job.build) | (my.job.build="auto")))
+    return (!defined(my.cmake) & is_job_autotools(my.job)) \
+      | (defined(my.cmake) & is_job_cmake(my.job))
 endfunction #is_valid_matrix_entry
 
 ###############################################################################
@@ -658,10 +671,22 @@ endfunction #is_valid_matrix_entry
 .
 .endmacro # emit_step_failure_output
 .
+.macro emit_step_failure_output_cmake()
+.
+      - name: Failure Display cmake test output
+        if: ${{failure() }}
+        run: |
+          cat ${{ github.workspace }}/Testing/Temporary/LastTest.log
+          ls ${{ github.workspace }}/prefixenv/lib/pkgconfig/
+          cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
+          ls ${{ github.workspace }}/prefixenv/lib/cmake
+.
+.endmacro # emit_step_failure_output_cmake
+.
 .macro emit_job_verify_installsh(ci)
 .   define my.ci = emit_job_verify_installsh.ci
 .
-.   if (has_installsh_jobs(my.ci))
+.   if (has_shell_jobs(my.ci))
   verify-installsh:
 
     strategy:
@@ -696,7 +721,7 @@ endfunction #is_valid_matrix_entry
 .macro emit_job_verify_install_cmake(ci)
 .   define my.ci = emit_job_verify_install_cmake.ci
 .
-.   if (has_install_cmake_jobs(my.ci))
+.   if (has_cmake_jobs(my.ci))
   verify-install-cmake:
 
     strategy:
@@ -723,8 +748,8 @@ endfunction #is_valid_matrix_entry
 .       emit_step_execute_install(my.ci, "cmake")
 
 .       emit_step_calculate_coverage(my.ci)
-.       #
-.       #emit_step_failure_output()
+
+.       emit_step_failure_output_cmake()
 .   endif
 .endmacro # emit_job_verify_install_cmake
 .
@@ -822,10 +847,14 @@ on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
 .       emit_job_verify_installsh(my.matrix)
-
+.
+.       if (has_shell_jobs(my.matrix) & has_cmake_jobs(my.matrix))
+.           write_line("")
+.       endif
+.
 .       emit_job_verify_install_cmake(my.matrix)
 .
-.       if (has_installsh_jobs(my.matrix) & has_sln_jobs(my.matrix))
+.       if ((has_shell_jobs(my.matrix) | has_cmake_jobs(my.matrix)) & has_sln_jobs(my.matrix))
 .           write_line("")
 .       endif
 .
