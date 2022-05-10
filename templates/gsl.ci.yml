@@ -553,6 +553,12 @@ endfunction #is_valid_matrix_entry
 .
       - name: Denormalize parameterization
         run: |
+.   # cmake library path
+.   if defined(my.cmake)
+          if [[ ${{ matrix.packager }} == 'brew' ]]; then
+            echo "CMAKE_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
+          fi
+.   endif
 .   # assert (ndebug)
           if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
 .   if defined(my.cmake)
@@ -676,6 +682,11 @@ endfunction #is_valid_matrix_entry
       - name: Failure Display cmake test output
         if: ${{failure() }}
         run: |
+          gcc -v
+          clang -v
+          echo "--- ENVIRONMENT ---"
+          env
+          echo "--- END ENVIRONMENT ---"
           cat ${{ github.workspace }}/Testing/Temporary/LastTest.log
           ls ${{ github.workspace }}/prefixenv/lib/pkgconfig/
           cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
