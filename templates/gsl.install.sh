@@ -99,7 +99,7 @@ make_jobs()
     shift 1
 
     SEQUENTIAL=1
-    # Avoid setting -j1 (causes problems on Travis).
+    # Avoid setting -j1 (causes problems on single threaded systems [TRAVIS]).
     if [[ $JOBS > $SEQUENTIAL ]]; then
         make -j"$JOBS" "$@"
     else
@@ -255,6 +255,7 @@ build_from_tarball_boost()
     # "-sICU_LINK=${ICU_LIBS[*]}"
 
     ./b2 install \\
+        "cxxstd=11" \\
         "variant=release" \\
         "threading=multi" \\
         "$BOOST_TOOLSET" \\
@@ -331,9 +332,9 @@ build_from_local()
 
 .endmacro # define_build_from_local
 .
-.macro define_build_from_travis()
-# Because Travis alread has downloaded the primary repo.
-build_from_travis()
+.macro define_build_from_ci()
+# Because continuous integration services has downloaded the primary repository.
+build_from_ci()
 {
     local ACCOUNT=$1
     local REPO=$2
@@ -342,9 +343,9 @@ build_from_travis()
     local OPTIONS=$5
     shift 5
 
-    # The primary build is not downloaded if we are running in Travis.
-    if [[ $TRAVIS == true ]]; then
-        build_from_local "Local $TRAVIS_REPO_SLUG" "$JOBS" "${OPTIONS[@]}" "$@"
+    # The primary build is not downloaded if we are running on a continuous integration system.
+    if [[ $CI == true ]]; then
+        build_from_local "Local $CI_REPOSITORY" "$JOBS" "${OPTIONS[@]}" "$@"
         make_tests "$JOBS"
     else
         build_from_github "$ACCOUNT" "$REPO" "$BRANCH" "$JOBS" "${OPTIONS[@]}" "$@"
@@ -356,7 +357,7 @@ build_from_travis()
     fi
 }
 
-.endmacro # define_build_from_travis
+.endmacro # define_build_from_ci
 .
 .macro define_build_functions()
 .   define_initialize_icu_packages()
@@ -365,7 +366,7 @@ build_from_travis()
 .   define_build_from_tarball_boost()
 .   define_build_from_github()
 .   define_build_from_local()
-.   define_build_from_travis()
+.   define_build_from_ci()
 .endmacro # define_build_functions
 .
 .macro build_from_tarball_icu()
@@ -391,12 +392,12 @@ build_from_travis()
     build_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.parallel)" "$(my.options)" "$@"
 .endmacro # build_github
 .
-.macro build_travis(build)
-.   define my.build = build_travis.build
+.macro build_ci(build)
+.   define my.build = build_ci.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-    build_from_travis $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.parallel)" "$(my.options)" "$@"
-.endmacro # build_travis
+    build_from_ci $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.parallel)" "$(my.options)" "$@"
+.endmacro # build_ci
 .
 .macro define_build_all(install)
 .   define my.install = define_build_all.install
@@ -419,7 +420,7 @@ build_all()
 .               if (!last())
 .                   build_github(_build)
 .               else
-.                   build_travis(_build)
+.                   build_ci(_build)
 .               endif
 .           else
 .               abort "Invalid build type: $(_build.name)."
@@ -446,65 +447,68 @@ time build_all "${CONFIGURE_OPTIONS[@]}"
 # Generation
 ###############################################################################
 function generate_installer(path_prefix)
-for generate.repository by name as _repository
-    require(_repository, "repository", "name")
-    my.output_path = join(my.path_prefix, canonical_path_name(_repository))
-    define my.out_file = "$(my.output_path)/install.sh"
-    define my.install = _repository->install
-    create_directory(my.output_path)
-    notify(my.out_file)
-    output(my.out_file)
+    for generate.repository by name as _repository
+        require(_repository, "repository", "name")
+        my.output_path = join(my.path_prefix, canonical_path_name(_repository))
+        define my.out_file = "$(my.output_path)/install.sh"
+        create_directory(my.output_path)
+        notify(my.out_file)
+        output(my.out_file)
 
-    shebang("bash")
+        new install as _install
+            cumulative_install(_install, generate, _repository)
 
-    copyleft(_repository.name)
-    documentation(_repository, my.install)
+            shebang("bash")
 
-    heading1("Define constants.")
-    define_build_directory(_repository)
-    define_icu(my.install)
-    define_zmq(my.install)
-    define_mbedtls(my.install)
-    define_boost(my.install)
+            copyleft(_repository.name)
+            documentation(_repository, _install)
 
-    heading1("Define utility functions.")
-    define_utility_functions()
-    define_help(_repository, my.install, "install")
+            heading1("Define constants.")
+            define_build_directory(_repository)
+            define_icu(_install)
+            define_zmq(_install)
+            define_mbedtls(_install)
+            define_boost(_install)
 
-    heading1("Define environment initialization functions")
-    define_parse_command_line_options(_repository, my.install)
-    define_handle_help_line_option()
-    define_set_operating_system()
-    define_parallelism()
-    define_set_os_specific_compiler_settings()
-    define_link_to_standard_library()
-    define_normalized_configure_options()
-    define_handle_custom_options()
-    define_remove_build_options()
-    define_set_prefix()
-    define_set_pkgconfigdir()
-    define_set_with_boost_prefix()
+            heading1("Define utility functions.")
+            define_utility_functions()
+            define_help(_repository, _install, "install")
 
-    heading1("Initialize the build environment.")
-    define_initialization_calls()
-    define_display_configuration(_repository, my.install)
+            heading1("Define environment initialization functions")
+            define_parse_command_line_options(_repository, _install)
+            define_handle_help_line_option()
+            define_set_operating_system()
+            define_parallelism()
+            define_set_os_specific_compiler_settings()
+            define_link_to_standard_library()
+            define_normalized_configure_options()
+            define_handle_custom_options()
+            define_remove_build_options()
+            define_set_prefix()
+            define_set_pkgconfigdir()
+            define_set_with_boost_prefix()
+            define_display_configuration(_repository, _install)
 
-    heading1("Define build options.")
-    for my.install.build as _build where count(_build.option) > 0
-        define_build_options(_build)
-    endfor _build
+            heading1("Define build functions.")
+            define_build_functions()
 
-    heading1("Define build functions.")
-    define_build_functions()
+            heading1("The master build function.")
+            define_build_all(_install)
 
-    heading1("The master build function.")
-    define_build_all(my.install)
+            heading1("Initialize the build environment.")
+            define_initialization_calls()
 
-    heading1("Build the primary library and all dependencies.")
-    define_invoke()
+            heading1("Define build options.")
+            for _install.build as _build where count(_build.option) > 0
+                define_build_options(_build)
+            endfor _build
 
-    close
-endfor _repository
+            heading1("Build the primary library and all dependencies.")
+            define_invoke()
+
+        endnew _install
+        close
+    endfor _repository
 endfunction # generate_installer
 .endtemplate
 .template 0

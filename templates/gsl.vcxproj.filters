@@ -311,6 +311,7 @@ function emit_filter(repository, product, vs_version, project_path)
 
             emit_item_group_includes(_files)
             emit_item_group_none(_files)
+            emit_item_group_natvis()
             emit_item_group_resources(_files)
         endnew
     endnew
@@ -395,6 +396,12 @@ endfunction
 .macro emit_item(type, include)
     <$(my.type) Include="$(my.include)" />
 .endmacro emit_item
+.
+.macro emit_item_group_natvis()
+.   emit_item_group_open()
+.   emit_item("Natvis", "..\\..\\debug.natvis")
+.   emit_item_group_close()
+.endmacro emit_item_group_natvis
 .
 .macro emit_item_compile_threadsafe_statistics(repository, product, vs_version)
 .   define my.repository = emit_item_compile_threadsafe_statistics.repository

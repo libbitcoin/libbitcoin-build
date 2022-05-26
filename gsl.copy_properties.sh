@@ -12,7 +12,8 @@
 .endtemplate
 .template 1
 .
-.macro emit_initialize()
+.macro emit_initialize(vs)
+.   define my.vs = emit_initialize.vs
 
 # Exit this script on the first build error.
 set -e
@@ -21,9 +22,9 @@ set -e
 cd `dirname "$0"`
 
 declare -a vs_version=( \\
-    "vs2013" \\
-    "vs2015" \\
-    "vs2017" \\
+.   for my.vs.version as _version
+    "$(_version.value)" \\
+.   endfor
     )
 
 .endmacro
@@ -47,11 +48,27 @@ do
     mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
     eval cp -rf props/project/$(my.repository.name)/* $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
 done
+
 mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/build/
 eval cp -rf props/nuget.config $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/
 eval cp -rf props/build/build_base.bat $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/build/
 
 .endmacro
+.
+.macro emit_cumulative_dependencies(repositories, repository, dependencies)
+.   define my.repositories = emit_cumulative_dependencies.repositories
+.   define my.repository = emit_cumulative_dependencies.repository
+.   define my.dependencies = emit_cumulative_dependencies.dependencies
+.
+    << project: $(_repository.name) >>
+.   for my.dependencies.dependency as _dependency where\
+      (count(my.repositories.repository, (count->package.library = _dependency.name)) > 0)
+.     define my.match = my.repositories->repository(repository->package.library = _dependency.name)
+      << name: $(_dependency.name) repo_name: $(my.match.name) >>
+.   endfor
+    <</ project: $(_repository.name) >>
+.endmacro
+.
 .endtemplate
 .template 0
 ###############################################################################
@@ -64,16 +81,26 @@ function generate_artifacts(path_prefix)
     shebang("bash")
     copyleft("libbitcoin-build")
 
-    emit_initialize()
+    emit_initialize(generate->vs)
 
-# TODO: walk dependency tree, not build list.
-# TODO: build list is for telling installer what to compile.
     for generate.repository by name as _repository
         echo(" Evaluating repository: $(_repository.name)")
-        for _repository->install.build as _build where\
-            defined(_build.repository) & starts_with(_build.repository, "libbitcoin")
-            emit_import_copy(_repository, my.path_prefix, _build.repository)
-        endfor
+        new configure as _dependencies
+            cumulative_dependencies(_dependencies, generate, _repository)
+
+            for _dependencies.dependency as _dependency where\
+              (count(generate.repository,\
+                (count->package.library = _dependency.name)) > 0)
+
+                define my.match = generate->repository(\
+                  repository->package.library = _dependency.name)
+
+                emit_import_copy(_repository, my.path_prefix, my.match.name)
+            endfor
+        endnew
+
+        emit_import_copy(_repository, my.path_prefix, _repository.name)
+
         emit_project_props_copy(_repository, my.path_prefix)
     endfor
 

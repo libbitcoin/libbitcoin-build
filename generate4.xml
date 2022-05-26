@@ -22,86 +22,124 @@
       <!-- https://svn.boost.org/trac/boost/ticket/6851 [gcc, 1.50-1.53] -->
       <!-- [log rotation derivation for customization]  [???? 1.56] -->
       <!-- [compiler failure]                           [vc120 1.62-1.72] -->
-      <dependency name="boost" version="1.72.0">
+      <dependency name="boost" version="1.76.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost" version="1.78.0" />
       </dependency>
+      <!-- boost atomic is header-only for lock-free cases. -->
+      <!-- www.boost.org/doc/libs/1_78_0/doc/html/atomic/interface.html
       <dependency name="boost_atomic" m4="none">
           <nuget compiler="vc120" name="boost_atomic-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_atomic-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_atomic-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_atomic-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_atomic-vc141" version="1.76.0.0" />
       </dependency>
+      -->
       <dependency name="boost_chrono">
           <nuget compiler="vc120" name="boost_chrono-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_chrono-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_chrono-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_chrono-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_chrono-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_chrono-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_chrono-vc143" version="1.78.0" />
+      </dependency>
+      <dependency name="boost_container" m4="none">
+          <!-- boost container is a header-only library, except if you use -->
+          <!-- Extended Allocators or some Polymorphic Memory Resources classes. -->
+          <!-- www.boost.org/doc/libs/1_68_0/doc/html/container.html -->
+          <!-- These are required by use of boost json (even as headers only). -->
+          <nuget compiler="vc120" name="boost_container-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_container-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_container-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_container-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_container-vc143" version="1.78.0" />
       </dependency>
       <dependency name="boost_date_time">
           <nuget compiler="vc120" name="boost_date_time-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_date_time-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_date_time-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_date_time-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_date_time-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_date_time-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_date_time-vc143" version="1.78.0" />
       </dependency>
       <dependency name="boost_filesystem">
           <nuget compiler="vc120" name="boost_filesystem-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_filesystem-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_filesystem-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_filesystem-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_filesystem-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_filesystem-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_filesystem-vc143" version="1.78.0" />
       </dependency>
       <dependency name="boost_iostreams">
           <nuget compiler="vc120" name="boost_iostreams-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_iostreams-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_iostreams-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_iostreams-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_iostreams-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_iostreams-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_iostreams-vc143" version="1.78.0" />
+      </dependency>
+      <!-- boost json is not used in the header-only configuration. -->
+      <dependency name="boost_json">
+          <nuget compiler="vc120" name="boost_json-vc120" version="1.57.0.0" />
+          <nuget compiler="vc140" name="boost_json-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_json-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_json-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_json-vc143" version="1.78.0" />
       </dependency>
       <dependency name="boost_locale">
           <nuget compiler="vc120" name="boost_locale-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_locale-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_locale-vc141" version="1.72.0.0" />
-      </dependency>
-      <dependency name="boost_log_setup">
-          <nuget compiler="vc120" name="boost_log_setup-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_log_setup-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_log_setup-vc141" version="1.72.0.0" />
-      </dependency>
-      <dependency name="boost_log">
-          <nuget compiler="vc120" name="boost_log-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_log-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_log-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_locale-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_locale-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_locale-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_locale-vc143" version="1.78.0" />
       </dependency>
       <dependency name="boost_program_options">
           <nuget compiler="vc120" name="boost_program_options-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_program_options-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_program_options-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_program_options-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_program_options-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_program_options-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_program_options-vc143" version="1.78.0" />
       </dependency>
       <dependency name="boost_regex">
           <nuget compiler="vc120" name="boost_regex-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_regex-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_regex-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_regex-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_regex-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_regex-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_regex-vc143" version="1.78.0" />
       </dependency>
       <dependency name="boost_system">
           <nuget compiler="vc120" name="boost_system-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_system-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_system-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_system-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_system-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_system-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_system-vc143" version="1.78.0" />
       </dependency>
       <dependency name="boost_thread">
           <nuget compiler="vc120" name="boost_thread-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_thread-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_thread-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_thread-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_thread-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_thread-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_thread-vc143" version="1.78.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
       </dependency>
       <dependency name="pthread" system_exclude="android" />
       <dependency name="rt" function="clock_gettime" system="linux" system_exclude="android" />
-      <dependency name="icu-i18n" version="51.2" unprefixed="true" option="icu" />
-      <!-- -ldl is missing from icu package config -->
+      <dependency name="icu-i18n" version="55.2" unprefixed="true" option="icu" />
+      <!-- TODO: verify this with more recent ICU. -->
+      <!-- -ldl is missing from icu package config. -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
-      <dependency name="secp256k1" version="0.1.0.19">
+      <dependency name="secp256k1" version="0.1.0.20">
+          <!-- The vc120 secp256k1 nuget package is no longer supported -->
           <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
-          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.19" />
-          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.19" />
+          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.20" />
+          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.20" />
+          <nuget compiler="vc142" name="secp256k1_vc142" version="0.1.0.20" />
+          <nuget compiler="vc143" name="secp256k1_vc143" version="0.1.0.20" />
       </dependency>
 
       <!-- General flags -->
@@ -148,8 +186,8 @@
         <library name="boost_date_time" />
         <library name="boost_filesystem" />
         <library name="boost_iostreams" />
+        <library name="boost_json" />
         <library name="boost_locale" />
-        <library name="boost_log" />
         <library name="boost_program_options" />
         <library name="boost_regex" />
         <library name="boost_system" />
@@ -157,7 +195,8 @@
         <library name="pthread" />
         <library name="rt" />
         <library name="icu-i18n" />
-        <!-- -ldl is missing from icu package config -->
+        <!-- TODO: verify this with more recent ICU. -->
+        <!-- -ldl is missing from icu package config. -->
         <library name="dl" />
         <library name="secp256k1" />
         <headers path="include" />
@@ -183,8 +222,10 @@
     </make>
 
     <install>
+      <!-- Building with our minimum (c++11 only) version of ICU. -->
       <build name="icu" version="55.2" parallel="true" >
-        <!-- Bug in ICU build requires --enable-draft. -->
+        <!-- TODO: verify this with more recent ICU. -->
+        <!-- Bug in ICU 55.2 build requires --enable-draft. -->
         <option value="--enable-draft" />
         <option value="--enable-tools" />
         <option value="--disable-extras" />
@@ -194,39 +235,99 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
+      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
         <option value="--with-iostreams" />
+        <option value="--with-json" />
         <option value="--with-locale" />
-        <option value="--with-log" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-system" />
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
+      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
         <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
+    <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" />
+
+      <coverage>
+        <exclude path="src/wallet/addresses/qrencode" />
+      </coverage>
+
+      <!-- image="xcode12.2" equivalent? -->
+      <!-- prefix variance? -->
+      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+        <!-- <axis name="boost" /> -->
+        <axis name="icu" value="with" />
+      </job>
+
+      <job system="osx" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+      </job>
+
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+    </ci>
+
     <matrix>
+      <!-- Default boost fails on Travis default macOS platform, so bumped to xcode12.2. -->
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <option value="--with-icu" />
+        <option value="--build-icu" />
+        <option value="--disable-static" />  
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <option value="--with-icu" />
         <option value="--build-icu" />
         <option value="--build-boost" />
         <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
+        <option value="--build-boost" />
+        <option value="--disable-ndebug" />
+        <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="clang" link="static" version="5.0" >
         <option value="--with-icu" />
@@ -237,37 +338,23 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
-        <option value="--with-icu" />
-        <option value="--build-icu" />
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--disable-static" />  
-      </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--with-icu" />
-        <option value="--build-icu" />
-        <option value="--build-boost" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-static" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <option value="--with-icu" />
+        <option value="--build-icu" />
+        <option value="--build-boost" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -295,15 +382,19 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0">
+      <dependency name="boost" version="1.76.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost" version="1.78.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
       </dependency>
       <dependency name="bitcoin-database" version="4.0.0" />
       <dependency name="bitcoin-consensus" version="4.0.0" option="consensus" />
@@ -365,80 +456,45 @@
     </make>
 
     <install>
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="evoskuil" repository="libbitcoin-database" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="bitcoin-blockchain" github="evoskuil" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--without-consensus" />
-        <!-- these allow unused build to complete -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--disable-static" />
+      </job>
+      <job system="osx" compiler="clang" link="static" >
+        <option value="--without-consensus" />
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -450,6 +506,14 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <option value="--build-boost" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -470,15 +534,19 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0">
+      <dependency name="boost" version="1.76.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost" version="1.78.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
       </dependency>
       <dependency name="bitcoin-system" version="4.0.0" />
       <dependency name="bitcoin-protocol" version="4.0.0" />
@@ -523,14 +591,7 @@
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-client-test" test="true" option="tests" uuid="a56a00c6-669b-4535-9dc2-772a931b04c2" >
-        <runner>
-          <run test="generated" />
-          <!--<run test="network" />-->
-          <run test="obsolete" />
-          <run test="offline" />
-          <run test="config" />
-          <run test="stub" />
-        </runner>
+        <runner/>
         <library name="bitcoin-client" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -552,80 +613,45 @@
     </make>
 
     <install>
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
+      <build name="bitcoin-client" github="evoskuil" repository="libbitcoin-client" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <option value="--disable-static" />
+        <option value="--build-zmq" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--disable-static" />
-        <option value="--build-zmq" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -637,6 +663,15 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -693,21 +728,27 @@
       <define header="sys/endian.h" export="htobe32" />
       <define header="sys/endian.h" export="htobe64" />
 
-      <dependency name="boost" version="1.72.0" option="tests">
+      <dependency name="boost" version="1.76.0" option="tests">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost" version="1.78.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
       </dependency>
       <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
-      <dependency name="secp256k1" version="0.1.0.19">
+      <dependency name="secp256k1" version="0.1.0.20">
           <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
-          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.19" />
-          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.19" />
+          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.20" />
+          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.20" />
+          <nuget compiler="vc142" name="secp256k1_vc142" version="0.1.0.20" />
+          <nuget compiler="vc143" name="secp256k1_vc143" version="0.1.0.20" />
       </dependency>
       <!-- <dependency name="java" option="java" /> -->
       <!-- <dependency name="python" version="2.7" option="python" /> -->
@@ -794,56 +835,88 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
+      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
         <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
+    <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" />
+
+      <!-- image="xcode12.2" equivalent? -->
+      <!-- prefix variance? -->
+      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+        <!-- <axis name="boost" /> -->
+        <axis name="icu" value="with" />
+      </job>
+
+      <job system="osx" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+      
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+    </ci>
+
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <!-- <get name="swig" /> -->
+        <option value="--disable-static" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <!-- <get name="swig" /> -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <!-- <get name="swig" /> -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <exclude path="clone/*" />
-        <!-- <get name="swig" /> -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <!-- <get name="swig" /> -->
-        <option value="--disable-static" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <!-- <get name="swig" /> -->
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -855,6 +928,16 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <exclude path="clone/*" />
+        <!-- <get name="swig" /> -->
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -879,15 +962,19 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0">
+      <dependency name="boost" version="1.76.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost" version="1.78.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
       </dependency>
       <dependency name="bitcoin-system" version="4.0.0" />
 
@@ -947,68 +1034,40 @@
     </make>
 
     <install>
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="evoskuil" repository="libbitcoin-database" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <option value="--disable-static" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--disable-static" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -1019,6 +1078,14 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <option value="--build-boost" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -1040,20 +1107,25 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0">
+      <dependency name="boost" version="1.76.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost" version="1.78.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="4.0.0" />
       <dependency name="bitcoin-network" version="4.0.0" />
-      <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
+        <!-- TODO: verify this with more recent ICU. -->
+      <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
 
       <!-- General flags -->
@@ -1096,7 +1168,8 @@
         <flag define="sysconfdir" />
         <library name="bitcoin-client" />
         <library name="bitcoin-network" />
-        <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion -->
+        <!-- TODO: verify this with more recent ICU. -->
+        <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
         <library name="dl" />
         <headers path="include" />
         <sources path="src" />
@@ -1128,15 +1201,15 @@
       <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
         <file path="data/bx" />
       </product>
-      <product prefix="sysconf" container="libbitcoin" >
+      <product prefix="sysconf" container="libbitcoin" option="console">
         <file path="data/bx.cfg" />
       </product>
     </make>
 
     <install>
-      <build name="icu" version="55.2" parallel="true" >
-        <!-- Bug in ICU build requires --enable-draft. -->
-        <option value="--enable-draft" />
+      <build name="icu" version="68.2" parallel="true" >
+        <!-- Bug in ICU 55.2 build requires --enable-draft. -->
+        <!--<option value="--enable-draft" />-->
         <option value="--enable-tools" />
         <option value="--disable-extras" />
         <option value="--disable-icuio" />
@@ -1145,97 +1218,54 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-client" github="evoskuil" repository="libbitcoin-client" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="master" parallel="true" >
+      <build name="bitcoin-explorer" github="evoskuil" repository="libbitcoin-explorer" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
     <matrix>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--with-icu" />
-        <option value="--build-icu" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <get name="bash-completion" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
+      <!-- Default boost fails on default macOS platform, so bump to xcode12.2. -->
+      <!-- ICU 68.2 include fail (Wc++11-extensions) on default macOS platform, so bump to xcode12.2. -->
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
+        <option value="--with-icu" />
+        <option value="--build-icu" />
         <option value="--build-zmq" />
         <option value="--with-bash-completiondir" />
         <option value="--disable-static" />
+      </job>
+      <job system="osx" compiler="clang" link="static" >
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -1249,6 +1279,18 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Og -g'" />
         <option value="CXXFLAGS='-Og -g'" />
+      </job>
+      <!-- Optional depedencies not built because of coverage time cost. -->
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <get name="bash-completion" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -1272,15 +1314,19 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0">
+      <dependency name="boost" version="1.76.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost" version="1.78.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
       </dependency>
       <dependency name="bitcoin-system" version="4.0.0" />
 
@@ -1324,7 +1370,7 @@
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-network-test" test="true" option="tests" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff" >
         <runner>
-          <run test="empty_tests" />
+	  <!--<run test="empty_tests" />-->
           <!--<run test="p2p_tests" />-->
         </runner>
         <library name="bitcoin-network" />
@@ -1338,68 +1384,84 @@
     </make>
 
     <install>
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
+    <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" />
+
+      <!-- image="xcode12.2" equivalent? -->
+      <!-- prefix variance? -->
+      <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
+      <!-- boost error from asio if from brew -->
+      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+        <!-- <axis name="boost" /> -->
+        <axis name="icu" value="with" />
+      </job>
+
+      <job system="osx" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+    </ci>
+
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <option value="--disable-static" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--disable-static" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -1410,6 +1472,14 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <option value="--build-boost" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -1435,19 +1505,23 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0">
+      <dependency name="boost" version="1.76.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost" version="1.78.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-blockchain" version="4.0.0"  />
-      <dependency name="bitcoin-network" version="4.0.0"  />
+      <dependency name="bitcoin-blockchain" version="4.0.0" />
+      <dependency name="bitcoin-network" version="4.0.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1507,67 +1581,36 @@
       <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
         <file path="data/bn" />
       </product>
-      <product prefix="sysconf" container="libbitcoin" option="console" >
+      <product prefix="sysconf" container="libbitcoin" option="console">
         <file path="data/bn.cfg" />
       </product>
     </make>
 
     <install>
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="evoskuil" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node" github="evoskuil" repository="libbitcoin-node" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <get name="bash-completion" />
+        <option value="--disable-static" />
+        <option value="--with-bash-completiondir" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <option value="--without-consensus" />
         <!-- these allow unused build to complete -->
@@ -1575,33 +1618,17 @@
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <get name="bash-completion" />
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <get name="bash-completion" />
-        <option value="--disable-static" />
-        <option value="--with-bash-completiondir" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -1615,6 +1642,16 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <get name="bash-completion" />
+        <option value="--build-boost" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -1637,24 +1674,30 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0">
+      <dependency name="boost" version="1.76.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost" version="1.78.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
       </dependency>
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.3.4">
           <nuget compiler="vc120" name="libzmq_vc120" version="4.3.2" />
           <nuget compiler="vc140" name="libzmq_vc140" version="4.3.2" />
           <nuget compiler="vc141" name="libzmq_vc141" version="4.3.2" />
+          <nuget compiler="vc142" name="libzmq_vc142" version="4.3.2" />
+          <nuget compiler="vc143" name="libzmq_vc143" version="4.3.2" />
       </dependency>
       <dependency name="mbedtls" version="2.12.0" option="mbedtls" />
-      <dependency name="bitcoin-system" version="4.0.0"  />
+      <dependency name="bitcoin-system" version="4.0.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1699,7 +1742,19 @@
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-protocol-test" test="true" option="tests" uuid="c42be17b-063d-44f1-a5bb-9f8295144b70" >
         <flag substitute="mbedtls" />
-        <runner/>
+        <runner>
+          <!--
+          <run test="authenticator_tests" />
+          <run test="certificate_tests" />
+          <run test="context_tests" />
+          <run test="frame_tests" />
+          <run test="identifiers_tests" />
+          <run test="message_tests" />
+          <run test="poller_tests" />
+          <run test="socket_tests" />
+          <run test="worker_tests" />
+          -->
+        </runner>
         <library name="bitcoin-protocol" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -1711,73 +1766,92 @@
     </make>
 
     <install>
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
       <build name="mbedtls" version="2.12.0" parallel="true">
       </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
+        <!-- until test hang is resolved -->
+        <option value="--without-tests" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
+    <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="mbedtls" build="true" />
+      <axis name="zmq" build="true" />
+
+      <!-- image="xcode12.2" equivalent? -->
+      <!-- prefix variance? -->
+      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+        <!-- <axis name="boost" /> -->
+        <axis name="icu" value="with" />
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="osx" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <!-- <axis name="mbedtls" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <!-- <axis name="mbedtls" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+        <!-- <axis name="mbedtls" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+    </ci>
+
     <matrix>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <exclude path="interface.pb.*" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--build-mbedtls" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--build-zmq" />
         <option value="--build-mbedtls" />
         <option value="--disable-static" />
+      </job>
+      <job system="osx" compiler="clang" link="static" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
@@ -1789,6 +1863,14 @@
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <option value="--disable-static" />
         <option value="--build-boost" />
@@ -1796,6 +1878,17 @@
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <exclude path="interface.pb.*" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--build-mbedtls" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
@@ -1821,15 +1914,19 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0">
+      <dependency name="boost" version="1.76.0">
           <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost" version="1.78.0" />
       </dependency>
       <dependency name="boost_unit_test_framework" option="tests">
           <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
+          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
+          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
+          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
+          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
       </dependency>
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
@@ -1894,81 +1991,38 @@
       <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
         <file path="data/bs" />
       </product>
-      <product prefix="sysconf" container="libbitcoin" >
+      <product prefix="sysconf" container="libbitcoin" option="console">
         <file path="data/bs.cfg" />
       </product>
     </make>
 
     <install>
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
-        <option value="--with-atomic" />
-        <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
-        <option value="--with-iostreams" />
-        <option value="--with-locale" />
-        <option value="--with-log" />
-        <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-system" />
-        <option value="--with-thread" />
-        <option value="--with-test" />
-      </build>
-      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
-      </build>
-      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node" github="evoskuil" repository="libbitcoin-node" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-console" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
         <option value="--without-tests" />
         <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="master" parallel="true" >
+      <build name="bitcoin-server" github="evoskuil" repository="libbitcoin-server" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
     <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <get name="bash-completion" />
+        <option value="--build-zmq" />
+        <option value="--disable-static" />
+        <option value="--with-bash-completiondir" />
+      </job>
       <job system="osx" compiler="clang" link="static" >
         <option value="--without-consensus" />
         <!-- these allow unused build to complete -->
@@ -1977,37 +2031,19 @@
         <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <get name="bash-completion" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <get name="bash-completion" />
-        <option value="--build-zmq" />
-        <option value="--disable-static" />
-        <option value="--with-bash-completiondir" />
-      </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--build-zmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -2023,6 +2059,17 @@
         <option value="CFLAGS='-Os -s'" />
         <option value="CXXFLAGS='-Os -s'" />
       </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <get name="bash-completion" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
+      </job>
       <job system="windows" compiler="x64" link="static">
         <option value="--disable-ndebug" />
       </job>
@@ -2031,7 +2078,13 @@
 
   </repository>
 
-  <templates>
+  <vs>
+    <version value="vs2017" />
+    <version value="vs2019" />
+    <version value="vs2022" />
+  </vs>
+
+  <templates source="generate4.xml">
     <template name="gsl.version.hpp" />
     <template name="gsl.include.hpp" />
     <!-- <template name="gsl.interface.swg" /> -->
@@ -2043,25 +2096,27 @@
     <template name="gsl.package.pc.in" />
     <template name="gsl.install.sh" />
     <template name="gsl.runner.sh" />
-    <template name="gsl.travis.yml" />
+    <!-- <template name="gsl.travis.yml" /> -->
     <template name="gsl.build.cmd" />
     <!-- <template name="gsl.build.ps1" /> -->
-    <template name="gsl.appveyor.yml" />
-    <template name="vs2013/gsl.packages.config" />
-    <template name="vs2013/gsl.vcxproj" />
-    <template name="vs2013/gsl.vcxproj.filters" />
-    <template name="vs2013/gsl.sln" />
-    <template name="vs2015/gsl.packages.config" />
-    <template name="vs2015/gsl.vcxproj" />
-    <template name="vs2015/gsl.vcxproj.filters" />
-    <template name="vs2015/gsl.sln" />
+    <!-- <template name="gsl.appveyor.yml" /> -->
+    <template name="gsl.debug.natvis" />
     <template name="vs2017/gsl.packages.config" />
     <template name="vs2017/gsl.vcxproj" />
     <template name="vs2017/gsl.vcxproj.filters" />
     <template name="vs2017/gsl.sln" />
+    <template name="vs2019/gsl.packages.config" />
+    <template name="vs2019/gsl.vcxproj" />
+    <template name="vs2019/gsl.vcxproj.filters" />
+    <template name="vs2019/gsl.sln" />
+    <template name="vs2022/gsl.packages.config" />
+    <template name="vs2022/gsl.vcxproj" />
+    <template name="vs2022/gsl.vcxproj.filters" />
+    <template name="vs2022/gsl.sln" />
     <!-- <template name="gsl.Find.cmake" /> -->
     <template name="gsl.CMakeLists.txt" />
     <!-- <template name="gsl.gitignore" /> -->
+    <template name="gsl.ci.yml" />
   </templates>
 
 </generate>

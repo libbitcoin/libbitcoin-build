@@ -1,0 +1,55 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2021 libbitcoin developers (see COPYING).
+#
+# GSL generate debug.natvis.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Generation
+###############################################################################
+.macro generate_natvis(path_prefix)
+.   for generate.repository by name as _repository
+.       require(_repository, "repository", "name")
+.       my.output_path = join(my.path_prefix, canonical_path_name(_repository))
+.       create_directory(my.output_path)
+.       define my.out_file = "$(my.output_path)/builds/msvc/debug.natvis"
+.       notify(my.out_file)
+.       output(my.out_file)
+.
+<?xml version="1.0" encoding="utf-8"?>
+.       xml_copyleft(_repository.name)
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+    <!-- boost::multiprecision::number<boost::multiprecision::cpp_int_backend<*, *, 0, 0, void>> -->
+    <Type Name="boost::multiprecision::number&lt;*&gt;">
+        <DisplayString>{ m_backend }</DisplayString>
+    </Type>
+
+    <!-- boost::multiprecision::backends::cpp_int_backend<*,*,0,0,void> -->
+    <Type Name="boost::multiprecision::backends::cpp_int_backend&lt;*,*,0,0,void&gt;">
+        <DisplayString>{ m_data }</DisplayString>
+    </Type>
+
+</AutoVisualizer>
+.   endfor _repository
+.endmacro # generate_natvis
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_natvis("output")
+
+.endtemplate

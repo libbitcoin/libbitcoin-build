@@ -31,12 +31,13 @@ call xcopy /y "props\\import\\$(my.import_name).import.*" $(my.msvc_path)
 
 .endmacro emit_import_copy_project
 .
-.macro emit_import_copy(repository, output, import_name)
+.macro emit_import_copy(vs, repository, output, import_name)
+.   define my.vs = emit_import_copy.vs
 .   define my.repository = emit_import_copy.repository
 REM Copy $(my.import_name) imports for $(my.repository.name)
-.   emit_import_copy_project(my.repository, my.output, my.import_name, "vs2013")
-.   emit_import_copy_project(my.repository, my.output, my.import_name, "vs2015")
-.   emit_import_copy_project(my.repository, my.output, my.import_name, "vs2017")
+.   for my.vs.version as _version
+.       emit_import_copy_project(my.repository, my.output, my.import_name, "$(_version.value)")
+.   endfor
 .   define my.msvc_path = "$(my.output)\\$(canonical_path_name(my.repository))\\builds\\msvc"
 if not exist "$(my.msvc_path)\\build\\" call mkdir "$(my.msvc_path)\\build\\"
 .   emit_error_handler("Failed to create build directory.")
@@ -60,9 +61,9 @@ call xcopy /s /y "props\\project\\$(my.repository.name)\\*" $(my.msvc_path)
 .macro emit_project_props_copy(repository, output)
 .   define my.repository = emit_project_props_copy.repository
 REM Copy project props for $(my.repository.name)
-.   emit_project_props_copy_project(my.repository, my.output, "vs2013")
-.   emit_project_props_copy_project(my.repository, my.output, "vs2015")
 .   emit_project_props_copy_project(my.repository, my.output, "vs2017")
+.   emit_project_props_copy_project(my.repository, my.output, "vs2019")
+.   emit_project_props_copy_project(my.repository, my.output, "vs2022")
 .endmacro
 .
 .macro emit_repository_completion_message(repository)
@@ -117,16 +118,26 @@ function generate_artifacts(path_prefix)
 
     emit_initialize()
 
-# TODO: walk dependency tree, not build list.
-# TODO: build list is for telling installer what to compile.
     for generate.repository by name as _repository
         echo(" Evaluating repository: $(_repository.name)")
-        for _repository->install.build as _build where\
-            defined(_build.repository) &\
-            starts_with(_build.repository, "libbitcoin")
-            emit_import_copy(_repository, my.path_prefix, _build.repository)
-        endfor
+        new configure as _dependencies
+            cumulative_dependencies(_dependencies, generate, _repository)
+
+            for _dependencies.dependency as _dependency where\
+              (count(generate.repository,\
+                (count->package.library = _dependency.name)) > 0)
+
+                define my.match = generate->repository(\
+                  repository->package.library = _dependency.name)
+
+                emit_import_copy(generate->vs, _repository, my.path_prefix, my.match.name)
+            endfor
+        endnew
+
+        emit_import_copy(generate->vs, _repository, my.path_prefix, _repository.name)
+
         emit_project_props_copy(_repository, my.path_prefix)
+
         emit_repository_completion_message(_repository)
     endfor
 

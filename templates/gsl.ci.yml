@@ -1,0 +1,743 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2021 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin .travis.yml.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+function workflow_relative_path(repository, path_prefix)
+    define my.repository = workflow_relative_path.repository
+    require(my.repository, "repository", "name")
+    define my.subpath = ".github/workflows"
+    return append_path(append_path(my.path_prefix,\
+        canonical_path_name(my.repository)), my.subpath)
+endfunction
+
+function is_system_linux(job)
+    define my.job = is_system_linux.job
+    return defined(my.job) & my.job.system = "linux"
+endfunction
+
+function is_system_osx(job)
+    define my.job = is_system_osx.job
+    return defined(my.job) & my.job.system = "osx"
+endfunction
+
+function is_system_windows(job)
+    define my.job = is_system_windows.job
+    return defined(my.job) & my.job.system = "windows"
+endfunction
+
+function has_installsh_jobs(ci)
+    define my.ci = has_installsh_jobs.ci
+    return (count(my.ci.job, (count.system = "linux")) + count(my.ci.job, \
+        (count.system = "osx"))  > 0)
+endfunction
+
+function has_sln_jobs(ci)
+    define my.ci = has_sln_jobs.ci
+    return (count(my.ci.job, (count.system = "windows"))  > 0)
+endfunction
+
+function get_job_os(job)
+    define my.job = get_job_os.job
+    define my.os = ""
+
+    if (is_empty(my.job.system))
+        abort "get_job_os failed due to missing job.system value."
+    elsif (my.job.system = "linux")
+        my.os = "ubuntu-latest"
+    elsif (my.job.system = "osx")
+        my.os = "macos-latest"
+    elsif (my.job.system = "windows")
+        my.os = "windows-latest"
+    else
+        abort "get_job_os failed due to unsupported job.system value '$(my.job.system)'."
+    endif
+
+    return my.os
+endfunction #get_job_os
+
+function get_job_packager(job)
+    define my.job = get_job_packager.job
+    define my.packager = ""
+
+    if (my.job.system = "linux")
+        my.packager = "apt"
+    elsif (my.job.system = "osx")
+        my.packager = "brew"
+    else
+        abort "get_job_packager failed due to unsupported job.system value '$(my.job.system)'."
+    endif
+
+    return my.packager
+endfunction #get_job_packager
+
+function sanitized_link(job)
+    define my.job = sanitized_link.job
+    require(my.job, "job", "link")
+    define my.result = ""
+
+    if (my.job.link = "dynamic")
+        my.result = "Dynamic"
+    elsif (my.job.link = "static")
+        my.result = "Static"
+    else
+        abort "sanitized_link failed due to unsupported job.link value '$(my.job.link)'."
+    endif
+
+    return my.result
+endfunction
+
+function sanitized_assert(job)
+    define my.job = sanitized_assert.job
+    require(my.job, "job", "assert")
+    define my.result = ""
+
+    if (my.job.assert = "debug")
+        my.result = "Debug"
+    elsif (my.job.assert = "ndebug")
+        my.result = "Release"
+    else
+        abort "sanitized_assert failed due to unsupported job.assert value '$(my.job.assert)'."
+    endif
+
+    return my.result
+endfunction
+
+function get_job_windows_configuration(job)
+    define my.job = get_job_windows_configuration.job
+    return "$(sanitized_link(my.job))$(sanitized_assert(my.job))"
+endfunction # get_job_windows_configuration
+
+function get_job_windows_platform(job)
+    define my.job = get_job_windows_platform.job
+    require(my.job, "job", "compiler")
+    return my.job.compiler
+endfunction # get_job_windows_platform
+
+function has_axis_value(job, name, value)
+    define my.job = has_axis_value.job
+    define my.name = has_axis_value.name
+    define my.value = has_axis_value.value
+
+    return (count(my.job.axis, (count.name = my.name)) = 1) &\
+      defined(my.job->axis(axis.name = my.name).value) &\
+      (my.job->axis(axis.name = my.name).value = my.value)
+endfunction #has_axis_value
+
+function get_job_packages(job)
+    define my.job = get_job_packages.job
+    define my.packages = ""
+    define my.spacer = ""
+
+    if (my.job.system = "osx")
+        if (!has_axis_value(my.job, "boost", "build"))
+            my.packages = "$(my.packages)$(my.spacer)boost"
+            my.spacer = " "
+        endif
+
+        if (!has_axis_value(my.job, "icu", "build"))
+            my.packages = "$(my.packages)$(my.spacer)icu4c"
+            my.spacer = " "
+        endif
+    elsif (my.job.system = "linux")
+        my.packages = get_job_compiler_package(my.job)
+        my.spacer = " "
+    endif
+
+    if (defined(my.job.coverage) & !(my.job.coverage = "false"))
+        my.packages = "$(my.packages)$(my.spacer)lcov"
+        my.spacer = " "
+    endif
+
+    return "$(my.packages)"
+endfunction #get_job_packages
+
+function get_job_compiler(job)
+    define my.job = get_job_compiler.job
+    define my.compiler = ""
+
+    if (my.job.system = "osx")
+        my.compiler = "clang"
+
+        if (!is_empty(my.job.compiler))
+            abort "Continuious Integration 'osx' job has extraneous 'compiler' property."
+        endif
+    elsif (my.job.system = "linux")
+        if (is_empty(my.job.compiler))
+            abort "get_job_compiler failed due to missing job.compiler value."
+        elsif ((my.job.compiler = "gcc") | (my.job.compiler = "clang"))
+            my.compiler = "$(my.job.compiler)"
+        else
+            abort "get_job_compiler failed due to unsupported job.compiler value $(my.job.compiler)."
+        endif
+    else
+        abort "get_job_compiler unrecognized system value $(my.job.system)"
+    endif
+
+    return "$(my.compiler)"
+endfunction #get_job_compiler
+
+function get_job_optimization(job)
+    define my.job = get_job_optimization.job
+    define my.value = ""
+
+    if (!defined(my.job.optimization))
+        abort "get_job_optimization failed due to undefined 'optimization' property."
+    endif
+
+    if (!(my.job.optimization = "debug") & !(my.job.optimization = "size"))
+        abort "get_job_optimization value '$(my.job.optimization)' unrecognized."
+    endif
+
+    return my.job.optimization
+endfunction #get_job_optimization
+
+function get_job_compiler_package(job)
+    define my.job = get_job_compiler_package.job
+    define my.version = ""
+
+    if (!is_empty(my.job.version))
+        my.version = "-$(my.job.version)"
+    endif
+
+    return "$(get_job_compiler(my.job))$(my.version)"
+endfunction #get_job_compiler_package
+
+function get_job_assert(job)
+    define my.job = get_job_assert.job
+
+    if (defined(my.job.assert) &\
+      (!(my.job.assert = "debug") & !(my.job.assert = "ndebug")))
+      abort "Expected job.assert defined as either 'debug' or 'ndebug'."
+    endif
+
+    return my.job.assert ? "ndebug"
+endfunction #get_job_assert
+
+function get_job_cc(job)
+    define my.job = get_job_cc.job
+    define my.version = ""
+    define my.compiler = get_job_compiler(my.job)
+
+    if (!is_empty(my.job.version))
+        my.version = "-$(my.job.version)"
+    endif
+
+    if !(my.compiler = "gcc") & !(my.compiler = "clang")
+        abort "get_job_cc failed due to unsupported compiler value."
+    endif
+
+    return "$(my.compiler)$(my.version)"
+endfunction #get_job_cc 
+
+function get_job_cxx(job)
+    define my.job = get_job_cxx.job
+    define my.version = ""
+    define my.compiler = ""
+    define my.specified_compiler = get_job_compiler(my.job)
+
+    if (!is_empty(my.job.version))
+        my.version = "-$(my.job.version)"
+    endif
+
+    if (my.specified_compiler = "gcc")
+        my.compiler = "g++"
+    elsif (my.specified_compiler = "clang")
+        my.compiler = "clang++"
+    else
+        abort "get_job_cxx failed due to unsupported compiler value."
+    endif
+
+    return "$(my.compiler)$(my.version)"
+endfunction #get_job_cxx 
+
+function get_job_link(job)
+    define my.job = get_job_link.job
+    define my.option = ""
+
+    if (is_empty(my.job.link))
+        abort "get_job_link failed due to missing job.link value."
+    elsif (!(my.job.link = "dynamic") & !(my.job.link = "static"))
+        abort "get_job_link failed due to unsupported job.link value."
+    endif
+
+    return my.job.link
+endfunction #get_job_link
+
+function get_job_cflags(job)
+    define my.job = get_job_cflags.job
+    define my.flags = ""
+
+    if (is_empty(my.job.optimization))
+        abort "get_job_cflags expects job.optimization, no value provided."
+    elsif (my.job.optimization = "size")
+        my.flags = "-Os"
+    elsif (my.job.optimization = "debug")
+        my.flags = "-Og"
+    else
+        abort "get_job_cflags unsupported job.optimization value '$(my.job.optimization)."
+    endif
+
+    if (!is_empty(my.job.coverage) & (my.job.coverage = "true"))
+        my.flags = "$(my.flags) -g --coverage"
+    endif
+
+    return "$(my.flags) -fPIE"
+endfunction #get_job_cflags
+
+function get_job_cxxflags(job)
+    define my.job = get_job_cxxflags.job
+    return get_job_cflags(my.job)
+endfunction #get_job_cxxflags
+
+function get_job_axis_value(decl, job, axis)
+    define my.decl = get_job_axis_value.decl
+    define my.job = get_job_axis_value.job
+    define my.axis = get_job_axis_value.axis
+    define my.value = ""
+
+    if (!defined(my.axis.value))
+        my.value = get_job_axis_default(my.decl, my.job)
+    elsif (my.axis.value = "build")
+        if (!defined(my.decl.build) | !(my.decl.build = "true"))
+            abort "Disallowed value 'build' provided for axis '$(my.axis.name)'."
+        endif
+
+        if (defined(my.decl.buildwith) & (my.decl.buildwith = "true") &\
+          defined(my.decl.with) & (my.decl.with = "true"))
+            my.value = "--build-$(my.axis.name) --with-$(my.axis.name)"
+        else
+            my.value = "--build-$(my.axis.name)"
+        endif
+    elsif (my.axis.value = "with")
+        if (!defined(my.decl.with) | !(my.decl.with = "true"))
+            abort "Disallowed value 'with' provided for axis '$(my.axis.name)'."
+        endif
+
+        my.value = "--with-$(my.axis.name)"
+    elsif (my.axis.value = "without")
+        if (!defined(my.decl.without) | !(my.decl.without = "true"))
+            abort "Disallowed value 'without' provided for axis '$(my.axis.name)'."
+        endif
+
+        my.value = "--without-$(my.axis.name)"
+    else
+        abort "Unrecognized value '$(my.axis.value)' provided for axis '$(my.axis.name)'."
+    endif
+
+    return my.value
+endfunction #get_job_axis_value
+
+function get_job_axis_default(decl, job)
+    define my.decl = get_job_axis_default.decl
+    define my.job = get_job_axis_default.job
+    return ""
+endfunction #get_job_axis_default
+
+function get_job_installsh_axis_value(job, decl)
+    define my.job =  get_job_installsh_axis_value.job
+    define my.decl =  get_job_installsh_axis_value.decl
+    define my.value = ""
+
+    define my.declared = (count(my.job.axis, (count.name = my.decl.name)) = 1)
+
+    if (my.declared)
+        my.value = get_job_axis_value(my.decl, my.job,\
+          my.job->axis(name = my.decl.name))
+    else
+        my.value = get_job_axis_default(my.decl, my.job)
+    endif
+
+    return my.value
+endfunction # get_job_installsh_axis_value
+
+function get_job_coverage(job)
+    define my.job = get_job_coverage.job
+    define my.coverage = "nocov"
+
+    if (defined(my.job.coverage) & !is_empty(my.job.coverage) &\
+      (my.job.coverage = "true"))
+        my.coverage = "cov"
+    endif
+
+    return my.coverage
+endfunction #get_job_coverage
+
+function get_coverage_exclusions(matrix)
+    define my.matrix = get_coverage_exclusions.matrix
+
+    # Exclude all system directories.
+    define my.excludes = quote("/usr/*")
+
+    # Exclude prefix directory (fixed in github actions ci)
+    my.excludes += " $(quote("${{ github.workspace }}/prefixenv/*"))"
+
+    # Exclude build directory (fixed in github actions ci)
+    my.excludes += " $(quote("${{ github.workspace }}/build/*"))"
+
+    # Exclude examples directory
+    my.excludes += " $(quote("${{ github.workspace }}/examples/*"))"
+
+    # Exclude test directory
+    my.excludes += " $(quote("${{ github.workspace }}/test/*"))"
+
+    # Exclude explicitly specified workspace relative paths
+    if (defined(my.matrix->coverage) & \
+      (count(my.matrix->coverage.exclude, !is_empty(count.path)) > 0))
+        for my.matrix->coverage.exclude as _exclude
+            my.excludes += " $(quote("${{ github.workspace }}/" + _exclude.path))"
+        endfor _exclude
+    endif
+
+    return my.excludes
+endfunction #get_coverage_exclusions
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro initialize_installsh_matrix_entry(matrix, job)
+.   define my.matrix = initialize_installsh_matrix_entry.matrix
+.   define my.job = initialize_installsh_matrix_entry.job
+.
+          - os: $(get_job_os(my.job))
+            cxx: "$(get_job_cxx(my.job))"
+            link: "$(get_job_link(my.job))"
+.#          optimization: "$(get_job_optimization(my.job))"
+            assert: "$(get_job_assert(my.job))"
+            coverage: "$(get_job_coverage(my.job))"
+.   for my.matrix.axis by "$(name)" as _axis
+            $(_axis.name): "$( get_job_installsh_axis_value(my.job, _axis))"
+.   endfor
+            cc: "$(get_job_cc(my.job))"
+            flags: "$(get_job_cflags(my.job))"
+            packager: "$(get_job_packager(my.job))"
+            packages: "$(get_job_packages(my.job))"
+
+.endmacro # initialize_installsh_matrix_entry
+.
+.macro initialize_installsh_matrix(matrix)
+.   define my.matrix = initialize_installsh_matrix.matrix
+.
+      matrix:
+        include:
+.
+.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_linux(_job)
+.       initialize_installsh_matrix_entry(my.matrix, _job)
+.   endfor _job
+.
+.   for my.matrix.job by "$(link)" as _job where is_system_osx(_job)
+.       initialize_installsh_matrix_entry(my.matrix, _job)
+.   endfor _job
+.
+.endmacro #initialize_installsh_matrix
+.
+.macro initialize_sln_matrix_entry(matrix, job)
+.   define my.matrix = initialize_sln_matrix_entry.matrix
+.   define my.job = initialize_sln_matrix_entry.job
+.
+          - os: $(get_job_os(my.job))
+            configuration: "$(get_job_windows_configuration(my.job))"
+            platform: "$(get_job_windows_platform(my.job))"
+            version: "vs2017"
+
+.endmacro # initialize_sln_matrix_entry
+.
+.macro initialize_sln_matrix(matrix)
+.   define my.matrix = initialize_sln_matrix.matrix
+.
+      matrix:
+        include:
+.
+.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_windows(_job)
+.       initialize_sln_matrix_entry(my.matrix, _job)
+.   endfor _job
+.
+.endmacro #initialize_installsh_matrix
+.
+.macro emit_step_prepare_toolchain()
+.
+      - name: Prepare toolchain [apt]
+        if: ${{ matrix.packager == 'apt' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.packages }}
+
+      - name: Prepare toolchain [brew]
+        if: ${{ matrix.packager == 'brew' }}
+        run: |
+          brew install autoconf automake libtool pkg-config ${{ matrix.packages }}
+.
+.endmacro # emit_step_prepare_toolchain
+.
+.macro emit_step_parameter_denormalization()
+.
+      - name: Denormalize parameterization
+        run: |
+.   # assert (ndebug)
+          if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
+            echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
+          else
+            echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
+          fi
+.   # link
+          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
+            echo "LINKAGE=--disable-static" >> $GITHUB_ENV
+          else
+            echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
+          fi
+.#   # compiler flags
+.#          if [[ ${{ matrix.optimization }} == 'debug' ]]; then
+.#            echo "CFLAGS='${{ env.CFLAGS }} -Og'" >> $GITHUB_ENV
+.#            echo "CXXFLAGS='${{ env.CXXFLAGS }} -Og'" >> $GITHUB_ENV
+.#          else if [[ ${{ matrix.optimization }} == 'size' ]]; then
+.#            echo "CFLAGS='${{ env.CFLAGS }} -Os'" >> $GITHUB_ENV
+.#            echo "CXXFLAGS='${{ env.CXXFLAGS }} -Os'" >> $GITHUB_ENV
+.#          fi
+.#          if [[ ${{ matrix.coverage }} == 'true' ]]; then
+.#            echo "CFLAGS='${{ env.CFLAGS }} -g --coverage" >> $GITHUB_ENV
+.#            echo "CXXFLAGS='${{ env.CXXFLAGS }} -g --coverage" >> $GITHUB_ENV
+.#          fi
+.   # linker flags
+          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
+            echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefixenv/lib" >> $GITHUB_ENV
+          fi
+.
+.endmacro # emit_step_parameter_denormalization
+.
+.macro emit_step_execute_install(matrix)
+.   define my.matrix = emit_step_execute_install.matrix
+      - name: Execute install.sh
+        run: >
+          ./install.sh
+          --build-dir=${{ github.workspace }}/build
+          --prefix=${{ github.workspace }}/prefixenv
+          ${{ env.LINKAGE }}
+          ${{ env.ASSERT_NDEBUG }}
+.       for my.matrix.axis as _axis
+          ${{ matrix.$(_axis.name) }}
+.       endfor
+.endmacro # emit_step_execute_install
+.
+.macro emit_step_calculate_coverage(matrix)
+.   define my.matrix = emit_step_calculate_coverage.matrix
+.   define my.exclusions = get_coverage_exclusions(my.matrix)
+.
+      - name: Coveralls Calculation
+        if: ${{ matrix.coverage == 'cov' }}
+        run: |
+          lcov --directory . --capture --output-file coverage.info
+          lcov --remove coverage.info $(my.exclusions) --output-file coverage.info
+          lcov --list coverage.info
+
+      - name: Coveralls.io Upload
+        if: ${{ matrix.coverage == 'cov' }}
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: "./coverage.info"
+          github-token: ${{ secrets.github_token }}
+.
+.endmacro # emit_step_calculate_coverage
+.
+.macro emit_step_failure_output()
+.
+      - name: Failure display compiler version
+        if: ${{ failure() }}
+        run: |
+          gcc -v
+          clang -v
+
+      - name: Failure display env
+        if: ${{ failure() }}
+        run: |
+          env
+ 
+      - name: Failure list libdir
+        if: ${{ failure() }}
+        run: |
+          ls -la ${{ github.workspace }}/prefixenv/lib
+
+      - name: Failure display boost bootstrap.log [--build-boost]
+        if: ${{ failure() && (matrix.boost == '--build-boost') }}
+        run: |
+          cat ${{ github.workspace }}/build/build-*/bootstrap.log
+
+      - name: Failure display otool output
+        if: ${{ failure() && (matrix.os == 'macos-latest') }}
+        run: |
+          otool -L ${{ github.workspace }}/test/.libs/$(_repository.name)-test
+
+      - name: Failure display DYLD_PRINT_LIBRARIES
+        if: ${{ failure() && (matrix.os == 'macos-latest') }}
+        run: |
+          DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/$(_repository.name)-test
+.
+.endmacro # emit_step_failure_output
+.
+.macro emit_job_verify_installsh(ci)
+.   define my.ci = emit_job_verify_installsh.ci
+.
+.   if (has_installsh_jobs(my.ci))
+  verify-installsh:
+
+    strategy:
+      fail-fast: false
+
+.       initialize_installsh_matrix(my.ci)
+    runs-on: ${{ matrix.os }}
+
+    env:
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
+      CI_REPOSITORY: '${{ github.repository }}'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+.       emit_step_prepare_toolchain()
+
+.       emit_step_parameter_denormalization()
+
+.       emit_step_execute_install(my.ci)
+
+.       emit_step_calculate_coverage(my.ci)
+ 
+.       emit_step_failure_output()
+.   endif
+.endmacro # emit_job_verify_installsh
+.
+.macro emit_job_verify_sln(repository, ci)
+.   define my.repository = emit_job_verify_sln.repository
+.   define my.ci = emit_job_verify_sln.ci
+.
+.   if (has_sln_jobs(my.ci))
+  verify-sln:
+    strategy:
+      fail-fast: false
+
+.       initialize_sln_matrix(my.ci)
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Initialize SDK
+        shell: powershell
+        run: |
+          try {
+            Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=323507" -OutFile "sdksetup.exe"
+
+            $FeatureList = "OptionId.WindowsDesktopSoftwareDevelopmentKit OptionId.NetFxSoftwareDevelopmentKit"
+            $Args = "/q /norestart /features $FeatureList"
+            $setup = Start-Process -PassThru -FilePath "sdksetup.exe" -ArgumentList $Args
+
+            $setup.WaitForExit()
+            if ($setup.ExitCode -ne 0) {
+              Write-Host "Test execution failure: " $setup.ExitCode -ForegroundColor Red;
+              exit $setup.ExitCode;
+            }
+          }
+          catch {
+            $ERR = $_;
+            Write-Host "Initialization failure: " $ERR -ForegroundColor Red;
+            exit $ERR;
+          }
+
+      - name: Execute build
+        run: .\\build.cmd .. ${{ matrix.platform }} ${{ matrix.configuration }} ${{ matrix.version }}
+
+      - name: Execute tests
+        shell: powershell
+        run: |
+          Write-Host "Locating test executables..." -ForegroundColor Yellow;
+          $BC_TEST_EXES = @(Get-ChildItem -Path "$env:${{ github.workspace }}\\bin" -recurse | Where-Object { $_.Name -eq "$(my.repository.name)-test.exe" });
+          If ($BC_TEST_EXES.Count -ne 1) {
+            Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
+            exit 1;
+          }
+          Write-Host "Found single test executable: " $BC_TEST_EXES.FullName -ForegroundColor Green;
+          $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
+          Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
+          try {
+            Invoke-Expression "$BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS"
+          }
+          catch {
+            $ERR = $_;
+            Write-Host "Test execution failure: " $ERR -ForegroundColor Red;
+            exit $ERR;
+          }
+          Write-Host "Test execution complete." -ForegroundColor Green;
+.   endif
+.endmacro # emit_job_verify_sln
+.
+.endtemplate
+.template 0
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.macro generate_ci_yml(path_prefix)
+.for generate.repository by name as _repository
+.   require(_repository, "repository", "name")
+.   if (defined(_repository->ci))
+.       my.absolute_path = join(join(global.root, my.path_prefix), _repository.name)
+.       my.output_path = workflow_relative_path(_repository, my.path_prefix)
+.       create_directory(my.output_path)
+.       define my.out_file = "$(my.output_path)/ci.yml"
+.       notify(my.out_file)
+.       output(my.out_file)
+.       copyleft(_repository.name)
+.       define my.matrix = _repository->ci
+
+name: Continuous Integration Build
+
+on: [ pull_request, push, workflow_dispatch ]
+
+jobs:
+.       emit_job_verify_installsh(my.matrix)
+.
+.       if (has_installsh_jobs(my.matrix) & has_sln_jobs(my.matrix))
+.           write_line("")
+.       endif
+.
+.       emit_job_verify_sln(_repository, my.matrix)
+.
+.       close
+.   endif
+.endfor _repository
+.endmacro # generate_ci_yml
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_ci_yml("output")
+
+.endtemplate

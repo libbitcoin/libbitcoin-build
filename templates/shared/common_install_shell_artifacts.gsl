@@ -58,100 +58,6 @@ function get_icu_url(install)
     return my.url
 endfunction
 
-# Functions with specific knowledge of ZLib archive file name and URL structure.
-
-function get_zlib_file(install)
-    define my.install = get_zlib_file.install
-    define my.version = get_archive_version(my.install, "zlib")?
-    if (!defined(my.version))
-        trace1("get_zlib_file:get_archive_version() = []")
-        return
-    endif
-    return "v$(my.version).tar.gz"
-endfunction
-
-function get_zlib_url(install)
-    trace1("get_zlib_url()")
-    define my.install = get_zlib_url.install
-    define my.version = get_archive_version(my.install, "zlib")?
-    if (!defined(my.version))
-        trace1("get_zlib_url:get_archive_version() = []")
-        return
-    endif
-    define my.archive = get_zlib_file(my.install)?
-    if (!defined(my.archive))
-        trace1("get_zlib_url:get_zlib_file() = []")
-        return
-    endif
-    define my.base_url = "https\://github.com/madler/zlib/archive"
-    define my.url = "$(my.base_url)/$(my.archive)"
-    trace1("get_zlib_url = $(my.url)")
-    return my.url
-endfunction
-
-# Functions with specific knowledge of PNG archive file name and URL structure.
-
-function get_png_file(install)
-    define my.install = get_png_file.install
-    define my.version = get_archive_version(my.install, "png")?
-    if (!defined(my.version))
-        trace1("get_png_file:get_archive_version() = []")
-        return
-    endif
-    return "libpng-$(my.version).tar.xz"
-endfunction
-
-function get_png_url(install)
-    trace1("get_png_url()")
-    define my.install = get_png_url.install
-    define my.version = get_archive_version(my.install, "png")?
-    if (!defined(my.version))
-        trace1("get_png_url:get_archive_version() = []")
-        return
-    endif
-    define my.archive = get_png_file(my.install)?
-    if (!defined(my.archive))
-        trace1("get_png_url:get_png_file() = []")
-        return
-    endif
-    define my.base_url = "https://sourceforge.net/projects/libpng/files/libpng16"
-    define my.url = "$(my.base_url)/$(my.version)/$(my.archive)"
-    trace1("get_png_url = $(my.url)")
-    return my.url
-endfunction
-
-# Functions with specific knowledge of QREncode archive file name and URL structure.
-
-function get_qrencode_file(install)
-    define my.install = get_qrencode_file.install
-    define my.version = get_archive_version(my.install, "qrencode")?
-    if (!defined(my.version))
-        trace1("get_qrencode_file:get_archive_version() = []")
-        return
-    endif
-    define my.underscore_version = string.convch(my.version, ".", "_")
-    return "qrencode-$(my.version).tar.bz2"
-endfunction
-
-function get_qrencode_url(install)
-    trace1("get_qrencode_url()")
-    define my.install = get_qrencode_url.install
-    define my.version = get_archive_version(my.install, "qrencode")?
-    if (!defined(my.version))
-        trace1("get_qrencode_url:get_archive_version() = []")
-        return
-    endif
-    define my.archive = get_qrencode_file(my.install)?
-    if (!defined(my.archive))
-        trace1("get_qrencode_url:get_qrencode_file() = []")
-        return
-    endif
-    define my.base_url = "http\://fukuchi.org/works/qrencode"
-    define my.url = "$(my.base_url)/$(my.archive)"
-    trace1("get_qrencode_url = $(my.url)")
-    return my.url
-endfunction
-
 # Functions with specific knowledge of ZMQ archive file name and URL structure.
 
 function get_zmq_file(install)
@@ -269,38 +175,12 @@ endfunction
 #                            use passphrase normalization this dependency can
 #                            be avoided.
 .   endif
-.   if (have_build(my.install, "png"))
-# --with-png               Compile with QR Code PNG Output Support
-#                            Since the addition of png support, libbitcoin
-#                            conditionally incorporates libpng (which in turn
-#                            requires zlib). Currently libbitcoin-explorer is
-#                            the only other library that accesses this feature,
-#                            so if you do not intend to use png this dependency
-#                            can be avoided.
-.   endif
-.   if (have_build(my.install, "qrencode"))
-# --with-qrencode          Compile with QR Code Support
-#                            Since the addition of qrcode support, libbitcoin
-#                            conditionally incorporates qrencode. Currently
-#                            libbitcoin-explorer is the only other library that
-#                            accesses this feature, so if you do not intend to
-#                            use qrcode this dependency can be avoided.
-.   endif
 .   if (have_build(my.install, "mbedtls"))
 # --with-mbedtls          Compile with MbedTLS Support
 #                            Provides a websockets implementation for query.
 .   endif
 .   if (have_build(my.install, "icu"))
 # --build-icu              Builds ICU libraries.
-.   endif
-.   if (have_build(my.install, "zlib"))
-# --build-zlib             Builds ZLib libraries.
-.   endif
-.   if (have_build(my.install, "png"))
-# --build-png              Builds PNG libraries.
-.   endif
-.   if (have_build(my.install, "qrencode"))
-# --build-qrencode         Builds QREncode libraries.
 .   endif
 .   if (have_build(my.install, "boost"))
 # --build-boost            Builds Boost libraries.
@@ -347,38 +227,12 @@ display_help()
     display_message "                             use passphrase normalization this dependency can "
     display_message "                             be avoided."
 .   endif
-.   if (have_build(my.install, "png"))
-    display_message "  --with-png               Compile with QR Code PNG Output Support"
-    display_message "                             Since the addition of png support, libbitcoin "
-    display_message "                             conditionally incorporates libpng (which in turn "
-    display_message "                             requires zlib). Currently libbitcoin-explorer is "
-    display_message "                             the only other library that accesses this feature, "
-    display_message "                             so if you do not intend to use png this dependency "
-    display_message "                             can be avoided."
-.   endif
-.   if (have_build(my.install, "qrencode"))
-    display_message "  --with-qrencode          Compile with QR Code Support"
-    display_message "                             Since the addition of qrcode support, libbitcoin "
-    display_message "                             conditionally incorporates qrencode. Currently "
-    display_message "                             libbitcoin-explorer is the only other library that "
-    display_message "                             accesses this feature, so if you do not intend to "
-    display_message "                             use qrcode this dependency can be avoided."
-.   endif
 .   if (have_build(my.install, "mbedtls"))
     display_message "  --with-mbedtls          Compile with MbedTLS Support"
     display_message "                             Provides a websockets implementation for query."
 .   endif
 .   if (have_build(my.install, "icu"))
     display_message "  --build-icu              Builds ICU libraries."
-.   endif
-.   if (have_build(my.install, "zlib"))
-    display_message "  --build-zlib             Builds ZLib libraries."
-.   endif
-.   if (have_build(my.install, "png"))
-    display_message "  --build-png              Builds PNG libraries."
-.   endif
-.   if (have_build(my.install, "qrencode"))
-    display_message "  --build-qrencode         Builds QREncode libraries."
 .   endif
 .   if (have_build(my.install, "boost"))
     display_message "  --build-boost            Builds Boost libraries."
@@ -419,23 +273,8 @@ display_configuration()
 .   if (have_build(my.install, "icu"))
     display_message "WITH_ICU              : $WITH_ICU"
 .   endif
-.   if (have_build(my.install, "png"))
-    display_message "WITH_PNG              : $WITH_PNG"
-.   endif
-.   if (have_build(my.install, "qrencode"))
-    display_message "WITH_QRENCODE         : $WITH_QRENCODE"
-.   endif
 .   if (have_build(my.install, "icu"))
     display_message "BUILD_ICU             : $BUILD_ICU"
-.   endif
-.   if (have_build(my.install, "zlib"))
-    display_message "BUILD_ZLIB            : $BUILD_ZLIB"
-.   endif
-.   if (have_build(my.install, "png"))
-    display_message "BUILD_PNG             : $BUILD_PNG"
-.   endif
-.   if (have_build(my.install, "qrencode"))
-    display_message "BUILD_QRENCODE        : $BUILD_QRENCODE"
 .   endif
 .   if (have_build(my.install, "zmq"))
     display_message "BUILD_ZMQ             : $BUILD_ZMQ"
@@ -493,25 +332,10 @@ parse_command_line_options()
 .   if (have_build(my.install, "icu"))
             (--with-icu)            WITH_ICU="yes";;
 .   endif
-.   if (have_build(my.install, "png"))
-            (--with-png)            WITH_PNG="yes";;
-.   endif
-.   if (have_build(my.install, "qrencode"))
-            (--with-qrencode)       WITH_QRENCODE="yes";;
-.   endif
 
             # Custom build options (in the form of --build-<option>).
 .   if (have_build(my.install, "icu"))
             (--build-icu)           BUILD_ICU="yes";;
-.   endif
-.   if (have_build(my.install, "zlib"))
-            (--build-zlib)          BUILD_ZLIB="yes";;
-.   endif
-.   if (have_build(my.install, "png"))
-            (--build-png)           BUILD_PNG="yes";;
-.   endif
-.   if (have_build(my.install, "qrencode"))
-            (--build-qrencode)      BUILD_QRENCODE="yes";;
 .   endif
 .   if (have_build(my.install, "zmq"))
             (--build-zmq)           BUILD_ZMQ="yes";;
@@ -559,45 +383,6 @@ ICU_URL="$(my.url)"
 ICU_ARCHIVE="$(get_icu_file(my.install))"
 
 .endmacro # define_icu
-.
-.macro define_zlib(install)
-.   define my.install = define_zlib.install
-.   define my.url = get_zlib_url(my.install)?
-.   if (!defined(my.url))
-.       #abort "A version of zlib is not defined."
-.       return
-.   endif
-.   heading2("ZLib archive.")
-ZLIB_URL="$(my.url)"
-ZLIB_ARCHIVE="$(get_zlib_file(my.install))"
-
-.endmacro # define_zlib
-.
-.macro define_png(install)
-.   define my.install = define_png.install
-.   define my.url = get_png_url(my.install)?
-.   if (!defined(my.url))
-.       #abort "A version of png is not defined."
-.       return
-.   endif
-.   heading2("PNG archive.")
-PNG_URL="$(my.url)"
-PNG_ARCHIVE="$(get_png_file(my.install))"
-
-.endmacro # define_png
-.
-.macro define_qrencode(install)
-.   define my.install = define_qrencode.install
-.   define my.url = get_qrencode_url(my.install)?
-.   if (!defined(my.url))
-.       #abort "A version of qrencode is not defined."
-.       return
-.   endif
-.   heading2("QREncode archive.")
-QRENCODE_URL="$(my.url)"
-QRENCODE_ARCHIVE="$(get_qrencode_file(my.install))"
-
-.endmacro # define_qrencode
 .
 .macro define_zmq(install)
 .   define my.install = define_zmq.install
@@ -893,36 +678,8 @@ initialize_icu_packages()
 
 .endmacro # define_initialize_icu_packages
 .
-.macro define_patch_zlib_configuration()
-# Because ZLIB doesn't actually parse its --disable-shared option.
-# Because ZLIB doesn't follow GNU recommentation for unknown arguments.
-patch_zlib_configuration()
-{
-    sed -i.tmp "s/leave 1/shift/" configure
-    sed -i.tmp "s/--static/--static | --disable-shared/" configure
-    sed -i.tmp "/unknown option/d" configure
-    sed -i.tmp "/help for help/d" configure
-
-    # display_message "Hack: ZLIB configuration options modified."
-}
-
-.endmacro # define_patch_zlib_configuration
-.
-.macro define_clean_zlib_build()
-# Because ZLIB can't build shared only.
-clean_zlib_build()
-{
-    if [[ $DISABLE_STATIC ]]; then
-        rm --force "$PREFIX/lib/libz.a"
-    fi
-}
-
-.endmacro # define_clean_zlib_build
-.
 .macro define_tarball_functions(has_preclean_option)
 .   define_initialize_icu_packages()
-.   define_patch_zlib_configuration()
-.   define_clean_zlib_build()
 .
 .   define my.make_jobs_preclean = is_true(my.has_preclean_option) \
         ?? "make_jobs true" ? "make_jobs"
@@ -998,17 +755,10 @@ build_from_tarball()
 
     display_heading_message "Prepairing to build $ARCHIVE"
 
-    # Because libpng doesn't actually use pkg-config to locate zlib.
     # Because ICU tools don't know how to locate internal dependencies.
-    if [[ ($ARCHIVE == "$ICU_ARCHIVE") || ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
+    if [[ ($ARCHIVE == "$ICU_ARCHIVE") ]]; then
         local SAVE_LDFLAGS="$LDFLAGS"
         export LDFLAGS="-L$PREFIX/lib $LDFLAGS"
-    fi
-
-    # Because libpng doesn't actually use pkg-config to locate zlib.h.
-    if [[ ($ARCHIVE == "$PNG_ARCHIVE") ]]; then
-        local SAVE_CPPFLAGS="$CPPFLAGS"
-        export CPPFLAGS="-I$PREFIX/include $CPPFLAGS"
     fi
 
     local TARGET="build-$ARCHIVE"
@@ -1016,11 +766,6 @@ build_from_tarball()
     push_directory "$PUSH_DIR"
     local PROJ_CONFIG_DIR
     PROJ_CONFIG_DIR=\$(pwd)
-
-    # Enable static only zlib build.
-    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
-        patch_zlib_configuration
-    fi
 
     push_obj_directory "$TARGET"
 
@@ -1038,11 +783,6 @@ build_from_tarball()
     fi
 
     configure_links
-
-    # Enable shared only zlib build.
-    if [[ $ARCHIVE == "$ZLIB_ARCHIVE" ]]; then
-        clean_zlib_build
-    fi
 
     pop_obj_directory
     pop_directory
@@ -1220,9 +960,7 @@ build_from_tarball_boost()
     display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
     display_message "-sNO_BZIP2            : 1"
     display_message "-sICU_PATH            : $ICU_PREFIX"
-    display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
-    display_message "-sZLIB_LIBPATH        : $PREFIX/lib"
-    display_message "-sZLIB_INCLUDE        : $PREFIX/include"
+  # display_message "-sICU_LINK            : " "${ICU_LIBS[*]}"
     display_message "-j                    : $JOBS"
     display_message "-d0                   : [supress informational messages]"
     display_message "-q                    : [stop at the first error]"
@@ -1231,17 +969,18 @@ build_from_tarball_boost()
     display_message "BOOST_OPTIONS         : $*"
     display_message "--------------------------------------------------------------------"
 
-    # boost_iostreams
-    # The zlib options prevent boost linkage to system libs in the case where
-    # we have built zlib in a prefix dir. Disabling zlib in boost is broken in
-    # all versions (through 1.60). https://svn.boost.org/trac/boost/ticket/9156
-    # The bzip2 auto-detection is not implemented, but disabling it works.
-
     ./bootstrap.sh \\
         "--prefix=$PREFIX" \\
         "--with-icu=$ICU_PREFIX"
 
+    # boost_regex:
+    # As of boost 1.72.0 the ICU_LINK symbol is no longer supported and
+    # produces a hard stop if WITH_ICU is also defined. Removal is sufficient.
+    # github.com/libbitcoin/libbitcoin-system/issues/1192
+    # "-sICU_LINK=${ICU_LIBS[*]}"
+
     ./b2 install \\
+        "cxxstd=11" \\
         "variant=release" \\
         "threading=multi" \\
         "$BOOST_TOOLSET" \\
@@ -1252,9 +991,6 @@ build_from_tarball_boost()
         "boost.locale.posix=$BOOST_ICU_POSIX" \\
         "-sNO_BZIP2=1" \\
         "-sICU_PATH=$ICU_PREFIX" \\
-        "-sICU_LINK=${ICU_LIBS[*]}" \\
-        "-sZLIB_LIBPATH=$PREFIX/lib" \\
-        "-sZLIB_INCLUDE=$PREFIX/include" \\
         "-j $JOBS" \\
         "-d0" \\
         "-q" \\

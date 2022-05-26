@@ -402,6 +402,7 @@ function emit_project(repository, product, vs_version, project_path)
     emit_import_group_extension_settings(my.repository, my.product)
     emit_target_ensure_nuget_imports(my.repository, my.product)
     emit_item_group_project_references(my.repository, my.product)
+    emit_item_group_natvis()
 
     emit_project_close()
 endfunction emit_project
@@ -646,7 +647,7 @@ endfunction emit_project
 .   define my.file_record = emit_compile_item.file_record
 .
 .   if (!exists_collision(my.collisions, my.file_record.name))
-.       emit_item("ClCompile", my.file_record)
+.       emit_file_record_item("ClCompile", my.file_record)
 .   else
 .       emit_item_with_object("ClCompile", my.file_record)
 .   endif
@@ -654,23 +655,30 @@ endfunction emit_project
 .
 .macro emit_include_item(file_record)
 .   define my.file_record = emit_include_item.file_record
-.   emit_item("ClInclude", my.file_record)
+.   emit_file_record_item("ClInclude", my.file_record)
 .endmacro emit_include_item
 .
 .macro emit_none_item(file_record)
 .   define my.file_record = emit_none_item.file_record
-.   emit_item("None", my.file_record)
+.   emit_file_record_item("None", my.file_record)
 .endmacro emit_none_item
 .
 .macro emit_resources_item(file_record)
 .   define my.file_record = emit_resources_item.file_record
-.   emit_item("ResourceCompile", my.file_record)
-.endmacro emit_none_item
+.   emit_file_record_item("ResourceCompile", my.file_record)
+.endmacro emit_resources_item
 .
-.macro emit_item(type, file_record)
-.   define my.file_record = emit_item.file_record
-    <$(my.type) Include="$(make_windows_path(my.file_record.relative_name))" />
+.macro emit_item(type, include)
+.   define my.type = emit_item.type
+.   define my.file_record = emit_item.include
+    <$(my.type) Include="$(my.include)" />
 .endmacro emit_item
+.
+.macro emit_file_record_item(type, file_record)
+.   define my.type = emit_file_record_item.type
+.   define my.file_record = emit_file_record_item.file_record
+.   emit_item(my.type, make_windows_path(my.file_record.relative_name))
+.endmacro emit_file_record_item
 .
 .macro emit_item_with_object(type, file_record)
 .   define my.file_record = emit_item_with_object.file_record
@@ -711,6 +719,12 @@ endfunction emit_project
       <Project>{$(my.uuid:upper)}</Project>
     </ProjectReference>
 .endmacro emit_item_group_project_reference_item
+.
+.macro emit_item_group_natvis()
+.   emit_item_group_open()
+.   emit_item("Natvis", "..\\..\\debug.natvis")
+.   emit_item_group_close()
+.endmacro emit_item_group_natvis
 .
 .macro emit_compile_item_threadsafe_statistics(repository, product, vs_version)
 .   define my.repository = emit_compile_item_threadsafe_statistics.repository

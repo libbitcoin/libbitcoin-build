@@ -351,6 +351,36 @@ endfunction
 # Build utilities.
 #------------------------------------------------------------------------------
 
+function global.cumulative_dependencies(list, repositories, repository)
+    define my.list = cumulative_dependencies.list
+    define my.repositories = cumulative_dependencies.repositories
+    define my.repository = cumulative_dependencies.repository
+
+    for my.repository->configure.dependency as _dependency
+        for my.repositories.repository as _repository
+            if (!(_repository.name = my.repository.name) &\
+                 (_repository->package.library = _dependency.name))
+                new configure as _deps
+                    cumulative_dependencies(_deps, my.repositories, _repository)
+
+                    for _deps.dependency as _subdep
+                        if (count(my.list.dependency,\
+                          (count.name = _subdep.name)) = 0)
+                            copy _subdep to my.list
+                        endif
+                    endfor
+                endnew
+            endif
+        endfor
+
+        if (defined(my.list->dependency(name = _dependency.name)))
+            delete my.list->dependency(name = _dependency.name)
+        endif
+
+        copy _dependency to my.list
+    endfor
+endfunction
+
 function global.cumulative_install(list, repositories, repository)
     define my.list = cumulative_install.list
     define my.repositories = cumulative_install.repositories
@@ -360,37 +390,23 @@ function global.cumulative_install(list, repositories, repository)
         for my.repositories.repository as _repository
             if (!(_repository.name = my.repository.name) &\
                  (_repository->package.library = _build.name))
-                cumulative_install_recurse(my.list, my.repositories, _repository)
+                new install as _dep_steps
+                    cumulative_install(_dep_steps, my.repositories, _repository)
+
+                    for _dep_steps.build as _step
+                        if (count(my.list.build, (count.name = _step.name)) = 0)
+                            copy _step to my.list
+                        endif
+                    endfor
+                endnew
             endif
         endfor
-    endfor
 
-    for my.repository->install.build as _build
-        if (count(my.list.build, (count.name = _build.name)) = 0)
-            copy _build to my.list
+        if (defined(my.list->build(name = _build.name)))
+            delete my.list->build(name = _build.name)
         endif
-    endfor
-endfunction
 
-function global.cumulative_install_recurse(list, repositories, repository)
-    define my.list = cumulative_install_recurse.list
-    define my.repositories = cumulative_install_recurse.repositories
-    define my.repository = cumulative_install_recurse.repository
-
-    for my.repository->install.build as _build
-        for my.repositories.repository as _repository
-            if (!(_repository.name = my.repository.name) &\
-                 (_repository->package.library = _build.name))
-                cumulative_install_recurse(my.list, my.repositories, _repository)
-            endif
-        endfor
-    endfor
-
-    for my.repository->install.build as _build
-        if ((count(my.list.build, (count.name = _build.name)) = 0) &\
-            !(my.repository->package.library = _build.name))
-            copy _build to my.list
-        endif
+        copy _build to my.list
     endfor
 endfunction
 
@@ -402,21 +418,6 @@ endfunction
 function global.is_icu_build(build)
     define my.build = is_icu_build.build
     return starts_with(my.build.name, "icu")
-endfunction
-
-function global.is_zlib_build(build)
-    define my.build = is_zlib_build.build
-    return starts_with(my.build.name, "zlib")
-endfunction
-
-function global.is_png_build(build)
-    define my.build = is_png_build.build
-    return starts_with(my.build.name, "png")
-endfunction
-
-function global.is_qrencode_build(build)
-    define my.build = is_qrencode_build.build
-    return starts_with(my.build.name, "qrencode")
 endfunction
 
 function global.is_zmq_build(build)
@@ -857,7 +858,7 @@ $(my.text ? "")
 .
 .macro global.c_copyleft(name)
 ///////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2014-2020 $(my.name) developers (see COPYING).
+// Copyright (c) 2014-2021 $(my.name) developers (see COPYING).
 //
 //        GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 //
@@ -875,7 +876,7 @@ REM ###########################################################################
 .
 .macro global.xml_copyleft(name)
 <!--
- |  Copyright (c) 2014-2020 $(my.name) developers (see COPYING).
+ |  Copyright (c) 2014-2021 $(my.name) developers (see COPYING).
  |
  |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
  |
