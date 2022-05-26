@@ -12,7 +12,8 @@
 .endtemplate
 .template 1
 .
-.macro emit_initialize()
+.macro emit_initialize(vs)
+.   define my.vs = emit_initialize.vs
 
 # Exit this script on the first build error.
 set -e
@@ -21,9 +22,9 @@ set -e
 cd `dirname "$0"`
 
 declare -a vs_version=( \\
-    "vs2017" \\
-    "vs2019" \\
-    "vs2022" \\
+.   for my.vs.version as _version
+    "$(_version.value)" \\
+.   endfor
     )
 
 .endmacro
@@ -80,7 +81,7 @@ function generate_artifacts(path_prefix)
     shebang("bash")
     copyleft("libbitcoin-build")
 
-    emit_initialize()
+    emit_initialize(generate->vs)
 
     for generate.repository by name as _repository
         echo(" Evaluating repository: $(_repository.name)")

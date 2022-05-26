@@ -507,6 +507,10 @@ endfunction #get_coverage_exclusions
 .#            echo "CFLAGS='${{ env.CFLAGS }} -g --coverage" >> $GITHUB_ENV
 .#            echo "CXXFLAGS='${{ env.CXXFLAGS }} -g --coverage" >> $GITHUB_ENV
 .#          fi
+.   # linker flags
+          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
+            echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefixenv/lib" >> $GITHUB_ENV
+          fi
 .
 .endmacro # emit_step_parameter_denormalization
 .
@@ -546,19 +550,36 @@ endfunction #get_coverage_exclusions
 .
 .macro emit_step_failure_output()
 .
-      - name: Failure Display boost bootstrap.log [--build-boost]
-        if: ${{ failure() && (matrix.boost == '--build-boost') }}
+      - name: Failure display compiler version
+        if: ${{ failure() }}
         run: |
           gcc -v
           clang -v
+
+      - name: Failure display env
+        if: ${{ failure() }}
+        run: |
+          env
+ 
+      - name: Failure list libdir
+        if: ${{ failure() }}
+        run: |
+          ls -la ${{ github.workspace }}/prefixenv/lib
+
+      - name: Failure display boost bootstrap.log [--build-boost]
+        if: ${{ failure() && (matrix.boost == '--build-boost') }}
+        run: |
           cat ${{ github.workspace }}/build/build-*/bootstrap.log
 
-      - name: Investigate macos failure
+      - name: Failure display otool output
         if: ${{ failure() && (matrix.os == 'macos-latest') }}
         run: |
           otool -L ${{ github.workspace }}/test/.libs/$(_repository.name)-test
+
+      - name: Failure display DYLD_PRINT_LIBRARIES
+        if: ${{ failure() && (matrix.os == 'macos-latest') }}
+        run: |
           DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/$(_repository.name)-test
-          env
 .
 .endmacro # emit_step_failure_output
 .
@@ -592,8 +613,8 @@ endfunction #get_coverage_exclusions
 .       emit_step_execute_install(my.ci)
 
 .       emit_step_calculate_coverage(my.ci)
-.       #
-.       #emit_step_failure_output()
+ 
+.       emit_step_failure_output()
 .   endif
 .endmacro # emit_job_verify_installsh
 .
