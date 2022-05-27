@@ -10,7 +10,7 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <!-- <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." /> -->
-      <!-- <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." /> -->
+	      <!-- <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." /> -->
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -77,6 +77,8 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
@@ -163,6 +165,10 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" />
+
+      <coverage>
+        <exclude path="src/clone/*" />
+      </coverage>
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
@@ -378,6 +384,8 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
@@ -630,6 +638,8 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
@@ -824,6 +834,8 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
@@ -1049,6 +1061,8 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
@@ -1261,6 +1275,8 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
@@ -1500,6 +1516,8 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
@@ -1684,6 +1702,8 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
@@ -1880,6 +1900,8 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
@@ -2090,6 +2112,8 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
