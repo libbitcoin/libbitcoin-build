@@ -289,6 +289,10 @@ function get_job_cflags(job)
         my.flags = "$(my.flags) -g --coverage"
     endif
 
+    if ((my.job.system = "osx") & (my.job.link = "static"))
+        my.flags = "$(my.flags) -fvisibility=hidden"
+    endif
+
     return "$(my.flags) -fPIE"
 endfunction #get_job_cflags
 
