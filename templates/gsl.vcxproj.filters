@@ -72,12 +72,12 @@ endfunction
 ###
 ### vcxproj related string generators
 ###
-function project_build_dir_relative_path(repository, product, path_prefix,\
+function project_build_relative_path(repository, product, path_prefix,\
     vs_version)
 
-    define my.repository = project_build_dir_relative_path.repository
+    define my.repository = project_build_relative_path.repository
     require(my.repository, "repository", "name")
-    define my.product = project_build_dir_relative_path.product
+    define my.product = project_build_relative_path.product
     define my.proj_name = project_name(my.product, my.repository)
     define my.subpath = "builds/msvc/$(my.vs_version)"
     return append_path(append_path(append_path(my.path_prefix,\
@@ -87,7 +87,7 @@ endfunction
 function project_file(repository, product, path_prefix, vs_version)
     define my.repository = project_file.repository
     define my.product = project_file.product
-    define my.proj_relative_path = project_build_dir_relative_path(\
+    define my.proj_relative_path = project_build_relative_path(\
         my.repository, my.product, my.path_prefix, my.vs_version)
 
     define my.proj_name = project_name(my.product, my.repository)
@@ -243,7 +243,8 @@ function emit_item_group_resources(files)
     endif
 endfunction
 
-function emit_filter(repository, product, vs_version, project_path)
+function emit_filter(toolset, repository, product, project_path)
+    define my.toolset = emit_filter.toolset
     define my.repository = emit_filter.repository
     define my.product = emit_filter.product
     require(my.product, "product", "path")
@@ -251,7 +252,7 @@ function emit_filter(repository, product, vs_version, project_path)
 
     emit_xml_declaration()
     xml_copyleft(my.repository.name)
-    emit_project_open(msbuild_version(my.product))
+    emit_project_open(msbuild_version(my.toolset, my.product))
 
     new directories as _directories
         new files as _files
@@ -300,14 +301,14 @@ function emit_filter(repository, product, vs_version, project_path)
             endif
 
             if (requires_threadsafe_statistics(my.repository, my.product,\
-                my.vs_version))
+                my.toolset.name))
 
                 my.uuid = filter_add(_directories, "src/external", my.uuid)
             endif
 
             emit_declare_filters_item_group(_directories, my.product.uuid)
             emit_item_group_compiler(_files, my.repository, my.product,\
-                my.vs_version)
+                my.toolset.name)
 
             emit_item_group_includes(_files)
             emit_item_group_none(_files)
@@ -418,33 +419,55 @@ endfunction
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_filter(path_prefix, generate, vs_version)
+function generate_filter(path_prefix, generate)
     define my.generate = generate_filter.generate
-    for my.generate.repository as _repository by _repository.name\
-        where defined(_repository->make)
 
-        require(_repository, "repository", "name")
-        define my.absolute_project_path = append_path(global.root,\
-            canonical_path_name(_repository))
+    for my.generate->vs.version as _version by _version.value
+        define my.toolset = my.generate->msvc->toolset(\
+            _toolset.name = _version.value, _toolset)
 
-        for _repository->make.product as _product where \
-            has_uuid(_product) & defined(_product.path)
+        for my.generate.repository as _repository by _repository.name
+            require(_repository, "repsoitory", "name")
 
-            define my.proj_dir_name = project_build_dir_relative_path(\
-                _repository, _product, my.path_prefix, my.vs_version)
+            define my.absolute_path = append_path(global.root,\
+                canonical_path_name(_repository))
 
-            define my.proj_file = project_file(_repository, _product,\
-                my.path_prefix, my.vs_version)
+            for _repository->make.product as _product where \
+                has_uuid(_product) & defined(_product.path)
 
-            create_directory(my.proj_dir_name)
-            notify(my.proj_file)
-            output(my.proj_file)
+                define my.dirname = project_build_relative_path(\
+                    _repository, _product, my.path_prefix, _version.value)
 
-            emit_filter(_repository, _product, my.vs_version,\
-                my.absolute_project_path)
+                define my.filename = project_file(_repository, \
+                    _product, my.path_prefix, _version.value)
 
-            close
-        endfor
-    endfor _repository
-endfunction # generate_vcxproj
+                create_directory(my.dirname)
+                notify(my.filename)
+                output(my.filename)
+
+                emit_filter(my.toolset, _repository, _product,\
+                    my.absolute_path)
+
+                close
+            endfor _product
+        endfor _repository
+    endfor _version
+endfunction # generate_filter
+
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+gsl from "templates/shared/common_msvc_artifacts.gsl"
+
+generate_filter("output", generate)
+
 .endtemplate

@@ -68,11 +68,12 @@ function emit_postsolution(repository)
     emit_global_postsolution_close()
 endfunction
 
-function emit_solution(repository)
+function emit_solution(toolset, repository)
+    define my.toolset = emit_solution.toolset
     define my.repository = emit_solution.repository
     require(my.repository, "repository", "name")
 
-    emit_version()
+    emit_version(my.toolset)
     emit_projects(my.repository)
     emit_global_open()
     emit_presolution()
@@ -87,12 +88,13 @@ endfunction emit_solution
 .endtemplate
 .template 1
 .
-.macro emit_version()
+.macro emit_version(toolset)
+.   define my.toolset = emit_version.toolset
 
-Microsoft Visual Studio Solution File, Format Version $(format_version())
-# Visual Studio $(visual_studio_year())
-VisualStudioVersion = $(visual_studio_version())
-MinimumVisualStudioVersion = $(visual_studio_version_min())
+Microsoft Visual Studio Solution File, Format Version $(my.toolset->solution.format)
+# Visual Studio $(my.toolset->solution.year)
+VisualStudioVersion = $(my.toolset->solution->version.value)
+MinimumVisualStudioVersion = $(my.toolset->solution->version.min)
 .endmacro emit_version
 .
 .macro emit_project(project_name, project_path, uuid)
@@ -158,24 +160,47 @@ EndGlobal
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_solutions(path_prefix, generate, vs_version)
+function generate_solutions(path_prefix, generate)
     define my.generate = generate_solutions.generate
-    for my.generate.repository as _repository by _repository.name
-        require(_repository, "repository", "name")
-        define my.absolute_path = join(join(global.root, my.path_prefix),\
-            _repository.name)
 
-        define my.solution_path = solution_relative_path(_repository,\
-            my.path_prefix, my.vs_version)
+    for my.generate->vs.version as _version by _version.value
+        define my.toolset = my.generate->msvc->toolset(\
+            _toolset.name = _version.value, _toolset)
 
-        define my.solution_filename = solution_file(_repository,\
-            my.path_prefix, my.vs_version)
+        for my.generate.repository as _repository by _repository.name
+            require(_repository, "repsoitory", "name")
 
-        create_directory(my.solution_path)
-        notify(my.solution_filename)
-        output(my.solution_filename)
-        emit_solution(_repository)
-        close
-    endfor _repository
+            define my.absolute_path = join(join(global.root, my.path_prefix, \
+                _repository.name))
+
+            define my.sln_path = solution_relative_path(_repository, \
+                my.path_prefix, _version.value)
+
+            define my.sln_filename = solution_file(_repository, \
+                my.path_prefix, _version.value)
+
+            create_directory(my.sln_path)
+            notify(my.sln_filename)
+            output(my.sln_filename)
+            emit_solution(my.toolset, _repository)
+            close
+        endfor _repository
+    endfor _version
 endfunction # generate_solutions
+
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_solutions("output", generate)
+
 .endtemplate
