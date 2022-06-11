@@ -24,16 +24,15 @@ function format_template_files(configure)
     return trim_left(my.template_files)
 endfunction
 
-function find_flag_name(configure, name)
-    define my.configure = find_flag_name.configure
-    define my.found = my.configure->flag(flag.name = my.name)?
+function is_flag_prefixed(configure, prefix)
+    define my.configure = is_flag_prefixed.configure
+    define my.found = my.configure->flag(starts_with(flag.name, my.prefix))?
     return defined(my.found)
 endfunction
 
-function find_flag_name(configure, value)
-    define my.configure = find_flag_name.configure
-    define my.found = my.configure->flag(flag.name = my.value)?
-    return defined(my.found)
+function find_flag_prefixed(configure, prefix)
+    define my.configure = find_flag_prefixed.configure
+    return my.configure->flag(starts_with(flag.name, my.prefix))
 endfunction
 
 # Return PREPROC|COMPILE|LINK
@@ -274,13 +273,17 @@ AS_CASE([${host_os}],
 .endmacro
 .
 .#-----------------------------------------------------------------------------
-.# AX_CXX_COMPILE_STDCXX_11
+.# AX_CXX_COMPILE_STDCXX
 .#-----------------------------------------------------------------------------
-.macro require_stdcxx11(repository)
-.   define my.repository = require_stdcxx11.repository
-.   if (find_flag_name(my.repository->configure, "std=c++11"))
-.heading2("Check for baseline language coverage in the compiler for the C++11 standard.")
-AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
+.macro require_stdcxx(repository)
+.   define std_prefix = "std=c++"
+.   define my.repository = require_stdcxx.repository
+.   if (is_flag_prefixed(my.repository->configure, std_prefix))
+.       define my.flag = find_flag_prefixed(my.repository->configure, std_prefix)
+.       define my.standard = right(my.flag.name,\
+            string.length(my.flag.name) - string.length(std_prefix))
+.heading2("Check for baseline language coverage in the compiler for the C++$(my.standard) standard.")
+AX_CXX_COMPILE_STDCXX([$(my.standard)], [noext], [mandatory])
 
 .   endif
 .endmacro
@@ -1043,7 +1046,7 @@ for generate.repository by name as _repository
 
     heading1("Standard declarations.")
     initialize_configure(_repository)
-    require_stdcxx11(_repository)
+    require_stdcxx(_repository)
 
     if (defined(my.configure->option))
         heading1("Process options.")
