@@ -103,7 +103,7 @@ call :pending "Building respository %~1..."
 call :depends "%~1"
 .   emit_error_handler("Initializing dependencies %~1 failed.")
 call cd /d "%path_base%\\%~1\\builds\\msvc\\%proj_version%"
-call "%msbuild_exe%" %msbuild_args% %~1.sln
+call "%msbuild_exe%" %msbuild_args% %~1.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false
 .   emit_error_handler("%msbuild_exe% %msbuild_args% %~1.sln failed.")
 call :success "Building repository %~1 execution complete."
 call cd /d "%path_base%"
@@ -116,7 +116,7 @@ call :pending "Building respository project %~1..."
 call :depends %~1
 .   emit_error_handler("Initializing dependencies %~1 failed.")
 call cd /d "%path_base%\\%~1\\builds\\msvc\\%proj_version%"
-call "%msbuild_exe%" %msbuild_args% /target:%~1:Rebuild %~1.sln
+call "%msbuild_exe%" %msbuild_args% /target:%~1:Rebuild %~1.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false
 .   emit_error_handler("%msbuild_exe% %msbuild_args% /target:%~1:Rebuild %~1.sln")
 call :success "Building repository project %~1 execution complete."
 call cd /d "%path_base%"
