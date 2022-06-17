@@ -61,7 +61,7 @@ function get_job_os(job)
     endif
 
     return my.os
-endfunction #get_job_os
+endfunction # get_job_os
 
 function get_job_packager(job)
     define my.job = get_job_packager.job
@@ -76,7 +76,7 @@ function get_job_packager(job)
     endif
 
     return my.packager
-endfunction #get_job_packager
+endfunction # get_job_packager
 
 function sanitized_link(job)
     define my.job = sanitized_link.job
@@ -129,7 +129,7 @@ function has_axis_value(job, name, value)
     return (count(my.job.axis, (count.name = my.name)) = 1) &\
       defined(my.job->axis(axis.name = my.name).value) &\
       (my.job->axis(axis.name = my.name).value = my.value)
-endfunction #has_axis_value
+endfunction # has_axis_value
 
 function get_job_packages(job)
     define my.job = get_job_packages.job
@@ -157,7 +157,7 @@ function get_job_packages(job)
     endif
 
     return "$(my.packages)"
-endfunction #get_job_packages
+endfunction # get_job_packages
 
 function get_job_compiler(job)
     define my.job = get_job_compiler.job
@@ -182,7 +182,7 @@ function get_job_compiler(job)
     endif
 
     return "$(my.compiler)"
-endfunction #get_job_compiler
+endfunction # get_job_compiler
 
 function get_job_optimization(job)
     define my.job = get_job_optimization.job
@@ -197,7 +197,7 @@ function get_job_optimization(job)
     endif
 
     return my.job.optimization
-endfunction #get_job_optimization
+endfunction # get_job_optimization
 
 function get_job_compiler_package(job)
     define my.job = get_job_compiler_package.job
@@ -208,7 +208,7 @@ function get_job_compiler_package(job)
     endif
 
     return "$(get_job_compiler(my.job))$(my.version)"
-endfunction #get_job_compiler_package
+endfunction # get_job_compiler_package
 
 function get_job_assert(job)
     define my.job = get_job_assert.job
@@ -219,7 +219,7 @@ function get_job_assert(job)
     endif
 
     return my.job.assert ? "ndebug"
-endfunction #get_job_assert
+endfunction # get_job_assert
 
 function get_job_cc(job)
     define my.job = get_job_cc.job
@@ -235,7 +235,7 @@ function get_job_cc(job)
     endif
 
     return "$(my.compiler)$(my.version)"
-endfunction #get_job_cc 
+endfunction # get_job_cc 
 
 function get_job_cxx(job)
     define my.job = get_job_cxx.job
@@ -256,7 +256,7 @@ function get_job_cxx(job)
     endif
 
     return "$(my.compiler)$(my.version)"
-endfunction #get_job_cxx 
+endfunction # get_job_cxx 
 
 function get_job_link(job)
     define my.job = get_job_link.job
@@ -269,7 +269,7 @@ function get_job_link(job)
     endif
 
     return my.job.link
-endfunction #get_job_link
+endfunction # get_job_link
 
 function get_job_cflags(job)
     define my.job = get_job_cflags.job
@@ -294,12 +294,12 @@ function get_job_cflags(job)
     endif
 
     return "$(my.flags) -fPIE"
-endfunction #get_job_cflags
+endfunction # get_job_cflags
 
 function get_job_cxxflags(job)
     define my.job = get_job_cxxflags.job
     return get_job_cflags(my.job)
-endfunction #get_job_cxxflags
+endfunction # get_job_cxxflags
 
 function get_job_axis_value(decl, job, axis)
     define my.decl = get_job_axis_value.decl
@@ -337,13 +337,13 @@ function get_job_axis_value(decl, job, axis)
     endif
 
     return my.value
-endfunction #get_job_axis_value
+endfunction # get_job_axis_value
 
 function get_job_axis_default(decl, job)
     define my.decl = get_job_axis_default.decl
     define my.job = get_job_axis_default.job
     return ""
-endfunction #get_job_axis_default
+endfunction # get_job_axis_default
 
 function get_job_installsh_axis_value(job, decl)
     define my.job =  get_job_installsh_axis_value.job
@@ -372,7 +372,7 @@ function get_job_coverage(job)
     endif
 
     return my.coverage
-endfunction #get_job_coverage
+endfunction # get_job_coverage
 
 function get_coverage_exclusions(matrix)
     define my.matrix = get_coverage_exclusions.matrix
@@ -401,7 +401,33 @@ function get_coverage_exclusions(matrix)
     endif
 
     return my.excludes
-endfunction #get_coverage_exclusions
+endfunction # get_coverage_exclusions
+
+function get_product_tests(product)
+    define my.product = get_product_tests.product
+    define my.tests = ""
+
+    if defined(my.product)
+        if defined(my.product->runner)
+            for my.product->runner.run as _run
+                my.tests = join(my.tests, _run.test, ",")
+            endfor
+        endif
+    endif
+
+    return my.tests
+endfunction
+
+function get_sln_tests(repository)
+    define my.repository = get_sln_tests.repository
+
+    define my.product = my.repository->make->product(\
+        defined(_product->runner), _product)?
+ 
+    define my.tests = get_product_tests(my.product)
+
+    return is_empty(my.tests) ?? "*" ? "$(my.tests)"
+endfunction # get_sln_tests
 
 ###############################################################################
 # Macros
@@ -445,7 +471,8 @@ endfunction #get_coverage_exclusions
 .
 .endmacro #initialize_installsh_matrix
 .
-.macro initialize_sln_matrix_entry(matrix, job)
+.macro initialize_sln_matrix_entry(repository, matrix, job)
+.   define my.repository = initialize_sln_matrix_entry.repository
 .   define my.matrix = initialize_sln_matrix_entry.matrix
 .   define my.job = initialize_sln_matrix_entry.job
 .
@@ -453,17 +480,19 @@ endfunction #get_coverage_exclusions
             configuration: "$(get_job_windows_configuration(my.job))"
             platform: "$(get_job_windows_platform(my.job))"
             version: "vs2022"
+            tests: "$(get_sln_tests(my.repository))"
 
 .endmacro # initialize_sln_matrix_entry
 .
-.macro initialize_sln_matrix(matrix)
+.macro initialize_sln_matrix(repository, matrix)
+.   define my.repository = initialize_sln_matrix.repository
 .   define my.matrix = initialize_sln_matrix.matrix
 .
       matrix:
         include:
 .
 .   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_windows(_job)
-.       initialize_sln_matrix_entry(my.matrix, _job)
+.       initialize_sln_matrix_entry(my.repository, my.matrix, _job)
 .   endfor _job
 .
 .endmacro #initialize_installsh_matrix
@@ -637,7 +666,7 @@ endfunction #get_coverage_exclusions
     strategy:
       fail-fast: false
 
-.       initialize_sln_matrix(my.ci)
+.       initialize_sln_matrix(my.repository, my.ci)
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -685,7 +714,7 @@ endfunction #get_coverage_exclusions
           $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
           Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
           try {
-            Invoke-Expression "$BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS"
+            Invoke-Expression "$BC_TEST_SINGLETON --run_test=${{ matrix.tests }} $env:BOOST_UNIT_TEST_OPTIONS"
           }
           catch {
             $ERR = $_;
