@@ -487,15 +487,22 @@ endfunction
 
 function emit_flags(repository)
     define my.repository = emit_flags.repository
+    define my.std_prefix = "std=c++"
 
-    if (count(my.repository->configure.flag, count.name = "std=c++11") > 0)
-        emit_cxx_standard("11")
+    if (count(my.repository->configure.flag,\
+        starts_with(count.name, my.std_prefix) > 0))
+        define my.std_flag = my.repository->configure->flag(\
+            starts_with(_flag.name, my.std_prefix), _flag)
+
+        define my.standard = right(my.std_flag.name,\
+            string.length(my.std_flag.name) - string.length(my.std_prefix))
+        emit_cxx_standard(my.standard)
     endif
 
     new compile_options as _options
         # add_compile_options
         for my.repository->configure.flag as _flag
-            if (_flag.name = "std=c++11")
+            if (starts_with(_flag.name, my.std_prefix))
                 next
             endif
 

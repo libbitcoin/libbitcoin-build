@@ -2,6 +2,258 @@
 <!-- Copyright (c) 2014-2020 libbitcoin developers (see COPYING). -->
 <generate language="en-us" >
 
+  <repository name="libbitcoin-consensus" version="4.0.0" email="eric@voskuil.org" >
+
+    <package library="bitcoin-consensus" description="Bitcoin Consensus Library (optional)" url="https://github.com/libbitcoin/libbitcoin-consensus" />
+
+    <configure>
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
+      <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <!-- <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." /> -->
+      <!-- <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." /> -->
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
+      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+
+      <!-- Locate function declarations and define found header and export symbols. -->
+      <define header="byteswap.h" export="bswap_16" />
+      <define header="byteswap.h" export="bswap_32" />
+      <define header="byteswap.h" export="bswap_64" />
+
+      <define header="endian.h" export="le16toh" />
+      <define header="endian.h" export="le32toh" />
+      <define header="endian.h" export="le64toh" />
+      <define header="endian.h" export="htole16" />
+      <define header="endian.h" export="htole32" />
+      <define header="endian.h" export="htole64" />
+      <define header="endian.h" export="be16toh" />
+      <define header="endian.h" export="be32toh" />
+      <define header="endian.h" export="be64toh" />
+      <define header="endian.h" export="htobe16" />
+      <define header="endian.h" export="htobe32" />
+      <define header="endian.h" export="htobe64" />
+
+      <define header="sys/endian.h" export="le16toh" />
+      <define header="sys/endian.h" export="le32toh" />
+      <define header="sys/endian.h" export="le64toh" />
+      <define header="sys/endian.h" export="htole16" />
+      <define header="sys/endian.h" export="htole32" />
+      <define header="sys/endian.h" export="htole64" />
+      <define header="sys/endian.h" export="be16toh" />
+      <define header="sys/endian.h" export="be32toh" />
+      <define header="sys/endian.h" export="be64toh" />
+      <define header="sys/endian.h" export="htobe16" />
+      <define header="sys/endian.h" export="htobe32" />
+      <define header="sys/endian.h" export="htobe64" />
+
+      <dependency name="boost" version="1.76.0" option="tests" />
+      <dependency name="boost_unit_test_framework" option="tests" />
+      <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
+      <dependency name="secp256k1" version="0.1.0.20" />
+      <!-- <dependency name="java" option="java" /> -->
+      <!-- <dependency name="python" version="2.7" option="python" /> -->
+
+      <!-- General flags -->
+      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
+
+      <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
+      <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
+
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
+
+      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c++" /> -->
+
+      <flag name="fstack-protector" comment="Protect stack." context="link" />
+      <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
+
+      <!-- Project specific flags -->
+      <flag name="Wno-unused-parameter" comment="Suppress frequent warning in cloned files." context="c++" />
+      <flag name="Wno-c++17-extensions" compiler="clang" comment="Suppress frequent warning in cloned files." context="c++" />
+    </configure>
+
+    <make>
+      <product prefix="pkgconfig" >
+        <file path="libbitcoin-consensus.pc" />
+      </product>
+      <product prefix="doc" >
+        <file path="AUTHORS" />
+        <file path="COPYING" />
+        <file path="ChangeLog" />
+        <file path="INSTALL" />
+        <file path="NEWS" />
+        <file path="README" />
+      </product>
+      <product prefix="lib" path="src" uuid="6c521d95-00ce-4120-97d1-430e2870d738" >
+        <library name="secp256k1" />
+        <headers path="include" />
+        <headers path="src" />
+        <headers path="src/clone" />
+        <sources path="src" />
+      </product>
+      <product prefix="bin" path="test" target_name="libbitcoin-consensus-test" test="true" option="tests" uuid="d282ef8c-6217-483c-ac47-864b2fba50fd" >
+        <runner/>
+        <library name="bitcoin-consensus" />
+        <library name="boost" />
+        <library name="boost_unit_test_framework" />
+        <headers path="include" />
+        <headers path="src" />
+        <headers path="src/clone" />
+        <sources path="test" />
+      </product>
+      <product prefix="include" container="bitcoin" >
+        <files path="include/bitcoin" />
+      </product>
+      <!-- <product prefix="lib" path="bindings/java/wrap" target_name="libbitcoin-consensus-jni" option="java" >
+        <library name="bitcoin-consensus" />
+        <library name="java" />
+        <headers path="include" />
+        <sources path="bindings/java/wrap" />
+      </product> -->
+      <!-- <product prefix="javaexec" distribute="true" install="false" option="java" >
+        <files path="bindings/java/proxy/org/libbitcoin/consensus" />
+      </product> -->
+      <!-- <product prefix="jarexec" distribute="false" install="true" option="java" >
+        <file path="org.libbitcoin.consensus-${VERSION}.jar" />
+      </product> -->
+      <!-- <product prefix="pkgpyexec" path="bindings/python/wrap" target_name="_bitcoin-consensus" unprefixed="true" option="python" >
+        <library name="bitcoin-consensus" />
+        <library name="python" />
+        <headers path="include" />
+        <sources path="bindings/python/wrap" />
+      </product> -->
+      <!-- <product prefix="pkgpython" option="python" >
+        <files path="bindings/python/proxy" />
+      </product> -->
+    </make>
+
+    <install>
+      <!-- Boost.system is necessary for detection, which is only required for test. -->
+      <build name="boost" version="1.78.0" parallel="true" nuget="true" >
+        <option value="--with-system" />
+        <option value="--with-test" />
+      </build>
+      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
+        <option value="--disable-tests" />
+        <option value="--enable-experimental" />
+        <option value="--enable-module-recovery" />
+        <option value="--enable-module-schnorrsig" />
+      </build>
+      <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+    </install>
+
+    <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" />
+
+      <!-- image="xcode12.2" equivalent? -->
+      <!-- prefix variance? -->
+      <job system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
+        <!-- <axis name="boost" /> -->
+        <axis name="icu" value="with" />
+      </job>
+
+      <job system="osx" version="14" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+      
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+    </ci>
+
+    <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <!-- <get name="swig" /> -->
+        <option value="--disable-static" />
+      </job>
+      <job system="osx" compiler="clang" link="static" >
+        <!-- <get name="swig" /> -->
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
+        <option value="--build-boost" />
+        <option value="--disable-ndebug" />
+        <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <!-- <get name="swig" /> -->
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
+        <!-- <get name="swig" /> -->
+        <option value="--disable-static" />
+        <option value="--build-boost" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <exclude path="clone/*" />
+        <!-- <get name="swig" /> -->
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
+      </job>
+      <job system="windows" compiler="x64" link="static">
+        <option value="--disable-ndebug" />
+      </job>
+      <job system="windows" compiler="x64" link="static" />
+      <job system="windows" compiler="Win32" link="static">
+        <option value="--disable-ndebug" />
+      </job>
+      <job system="windows" compiler="Win32" link="static" />
+    </matrix>
+
+  </repository>
+
   <repository name="libbitcoin-system" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-system" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin-system" >
@@ -22,110 +274,24 @@
       <!-- https://svn.boost.org/trac/boost/ticket/6851 [gcc, 1.50-1.53] -->
       <!-- [log rotation derivation for customization]  [???? 1.56] -->
       <!-- [compiler failure]                           [vc120 1.62-1.72] -->
-      <dependency name="boost" version="1.76.0">
-          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost" version="1.78.0" />
-      </dependency>
+      <dependency name="boost" version="1.76.0" />
       <!-- boost atomic is header-only for lock-free cases. -->
       <!-- www.boost.org/doc/libs/1_78_0/doc/html/atomic/interface.html
-      <dependency name="boost_atomic" m4="none">
-          <nuget compiler="vc120" name="boost_atomic-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_atomic-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_atomic-vc141" version="1.76.0.0" />
-      </dependency>
+      <dependency name="boost_atomic" m4="none" />
       -->
-      <dependency name="boost_chrono">
-          <nuget compiler="vc120" name="boost_chrono-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_chrono-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_chrono-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_chrono-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_chrono-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_container" m4="none">
-          <!-- boost container is a header-only library, except if you use -->
-          <!-- Extended Allocators or some Polymorphic Memory Resources classes. -->
-          <!-- www.boost.org/doc/libs/1_68_0/doc/html/container.html -->
-          <!-- These are required by use of boost json (even as headers only). -->
-          <nuget compiler="vc120" name="boost_container-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_container-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_container-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_container-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_container-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_date_time">
-          <nuget compiler="vc120" name="boost_date_time-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_date_time-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_date_time-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_date_time-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_date_time-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_filesystem">
-          <nuget compiler="vc120" name="boost_filesystem-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_filesystem-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_filesystem-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_filesystem-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_filesystem-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_iostreams">
-          <nuget compiler="vc120" name="boost_iostreams-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_iostreams-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_iostreams-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_iostreams-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_iostreams-vc143" version="1.78.0" />
-      </dependency>
+      <dependency name="boost_chrono" />
+      <dependency name="boost_container" m4="none" />
+      <dependency name="boost_date_time" />
+      <dependency name="boost_filesystem" />
+      <dependency name="boost_iostreams" />
       <!-- boost json is not used in the header-only configuration. -->
-      <dependency name="boost_json">
-          <nuget compiler="vc120" name="boost_json-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_json-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_json-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_json-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_json-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_locale">
-          <nuget compiler="vc120" name="boost_locale-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_locale-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_locale-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_locale-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_locale-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_program_options">
-          <nuget compiler="vc120" name="boost_program_options-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_program_options-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_program_options-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_program_options-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_program_options-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_regex">
-          <nuget compiler="vc120" name="boost_regex-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_regex-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_regex-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_regex-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_regex-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_system">
-          <nuget compiler="vc120" name="boost_system-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_system-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_system-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_system-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_system-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_thread">
-          <nuget compiler="vc120" name="boost_thread-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_thread-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_thread-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_thread-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_thread-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_unit_test_framework" option="tests">
-          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
-      </dependency>
+      <dependency name="boost_json" />
+      <dependency name="boost_locale" />
+      <dependency name="boost_program_options" />
+      <dependency name="boost_regex" />
+      <dependency name="boost_system" />
+      <dependency name="boost_thread" />
+      <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="pthread" system_exclude="android" />
       <dependency name="rt" function="clock_gettime" system="linux" system_exclude="android" />
       <dependency name="icu-i18n" version="55.2" unprefixed="true" option="icu" />
@@ -133,17 +299,10 @@
       <!-- -ldl is missing from icu package config. -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
       <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
-      <dependency name="secp256k1" version="0.1.0.20">
-          <!-- The vc120 secp256k1 nuget package is no longer supported -->
-          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
-          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.20" />
-          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.20" />
-          <nuget compiler="vc142" name="secp256k1_vc142" version="0.1.0.20" />
-          <nuget compiler="vc143" name="secp256k1_vc143" version="0.1.0.20" />
-      </dependency>
+      <dependency name="secp256k1" version="0.1.0.20" />
 
       <!-- General flags -->
-      <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
+      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wall" comment="Warn on all stuff." context="c++" />
@@ -155,9 +314,13 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
+
+      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -227,6 +390,7 @@
         <!-- TODO: verify this with more recent ICU. -->
         <!-- Bug in ICU 55.2 build requires --enable-draft. -->
         <option value="--enable-draft" />
+        <option value="--enable-rpath" />
         <option value="--enable-tools" />
         <option value="--disable-extras" />
         <option value="--disable-icuio" />
@@ -235,7 +399,7 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.78.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
         <option value="--with-date_time" />
         <option value="--with-filesystem" />
@@ -270,32 +434,32 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
       </job>
 
-      <job system="osx" link="static" optimization="size" assert="ndebug">
+      <job system="osx" version="14" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -370,38 +534,23 @@
 
   </repository>
 
-  <repository name="libbitcoin-blockchain" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-network" version="4.0.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-blockchain" description="Bitcoin Blockchain Library" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
+    <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" />
 
     <configure>
-      <option type="with" name="consensus" default="yes" define="WITH_CONSENSUS" description="Link libbitcoin-consensus and use for consensus checks." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="with" name="tools" default="yes" conditional="true" description="Compile with tools." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0">
-          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_unit_test_framework" option="tests">
-          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="bitcoin-database" version="4.0.0" />
-      <dependency name="bitcoin-consensus" version="4.0.0" option="consensus" />
-
-      <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
+      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="bitcoin-system" version="4.0.0" />
 
       <!-- General flags -->
+      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
+
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
@@ -412,9 +561,13 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
+
+      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -422,7 +575,7 @@
 
     <make>
       <product prefix="pkgconfig" >
-        <file path="libbitcoin-blockchain.pc" />
+        <file path="libbitcoin-network.pc" />
       </product>
       <product prefix="doc" >
         <file path="AUTHORS" />
@@ -432,23 +585,20 @@
         <file path="NEWS" />
         <file path="README" />
       </product>
-      <product prefix="lib" path="src" uuid="868dab9e-fd33-497f-9468-c9000b3d7801" >
-        <library name="bitcoin-database" />
-        <library name="bitcoin-consensus" />
+      <product prefix="lib" path="src" uuid="564eb540-d6b6-425c-b8db-b0bee8970c18" >
+        <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="test" target_name="libbitcoin-blockchain-test" test="true" option="tests" uuid="cec6de45-b67a-487f-b3ad-3d14e83ad032" >
-        <runner/>
-        <library name="bitcoin-blockchain" />
+      <product prefix="bin" path="test" target_name="libbitcoin-network-test" test="true" option="tests" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff" >
+        <runner>
+	  <!--<run test="empty_tests" />-->
+          <!--<run test="p2p_tests" />-->
+        </runner>
+        <library name="bitcoin-network" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
-      </product>
-      <product prefix="bin" path="tools/initchain" project_name="libbitcoin-blockchain-tools" target_name="initchain" install="false" option="tools" uuid="b9ced930-2ec0-4639-9427-d8edb9a677ac" >
-        <library name="bitcoin-blockchain" />
-        <headers path="include" />
-        <sources path="tools/initchain" />
       </product>
       <product prefix="include" container="bitcoin" >
         <files path="include/bitcoin" />
@@ -456,22 +606,61 @@
     </make>
 
     <install>
-      <build name="bitcoin-database" github="evoskuil" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" />
-        <option value="--without-tools" />
+        <option value="--without-examples" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-blockchain" github="evoskuil" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
+
+    <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" />
+
+      <!-- image="xcode12.2" equivalent? -->
+      <!-- prefix variance? -->
+      <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
+      <!-- boost error from asio if from brew -->
+      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+        <!-- <axis name="boost" /> -->
+        <axis name="icu" value="with" />
+      </job>
+
+      <job system="osx" version="14" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" version="14" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+    </ci>
 
     <matrix>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
@@ -479,7 +668,7 @@
         <option value="--disable-static" />
       </job>
       <job system="osx" compiler="clang" link="static" >
-        <option value="--without-consensus" />
+        <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -500,7 +689,6 @@
         <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -519,6 +707,237 @@
         <option value="--disable-ndebug" />
       </job>
       <job system="windows" compiler="x64" link="static" />
+      <job system="windows" compiler="Win32" link="static">
+        <option value="--disable-ndebug" />
+      </job>
+      <job system="windows" compiler="Win32" link="static" />
+    </matrix>
+
+  </repository>
+
+  <repository name="libbitcoin-protocol" version="4.0.0" email="eric@voskuil.org" >
+
+    <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol">
+      <flag value="@mbedtls@" />
+    </package>
+
+    <configure>
+      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
+      <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="with" name="mbedtls" default="no" substitute="true" value="-DWITH_MBEDTLS" description="Compile with MbedTLS." />
+      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+
+      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost_unit_test_framework" option="tests" />
+      <!-- We specify zmq explicitly to require a version with tweetnacl. -->
+      <dependency name="zmq" version="4.3.4" />
+      <dependency name="mbedtls" version="2.12.0" option="mbedtls" />
+      <dependency name="bitcoin-system" version="4.0.0" />
+
+      <!-- General flags -->
+      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
+
+      <flag name="Wall" comment="Warn on all stuff." context="c" />
+      <flag name="Wall" comment="Warn on all stuff." context="c++" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c" />
+      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
+      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
+      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
+      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
+      <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
+      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
+
+      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
+      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
+
+      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
+
+      <flag name="fstack-protector" comment="Protect stack." context="link" />
+      <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
+    </configure>
+
+    <make>
+      <product prefix="pkgconfig" >
+        <file path="libbitcoin-protocol.pc" />
+      </product>
+      <product prefix="doc" >
+        <file path="AUTHORS" />
+        <file path="COPYING" />
+        <file path="ChangeLog" />
+        <file path="INSTALL" />
+        <file path="NEWS" />
+        <file path="README" />
+      </product>
+      <product prefix="lib" path="src" uuid="6b94e2a5-c054-4790-963d-a7be493259b0" >
+        <flag substitute="mbedtls" />
+        <library name="zmq" />
+        <library name="mbedtls" />
+        <library name="bitcoin-system" />
+        <headers path="include" />
+        <sources path="src" />
+      </product>
+      <product prefix="bin" path="test" target_name="libbitcoin-protocol-test" test="true" option="tests" uuid="c42be17b-063d-44f1-a5bb-9f8295144b70" >
+        <flag substitute="mbedtls" />
+        <runner>
+          <!--
+          <run test="authenticator_tests" />
+          <run test="certificate_tests" />
+          <run test="context_tests" />
+          <run test="frame_tests" />
+          <run test="identifiers_tests" />
+          <run test="message_tests" />
+          <run test="poller_tests" />
+          <run test="socket_tests" />
+          <run test="worker_tests" />
+          -->
+        </runner>
+        <library name="bitcoin-protocol" />
+        <library name="boost_unit_test_framework" />
+        <headers path="include" />
+        <sources path="test" />
+      </product>
+      <product prefix="include" container="bitcoin" >
+        <files path="include/bitcoin" />
+      </product>
+    </make>
+
+    <install>
+      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
+      </build>
+      <build name="mbedtls" version="2.12.0" parallel="true">
+      </build>
+      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="--without-examples" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
+        <!-- until test hang is resolved -->
+        <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+    </install>
+
+    <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="mbedtls" build="true" />
+      <axis name="zmq" build="true" />
+
+      <!-- image="xcode12.2" equivalent? -->
+      <!-- prefix variance? -->
+      <job system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
+        <!-- <axis name="boost" /> -->
+        <axis name="icu" value="with" />
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="osx" version="14" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <!-- <axis name="mbedtls" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <!-- <axis name="mbedtls" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+        <!-- <axis name="mbedtls" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+    </ci>
+
+    <matrix>
+      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
+        <get name="boost" />
+        <option value="--build-zmq" />
+        <option value="--build-mbedtls" />
+        <option value="--disable-static" />
+      </job>
+      <job system="osx" compiler="clang" link="static" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+      </job>
+      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--build-mbedtls" />
+        <option value="--disable-ndebug" />
+        <option value="--disable-static" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="clang" link="static" version="5.0" >
+        <option value="--disable-shared" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os'" />
+        <option value="CXXFLAGS='-Os'" />
+      </job>
+      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
+        <option value="--disable-static" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Os -s'" />
+        <option value="CXXFLAGS='-Os -s'" />
+      </job>
+      <job system="linux" compiler="gcc" link="static" coverage="true" >
+        <exclude path="interface.pb.*" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--build-mbedtls" />
+        <option value="--disable-shared" />
+        <option value="--build-dir=my-build" />
+        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="CFLAGS='-Og -g --coverage'" />
+        <option value="CXXFLAGS='-Og -g --coverage'" />
+      </job>
+      <job system="windows" compiler="x64" link="static">
+        <option value="--disable-ndebug" />
+      </job>
+      <job system="windows" compiler="x64" link="static" />
+      <job system="windows" compiler="Win32" link="static">
+        <option value="--disable-ndebug" />
+      </job>
+      <job system="windows" compiler="Win32" link="static" />
     </matrix>
 
   </repository>
@@ -534,25 +953,13 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0">
-          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_unit_test_framework" option="tests">
-          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
-      </dependency>
+      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="4.0.0" />
       <dependency name="bitcoin-protocol" version="4.0.0" />
 
       <!-- General flags -->
-      <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
+      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wall" comment="Warn on all stuff." context="c++" />
@@ -564,9 +971,13 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
+
+      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -685,76 +1096,29 @@
 
   </repository>
 
-  <repository name="libbitcoin-consensus" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-explorer" version="4.0.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-consensus" description="Bitcoin Consensus Library (optional)" url="https://github.com/libbitcoin/libbitcoin-consensus" />
+    <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
 
     <configure>
+      <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <!-- <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." /> -->
-      <!-- <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." /> -->
+      <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
+      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <!-- Locate function declarations and define found header and export symbols. -->
-      <define header="byteswap.h" export="bswap_16" />
-      <define header="byteswap.h" export="bswap_32" />
-      <define header="byteswap.h" export="bswap_64" />
-
-      <define header="endian.h" export="le16toh" />
-      <define header="endian.h" export="le32toh" />
-      <define header="endian.h" export="le64toh" />
-      <define header="endian.h" export="htole16" />
-      <define header="endian.h" export="htole32" />
-      <define header="endian.h" export="htole64" />
-      <define header="endian.h" export="be16toh" />
-      <define header="endian.h" export="be32toh" />
-      <define header="endian.h" export="be64toh" />
-      <define header="endian.h" export="htobe16" />
-      <define header="endian.h" export="htobe32" />
-      <define header="endian.h" export="htobe64" />
-
-      <define header="sys/endian.h" export="le16toh" />
-      <define header="sys/endian.h" export="le32toh" />
-      <define header="sys/endian.h" export="le64toh" />
-      <define header="sys/endian.h" export="htole16" />
-      <define header="sys/endian.h" export="htole32" />
-      <define header="sys/endian.h" export="htole64" />
-      <define header="sys/endian.h" export="be16toh" />
-      <define header="sys/endian.h" export="be32toh" />
-      <define header="sys/endian.h" export="be64toh" />
-      <define header="sys/endian.h" export="htobe16" />
-      <define header="sys/endian.h" export="htobe32" />
-      <define header="sys/endian.h" export="htobe64" />
-
-      <dependency name="boost" version="1.76.0" option="tests">
-          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_unit_test_framework" option="tests">
-          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
-      </dependency>
-      <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
-      <dependency name="secp256k1" version="0.1.0.20">
-          <nuget compiler="vc120" name="secp256k1_vc120" version="0.1.0.19" />
-          <nuget compiler="vc140" name="secp256k1-vc140" version="0.1.0.20" />
-          <nuget compiler="vc141" name="secp256k1_vc141" version="0.1.0.20" />
-          <nuget compiler="vc142" name="secp256k1_vc142" version="0.1.0.20" />
-          <nuget compiler="vc143" name="secp256k1_vc143" version="0.1.0.20" />
-      </dependency>
-      <!-- <dependency name="java" option="java" /> -->
-      <!-- <dependency name="python" version="2.7" option="python" /> -->
+      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
+      <dependency name="bitcoin-client" version="4.0.0" />
+      <dependency name="bitcoin-network" version="4.0.0" />
+        <!-- TODO: verify this with more recent ICU. -->
+      <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
+      <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
 
       <!-- General flags -->
-      <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
+      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wall" comment="Warn on all stuff." context="c++" />
@@ -766,21 +1130,24 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
+
+      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
 
       <!-- Project specific flags -->
-      <flag name="Wno-unused-parameter" comment="Suppress frequent warning in cloned files." context="c++" />
-      <flag name="Wno-c++17-extensions" compiler="clang" comment="Suppress frequent warning in cloned files." context="c++" />
+      <flag name="Wno-unused-parameter" comment="Clean up bx generated code." context="c++" />
     </configure>
 
     <make>
       <product prefix="pkgconfig" >
-        <file path="libbitcoin-consensus.pc" />
+        <file path="libbitcoin-explorer.pc" />
       </product>
       <product prefix="doc" >
         <file path="AUTHORS" />
@@ -790,123 +1157,99 @@
         <file path="NEWS" />
         <file path="README" />
       </product>
-      <product prefix="lib" path="src" uuid="6c521d95-00ce-4120-97d1-430e2870d738" >
-        <library name="secp256k1" />
+      <product prefix="lib" path="src" uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f" >
+        <flag define="sysconfdir" />
+        <library name="bitcoin-client" />
+        <library name="bitcoin-network" />
+        <!-- TODO: verify this with more recent ICU. -->
+        <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
+        <library name="dl" />
         <headers path="include" />
-        <headers path="src" />
-        <headers path="src/clone" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="test" target_name="libbitcoin-consensus-test" test="true" option="tests" uuid="d282ef8c-6217-483c-ac47-864b2fba50fd" >
-        <runner/>
-        <library name="bitcoin-consensus" />
-        <library name="boost" />
+      <product prefix="bin" path="console" target_name="bx" option="console" uuid="098a91f3-291c-4a0d-ae5a-bc5f9f5693ed" >
+        <flag define="sysconfdir" />
+        <library name="bitcoin-explorer" />
+        <headers path="include" />
+        <sources path="console" />
+      </product>
+      <product prefix="bin" path="test" target_name="libbitcoin-explorer-test" test="true" option="tests" uuid="1a0e5edd-e803-4268-9dfb-044eb80bb0f1" >
+        <runner>
+          <run test="generated" />
+          <!--<run test="network" />-->
+          <run test="obsolete" />
+          <run test="offline" />
+          <run test="config" />
+          <run test="stub" />
+        </runner>
+        <flag define="sysconfdir" />
+        <library name="bitcoin-explorer" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
-        <headers path="src" />
-        <headers path="src/clone" />
         <sources path="test" />
       </product>
       <product prefix="include" container="bitcoin" >
         <files path="include/bitcoin" />
       </product>
-      <!-- <product prefix="lib" path="bindings/java/wrap" target_name="libbitcoin-consensus-jni" option="java" >
-        <library name="bitcoin-consensus" />
-        <library name="java" />
-        <headers path="include" />
-        <sources path="bindings/java/wrap" />
-      </product> -->
-      <!-- <product prefix="javaexec" distribute="true" install="false" option="java" >
-        <files path="bindings/java/proxy/org/libbitcoin/consensus" />
-      </product> -->
-      <!-- <product prefix="jarexec" distribute="false" install="true" option="java" >
-        <file path="org.libbitcoin.consensus-${VERSION}.jar" />
-      </product> -->
-      <!-- <product prefix="pkgpyexec" path="bindings/python/wrap" target_name="_bitcoin-consensus" unprefixed="true" option="python" >
-        <library name="bitcoin-consensus" />
-        <library name="python" />
-        <headers path="include" />
-        <sources path="bindings/python/wrap" />
-      </product> -->
-      <!-- <product prefix="pkgpython" option="python" >
-        <files path="bindings/python/proxy" />
-      </product> -->
+      <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
+        <file path="data/bx" />
+      </product>
+      <product prefix="sysconf" container="libbitcoin" option="console">
+        <file path="data/bx.cfg" />
+      </product>
     </make>
 
     <install>
-      <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.76.0" parallel="true" nuget="true" >
-        <option value="--with-system" />
-        <option value="--with-test" />
-      </build>
-      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
+      <build name="icu" version="68.2" parallel="true" >
+        <!-- Bug in ICU 55.2 build requires --enable-draft. -->
+        <!--<option value="--enable-draft" />-->
+        <option value="--enable-rpath" />
+        <option value="--enable-tools" />
+        <option value="--disable-extras" />
+        <option value="--disable-icuio" />
+        <option value="--disable-layout" />
+        <option value="--disable-layoutex" />
         <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
+        <option value="--disable-samples" />
       </build>
-      <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-client" github="evoskuil" repository="libbitcoin-client" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="--without-examples" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="bitcoin-explorer" github="evoskuil" repository="libbitcoin-explorer" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
 
-    <ci>
-      <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
-
-      <!-- image="xcode12.2" equivalent? -->
-      <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
-        <!-- <axis name="boost" /> -->
-        <axis name="icu" value="with" />
-      </job>
-
-      <job system="osx" link="static" optimization="size" assert="ndebug">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-      </job>
-
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
-      </job>
-      
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-      </job>
-
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
-      </job>
-
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-      </job>
-
-      <job system="windows" compiler="x64" link="static" assert="debug" />
-      <job system="windows" compiler="x64" link="static" assert="ndebug" />
-      <job system="windows" compiler="Win32" link="static" assert="debug" />
-      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
-    </ci>
-
     <matrix>
+      <!-- Default boost fails on default macOS platform, so bump to xcode12.2. -->
+      <!-- ICU 68.2 include fail (Wc++11-extensions) on default macOS platform, so bump to xcode12.2. -->
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
-        <!-- <get name="swig" /> -->
+        <get name="bash-completion" />
+        <option value="--with-icu" />
+        <option value="--build-icu" />
+        <option value="--build-zmq" />
+        <option value="--with-bash-completiondir" />
         <option value="--disable-static" />
       </job>
       <job system="osx" compiler="clang" link="static" >
-        <!-- <get name="swig" /> -->
-        <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -914,28 +1257,32 @@
         <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="clang" link="static" version="5.0" >
-        <!-- <get name="swig" /> -->
-        <option value="--disable-shared" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <!-- <get name="swig" /> -->
+        <get name="bash-completion" />
+        <option value="--build-boost" />
+        <option value="--build-zmq" />
         <option value="--disable-static" />
-        <option value="--build-boost" />
+        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os -s'" />
-        <option value="CXXFLAGS='-Os -s'" />
+        <option value="CFLAGS='-Og -g'" />
+        <option value="CXXFLAGS='-Og -g'" />
       </job>
+      <!-- Optional depedencies not built because of coverage time cost. -->
       <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <exclude path="clone/*" />
-        <!-- <get name="swig" /> -->
-        <option value="--disable-shared" />
+        <get name="bash-completion" />
         <option value="--build-boost" />
+        <option value="--build-zmq" />
+        <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
+        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
         <option value="CFLAGS='-Og -g --coverage'" />
         <option value="CXXFLAGS='-Og -g --coverage'" />
       </job>
@@ -962,24 +1309,12 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0">
-          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_unit_test_framework" option="tests">
-          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
-      </dependency>
+      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="4.0.0" />
 
       <!-- General flags -->
-      <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
+      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wall" comment="Warn on all stuff." context="c++" />
@@ -991,9 +1326,13 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
+
+      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -1095,42 +1434,26 @@
 
   </repository>
 
-  <repository name="libbitcoin-explorer" version="4.0.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-blockchain" version="4.0.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
+    <package library="bitcoin-blockchain" description="Bitcoin Blockchain Library" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
     <configure>
-      <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
+      <option type="with" name="consensus" default="yes" define="WITH_CONSENSUS" description="Link libbitcoin-consensus and use for consensus checks." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="with" name="console" default="yes" conditional="true" description="Compile console application." />
+      <option type="with" name="tools" default="yes" conditional="true" description="Compile with tools." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0">
-          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_unit_test_framework" option="tests">
-          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-client" version="4.0.0" />
-      <dependency name="bitcoin-network" version="4.0.0" />
-        <!-- TODO: verify this with more recent ICU. -->
-      <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
-      <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
+      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost_unit_test_framework" option="tests" />
+      <dependency name="bitcoin-database" version="4.0.0" />
+      <dependency name="bitcoin-consensus" version="4.0.0" option="consensus" />
+
+      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
 
       <!-- General flags -->
-      <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
-
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wall" comment="Warn on all stuff." context="c++" />
       <flag name="Wextra" comment="Warn on extra stuff." context="c" />
@@ -1141,20 +1464,21 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
+
+      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-
-      <!-- Project specific flags -->
-      <flag name="Wno-unused-parameter" comment="Clean up bx generated code." context="c++" />
     </configure>
 
     <make>
       <product prefix="pkgconfig" >
-        <file path="libbitcoin-explorer.pc" />
+        <file path="libbitcoin-blockchain.pc" />
       </product>
       <product prefix="doc" >
         <file path="AUTHORS" />
@@ -1164,219 +1488,23 @@
         <file path="NEWS" />
         <file path="README" />
       </product>
-      <product prefix="lib" path="src" uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f" >
-        <flag define="sysconfdir" />
-        <library name="bitcoin-client" />
-        <library name="bitcoin-network" />
-        <!-- TODO: verify this with more recent ICU. -->
-        <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
-        <library name="dl" />
+      <product prefix="lib" path="src" uuid="868dab9e-fd33-497f-9468-c9000b3d7801" >
+        <library name="bitcoin-database" />
+        <library name="bitcoin-consensus" />
         <headers path="include" />
         <sources path="src" />
       </product>
-      <product prefix="bin" path="console" target_name="bx" option="console" uuid="098a91f3-291c-4a0d-ae5a-bc5f9f5693ed" >
-        <flag define="sysconfdir" />
-        <library name="bitcoin-explorer" />
-        <headers path="include" />
-        <sources path="console" />
-      </product>
-      <product prefix="bin" path="test" target_name="libbitcoin-explorer-test" test="true" option="tests" uuid="1a0e5edd-e803-4268-9dfb-044eb80bb0f1" >
-        <runner>
-          <run test="generated" />
-          <!--<run test="network" />-->
-          <run test="obsolete" />
-          <run test="offline" />
-          <run test="config" />
-          <run test="stub" />
-        </runner>
-        <flag define="sysconfdir" />
-        <library name="bitcoin-explorer" />
+      <product prefix="bin" path="test" target_name="libbitcoin-blockchain-test" test="true" option="tests" uuid="cec6de45-b67a-487f-b3ad-3d14e83ad032" >
+        <runner/>
+        <library name="bitcoin-blockchain" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <sources path="test" />
       </product>
-      <product prefix="include" container="bitcoin" >
-        <files path="include/bitcoin" />
-      </product>
-      <product prefix="bash_completion" distribute="true" install="true" option="bash-completiondir" >
-        <file path="data/bx" />
-      </product>
-      <product prefix="sysconf" container="libbitcoin" option="console">
-        <file path="data/bx.cfg" />
-      </product>
-    </make>
-
-    <install>
-      <build name="icu" version="68.2" parallel="true" >
-        <!-- Bug in ICU 55.2 build requires --enable-draft. -->
-        <!--<option value="--enable-draft" />-->
-        <option value="--enable-tools" />
-        <option value="--disable-extras" />
-        <option value="--disable-icuio" />
-        <option value="--disable-layout" />
-        <option value="--disable-layoutex" />
-        <option value="--disable-tests" />
-        <option value="--disable-samples" />
-      </build>
-      <build name="bitcoin-client" github="evoskuil" repository="libbitcoin-client" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-explorer" github="evoskuil" repository="libbitcoin-explorer" branch="master" parallel="true" >
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-    </install>
-
-    <matrix>
-      <!-- Default boost fails on default macOS platform, so bump to xcode12.2. -->
-      <!-- ICU 68.2 include fail (Wc++11-extensions) on default macOS platform, so bump to xcode12.2. -->
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <get name="bash-completion" />
-        <option value="--with-icu" />
-        <option value="--build-icu" />
-        <option value="--build-zmq" />
-        <option value="--with-bash-completiondir" />
-        <option value="--disable-static" />
-      </job>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-static" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <get name="bash-completion" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-static" />
-        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g'" />
-        <option value="CXXFLAGS='-Og -g'" />
-      </job>
-      <!-- Optional depedencies not built because of coverage time cost. -->
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <get name="bash-completion" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="windows" compiler="x64" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="x64" link="static" />
-      <job system="windows" compiler="Win32" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="Win32" link="static" />
-    </matrix>
-
-  </repository>
-
-  <repository name="libbitcoin-network" version="4.0.0" email="eric@voskuil.org" >
-
-    <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" />
-
-    <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
-      <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
-
-      <dependency name="boost" version="1.76.0">
-          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_unit_test_framework" option="tests">
-          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
-      </dependency>
-      <dependency name="bitcoin-system" version="4.0.0" />
-
-      <!-- General flags -->
-      <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
-
-      <flag name="Wall" comment="Warn on all stuff." context="c" />
-      <flag name="Wall" comment="Warn on all stuff." context="c++" />
-      <flag name="Wextra" comment="Warn on extra stuff." context="c" />
-      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
-      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
-      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
-      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
-      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
-      <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
-
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-
-      <flag name="fstack-protector" comment="Protect stack." context="link" />
-      <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-    </configure>
-
-    <make>
-      <product prefix="pkgconfig" >
-        <file path="libbitcoin-network.pc" />
-      </product>
-      <product prefix="doc" >
-        <file path="AUTHORS" />
-        <file path="COPYING" />
-        <file path="ChangeLog" />
-        <file path="INSTALL" />
-        <file path="NEWS" />
-        <file path="README" />
-      </product>
-      <product prefix="lib" path="src" uuid="564eb540-d6b6-425c-b8db-b0bee8970c18" >
-        <library name="bitcoin-system" />
+      <product prefix="bin" path="tools/initchain" project_name="libbitcoin-blockchain-tools" target_name="initchain" install="false" option="tools" uuid="b9ced930-2ec0-4639-9427-d8edb9a677ac" >
+        <library name="bitcoin-blockchain" />
         <headers path="include" />
-        <sources path="src" />
-      </product>
-      <product prefix="bin" path="test" target_name="libbitcoin-network-test" test="true" option="tests" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff" >
-        <runner>
-	  <!--<run test="empty_tests" />-->
-          <!--<run test="p2p_tests" />-->
-        </runner>
-        <library name="bitcoin-network" />
-        <library name="boost_unit_test_framework" />
-        <headers path="include" />
-        <sources path="test" />
+        <sources path="tools/initchain" />
       </product>
       <product prefix="include" container="bitcoin" >
         <files path="include/bitcoin" />
@@ -1384,61 +1512,22 @@
     </make>
 
     <install>
-      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="evoskuil" repository="libbitcoin-database" branch="master" parallel="true" >
         <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tools" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
+        <option value="--without-tests" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="bitcoin-blockchain" github="evoskuil" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
-
-    <ci>
-      <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
-
-      <!-- image="xcode12.2" equivalent? -->
-      <!-- prefix variance? -->
-      <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
-      <!-- boost error from asio if from brew -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
-        <!-- <axis name="boost" /> -->
-        <axis name="icu" value="with" />
-      </job>
-
-      <job system="osx" link="static" optimization="size" assert="ndebug">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-      </job>
-
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
-      </job>
-
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-      </job>
-
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
-      </job>
-
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-      </job>
-
-      <job system="windows" compiler="x64" link="static" assert="debug" />
-      <job system="windows" compiler="x64" link="static" assert="ndebug" />
-      <job system="windows" compiler="Win32" link="static" assert="debug" />
-      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
-    </ci>
 
     <matrix>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
@@ -1446,7 +1535,7 @@
         <option value="--disable-static" />
       </job>
       <job system="osx" compiler="clang" link="static" >
-        <!-- these allow unused build to complete -->
+        <option value="--without-consensus" />
         <option value="--disable-shared" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1467,6 +1556,7 @@
         <option value="CXXFLAGS='-Os'" />
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
+        <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1485,10 +1575,6 @@
         <option value="--disable-ndebug" />
       </job>
       <job system="windows" compiler="x64" link="static" />
-      <job system="windows" compiler="Win32" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="Win32" link="static" />
     </matrix>
 
   </repository>
@@ -1505,26 +1591,14 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0">
-          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_unit_test_framework" option="tests">
-          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
-      </dependency>
+      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="4.0.0" />
       <dependency name="bitcoin-network" version="4.0.0" />
 
       <!-- General flags -->
-      <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
+      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wall" comment="Warn on all stuff." context="c++" />
@@ -1536,9 +1610,13 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
+
+      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -1661,247 +1739,6 @@
 
   </repository>
 
-  <repository name="libbitcoin-protocol" version="4.0.0" email="eric@voskuil.org" >
-
-    <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol">
-      <flag value="@mbedtls@" />
-    </package>
-
-    <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
-      <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="with" name="mbedtls" default="no" substitute="true" value="-DWITH_MBEDTLS" description="Compile with MbedTLS." />
-      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
-
-      <dependency name="boost" version="1.76.0">
-          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_unit_test_framework" option="tests">
-          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
-      </dependency>
-      <!-- We specify zmq explicitly to require a version with tweetnacl. -->
-      <dependency name="zmq" version="4.3.4">
-          <nuget compiler="vc120" name="libzmq_vc120" version="4.3.2" />
-          <nuget compiler="vc140" name="libzmq_vc140" version="4.3.2" />
-          <nuget compiler="vc141" name="libzmq_vc141" version="4.3.2" />
-          <nuget compiler="vc142" name="libzmq_vc142" version="4.3.2" />
-          <nuget compiler="vc143" name="libzmq_vc143" version="4.3.2" />
-      </dependency>
-      <dependency name="mbedtls" version="2.12.0" option="mbedtls" />
-      <dependency name="bitcoin-system" version="4.0.0" />
-
-      <!-- General flags -->
-      <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
-
-      <flag name="Wall" comment="Warn on all stuff." context="c" />
-      <flag name="Wall" comment="Warn on all stuff." context="c++" />
-      <flag name="Wextra" comment="Warn on extra stuff." context="c" />
-      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
-      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" />
-      <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" />
-      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
-      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
-      <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
-
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-
-      <flag name="fstack-protector" comment="Protect stack." context="link" />
-      <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-    </configure>
-
-    <make>
-      <product prefix="pkgconfig" >
-        <file path="libbitcoin-protocol.pc" />
-      </product>
-      <product prefix="doc" >
-        <file path="AUTHORS" />
-        <file path="COPYING" />
-        <file path="ChangeLog" />
-        <file path="INSTALL" />
-        <file path="NEWS" />
-        <file path="README" />
-      </product>
-      <product prefix="lib" path="src" uuid="6b94e2a5-c054-4790-963d-a7be493259b0" >
-        <flag substitute="mbedtls" />
-        <library name="zmq" />
-        <library name="mbedtls" />
-        <library name="bitcoin-system" />
-        <headers path="include" />
-        <sources path="src" />
-      </product>
-      <product prefix="bin" path="test" target_name="libbitcoin-protocol-test" test="true" option="tests" uuid="c42be17b-063d-44f1-a5bb-9f8295144b70" >
-        <flag substitute="mbedtls" />
-        <runner>
-          <!--
-          <run test="authenticator_tests" />
-          <run test="certificate_tests" />
-          <run test="context_tests" />
-          <run test="frame_tests" />
-          <run test="identifiers_tests" />
-          <run test="message_tests" />
-          <run test="poller_tests" />
-          <run test="socket_tests" />
-          <run test="worker_tests" />
-          -->
-        </runner>
-        <library name="bitcoin-protocol" />
-        <library name="boost_unit_test_framework" />
-        <headers path="include" />
-        <sources path="test" />
-      </product>
-      <product prefix="include" container="bitcoin" >
-        <files path="include/bitcoin" />
-      </product>
-    </make>
-
-    <install>
-      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
-      </build>
-      <build name="mbedtls" version="2.12.0" parallel="true">
-      </build>
-      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
-        <!-- until test hang is resolved -->
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-    </install>
-
-    <ci>
-      <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
-      <axis name="mbedtls" build="true" />
-      <axis name="zmq" build="true" />
-
-      <!-- image="xcode12.2" equivalent? -->
-      <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
-        <!-- <axis name="boost" /> -->
-        <axis name="icu" value="with" />
-        <axis name="mbedtls" value="build" />
-        <axis name="zmq" value="build" />
-      </job>
-
-      <job system="osx" link="static" optimization="size" assert="ndebug">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-        <!-- <axis name="mbedtls" /> -->
-        <axis name="zmq" value="build" />
-      </job>
-
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
-        <axis name="boost" value="build" />
-        <!-- axis name="icu" /> -->
-        <axis name="mbedtls" value="build" />
-        <axis name="zmq" value="build" />
-      </job>
-
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-        <!-- <axis name="mbedtls" /> -->
-        <axis name="zmq" value="build" />
-      </job>
-
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
-        <!-- <axis name="mbedtls" /> -->
-        <axis name="zmq" value="build" />
-      </job>
-
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-        <axis name="mbedtls" value="build" />
-        <axis name="zmq" value="build" />
-      </job>
-
-      <job system="windows" compiler="x64" link="static" assert="debug" />
-      <job system="windows" compiler="x64" link="static" assert="ndebug" />
-      <job system="windows" compiler="Win32" link="static" assert="debug" />
-      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
-    </ci>
-
-    <matrix>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--build-zmq" />
-        <option value="--build-mbedtls" />
-        <option value="--disable-static" />
-      </job>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--build-mbedtls" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-static" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os -s'" />
-        <option value="CXXFLAGS='-Os -s'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <exclude path="interface.pb.*" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--build-mbedtls" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="windows" compiler="x64" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="x64" link="static" />
-      <job system="windows" compiler="Win32" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="Win32" link="static" />
-    </matrix>
-
-  </repository>
-
   <repository name="libbitcoin-server" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
@@ -1914,27 +1751,15 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0">
-          <nuget compiler="vc120" name="boost" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost" version="1.78.0" />
-      </dependency>
-      <dependency name="boost_unit_test_framework" option="tests">
-          <nuget compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-          <nuget compiler="vc140" name="boost_unit_test_framework-vc140" version="1.76.0.0" />
-          <nuget compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
-          <nuget compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
-          <nuget compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
-      </dependency>
+      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
       <dependency name="bitcoin-node" version="4.0.0" />
       <dependency name="bitcoin-protocol" version="4.0.0" />
 
       <!-- General flags -->
-      <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
+      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
 
       <flag name="Wall" comment="Warn on all stuff." context="c" />
       <flag name="Wall" comment="Warn on all stuff." context="c++" />
@@ -1946,9 +1771,13 @@
       <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
+      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
+      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
+
+      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -2078,11 +1907,146 @@
 
   </repository>
 
+  <nuget>
+    <resource canonical="boost">
+      <package compiler="vc141" name="boost" version="1.76.0.0" />
+      <package compiler="vc142" name="boost" version="1.76.0.0" />
+      <package compiler="vc143" name="boost" version="1.78.0" />
+    </resource>
+    <!-- boost atomic is header-only for lock-free cases. -->
+    <!-- www.boost.org/doc/libs/1_78_0/doc/html/atomic/interface.html
+    <resource canonical="boost_atomic">
+      <package compiler="vc141" name="boost_atomic-vc141" version="1.72.0.0" />
+    </resource> -->
+    <resource canonical="boost_chrono">
+      <package compiler="vc141" name="boost_chrono-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_chrono-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_chrono-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="boost_container">
+      <!-- boost container is a header-only library, except if you use -->
+      <!-- Extended Allocators or some Polymorphic Memory Resources classes. -->
+      <!-- www.boost.org/doc/libs/1_68_0/doc/html/container.html -->
+      <!-- These are required by use of boost json (even as headers only). -->
+      <package compiler="vc141" name="boost_container-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_container-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_container-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="boost_date_time">
+      <package compiler="vc141" name="boost_date_time-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_date_time-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_date_time-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="boost_filesystem">
+      <package compiler="vc141" name="boost_filesystem-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_filesystem-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_filesystem-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="boost_iostreams">
+      <package compiler="vc141" name="boost_iostreams-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_iostreams-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_iostreams-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="boost_json">
+      <package compiler="vc141" name="boost_json-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_json-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_json-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="boost_locale">
+      <package compiler="vc141" name="boost_locale-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_locale-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_locale-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="boost_program_options">
+      <package compiler="vc141" name="boost_program_options-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_program_options-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_program_options-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="boost_regex">
+      <package compiler="vc141" name="boost_regex-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_regex-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_regex-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="boost_system">
+      <package compiler="vc141" name="boost_system-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_system-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_system-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="boost_thread">
+      <package compiler="vc141" name="boost_thread-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_thread-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_thread-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="boost_unit_test_framework">
+      <package compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
+      <package compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
+      <package compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
+    </resource>
+    <resource canonical="secp256k1">
+      <!-- The vc120 secp256k1 nuget package is no longer supported -->
+      <package compiler="vc141" name="secp256k1_vc141" version="0.1.0.20" />
+      <package compiler="vc142" name="secp256k1_vc142" version="0.1.0.20" />
+      <package compiler="vc143" name="secp256k1_vc143" version="0.1.0.20" />
+    </resource>
+    <resource canonical="zmq">
+      <!-- We specify zmq explicitly to require a version with tweetnacl. -->
+      <package compiler="vc141" name="libzmq_vc141" version="4.3.2" />
+      <package compiler="vc142" name="libzmq_vc142" version="4.3.2" />
+      <package compiler="vc143" name="libzmq_vc143" version="4.3.2" />
+    </resource>
+  </nuget>
+
   <vs>
-    <version value="vs2017" />
-    <version value="vs2019" />
     <version value="vs2022" />
   </vs>
+
+  <msvc>
+    <toolset name="vs2022">
+      <solution format="12.00" year="15">
+        <version min="10.0.40219.1" value="15.0.27004.2010" />
+      </solution>
+      <msbuild toolset="v143">
+        <version bin="4.0" lib="15.0" />
+      </msbuild>
+      <nuget version="vc143" />
+    </toolset>
+    <toolset name="vs2019">
+      <solution format="12.00" year="15">
+        <version min="10.0.40219.1" value="15.0.27004.2010" />
+      </solution>
+      <msbuild toolset="v142">
+        <version bin="4.0" lib="15.0" />
+      </msbuild>
+      <nuget version="vc142" />
+    </toolset>
+    <toolset name="vs2017">
+      <solution format="12.00" year="15">
+        <version min="10.0.40219.1" value="15.0.27004.2010" />
+      </solution>
+      <msbuild toolset="v141">
+        <version bin="4.0" lib="15.0" />
+      </msbuild>
+      <nuget version="vc141" />
+    </toolset>
+    <toolset name="vs2015">
+      <solution format="12.00" year="14">
+        <version min="10.0.40219.1" value="14.0.25420.1" />
+      </solution>
+      <msbuild toolset="v140">
+        <version bin="4.0" lib="14.0" />
+      </msbuild>
+      <nuget version="vc140" />
+    </toolset>
+    <toolset name="vs2013">
+      <solution format="12.00" year="2013">
+        <version min="10.0.40219.1" value="12.0.30723.0" />
+      </solution>
+      <msbuild toolset="v120" ctp="CTP_Nov2013">
+        <version bin="4.0" lib="12.0" />
+      </msbuild>
+      <nuget version="vc120" />
+    </toolset>
+  </msvc>
 
   <templates source="generate4.xml">
     <template name="gsl.version.hpp" />
@@ -2101,18 +2065,10 @@
     <!-- <template name="gsl.build.ps1" /> -->
     <!-- <template name="gsl.appveyor.yml" /> -->
     <template name="gsl.debug.natvis" />
-    <template name="vs2017/gsl.packages.config" />
-    <template name="vs2017/gsl.vcxproj" />
-    <template name="vs2017/gsl.vcxproj.filters" />
-    <template name="vs2017/gsl.sln" />
-    <template name="vs2019/gsl.packages.config" />
-    <template name="vs2019/gsl.vcxproj" />
-    <template name="vs2019/gsl.vcxproj.filters" />
-    <template name="vs2019/gsl.sln" />
-    <template name="vs2022/gsl.packages.config" />
-    <template name="vs2022/gsl.vcxproj" />
-    <template name="vs2022/gsl.vcxproj.filters" />
-    <template name="vs2022/gsl.sln" />
+    <template name="gsl.packages.config" />
+    <template name="gsl.sln" />
+    <template name="gsl.vcxproj" />
+    <template name="gsl.vcxproj.filters" />
     <!-- <template name="gsl.Find.cmake" /> -->
     <template name="gsl.CMakeLists.txt" />
     <!-- <template name="gsl.gitignore" /> -->

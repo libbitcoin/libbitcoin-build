@@ -39,19 +39,42 @@ function global.matches_option(dependency, option)
         (my.option = my.dependency.option)))
 endfunction
 
-function global.is_dependency_nuget(dependency, compiler)
+function global.has_canonical_resource(resources, dependency)
+    define my.resources = has_canonical_resource.resources
+    define my.dependency = has_canonical_resource.dependency
+
+    return defined(my.resources->resource(\
+        _resource.canonical = my.dependency.name, _resource))
+endfunction
+
+function global.is_dependency_nuget(resources, dependency, compiler)
+    define my.resources = is_dependency_nuget.resources
     define my.dependency = is_dependency_nuget.dependency
 
     return defined(my.dependency) &\
         is_compiler_msvc(my.dependency) &\
-        (count(my.dependency.nuget, count.compiler = my.compiler) > 0)
+        has_canonical_resource(my.resources, my.dependency) &\
+        (count(my.resources->resource(\
+            _resource.canonical = my.dependency.name, _resource).package,\
+            count.compiler = my.compiler) > 0)
 endfunction
 
-function global.is_dependency_repository(dependency, compiler)
+function global.get_dependency_nuget_package(resources, dependency, compiler)
+    define my.resources = get_dependency_nuget_package.resources
+    define my.dependency = get_dependency_nuget_package.dependency
+
+    return my.resources->resource(\
+        _resource.canonical = my.dependency.name, _resource)->package(\
+            _package.compiler = my.compiler, _package)
+endfunction
+
+function global.is_dependency_repository(resources, dependency, compiler)
+    define my.resources = is_dependency_repository.resources
     define my.dependency = is_dependency_repository.dependency
+
     return defined(my.dependency) &\
         is_compiler_msvc(my.dependency) &\
-        !is_dependency_nuget(my.dependency, my.compiler) &\
+        !is_dependency_nuget(my.resources, my.dependency, my.compiler) &\
         !has_optionXXX(my.dependency) &\
         !has_function(my.dependency) &\
         !is_dependency_pthread(my.dependency)
@@ -67,16 +90,19 @@ function global.detect_collision_by_name(collection, name)
     return count(my.collection.element, match_element_by_name(count, my.name)) > 0
 endfunction
 
-function global.get_dependencies_nuget(result, repositories, configure,\
-    compiler, option)
+function global.get_dependencies_nuget(result, resources, repositories, \
+    configure, compiler, option)
     define my.result = get_dependencies_nuget.result
+    define my.resources = get_dependencies_nuget.resources
     define my.repositories = get_dependencies_nuget.repositories
     define my.configure = get_dependencies_nuget.configure
 
     for my.configure.dependency as _dependency where is_dependency_nuget(\
-        _dependency, my.compiler) & matches_option(_dependency, my.option)
+        my.resources, _dependency, my.compiler) &\
+        matches_option(_dependency, my.option)
 
-        define my.entry = _dependency->nuget(_nuget.compiler = my.compiler, _nuget)
+        define my.entry = get_dependency_nuget_package(my.resources,\
+            _dependency, my.compiler)
 
         # could replace with computation of name, would require more
         # context embedding
@@ -91,18 +117,54 @@ function global.get_dependencies_nuget(result, repositories, configure,\
     endfor
 
     for my.configure.dependency as _dependency where is_dependency_repository(\
-        _dependency, my.compiler) & matches_option(_dependency, my.option)
+        my.resources, _dependency, my.compiler) &\
+        matches_option(_dependency, my.option)
 
         # embedded prefix
         define my.name = "lib$(_dependency.name)"
+
         define my.repository = my.repositories->repository(\
             _repository.name = my.name, _repository)
 
         if (defined(my.repository))
-            get_dependencies_nuget(my.result, my.repositories,\
+            get_dependencies_nuget(my.result, my.resources, my.repositories,\
                 my.repository->configure, my.compiler, my.option)
         endif
     endfor
+endfunction
+
+function msbuild_version(toolset, product)
+    define my.toolset = msbuild_version.toolset
+    define my.product = msbuild_version.product
+
+    if (is_library(my.product))
+        return my.toolset->msbuild->version.lib
+    endif
+    return my.toolset->msbuild->version.bin
+endfunction
+
+function platform_toolset(toolset, product, repository)
+    define my.toolset = platform_toolset.toolset
+    define my.product = platform_toolset.product
+    define my.repository = platform_toolset.repository
+
+    if (defined(my.toolset->msbuild.ctp) &\
+        is_compiler_ctp(my.product, my.repository))
+        return my.toolset->msbuild.ctp
+    else
+        return my.toolset->msbuild.toolset
+   endif
+endfunction
+
+function is_compiler_ctp(product, repository)
+    define my.product = is_compiler_ctp.product
+    define my.repository = is_compiler_ctp.repository
+    require(my.repository, "repository", "name")
+
+    return is_library(my.product) |\
+        (is_program(my.product) & !is_option_tests(my.product)) |\
+        (is_program(my.product) & is_option_tests(my.product) &\
+            (my.repository.name = "libbitcoin-consensus"))
 endfunction
 
 function requires_threadsafe_statistics(repository, product, vs_version)

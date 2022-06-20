@@ -255,7 +255,8 @@ function emit_propery_group_configuration(product)
     endif
 endfunction
 
-function emit_import_group_extension_settings(repository, product)
+function emit_import_group_extension_settings(toolset, repository, product)
+    define my.toolset = emit_import_group_extension_settings.toolset
     define my.repository = emit_import_group_extension_settings.repository
     require(my.repository, "repository", "name")
     define my.product = emit_import_group_extension_settings.product
@@ -266,15 +267,17 @@ function emit_import_group_extension_settings(repository, product)
     emit_import_group_extension_settings_open()
 
     new nuget_dependencies as _nuget
-        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
-            platform_compiler())
+        get_dependencies_nuget(_nuget, generate->nuget, generate,\
+            my.repository->configure, my.toolset->nuget.version)
 
-        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
-            platform_compiler(), my.product.option)
+        get_dependencies_nuget(_nuget, generate->nuget, generate,\
+            my.repository->configure, my.toolset->nuget.version,\
+            my.product.option)
 
         if (!defined(my.product.option))
-            get_dependencies_nuget(_nuget, generate, my.repository->configure,\
-                platform_compiler(), "consensus")
+            get_dependencies_nuget(_nuget, generate->nuget, generate,\
+                my.repository->configure, my.toolset->nuget.version,\
+                "consensus")
         endif
 
         for _nuget.element as _element
@@ -288,7 +291,8 @@ function emit_import_group_extension_settings(repository, product)
     emit_import_group_extension_settings_close()
 endfunction
 
-function emit_target_ensure_nuget_imports(repository, product)
+function emit_target_ensure_nuget_imports(toolset, repository, product)
+    define my.toolset = emit_target_ensure_nuget_imports.toolset
     define my.repository = emit_target_ensure_nuget_imports.repository
     require(my.repository, "repository", "name")
     define my.product = emit_target_ensure_nuget_imports.product
@@ -299,15 +303,17 @@ function emit_target_ensure_nuget_imports(repository, product)
     emit_target_ensure_nuget_imports_open()
 
     new nuget_dependencies as _nuget
-        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
-            platform_compiler())
+        get_dependencies_nuget(_nuget, generate->nuget, generate,\
+            my.repository->configure, my.toolset->nuget.version)
 
-        get_dependencies_nuget(_nuget, generate, my.repository->configure,\
-            platform_compiler(), my.product.option)
+        get_dependencies_nuget(_nuget, generate->nuget, generate,\
+            my.repository->configure, my.toolset->nuget.version,\
+            my.product.option)
 
         if (!defined(my.product.option))
-            get_dependencies_nuget(_nuget, generate, my.repository->configure,\
-                platform_compiler(), "consensus")
+            get_dependencies_nuget(_nuget, generate->nuget, generate,\
+                my.repository->configure, my.toolset->nuget.version,\
+                "consensus")
         endif
 
         for _nuget.element as _element
@@ -338,7 +344,8 @@ function emit_item_group_project_references(repository, product)
 
 endfunction
 
-function emit_project(repository, product, vs_version, project_path)
+function emit_project(toolset, repository, product, project_path)
+    define my.toolset = emit_project.toolset
     define my.repository = emit_project.repository
     require(my.repository, "repository", "name")
     define my.product = emit_project.product
@@ -351,9 +358,9 @@ function emit_project(repository, product, vs_version, project_path)
 
     emit_xml_declaration()
     xml_copyleft(my.repository.name)
-    emit_project_open(msbuild_version(my.product))
+    emit_project_open(msbuild_version(my.toolset, my.product))
 
-    emit_property_group_globals(my.product, my.repository)
+    emit_property_group_globals(my.toolset, my.product, my.repository)
     emit_item_group_product_configurations(my.product)
     emit_propery_group_configuration(my.product)
     emit_import_props()
@@ -388,8 +395,8 @@ function emit_project(repository, product, vs_version, project_path)
                     "true", "true")
             endif
 
-            emit_item_group_compiler(my.repository, my.product, my.vs_version,\
-                _files, _map)
+            emit_item_group_compiler(my.repository, my.product,\
+                my.toolset.name, _files, _map)
 
             emit_item_group_includes(_files, _map)
             emit_item_group_none(_files, _map)
@@ -399,8 +406,8 @@ function emit_project(repository, product, vs_version, project_path)
 
     emit_import_targets()
     emit_import_group_extension_targets()
-    emit_import_group_extension_settings(my.repository, my.product)
-    emit_target_ensure_nuget_imports(my.repository, my.product)
+    emit_import_group_extension_settings(my.toolset, my.repository, my.product)
+    emit_target_ensure_nuget_imports(my.toolset, my.repository, my.product)
     emit_item_group_project_references(my.repository, my.product)
     emit_item_group_natvis()
 
@@ -433,7 +440,8 @@ endfunction emit_project
   </ItemGroup>
 .endmacro emit_item_group_close
 .
-.macro emit_property_group_globals(product, repository)
+.macro emit_property_group_globals(toolset, product, repository)
+.   define my.toolset = emit_property_group_globals.toolset
 .   define my.product = emit_property_group_globals.product
 .   define my.repository = emit_property_group_globals.repository
 .   require(my.product, "product", "uuid")
@@ -441,7 +449,7 @@ endfunction emit_project
 .   if (is_program(my.product))
     <ConfigurationType>Application</ConfigurationType>
 .   endif
-    <PlatformToolset>$(platform_toolset(my.product, my.repository))</PlatformToolset>
+    <PlatformToolset>$(platform_toolset(my.toolset, my.product, my.repository))</PlatformToolset>
     <ProjectGuid>{$(my.product.uuid:upper)}</ProjectGuid>
     <ProjectName>$(project_name(my.product, my.repository))</ProjectName>
   </PropertyGroup>
@@ -741,33 +749,55 @@ endfunction emit_project
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_vcxproj(path_prefix, generate, vs_version)
+function generate_vcxproj(path_prefix, generate)
     define my.generate = generate_vcxproj.generate
-    for my.generate.repository as _repository by _repository.name\
-        where defined(_repository->make)
 
-        require(_repository, "repository", "name")
-        define my.absolute_project_path = append_path(global.root,\
-            canonical_path_name(_repository))
+    for my.generate->vs.version as _version by _version.value
+        define my.toolset = my.generate->msvc->toolset(\
+            _toolset.name = _version.value, _toolset)
 
-        for _repository->make.product as _product where \
-            has_uuid(_product) & defined(_product.path)
+        for my.generate.repository as _repository by _repository.name
+            require(_repository, "repsoitory", "name")
 
-            define my.project_directory_name = project_build_relative_path(\
-                _repository, _product, my.path_prefix, my.vs_version)
+            define my.absolute_path = append_path(global.root,\
+                canonical_path_name(_repository))
 
-            define my.project_file = project_file(_repository, _product,\
-                my.path_prefix, my.vs_version)
+            for _repository->make.product as _product where \
+                has_uuid(_product) & defined(_product.path)
 
-            create_directory(my.project_directory_name)
-            notify(my.project_file)
-            output(my.project_file)
+                define my.dirname = project_build_relative_path(\
+                    _repository, _product, my.path_prefix, _version.value)
 
-            emit_project(_repository, _product, my.vs_version,\
-                my.absolute_project_path)
+                define my.filename = project_file(_repository, \
+                    _product, my.path_prefix, _version.value)
 
-            close
-        endfor
-    endfor _repository
+                create_directory(my.dirname)
+                notify(my.filename)
+                output(my.filename)
+
+                emit_project(my.toolset, _repository, _product,\
+                    my.absolute_path)
+
+                close
+            endfor _product
+        endfor _repository
+    endfor _version
 endfunction # generate_vcxproj
+
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+gsl from "templates/shared/common_msvc_artifacts.gsl"
+
+generate_vcxproj("output", generate)
+
 .endtemplate
