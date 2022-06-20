@@ -50,6 +50,8 @@ function get_job_os(job)
 
     if (is_empty(my.job.system))
         abort "get_job_os failed due to missing job.system value."
+    elsif (defined(my.job.image))
+        my.os = my.job.image
     elsif (my.job.system = "linux")
         my.os = "ubuntu-latest"
     elsif (my.job.system = "osx")
@@ -146,9 +148,9 @@ function get_job_packages(job)
             my.packages = "$(my.packages)$(my.spacer)icu4c"
             my.spacer = " "
         endif
-    elsif (my.job.system = "linux")
-        my.packages = get_job_compiler_package(my.job)
-        my.spacer = " "
+    #elsif (my.job.system = "linux")
+    #    my.packages = get_job_compiler_package(my.job)
+    #    my.spacer = " "
     endif
 
     if (defined(my.job.coverage) & !(my.job.coverage = "false"))
@@ -583,6 +585,11 @@ endfunction # get_sln_tests
 .
 .macro emit_step_failure_output()
 .
+      - name: Failure display available binaries
+        if: ${{ failure() }}
+        run: |
+          ls -la /usr/bin
+
       - name: Failure display selected compiler version
         if: ${{ failure() }}
         run: |
