@@ -494,6 +494,7 @@ function generate_setup(path_prefix)
         notify(my.out_file)
         output(my.out_file)
 
+        new configuration as _config
         new install as _install
             cumulative_install(_install, generate, _repository)
 
@@ -523,8 +524,8 @@ function generate_setup(path_prefix)
             define_handle_custom_options()
             define_remove_build_options()
             define_set_prefix()
-            define_set_pkgconfigdir()
-            define_set_with_boost_prefix()
+            define_set_pkgconfigdir(_config)
+            define_set_with_boost_prefix(_config)
             define_display_configuration(_repository, _install)
 
             heading1("Define build functions.")
@@ -541,7 +542,7 @@ function generate_setup(path_prefix)
 
             heading1("Define build options.")
             for _install.build as _build where count(_build.option) > 0
-                 define_build_options(_build)
+                 define_build_options(_config, _build)
             endfor _build
 
             heading1("Build the primary library and all dependencies.")
@@ -549,6 +550,7 @@ function generate_setup(path_prefix)
 
             close
         endnew _install
+        endnew _config
     endfor _repository
 endfunction # generate_setup
 .endtemplate

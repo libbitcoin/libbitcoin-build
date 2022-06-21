@@ -420,7 +420,9 @@ function generate_installer_cmake(path_prefix)
         notify(my.out_file)
         output(my.out_file)
 
+        new configuration as _config
         new install as _install
+            _config.cmake = "true"
             cumulative_install(_install, generate, _repository)
 
             shebang("bash")
@@ -451,8 +453,8 @@ function generate_installer_cmake(path_prefix)
             define_remove_build_options()
             define_remove_install_options()
             define_set_prefix()
-            define_set_pkgconfigdir("true")
-            define_set_with_boost_prefix("true")
+            define_set_pkgconfigdir(_config)
+            define_set_with_boost_prefix(_config)
             define_display_configuration(_repository, _install)
 
             heading1("Define build functions.")
@@ -467,13 +469,14 @@ function generate_installer_cmake(path_prefix)
 
             heading1("Define build options.")
             for _install.build as _build where count(_build.option) > 0
-                define_build_options(_build, "cmake")
+                define_build_options(_config, _build)
             endfor _build
 
             heading1("Build the primary library and all dependencies.")
             define_invoke()
 
         endnew _install
+        endnew _config
         close
     endfor _repository
 endfunction # generate_installer_cmake

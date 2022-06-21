@@ -538,7 +538,8 @@ set_prefix()
 
 .endmacro # define_set_prefix
 .
-.macro define_set_pkgconfigdir(enable_cmake)
+.macro define_set_pkgconfigdir(configuration)
+.   define my.configuration = define_set_pkgconfigdir.configuration
 set_pkgconfigdir()
 {
     # Set the prefix-based package config directory.
@@ -548,7 +549,7 @@ set_pkgconfigdir()
     export PKG_CONFIG_PATH="$PREFIX_PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
 
     # Set a package config save path that can be passed via our builds.
-.   if !defined(my.enable_cmake)
+.   if !defined(my.configuration.cmake)
     with_pkgconfigdir="--with-pkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
 .   else
     with_pkgconfigdir="-Dpkgconfigdir=$PREFIX_PKG_CONFIG_DIR"
@@ -557,7 +558,8 @@ set_pkgconfigdir()
 
 .endmacro # define_set_pkgconfigdir
 .
-.macro define_set_with_boost_prefix(include_cmake)
+.macro define_set_with_boost_prefix(configuration)
+.   define my.configuration = define_set_with_boost_prefix.configuration
 set_with_boost_prefix()
 {
     if [[ $BUILD_BOOST ]]; then
@@ -567,7 +569,7 @@ set_with_boost_prefix()
         # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
         # ax_boost_base.m4 appends /include and adds to BOOST_CPPFLAGS
         # ax_boost_base.m4 searches for /lib /lib64 and adds to BOOST_LDFLAGS
-.   if defined(my.include_cmake)
+.   if defined(my.configuration.cmake)
         #
         # cmake does not process this argument, so it has been zeroed out.
         with_boost=""
@@ -579,12 +581,13 @@ set_with_boost_prefix()
 
 .endmacro # define_set_with_boost_prefix
 .
-.macro define_build_options(build, cmake)
+.macro define_build_options(configuration, build)
+.   define my.configuration = define_build_options.configuration
 .   define my.build = define_build_options.build
 .   heading2("Define $(my.build.name) options.")
 $(my.build.name:upper,c)_OPTIONS=(
 .   for my.build.option as _option
-.       if (defined(my.cmake) & defined(_option.cmake))
+.       if (defined(my.configuration.cmake) & defined(_option.cmake))
 "$(_option.cmake)"$(last() ?? ")" ? " \\")
 .       else
 "$(_option.value)"$(last() ?? ")" ? " \\")
