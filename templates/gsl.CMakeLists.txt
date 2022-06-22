@@ -344,8 +344,10 @@ function emit_boost_dependency(dependency, configure)
         endfor
 
         # emit
+        emit_boost_use_static_libs()
         emit_find_package_dependency(my.dependency, _features)
     endnew
+
 endfunction
 
 function emit_products(repository, path_prefix)
@@ -1049,6 +1051,16 @@ set( $(my.dependency.name)_CPPFLAGS "-I\${$(my.dependency.name:neat)_INCLUDE_DIR
 set( $(my.dependency.name)_LDFLAGS "-L\${$(my.dependency.name:neat)_LIBRARY_DIR}" )
 
 .endmacro # emit_find_package_dependency
+.
+.macro emit_boost_use_static_libs()
+.
+if (BUILD_SHARED_LIBS)
+    set( Boost_USE_STATIC_LIBS "off" )
+else()
+    set( Boost_USE_STATIC_LIBS "on" )
+endif()
+
+.endmacro # emit_boost_use_static_libs
 .
 .macro emit_pthread_dependency(dependency, configure)
 .   define my.dependency = emit_pthread_dependency.dependency
