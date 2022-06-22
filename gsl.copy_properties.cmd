@@ -58,12 +58,13 @@ call xcopy /s /y "props\\project\\$(my.repository.name)\\*" $(my.msvc_path)
 
 .endmacro
 .
-.macro emit_project_props_copy(repository, output)
+.macro emit_project_props_copy(vs, repository, output)
+.   define my.vs = emit_project_props_copy.vs
 .   define my.repository = emit_project_props_copy.repository
 REM Copy project props for $(my.repository.name)
-.   emit_project_props_copy_project(my.repository, my.output, "vs2017")
-.   emit_project_props_copy_project(my.repository, my.output, "vs2019")
-.   emit_project_props_copy_project(my.repository, my.output, "vs2022")
+.   for my.vs.version as _version
+.       emit_project_props_copy_project(my.repository, my.output, _version.value)
+.   endfor # _version
 .endmacro
 .
 .macro emit_repository_completion_message(repository)
@@ -136,7 +137,7 @@ function generate_artifacts(path_prefix)
 
         emit_import_copy(generate->vs, _repository, my.path_prefix, _repository.name)
 
-        emit_project_props_copy(_repository, my.path_prefix)
+        emit_project_props_copy(generate->vs, _repository, my.path_prefix)
 
         emit_repository_completion_message(_repository)
     endfor
