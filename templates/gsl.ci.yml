@@ -383,9 +383,9 @@ function get_job_install_axis_value(job, decl, cmake)
 
     if (my.declared)
         my.value = get_job_axis_value(my.decl, my.job,\
-          my.job->axis(name = my.decl.name), cmake)
+          my.job->axis(name = my.decl.name), my.cmake)
     else
-        my.value = get_job_axis_default(my.decl, my.job, cmake)
+        my.value = get_job_axis_default(my.decl, my.job, my.cmake)
     endif
 
     return my.value
@@ -694,11 +694,11 @@ endfunction #is_valid_matrix_entry
 .
 .endmacro # emit_step_failure_output_cmake
 .
-.macro emit_job_verify_installsh(ci)
-.   define my.ci = emit_job_verify_installsh.ci
+.macro emit_job_autotools(ci)
+.   define my.ci = emit_job_autotools.ci
 .
 .   if (has_shell_jobs(my.ci))
-  verify-installsh:
+  autotools:
 
     strategy:
       fail-fast: false
@@ -727,18 +727,20 @@ endfunction #is_valid_matrix_entry
  
 .       emit_step_failure_output()
 .   endif
-.endmacro # emit_job_verify_installsh
+.endmacro # emit_job_autotools
 .
-.macro emit_job_verify_install_cmake(ci)
-.   define my.ci = emit_job_verify_install_cmake.ci
+.macro emit_job_cmake(ci)
+.   define my.ci = emit_job_cmake.ci
 .
-.   if (has_cmake_jobs(my.ci))
-  verify-install-cmake:
+.   new configuration as _config
+.       _config.cmake = "true"
+.       if (has_cmake_jobs(my.ci))
+  cmake:
 
     strategy:
       fail-fast: false
 
-.       initialize_install_matrix(my.ci, "cmake")
+.           initialize_install_matrix(_config, my.ci)
     runs-on: ${{ matrix.os }}
 
     env:
@@ -752,24 +754,25 @@ endfunction #is_valid_matrix_entry
       - name: Checkout repository
         uses: actions/checkout@v2
 
-.       emit_step_prepare_toolchain()
+.           emit_step_prepare_toolchain()
 
-.       emit_step_parameter_denormalization("cmake")
+.           emit_step_parameter_denormalization(_config)
 
-.       emit_step_execute_install(my.ci, "cmake")
+.           emit_step_execute_install(_config, my.ci)
 
-.       emit_step_calculate_coverage(my.ci)
+.           emit_step_calculate_coverage(_config, my.ci)
 
-.       emit_step_failure_output_cmake()
-.   endif
-.endmacro # emit_job_verify_install_cmake
+.           emit_step_failure_output(_config)
+.       endif
+.   endnew _config
+.endmacro # emit_job_cmake
 .
-.macro emit_job_verify_sln(repository, ci)
-.   define my.repository = emit_job_verify_sln.repository
-.   define my.ci = emit_job_verify_sln.ci
+.macro emit_job_msbuild(repository, ci)
+.   define my.repository = emit_job_msbuild.repository
+.   define my.ci = emit_job_msbuild.ci
 .
 .   if (has_sln_jobs(my.ci))
-  verify-sln:
+  msbuild:
     strategy:
       fail-fast: false
 
@@ -830,7 +833,7 @@ endfunction #is_valid_matrix_entry
           }
           Write-Host "Test execution complete." -ForegroundColor Green;
 .   endif
-.endmacro # emit_job_verify_sln
+.endmacro # emit_job_msbuild
 .
 .endtemplate
 .template 0
@@ -857,19 +860,19 @@ name: Continuous Integration Build
 on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
-.       emit_job_verify_installsh(my.matrix)
+.       emit_job_autotools(my.matrix)
 .
 .       if (has_shell_jobs(my.matrix) & has_cmake_jobs(my.matrix))
 .           write_line("")
 .       endif
 .
-.       emit_job_verify_install_cmake(my.matrix)
+.       emit_job_cmake(my.matrix)
 .
 .       if ((has_shell_jobs(my.matrix) | has_cmake_jobs(my.matrix)) & has_sln_jobs(my.matrix))
 .           write_line("")
 .       endif
 .
-.       emit_job_verify_sln(_repository, my.matrix)
+.       emit_job_msbuild(_repository, my.matrix)
 .
 .       close
 .   endif
