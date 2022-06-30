@@ -143,7 +143,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
+      <build name="bitcoin-consensus" github="pmienk" repository="libbitcoin-consensus" branch="install-cmake-v3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -151,7 +151,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <coverage>
         <exclude path="src/clone/*" />
@@ -184,7 +184,12 @@
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job build="auto" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -409,7 +414,7 @@
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
+      <build name="bitcoin-system" github="pmienk" repository="libbitcoin-system" branch="install-cmake-v3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -417,7 +422,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <coverage>
         <exclude path="src/wallet/addresses/qrencode" />
@@ -450,7 +455,12 @@
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job build="auto" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -594,13 +604,13 @@
     </make>
 
     <install>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+      <build name="bitcoin-system" github="pmienk" repository="libbitcoin-system" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
+      <build name="bitcoin-network" github="pmienk" repository="libbitcoin-network" branch="install-cmake-v3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -608,7 +618,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
@@ -639,7 +649,12 @@
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job build="auto" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -784,17 +799,17 @@
     </make>
 
     <install>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+      <build name="bitcoin-system" github="pmienk" repository="libbitcoin-system" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
+      <build name="bitcoin-protocol" github="pmienk" repository="libbitcoin-protocol" branch="install-cmake-v3" parallel="true" >
         <!-- until test hang is resolved -->
-        <option value="--without-tests" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -802,7 +817,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="mbedtls" build="true" />
       <axis name="zmq" build="true" />
 
@@ -847,8 +862,15 @@
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="auto" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
 	<!-- coverage="true" -->
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="mbedtls" value="build" />
@@ -999,13 +1021,13 @@
     </make>
 
     <install>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+      <build name="bitcoin-protocol" github="pmienk" repository="libbitcoin-protocol" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version3" parallel="true" >
+      <build name="bitcoin-client" github="pmienk" repository="libbitcoin-client" branch="install-cmake-v3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1013,7 +1035,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="zmq" build="true" />
 
       <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
@@ -1048,7 +1070,13 @@
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="auto" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
@@ -1219,18 +1247,18 @@
     </make>
 
     <install>
-      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+      <build name="bitcoin-client" github="pmienk" repository="libbitcoin-client" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
+      <build name="bitcoin-network" github="pmienk" repository="libbitcoin-network" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+	<option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version3" parallel="true" >
+      <build name="bitcoin-explorer" github="pmienk" repository="libbitcoin-explorer" branch="install-cmake-v3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1238,7 +1266,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="zmq" build="true" />
 
       <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
@@ -1273,7 +1301,13 @@
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="auto" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
@@ -1426,13 +1460,13 @@
     </make>
 
     <install>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+      <build name="bitcoin-system" github="pmienk" repository="libbitcoin-system" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="version3" parallel="true" >
+      <build name="bitcoin-database" github="pmienk" repository="libbitcoin-database" branch="install-cmake-v3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1440,7 +1474,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
@@ -1469,7 +1503,12 @@
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job build="auto" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -1602,18 +1641,18 @@
     </make>
 
     <install>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
+      <build name="bitcoin-database" github="pmienk" repository="libbitcoin-database" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-tools" cmake="-Dwith-tools=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
-        <option value="--without-tests" />
+      <build name="bitcoin-consensus" github="pmienk" repository="libbitcoin-consensus" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version3" parallel="true" >
+      <build name="bitcoin-blockchain" github="pmienk" repository="libbitcoin-blockchain" branch="install-cmake-v3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1621,7 +1660,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="consensus" build="false" with="true" without="true" />
 
       <!-- image="xcode12.2" equivalent? -->
@@ -1653,7 +1692,12 @@
         <axis name="consensus" value="without" />
       </job>
 
-      <job build="auto" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -1796,18 +1840,18 @@
     </make>
 
     <install>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
+      <build name="bitcoin-blockchain" github="pmienk" repository="libbitcoin-blockchain" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-tools" cmake="-Dwith-tools=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
-        <option value="--without-tests" />
+      <build name="bitcoin-network" github="pmienk" repository="libbitcoin-network" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version3" parallel="true" >
+      <build name="bitcoin-node" github="pmienk" repository="libbitcoin-node" branch="install-cmake-v3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1815,7 +1859,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="consensus" build="false" with="true" without="true" />
 
       <!-- image="xcode12.2" equivalent? -->
@@ -1847,7 +1891,12 @@
         <axis name="consensus" value="without" />
       </job>
 
-      <job build="auto" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -1997,19 +2046,19 @@
     </make>
 
     <install>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-console" />
+      <build name="bitcoin-node" github="pmienk" repository="libbitcoin-node" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-console" cmake="-Dwith-console=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+      <build name="bitcoin-protocol" github="pmienk" repository="libbitcoin-protocol" branch="install-cmake-v3" parallel="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="version3" parallel="true" >
+      <build name="bitcoin-server" github="pmienk" repository="libbitcoin-server" branch="install-cmake-v3" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -2017,7 +2066,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="consensus" build="false" with="true" without="true" />
       <axis name="zmq" build="true" />
 
@@ -2055,8 +2104,14 @@
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="auto" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
 	      <!-- coverage="true" -->
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />

@@ -18,14 +18,10 @@ function workflow_relative_path(repository, path_prefix)
         canonical_path_name(my.repository)), my.subpath)
 endfunction
 
-function is_system_linux(job)
-    define my.job = is_system_linux.job
-    return defined(my.job) & my.job.system = "linux"
-endfunction
-
-function is_system_osx(job)
-    define my.job = is_system_osx.job
-    return defined(my.job) & my.job.system = "osx"
+function sort_compiler(job)
+    define my.job = sort_compiler.job
+    return (defined(my.job) & defined(my.job.compiler)) ?? my.job.compiler ? \
+        "default"
 endfunction
 
 function is_system_windows(job)
@@ -33,9 +29,16 @@ function is_system_windows(job)
     return defined(my.job) & my.job.system = "windows"
 endfunction
 
+function is_job_config(configuration, job)
+    define my.config = is_job_config.configuration
+    define my.job = is_job_config.job
+    return defined(my.job.build) \
+      & ((my.job.build = "all") | (my.job.build = my.config.job))
+endfunction
+
 function is_job_autotools(job)
     define my.job = is_job_autotools.job
-    return !defined(my.job.build) \
+    return defined(my.job.build) \
       | (my.job.build = "auto") \
       | (my.job.build = "all")
 endfunction
@@ -46,20 +49,20 @@ function is_job_cmake(job)
         ((my.job.build = "cmake") | (my.job.build = "all"))
 endfunction
 
-function has_shell_jobs(ci)
-    define my.ci = has_shell_jobs.ci
+function has_jobs_autotools(ci)
+    define my.ci = has_jobs_autotools.ci
     return (count(my.ci.job, (count.system = "linux") & is_job_autotools(count)) \
         + count(my.ci.job, (count.system = "osx") & is_job_autotools(count))  > 0)
 endfunction
 
-function has_cmake_jobs(ci)
-    define my.ci = has_cmake_jobs.ci
+function has_jobs_cmake(ci)
+    define my.ci = has_jobs_cmake.ci
     return (count(my.ci.job, (count.system = "linux") & is_job_cmake(count)) \
         + count(my.ci.job, (count.system = "osx") & is_job_cmake(count)) > 0)
 endfunction
 
-function has_sln_jobs(ci)
-    define my.ci = has_sln_jobs.ci
+function has_jobs_msbuild(ci)
+    define my.ci = has_jobs_msbuild.ci
     return (count(my.ci.job, (count.system = "windows"))  > 0)
 endfunction
 
@@ -322,7 +325,8 @@ function get_job_cxxflags(job)
     return get_job_cflags(my.job)
 endfunction # get_job_cxxflags
 
-function get_job_axis_value(decl, job, axis, cmake)
+function get_job_axis_value(configuration, decl, job, axis)
+    define my.config = get_job_axis_value.configuration
     define my.decl = get_job_axis_value.decl
     define my.job = get_job_axis_value.job
     define my.axis = get_job_axis_value.axis
@@ -331,7 +335,7 @@ function get_job_axis_value(decl, job, axis, cmake)
     define my.axis_with = "--with-$(my.axis.name)"
     define my.axis_without = "--without-$(my.axis.name)"
 
-    if defined(my.cmake)
+    if (defined(my.config.cmake) & !defined(my.decl.recognized))
         my.axis_with = "-Dwith-$(my.axis.name)=yes"
         my.axis_without = "-Dwith-$(my.axis.name)=no"
     endif
@@ -368,28 +372,30 @@ function get_job_axis_value(decl, job, axis, cmake)
     return my.value
 endfunction # get_job_axis_value
 
-function get_job_axis_default(decl, job, cmake)
+function get_job_axis_default(configuration, decl, job)
+    define my.config = get_job_axis_default.configuration
     define my.decl = get_job_axis_default.decl
     define my.job = get_job_axis_default.job
     return ""
 endfunction # get_job_axis_default
 
-function get_job_install_axis_value(job, decl, cmake)
-    define my.job =  get_job_install_axis_value.job
-    define my.decl =  get_job_install_axis_value.decl
+function get_job_shell_axis_value(configuration, job, decl)
+    define my.config = get_job_shell_axis_value.configuration
+    define my.job =  get_job_shell_axis_value.job
+    define my.decl =  get_job_shell_axis_value.decl
     define my.value = ""
 
     define my.declared = (count(my.job.axis, (count.name = my.decl.name)) = 1)
 
     if (my.declared)
-        my.value = get_job_axis_value(my.decl, my.job,\
-          my.job->axis(name = my.decl.name), my.cmake)
+        my.value = get_job_axis_value(my.config, my.decl, my.job,\
+          my.job->axis(name = my.decl.name))
     else
-        my.value = get_job_axis_default(my.decl, my.job, my.cmake)
+        my.value = get_job_axis_default(my.config, my.decl, my.job)
     endif
 
     return my.value
-endfunction # get_job_install_axis_value
+endfunction # get_job_shell_axis_value
 
 function get_job_coverage(job)
     define my.job = get_job_coverage.job
@@ -403,8 +409,8 @@ function get_job_coverage(job)
     return my.coverage
 endfunction # get_job_coverage
 
-function get_coverage_exclusions(matrix)
-    define my.matrix = get_coverage_exclusions.matrix
+function get_coverage_exclusions(ci)
+    define my.ci = get_coverage_exclusions.ci
 
     # Exclude all system directories.
     define my.excludes = quote("/usr/*")
@@ -422,9 +428,9 @@ function get_coverage_exclusions(matrix)
     my.excludes += " $(quote("${{ github.workspace }}/test/*"))"
 
     # Exclude explicitly specified workspace relative paths
-    if (defined(my.matrix->coverage) & \
-      (count(my.matrix->coverage.exclude, !is_empty(count.path)) > 0))
-        for my.matrix->coverage.exclude as _exclude
+    if (defined(my.ci->coverage) & \
+      (count(my.ci->coverage.exclude, !is_empty(count.path)) > 0))
+        for my.ci->coverage.exclude as _exclude
             my.excludes += " $(quote("${{ github.workspace }}/" + _exclude.path))"
         endfor _exclude
     endif
@@ -458,31 +464,26 @@ function get_sln_tests(repository)
     return is_empty(my.tests) ?? "*" ? "$(my.tests)"
 endfunction # get_sln_tests
 
-function is_valid_matrix_entry(job, cmake)
-    define my.job = is_valid_matrix_entry.job
-    return (!defined(my.cmake) & is_job_autotools(my.job)) \
-      | (defined(my.cmake) & is_job_cmake(my.job))
-endfunction #is_valid_matrix_entry
-
 ###############################################################################
 # Macros
 ###############################################################################
 .endtemplate
 .template 1
 .
-.macro initialize_install_matrix_entry(matrix, job, cmake)
-.   define my.matrix = initialize_install_matrix_entry.matrix
-.   define my.job = initialize_install_matrix_entry.job
+.macro initialize_matrix_shell_entry(configuration, ci, job)
+.   define my.config = initialize_matrix_shell_entry.configuration
+.   define my.ci = initialize_matrix_shell_entry.ci
+.   define my.job = initialize_matrix_shell_entry.job
 .
-.   if is_valid_matrix_entry(my.job, my.cmake)
+.   if is_job_config(my.config, my.job)
           - os: $(get_job_os(my.job))
             cxx: "$(get_job_cxx(my.job))"
             link: "$(get_job_link(my.job))"
-.#          optimization: "$(get_job_optimization(my.job))"
+            optimization: "$(get_job_optimization(my.job))"
             assert: "$(get_job_assert(my.job))"
             coverage: "$(get_job_coverage(my.job))"
-.       for my.matrix.axis by "$(name)" as _axis
-            $(_axis.name): "$( get_job_install_axis_value(my.job, _axis, my.cmake))"
+.       for my.ci.axis by "$(name)" as _axis
+            $(_axis.name): "$( get_job_shell_axis_value(my.config, my.job, _axis))"
 .       endfor
             cc: "$(get_job_cc(my.job))"
             flags: "$(get_job_cflags(my.job))"
@@ -490,28 +491,24 @@ endfunction #is_valid_matrix_entry
             packages: "$(get_job_packages(my.job))"
 
 .   endif
-.endmacro # initialize_install_matrix_entry
+.endmacro # initialize_matrix_shell_entry
 .
-.macro initialize_install_matrix(matrix, cmake)
-.   define my.matrix = initialize_install_matrix.matrix
+.macro initialize_matrix_shell(configuration, ci)
+.   define my.config = initialize_matrix_shell.configuration
+.   define my.ci = initialize_matrix_shell.ci
 .
       matrix:
         include:
 .
-.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_linux(_job)
-.       initialize_install_matrix_entry(my.matrix, _job, my.cmake)
+.   for my.ci.job by "$(system)-$(sort_compiler(_job))-$(link)" as _job where is_job_config(_config, _job)
+.       initialize_matrix_shell_entry(my.config, my.ci, _job)
 .   endfor _job
+.endmacro # initialize_matrix_shell
 .
-.   for my.matrix.job by "$(link)" as _job where is_system_osx(_job)
-.       initialize_install_matrix_entry(my.matrix, _job, my.cmake)
-.   endfor _job
-.
-.endmacro #initialize_install_matrix
-.
-.macro initialize_sln_matrix_entry(repository, matrix, job)
-.   define my.repository = initialize_sln_matrix_entry.repository
-.   define my.matrix = initialize_sln_matrix_entry.matrix
-.   define my.job = initialize_sln_matrix_entry.job
+.macro initialize_matrix_msbuild_entry(repository, ci, job)
+.   define my.repository = initialize_matrix_msbuild_entry.repository
+.   define my.ci = initialize_matrix_msbuild_entry.ci
+.   define my.job = initialize_matrix_msbuild_entry.job
 .
           - os: $(get_job_os(my.job))
             configuration: "$(get_job_windows_configuration(my.job))"
@@ -519,22 +516,23 @@ endfunction #is_valid_matrix_entry
             version: "vs2022"
             tests: "$(get_sln_tests(my.repository))"
 
-.endmacro # initialize_sln_matrix_entry
+.endmacro # initialize_matrix_msbuild_entry
 .
-.macro initialize_sln_matrix(repository, matrix)
-.   define my.repository = initialize_sln_matrix.repository
-.   define my.matrix = initialize_sln_matrix.matrix
+.macro initialize_matrix_msbuild(repository, ci)
+.   define my.repository = initialize_matrix_msbuild.repository
+.   define my.ci = initialize_matrix_msbuild.ci
 .
       matrix:
         include:
 .
-.   for my.matrix.job by "$(compiler)-$(link)" as _job where is_system_windows(_job)
-.       initialize_sln_matrix_entry(my.repository, my.matrix, _job)
+.   for my.ci.job by "$(system)-$(compiler)-$(link)" as _job where is_system_windows(_job)
+.       initialize_matrix_msbuild_entry(my.repository, my.ci, _job)
 .   endfor _job
 .
-.endmacro #initialize_sln_matrix
+.endmacro #initialize_matrix_msbuild
 .
-.macro emit_step_prepare_toolchain()
+.macro emit_step_prepare_toolchain(configuration)
+.   define my.config = emit_step_prepare_toolchain.configuration
 .
       - name: Prepare toolchain [apt]
         if: ${{ matrix.packager == 'apt' }}
@@ -549,19 +547,20 @@ endfunction #is_valid_matrix_entry
 .
 .endmacro # emit_step_prepare_toolchain
 .
-.macro emit_step_parameter_denormalization(cmake)
+.macro emit_step_parameter_denormalization(configuration)
+.   define my.config = emit_step_parameter_denormalization.configuration
 .
       - name: Denormalize parameterization
         run: |
 .   # cmake library path
-.   if defined(my.cmake)
+.   if defined(my.config.cmake)
           if [[ ${{ matrix.packager }} == 'brew' ]]; then
             echo "CMAKE_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
           fi
 .   endif
 .   # assert (ndebug)
           if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
-.   if defined(my.cmake)
+.   if defined(my.config.cmake)
             echo "ASSERT_NDEBUG=--enable-ndebug -Denable-ndebug=yes" >> $GITHUB_ENV
           else
             echo "ASSERT_NDEBUG=--disable-ndebug -Denable-ndebug=no" >> $GITHUB_ENV
@@ -596,9 +595,10 @@ endfunction #is_valid_matrix_entry
 .
 .endmacro # emit_step_parameter_denormalization
 .
-.macro emit_step_execute_install(matrix, cmake)
-.   define my.matrix = emit_step_execute_install.matrix
-.   define my.suffix = defined(my.cmake) ?? "-cmake.sh" ? ".sh"
+.macro emit_step_execute_shell(configuration, ci)
+.   define my.config = emit_step_execute_shell.configuration
+.   define my.ci = emit_step_execute_shell.ci
+.   define my.suffix = defined(my.config.cmake) ?? "-cmake.sh" ? ".sh"
       - name: Execute install$(my.suffix)
         run: >
           ./install$(my.suffix)
@@ -606,14 +606,15 @@ endfunction #is_valid_matrix_entry
           --prefix=${{ github.workspace }}/prefixenv
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
-.       for my.matrix.axis as _axis
+.       for my.ci.axis as _axis
           ${{ matrix.$(_axis.name) }}
 .       endfor
-.endmacro # emit_step_execute_install
+.endmacro # emit_step_execute_shell
 .
-.macro emit_step_calculate_coverage(matrix)
-.   define my.matrix = emit_step_calculate_coverage.matrix
-.   define my.exclusions = get_coverage_exclusions(my.matrix)
+.macro emit_step_calculate_coverage(configuration, ci)
+.   define my.config = emit_step_calculate_coverage.configuration
+.   define my.ci = emit_step_calculate_coverage.ci
+.   define my.exclusions = get_coverage_exclusions(my.ci)
 .
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
@@ -631,7 +632,8 @@ endfunction #is_valid_matrix_entry
 .
 .endmacro # emit_step_calculate_coverage
 .
-.macro emit_step_failure_output()
+.macro emit_step_failure_output(configuration)
+.   define my.config = emit_step_failure_output.configuration
 .
       - name: Failure display available binaries
         if: ${{ failure() }}
@@ -674,36 +676,40 @@ endfunction #is_valid_matrix_entry
         if: ${{ failure() && (matrix.os == 'macos-latest') }}
         run: |
           DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/$(_repository.name)-test
+
+      - name: Failure display pkgconfig
+        if: ${{ failure() }}
+        run: |
+          ls ${{ github.workspace }}/prefixenv/lib/pkgconfig/
+          cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
+.
+.   if (defined(my.config.cmake))
+
+      - name: Failure display cmake specific libraries
+        if: ${{ failure() }}
+        run: |
+          ls ${{ github.workspace }}/prefixenv/lib/cmake
+
+      - name: Failure display cmake LastTest.log
+        if: ${{ failure() }}
+        run: |
+          cat ${{ github.workspace }}/Testing/Temporary/LastTest.log
+.   endif
 .
 .endmacro # emit_step_failure_output
 .
-.macro emit_step_failure_output_cmake()
+.macro emit_job_shell(configuration, repository, ci)
+.   define my.config = emit_job_shell.configuration
+.   define my.repository = emit_job_shell.repository
+.   define my.ci = emit_job_shell.ci
 .
-      - name: Failure Display cmake test output
-        if: ${{failure() }}
-        run: |
-          gcc -v
-          clang -v
-          echo "--- ENVIRONMENT ---"
-          env
-          echo "--- END ENVIRONMENT ---"
-          cat ${{ github.workspace }}/Testing/Temporary/LastTest.log
-          ls ${{ github.workspace }}/prefixenv/lib/pkgconfig/
-          cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
-          ls ${{ github.workspace }}/prefixenv/lib/cmake
-.
-.endmacro # emit_step_failure_output_cmake
-.
-.macro emit_job_autotools(ci)
-.   define my.ci = emit_job_autotools.ci
-.
-.   if (has_shell_jobs(my.ci))
-  autotools:
+  $(my.config.job):
 
     strategy:
       fail-fast: false
 
-.       initialize_install_matrix(my.ci)
+.   initialize_matrix_shell(my.config, my.ci)
+
     runs-on: ${{ matrix.os }}
 
     env:
@@ -717,66 +723,28 @@ endfunction #is_valid_matrix_entry
       - name: Checkout repository
         uses: actions/checkout@v2
 
-.       emit_step_prepare_toolchain()
+.   emit_step_prepare_toolchain(my.config)
 
-.       emit_step_parameter_denormalization()
+.   emit_step_parameter_denormalization(my.config)
 
-.       emit_step_execute_install(my.ci)
+.   emit_step_execute_shell(_config, my.ci)
 
-.       emit_step_calculate_coverage(my.ci)
- 
-.       emit_step_failure_output()
-.   endif
-.endmacro # emit_job_autotools
+.   emit_step_calculate_coverage(_config, my.ci)
+
+.   emit_step_failure_output(_config)
 .
-.macro emit_job_cmake(ci)
-.   define my.ci = emit_job_cmake.ci
-.
-.   new configuration as _config
-.       _config.cmake = "true"
-.       if (has_cmake_jobs(my.ci))
-  cmake:
-
-    strategy:
-      fail-fast: false
-
-.           initialize_install_matrix(_config, my.ci)
-    runs-on: ${{ matrix.os }}
-
-    env:
-      CC: '${{ matrix.cc }}'
-      CXX: '${{ matrix.cxx }}'
-      CFLAGS: '${{ matrix.flags }}'
-      CXXFLAGS: '${{ matrix.flags }}'
-      CI_REPOSITORY: '${{ github.repository }}'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-.           emit_step_prepare_toolchain()
-
-.           emit_step_parameter_denormalization(_config)
-
-.           emit_step_execute_install(_config, my.ci)
-
-.           emit_step_calculate_coverage(_config, my.ci)
-
-.           emit_step_failure_output(_config)
-.       endif
-.   endnew _config
-.endmacro # emit_job_cmake
+.endmacro # emit_job_shell
 .
 .macro emit_job_msbuild(repository, ci)
 .   define my.repository = emit_job_msbuild.repository
 .   define my.ci = emit_job_msbuild.ci
 .
-.   if (has_sln_jobs(my.ci))
   msbuild:
     strategy:
       fail-fast: false
 
-.       initialize_sln_matrix(my.repository, my.ci)
+.   initialize_matrix_msbuild(my.repository, my.ci)
+.
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -832,7 +800,6 @@ endfunction #is_valid_matrix_entry
             exit $ERR;
           }
           Write-Host "Test execution complete." -ForegroundColor Green;
-.   endif
 .endmacro # emit_job_msbuild
 .
 .endtemplate
@@ -853,26 +820,40 @@ endfunction #is_valid_matrix_entry
 .       notify(my.out_file)
 .       output(my.out_file)
 .       copyleft(_repository.name)
-.       define my.matrix = _repository->ci
+.       define my.ci = _repository->ci
 
 name: Continuous Integration Build
 
 on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
-.       emit_job_autotools(my.matrix)
+.       if (has_jobs_autotools(my.ci))
+.           new configuration as _config
+.               _config.job = "autotools"
+.               _config.auto = "true"
+.               emit_job_shell(_config, _repository, my.ci)
+.           endnew _config
+.       endif
 .
-.       if (has_shell_jobs(my.matrix) & has_cmake_jobs(my.matrix))
+.       if (has_jobs_autotools(my.ci) & has_jobs_cmake(my.ci))
 .           write_line("")
 .       endif
 .
-.       emit_job_cmake(my.matrix)
+.       if (has_jobs_cmake(my.ci))
+.           new configuration as _config
+.               _config.job = "cmake"
+.               _config.cmake = "true"
+.               emit_job_shell(_config, _repository, my.ci)
+.           endnew _config
+.       endif
 .
-.       if ((has_shell_jobs(my.matrix) | has_cmake_jobs(my.matrix)) & has_sln_jobs(my.matrix))
+.       if ((has_jobs_autotools(my.ci) | has_jobs_cmake(my.ci)) & has_jobs_msbuild(my.ci))
 .           write_line("")
 .       endif
 .
-.       emit_job_msbuild(_repository, my.matrix)
+.       if (has_jobs_msbuild(my.ci))
+.         emit_job_msbuild(_repository, my.ci)
+.       endif
 .
 .       close
 .   endif

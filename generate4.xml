@@ -156,41 +156,41 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" version="13" link="dynamic" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
       </job>
 
-      <job system="osx" version="13" link="static" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug" build="all">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
       
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="auto" coverage="true">
+      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="cmake">
+      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -431,7 +431,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <coverage>
         <exclude path="src/wallet/addresses/qrencode" />
@@ -439,37 +439,37 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" version="13" link="dynamic" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
       </job>
 
-      <job system="osx" version="13" link="static" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug" build="all">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="auto" coverage="true">
+      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="cmake">
+      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -630,43 +630,43 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
       </job>
 
-      <job system="osx" version="13" link="static" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" version="13" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug" build="all">
+      <job build="all" system="linux" image="ubuntu-22.04" version="14" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="auto" coverage="true">
+      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="cmake">
+      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -841,55 +841,55 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="mbedtls" build="true" />
       <axis name="zmq" build="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" version="13" link="dynamic" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
         <!-- <axis name="boost" /> -->
         <axis name="icu" value="with" />
         <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="osx" version="13" link="static" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug" build="all">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug" build="all">
-        <axis name="boost" value="build" />
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
+<axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug" build="all">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="auto" coverage="true">
+      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" build="cmake">
+      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="mbedtls" value="build" />
