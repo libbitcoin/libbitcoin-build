@@ -1,0 +1,165 @@
+###############################################################################
+#  Copyright (c) 2014-2022 libbitcoin-build developers (see COPYING).
+#
+###############################################################################
+
+name: Continuous Integration Build
+
+on: [ pull_request, push, workflow_dispatch ]
+
+jobs:
+  generate:
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - os: ubuntu-latest
+            script: generate4.sh
+
+          - os: ubuntu-latest
+            script: generate3.sh
+
+          - os: macos-latest
+            script: generate4.sh
+
+          - os: macos-latest
+            script: generate3.sh
+
+          - os: windows-latest
+            script: generate4.cmd
+
+          - os: windows-latest
+            script: generate3.cmd
+
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-build'
+          repository: ${{ github.repository }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-system'
+          repository: '${{ github.repository_owner }}/libbitcoin-system'
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-protocol'
+          repository: '${{ github.repository_owner }}/libbitcoin-protocol'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-client'
+          repository: '${{ github.repository_owner }}/libbitcoin-client'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-explorer'
+          repository: '${{ github.repository_owner }}/libbitcoin-explorer'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-network'
+          repository: '${{ github.repository_owner }}/libbitcoin-network'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-consensus'
+          repository: '${{ github.repository_owner }}/libbitcoin-consensus'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-database'
+          repository: '${{ github.repository_owner }}/libbitcoin-database'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-blockchain'
+          repository: '${{ github.repository_owner }}/libbitcoin-blockchain'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-node'
+          repository: '${{ github.repository_owner }}/libbitcoin-node'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          path: 'libbitcoin-server'
+          repository: '${{ github.repository_owner }}/libbitcoin-server'
+
+      - name: Checkout repository
+        if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          path: 'gsl'
+          repository: 'zeromq/gsl'
+
+      - name: Prepare toolchain [macos]
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        run: |
+          brew install pcre
+
+      - name: Prepare toolchain [ubuntu]
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install libpcre3-dev
+
+      - name: Prepare toolchain [windows]
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Build gsl [macos, ubuntu]
+        if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          pushd "gsl/src"
+          make --silent
+          sudo make install
+          popd
+
+      - name: Retrieve gsl binary [windows]
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        shell: powershell
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe" -OutFile "${{ github.workspace }}\libbitcoin-build\gsl.exe"
+
+      - name: Execute generation [macos, ubuntu]
+        if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          pushd libbitcoin-build
+          ./${{ matrix.script }}
+          popd
+
+      - name: Execute generation [windows]
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        shell: cmd
+        run: .\libbitcoin-build\${{ matrix.script }}
+

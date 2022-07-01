@@ -344,8 +344,10 @@ function emit_boost_dependency(dependency, configure)
         endfor
 
         # emit
+        emit_boost_use_static_libs()
         emit_find_package_dependency(my.dependency, _features)
     endnew
+
 endfunction
 
 function emit_products(repository, path_prefix)
@@ -993,11 +995,9 @@ endif()
 .
 .   heading2("Initialize HAVE_$(my.uname) variable checking for $(my.header.name)")
 check_include_files( "$(my.header.name)" HAVE_$(my.uname) )
-if (!HAVE_$(my.uname))
-    set( HAVE_$(my.uname) 0 )
+if (HAVE_$(my.uname))
+    add_definitions( -DHAVE_$(my.uname) )
 endif()
-
-add_definitions( -DHAVE_$(my.uname)=${HAVE_$(my.uname)} )
 
 .endmacro # emit_header
 .
@@ -1014,7 +1014,11 @@ add_definitions( -DHAVE_$(my.uname)=${HAVE_$(my.uname)} )
 .
 if (HAVE_$(my.header_uname))
     check_symbol_exists( "$(my.export)" "$(my.define.header)" HAVE_DECL_$(my.export_uname) )
-    add_definitions( -DHAVE_DECL_$(my.export_uname)=${HAVE_DECL_$(my.export_uname)} )
+    if (HAVE_DECL_$(my.export_uname))
+        add_definitions( -DHAVE_DECL_$(my.export_uname)=1 )
+    else()
+        add_definitions( -DHAVE_DECL_$(my.export_uname)=0 )
+    endif()
 endif()
 
 .endmacro # emit_define
@@ -1049,6 +1053,16 @@ set( $(my.dependency.name)_CPPFLAGS "-I\${$(my.dependency.name:neat)_INCLUDE_DIR
 set( $(my.dependency.name)_LDFLAGS "-L\${$(my.dependency.name:neat)_LIBRARY_DIR}" )
 
 .endmacro # emit_find_package_dependency
+.
+.macro emit_boost_use_static_libs()
+.
+if (BUILD_SHARED_LIBS)
+    set( Boost_USE_STATIC_LIBS "off" )
+else()
+    set( Boost_USE_STATIC_LIBS "on" )
+endif()
+
+.endmacro # emit_boost_use_static_libs
 .
 .macro emit_pthread_dependency(dependency, configure)
 .   define my.dependency = emit_pthread_dependency.dependency

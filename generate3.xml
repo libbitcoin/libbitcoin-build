@@ -151,7 +151,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <coverage>
         <exclude path="src/clone/*" />
@@ -159,32 +159,37 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost"  value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="osx" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
       
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -417,7 +422,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <coverage>
         <exclude path="src/wallet/addresses/qrencode" />
@@ -425,32 +430,37 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
        <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="osx" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -595,8 +605,8 @@
 
     <install>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -608,38 +618,43 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="osx" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -785,8 +800,8 @@
 
     <install>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -794,7 +809,7 @@
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
         <!-- until test hang is resolved -->
-        <option value="--without-tests" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -802,7 +817,7 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="mbedtls" build="true" />
       <axis name="zmq" build="true" />
 
@@ -812,43 +827,50 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="osx" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
 	<!-- coverage="true" -->
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="mbedtls" value="build" />
@@ -1000,8 +1022,8 @@
 
     <install>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1013,42 +1035,48 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="zmq" build="true" />
 
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
 	<axis name="zmq" value="build" />
       </job>
 
-      <job system="osx" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <!-- version="5.0" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <!-- version="4.8" -->
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
@@ -1220,14 +1248,14 @@
 
     <install>
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="${with_boost}" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+	<option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version3" parallel="true" >
@@ -1238,42 +1266,48 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="zmq" build="true" />
 
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="osx" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <!-- version="5.0" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <!-- version="4.8" -->
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
@@ -1427,8 +1461,8 @@
 
     <install>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1440,36 +1474,41 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="osx" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <!-- version="5.0" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <!-- version="4.8" -->
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -1603,13 +1642,13 @@
 
     <install>
       <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-tools" cmake="-Dwith-tools=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
-        <option value="--without-tests" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1621,39 +1660,44 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="consensus" build="false" with="true" without="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
        <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="osx" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="without" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="consensus" value="without" />
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -1797,13 +1841,13 @@
 
     <install>
       <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-tools" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-tools" cmake="-Dwith-tools=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
-        <option value="--without-tests" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1815,39 +1859,44 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="consensus" build="false" with="true" without="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
        <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="osx" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="without" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="consensus" value="without" />
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -1998,14 +2047,14 @@
 
     <install>
       <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-console" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-console" cmake="-Dwith-console=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
-        <option value="--without-tests" />
-        <option value="--without-examples" />
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -2017,46 +2066,52 @@
 
     <ci>
       <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
       <axis name="consensus" build="false" with="true" without="true" />
       <axis name="zmq" build="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
        <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="osx" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="osx" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="without" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" compiler="clang" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="clang" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" system="linux" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="consensus" value="without" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
 	      <!-- coverage="true" -->
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
@@ -2338,6 +2393,8 @@
     <template name="gsl.sln" />
     <template name="gsl.vcxproj" />
     <template name="gsl.vcxproj.filters" />
+    <template name="gsl.CMakeLists.txt" />
+    <template name="gsl.install-cmake.sh" />
     <template name="gsl.ci.yml" />
   </templates>
 
