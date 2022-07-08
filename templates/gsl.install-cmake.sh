@@ -272,12 +272,17 @@ make_jobs()
     local JOBS=$1
     shift 1
 
+    VERBOSITY=""
+    if [[ DISPLAY_VERBOSE ]]; then
+        VERBOSITY="VERBOSE=1"
+    fi
+
     SEQUENTIAL=1
     # Avoid setting -j1 (causes problems on single threaded systems [TRAVIS]).
     if [[ $JOBS > $SEQUENTIAL ]]; then
-        make -j"$JOBS" "$@"
+        make -j"$JOBS" "$@" $VERBOSITY
     else
-        make "$@"
+        make "$@" $VERBOSITY
     fi
 }
 
