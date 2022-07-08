@@ -784,8 +784,16 @@ extract_from_tarball()
     push_directory "$TARGET_DIR"
 
     # Extract the source locally.
-    wget --output-document "$ARCHIVE" "$URL"
-    tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
+    if [[ ! ($VERBOSE) ]]; then
+        WGET="wget --quiet"
+        TAR="tar"
+    else
+        WGET="wget --verbose"
+        TAR="tar --verbose"
+    fi
+
+    $WGET --output-document "$ARCHIVE" "$URL"
+    $TAR --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
 
     pop_directory
 }
