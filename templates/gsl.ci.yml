@@ -534,6 +534,10 @@ endfunction # get_sln_tests
 .macro emit_step_prepare_toolchain(configuration)
 .   define my.config = emit_step_prepare_toolchain.configuration
 .
+      - name: Prepare toolchain [generic]
+        run: |
+          git config --global init.defaultBranch master
+
       - name: Prepare toolchain [apt]
         if: ${{ matrix.packager == 'apt' }}
         run: |
