@@ -606,6 +606,9 @@ endfunction # get_sln_tests
       - name: Execute install$(my.suffix)
         run: >
           ./install$(my.suffix)
+.   if !defined(my.config.cmake)
+          --enable-isystem
+.   endif
           --build-dir=${{ github.workspace }}/build
           --prefix=${{ github.workspace }}/prefixenv
           ${{ env.LINKAGE }}
