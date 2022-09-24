@@ -604,7 +604,7 @@
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-network-test" test="true" option="tests" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff" >
         <runner>
-	  <!--<run test="empty_tests" />-->
+          <!--<run test="empty_tests" />-->
           <!--<run test="p2p_tests" />-->
         </runner>
         <library name="bitcoin-network" />
@@ -1946,10 +1946,11 @@
       <package compiler="vc143" name="boost" version="1.78.0" />
     </resource>
     <!-- boost atomic is header-only for lock-free cases. -->
-    <!-- www.boost.org/doc/libs/1_78_0/doc/html/atomic/interface.html
-    <resource canonical="boost_atomic">
+    <!-- www.boost.org/doc/libs/1_78_0/doc/html/atomic/interface.html -->
+    <!--<resource canonical="boost_atomic">
       <package compiler="vc141" name="boost_atomic-vc141" version="1.72.0.0" />
-    </resource> -->
+    </resource>-->
+    <!-- boost chrono appears to be a dependency of another boost dependency. -->
     <resource canonical="boost_chrono">
       <package compiler="vc141" name="boost_chrono-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_chrono-vc142" version="1.76.0.0" />
