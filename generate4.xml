@@ -142,13 +142,13 @@
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
         <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -170,12 +170,12 @@
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
       
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -286,14 +286,14 @@
       -->
       <dependency name="boost_chrono" />
       <dependency name="boost_container" m4="none" />
-      <dependency name="boost_date_time" />
-      <dependency name="boost_filesystem" />
+      <!-- <dependency name="boost_date_time" /> -->
+      <!-- <dependency name="boost_filesystem" /> -->
       <dependency name="boost_iostreams" />
       <!-- boost json is not used in the header-only configuration. -->
       <dependency name="boost_json" />
       <dependency name="boost_locale" />
       <dependency name="boost_program_options" />
-      <dependency name="boost_regex" />
+      <!-- <dependency name="boost_regex" /> -->
       <dependency name="boost_system" />
       <dependency name="boost_thread" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -351,13 +351,13 @@
         <flag substitute="icu" />
         <library name="boost" />
         <library name="boost_chrono" />
-        <library name="boost_date_time" />
-        <library name="boost_filesystem" />
+        <!-- <library name="boost_date_time" /> -->
+        <!-- <library name="boost_filesystem" /> -->
         <library name="boost_iostreams" />
         <library name="boost_json" />
         <library name="boost_locale" />
         <library name="boost_program_options" />
-        <library name="boost_regex" />
+        <!-- <library name="boost_regex" /> -->
         <library name="boost_system" />
         <library name="boost_thread" />
         <library name="pthread" />
@@ -406,24 +406,24 @@
       </build>
       <build name="boost" version="1.78.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
-        <option value="--with-date_time" />
-        <option value="--with-filesystem" />
+        <!-- <option value="--with-date_time" /> -->
+        <!-- <option value="--with-filesystem" /> -->
         <option value="--with-iostreams" />
         <option value="--with-json" />
         <option value="--with-locale" />
         <option value="--with-program_options" />
-        <option value="--with-regex" />
+        <!-- <option value="--with-regex" /> -->
         <option value="--with-system" />
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="evoskuil" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
+      <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
         <option value="--disable-tests" />
         <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
         <option value="--enable-module-schnorrsig" />
       </build>
-      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -449,12 +449,12 @@
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -555,6 +555,7 @@
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
       <dependency name="boost" version="1.76.0" />
+      <dependency name="boost_regex" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="4.0.0" />
 
@@ -596,6 +597,7 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" uuid="564eb540-d6b6-425c-b8db-b0bee8970c18" >
+        <library name="boost_regex" />
         <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="src" />
@@ -616,13 +618,40 @@
     </make>
 
     <install>
-      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
+      <!-- Building with our minimum (c++11 only) version of ICU. -->
+      <build name="icu" version="55.2" parallel="true" >
+        <!-- TODO: verify this with more recent ICU. -->
+        <!-- Bug in ICU 55.2 build requires --enable-draft. -->
+        <option value="--enable-draft" />
+        <option value="--enable-rpath" />
+        <option value="--enable-tools" />
+        <option value="--disable-extras" />
+        <option value="--disable-icuio" />
+        <option value="--disable-layout" />
+        <option value="--disable-layoutex" />
+        <option value="--disable-tests" />
+        <option value="--disable-samples" />
+      </build>
+      <build name="boost" version="1.78.0" parallel="true" nuget="true" >
+        <option value="--with-chrono" />
+        <!-- <option value="--with-date_time" /> -->
+        <!-- <option value="--with-filesystem" /> -->
+        <option value="--with-iostreams" />
+        <option value="--with-json" />
+        <option value="--with-locale" />
+        <option value="--with-program_options" />
+        <option value="--with-regex" />
+        <option value="--with-system" />
+        <option value="--with-thread" />
+        <option value="--with-test" />
+      </build>
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -637,7 +666,7 @@
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
       <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
-        <!-- <axis name="boost" /> -->
+        <axis name="boost" value="build" />
         <axis name="icu" value="with" />
       </job>
 
@@ -646,12 +675,12 @@
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" version="14" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" image="ubuntu-22.04" version="14" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -732,14 +761,11 @@
 
   <repository name="libbitcoin-protocol" version="4.0.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol">
-      <flag value="@mbedtls@" />
-    </package>
+    <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="with" name="mbedtls" default="no" substitute="true" value="-DWITH_MBEDTLS" description="Compile with MbedTLS." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -747,7 +773,6 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.3.4" />
-      <dependency name="mbedtls" version="2.12.0" option="mbedtls" />
       <dependency name="bitcoin-system" version="4.0.0" />
 
       <!-- General flags -->
@@ -788,15 +813,12 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" uuid="6b94e2a5-c054-4790-963d-a7be493259b0" >
-        <flag substitute="mbedtls" />
         <library name="zmq" />
-        <library name="mbedtls" />
         <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-protocol-test" test="true" option="tests" uuid="c42be17b-063d-44f1-a5bb-9f8295144b70" >
-        <flag substitute="mbedtls" />
         <runner>
           <!--
           <run test="authenticator_tests" />
@@ -823,15 +845,13 @@
     <install>
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
-      <build name="mbedtls" version="2.12.0" parallel="true">
-      </build>
-      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
         <!-- until test hang is resolved -->
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
@@ -842,57 +862,50 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="mbedtls" build="true" />
       <axis name="zmq" build="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
-        <!-- <axis name="boost" /> -->
+        <axis name="boost" value="build" />
         <axis name="icu" value="with" />
-        <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
       <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="dynamic" optimization="size" assert="debug">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
-        <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="13" link="static" optimization="size" assert="ndebug">
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
 <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
       <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
-        <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
+        <!-- coverage="true" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
       <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
@@ -906,7 +919,6 @@
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <option value="--build-zmq" />
-        <option value="--build-mbedtls" />
         <option value="--disable-static" />
       </job>
       <job system="osx" compiler="clang" link="static" >
@@ -918,7 +930,6 @@
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
         <option value="--build-zmq" />
-        <option value="--build-mbedtls" />
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -945,7 +956,6 @@
         <exclude path="interface.pb.*" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
-        <option value="--build-mbedtls" />
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1048,13 +1058,13 @@
     <install>
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
       </build>
-      <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-client" github="evoskuil" repository="libbitcoin-client" branch="master" parallel="true" >
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1234,18 +1244,18 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="bitcoin-client" github="evoskuil" repository="libbitcoin-client" branch="master" parallel="true" >
+      <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-explorer" github="evoskuil" repository="libbitcoin-explorer" branch="master" parallel="true" >
+      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1395,13 +1405,13 @@
     </make>
 
     <install>
-      <build name="bitcoin-system" github="evoskuil" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="evoskuil" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1534,18 +1544,18 @@
     </make>
 
     <install>
-      <build name="bitcoin-database" github="evoskuil" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-tools" cmake="-Dwith-tools=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="evoskuil" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="evoskuil" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1687,18 +1697,18 @@
     </make>
 
     <install>
-      <build name="bitcoin-blockchain" github="evoskuil" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-tools" cmake="-Dwith-tools=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="evoskuil" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="evoskuil" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1848,19 +1858,19 @@
     </make>
 
     <install>
-      <build name="bitcoin-node" github="evoskuil" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-console" cmake="-Dwith-console=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-protocol" github="evoskuil" repository="libbitcoin-protocol" branch="master" parallel="true" >
+      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-server" github="evoskuil" repository="libbitcoin-server" branch="master" parallel="true" >
+      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1954,16 +1964,16 @@
       <package compiler="vc142" name="boost_container-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_container-vc143" version="1.78.0" />
     </resource>
-    <resource canonical="boost_date_time">
+    <!-- <resource canonical="boost_date_time">
       <package compiler="vc141" name="boost_date_time-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_date_time-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_date_time-vc143" version="1.78.0" />
-    </resource>
-    <resource canonical="boost_filesystem">
+    </resource> -->
+    <!-- <resource canonical="boost_filesystem">
       <package compiler="vc141" name="boost_filesystem-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_filesystem-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_filesystem-vc143" version="1.78.0" />
-    </resource>
+    </resource> -->
     <resource canonical="boost_iostreams">
       <package compiler="vc141" name="boost_iostreams-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_iostreams-vc142" version="1.76.0.0" />
