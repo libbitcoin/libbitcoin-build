@@ -1417,6 +1417,51 @@
       </build>
     </install>
 
+    <ci>
+      <axis name="boost" build="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
+
+      <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+      </job>
+
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
+        <!-- version="5.0" -->
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+        <!-- version="4.8" -->
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job system="windows" compiler="x64" link="static" assert="debug" />
+      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+    </ci>
+
     <matrix>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
