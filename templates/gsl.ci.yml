@@ -632,7 +632,7 @@ endfunction # get_sln_tests
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
-        uses: coverallsapp/github-action@master
+        uses: pmienk/coveralls-github-action@master
         with:
           path-to-lcov: "./coverage.info"
           github-token: ${{ secrets.github_token }}
