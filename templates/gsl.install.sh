@@ -62,9 +62,6 @@ endfunction
 .   heading2("The default build directory.")
 BUILD_DIR="build-$(my.repo.name)"
 
-.   heading2("Git clone parameters.")
-GIT_CLONE_PARAMS="--depth 1 --single-branch"
-
 PRESUMED_CI_PROJECT_PATH=\$(pwd)
 
 .endmacro # define_build_variables_custom
