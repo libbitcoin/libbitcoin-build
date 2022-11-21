@@ -30,7 +30,7 @@ REM endfor
 
 REM Execute property copiers and artifact generators.
 call copy_modules.cmd
-call copy_properties.cmd
+REM call copy_properties.cmd
 call generate_artifacts.cmd
 
 REM Copy outputs to all repositories.
