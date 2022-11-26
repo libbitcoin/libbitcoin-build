@@ -155,25 +155,24 @@ function has_axis_value(job, name, value)
       (my.job->axis(axis.name = my.name).value = my.value)
 endfunction # has_axis_value
 
-function get_job_packages(job)
+function get_job_packages(integration, repository, job)
+    define my.integration = get_job_packages.integration
+    define my.repository = get_job_packages.repository
     define my.job = get_job_packages.job
     define my.packages = ""
     define my.spacer = ""
 
-    if (my.job.system = "osx")
-        if (!has_axis_value(my.job, "boost", "build"))
-            my.packages = "$(my.packages)$(my.spacer)boost"
-            my.spacer = " "
+    for my.repository->ci.axis as _axis
+        if (!has_axis_value(my.job, _axis.name, "build"))
+            if (count(my.integration.dependency, (count.name  = _axis.name) &\
+                (count.os = my.job.system) & defined(count.package)) = 1)
+                my.pname = my.integration->dependency((name = _axis.name) &\
+                    (os = my.job.system)).package
+                my.packages = "$(my.packages)$(my.spacer)$(my.pname)"
+                my.spacer = " "
+            endif
         endif
-
-        if (!has_axis_value(my.job, "icu", "build"))
-            my.packages = "$(my.packages)$(my.spacer)icu4c"
-            my.spacer = " "
-        endif
-    #elsif (my.job.system = "linux")
-    #    my.packages = get_job_compiler_package(my.job)
-    #    my.spacer = " "
-    endif
+    endfor
 
     if (defined(my.job.coverage) & !(my.job.coverage = "false"))
         my.packages = "$(my.packages)$(my.spacer)lcov"
@@ -295,7 +294,9 @@ function get_job_link(job)
     return my.job.link
 endfunction # get_job_link
 
-function get_job_cflags(job)
+function get_job_cflags(integration, repository, job)
+    define my.integration = get_job_cflags.integration
+    define my.repository = get_job_cflags.repository
     define my.job = get_job_cflags.job
     define my.flags = ""
 
@@ -317,13 +318,23 @@ function get_job_cflags(job)
         my.flags = "$(my.flags) -fvisibility=hidden"
     endif
 
-    return "$(my.flags) -fPIE"
-endfunction # get_job_cflags
+    my.flags = "$(my.flags) -fPIE"
 
-function get_job_cxxflags(job)
-    define my.job = get_job_cxxflags.job
-    return get_job_cflags(my.job)
-endfunction # get_job_cxxflags
+    for my.repository->ci.axis as _axis
+        if (!has_axis_value(my.job, _axis.name, "build"))
+            if (count(my.integration.dependency, ((count.name = _axis.name) & (count.os = my.job.system))) = 1)
+                define my.dependency = my.integration->dependency(\
+                    (name = _axis.name) & (os = my.job.system))
+
+                if (defined(my.dependency.path))
+                    my.flags = "$(my.flags) -I$(my.dependency.path)/include"
+                endif
+            endif
+        endif
+    endfor
+
+    return "$(my.flags)"
+endfunction # get_job_cflags
 
 function get_job_axis_value(configuration, decl, job, axis)
     define my.config = get_job_axis_value.configuration
@@ -372,26 +383,45 @@ function get_job_axis_value(configuration, decl, job, axis)
     return my.value
 endfunction # get_job_axis_value
 
-function get_job_axis_default(configuration, decl, job)
+function get_job_axis_default(configuration, integration, decl, job)
     define my.config = get_job_axis_default.configuration
+    define my.integration = get_job_axis_default.integration
     define my.decl = get_job_axis_default.decl
     define my.job = get_job_axis_default.job
-    return ""
+    define my.result = ""
+
+    if (count(my.integration.dependency, (count.name = my.decl.name) &\
+        (count.os = my.job.system)) = 1)
+        define my.dependency = my.integration->dependency((name = my.decl.name) & (os = my.job.system))
+
+        if ((count(my.dependency.toolset, (count.name = "auto")) = 1))
+            my.result = my.dependency->toolset(name = "auto").axis
+        endif
+
+        if ((count(my.dependency.toolset, (count.name = "cmake")) = 1) & defined(my.config.cmake))
+            my.result = my.dependency->toolset(name = "cmake").axis
+        endif
+    endif
+
+    return my.result
 endfunction # get_job_axis_default
 
-function get_job_shell_axis_value(configuration, job, decl)
+function get_job_shell_axis_value(configuration, integration, job, decl)
     define my.config = get_job_shell_axis_value.configuration
+    define my.integration = get_job_shell_axis_value.integration
     define my.job =  get_job_shell_axis_value.job
     define my.decl =  get_job_shell_axis_value.decl
     define my.value = ""
 
     define my.declared = (count(my.job.axis, (count.name = my.decl.name)) = 1)
+    define my.pathed = (count(my.integration.dependency, (count.name = my.decl.name) &\
+        (count.os = my.job.system) & defined(count.path)) = 1)
 
     if (my.declared)
         my.value = get_job_axis_value(my.config, my.decl, my.job,\
           my.job->axis(name = my.decl.name))
     else
-        my.value = get_job_axis_default(my.config, my.decl, my.job)
+        my.value = get_job_axis_default(my.config, my.integration, my.decl, my.job)
     endif
 
     return my.value
@@ -470,8 +500,10 @@ endfunction # get_sln_tests
 .endtemplate
 .template 1
 .
-.macro initialize_matrix_shell_entry(configuration, ci, job)
+.macro initialize_matrix_shell_entry(configuration, integration, repository, ci, job)
 .   define my.config = initialize_matrix_shell_entry.configuration
+.   define my.integration = initialize_matrix_shell_entry.integration
+.   define my.repository = initialize_matrix_shell_entry.repository
 .   define my.ci = initialize_matrix_shell_entry.ci
 .   define my.job = initialize_matrix_shell_entry.job
 .
@@ -483,25 +515,27 @@ endfunction # get_sln_tests
             assert: "$(get_job_assert(my.job))"
             coverage: "$(get_job_coverage(my.job))"
 .       for my.ci.axis by "$(name)" as _axis
-            $(_axis.name): "$( get_job_shell_axis_value(my.config, my.job, _axis))"
+            $(_axis.name): "$( get_job_shell_axis_value(my.config, my.integration, my.job, _axis))"
 .       endfor
             cc: "$(get_job_cc(my.job))"
-            flags: "$(get_job_cflags(my.job))"
+            flags: "$(get_job_cflags(my.integration, my.repository, my.job))"
             packager: "$(get_job_packager(my.job))"
-            packages: "$(get_job_packages(my.job))"
+            packages: "$(get_job_packages(my.integration, my.repository, my.job))"
 
 .   endif
 .endmacro # initialize_matrix_shell_entry
 .
-.macro initialize_matrix_shell(configuration, ci)
+.macro initialize_matrix_shell(configuration, integration, repository, ci)
 .   define my.config = initialize_matrix_shell.configuration
+.   define my.integration = initialize_matrix_shell.integration
+.   define my.repository = initialize_matrix_shell.repository
 .   define my.ci = initialize_matrix_shell.ci
 .
       matrix:
         include:
 .
 .   for my.ci.job by "$(system)-$(sort_compiler(_job))-$(link)" as _job where is_job_config(_config, _job)
-.       initialize_matrix_shell_entry(my.config, my.ci, _job)
+.       initialize_matrix_shell_entry(my.config, my.integration, my.repository, my.ci, _job)
 .   endfor _job
 .endmacro # initialize_matrix_shell
 .
@@ -705,8 +739,9 @@ endfunction # get_sln_tests
 .
 .endmacro # emit_step_failure_output
 .
-.macro emit_job_shell(configuration, repository, ci)
+.macro emit_job_shell(configuration, integration, repository, ci)
 .   define my.config = emit_job_shell.configuration
+.   define my.integration = emit_job_shell.integration
 .   define my.repository = emit_job_shell.repository
 .   define my.ci = emit_job_shell.ci
 .
@@ -715,7 +750,7 @@ endfunction # get_sln_tests
     strategy:
       fail-fast: false
 
-.   initialize_matrix_shell(my.config, my.ci)
+.   initialize_matrix_shell(my.config, my.integration, my.repository, my.ci)
 
     runs-on: ${{ matrix.os }}
 
@@ -817,6 +852,10 @@ endfunction # get_sln_tests
 .endtemplate
 .template 1
 .macro generate_ci_yml(path_prefix)
+.define my.integration = generate->integration
+.if (!defined(my.integration))
+.   abort "FATAL no integration."
+.endif
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
 .   if (defined(_repository->ci))
@@ -838,7 +877,7 @@ jobs:
 .           new configuration as _config
 .               _config.job = "autotools"
 .               _config.auto = "true"
-.               emit_job_shell(_config, _repository, my.ci)
+.               emit_job_shell(_config, my.integration, _repository, my.ci)
 .           endnew _config
 .       endif
 .
@@ -850,7 +889,7 @@ jobs:
 .           new configuration as _config
 .               _config.job = "cmake"
 .               _config.cmake = "true"
-.               emit_job_shell(_config, _repository, my.ci)
+.               emit_job_shell(_config, my.integration, _repository, my.ci)
 .           endnew _config
 .       endif
 .
