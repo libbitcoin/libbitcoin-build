@@ -809,7 +809,7 @@
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
         <!-- until test hang is resolved -->
-        <!-- option value="--without-tests" cmake="-Dwith-tests=no" -->
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -862,7 +862,8 @@
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+        <!-- coverage="true" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="mbedtls" value="build" />
