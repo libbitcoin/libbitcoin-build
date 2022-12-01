@@ -438,7 +438,7 @@
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <coverage>
-        <exclude path="src/wallet/addresses/qrencode" />
+        <exclude path="src/wallet/addresses/qrencode/*" />
       </coverage>
 
       <!-- image="xcode12.2" equivalent? -->
@@ -856,8 +856,6 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
-        <!-- until test hang is resolved -->
-        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -900,8 +898,7 @@
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
-        <!-- coverage="true" -->
+      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
