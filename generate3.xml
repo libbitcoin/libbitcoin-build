@@ -45,7 +45,7 @@
       <define header="sys/endian.h" export="htobe32" />
       <define header="sys/endian.h" export="htobe64" />
 
-      <dependency name="boost" version="1.72.0" option="tests" />
+      <dependency name="boost" version="1.72.0" maximum="1.76.0" option="tests" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
       <dependency name="secp256k1" version="0.1.0.19" />
@@ -278,7 +278,7 @@
       <!-- https://svn.boost.org/trac/boost/ticket/6851 [gcc, 1.50-1.53] -->
       <!-- [log rotation derivation for customization]  [???? 1.56] -->
       <!-- [compiler failure]                           [vc120 1.62-1.72] -->
-      <dependency name="boost" version="1.72.0" />
+      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_atomic" m4="none" />
       <dependency name="boost_chrono" />
       <dependency name="boost_date_time" />
@@ -385,7 +385,7 @@
       <!-- Building with our minimum (c++11 only) version of ICU. -->
       <build name="icu" version="55.2" parallel="true" >
         <!-- TODO: verify this with more recent ICU. -->
-        <!-- Bug in ICU 55.2 build requires --enable-draft. -->
+        <!-- Bug in ICU 55.2 build requires enable-draft. -->
 	<option value="--enable-draft" />
         <option value="--enable-rpath" />
         <option value="--enable-tools" />
@@ -425,13 +425,13 @@
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <coverage>
-        <exclude path="src/wallet/addresses/qrencode" />
+        <exclude path="src/wallet/addresses/qrencode/*" />
       </coverage>
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
-       <axis name="boost" value="build" />
+        <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
@@ -545,7 +545,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" />
+      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="3.7.0" />
 
@@ -729,7 +729,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" />
+      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.3.4" />
@@ -863,7 +863,7 @@
       </job>
 
       <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
-	<!-- coverage="true" -->
+        <!-- coverage="true" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="mbedtls" value="build" />
@@ -953,7 +953,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" />
+      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="3.7.0" />
       <dependency name="bitcoin-protocol" version="3.7.0" />
@@ -1158,7 +1158,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" />
+      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="3.7.0" />
@@ -1399,7 +1399,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" />
+      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="3.7.0" />
 
@@ -1578,7 +1578,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" />
+      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-database" version="3.7.0" />
       <dependency name="bitcoin-consensus" version="3.7.0" option="consensus" />
@@ -1769,7 +1769,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" />
+      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="3.7.0" />
@@ -1974,7 +1974,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" />
+      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
@@ -2183,6 +2183,14 @@
     </matrix>
 
   </repository>
+
+  <integration>
+    <dependency name="boost" os="osx" package="boost@1.76" path="/usr/local/opt/boost@1.76">
+      <toolset name="auto" axis="--with-boost=/usr/local/opt/boost@1.76" />
+      <toolset name="cmake" axis="-DBOOST_ROOT=/usr/local/opt/boost@1.76 -DBOOST_LIBRARYDIR=/usr/local/opt/boost@1.76/lib" />
+    </dependency>
+    <dependency name="icu" os="osx" package="icu4c" />
+  </integration>
 
   <nuget>
     <resource canonical="boost">

@@ -158,6 +158,10 @@
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
+      <coverage>
+        <exclude path="src/clone/*" />
+      </coverage>
+
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
@@ -434,7 +438,7 @@
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <coverage>
-        <exclude path="src/wallet/addresses/qrencode" />
+        <exclude path="src/wallet/addresses/qrencode/*" />
       </coverage>
 
       <!-- image="xcode12.2" equivalent? -->
@@ -852,7 +856,6 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
-        <!-- until test hang is resolved -->
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -2125,6 +2128,11 @@
       <nuget version="vc120" />
     </toolset>
   </msvc>
+
+  <integration>
+    <dependency name="boost" os="osx" package="boost" />
+    <dependency name="icu" os="osx" package="icu4c" />
+  </integration>
 
   <templates source="generate4.xml">
     <template name="gsl.version.hpp" />
