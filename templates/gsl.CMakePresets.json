@@ -1,0 +1,190 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2021 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin .vscode/settings.json.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+function workflow_relative_path(repository, path_prefix)
+    define my.repository = workflow_relative_path.repository
+    require(my.repository, "repository", "name")
+    define my.subpath = "builds/cmake"
+    return append_path(append_path(my.path_prefix,\
+        canonical_path_name(my.repository)), my.subpath)
+endfunction
+
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.macro generate_cmake_presets_json(path_prefix)
+.for generate.repository by name as _repository
+.   require(_repository, "repository", "name")
+.   my.absolute_path = join(join(global.root, my.path_prefix), _repository.name)
+.   my.output_path = workflow_relative_path(_repository, my.path_prefix)
+.   create_directory(my.output_path)
+.   define my.out_file = "$(my.output_path)/CMakePresets.json"
+.   notify(my.out_file)
+.   output(my.out_file)
+{
+    "version": 5,
+    "configurePresets": [
+        {
+            "name": "base",
+            "description": "Factored base pattern settings.",
+            "hidden": true,
+            "installDir": "${sourceParentDir}/../../prefix/${presetName}",
+            "binaryDir": "${sourceParentDir}/../obj/${presetName}",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "${sourceParentDir}/../../prefix/${presetName}",
+                "CMAKE_LIBRARY_PATH": "${sourceParentDir}/../../prefix/lib:$env{CMAKE_LIBRARY_PATH}"
+            }
+        },
+        {
+            "name": "debug",
+            "description": "Factored debug settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Og -g --coverage",
+                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Og -g --coverage",
+                "enable-ndebug": "no"
+            }
+        },
+        {
+            "name": "release",
+            "description": "Factored release settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -O3",
+                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -O3",
+                "enable-ndebug": "yes"
+            }
+        },
+        {
+            "name": "static",
+            "description": "Factored static linking settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "BUILD_SHARED_LIBS": "FALSE"
+            }
+        },
+        {
+            "name": "shared",
+            "description": "Factored shared/dynamic linking settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "BUILD_SHARED_LIBS": "TRUE"
+            }
+        },
+        {
+            "name": "optimized-size",
+            "description": "Factored size optimization settings.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Os -s",
+                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Os -s"
+            }
+        },
+        {
+            "name": "debug-static",
+            "displayName": "Debug/Static",
+            "description": "Debug build with static linking.",
+            "hidden": false,
+            "inherits": [ "static", "debug", "base" ]
+        },
+        {
+            "name": "release-static",
+            "displayName": "Release/Static",
+            "description": "Release build with static linking with standard optimizations.",
+            "hidden": false,
+            "inherits": [ "static", "release", "base" ]
+        },
+        {
+            "name": "debug-shared",
+            "displayName": "Debug/Shared",
+            "description": "Debug build with shared linking.",
+            "hidden": false,
+            "inherits": [ "shared", "debug", "base" ]
+        },
+        {
+            "name": "release-shared",
+            "displayName": "Release/Shared",
+            "description": "Release build with shared linking with standard optimizations.",
+            "hidden": false,
+            "inherits": [ "shared", "release", "base" ]
+        },
+        {
+            "name": "release-static-size",
+            "displayName": "Release/Shared/Size",
+            "description": "Release build with static linking optimized for size.",
+            "hidden": false,
+            "inherits": [ "optimized-size", "static", "release", "base" ]
+        },
+        {
+            "name": "release-shared-size",
+            "displayName": "Release/Shared/Size",
+            "description": "Release build with shared linking optimized for size.",
+            "hidden": false,
+            "inherits": [ "optimized-size", "shared", "release", "base" ]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "debug-static",
+            "displayName": "Debug/Static",
+            "configurePreset": "debug-static"
+        },
+        {
+            "name": "release-static",
+            "displayName": "Release/Static",
+            "configurePreset": "release-static"
+        },
+        {
+            "name": "debug-shared",
+            "displayName": "Debug/Shared",
+            "configurePreset": "debug-shared"
+        },
+        {
+            "name": "release-shared",
+            "displayName": "Release/Shared",
+            "configurePreset": "release-shared"
+        },
+        {
+            "name": "release-static-size",
+            "displayName": "Release/Shared/Size",
+            "configurePreset": "release-static-size"
+        },
+        {
+            "name": "release-shared-size",
+            "displayName": "Release/Shared/Size",
+            "configurePreset": "release-shared-size"
+        }
+    ]
+}
+.
+.       close
+.endfor _repository
+.endmacro # generate_cmake_presets_json
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_cmake_presets_json("output")
+
+.endtemplate
