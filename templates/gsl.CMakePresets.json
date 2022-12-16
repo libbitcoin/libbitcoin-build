@@ -158,33 +158,48 @@ endfunction
     ],
     "buildPresets": [
         {
+            "name": "nix-target-list",
+            "hidden": "true",
+            "targets": [
+.   for _repository->make.product as _product where ((_product.prefix = "bin") | (_product.prefix = "lib"))
+                "$(target_name(_product, _repository))"$(last() ?? "" ? ",")
+.   endfor
+            ]
+        },
+        {
             "name": "nix-gnu-debug-static",
             "displayName": "*nix/GNU/Debug/Static",
+            "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-debug-static"
         },
         {
             "name": "nix-gnu-release-static",
             "displayName": "*nix/GNU/Release/Static",
+            "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-release-static"
         },
         {
             "name": "nix-gnu-debug-shared",
             "displayName": "*nix/GNU/Debug/Shared",
+            "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-debug-shared"
         },
         {
             "name": "nix-gnu-release-shared",
             "displayName": "*nix/GNU/Release/Shared",
+            "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-release-shared"
         },
         {
             "name": "nix-gnu-release-static-size",
             "displayName": "*nix/GNU/Release/Shared/Size",
+            "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-release-static-size"
         },
         {
             "name": "nix-gnu-release-shared-size",
             "displayName": "*nix/GNU/Release/Shared/Size",
+            "inherits": [ "nix-target-list" ],
             "configurePreset": "nix-gnu-release-shared-size"
         }
     ]
