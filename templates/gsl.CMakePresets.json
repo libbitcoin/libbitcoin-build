@@ -162,7 +162,11 @@ endfunction
             "hidden": "true",
             "targets": [
 .   for _repository->make.product as _product where ((_product.prefix = "bin") | (_product.prefix = "lib"))
+.       if (_product.path = "src")
+                "$(_repository->package.library)"$(last() ?? "" ? ",")
+.       else
                 "$(target_name(_product, _repository))"$(last() ?? "" ? ",")
+.       endif
 .   endfor
             ]
         },
