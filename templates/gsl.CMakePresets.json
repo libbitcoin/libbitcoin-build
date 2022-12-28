@@ -22,6 +22,60 @@ endfunction
 ###############################################################################
 .endtemplate
 .template 1
+.macro emit_property(property, pre, post, listMember)
+.   my.property = emit_property.property
+.   my.prefix = emit_property.pre
+.   my.postfix = emit_property.post
+.
+.   if (defined(my.property.type))
+.       require(my.property, "property", "name")
+.       my.isObject = (my.property.type = "object")
+.       my.isList = (my.property.type = "list")
+.       if (my.isObject | my.isList)
+$(my.prefix)"$(my.property.name)": $(my.isObject ?? "{" ? "[")
+.           for my.property.property as _property
+.               emit_property(_property, "$(my.prefix)    ", last() ?? "" ? ",", my.isList)
+.           endfor
+$(my.prefix)$(my.isObject ?? "}" ? "]")$(my.postfix)
+.       else
+$(my.prefix)"$(my.property.name)": {
+$(my.prefix)    "type": "$(my.property.type)",
+$(my.prefix)    "value": "$(my.property.value)"
+$(my.prefix)}$(my.postfix)
+.       endif
+.   elsif (defined(my.property.value))
+.       if (defined(my.property.name))
+$(my.prefix)"$(my.property.name)": "$(my.property.value)"$(my.postfix)
+.       elsif (emit_property.listMember)
+$(my.prefix)"$(my.property.value)"$(my.postfix)
+.       else
+.           abort("Non-list-member property lacks name.")
+.       endif
+.   else
+.       abort("Unrecognized type-less, value-less property.")
+.   endif
+.endmacro #emit_property
+.
+.macro emit_configuration_body(config)
+.   my.config = emit_configuration_body.config
+.
+            "name": "$(my.config.name)",
+.   if defined(my.config.display)
+            "displayName": "$(my.config.display)",
+.   endif
+.   if defined(my.config.description)
+            "description": "$(my.config.description)",
+.   endif
+.   if defined(my.config.hidden)
+            "hidden": $(my.config.hidden),
+.   endif
+.   for my.config.property as _property
+.       my.prefix = "            "
+.       my.postfix = last() ?? "" ? ","
+.       emit_property(_property, my.prefix, my.postfix, false)
+.   endfor
+.endmacro #emit_configuration_body
+.
 .macro generate_cmake_presets_json(path_prefix)
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
@@ -34,127 +88,11 @@ endfunction
 {
     "version": 5,
     "configurePresets": [
+.  for generate->CMakePresets.configuration as _configuration
         {
-            "name": "nix-base",
-            "description": "Factored base settings for non-windows *nix based platforms.",
-            "hidden": true,
-            "installDir": "${sourceParentDir}/../../prefix/${presetName}",
-            "binaryDir": "${sourceParentDir}/../obj/${presetName}",
-            "condition": {
-                "type": "inList",
-                "string": "${hostSystemName}",
-                "list": [ "Darwin", "Linux" ]
-            },
-            "cacheVariables": {
-                "CMAKE_PREFIX_PATH": {
-                    "type": "PATH",
-                    "value": "${sourceParentDir}/../../prefix/${presetName}"
-                },
-                "CMAKE_LIBRARY_PATH": {
-                    "type": "PATH",
-                    "value": "${sourceParentDir}/../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}"
-                }
-            }
-        },
-        {
-            "name": "gnu-debug",
-            "description": "Factored debug settings.",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Og -g --coverage",
-                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Og -g --coverage",
-                "enable-ndebug": {
-                    "type": "BOOL",
-                    "value": "OFF"
-                }
-            }
-        },
-        {
-            "name": "gnu-release",
-            "description": "Factored release settings.",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -O3",
-                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -O3",
-                "enable-ndebug": {
-                    "type": "BOOL",
-                    "value": "ON"
-                }
-            }
-        },
-        {
-            "name": "static",
-            "description": "Factored static linking settings.",
-            "hidden": true,
-            "cacheVariables": {
-                "BUILD_SHARED_LIBS": {
-                    "type": "BOOL",
-                    "value": "OFF"
-                }
-            }
-        },
-        {
-            "name": "shared",
-            "description": "Factored shared/dynamic linking settings.",
-            "hidden": true,
-            "cacheVariables": {
-                "BUILD_SHARED_LIBS": {
-                    "type": "BOOL",
-                    "value": "ON"
-                }
-            }
-        },
-        {
-            "name": "gnu-optimized-size",
-            "description": "Factored size optimization settings.",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Os -s",
-                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Os -s"
-            }
-        },
-        {
-            "name": "nix-gnu-debug-static",
-            "displayName": "*nix/GNU/Debug/Static",
-            "description": "Debug build with static linking.",
-            "hidden": false,
-            "inherits": [ "static", "gnu-debug", "nix-base" ]
-        },
-        {
-            "name": "nix-gnu-release-static",
-            "displayName": "*nix/GNU/Release/Static",
-            "description": "Release build with static linking with standard optimizations.",
-            "hidden": false,
-            "inherits": [ "static", "gnu-release", "nix-base" ]
-        },
-        {
-            "name": "nix-gnu-debug-shared",
-            "displayName": "*nix/GNU/Debug/Shared",
-            "description": "Debug build with shared linking.",
-            "hidden": false,
-            "inherits": [ "shared", "gnu-debug", "nix-base" ]
-        },
-        {
-            "name": "nix-gnu-release-shared",
-            "displayName": "*nix/GNU/Release/Shared",
-            "description": "Release build with shared linking with standard optimizations.",
-            "hidden": false,
-            "inherits": [ "shared", "gnu-release", "nix-base" ]
-        },
-        {
-            "name": "nix-gnu-release-static-size",
-            "displayName": "*nix/GNU/Release/Shared/Size",
-            "description": "Release build with static linking optimized for size.",
-            "hidden": false,
-            "inherits": [ "gnu-optimized-size", "static", "gnu-release", "nix-base" ]
-        },
-        {
-            "name": "nix-gnu-release-shared-size",
-            "displayName": "*nix/GNU/Release/Shared/Size",
-            "description": "Release build with shared linking optimized for size.",
-            "hidden": false,
-            "inherits": [ "gnu-optimized-size", "shared", "gnu-release", "nix-base" ]
-        }
+.    emit_configuration_body(_configuration)
+        }$(last() ?? "" ? ",")
+.  endfor
     ],
     "buildPresets": [
         {
@@ -170,42 +108,14 @@ endfunction
 .   endfor
             ]
         },
+.   for generate->CMakePresets.configuration as _configuration where !defined(_configuration.hidden) | (_configuration.hidden = "false")
         {
-            "name": "nix-gnu-debug-static",
-            "displayName": "*nix/GNU/Debug/Static",
+            "name": "$(_configuration.name)",
+            "displayName": "$(_configuration.display)",
             "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-debug-static"
-        },
-        {
-            "name": "nix-gnu-release-static",
-            "displayName": "*nix/GNU/Release/Static",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-static"
-        },
-        {
-            "name": "nix-gnu-debug-shared",
-            "displayName": "*nix/GNU/Debug/Shared",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-debug-shared"
-        },
-        {
-            "name": "nix-gnu-release-shared",
-            "displayName": "*nix/GNU/Release/Shared",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-shared"
-        },
-        {
-            "name": "nix-gnu-release-static-size",
-            "displayName": "*nix/GNU/Release/Shared/Size",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-static-size"
-        },
-        {
-            "name": "nix-gnu-release-shared-size",
-            "displayName": "*nix/GNU/Release/Shared/Size",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-shared-size"
-        }
+            "configurePreset": "$(_configuration.name)"
+        }$(last() ?? "" ? ",")
+.   endfor
     ]
 }
 .
