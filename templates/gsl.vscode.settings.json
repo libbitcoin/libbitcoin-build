@@ -1,0 +1,58 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2021 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin .vscode/settings.json.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+function workflow_relative_path(repository, path_prefix)
+    define my.repository = workflow_relative_path.repository
+    require(my.repository, "repository", "name")
+    define my.subpath = ".vscode"
+    return append_path(append_path(my.path_prefix,\
+        canonical_path_name(my.repository)), my.subpath)
+endfunction
+
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.macro generate_vscode_settings_json(path_prefix)
+.for generate.repository by name as _repository
+.   require(_repository, "repository", "name")
+.   my.absolute_path = join(join(global.root, my.path_prefix), _repository.name)
+.   my.output_path = workflow_relative_path(_repository, my.path_prefix)
+.   create_directory(my.output_path)
+.   define my.out_file = "$(my.output_path)/settings.json"
+.   notify(my.out_file)
+.   output(my.out_file)
+{
+    "cmake.sourceDirectory": "${workspaceFolder}/builds/cmake"
+}
+.
+.       close
+.endfor _repository
+.endmacro # generate_vscode_settings_json
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "utilities.gsl"
+
+generate_vscode_settings_json("output")
+
+.endtemplate
