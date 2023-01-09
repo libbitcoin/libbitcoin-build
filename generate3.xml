@@ -10,7 +10,7 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <!-- <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." /> -->
-	      <!-- <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." /> -->
+      <!-- <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." /> -->
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -386,7 +386,7 @@
       <build name="icu" version="55.2" parallel="true" >
         <!-- TODO: verify this with more recent ICU. -->
         <!-- Bug in ICU 55.2 build requires enable-draft. -->
-	<option value="--enable-draft" />
+        <option value="--enable-draft" />
         <option value="--enable-rpath" />
         <option value="--enable-tools" />
         <option value="--disable-extras" />
@@ -1041,7 +1041,7 @@
       <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-	<axis name="zmq" value="build" />
+        <axis name="zmq" value="build" />
       </job>
 
       <job build="all" system="osx" link="static" optimization="size" assert="ndebug">
@@ -1255,7 +1255,7 @@
       </build>
       <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="version3" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
-	<option value="${with_boost}" />
+        <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="version3" parallel="true" >
@@ -2105,7 +2105,7 @@
       </job>
 
       <job build="autotools" system="linux" compiler="gcc" link="static" optimization="debug" assert="ndebug">
-	      <!-- coverage="true" -->
+        <!-- coverage="true" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
