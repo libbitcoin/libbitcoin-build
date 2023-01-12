@@ -18,6 +18,21 @@ function workflow_relative_path(repository, path_prefix)
         canonical_path_name(my.repository)), my.subpath)
 endfunction
 
+function calculate_presets(result, repository, presets)
+    define my.result = calculate_presets.result
+    define my.repository = calculate_presets.repository
+    define my.presets = calculate_presets.presets
+
+    for my.repository->presets.configuration as _configuration
+        if (count(my.presets.configuration, count.name = _configuration.name) = 1)
+            copy my.presets->configuration(name = _configuration.name) to my.result
+        else
+            abort "Preset $(_configuration.name) absent from registry."
+        endif
+    endfor
+
+endfunction
+
 # Generation
 ###############################################################################
 .endtemplate
@@ -85,41 +100,46 @@ $(my.prefix)"$(my.property.value)"$(my.postfix)
 .   define my.out_file = "$(my.output_path)/CMakePresets.json"
 .   notify(my.out_file)
 .   output(my.out_file)
+.
+.   new presets as _presets
+.       calculate_presets(_presets, _repository, generate->presets)
+.
 {
     "version": 5,
     "configurePresets": [
-.  for generate->CMakePresets.configuration as _configuration
+.      for _presets.configuration as _configuration
         {
-.    emit_configuration_body(_configuration)
+.           emit_configuration_body(_configuration)
         }$(last() ?? "" ? ",")
-.  endfor
+.      endfor
     ],
     "buildPresets": [
         {
             "name": "nix-target-list",
             "hidden": "true",
             "targets": [
-.   for _repository->make.product as _product where ((_product.prefix = "bin") | (_product.prefix = "lib"))
-.       if (_product.path = "src")
+.       for _repository->make.product as _product where ((_product.prefix = "bin") | (_product.prefix = "lib"))
+.           if (_product.path = "src")
                 "$(_repository->package.library)"$(last() ?? "" ? ",")
-.       else
+.           else
                 "$(target_name(_product, _repository))"$(last() ?? "" ? ",")
-.       endif
-.   endfor
+.           endif
+.       endfor
             ]
         },
-.   for generate->CMakePresets.configuration as _configuration where !defined(_configuration.hidden) | (_configuration.hidden = "false")
+.       for _presets.configuration as _configuration where !defined(_configuration.hidden) | (_configuration.hidden = "false")
         {
             "name": "$(_configuration.name)",
             "displayName": "$(_configuration.display)",
             "inherits": [ "nix-target-list" ],
             "configurePreset": "$(_configuration.name)"
         }$(last() ?? "" ? ",")
-.   endfor
+.       endfor
     ]
 }
+.   endnew
 .
-.       close
+.   close
 .endfor _repository
 .endmacro # generate_cmake_presets_json
 .endtemplate
