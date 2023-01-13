@@ -888,7 +888,7 @@
       </job>
 
       <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
-<axis name="boost" value="build" />
+        <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
@@ -1798,14 +1798,14 @@
     </make>
 
     <install>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
-        <option value="--without-tools" cmake="-Dwith-tools=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-tools" cmake="-Dwith-tools=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
