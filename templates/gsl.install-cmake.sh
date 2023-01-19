@@ -119,6 +119,17 @@ handle_custom_options()
         fi
     fi
 .
+.   if (have_build(my.install, "bitcoin-consensus"))
+
+    # Process Consensus
+    if [[ $WITH_BITCOIN_CONSENSUS = "yes" ]]; then
+        CUMULATIVE_FILTERED_ARGS+=" --with-consensus"
+        CUMULATIVE_FILTERED_ARGS_CMAKE+=" -Dwith-consensus=yes"
+    else
+        CUMULATIVE_FILTERED_ARGS+=" --without-consensus"
+        CUMULATIVE_FILTERED_ARGS_CMAKE+=" -Dwith-consensus=no"
+    fi
+.   endif
 .   if (have_build(my.install, "icu"))
 
     # Process ICU
@@ -145,6 +156,7 @@ remove_install_options()
 {
     # Purge installer handled options other than --build-.
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--with-*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--without-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--enable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--disable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
@@ -248,8 +260,13 @@ build_from_github_cmake()
     local REPO=$1
     local JOBS=$2
     local TEST=$3
-    local OPTIONS=$4
-    shift 4
+    local BUILD=$4
+    local OPTIONS=$5
+    shift 5
+
+    if [[ ! ($BUILD) || ($BUILD == "no") ]]; then
+        return
+    fi
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
@@ -329,38 +346,41 @@ make_jobs()
 .macro build_github(build)
 .   define my.build = build_github.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
+.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-    create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch)
+    create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
 .   if (is_bitcoin_dependency(my.build))
-    build_from_github_cmake $(my.build.repository) "$(my.parallel)" false "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+    build_from_github_cmake $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
 .   else
-    build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.options)" $CUMULATIVE_FILTERED_ARGS
+    build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS
 .   endif
 .endmacro # build_github
 .
 .macro build_github_cmake(build)
 .   define my.build = build_github_cmake.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
+.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-    create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch)
-    build_from_github_cmake $(my.build.repository) "$(my.parallel)" false "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+    create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
+    build_from_github_cmake $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
 .endmacro # build_github_cmake
 .
 .macro build_ci(build)
 .   define my.build = build_ci.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
+.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
     if [[ ! ($CI == true) ]]; then
-        create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch)
+        create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
 .   if (is_bitcoin_dependency(my.build))
-        build_from_github_cmake $(my.build.repository) "$(my.parallel)" true "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+        build_from_github_cmake $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
 .   else
-        build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.options)" $CUMULATIVE_FILTERED_ARGS
+        build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS
 .   endif
     else
         push_directory "$PRESUMED_CI_PROJECT_PATH"
         push_directory ".."
-        build_from_github_cmake $(my.build.repository) "$(my.parallel)" true "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+        build_from_github_cmake $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
         pop_directory
         pop_directory
     fi

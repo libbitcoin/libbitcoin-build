@@ -185,22 +185,24 @@ make_jobs()
 .macro build_github(build)
 .   define my.build = build_github.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
+.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-    create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch)
-    build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.options)" "$@"
+    create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
+    build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" "$@"
 .endmacro # build_github
 .
 .macro build_ci(build)
 .   define my.build = build_ci.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
+.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
     if [[ ! ($CI == true) ]]; then
         create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch)
-        build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.options)" "$@"
+        build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" "$@"
     else
         push_directory "$PRESUMED_CI_PROJECT_PATH"
         push_directory ".."
-        build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.options)" "$@"
+        build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" "$@"
         pop_directory
         pop_directory
     fi

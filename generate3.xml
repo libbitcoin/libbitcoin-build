@@ -1761,7 +1761,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" conditional="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1798,7 +1798,7 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="consensus" build="false" with="true" without="true" />
+      <axis name="consensus" build="false" with="true" without="true" recognized="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
@@ -2012,7 +2012,7 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="consensus" build="false" with="true" without="true" />
+      <axis name="consensus" build="false" with="true" without="true" recognized="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
@@ -2234,7 +2234,7 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="consensus" build="false" with="true" without="true" />
+      <axis name="consensus" build="false" with="true" without="true" recognized="true" />
       <axis name="zmq" build="true" />
 
       <!-- image="xcode12.2" equivalent? -->

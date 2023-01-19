@@ -811,6 +811,24 @@ function split_version(version, version_string)
     define my.version.patch = string.substr(my.remainder, my.position + 1)
 endfunction
 
+#------------------------------------------------------------------------------
+# CMake utilities.
+#------------------------------------------------------------------------------
+
+function calculate_presets(result, repository, presets)
+    define my.result = calculate_presets.result
+    define my.repository = calculate_presets.repository
+    define my.presets = calculate_presets.presets
+
+    for my.repository->presets.configuration as _configuration
+        if (count(my.presets.configuration, count.name = _configuration.name) = 1)
+            copy my.presets->configuration(name = _configuration.name) to my.result
+        else
+            abort "Preset $(_configuration.name) absent from registry."
+        endif
+    endfor
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
