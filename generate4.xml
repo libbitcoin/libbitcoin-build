@@ -165,7 +165,7 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
-        <!-- <axis name="boost" /> -->
+        <axis name="boost" value="build" />
         <axis name="icu" value="with" />
       </job>
 
@@ -444,7 +444,7 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
-        <!-- <axis name="boost" /> -->
+        <axis name="boost" value="build" />
         <axis name="icu" value="with" />
       </job>
 
@@ -1818,7 +1818,7 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-	  <axis name="consensus" with="true" without="true" />
+      <axis name="consensus" with="true" without="true" />
 
       <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
         <axis name="boost" value="build" />
