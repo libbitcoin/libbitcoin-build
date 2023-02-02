@@ -243,8 +243,14 @@ build_all()
 .
 .macro define_invoke()
 display_configuration
-create_directory "$BUILD_DIR"
-push_directory "$BUILD_DIR"
+
+if [[ ! ($CI == true) ]]; then
+    create_directory "$BUILD_DIR"
+    push_directory "$BUILD_DIR"
+else
+    push_directory "$BUILD_DIR"
+fi
+
 initialize_git
 time build_all "${CONFIGURE_OPTIONS[@]}"
 pop_directory

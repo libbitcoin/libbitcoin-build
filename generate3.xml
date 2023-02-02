@@ -150,6 +150,7 @@
     </install>
 
     <presets>
+      <mapping name="bitcoin-consensus" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
@@ -205,6 +206,26 @@
       </job>
 
       <job build="cmake" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-shared" system="linux" image="ubuntu-20.04" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-static-size" system="linux" image="ubuntu-20.04" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-shared-size" system="linux" image="ubuntu-20.04" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-static" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -436,6 +457,7 @@
     </install>
 
     <presets>
+      <mapping name="bitcoin-system" type="remove" parameter="icu" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
@@ -499,6 +521,26 @@
       </job>
 
       <job build="cmake" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-shared-without_icu" system="linux" image="ubuntu-20.04" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-static-size-with_icu" system="linux" image="ubuntu-20.04" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-shared-size-without_icu" system="linux" image="ubuntu-20.04" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-static-with_icu" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -655,6 +697,8 @@
     </install>
 
     <presets>
+      <mapping name="bitcoin-network" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
@@ -708,6 +752,26 @@
       </job>
 
       <job build="cmake" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-shared" system="linux" image="ubuntu-20.04" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-static-size" system="linux" image="ubuntu-20.04" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-shared-size" system="linux" image="ubuntu-20.04" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-static" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -870,6 +934,8 @@
     </install>
 
     <presets>
+      <mapping name="bitcoin-protocol" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
@@ -940,6 +1006,34 @@
       </job>
 
       <job build="cmake" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-shared" system="linux" image="ubuntu-20.04" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-static-size" system="linux" image="ubuntu-20.04" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-shared-size" system="linux" image="ubuntu-20.04" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+        <axis name="mbedtls" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-static" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="mbedtls" value="build" />
@@ -1103,6 +1197,9 @@
     </install>
 
     <presets>
+      <mapping name="bitcoin-client" type="base" />
+      <mapping name="bitcoin-protocol" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
@@ -1161,6 +1258,30 @@
       </job>
 
       <job build="cmake" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-shared" system="linux" image="ubuntu-20.04" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-static-size" system="linux" image="ubuntu-20.04" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-shared-size" system="linux" image="ubuntu-20.04" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-static" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
@@ -1349,6 +1470,11 @@
     </install>
 
     <presets>
+      <mapping name="bitcoin-explorer" type="base" />
+      <mapping name="bitcoin-network" type="base" />
+      <mapping name="bitcoin-client" type="base" />
+      <mapping name="bitcoin-protocol" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
@@ -1407,6 +1533,30 @@
       </job>
 
       <job build="cmake" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-shared" system="linux" image="ubuntu-20.04" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-static-size" system="linux" image="ubuntu-20.04" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-shared-size" system="linux" image="ubuntu-20.04" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-static" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
@@ -1572,6 +1722,8 @@
     </install>
 
     <presets>
+      <mapping name="bitcoin-database" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
@@ -1623,6 +1775,26 @@
       </job>
 
       <job build="cmake" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-shared" system="linux" image="ubuntu-20.04" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-static-size" system="linux" image="ubuntu-20.04" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-shared-size" system="linux" image="ubuntu-20.04" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-static" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -1773,6 +1945,10 @@
     </install>
 
     <presets>
+      <mapping name="bitcoin-blockchain" type="remove" parameter="consensus" />
+      <mapping name="bitcoin-consensus" type="base" />
+      <mapping name="bitcoin-database" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
@@ -1835,6 +2011,26 @@
       </job>
 
       <job build="cmake" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-shared-with_consensus" system="linux" image="ubuntu-20.04" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-static-size-with_consensus" system="linux" image="ubuntu-20.04" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-shared-size-with_consensus" system="linux" image="ubuntu-20.04" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-static-with_consensus" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -1995,6 +2191,12 @@
     </install>
 
     <presets>
+      <mapping name="bitcoin-node" type="base" />
+      <mapping name="bitcoin-network" type="base" />
+      <mapping name="bitcoin-blockchain" type="add" parameter="consensus" />
+      <mapping name="bitcoin-consensus" type="base" />
+      <mapping name="bitcoin-database" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
@@ -2049,6 +2251,26 @@
       </job>
 
       <job build="cmake" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-shared" system="linux" image="ubuntu-20.04" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-static-size" system="linux" image="ubuntu-20.04" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-shared-size" system="linux" image="ubuntu-20.04" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-static" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -2217,6 +2439,14 @@
     </install>
 
     <presets>
+      <mapping name="bitcoin-server" type="base" />
+      <mapping name="bitcoin-protocol" type="base" />
+      <mapping name="bitcoin-node" type="base" />
+      <mapping name="bitcoin-network" type="base" />
+      <mapping name="bitcoin-blockchain" type="add" parameter="consensus" />
+      <mapping name="bitcoin-consensus" type="base" />
+      <mapping name="bitcoin-database" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
@@ -2279,6 +2509,30 @@
       </job>
 
       <job build="cmake" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-shared" system="linux" image="ubuntu-20.04" compiler="clang" link="dynamic" optimization="size" assert="debug">
+        <axis name="boost" value="build" />
+        <!-- axis name="icu" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-static-size" system="linux" image="ubuntu-20.04" compiler="clang" link="static" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <axis name="icu" value="build" />
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-release-shared-size" system="linux" image="ubuntu-20.04" compiler="gcc" link="dynamic" optimization="size" assert="ndebug">
+        <axis name="boost" value="build" />
+        <!-- <axis name="icu" /> -->
+        <axis name="zmq" value="build" />
+      </job>
+
+      <job build="preset" preset="nix-gnu-debug-static" system="linux" image="ubuntu-20.04" compiler="gcc" link="static" optimization="debug" assert="ndebug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
@@ -2883,6 +3137,8 @@
     <template name="gsl.vcxproj.filters" />
     <template name="gsl.CMakeLists.txt" />
     <template name="gsl.install-cmake.sh" />
+    <template name="gsl.CMakePresets.json" />
+    <template name="gsl.install-cmakepresets.sh" />
     <template name="gsl.ci.yml" />
   </templates>
 

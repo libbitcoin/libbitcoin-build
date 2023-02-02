@@ -101,7 +101,7 @@ $(my.prefix)"$(my.property.value)"$(my.postfix)
     "buildPresets": [
         {
             "name": "nix-target-list",
-            "hidden": "true",
+            "hidden": true,
             "targets": [
 .       for _repository->make.product as _product where ((_product.prefix = "bin") | (_product.prefix = "lib"))
 .           if (_product.path = "src")

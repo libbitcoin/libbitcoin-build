@@ -33,7 +33,8 @@ function is_job_config(configuration, job)
     define my.config = is_job_config.configuration
     define my.job = is_job_config.job
     return defined(my.job.build) \
-      & ((my.job.build = "all") | (my.job.build = my.config.job))
+      & (((my.job.build = "all") & (defined(my.config.accept_all))) \
+      | (my.job.build = my.config.job))
 endfunction
 
 function is_job_autotools(job)
@@ -49,6 +50,11 @@ function is_job_cmake(job)
         ((my.job.build = "cmake") | (my.job.build = "all"))
 endfunction
 
+function is_job_preset(job)
+    define my.job = is_job_preset.job
+    return defined(my.job.build) & (my.job.build = "preset")
+endfunction
+
 function has_jobs_autotools(ci)
     define my.ci = has_jobs_autotools.ci
     return (count(my.ci.job, (count.system = "linux") & is_job_autotools(count)) \
@@ -59,6 +65,12 @@ function has_jobs_cmake(ci)
     define my.ci = has_jobs_cmake.ci
     return (count(my.ci.job, (count.system = "linux") & is_job_cmake(count)) \
         + count(my.ci.job, (count.system = "osx") & is_job_cmake(count)) > 0)
+endfunction
+
+function has_jobs_presets(ci)
+    define my.ci = has_jobs_presets.ci
+    return (count(my.ci.job, (count.system = "linux") & is_job_preset(count)) \
+        + count(my.ci.job, (count.system = "osx") & is_job_preset(count)) > 0)
 endfunction
 
 function has_jobs_msbuild(ci)
@@ -86,6 +98,11 @@ function get_job_os(job)
 
     return my.os
 endfunction # get_job_os
+
+function get_job_preset(job)
+    define my.job = get_job_preset.job
+    return my.job.preset
+endfunction # get_job_preset
 
 function get_job_packager(job)
     define my.job = get_job_packager.job
@@ -436,7 +453,7 @@ function get_job_coverage(job)
         my.coverage = "cov"
     endif
 
-    return my.coverage
+return my.coverage
 endfunction # get_job_coverage
 
 function get_coverage_exclusions(ci)
@@ -446,7 +463,7 @@ function get_coverage_exclusions(ci)
     define my.excludes = quote("/usr/*")
 
     # Exclude prefix directory (fixed in github actions ci)
-    my.excludes += " $(quote("${{ github.workspace }}/prefixenv/*"))"
+    my.excludes += " $(quote("${{ github.workspace }}/prefix/*"))"
 
     # Exclude build directory (fixed in github actions ci)
     my.excludes += " $(quote("${{ github.workspace }}/build/*"))"
@@ -509,6 +526,9 @@ endfunction # get_sln_tests
 .
 .   if is_job_config(my.config, my.job)
           - os: $(get_job_os(my.job))
+.       if (defined(my.config.use_preset))
+            preset: "$(get_job_preset(my.job))"
+.       endif
             cxx: "$(get_job_cxx(my.job))"
             link: "$(get_job_link(my.job))"
             optimization: "$(get_job_optimization(my.job))"
@@ -585,11 +605,15 @@ endfunction # get_sln_tests
 .
 .endmacro # emit_step_prepare_toolchain
 .
-.macro emit_step_parameter_denormalization(configuration)
+.macro emit_step_parameter_denormalization(configuration, repository)
 .   define my.config = emit_step_parameter_denormalization.configuration
+.   define my.repository = emit_step_parameter_denormalization.repository
 .
       - name: Denormalize parameterization
+        shell: bash
         run: |
+          WORKSPACE_SUBPATH="${GITHUB_WORKSPACE%$(my.repository.name)}"
+          echo "LIBBITCOIN_SRC_PATH=$WORKSPACE_SUBPATH" >> $GITHUB_ENV
 .   # cmake library path
 .   if defined(my.config.cmake)
           if [[ ${{ matrix.packager }} == 'brew' ]]; then
@@ -628,7 +652,11 @@ endfunction # get_sln_tests
 .#          fi
 .   # linker flags
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefixenv/lib" >> $GITHUB_ENV
+.   if (defined(my.config.use_preset))
+            echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/${{ matrix.preset }}/lib" >> $GITHUB_ENV
+.   else
+            echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/lib" >> $GITHUB_ENV
+.   endif
           fi
 .
 .endmacro # emit_step_parameter_denormalization
@@ -636,15 +664,20 @@ endfunction # get_sln_tests
 .macro emit_step_execute_shell(configuration, ci)
 .   define my.config = emit_step_execute_shell.configuration
 .   define my.ci = emit_step_execute_shell.ci
-.   define my.suffix = defined(my.config.cmake) ?? "-cmake.sh" ? ".sh"
+.   define my.suffix = defined(my.config.suffix) ?? "-$(my.config.suffix).sh" ? ".sh"
       - name: Execute install$(my.suffix)
         run: >
           ./install$(my.suffix)
 .   if !defined(my.config.cmake)
           --enable-isystem
 .   endif
-          --build-dir=${{ github.workspace }}/build
-          --prefix=${{ github.workspace }}/prefixenv
+          --build-dir=$LIBBITCOIN_SRC_PATH
+.   if (defined(my.config.use_preset))
+          --prefix=$LIBBITCOIN_SRC_PATH/prefix/${{ matrix.preset }}
+          --preset=${{ matrix.preset }}
+.   else
+          --prefix=$LIBBITCOIN_SRC_PATH/prefix
+.   endif
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
 .       for my.ci.axis as _axis
@@ -767,7 +800,7 @@ endfunction # get_sln_tests
 
 .   emit_step_prepare_toolchain(my.config)
 
-.   emit_step_parameter_denormalization(my.config)
+.   emit_step_parameter_denormalization(my.config, my.repository)
 
 .   emit_step_execute_shell(_config, my.ci)
 
@@ -876,6 +909,7 @@ jobs:
 .       if (has_jobs_autotools(my.ci))
 .           new configuration as _config
 .               _config.job = "autotools"
+.               _config.accept_all = "true"
 .               _config.auto = "true"
 .               emit_job_shell(_config, my.integration, _repository, my.ci)
 .           endnew _config
@@ -888,12 +922,28 @@ jobs:
 .       if (has_jobs_cmake(my.ci))
 .           new configuration as _config
 .               _config.job = "cmake"
+.               _config.accept_all = "true"
 .               _config.cmake = "true"
+.               _config.suffix = "cmake"
 .               emit_job_shell(_config, my.integration, _repository, my.ci)
 .           endnew _config
 .       endif
 .
-.       if ((has_jobs_autotools(my.ci) | has_jobs_cmake(my.ci)) & has_jobs_msbuild(my.ci))
+.       if ((has_jobs_autotools(my.ci) | has_jobs_cmake(my.ci)) & has_jobs_presets(my.ci))
+.           write_line("")
+.       endif
+.
+.       if (has_jobs_presets(my.ci))
+.           new configuration as _config
+.               _config.job = "preset"
+.               _config.cmake = "true"
+.               _config.use_preset = "true"
+.               _config.suffix = "cmakepresets"
+.               emit_job_shell(_config, my.integration, _repository, my.ci)
+.           endnew _config
+.       endif
+.
+.       if ((has_jobs_autotools(my.ci) | has_jobs_cmake(my.ci) | has_jobs_presets(my.ci)) & has_jobs_msbuild(my.ci))
 .           write_line("")
 .       endif
 .
