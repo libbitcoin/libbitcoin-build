@@ -88,7 +88,7 @@ PRESUMED_CI_PROJECT_PATH=\$(pwd)
 .
 .macro define_valid_parameterized_preset_to_base(target)
 .   define my.target = define_valid_parameterized_preset_to_base.target
-    BASE_PRESET_ID=${PRESET_ID/%-with*_*/ }
+    BASE_PRESET_ID=${PRESET_ID/%-with*_*/}
     REPO_PRESET[$(my.target)]="$PRESET_ID"
     display_message "REPO_PRESET[$(my.target)]=${REPO_PRESET[$(my.target)]}"
 .endmacro # define_valid_parameterized_preset_to_base
