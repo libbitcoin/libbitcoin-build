@@ -848,6 +848,7 @@
 
     <install>
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
+        <option value="--disable-Werror" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
@@ -1060,6 +1061,7 @@
 
     <install>
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
+        <option value="--disable-Werror" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
