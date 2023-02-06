@@ -52,7 +52,9 @@ endfunction
 
 function is_job_preset(job)
     define my.job = is_job_preset.job
-    return defined(my.job.build) & (my.job.build = "preset")
+    return defined(my.job.build) & \
+        ((my.job.build = "preset") | \
+        ((my.job.build = "all") & (defined(my.job.preset))))
 endfunction
 
 function has_jobs_autotools(ci)
@@ -101,6 +103,7 @@ endfunction # get_job_os
 
 function get_job_preset(job)
     define my.job = get_job_preset.job
+    require(my.job, "job", "preset")
     return my.job.preset
 endfunction # get_job_preset
 
