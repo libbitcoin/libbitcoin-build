@@ -6,7 +6,7 @@
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
-###############################################################################
+#### ###########################################################################
 # Functions
 ###############################################################################
 
@@ -33,6 +33,7 @@ function is_job_config(configuration, job)
     define my.config = is_job_config.configuration
     define my.job = is_job_config.job
     return defined(my.job.build) \
+      & (!defined(my.config.job_require) | defined(my.job.$(my.config.job_require))) \
       & (((my.job.build = "all") & (defined(my.config.accept_all))) \
       | (my.job.build = my.config.job))
 endfunction
@@ -939,6 +940,8 @@ jobs:
 .       if (has_jobs_presets(my.ci))
 .           new configuration as _config
 .               _config.job = "preset"
+.               _config.accept_all = "true"
+.               _config.job_require = "preset"
 .               _config.cmake = "true"
 .               _config.use_preset = "true"
 .               _config.suffix = "cmakepresets"

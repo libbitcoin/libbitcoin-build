@@ -329,7 +329,8 @@ set_with_boost_prefix
 .   define my.install = define_parse_command_line_options.install
 parse_command_line_options()
 {
-.   if (have_build(my.install, "bitcoin-consensus"))
+.   if (have_build(my.install, "bitcoin-consensus") &\
+      !(my.repository.name = "libbitcoin-consensus"))
     WITH_BITCOIN_CONSENSUS="yes"
 
 .   endif
@@ -345,9 +346,10 @@ parse_command_line_options()
             (--disable-static)      DISABLE_STATIC="yes";;
 
             # Common project options.
-.   if (have_build(my.install, "bitcoin-consensus"))
+.   if (have_build(my.install, "bitcoin-consensus") &\
+      !(my.repository.name = "libbitcoin-consensus"))
             (--with-consensus)      WITH_BITCOIN_CONSENSUS="yes";;
-            (--without-consensus)   WITH_BITCOIN_CONSENSUS="no";;
+            (--without-consensus)   unset -f WITH_BITCOIN_CONSENSUS;;
 .   endif
 .   if (have_build(my.install, "icu"))
             (--with-icu)            WITH_ICU="yes";;
