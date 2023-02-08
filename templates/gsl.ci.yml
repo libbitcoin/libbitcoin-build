@@ -467,10 +467,10 @@ function get_coverage_exclusions(ci)
     define my.excludes = quote("/usr/*")
 
     # Exclude prefix directory (fixed in github actions ci)
-    my.excludes += " $(quote("${{ github.workspace }}/prefix/*"))"
+    my.excludes += " $(quote("${{ env.LIBBITCOIN_SRC_PATH }}prefix/*"))"
 
     # Exclude build directory (fixed in github actions ci)
-    my.excludes += " $(quote("${{ github.workspace }}/build/*"))"
+    # my.excludes += " $(quote("${{ github.workspace }}/build/*"))"
 
     # Exclude examples directory
     my.excludes += " $(quote("${{ github.workspace }}/examples/*"))"
@@ -738,7 +738,7 @@ endfunction # get_sln_tests
       - name: Failure list libdir
         if: ${{ failure() }}
         run: |
-          ls -la ${{ github.workspace }}/prefixenv/lib
+          ls -la ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib
 
       - name: Failure display boost bootstrap.log [--build-boost]
         if: ${{ failure() && (matrix.boost == '--build-boost') }}
@@ -758,15 +758,15 @@ endfunction # get_sln_tests
       - name: Failure display pkgconfig
         if: ${{ failure() }}
         run: |
-          ls ${{ github.workspace }}/prefixenv/lib/pkgconfig/
-          cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
+          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/
+          cat ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/*.pc
 .
 .   if (defined(my.config.cmake))
 
       - name: Failure display cmake specific libraries
         if: ${{ failure() }}
         run: |
-          ls ${{ github.workspace }}/prefixenv/lib/cmake
+          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/cmake
 
       - name: Failure display cmake LastTest.log
         if: ${{ failure() }}
