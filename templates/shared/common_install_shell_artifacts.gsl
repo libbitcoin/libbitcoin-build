@@ -164,6 +164,11 @@ endfunction
 # Script to build and install $(my.repository.name).
 #
 # Script options:
+.   if (have_build(my.install, "bitcoin-consensus"))
+# --with-consensus         Compile libbitcoin-consensus for consensus checks.
+# --without-consensus      Compile without libbitcoin-consensus for consensus
+#                            checks.
+.   endif
 .   if (have_build(my.install, "icu"))
 # --with-icu               Compile with International Components for Unicode.
 #                            Since the addition of BIP-39 and later BIP-38
@@ -217,6 +222,11 @@ display_help()
     display_message "Usage: ./$(my.script_name).sh [OPTION]..."
     display_message "Manage the installation of $(my.repository.name)."
     display_message "Script options:"
+.   if (have_build(my.install, "bitcoin-consensus"))
+    display_message "  --with-consensus         Compile libbitcoin-consensus for consensus checks."
+    display_message "  --without-consensus      Compile without libbitcoin-consensus for consensus "
+    display_message "                             checks."
+.   endif
 .   if (have_build(my.install, "icu"))
     display_message "  --with-icu               Compile with International Components for Unicode."
     display_message "                             Since the addition of BIP-39 and later BIP-38 "
@@ -319,6 +329,11 @@ set_with_boost_prefix
 .   define my.install = define_parse_command_line_options.install
 parse_command_line_options()
 {
+.   if (have_build(my.install, "bitcoin-consensus") &\
+      !(my.repository.name = "libbitcoin-consensus"))
+    WITH_BITCOIN_CONSENSUS="yes"
+
+.   endif
     for OPTION in "$@"; do
         case $OPTION in
             # Standard script options.
@@ -331,6 +346,11 @@ parse_command_line_options()
             (--disable-static)      DISABLE_STATIC="yes";;
 
             # Common project options.
+.   if (have_build(my.install, "bitcoin-consensus") &\
+      !(my.repository.name = "libbitcoin-consensus"))
+            (--with-consensus)      WITH_BITCOIN_CONSENSUS="yes";;
+            (--without-consensus)   unset -f WITH_BITCOIN_CONSENSUS;;
+.   endif
 .   if (have_build(my.install, "icu"))
             (--with-icu)            WITH_ICU="yes";;
 .   endif
@@ -922,6 +942,12 @@ create_from_github()
     local ACCOUNT=$1
     local REPO=$2
     local BRANCH=$3
+    local BUILD=$4
+	shift 4
+
+    if [[ ! ($BUILD) || ($BUILD == "no") ]]; then
+        return
+    fi
 
     FORK="$ACCOUNT/$REPO"
 
@@ -949,8 +975,13 @@ build_from_github()
     local REPO=$1
     local JOBS=$2
     local TEST=$3
-    local OPTIONS=$4
-    shift 4
+    local BUILD=$4
+    local OPTIONS=$5
+    shift 5
+
+    if [[ ! ($BUILD) || ($BUILD == "no") ]]; then
+        return
+    fi
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")

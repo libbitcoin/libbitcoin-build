@@ -2,7 +2,7 @@
 ###############################################################################
 # Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
 #
-# GSL generate install-cmake.sh.
+# GSL generate install-cmakepresets.sh.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
@@ -40,16 +40,28 @@ endfunction
 .endtemplate
 .template 1
 .
+.macro define_custom_build_variables(repository)
+.   define my.repository = define_custom_build_variables.repository
+.
+
+.   heading2("Declare associative array for computed presets.")
+declare -A REPO_PRESET
+
+.endmacro # define_custom_build_variables
+.
 .macro custom_help(repository, install, script_name)
     display_message "  --build-dir=<path>       Location of downloaded and intermediate files."
+    display_message "  --preset=<label>         CMakePreset label."
 .endmacro # custom_help
 .
 .macro custom_documentation(repository, install)
 # --build-dir=<path>       Location of downloaded and intermediate files.
+# --preset=<label>         CMakePreset label.
 .endmacro # custom_documentation
 .
 .macro custom_configuration(repository, install)
     display_message "BUILD_DIR                      : $BUILD_DIR"
+    display_message "PRESET_ID                      : $PRESET_ID"
     display_message "CUMULATIVE_FILTERED_ARGS       : $CUMULATIVE_FILTERED_ARGS"
     display_message "CUMULATIVE_FILTERED_ARGS_CMAKE : $CUMULATIVE_FILTERED_ARGS_CMAKE"
 .endmacro # custom_configuration
@@ -57,6 +69,7 @@ endfunction
 .macro custom_script_options()
             # Unique script options.
             (--build-dir=*)         BUILD_DIR="${OPTION#*=}";;
+            (--preset=*)            PRESET_ID="${OPTION#*=}";;
 
             # Handle ndebug declarations due to disabled argument passthrough
             (--enable-ndebug)       ENABLE_NDEBUG="yes";;
@@ -73,10 +86,102 @@ PRESUMED_CI_PROJECT_PATH=\$(pwd)
 
 .endmacro # define_build_variables_custom
 .
-.macro define_handle_custom_options(install)
-.   define my.install = define_handle_custom_options.install
+.macro define_valid_parameterized_preset_to_base(target)
+.   define my.target = define_valid_parameterized_preset_to_base.target
+    BASE_PRESET_ID=${PRESET_ID/%-with*_*/}
+    REPO_PRESET[$(my.target)]="$PRESET_ID"
+    display_message "REPO_PRESET[$(my.target)]=${REPO_PRESET[$(my.target)]}"
+.endmacro # define_valid_parameterized_preset_to_base
+.
+.macro define_valid_base_preset_to_base(target)
+.   define my.target = define_valid_base_preset_to_base.target
+    BASE_PRESET_ID="$PRESET_ID"
+    REPO_PRESET[$(my.target)]="$PRESET_ID"
+    display_message "REPO_PRESET[$(my.target)]=${REPO_PRESET[$(my.target)]}"
+.endmacro # define_valid_base_preset_to_base
+.
+.macro define_valid_base_to_base(target)
+.   define my.target = define_valid_base_to_base.target
+    REPO_PRESET[$(my.target)]="$BASE_PRESET_ID"
+    display_message "REPO_PRESET[$(my.target)]=${REPO_PRESET[$(my.target)]}"
+.endmacro # define_valid_base_to_base
+.
+.macro define_valid_preset_base_to_icu(target)
+.   define my.target = define_valid_preset_base_to_icu.target
+    if [[ $WITH_ICU ]]; then
+        REPO_PRESET[$(my.target)]="$BASE_PRESET_ID-with_icu"
+    else
+        REPO_PRESET[$(my.target)]="$BASE_PRESET_ID-without_icu"
+    fi
+    display_message "REPO_PRESET[$(my.target)]=${REPO_PRESET[$(my.target)]}"
+.endmacro # define_valid_preset_base_to_icu
+.
+.macro define_valid_preset_base_to_consensus(target)
+.   define my.target = define_valid_preset_base_to_consensus.target
+    if [[ $WITH_BITCOIN_CONSENSUS ]]; then
+        REPO_PRESET[$(my.target)]="$BASE_PRESET_ID-with_consensus"
+    else
+        REPO_PRESET[$(my.target)]="$BASE_PRESET_ID-without_consensus"
+    fi
+    display_message "REPO_PRESET[$(my.target)]=${REPO_PRESET[$(my.target)]}"
+.endmacro # define_valid_preset_base_to_consensus
+.
+.macro emit_mapping_to_base(mapping)
+.   define my.mapping = emit_mapping_to_base.mapping
+.
+.   if (my.mapping.type = "base")
+.       define_valid_base_preset_to_base("lib$(my.mapping.name)")
+.   elsif (my.mapping.type = "remove")
+.       define_valid_parameterized_preset_to_base("lib$(my.mapping.name)")
+.   else
+.       abort "Unsupported mapping by context: $(my.mapping.type)"
+.   endif
+.endmacro # emit_mapping_to_base
+.
+.macro emit_mapping_from_base(mapping)
+.   define my.mapping = emit_mapping_from_base.mapping
+.
+.   if (my.mapping.type = "base")
+.       define_valid_base_to_base("lib$(my.mapping.name)")
+.   elsif (my.mapping.type = "add")
+.       if (my.mapping.parameter = "consensus")
+.           define_valid_preset_base_to_consensus("lib$(my.mapping.name)")
+.       elsif (my.mapping.parameter = "icu")
+.           define_valid_preset_base_to_icu("lib$(my.mapping.name)")
+.       else
+.           abort "Unsupported mapping by context: $(my.mapping.parameter)"
+.       endif
+.   else
+.       abort "Unsupported mapping by context: $(my.mapping.type)"
+.   endif
+.endmacro # emit_mapping_from_base
+.
+.macro define_handle_custom_options(repository)
+.   define my.repository = define_handle_custom_options.repository
 handle_custom_options()
 {
+    if [[
+.   for my.repository->presets.configuration as _configuration where !defined(_configuration.hidden) | (_configuration.hidden = "false")
+        ($PRESET_ID != "$(_configuration.name)")$(last() ?? "]]; then" ? " &&")
+.   endfor
+        display_error "Unsupported preset: $PRESET_ID"
+        display_error "Supported values are:"
+.   for my.repository->presets.configuration as _configuration where !defined(_configuration.hidden) | (_configuration.hidden = "false")
+        display_error "  $(_configuration.name)"
+.   endfor
+        display_error ""
+        display_help
+        exit 1
+    fi
+
+.   for my.repository->presets.mapping as _mapping where is_bitcoin_dependency(_mapping)
+.       if (my.repository->package.library = _mapping.name)
+.           emit_mapping_to_base(_mapping)
+.       else
+.           emit_mapping_from_base(_mapping)
+.       endif
+.   endfor
+
     CUMULATIVE_FILTERED_ARGS=""
     CUMULATIVE_FILTERED_ARGS_CMAKE=""
 
@@ -119,18 +224,7 @@ handle_custom_options()
         fi
     fi
 .
-.   if (have_build(my.install, "bitcoin-consensus"))
-
-    # Process Consensus
-    if [[ $WITH_BITCOIN_CONSENSUS = "yes" ]]; then
-        CUMULATIVE_FILTERED_ARGS+=" --with-consensus"
-        CUMULATIVE_FILTERED_ARGS_CMAKE+=" -Dwith-consensus=yes"
-    else
-        CUMULATIVE_FILTERED_ARGS+=" --without-consensus"
-        CUMULATIVE_FILTERED_ARGS_CMAKE+=" -Dwith-consensus=no"
-    fi
-.   endif
-.   if (have_build(my.install, "icu"))
+.   if (have_build(my.repository->install, "icu"))
 
     # Process ICU
     if [[ $WITH_ICU ]]; then
@@ -138,7 +232,7 @@ handle_custom_options()
         CUMULATIVE_FILTERED_ARGS_CMAKE+=" -Dwith-icu=yes"
     fi
 .   endif
-.   if (have_build(my.install, "mbedtls"))
+.   if (have_build(my.repository->install, "mbedtls"))
 
     # Process MBEDTLS
     if [[ $WITH_MBEDTLS ]]; then
@@ -160,6 +254,7 @@ remove_install_options()
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--enable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--disable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--preset=*/}")
 }
 
 .endmacro # define_remove_install_options()
@@ -235,15 +330,21 @@ cmake_tests()
 cmake_project_directory()
 {
     local PROJ_NAME=$1
-    local JOBS=$2
-    local TEST=$3
-    shift 3
+    local PRESET=$2
+    local JOBS=$3
+    local TEST=$4
+    shift 4
 
     push_directory "$PROJ_NAME"
     local PROJ_CONFIG_DIR
     PROJ_CONFIG_DIR=\$(pwd)
 
-    cmake $@ builds/cmake
+    push_directory "builds/cmake"
+    display_message "Preparing cmake --preset=$PRESET $@"
+    cmake --preset=$PRESET $@
+    popd
+
+    push_directory "obj/$PRESET"
     make_jobs "$JOBS"
 
     if [[ $TEST == true ]]; then
@@ -253,16 +354,18 @@ cmake_project_directory()
     make install
     configure_links
     pop_directory
+    pop_directory
 }
 
 build_from_github_cmake()
 {
     local REPO=$1
-    local JOBS=$2
-    local TEST=$3
-    local BUILD=$4
-    local OPTIONS=$5
-    shift 5
+    local PRESET=$2
+    local JOBS=$3
+    local TEST=$4
+    local BUILD=$5
+    local OPTIONS=$6
+    shift 6
 
     if [[ ! ($BUILD) || ($BUILD == "no") ]]; then
         return
@@ -274,7 +377,7 @@ build_from_github_cmake()
     display_heading_message "Prepairing to build $REPO"
 
     # Build the local repository clone.
-    cmake_project_directory "$REPO" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
+    cmake_project_directory "$REPO" "$PRESET" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
 }
 
 .endmacro # define_cmake_analogous_functions
@@ -350,7 +453,8 @@ make_jobs()
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
     create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
 .   if (is_bitcoin_dependency(my.build))
-    build_from_github_cmake $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+    display_message "$(my.build.repository) PRESET ${REPO_PRESET[$(my.build.repository)]}"
+    build_from_github_cmake $(my.build.repository) ${REPO_PRESET[$(my.build.repository)]} "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
 .   else
     build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS
 .   endif
@@ -362,7 +466,8 @@ make_jobs()
 .   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
     create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
-    build_from_github_cmake $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+    display_message "$(my.build.repository) PRESET ${REPO_PRESET[$(my.build.repository)]}"
+    build_from_github_cmake $(my.build.repository) ${REPO_PRESET[$(my.build.repository)]} "$(my.parallel)" false  "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
 .endmacro # build_github_cmake
 .
 .macro build_ci(build)
@@ -373,14 +478,16 @@ make_jobs()
     if [[ ! ($CI == true) ]]; then
         create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
 .   if (is_bitcoin_dependency(my.build))
-        build_from_github_cmake $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+        display_message "$(my.build.repository) PRESET ${REPO_PRESET[$(my.build.repository)]}"
+        build_from_github_cmake $(my.build.repository) ${REPO_PRESET[$(my.build.repository)]} "$(my.parallel)" true  "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
 .   else
-        build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS
+        build_from_github $(my.build.repository) "$(my.parallel)" true  "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS
 .   endif
     else
         push_directory "$PRESUMED_CI_PROJECT_PATH"
         push_directory ".."
-        build_from_github_cmake $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+        display_message "$(my.build.repository) PRESET ${REPO_PRESET[$(my.build.repository)]}"
+        build_from_github_cmake $(my.build.repository) ${REPO_PRESET[$(my.build.repository)]} "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
         pop_directory
         pop_directory
     fi
@@ -443,15 +550,17 @@ function generate_installer_cmake(path_prefix)
     for generate.repository by name as _repository
         require(_repository, "repository", "name")
         my.output_path = join(my.path_prefix, canonical_path_name(_repository))
-        define my.out_file = "$(my.output_path)/install-cmake.sh"
+        define my.out_file = "$(my.output_path)/install-cmakepresets.sh"
         create_directory(my.output_path)
         notify(my.out_file)
         output(my.out_file)
 
         new configuration as _config
         new install as _install
+        new presets as _presets
             _config.cmake = "true"
             cumulative_install(_install, generate, _repository)
+            calculate_presets(_presets, _repository, generate->presets)
 
             shebang("bash")
 
@@ -459,6 +568,7 @@ function generate_installer_cmake(path_prefix)
             documentation(_repository, _install)
 
             heading1("Define constants.")
+            define_custom_build_variables(_repository)
             define_build_variables(_repository)
             define_icu(_install)
             define_zmq(_install)
@@ -477,7 +587,7 @@ function generate_installer_cmake(path_prefix)
             define_set_os_specific_compiler_settings()
             define_link_to_standard_library()
             define_normalized_configure_options()
-            define_handle_custom_options(_install)
+            define_handle_custom_options(_repository)
             define_remove_build_options()
             define_remove_install_options()
             define_set_prefix()
@@ -503,6 +613,7 @@ function generate_installer_cmake(path_prefix)
             heading1("Build the primary library and all dependencies.")
             define_invoke()
 
+        endnew _presets
         endnew _install
         endnew _config
         close

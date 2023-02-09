@@ -154,6 +154,22 @@
       </build>
     </install>
 
+    <presets>
+      <mapping name="bitcoin-consensus" type="base" />
+      <configuration name="nix-base" />
+      <configuration name="gnu-debug" />
+      <configuration name="gnu-release" />
+      <configuration name="static" />
+      <configuration name="shared" />
+      <configuration name="gnu-optimized-size" />
+      <configuration name="nix-gnu-debug-static" />
+      <configuration name="nix-gnu-debug-shared" />
+      <configuration name="nix-gnu-release-static" />
+      <configuration name="nix-gnu-release-shared" />
+      <configuration name="nix-gnu-release-static-size" />
+      <configuration name="nix-gnu-release-shared-size" />
+    </presets>
+
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
@@ -164,45 +180,82 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" version="14" 
+           assert="ndebug" 
+           link="dynamic" 
+           optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
       </job>
 
-      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" version="14" 
+           assert="ndebug" 
+           link="static" 
+           optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04"
+           compiler="clang" version="14" 
+           assert="debug" 
+           link="dynamic" 
+           optimization="size" 
+           preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
       
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="ndebug" 
+           link="static" 
+           optimization="size" 
+           preset="nix-gnu-release-static-size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" 
+           link="dynamic" 
+           optimization="size" 
+           preset="nix-gnu-release-shared-size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" 
+           link="static" 
+           optimization="debug" 
+           coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
+      <job build="cmake" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" 
+           link="static" 
+           optimization="debug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" link="static" assert="debug" />
-      <job system="windows" compiler="x64" link="static" assert="ndebug" />
-      <job system="windows" compiler="Win32" link="static" assert="debug" />
-      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+      <job system="windows" compiler="x64" assert="debug" link="static" />
+      <job system="windows" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" compiler="Win32" assert="debug" link="static" />
+      <job system="windows" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
     <matrix>
@@ -397,7 +450,7 @@
       <!-- Building with our minimum (c++11 only) version of ICU. -->
       <build name="icu" version="55.2" parallel="true" >
         <!-- TODO: verify this with more recent ICU. -->
-        <!-- Bug in ICU 55.2 build requires --enable-draft. -->
+        <!-- Bug in ICU 55.2 build requires -enable-draft. -->
         <option value="--enable-draft" />
         <option value="--enable-rpath" />
         <option value="--enable-tools" />
@@ -410,13 +463,10 @@
       </build>
       <build name="boost" version="1.78.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
-        <!-- <option value="--with-date_time" /> -->
-        <!-- <option value="--with-filesystem" /> -->
         <option value="--with-iostreams" />
         <option value="--with-json" />
         <option value="--with-locale" />
         <option value="--with-program_options" />
-        <!-- <option value="--with-regex" /> -->
         <option value="--with-system" />
         <option value="--with-thread" />
         <option value="--with-test" />
@@ -433,6 +483,30 @@
       </build>
     </install>
 
+    <presets>
+      <mapping name="bitcoin-system" type="remove" parameter="icu" />
+      <configuration name="nix-base" />
+      <configuration name="gnu-debug" />
+      <configuration name="gnu-release" />
+      <configuration name="static" />
+      <configuration name="shared" />
+      <configuration name="gnu-optimized-size" />
+      <configuration name="with_icu" />
+      <configuration name="without_icu" />
+      <configuration name="nix-gnu-debug-static-with_icu" />
+      <configuration name="nix-gnu-debug-static-without_icu" />
+      <configuration name="nix-gnu-debug-shared-with_icu" />
+      <configuration name="nix-gnu-debug-shared-without_icu" />
+      <configuration name="nix-gnu-release-static-with_icu" />
+      <configuration name="nix-gnu-release-static-without_icu" />
+      <configuration name="nix-gnu-release-shared-with_icu" />
+      <configuration name="nix-gnu-release-shared-without_icu" />
+      <configuration name="nix-gnu-release-static-size-with_icu" />
+      <configuration name="nix-gnu-release-static-size-without_icu" />
+      <configuration name="nix-gnu-release-shared-size-with_icu" />
+      <configuration name="nix-gnu-release-shared-size-without_icu" />
+    </presets>
+
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
@@ -443,45 +517,70 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           version="14" 
+           assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
       </job>
 
-      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           version="14" 
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="debug" link="dynamic" optimization="size" 
+           preset="nix-gnu-debug-shared-without_icu">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="ndebug" link="static" optimization="size" 
+           preset="nix-gnu-release-static-size-with_icu">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="dynamic" optimization="size" 
+           preset="nix-gnu-release-shared-size-without_icu">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug" 
+           coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
+      <job build="cmake" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" link="static" assert="debug" />
-      <job system="windows" compiler="x64" link="static" assert="ndebug" />
-      <job system="windows" compiler="Win32" link="static" assert="debug" />
-      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+      <job system="windows" compiler="x64" assert="debug" link="static" />
+      <job system="windows" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" compiler="Win32" assert="debug" link="static" />
+      <job system="windows" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
     <matrix>
@@ -625,7 +724,7 @@
       <!-- Building with our minimum (c++11 only) version of ICU. -->
       <build name="icu" version="55.2" parallel="true" >
         <!-- TODO: verify this with more recent ICU. -->
-        <!-- Bug in ICU 55.2 build requires --enable-draft. -->
+        <!-- Bug in ICU 55.2 build requires enable-draft. -->
         <option value="--enable-draft" />
         <option value="--enable-rpath" />
         <option value="--enable-tools" />
@@ -638,8 +737,6 @@
       </build>
       <build name="boost" version="1.78.0" parallel="true" nuget="true" >
         <option value="--with-chrono" />
-        <!-- <option value="--with-date_time" /> -->
-        <!-- <option value="--with-filesystem" /> -->
         <option value="--with-iostreams" />
         <option value="--with-json" />
         <option value="--with-locale" />
@@ -661,6 +758,23 @@
       </build>
     </install>
 
+    <presets>
+      <mapping name="bitcoin-network" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <configuration name="nix-base" />
+      <configuration name="gnu-debug" />
+      <configuration name="gnu-release" />
+      <configuration name="static" />
+      <configuration name="shared" />
+      <configuration name="gnu-optimized-size" />
+      <configuration name="nix-gnu-debug-static" />
+      <configuration name="nix-gnu-debug-shared" />
+      <configuration name="nix-gnu-release-static" />
+      <configuration name="nix-gnu-release-shared" />
+      <configuration name="nix-gnu-release-static-size" />
+      <configuration name="nix-gnu-release-shared-size" />
+    </presets>
+
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
@@ -669,45 +783,69 @@
       <!-- prefix variance? -->
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
-      <job build="all" system="osx" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
       </job>
 
-      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           version="14" 
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" version="14" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="debug" link="dynamic" optimization="size" 
+           preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="ndebug" link="static" optimization="size" 
+           preset="nix-gnu-release-static-size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="dynamic" optimization="size" 
+           preset="nix-gnu-release-shared-size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug" 
+           coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
+      <job build="cmake" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" link="static" assert="debug" />
-      <job system="windows" compiler="x64" link="static" assert="ndebug" />
-      <job system="windows" compiler="Win32" link="static" assert="debug" />
-      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+      <job system="windows" compiler="x64" assert="debug" link="static" />
+      <job system="windows" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" compiler="Win32" assert="debug" link="static" />
+      <job system="windows" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
     <matrix>
@@ -863,6 +1001,23 @@
       </build>
     </install>
 
+    <presets>
+      <mapping name="bitcoin-protocol" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <configuration name="nix-base" />
+      <configuration name="gnu-debug" />
+      <configuration name="gnu-release" />
+      <configuration name="static" />
+      <configuration name="shared" />
+      <configuration name="gnu-optimized-size" />
+      <configuration name="nix-gnu-debug-static" />
+      <configuration name="nix-gnu-debug-shared" />
+      <configuration name="nix-gnu-release-static" />
+      <configuration name="nix-gnu-release-shared" />
+      <configuration name="nix-gnu-release-static-size" />
+      <configuration name="nix-gnu-release-shared-size" />
+    </presets>
+
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
@@ -870,53 +1025,77 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           version="14" 
+           assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           version="14" 
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="debug" link="dynamic" optimization="size" 
+           preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="ndebug" link="static" optimization="size" 
+           preset="nix-gnu-release-static-size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="dynamic" optimization="size" 
+           preset="nix-gnu-release-shared-size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
+      <job build="autotools" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug">
         <!-- coverage="true" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
+      <job build="cmake" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" link="static" assert="debug" />
-      <job system="windows" compiler="x64" link="static" assert="ndebug" />
-      <job system="windows" compiler="Win32" link="static" assert="debug" />
-      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+      <job system="windows" compiler="x64" assert="debug" link="static" />
+      <job system="windows" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" compiler="Win32" assert="debug" link="static" />
+      <job system="windows" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
     <matrix>
@@ -1074,6 +1253,24 @@
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
+
+    <presets>
+      <mapping name="bitcoin-client" type="base" />
+      <mapping name="bitcoin-protocol" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <configuration name="nix-base" />
+      <configuration name="gnu-debug" />
+      <configuration name="gnu-release" />
+      <configuration name="static" />
+      <configuration name="shared" />
+      <configuration name="gnu-optimized-size" />
+      <configuration name="nix-gnu-debug-static" />
+      <configuration name="nix-gnu-debug-shared" />
+      <configuration name="nix-gnu-release-static" />
+      <configuration name="nix-gnu-release-shared" />
+      <configuration name="nix-gnu-release-static-size" />
+      <configuration name="nix-gnu-release-shared-size" />
+    </presets>
 
     <matrix>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
@@ -1238,8 +1435,7 @@
 
     <install>
       <build name="icu" version="68.2" parallel="true" >
-        <!-- Bug in ICU 55.2 build requires --enable-draft. -->
-        <!--<option value="--enable-draft" />-->
+        <!-- Bug in ICU 55.2 build requires -enable-draft. -->
         <option value="--enable-rpath" />
         <option value="--enable-tools" />
         <option value="--disable-extras" />
@@ -1265,6 +1461,26 @@
         <option value="${with_pkgconfigdir}" />
       </build>
     </install>
+
+    <presets>
+      <mapping name="bitcoin-explorer" type="base" />
+      <mapping name="bitcoin-network" type="base" />
+      <mapping name="bitcoin-client" type="base" />
+      <mapping name="bitcoin-protocol" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <configuration name="nix-base" />
+      <configuration name="gnu-debug" />
+      <configuration name="gnu-release" />
+      <configuration name="static" />
+      <configuration name="shared" />
+      <configuration name="gnu-optimized-size" />
+      <configuration name="nix-gnu-debug-static" />
+      <configuration name="nix-gnu-debug-shared" />
+      <configuration name="nix-gnu-release-static" />
+      <configuration name="nix-gnu-release-shared" />
+      <configuration name="nix-gnu-release-static-size" />
+      <configuration name="nix-gnu-release-shared-size" />
+    </presets>
 
     <matrix>
       <!-- Default boost fails on default macOS platform, so bump to xcode12.2. -->
@@ -1422,49 +1638,91 @@
       </build>
     </install>
 
+    <presets>
+      <mapping name="bitcoin-database" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <configuration name="nix-base" />
+      <configuration name="gnu-debug" />
+      <configuration name="gnu-release" />
+      <configuration name="static" />
+      <configuration name="shared" />
+      <configuration name="gnu-optimized-size" />
+      <configuration name="nix-gnu-debug-static" />
+      <configuration name="nix-gnu-debug-shared" />
+      <configuration name="nix-gnu-release-static" />
+      <configuration name="nix-gnu-release-shared" />
+      <configuration name="nix-gnu-release-static-size" />
+      <configuration name="nix-gnu-release-shared-size" />
+    </presets>
+
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
-      <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           version="14" 
+           assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           version="14" 
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="debug" link="dynamic" optimization="size" 
+           preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="ndebug" link="static" optimization="size" 
+           preset="nix-gnu-release-static-size">
         <!-- version="5.0" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="dynamic" optimization="size" 
+           preset="nix-gnu-release-shared-size">
         <!-- version="4.8" -->
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
       </job>
 
-      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug" assert="ndebug" 
+           coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
+      <job build="cmake" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" link="static" assert="debug" />
-      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="x64" assert="debug" link="static" />
+      <job system="windows" compiler="x64" assert="ndebug" link="static" />
     </ci>
 
     <matrix>
@@ -1600,7 +1858,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" conditional="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1611,57 +1869,109 @@
       </build>
     </install>
 
+    <presets>
+      <mapping name="bitcoin-blockchain" type="remove" parameter="consensus" />
+      <mapping name="bitcoin-consensus" type="base" />
+      <mapping name="bitcoin-database" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <configuration name="nix-base" />
+      <configuration name="gnu-debug" />
+      <configuration name="gnu-release" />
+      <configuration name="static" />
+      <configuration name="shared" />
+      <configuration name="gnu-optimized-size" />
+      <configuration name="with_consensus" />
+      <configuration name="without_consensus" />
+      <configuration name="nix-gnu-debug-static-with_consensus" />
+      <configuration name="nix-gnu-debug-static-without_consensus" />
+      <configuration name="nix-gnu-debug-shared-with_consensus" />
+      <configuration name="nix-gnu-debug-shared-without_consensus" />
+      <configuration name="nix-gnu-release-static-with_consensus" />
+      <configuration name="nix-gnu-release-static-without_consensus" />
+      <configuration name="nix-gnu-release-shared-with_consensus" />
+      <configuration name="nix-gnu-release-shared-without_consensus" />
+      <configuration name="nix-gnu-release-static-size-with_consensus" />
+      <configuration name="nix-gnu-release-static-size-without_consensus" />
+      <configuration name="nix-gnu-release-shared-size-with_consensus" />
+      <configuration name="nix-gnu-release-shared-size-without_consensus" />
+    </presets>
+
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-	  <axis name="consensus" with="true" without="true" />
+	  <axis name="consensus" with="true" without="true" recognized="true" />
 
-      <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           version="14" 
+           assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
       </job>
 
-      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           version="14" 
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="without" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="debug" link="dynamic" optimization="size" 
+           preset="nix-gnu-debug-shared-with_consensus">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="consensus" value="with" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="ndebug" link="static" optimization="size" 
+           preset="nix-gnu-release-static-size-with_consensus">
         <!-- version="5.0" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="dynamic" optimization="size" 
+           preset="nix-gnu-release-shared-size-without_consensus">
         <!-- version="4.8" -->
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="consensus" value="without" />
       </job>
 
-      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug" 
+           coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
       </job>
 
-      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
+      <job build="cmake" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
       </job>
 
-      <job system="windows" compiler="x64" link="static" assert="debug" />
-      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="x64" assert="debug" link="static" />
+      <job system="windows" compiler="x64" assert="ndebug" link="static" />
     </ci>
 
     <matrix>
@@ -1817,57 +2127,101 @@
       </build>
     </install>
 
+    <presets>
+      <mapping name="bitcoin-node" type="base" />
+      <mapping name="bitcoin-network" type="base" />
+      <mapping name="bitcoin-blockchain" type="add" parameter="consensus" />
+      <mapping name="bitcoin-consensus" type="base" />
+      <mapping name="bitcoin-database" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <configuration name="nix-base" />
+      <configuration name="gnu-debug" />
+      <configuration name="gnu-release" />
+      <configuration name="static" />
+      <configuration name="shared" />
+      <configuration name="gnu-optimized-size" />
+      <configuration name="nix-gnu-debug-static" />
+      <configuration name="nix-gnu-debug-shared" />
+      <configuration name="nix-gnu-release-static" />
+      <configuration name="nix-gnu-release-shared" />
+      <configuration name="nix-gnu-release-static-size" />
+      <configuration name="nix-gnu-release-shared-size" />
+    </presets>
+
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="consensus" with="true" without="true" />
+      <axis name="consensus" with="true" without="true" recognized="true" />
 
-      <job build="all" system="osx" version="14" link="dynamic" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           version="14" 
+           assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
       </job>
 
-      <job build="all" system="osx" version="14" link="static" optimization="size" assert="ndebug">
+      <job build="all" 
+           system="osx" 
+           version="14" 
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="without" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="dynamic" optimization="size" assert="debug">
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="debug" link="dynamic" optimization="size" 
+           preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="consensus" value="with" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="clang" version="14" link="static" optimization="size" assert="ndebug">
-        <!-- version="5.0" -->
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="clang" version="14" 
+           assert="ndebug" link="static" optimization="size" 
+           preset="nix-gnu-release-static-size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
       </job>
 
-      <job build="all" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="dynamic" optimization="size" assert="ndebug">
-        <!-- version="4.8" -->
+      <job build="all" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="dynamic" optimization="size" 
+           preset="nix-gnu-release-shared-size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="consensus" value="without" />
       </job>
 
-      <job build="autotools" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug" coverage="true">
+      <job build="autotools" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug" 
+           coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
       </job>
 
-      <job build="cmake" system="linux" image="ubuntu-22.04" compiler="gcc" version="11" link="static" optimization="debug" assert="ndebug">
+      <job build="cmake" 
+           system="linux" image="ubuntu-22.04" 
+           compiler="gcc" version="11" 
+           assert="ndebug" link="static" optimization="debug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
       </job>
 
-      <job system="windows" compiler="x64" link="static" assert="debug" />
-      <job system="windows" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" compiler="x64" assert="debug" link="static" />
+      <job system="windows" compiler="x64" assert="ndebug" link="static" />
     </ci>
 
     <matrix>
@@ -2032,6 +2386,29 @@
       </build>
     </install>
 
+    <presets>
+      <mapping name="bitcoin-server" type="base" />
+      <mapping name="bitcoin-protocol" type="base" />
+      <mapping name="bitcoin-node" type="base" />
+      <mapping name="bitcoin-network" type="base" />
+      <mapping name="bitcoin-blockchain" type="add" parameter="consensus" />
+      <mapping name="bitcoin-consensus" type="base" />
+      <mapping name="bitcoin-database" type="base" />
+      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <configuration name="nix-base" />
+      <configuration name="gnu-debug" />
+      <configuration name="gnu-release" />
+      <configuration name="static" />
+      <configuration name="shared" />
+      <configuration name="gnu-optimized-size" />
+      <configuration name="nix-gnu-debug-static" />
+      <configuration name="nix-gnu-debug-shared" />
+      <configuration name="nix-gnu-release-static" />
+      <configuration name="nix-gnu-release-shared" />
+      <configuration name="nix-gnu-release-static-size" />
+      <configuration name="nix-gnu-release-shared-size" />
+    </presets>
+
     <matrix>
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
@@ -2094,6 +2471,319 @@
     </matrix>
 
   </repository>
+
+  <presets>
+    <configuration name="nix-base" description="Factored base settings for non-windows *nix based platforms." hidden="true" inherits="">
+      <property name="installDir" value="${sourceParentDir}/../../prefix/${presetName}" />
+      <property name="binaryDir" value="${sourceParentDir}/../obj/${presetName}" />
+      <property name="condition" type="object">
+        <property name="type" value="inList" />
+        <property name="string" value="${hostSystemName}" />
+        <property name="list" type="list">
+          <property value="Darwin" />
+          <property value="Linux" />
+        </property>
+      </property>
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../prefix/${presetName}" type="PATH" />
+        <property name="CMAKE_LIBRARY_PATH" value="${sourceParentDir}/../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}" type="PATH" />
+      </property>
+    </configuration>
+    <configuration name="gnu-debug" description="Factored debug settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -Og -g --coverage" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Og -g --coverage" />
+        <property name="enable-ndebug" value="OFF" type="BOOL" />
+      </property>
+    </configuration>
+    <configuration name="gnu-release" description="Factored release settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -O3" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -O3" />
+        <property name="enable-ndebug" value="ON" type="BOOL" />
+      </property>
+    </configuration>
+    <configuration name="static" description="Factored static linking settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="BUILD_SHARED_LIBS" value="OFF" type="BOOL" />
+      </property>
+    </configuration>
+    <configuration name="shared" description="Factored shared/dynamic linking settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="BUILD_SHARED_LIBS" value="ON" type="BOOL" />
+      </property>
+    </configuration>
+    <configuration name="gnu-optimized-size" description="Factored size optimization settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -Os -s" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Os -s" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-static" description="Debug build with static linking." hidden="false" display="*nix/GNU/Debug/Static">
+      <property name="inherits" type="list">
+        <property value="static" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static" description="Release build with static linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Static">
+      <property name="inherits" type="list">
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-shared" description="Debug build with shared linking." hidden="false" display="*nix/GNU/Debug/Shared">
+      <property name="inherits" type="list">
+        <property value="shared" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared" description="Release build with shared linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Shared">
+      <property name="inherits" type="list">
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static-size" description="Release build with static linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="with_icu" description="Factored ICU inclusion flag." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="with-icu" value="ON" type="BOOL" />
+      </property>
+    </configuration>
+    <configuration name="without_icu" description="Factored ICU exclusion flag." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="with-icu" value="OFF" type="BOOL" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-static-with_icu" description="Debug build with static linking and with icu." hidden="false" display="*nix/GNU/Debug/Static/WithICU">
+      <property name="inherits" type="list">
+        <property value="with_icu" />
+        <property value="static" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-static-without_icu" description="Debug build with static linking and without icu." hidden="false" display="*nix/GNU/Debug/Static/WithoutICU">
+      <property name="inherits" type="list">
+        <property value="without_icu" />
+        <property value="static" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static-with_icu" description="Release build with static linking and standard optimizations and with icu." hidden="false" display="*nix/GNU/Release/Static/WithICU">
+      <property name="inherits" type="list">
+        <property value="with_icu" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static-without_icu" description="Release build with static linking and standard optimizations and without icu." hidden="false" display="*nix/GNU/Release/Static/WithoutICU">
+      <property name="inherits" type="list">
+        <property value="without_icu" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-shared-with_icu" description="Debug build with shared linking and with icu." hidden="false" display="*nix/GNU/Debug/Shared/WithICU">
+      <property name="inherits" type="list">
+        <property value="with_icu" />
+        <property value="shared" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-shared-without_icu" description="Debug build with shared linking and without icu." hidden="false" display="*nix/GNU/Debug/Shared/WithoutICU">
+      <property name="inherits" type="list">
+        <property value="without_icu" />
+        <property value="shared" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared-with_icu" description="Release build with shared linking and standard optimizations and with icu." hidden="false" display="*nix/GNU/Release/Shared/WithICU">
+      <property name="inherits" type="list">
+        <property value="with_icu" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared-without_icu" description="Release build with shared linking and standard optimizations and without icu." hidden="false" display="*nix/GNU/Release/Shared/WithoutICU">
+      <property name="inherits" type="list">
+        <property value="without_icu" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static-size-with_icu" description="Release build with static linking and optimizations for size and with icu." hidden="false" display="*nix/GNU/Release/Static/Size/WithICU">
+      <property name="inherits" type="list">
+        <property value="with_icu" />
+        <property value="gnu-optimized-size" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static-size-without_icu" description="Release build with static linking and optimizations for size and without icu." hidden="false" display="*nix/GNU/Release/Static/Size/WithoutICU">
+      <property name="inherits" type="list">
+        <property value="without_icu" />
+        <property value="gnu-optimized-size" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared-size-with_icu" description="Release build with shared linking and optimizations for size and with icu." hidden="false" display="*nix/GNU/Release/Shared/Size/WithICU">
+      <property name="inherits" type="list">
+        <property value="with_icu" />
+        <property value="gnu-optimized-size" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared-size-without_icu" description="Release build with shared linking and optimizations for size and without icu." hidden="false" display="*nix/GNU/Release/Shared/Size/WithoutICU">
+      <property name="inherits" type="list">
+        <property value="without_icu" />
+        <property value="gnu-optimized-size" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="with_consensus" description="Factored consensus inclusion flag." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="with-consensus" value="ON" type="BOOL" />
+      </property>
+    </configuration>
+    <configuration name="without_consensus" description="Factored consensus exclusion flag." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="with-consensus" value="OFF" type="BOOL" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-static-with_consensus" description="Debug build with static linking and with consensus." hidden="false" display="*nix/GNU/Debug/Static/WithConsensus">
+      <property name="inherits" type="list">
+        <property value="with_consensus" />
+        <property value="static" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-static-without_consensus" description="Debug build with static linking and without consensus." hidden="false" display="*nix/GNU/Debug/Static/WithoutConsensus">
+      <property name="inherits" type="list">
+        <property value="without_consensus" />
+        <property value="static" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static-with_consensus" description="Release build with static linking and standard optimizations and with consensus." hidden="false" display="*nix/GNU/Release/Static/WithConsensus">
+      <property name="inherits" type="list">
+        <property value="with_consensus" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static-without_consensus" description="Release build with static linking and standard optimizations and without consensus." hidden="false" display="*nix/GNU/Release/Static/WithoutConsensus">
+      <property name="inherits" type="list">
+        <property value="without_consensus" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-shared-with_consensus" description="Debug build with shared linking and with consensus." hidden="false" display="*nix/GNU/Debug/Shared/WithConsensus">
+      <property name="inherits" type="list">
+        <property value="with_consensus" />
+        <property value="shared" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-shared-without_consensus" description="Debug build with shared linking and without consensus." hidden="false" display="*nix/GNU/Debug/Shared/WithoutConsensus">
+      <property name="inherits" type="list">
+        <property value="without_consensus" />
+        <property value="shared" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared-with_consensus" description="Release build with shared linking and standard optimizations and with consensus." hidden="false" display="*nix/GNU/Release/Shared/WithConsensus">
+      <property name="inherits" type="list">
+        <property value="with_consensus" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared-without_consensus" description="Release build with shared linking and standard optimizations and without consensus." hidden="false" display="*nix/GNU/Release/Shared/WithoutConsensus">
+      <property name="inherits" type="list">
+        <property value="without_consensus" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static-size-with_consensus" description="Release build with static linking and optimizations for size and with consensus." hidden="false" display="*nix/GNU/Release/Static/Size/WithConsensus">
+      <property name="inherits" type="list">
+        <property value="with_consensus" />
+        <property value="gnu-optimized-size" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static-size-without_consensus" description="Release build with static linking and optimizations for size and without consensus." hidden="false" display="*nix/GNU/Release/Static/Size/WithoutConsensus">
+      <property name="inherits" type="list">
+        <property value="without_consensus" />
+        <property value="gnu-optimized-size" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared-size-with_consensus" description="Release build with shared linking and optimizations for size and with consensus." hidden="false" display="*nix/GNU/Release/Shared/Size/WithConsensus">
+      <property name="inherits" type="list">
+        <property value="with_consensus" />
+        <property value="gnu-optimized-size" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared-size-without_consensus" description="Release build with shared linking and optimizations for size and without consensus." hidden="false" display="*nix/GNU/Release/Shared/Size/WithoutConsensus">
+      <property name="inherits" type="list">
+        <property value="without_consensus" />
+        <property value="gnu-optimized-size" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+  </presets>
 
   <nuget>
     <resource canonical="boost">
@@ -2254,6 +2944,7 @@
     <template name="gsl.package.pc.in" />
     <template name="gsl.install.sh" />
     <template name="gsl.install-cmake.sh" />
+    <template name="gsl.install-cmakepresets.sh" />
     <template name="gsl.runner.sh" />
     <!-- <template name="gsl.travis.yml" /> -->
     <template name="gsl.build.cmd" />
@@ -2266,6 +2957,7 @@
     <template name="gsl.vcxproj.filters" />
     <!-- <template name="gsl.Find.cmake" /> -->
     <template name="gsl.CMakeLists.txt" />
+    <template name="gsl.CMakePresets.json" />
     <!-- <template name="gsl.gitignore" /> -->
     <template name="gsl.ci.yml" />
   </templates>
