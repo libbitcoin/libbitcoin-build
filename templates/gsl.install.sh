@@ -197,7 +197,7 @@ make_jobs()
 .   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
     if [[ ! ($CI == true) ]]; then
-        create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch)
+        create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
         build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" "$@"
     else
         push_directory "$PRESUMED_CI_PROJECT_PATH"
