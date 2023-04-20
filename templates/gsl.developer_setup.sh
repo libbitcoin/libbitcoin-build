@@ -346,21 +346,24 @@ $(my.prefix)build_from_tarball_boost $BOOST_ARCHIVE "$PARALLEL" "$BUILD_BOOST" "
 .
 .macro create_github(build, prefix)
 .   define my.build = create_github.build
-$(my.prefix)create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch)
+.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+$(my.prefix)create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
 .endmacro # create_github
 .
 .macro build_github(build, prefix)
 .   define my.build = build_github.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
+.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-$(my.prefix)build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.options)" "$@"
+$(my.prefix)build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" "$@"
 .endmacro # build_github_test
 .
 .macro build_github_test(build, prefix)
 .   define my.build = build_github_test.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
+.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-$(my.prefix)build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.options)" "$@"
+$(my.prefix)build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" "$@"
 .endmacro # build_github_test
 .
 .macro define_create_local_copies(install)
