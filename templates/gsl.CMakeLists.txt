@@ -34,6 +34,15 @@ function boost_component(name)
     endif
 endfunction
 
+function join_flags(container)
+    define my.container = join_flags.container
+    define my.result = ""
+    for my.container.flag as _flag where defined(_flag.name) & !is_empty(_flag.name)
+        my.result = join(my.result, "-$(_flag.name)", " ")
+    endfor
+    return my.result
+endfunction
+
 function get_cmake_system_from_name(name, sentinel)
     define my.result = my.sentinel
 
@@ -275,15 +284,20 @@ endfunction
 
 function emit_options(repository)
     define my.repository = emit_options.repository
-
     for my.repository->configure.option as _option
         emit_option(_option)
     endfor
 endfunction
 
+function emit_compound_flags(repository)
+    define my.repository = emit_compound_flags.repository
+    for my.repository->configure.compound as _compound
+        emit_compound_flag(_compound, my.repository)
+    endfor
+endfunction
+
 function emit_defines(repository)
     define my.repository = emit_defines.repository
-
     new headers as _headers
         for my.repository->configure.define as _define\
             where !is_empty(_define.header)
@@ -811,6 +825,8 @@ function emit_cmakelists(repository)
 
     emit_options(my.repository)
 
+    emit_compound_flags(my.repository)
+
     emit_defines(my.repository)
 
     emit_dependencies(my.repository)
@@ -842,6 +858,8 @@ enable_testing()
 list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
 include(CheckIncludeFiles)
 include(CheckSymbolExists)
+include(CheckCXXCompilerFlag)
+include(CheckCXXSourceCompiles)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -882,17 +900,21 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 .
 .   heading2("Add compiler options")
 .   for my.options.flag as _flag by defined(_flag.compiler) ?? _flag.compiler ? ""
+.       define my.indent = defined(_flag.compiler) ?? "    " ? ""
+# $(_flag.comment)
 .       if (defined(_flag.compiler))
-# $(_flag.comment)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "$(compiler_id(_flag.compiler))")
-    add_compile_options( "-$(_flag.name)" )
-endif()
-
-.       else
-# $(_flag.comment)
-add_compile_options( "-$(_flag.name)" )
-
 .       endif
+$(my.indent)check_cxx_compiler_flag( "-$(_flag.name)" HAS_FLAG_$(_flag.name:upper) )
+$(my.indent)if ( HAS_FLAG_$(_flag.name:upper) )
+    $(my.indent)add_compile_options( "-$(_flag.name)" )
+$(my.indent)else()
+    $(my.indent)message( FATAL_ERROR "Compiler does not support -$(_flag.name)" )
+$(my.indent)endif()
+.       if defined(_flag.compiler)
+endif()
+.       endif
+
 .   endfor
 .endmacro # emit_add_compile_options
 .
@@ -949,6 +971,58 @@ $(my.indent)$(my.name)( $(my.target_name)
 .   endif
 .
 .endmacro # emit_value_params
+.
+.macro emit_compound_flag(compound, repository)
+.   define my.compound = emit_compound_flag.compound
+.   define my.repository = emit_compound_flag.repository
+.
+.   define my.option = my.repository->configure->option(name = my.compound.name)
+.   define my.indent = defined(my.option) ?? "    " ? ""
+.   define my.flags = join_flags(my.compound)
+.   define my.symbol_prefix = defined(my.option) ?? "HAS_FLAGS_" ? "HAVE_"
+.
+.   if defined(my.option)
+if ($(get_option_symbol_generic(my.option, "-", "false")))
+.   endif
+$(my.indent)check_cxx_compiler_flag("$(my.flags)" $(my.symbol_prefix)$(my.compound.name:upper))
+
+$(my.indent)if ($(my.symbol_prefix)$(my.compound.name:upper))
+.   for my.compound.flag as _flag where defined(_flag.name) & !is_empty(_flag.name)
+    $(my.indent)add_compile_options( "-$(_flag.name)" )
+.   endfor
+.   if defined(my.compound->program)
+    $(my.indent)set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+    $(my.indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} $(my.flags)" )
+.   endif
+$(my.indent)endif()
+
+.   if defined(my.compound->program)
+$(my.indent)check_cxx_source_compiles("
+.       for my.compound->program.include as _include
+    $(my.indent)#include <$(_include.header)>
+.       endfor
+    $(my.indent)int main() {
+.       for my.compound->program.loc as _loc
+        $(my.indent)$(_loc)
+.       endfor
+    $(my.indent)}" HAVE_$(my.compound.name:upper))
+
+$(my.indent)if ($(my.symbol_prefix)$(my.compound.name:upper))
+    $(my.indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+$(my.indent)endif()
+
+.   endif
+.
+$(my.indent)if ( HAVE_$(my.compound.name:upper) )
+    $(my.indent)add_compile_definitions( HAVE_$(my.compound.name:upper) )
+$(my.indent)else()
+    $(my.indent)message( FATAL_ERROR "Failed to enable HAVE_$(my.compound.name:upper)" )
+$(my.indent)endif()
+.   if defined(my.option)
+endif()
+.   endif
+
+.endmacro # emit_compound_flag
 .
 .macro emit_option(option)
 .   define my.option = emit_option.option
