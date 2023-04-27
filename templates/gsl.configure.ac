@@ -10,6 +10,15 @@
 # Functions
 ###############################################################################
 
+function join_flags(container)
+    define my.container = join_flags.container
+    define my.result = ""
+    for my.container.flag as _flag where defined(_flag.name) & !is_empty(_flag.name)
+        my.result = join(my.result, "-$(_flag.name)", " ")
+    endfor
+    return my.result
+endfunction
+
 function substitute_system_include(variable_name)
     return "`echo ${$(my.variable_name)} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`"
 endfunction
@@ -174,6 +183,28 @@ endfunction
 ###############################################################################
 .endtemplate
 .template 1
+.
+.#-----------------------------------------------------------------------------
+.# AC_LANG_PROGRAM tests
+.#-----------------------------------------------------------------------------
+.macro render_test_program(program, indent, prefix, suffix)
+.   my.program = render_test_program.program
+.   my.indent = render_test_program.indent
+.   my.prefix = render_test_program.prefix
+.   my.suffix = render_test_program.suffix
+.
+$(my.prefix)AC_LANG_PROGRAM(
+  $(my.indent)[[
+.   for my.program.include as _include
+    $(my.indent)#include <$(_include.header)>
+.   endfor
+  $(my.indent)]],
+  $(my.indent)[[
+.   for my.program.loc as _loc
+    $(my.indent)$(_loc)
+.   endfor
+  $(my.indent)]])$(my.suffix)
+.endmacro
 .
 .#-----------------------------------------------------------------------------
 .# Initialize
@@ -975,6 +1006,41 @@ AC_MSG_NOTICE([$(my.cname)_BUILD_CPPFLAGS : ${$(my.cname)_BUILD_CPPFLAGS}])
 .endmacro
 .
 .#-----------------------------------------------------------------------------
+.# Compound flags AX_CHECK_COMPILE_FLAG
+.#-----------------------------------------------------------------------------
+.macro render_compound_flags(compound, repository)
+.   define my.compound = render_compound_flags.compound
+.   require(my.compound, "compound", "name")
+.   require(my.compound, "compound", "comment")
+.   define my.repository = render_compound_flags.repository
+.
+.   define my.option = my.repository->configure->option(name = my.compound.name)
+.   define my.indent = defined(my.option) ?? "    " ? ""
+.   define my.flags = join_flags(my.compound)
+.   define my.terminator = "])"
+.
+.   if defined(my.option)
+.       my.terminator = "])])"
+AS_IF([test x${$(get_option_symbol(my.option))} != "xno"],
+    [AX_CHECK_COMPILE_FLAG([$(my.flags)],
+.   else
+AX_CHECK_COMPILE_FLAG([$(my.flags)],
+.   endif
+    $(my.indent)[CXXFLAGS="$CXXFLAGS $(my.flags)";
+    $(my.indent) AC_DEFINE([HAVE_$(my.compound.name:upper)])],
+    $(my.indent)[AC_MSG_ERROR([$(my.flags) not supported.])],
+.   if defined(my.compound->program)
+.       define my.prog_indent = "    $(my.indent)"
+.       define my.prog_prefix = "    $(my.indent)["
+    $(my.indent)[],
+.       render_test_program(my.compound->program, my.prog_indent, my.prog_prefix, my.terminator)
+.   else
+    $(my.indent)[$(my.terminator)
+.   endif
+
+.endmacro
+.
+.#-----------------------------------------------------------------------------
 .# AX_CHECK_XXX_FLAG
 .#-----------------------------------------------------------------------------
 .macro render_flag(flag)
@@ -1070,6 +1136,20 @@ for generate.repository by name as _repository
         endfor
     endif
 
+    if (defined(my.configure->flag))
+        heading1("Set flags.")
+        for my.configure.flag as _flag
+            render_flag(_flag)
+        endfor
+    endif
+
+    if (defined(my.configure->compound))
+        heading1("Set flags for compound flags.")
+        for my.configure.compound as _compound
+            render_compound_flags(_compound, _repository)
+        endfor
+    endif
+
     if (defined(my.configure->dependency))
         heading1("Check dependencies.")
         for my.configure.dependency as _dependency where has_m4(_dependency)
@@ -1092,13 +1172,6 @@ for generate.repository by name as _repository
             else
                 check_lib_dependency_conditional(_dependency, my.configure)
             endif
-        endfor
-    endif
-
-    if (defined(my.configure->flag))
-        heading1("Set flags.")
-        for my.configure.flag as _flag
-            render_flag(_flag)
         endfor
     endif
 

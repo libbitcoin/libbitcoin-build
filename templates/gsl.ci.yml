@@ -6,7 +6,7 @@
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
-#### ###########################################################################
+###############################################################################
 # Functions
 ###############################################################################
 
@@ -609,6 +609,17 @@ endfunction # get_sln_tests
 .
 .endmacro # emit_step_prepare_toolchain
 .
+.macro emit_step_display_environment(configuration, repository)
+.   define my.config = emit_step_display_environment.configuration
+.   define my.repository = emit_step_display_environment.repository
+.
+      - name: Display CPU details
+        if: ${{ (runner.os == 'Linux') }}
+        shell: bash
+        run: |
+          lscpu
+.endmacro # emit_step_display_environment
+.
 .macro emit_step_parameter_denormalization(configuration, repository)
 .   define my.config = emit_step_parameter_denormalization.configuration
 .   define my.repository = emit_step_parameter_denormalization.repository
@@ -745,11 +756,11 @@ endfunction # get_sln_tests
         run: |
           cat ${{ github.workspace }}/build/build-*/bootstrap.log
 
+
       - name: Failure display otool output
         if: ${{ failure() && (matrix.os == 'macos-latest') }}
         run: |
           otool -L ${{ github.workspace }}/test/.libs/$(_repository.name)-test
-
       - name: Failure display DYLD_PRINT_LIBRARIES
         if: ${{ failure() && (matrix.os == 'macos-latest') }}
         run: |
@@ -805,6 +816,8 @@ endfunction # get_sln_tests
 .   emit_step_prepare_toolchain(my.config)
 
 .   emit_step_parameter_denormalization(my.config, my.repository)
+
+.   emit_step_display_environment(my.config, my.repository)
 
 .   emit_step_execute_shell(_config, my.ci)
 
