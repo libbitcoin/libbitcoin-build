@@ -396,7 +396,7 @@
       <flag name="fno-var-tracking-assignments" compiler="gcc" comment="Limit delays and warnings." context="c++" />
 
       <!-- compound flags -->
-      <compound name="avx2" comment="Conditionally require avx2 intrinsics.">
+      <compound name="avx2" type="with" option="avx2" comment="Conditionally require avx2 intrinsics.">
         <flag name="mavx" />
         <flag name="mavx2" />
         <program>
@@ -406,7 +406,7 @@
           <loc>return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);</loc>
         </program>
       </compound>
-      <compound name="avx512" comment="Conditionally require avx512 intrinsics.">
+      <compound name="avx512" type="with" option="avx512" comment="Conditionally require avx512 intrinsics.">
         <flag name="mavx512f" />
         <flag name="mavx512bw" />
         <program>
@@ -416,7 +416,7 @@
           <loc>return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1);</loc>
         </program>
       </compound>
-      <compound name="shani" comment="Conditionally require sha native intrincis.">
+      <compound name="shani" type="with" option="shani" comment="Conditionally require sha native intrincis.">
         <flag name="msse4" />
 	<flag name="msha" />
 	<program>
@@ -428,7 +428,7 @@
 	  <loc>return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);</loc>
 	</program>
       </compound>
-      <compound name="sse4" comment="Conditionally require sse4 intrinsics.">
+      <compound name="sse4" type="with" option="sse4" comment="Conditionally require sse4 intrinsics.">
         <flag name="msse4.1" />
 	<program>
 	  <include header="stdint.h" />

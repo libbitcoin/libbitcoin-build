@@ -1014,7 +1014,13 @@ AC_MSG_NOTICE([$(my.cname)_BUILD_CPPFLAGS : ${$(my.cname)_BUILD_CPPFLAGS}])
 .   require(my.compound, "compound", "comment")
 .   define my.repository = render_compound_flags.repository
 .
-.   define my.option = my.repository->configure->option(name = my.compound.name)
+.   if defined(my.compound.option)
+.       define my.option = my.repository->configure->option(name = my.compound.option)
+.       if !defined(my.option)
+.           abort("Matching option '$(my.compound.option)' not found for '$(my.compound.name)'.")
+.       endif
+.   endif
+.
 .   define my.indent = defined(my.option) ?? "    " ? ""
 .   define my.flags = join_flags(my.compound)
 .   define my.terminator = "])"
@@ -1027,7 +1033,7 @@ AS_IF([test x${$(get_option_symbol(my.option))} != "xno"],
 AX_CHECK_COMPILE_FLAG([$(my.flags)],
 .   endif
     $(my.indent)[CXXFLAGS="$CXXFLAGS $(my.flags)";
-    $(my.indent) AC_DEFINE([HAVE_$(my.compound.name:upper)])],
+    $(my.indent) AC_DEFINE([$(my.compound.type:upper)_$(my.compound.name:upper)])],
     $(my.indent)[AC_MSG_ERROR([$(my.flags) not supported.])],
 .   if defined(my.compound->program)
 .       define my.prog_indent = "    $(my.indent)"
