@@ -187,6 +187,7 @@
            optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -196,6 +197,7 @@
            optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -207,6 +209,7 @@
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <option autotools="--enable-isystem" />
       </job>
       
       <job build="all" 
@@ -218,6 +221,7 @@
            preset="nix-gnu-release-static-size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -229,6 +233,7 @@
            preset="nix-gnu-release-shared-size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="autotools" 
@@ -240,6 +245,7 @@
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="cmake" 
@@ -396,6 +402,19 @@
       <flag name="fno-var-tracking-assignments" compiler="gcc" comment="Limit delays and warnings." context="c++" />
 
       <!-- compound flags -->
+      <!--
+      <compound name="xgetbv" type="have" comment="Require avx intrinsics.">
+        <flag name="mavx" />
+        <program>
+          <include header="stdio.h" />
+          <include header="cstdint" />
+          <include header="immintrin.h" />
+          <loc>unsigned int index=16;</loc>
+          <loc>long long int value = _xgetbv(index);</loc>
+          <loc>return value;</loc>
+        </program>
+      </compound> -->
+
       <compound name="avx2" type="with" option="avx2" comment="Conditionally require avx2 intrinsics.">
         <flag name="mavx" />
         <flag name="mavx2" />
@@ -418,25 +437,25 @@
       </compound>
       <compound name="shani" type="with" option="shani" comment="Conditionally require sha native intrincis.">
         <flag name="msse4" />
-	<flag name="msha" />
-	<program>
-	  <include header="stdint.h" />
-	  <include header="immintrin.h" />
-	  <loc>__m128i a = _mm_set1_epi32(0);</loc>
-	  <loc>__m128i b = _mm_set1_epi32(15);</loc>
-	  <loc>__m128i k = _mm_set1_epi32(31);</loc>
-	  <loc>return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);</loc>
-	</program>
+        <flag name="msha" />
+        <program>
+          <include header="stdint.h" />
+          <include header="immintrin.h" />
+          <loc>__m128i a = _mm_set1_epi32(0);</loc>
+          <loc>__m128i b = _mm_set1_epi32(15);</loc>
+          <loc>__m128i k = _mm_set1_epi32(31);</loc>
+          <loc>return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);</loc>
+        </program>
       </compound>
       <compound name="sse4" type="with" option="sse4" comment="Conditionally require sse4 intrinsics.">
         <flag name="msse4.1" />
-	<program>
-	  <include header="stdint.h" />
-	  <include header="immintrin.h" />
-	  <loc>__m128i a = _mm_set1_epi32(0);</loc>
-	  <loc>__m128i b = _mm_set1_epi32(15);</loc>
-	  <loc>return _mm_extract_epi32(_mm_add_epi64(a, b), 2);</loc>
-	</program>
+        <program>
+          <include header="stdint.h" />
+          <include header="immintrin.h" />
+          <loc>__m128i a = _mm_set1_epi32(0);</loc>
+          <loc>__m128i b = _mm_set1_epi32(15);</loc>
+          <loc>return _mm_extract_epi32(_mm_add_epi64(a, b), 2);</loc>
+        </program>
       </compound>
     </configure>
 
@@ -571,6 +590,7 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -579,6 +599,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -588,6 +609,9 @@
            preset="nix-gnu-debug-shared-without_icu">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
+        <option autotools="--enable-isystem" />
+        <option autotools="--enable-avx2" cmake="-Denable-avx2=on" />
+        <option autotools="--enable-sse4" cmake="-Denable-sse4=on" />
       </job>
 
       <job build="all" 
@@ -597,6 +621,8 @@
            preset="nix-gnu-release-static-size-with_icu">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
+        <option autotools="--enable-avx2" cmake="-Denable-avx2=on" />
       </job>
 
       <job build="all" 
@@ -606,6 +632,8 @@
            preset="nix-gnu-release-shared-size-without_icu">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <option autotools="--enable-isystem" />
+        <option autotools="--enable-sse4" cmake="-Denable-sse4=on" />
       </job>
 
       <job build="autotools" 
@@ -615,6 +643,8 @@
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
+        <option autotools="--enable-avx512" cmake="-Denable-avx512=on" />
       </job>
 
       <job build="cmake" 
@@ -623,6 +653,7 @@
            assert="ndebug" link="static" optimization="debug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-avx512" cmake="-Denable-avx512=on" />
       </job>
 
       <job system="windows" compiler="x64" assert="debug" link="static" />
@@ -836,6 +867,7 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -844,6 +876,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -853,6 +886,7 @@
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -862,6 +896,7 @@
            preset="nix-gnu-release-static-size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -871,6 +906,7 @@
            preset="nix-gnu-release-shared-size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="autotools" 
@@ -880,6 +916,7 @@
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="cmake" 
@@ -1080,6 +1117,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
         <axis name="zmq" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1089,6 +1127,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1099,6 +1138,7 @@
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="zmq" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1109,6 +1149,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1119,6 +1160,7 @@
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="zmq" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="autotools" 
@@ -1129,6 +1171,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="cmake" 
@@ -1713,6 +1756,7 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1721,6 +1765,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1730,6 +1775,7 @@
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1740,6 +1786,7 @@
         <!-- version="5.0" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1750,6 +1797,7 @@
         <!-- version="4.8" -->
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="autotools" 
@@ -1759,6 +1807,7 @@
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="cmake" 
@@ -1947,7 +1996,7 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-	  <axis name="consensus" with="true" without="true" recognized="true" />
+      <axis name="consensus" with="true" without="true" recognized="true" />
 
       <job build="all" 
            system="osx" 
@@ -1956,6 +2005,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1965,6 +2015,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="without" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1975,6 +2026,7 @@
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="consensus" value="with" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1986,6 +2038,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -1997,6 +2050,7 @@
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="consensus" value="without" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="autotools" 
@@ -2007,6 +2061,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="cmake" 
@@ -2208,6 +2263,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -2217,6 +2273,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="without" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -2227,6 +2284,7 @@
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="consensus" value="with" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -2237,6 +2295,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
@@ -2247,6 +2306,7 @@
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="consensus" value="without" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="autotools" 
@@ -2257,6 +2317,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
+        <option autotools="--enable-isystem" />
       </job>
 
       <job build="cmake" 

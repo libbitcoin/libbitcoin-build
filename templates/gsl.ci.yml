@@ -108,6 +108,33 @@ function get_job_preset(job)
     return my.job.preset
 endfunction # get_job_preset
 
+function get_job_options(job, config)
+    define my.job = get_job_options.job
+    define my.config = get_job_options.config
+
+    define my.toolset = ""
+    if (defined(my.job.build))
+        if (my.job.build = 'all')
+            my.toolset = my.config.job
+        elsif ((my.job.build = 'autotools') | (my.job.build = 'cmake') | (my.job.build = 'preset'))
+            my.toolset = my.job.build
+        else
+            abort("get_job_options: unsupported job build value '$(my.job.build)'.")
+        endif
+    endif
+
+    if (my.toolset = 'preset')
+        my.toolset = 'cmake'
+    endif
+
+    define my.result = ""
+    for my.job.option as _option where (defined(_option.$(my.toolset)))
+        my.result = join(my.result, _option.$(my.toolset), " ")
+    endfor
+
+    return my.result
+endfunction # get_job_options
+
 function get_job_packager(job)
     define my.job = get_job_packager.job
     define my.packager = ""
@@ -543,6 +570,7 @@ endfunction # get_sln_tests
 .       endfor
             cc: "$(get_job_cc(my.job))"
             flags: "$(get_job_cflags(my.integration, my.repository, my.job))"
+            options: "$(get_job_options(my.job, my.config))"
             packager: "$(get_job_packager(my.job))"
             packages: "$(get_job_packages(my.integration, my.repository, my.job))"
 
@@ -683,10 +711,7 @@ endfunction # get_sln_tests
       - name: Execute install$(my.suffix)
         run: >
           ./install$(my.suffix)
-.   if !defined(my.config.cmake)
-          --enable-isystem
-.   endif
-          --build-dir=$LIBBITCOIN_SRC_PATH
+          --build-dir=$LIBBITCOIN_SRC_PATH ${{ matrix.options }}
 .   if (defined(my.config.use_preset))
           --prefix=$LIBBITCOIN_SRC_PATH/prefix/${{ matrix.preset }}
           --preset=${{ matrix.preset }}
