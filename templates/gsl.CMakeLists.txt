@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2020 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2023 libbitcoin developers (see COPYING).
 #
 # GSL generate libbitcoin CMakeLists.txt.
 #
@@ -975,11 +975,18 @@ $(my.indent)$(my.name)( $(my.target_name)
 .macro emit_compound_flag(compound, repository)
 .   define my.compound = emit_compound_flag.compound
 .   define my.repository = emit_compound_flag.repository
+.   define my.define_prefix = "$(my.compound.type:upper)_"
 .
-.   define my.option = my.repository->configure->option(name = my.compound.name)
+.   if defined(my.compound.option)
+.       define my.option = my.repository->configure->option(name = my.compound.name)
+.       if !defined(my.option)
+.           abort("Matching option '$(my.compound.option)' not found for '$(my.compound.name)'.")
+.       endif
+.   endif
+.
 .   define my.indent = defined(my.option) ?? "    " ? ""
 .   define my.flags = join_flags(my.compound)
-.   define my.symbol_prefix = defined(my.option) ?? "HAS_FLAGS_" ? "HAVE_"
+.   define my.symbol_prefix = defined(my.option) ?? "HAS_FLAGS_" ? my.define_prefix
 .
 .   if defined(my.option)
 if ($(get_option_symbol_generic(my.option, "-", "false")))
@@ -1005,7 +1012,7 @@ $(my.indent)check_cxx_source_compiles("
 .       for my.compound->program.loc as _loc
         $(my.indent)$(_loc)
 .       endfor
-    $(my.indent)}" HAVE_$(my.compound.name:upper))
+    $(my.indent)}" $(my.define_prefix)$(my.compound.name:upper))
 
 $(my.indent)if ($(my.symbol_prefix)$(my.compound.name:upper))
     $(my.indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
@@ -1013,10 +1020,10 @@ $(my.indent)endif()
 
 .   endif
 .
-$(my.indent)if ( HAVE_$(my.compound.name:upper) )
-    $(my.indent)add_compile_definitions( HAVE_$(my.compound.name:upper) )
+$(my.indent)if ( $(my.define_prefix)$(my.compound.name:upper) )
+    $(my.indent)add_compile_definitions( $(my.define_prefix)$(my.compound.name:upper) )
 $(my.indent)else()
-    $(my.indent)message( FATAL_ERROR "Failed to enable HAVE_$(my.compound.name:upper)" )
+    $(my.indent)message( FATAL_ERROR "Failed to enable $(my.define_prefix)$(my.compound.name:upper)" )
 $(my.indent)endif()
 .   if defined(my.option)
 endif()
