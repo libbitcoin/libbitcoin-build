@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2014-2023 libbitcoin developers (see COPYING). -->
 <generate language="en-us" >
 
-  <repository name="libbitcoin-consensus" version="3.7.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-consensus" version="3.8.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-consensus" description="Bitcoin Consensus Library (optional)" url="https://github.com/libbitcoin/libbitcoin-consensus" />
 
@@ -303,7 +303,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-system" version="3.7.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-system" version="3.8.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-system" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin-system" >
       <flag value="@icu@" />
@@ -633,7 +633,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-network" version="3.7.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-network" version="3.8.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" />
 
@@ -645,7 +645,7 @@
 
       <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin-system" version="3.7.0" />
+      <dependency name="bitcoin-system" version="3.8.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -862,7 +862,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-protocol" version="3.7.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-protocol" version="3.8.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol">
     </package>
@@ -877,7 +877,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.3.4" />
-      <dependency name="bitcoin-system" version="3.7.0" />
+      <dependency name="bitcoin-system" version="3.8.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1132,7 +1132,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-client" version="3.7.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-client" version="3.8.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-client" description="Bitcoin Client Query Library" url="https://github.com/libbitcoin/libbitcoin-client" />
 
@@ -1145,8 +1145,8 @@
 
       <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin-system" version="3.7.0" />
-      <dependency name="bitcoin-protocol" version="3.7.0" />
+      <dependency name="bitcoin-system" version="3.8.0" />
+      <dependency name="bitcoin-protocol" version="3.8.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1383,7 +1383,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-explorer" version="3.7.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-explorer" version="3.8.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-explorer" description="Bitcoin Command Line Tool" url="https://github.com/libbitcoin/libbitcoin-explorer" />
 
@@ -1398,8 +1398,8 @@
       <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-client" version="3.7.0" />
-      <dependency name="bitcoin-network" version="3.7.0" />
+      <dependency name="bitcoin-client" version="3.8.0" />
+      <dependency name="bitcoin-network" version="3.8.0" />
       <!-- TODO: verify this with more recent ICU. -->
       <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
@@ -1674,7 +1674,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-database" version="3.7.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-database" version="3.8.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-database" description="Bitcoin High Performance Blockchain Database" url="https://github.com/libbitcoin/libbitcoin-database" />
 
@@ -1687,7 +1687,7 @@
 
       <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin-system" version="3.7.0" />
+      <dependency name="bitcoin-system" version="3.8.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -1898,7 +1898,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-blockchain" version="3.7.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-blockchain" version="3.8.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-blockchain" description="Bitcoin Blockchain Library" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
 
@@ -1912,8 +1912,8 @@
 
       <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin-database" version="3.7.0" />
-      <dependency name="bitcoin-consensus" version="3.7.0" option="consensus" />
+      <dependency name="bitcoin-database" version="3.8.0" />
+      <dependency name="bitcoin-consensus" version="3.8.0" option="consensus" />
 
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
 
@@ -2145,7 +2145,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-node" version="3.7.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-node" version="3.8.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
@@ -2160,8 +2160,8 @@
       <dependency name="boost" version="1.72.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-blockchain" version="3.7.0" />
-      <dependency name="bitcoin-network" version="3.7.0" />
+      <dependency name="bitcoin-blockchain" version="3.8.0" />
+      <dependency name="bitcoin-network" version="3.8.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
@@ -2400,7 +2400,7 @@
 
   </repository>
 
-  <repository name="libbitcoin-server" version="3.7.0" email="eric@voskuil.org" >
+  <repository name="libbitcoin-server" version="3.8.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-server" description="Bitcoin Full Node and Query Server" url="https://github.com/libbitcoin/libbitcoin-server" />
 
@@ -2416,8 +2416,8 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
-      <dependency name="bitcoin-node" version="3.7.0" />
-      <dependency name="bitcoin-protocol" version="3.7.0" />
+      <dependency name="bitcoin-node" version="3.8.0" />
+      <dependency name="bitcoin-protocol" version="3.8.0" />
 
       <!-- General flags -->
       <flag name="std=c++11" comment="Require c++11 for all c++ products." context="c++" />
