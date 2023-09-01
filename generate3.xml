@@ -45,7 +45,7 @@
       <define header="sys/endian.h" export="htobe32" />
       <define header="sys/endian.h" export="htobe64" />
 
-      <dependency name="boost" version="1.72.0" maximum="1.76.0" option="tests" />
+      <dependency name="boost" version="1.73.0" maximum="1.76.0" option="tests" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
       <dependency name="secp256k1" version="0.1.0.19" />
@@ -135,7 +135,7 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.73.0" parallel="true" nuget="true" >
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
@@ -323,7 +323,7 @@
       <!-- https://svn.boost.org/trac/boost/ticket/6851 [gcc, 1.50-1.53] -->
       <!-- [log rotation derivation for customization]  [???? 1.56] -->
       <!-- [compiler failure]                           [vc120 1.62-1.72] -->
-      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
+      <dependency name="boost" version="1.73.0" maximum="1.76.0" />
       <dependency name="boost_atomic" m4="none" />
       <dependency name="boost_chrono" />
       <dependency name="boost_date_time" />
@@ -441,7 +441,7 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.72.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.73.0" parallel="true" nuget="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -643,7 +643,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
+      <dependency name="boost" version="1.73.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="3.8.0" />
 
@@ -873,7 +873,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
+      <dependency name="boost" version="1.73.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.3.4" />
@@ -1143,7 +1143,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
+      <dependency name="boost" version="1.73.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="3.8.0" />
       <dependency name="bitcoin-protocol" version="3.8.0" />
@@ -1395,7 +1395,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
+      <dependency name="boost" version="1.73.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="3.8.0" />
@@ -1685,7 +1685,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
+      <dependency name="boost" version="1.73.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="3.8.0" />
 
@@ -1910,7 +1910,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
+      <dependency name="boost" version="1.73.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-database" version="3.8.0" />
       <dependency name="bitcoin-consensus" version="3.8.0" option="consensus" />
@@ -2157,7 +2157,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
+      <dependency name="boost" version="1.73.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-blockchain" version="3.8.0" />
@@ -2412,7 +2412,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.72.0" maximum="1.76.0" />
+      <dependency name="boost" version="1.73.0" maximum="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
@@ -2997,21 +2997,21 @@
   <nuget>
     <resource canonical="boost">
       <package compiler="vc120" name="boost" version="1.57.0.0" />
-      <package compiler="vc140" name="boost" version="1.72.0.0" />
-      <package compiler="vc141" name="boost" version="1.72.0.0" />
+      <package compiler="vc140" name="boost" version="1.73.0.0" />
+      <package compiler="vc141" name="boost" version="1.73.0.0" />
       <package compiler="vc141" name="boost" version="1.76.0.0" />
       <package compiler="vc142" name="boost" version="1.76.0.0" />
       <package compiler="vc143" name="boost" version="1.78.0" />
     </resource>
     <resource canonical="boost_atomic">
       <package compiler="vc120" name="boost_atomic-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_atomic-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_atomic-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_atomic-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_atomic-vc141" version="1.73.0.0" />
     </resource>
     <resource canonical="boost_chrono">
       <package compiler="vc120" name="boost_chrono-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_chrono-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_chrono-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_chrono-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_chrono-vc141" version="1.73.0.0" />
       <package compiler="vc141" name="boost_chrono-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_chrono-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_chrono-vc143" version="1.78.0" />
@@ -3027,24 +3027,24 @@
     </resource>
     <resource canonical="boost_date_time">
       <package compiler="vc120" name="boost_date_time-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_date_time-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_date_time-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_date_time-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_date_time-vc141" version="1.73.0.0" />
       <package compiler="vc141" name="boost_date_time-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_date_time-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_date_time-vc143" version="1.78.0" />
     </resource>
     <resource canonical="boost_filesystem">
       <package compiler="vc120" name="boost_filesystem-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_filesystem-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_filesystem-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_filesystem-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_filesystem-vc141" version="1.73.0.0" />
       <package compiler="vc141" name="boost_filesystem-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_filesystem-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_filesystem-vc143" version="1.78.0" />
     </resource>
     <resource canonical="boost_iostreams">
       <package compiler="vc120" name="boost_iostreams-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_iostreams-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_iostreams-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_iostreams-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_iostreams-vc141" version="1.73.0.0" />
       <package compiler="vc141" name="boost_iostreams-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_iostreams-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_iostreams-vc143" version="1.78.0" />
@@ -3056,58 +3056,58 @@
     </resource>
     <resource canonical="boost_locale">
       <package compiler="vc120" name="boost_locale-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_locale-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_locale-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_locale-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_locale-vc141" version="1.73.0.0" />
       <package compiler="vc141" name="boost_locale-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_locale-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_locale-vc143" version="1.78.0" />
     </resource>
     <resource canonical="boost_log_setup">
       <package compiler="vc120" name="boost_log_setup-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_log_setup-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_log_setup-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_log_setup-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_log_setup-vc141" version="1.73.0.0" />
     </resource>
     <resource canonical="boost_log">
       <package compiler="vc120" name="boost_log-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_log-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_log-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_log-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_log-vc141" version="1.73.0.0" />
     </resource>
     <resource canonical="boost_program_options">
       <package compiler="vc120" name="boost_program_options-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_program_options-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_program_options-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_program_options-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_program_options-vc141" version="1.73.0.0" />
       <package compiler="vc141" name="boost_program_options-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_program_options-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_program_options-vc143" version="1.78.0" />
     </resource>
     <resource canonical="boost_regex">
       <package compiler="vc120" name="boost_regex-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_regex-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_regex-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_regex-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_regex-vc141" version="1.73.0.0" />
       <package compiler="vc141" name="boost_regex-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_regex-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_regex-vc143" version="1.78.0" />
     </resource>
     <resource canonical="boost_system">
       <package compiler="vc120" name="boost_system-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_system-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_system-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_system-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_system-vc141" version="1.73.0.0" />
       <package compiler="vc141" name="boost_system-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_system-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_system-vc143" version="1.78.0" />
     </resource>
     <resource canonical="boost_thread">
       <package compiler="vc120" name="boost_thread-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_thread-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_thread-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_thread-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_thread-vc141" version="1.73.0.0" />
       <package compiler="vc141" name="boost_thread-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_thread-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_thread-vc143" version="1.78.0" />
     </resource>
     <resource canonical="boost_unit_test_framework">
       <package compiler="vc120" name="boost_unit_test_framework-vc120" version="1.57.0.0" />
-      <package compiler="vc140" name="boost_unit_test_framework-vc140" version="1.72.0.0" />
-      <package compiler="vc141" name="boost_unit_test_framework-vc141" version="1.72.0.0" />
+      <package compiler="vc140" name="boost_unit_test_framework-vc140" version="1.73.0.0" />
+      <package compiler="vc141" name="boost_unit_test_framework-vc141" version="1.73.0.0" />
       <package compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
