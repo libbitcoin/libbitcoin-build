@@ -341,7 +341,7 @@ cmake_project_directory()
 
     push_directory "builds/cmake"
     display_message "Preparing cmake --preset=$PRESET $@"
-    cmake --preset=$PRESET $@
+    cmake -LA --preset=$PRESET $@
     popd
 
     push_directory "obj/$PRESET"

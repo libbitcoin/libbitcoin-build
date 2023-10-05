@@ -296,6 +296,7 @@ display_configuration()
 .   if (have_build(my.install, "boost"))
     display_message "BUILD_BOOST           : $BUILD_BOOST"
 .   endif
+    display_message "BOOST_ROOT            : $BOOST_ROOT"
 .   custom_configuration(my.repository, my.install)
     display_message "PREFIX                : $PREFIX"
     display_message "DISABLE_SHARED        : $DISABLE_SHARED"
@@ -585,19 +586,19 @@ set_pkgconfigdir()
 set_with_boost_prefix()
 {
     if [[ $BUILD_BOOST ]]; then
+.   if defined(my.configuration.cmake)
+        # Boost detection via FindBoost.cmake provides for path hint via
+	# $BOOT_ROOT environment variable only.
+.   else
         # Boost has no pkg-config, m4 searches in the following order:
         # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
         # We use --with-boost to prioritize the --prefix path when we build it.
         # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
         # ax_boost_base.m4 appends /include and adds to BOOST_CPPFLAGS
         # ax_boost_base.m4 searches for /lib /lib64 and adds to BOOST_LDFLAGS
-.   if defined(my.configuration.cmake)
-        #
-        # cmake does not process this argument, so it has been zeroed out.
-        with_boost=""
-.   else
         with_boost="--with-boost=$PREFIX"
 .   endif
+        export BOOST_ROOT="$PREFIX"
     fi
 }
 

@@ -641,6 +641,12 @@ endfunction # get_sln_tests
 .   define my.config = emit_step_display_environment.configuration
 .   define my.repository = emit_step_display_environment.repository
 .
+      - name: Display Compiler details
+        shell: bash
+        run: |
+          ${CC} -v
+          ${CXX} -v
+
       - name: Display CPU details
         if: ${{ (runner.os == 'Linux') }}
         shell: bash
@@ -711,12 +717,12 @@ endfunction # get_sln_tests
       - name: Execute install$(my.suffix)
         run: >
           ./install$(my.suffix)
-          --build-dir=$LIBBITCOIN_SRC_PATH ${{ matrix.options }}
+          --build-dir=${{ env.LIBBITCOIN_SRC_PATH }} ${{ matrix.options }}
 .   if (defined(my.config.use_preset))
-          --prefix=$LIBBITCOIN_SRC_PATH/prefix/${{ matrix.preset }}
+          --prefix=${{ env.LIBBITCOIN_SRC_PATH }}prefix/${{ matrix.preset }}
           --preset=${{ matrix.preset }}
 .   else
-          --prefix=$LIBBITCOIN_SRC_PATH/prefix
+          --prefix=${{ env.LIBBITCOIN_SRC_PATH }}prefix
 .   endif
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
