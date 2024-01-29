@@ -181,7 +181,7 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" version="14" 
+           system="osx"  
            assert="ndebug" 
            link="dynamic" 
            optimization="size">
@@ -191,7 +191,7 @@
       </job>
 
       <job build="all" 
-           system="osx" version="14" 
+           system="osx"  
            assert="ndebug" 
            link="static" 
            optimization="size">
@@ -202,7 +202,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04"
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="debug" 
            link="dynamic" 
            optimization="size" 
@@ -214,7 +214,7 @@
       
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="ndebug" 
            link="static" 
            optimization="size" 
@@ -586,7 +586,6 @@
       <!-- prefix variance? -->
       <job build="all" 
            system="osx" 
-           version="14" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
@@ -595,7 +594,6 @@
 
       <job build="all" 
            system="osx" 
-           version="14" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -604,7 +602,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="debug" link="dynamic" optimization="size" 
            preset="nix-gnu-debug-shared-without_icu">
         <axis name="boost" value="build" />
@@ -616,7 +614,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="ndebug" link="static" optimization="size" 
            preset="nix-gnu-release-static-size-with_icu">
         <axis name="boost" value="build" />
@@ -872,7 +870,6 @@
 
       <job build="all" 
            system="osx" 
-           version="14" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -881,7 +878,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="debug" link="dynamic" optimization="size" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
@@ -891,7 +888,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="ndebug" link="static" optimization="size" 
            preset="nix-gnu-release-static-size">
         <axis name="boost" value="build" />
@@ -1112,7 +1109,6 @@
       <!-- prefix variance? -->
       <job build="all" 
            system="osx" 
-           version="14" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
@@ -1122,7 +1118,6 @@
 
       <job build="all" 
            system="osx" 
-           version="14" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1132,7 +1127,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="debug" link="dynamic" optimization="size" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
@@ -1143,7 +1138,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="ndebug" link="static" optimization="size" 
            preset="nix-gnu-release-static-size">
         <axis name="boost" value="build" />
@@ -1752,7 +1747,6 @@
 
       <job build="all" 
            system="osx" 
-           version="14" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1761,7 +1755,6 @@
 
       <job build="all" 
            system="osx" 
-           version="14" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1770,7 +1763,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="debug" link="dynamic" optimization="size" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
@@ -1780,7 +1773,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="ndebug" link="static" optimization="size" 
            preset="nix-gnu-release-static-size">
         <!-- version="5.0" -->
@@ -2000,7 +1993,6 @@
 
       <job build="all" 
            system="osx" 
-           version="14" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -2010,7 +2002,6 @@
 
       <job build="all" 
            system="osx" 
-           version="14" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -2020,7 +2011,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="debug" link="dynamic" optimization="size" 
            preset="nix-gnu-debug-shared-with_consensus">
         <axis name="boost" value="build" />
@@ -2031,7 +2022,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="ndebug" link="static" optimization="size" 
            preset="nix-gnu-release-static-size-with_consensus">
         <!-- version="5.0" -->
@@ -2258,7 +2249,6 @@
 
       <job build="all" 
            system="osx" 
-           version="14" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -2268,7 +2258,6 @@
 
       <job build="all" 
            system="osx" 
-           version="14" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -2278,7 +2267,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="debug" link="dynamic" optimization="size" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
@@ -2289,7 +2278,7 @@
 
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="14" 
+           compiler="clang" version="15" 
            assert="ndebug" link="static" optimization="size" 
            preset="nix-gnu-release-static-size">
         <axis name="boost" value="build" />
