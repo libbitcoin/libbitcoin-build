@@ -205,7 +205,7 @@
            compiler="clang" version="15" 
            assert="debug" 
            link="dynamic" 
-           optimization="size" 
+           optimization="debug" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
@@ -241,7 +241,7 @@
            compiler="gcc" version="11" 
            assert="ndebug" 
            link="static" 
-           optimization="debug" 
+           optimization="size" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -253,7 +253,7 @@
            compiler="gcc" version="11" 
            assert="ndebug" 
            link="static" 
-           optimization="debug">
+           optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -603,7 +603,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared-without_icu">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
@@ -637,7 +637,7 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug" 
+           assert="ndebug" link="static" optimization="size" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -648,7 +648,7 @@
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <option autotools="--enable-avx512" cmake="-Denable-avx512=on" />
@@ -879,7 +879,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
@@ -909,7 +909,7 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug" 
+           assert="ndebug" link="static" optimization="size" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -919,7 +919,7 @@
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -1128,7 +1128,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
@@ -1161,7 +1161,7 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <!-- coverage="true" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1172,7 +1172,7 @@
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
@@ -1764,7 +1764,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
@@ -1796,7 +1796,7 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug" assert="ndebug" 
+           assert="ndebug" link="static" optimization="size" assert="ndebug" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1806,7 +1806,7 @@
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -2012,7 +2012,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared-with_consensus">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
@@ -2047,7 +2047,7 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug" 
+           assert="ndebug" link="static" optimization="size" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -2058,7 +2058,7 @@
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
@@ -2268,7 +2268,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
@@ -2301,7 +2301,7 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug" 
+           assert="ndebug" link="static" optimization="size" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -2312,7 +2312,7 @@
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
