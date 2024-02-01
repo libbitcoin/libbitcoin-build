@@ -643,7 +643,7 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <option autotools="--enable-isystem" />
-        <option autotools="--enable-avx512" cmake="-Denable-avx512=on" />
+        <!-- <option autotools="-\-enable-avx512" cmake="-Denable-avx512=on" /> -->
       </job>
 
       <job build="cmake" 
@@ -652,7 +652,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <option autotools="--enable-avx512" cmake="-Denable-avx512=on" />
+        <!-- <option autotools="-\-enable-avx512" cmake="-Denable-avx512=on" /> -->
       </job>
 
       <job system="windows" compiler="x64" assert="debug" link="static" />
