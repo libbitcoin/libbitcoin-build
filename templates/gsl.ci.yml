@@ -842,7 +842,7 @@ endfunction # get_sln_tests
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
 .   emit_step_prepare_toolchain(my.config)
 
@@ -877,7 +877,7 @@ endfunction # get_sln_tests
           msbuild-architecture: x64
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Initialize SDK
         shell: powershell
