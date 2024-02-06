@@ -38,77 +38,77 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'libbitcoin-build'
           repository: ${{ github.repository }}
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'libbitcoin-system'
           repository: '${{ github.repository_owner }}/libbitcoin-system'
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'libbitcoin-protocol'
           repository: '${{ github.repository_owner }}/libbitcoin-protocol'
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'libbitcoin-client'
           repository: '${{ github.repository_owner }}/libbitcoin-client'
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'libbitcoin-explorer'
           repository: '${{ github.repository_owner }}/libbitcoin-explorer'
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'libbitcoin-network'
           repository: '${{ github.repository_owner }}/libbitcoin-network'
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'libbitcoin-consensus'
           repository: '${{ github.repository_owner }}/libbitcoin-consensus'
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'libbitcoin-database'
           repository: '${{ github.repository_owner }}/libbitcoin-database'
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'libbitcoin-blockchain'
           repository: '${{ github.repository_owner }}/libbitcoin-blockchain'
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'libbitcoin-node'
           repository: '${{ github.repository_owner }}/libbitcoin-node'
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'libbitcoin-server'
@@ -116,7 +116,7 @@ jobs:
 
       - name: Checkout repository
         if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           path: 'gsl'
