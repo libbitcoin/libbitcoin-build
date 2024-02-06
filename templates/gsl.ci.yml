@@ -662,7 +662,7 @@ endfunction # get_sln_tests
         shell: bash
         run: |
           WORKSPACE_SUBPATH="${GITHUB_WORKSPACE%$(my.repository.name)}"
-          echo "LIBBITCOIN_SRC_PATH=$WORKSPACE_SUBPATH" >> $GITHUB_ENV
+          echo "LIBBITCOIN_SRC_PATH=${WORKSPACE_SUBPATH}" >> $GITHUB_ENV
 .   # cmake library path
 .   if defined(my.config.cmake)
           if [[ ${{ matrix.packager }} == 'brew' ]]; then
@@ -702,9 +702,9 @@ endfunction # get_sln_tests
 .   # linker flags
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
 .   if (defined(my.config.use_preset))
-            echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/${{ matrix.preset }}/lib" >> $GITHUB_ENV
+            echo "LDFLAGS=-Wl,-rpath,${WORKSPACE_SUBPATH}prefix/${{ matrix.preset }}/lib" >> $GITHUB_ENV
 .   else
-            echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/lib" >> $GITHUB_ENV
+            echo "LDFLAGS=-Wl,-rpath,${WORKSPACE_SUBPATH}prefix/lib" >> $GITHUB_ENV
 .   endif
           fi
 .
