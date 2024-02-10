@@ -107,12 +107,17 @@ function is_static_suffixed(library)
         !match_name(my.library, "rt")
 endfunction
 
-function get_suffix_include_dirs(library, static)
+function get_suffix_include_dirs(library, type)
     define my.library = get_suffix_include_dirs.library
+    define my.type = get_suffix_include_dirs.type
     define my.result = "INCLUDE_DIR"
 
-    if (is_true(my.static) & is_static_suffixed(my.library))
+    if ((my.type = "static") & is_static_suffixed(my.library))
         my.result = "STATIC_$(my.result)"
+    endif
+
+    if ((my.type = "canonical") & is_static_suffixed(my.library))
+        my.result = "FOR_BUILD_$(my.result)"
     endif
 
     if (!is_boost_dependency(my.library))
@@ -122,23 +127,33 @@ function get_suffix_include_dirs(library, static)
     return my.result
 endfunction
 
-function get_suffix_library_dirs(library, static)
+function get_suffix_library_dirs(library, type)
     define my.library = get_suffix_library_dirs.library
+    define my.type = get_suffix_library_dirs.type
     define my.result = "LIBRARY_DIRS"
 
-    if (is_true(my.static) & is_static_suffixed(my.library))
+    if ((my.type = "static") & is_static_suffixed(my.library))
         my.result = "STATIC_$(my.result)"
+    endif
+
+    if ((my.type = "canonical") & is_static_suffixed(my.library))
+        my.result = "FOR_BUILD_$(my.result)"
     endif
 
     return my.result
 endfunction
 
-function get_suffix_libraries(library, static)
+function get_suffix_libraries(library, type)
     define my.library = get_suffix_libraries.library
+    define my.type = get_suffix_libraries.type
     define my.result = ""
 
-    if (is_true(my.static) & is_static_suffixed(my.library))
+    if ((my.type = "static") & is_static_suffixed(my.library))
         my.result = "STATIC_$(my.result)"
+    endif
+
+    if ((my.type = "canonical") & is_static_suffixed(my.library))
+        my.result = "FOR_BUILD_$(my.result)"
     endif
 
     if (is_boost_lib_dependency(my.library))
@@ -557,22 +572,31 @@ function extract_include_directories(params, repository, libraries,\
     define my.libraries = extract_include_directories.libraries
 
     for my.libraries.library as _library
-        define my.suffix_shared = get_suffix_include_dirs(_library, "false")
-        define my.suffix_static = get_suffix_include_dirs(_library, "true")
+        define my.suffix_shared = get_suffix_include_dirs(_library, "shared")
+        define my.suffix_static = get_suffix_include_dirs(_library, "static")
+        define my.suffix_canonical = get_suffix_include_dirs(_library, "canonical")
 
         if (is_boost_dependency(_library))
             new my.params.element as _element
-                _element.universal = "\$\{Boost_$(my.suffix_shared)\}"
+                _element.universal = "Boost_$(my.suffix_shared)"
+                _element.variable = "true"
             endnew
         elsif (is_boost_lib_dependency(_library))
         elsif (_library.name = my.repository->package.library)
 #            new my.params.element as _element
 #                _element.universal = "\"$(my.project_include_path)\""
 #            endnew
+        elsif (my.suffix_shared = my.suffix_static)
+            new my.params.element as _element
+                _element.universal = "$(_library.name:c)_$(my.suffix_shared)"
+                _element.variable = "true"
+            endnew
         else
             new my.params.element as _element
-                _element.shared = "\$\{$(_library.name:c)_$(my.suffix_shared)\}"
-                _element.static = "\$\{$(_library.name:c)_$(my.suffix_static)\}"
+                _element.shared = "$(_library.name:c)_$(my.suffix_shared)"
+                _element.static = "$(_library.name:c)_$(my.suffix_static)"
+                _element.universal = "$(_library.name:c)_$(my.suffix_canonical)"
+                _element.variable = "true"
             endnew
         endif
     endfor
@@ -584,19 +608,28 @@ function extract_link_directories(params, repository, libraries)
     define my.libraries = extract_link_directories.libraries
 
     for my.libraries.library as _library
-        define my.suffix_shared = get_suffix_library_dirs(_library, "false")
-        define my.suffix_static = get_suffix_library_dirs(_library, "true")
+        define my.suffix_shared = get_suffix_library_dirs(_library, "shared")
+        define my.suffix_static = get_suffix_library_dirs(_library, "static")
+        define my.suffix_canonical = get_suffix_library_dirs(_library, "canonical")
 
         if (is_boost_dependency(_library))
             new my.params.element as _element
-                _element.universal = "\$\{Boost_$(my.suffix_shared)\}"
+                _element.universal = "Boost_$(my.suffix_shared)"
+                _element.variable = "true"
             endnew
         elsif (is_boost_lib_dependency(_library))
         elsif (_library.name = my.repository->package.library)
+        elsif (my.suffix_shared = my.suffix_static)
+            new my.params.element as _element
+                _element.universal = "$(_library.name:c)_$(my.suffix_shared)"
+                _element.variable = "true"
+            endnew
         else
             new my.params.element as _element
-                _element.shared = "\$\{$(_library.name:c)_$(my.suffix_shared)\}"
-                _element.static = "\$\{$(_library.name:c)_$(my.suffix_static)\}"
+                _element.shared = "$(_library.name:c)_$(my.suffix_shared)"
+                _element.static = "$(_library.name:c)_$(my.suffix_static)"
+                _element.universal = "$(_library.name:c)_$(my.suffix_canonical)"
+                _element.variable = "true"
             endnew
         endif
     endfor
@@ -608,24 +641,34 @@ function extract_link_libraries(params, repository, libraries)
     define my.libraries = extract_link_libraries.libraries
 
     for my.libraries.library as _library
-        define my.suffix_shared = get_suffix_libraries(_library, "false")
-        define my.suffix_static = get_suffix_libraries(_library, "true")
+        define my.suffix_shared = get_suffix_libraries(_library, "shared")
+        define my.suffix_static = get_suffix_libraries(_library, "static")
+        define my.suffix_canonical = get_suffix_libraries(_library, "canonical")
 
         if (is_boost_dependency(_library))
         elsif (is_boost_lib_dependency(_library))
             define my.name = "Boost_$(boost_component(_library.name):upper)"
 
             new my.params.element as _element
-                _element.universal = "\$\{$(my.name)_$(my.suffix_shared)\}"
+                _element.universal = "$(my.name)_$(my.suffix_shared)"
+                _element.variable = "true"
             endnew
         elsif (_library.name = my.repository->package.library)
             new my.params.element as _element
-                _element.universal = "\$\{CANONICAL_LIB_NAME\}"
+                _element.universal = "CANONICAL_LIB_NAME"
+                _element.variable = "true"
+            endnew
+        elsif (my.suffix_shared = my.suffix_static)
+            new my.params.element as _element
+                _element.universal = "$(_library.name:c)_$(my.suffix_shared)"
+                _element.variable = "true"
             endnew
         else
             new my.params.element as _element
-                _element.shared = "\$\{$(_library.name:c)_$(my.suffix_shared)\}"
-                _element.static = "\$\{$(_library.name:c)_$(my.suffix_static)\}"
+                _element.shared = "$(_library.name:c)_$(my.suffix_shared)"
+                _element.static = "$(_library.name:c)_$(my.suffix_static)"
+                _element.universal = "$(_library.name:c)_$(my.suffix_canonical)"
+                _element.variable = "true"
             endnew
         endif
     endfor
@@ -635,22 +678,37 @@ function emit_library_params(repository, libraries)
     define my.repository = emit_library_params.repository
     define my.libraries = emit_library_params.libraries
 
-    new link_library_params as _params
+    new link_library_param_flags as _params
         for my.repository->configure.flag as _flag where _flag.context = "link"
             if (defined(_flag.compiler))
-                abort("Unable to limit link flag $(_flag.name) by compiler.")
+                abort("Not currently supporting compiler limited flags $(_flag.name).")
             endif
 
             new _params.element as _element
+                _element.linker = "true"
                 _element.universal = "\"-$(_flag.name)\""
+                _element.canonical = "$(_flag.name)"
             endnew
         endfor
 
+        if (count(_params.element) > 0)
+            heading2("Define project common linker flags.")
+            emit_check_linker_flags(_params, "")
+        endif
+    endnew
+
+    new link_library_params as _params
         extract_link_libraries(_params, my.repository, my.libraries)
 
+        if (count(_params.element, defined(element.shared)) > 0)
+            heading2("Define common library usage for build.")
+            emit_shared_static_normalization(_params, "")
+            write_line("")
+        endif
+
         if (count(_params.element) > 0)
-            heading2("Define project common libraries/linker flags.")
-            emit_shared_static_params("link_libraries", "", _params, "")
+            heading2("Define project common libraries.")
+            emit_params("link_libraries", "", _params, "")
             write_line("")
         endif
     endnew
@@ -664,10 +722,16 @@ function emit_include_directories(repository, libraries, project_include_path)
         extract_include_directories(_params, my.repository, my.libraries,\
             my.project_include_path)
 
+        if (count(_params.element, defined(element.shared)) > 0)
+            heading2("Define project common includes for build.")
+            emit_shared_static_normalization(_params, "")
+            write_line("")
+        endif
+
         # NOTE: SYSTEM target suppresses warnings from included files.
         if (count(_params.element) > 0)
             heading2("Define project common includes directories")
-            emit_shared_static_params("include_directories", "SYSTEM", _params, "")
+            emit_params("include_directories", "SYSTEM", _params, "")
             write_line("")
         endif
     endnew
@@ -680,9 +744,15 @@ function emit_link_directories(repository, libraries)
     new library_dirs_params as _params
         extract_link_directories(_params, my.repository, my.libraries)
 
+        if (count(_params.element, defined(element.shared)) > 0)
+            heading2("Define project common library directories for build.")
+            emit_shared_static_normalization(_params, "")
+            write_line("")
+        endif
+
         if (count(_params.element) > 0)
             heading2("Define project common library directories")
-            emit_shared_static_params("link_directories", "", _params, "")
+            emit_params("link_directories", "", _params, "")
             write_line("")
         endif
     endnew
@@ -704,12 +774,18 @@ function emit_private_target_include_directories(repository, product,\
             endfor
         endif
 
-        extract_include_directories(_params, my.repository, my.product,\
-            my.project_include_path)
+        extract_include_directories(_params, my.repository, my.product, "")
+
+        if (count(_params.element, defined(element.shared)) > 0)
+            heading2("$(my.indent)$(my.target_name) project specific include directory normalization for build.")
+            emit_shared_static_normalization(_params, my.indent)
+            write_line("")
+        endif
+
 
         if (count(_params.element) > 0)
             heading2("$(my.indent)$(my.target_name) project specific include directories.")
-            emit_shared_static_params(\
+            emit_params(\
                 "target_include_directories", "$(my.target_name) PRIVATE",\
                 _params, my.indent)
 
@@ -739,9 +815,15 @@ function emit_target_link_libraries(repository, product, target_name, indent)
     new link_libraries as _params
         extract_link_libraries(_params, my.repository, my.product)
 
+        if (count(_params.element, defined(element.shared)) > 0)
+            heading2("$(my.indent)$(my.target_name) project specific libraries noramalization for build.")
+            emit_shared_static_normalization(_params, my.indent)
+            write_line("")
+        endif
+
         if (count(_params.element) > 0)
             heading2("$(my.indent)$(my.target_name) project specific libraries/linker flags.")
-            emit_shared_static_params("target_link_libraries", my.target_name,\
+            emit_params("target_link_libraries", my.target_name,\
                 _params, my.indent)
 
             write_line("")
@@ -849,7 +931,7 @@ endfunction
 .   require(my.repository, "repository", "name")
 
 .   heading2("$(my.repository.name) project configuration.")
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
 project($(my.repository.name) LANGUAGES C CXX)
 
@@ -860,6 +942,7 @@ include(CheckIncludeFiles)
 include(CheckSymbolExists)
 include(CheckCXXCompilerFlag)
 include(CheckCXXSourceCompiles)
+include(CheckLinkerFlag)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -938,6 +1021,45 @@ $(my.indent)$(my.name)( $(my.target_name)
 .   endfor
 .
 .endmacro # emit_shared_static_params_specific
+.
+.macro emit_check_linker_flags(params, indent)
+.   define my.params = emit_check_linker_flags.params
+.
+.   for my.params.element as _element
+$(my.indent)check_linker_flag(CXX $(_element.universal) "$(_element.canonical:c)_FOUND")
+
+$(my.indent)if ($(_element.canonical:c)_FOUND)
+    $(my.indent)add_link_options($(_element.universal))
+endif()
+
+.   endfor
+
+.endmacro # emit_check_linker_flags
+.
+.macro emit_shared_static_normalization(params, indent)
+.   define my.params = emit_shared_static_normalization.params
+.
+$(my.indent)if (BUILD_SHARED_LIBS)
+.   for my.params.element as _element where defined(_element.shared)
+    $(my.indent)set( $(_element.universal) \$\{$(_element.shared)\} CACHE STRING "Placeholder" )
+.   endfor
+$(my.indent)else()
+.   for my.params.element as _element where defined(_element.static)
+    $(my.indent)set( $(_element.universal) \$\{$(_element.static)\} CACHE STRING "Placeholder" )
+.   endfor
+$(my.indent)endif()
+.endmacro # emit_shared_static_normalization
+.
+.macro emit_params(name, target_name, params, indent)
+.   define my.params = emit_params.params
+.
+$(my.indent)$(my.name)( $(my.target_name)
+.   for my.params.element as _element
+.       if (!is_empty(_element.universal))
+    $(my.indent)$(defined(_element.variable) ?? "\${" ? "")$(_element.universal)$(defined(_element.variable) ?? "}" ? "")$(last() ?? " )" ? "")
+.       endif
+.   endfor
+.endmacro # emit_params
 .
 .macro emit_shared_static_params(name, target_name, params, indent)
 .   define my.params = emit_shared_static_params.params
@@ -1124,11 +1246,7 @@ find_package( $(my.dependency.name) $(my.dependency.version) )
 .   endif
 
 .# NOTE: enable-ndebug hardcoded match to configuration option
-if (enable-ndebug)
-    set( $(my.dependency.name:neat)_LIBRARY_DIR "\${$(my.dependency.name:neat)_LIBRARY_DIR_DEBUG}" )
-else ()
-    set( $(my.dependency.name:neat)_LIBRARY_DIR "\${$(my.dependency.name:neat)_LIBRARY_DIR_RELEASE}" )
-endif()
+set( $(my.dependency.name:neat)_LIBRARY_DIR $<IF:$<BOOL:${enable-ndebug}>,"\${$(my.dependency.name:neat)_LIBRARY_DIR_RELEASE}","\${$(my.dependency.name:neat)_LIBRARY_DIR_DEBUG}">)
 
 set( $(my.dependency.name)_CPPFLAGS "-I\${$(my.dependency.name:neat)_INCLUDE_DIR}" )
 set( $(my.dependency.name)_LDFLAGS "-L\${$(my.dependency.name:neat)_LIBRARY_DIR}" )

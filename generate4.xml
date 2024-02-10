@@ -73,6 +73,7 @@
 
       <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c++" /> -->
 
+      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
 
@@ -205,7 +206,7 @@
            compiler="clang" version="15" 
            assert="debug" 
            link="dynamic" 
-           optimization="size" 
+           optimization="debug" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
@@ -241,7 +242,7 @@
            compiler="gcc" version="11" 
            assert="ndebug" 
            link="static" 
-           optimization="debug" 
+           optimization="size" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -253,7 +254,7 @@
            compiler="gcc" version="11" 
            assert="ndebug" 
            link="static" 
-           optimization="debug">
+           optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -387,6 +388,7 @@
       <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
       <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
       <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
+      <flag name="Wno-ignored-attributes" comment="Suppress warning for ignored attributes (arising on template arguments)." context="c++" />
 
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- This varies by dependency build, such as boost. So we do not enforce. -->
@@ -394,6 +396,7 @@
 
       <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
+      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
 
@@ -603,7 +606,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared-without_icu">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
@@ -637,21 +640,21 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug" 
+           assert="ndebug" link="static" optimization="size" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <option autotools="--enable-isystem" />
-        <option autotools="--enable-avx512" cmake="-Denable-avx512=on" />
+        <!-- <option autotools="-\-enable-avx512" cmake="-Denable-avx512=on" /> -->
       </job>
 
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <option autotools="--enable-avx512" cmake="-Denable-avx512=on" />
+        <!-- <option autotools="-\-enable-avx512" cmake="-Denable-avx512=on" /> -->
       </job>
 
       <job system="windows" compiler="x64" assert="debug" link="static" />
@@ -760,6 +763,7 @@
 
       <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
+      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
     </configure>
@@ -879,7 +883,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
@@ -909,7 +913,7 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug" 
+           assert="ndebug" link="static" optimization="size" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -919,7 +923,7 @@
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -996,7 +1000,7 @@
       <dependency name="boost" version="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
-      <dependency name="zmq" version="4.3.4" />
+      <dependency name="zmq" version="4.3.5" />
       <dependency name="bitcoin-system" version="4.0.0" />
 
       <!-- General flags -->
@@ -1020,6 +1024,7 @@
 
       <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
+      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
     </configure>
@@ -1067,7 +1072,7 @@
     </make>
 
     <install>
-      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.5" parallel="true" nuget="true" >
         <option value="--disable-Werror" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
@@ -1128,7 +1133,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
@@ -1161,7 +1166,7 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <!-- coverage="true" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1172,7 +1177,7 @@
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
@@ -1280,6 +1285,7 @@
 
       <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
+      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
     </configure>
@@ -1325,7 +1331,7 @@
     </make>
 
     <install>
-      <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.5" parallel="true" nuget="true" >
         <option value="--disable-Werror" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
@@ -1458,6 +1464,7 @@
 
       <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
+      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
 
@@ -1673,6 +1680,7 @@
 
       <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
+      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
     </configure>
@@ -1764,7 +1772,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
@@ -1796,7 +1804,7 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug" assert="ndebug" 
+           assert="ndebug" link="static" optimization="size" assert="ndebug" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1806,7 +1814,7 @@
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
       </job>
@@ -1902,6 +1910,7 @@
 
       <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
+      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
     </configure>
@@ -2012,7 +2021,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared-with_consensus">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
@@ -2047,7 +2056,7 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug" 
+           assert="ndebug" link="static" optimization="size" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -2058,7 +2067,7 @@
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
@@ -2157,6 +2166,7 @@
 
       <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
+      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
     </configure>
@@ -2268,7 +2278,7 @@
       <job build="all" 
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="size" 
+           assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
@@ -2301,7 +2311,7 @@
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug" 
+           assert="ndebug" link="static" optimization="size" 
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -2312,7 +2322,7 @@
       <job build="cmake" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="debug">
+           assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="consensus" value="with" />
@@ -2419,6 +2429,7 @@
 
       <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
+      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
     </configure>
