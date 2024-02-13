@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <ImportGroup Label="PropertySheets">
+    <Import Project="Common.props" />
+  </ImportGroup>
+  
+  <PropertyGroup>
+    <_PropertySheetDisplayName>Release Settings</_PropertySheetDisplayName>
+    <DebugOrRelease>Release</DebugOrRelease>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  
+  <!-- DebugInformationFormat and GenerateDebugInformation were formerly disabled. -->
+  <!-- This is why we were not getting symbols in release builds (update nuget). -->
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <!-- performance -->
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <!-- Breaks boost.test. -->
+      <!--<CallingConvention>FastCall</CallingConvention>-->
+      <ControlFlowGuard>false</ControlFlowGuard>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <OmitFramePointers>true</OmitFramePointers>
+      <Optimization>MaxSpeed</Optimization>
+
+      <!-- SSE4/AVX2 (also AVX512) -->
+      <!--TODO: these should be integrated with the HAVE build options.-->
+      <!--<EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>-->
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+  
+      <!-- Other. -->
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <StringPooling>true</StringPooling>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link> 
+  </ItemDefinitionGroup>
+</Project>

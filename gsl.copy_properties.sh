@@ -29,29 +29,29 @@ declare -a vs_version=( \\
 
 .endmacro
 .
-.macro emit_import_copy(repository, output, import_name)
+.macro emit_import_copy(repository, source, output, import_name)
 .   define my.repository = emit_import_copy.repository
 .
 for version in "\${vs_version[@]}"
 do
     mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
-    eval cp -f props/import/$(my.import_name).import.* $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
+    eval cp -f props/$(my.source)/import/$(my.import_name).import.* $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
 done
 
 .endmacro
 .
-.macro emit_project_props_copy(repository, output)
+.macro emit_project_props_copy(repository, source, output)
 .   define my.repository = emit_project_props_copy.repository
 .
 for version in "\${vs_version[@]}"
 do
     mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
-    eval cp -rf props/project/$(my.repository.name)/* $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
+    eval cp -rf props/$(my.source)/project/$(my.repository.name)/* $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/\$version/
 done
 
 mkdir -p $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/build/
-eval cp -rf props/nuget.config $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/
-eval cp -rf props/build/build_base.bat $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/build/
+eval cp -rf props/$(my.source)/nuget.config $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/
+eval cp -rf props/$(my.source)/build/build_base.bat $(my.output)/$(canonical_path_name(my.repository))/builds/msvc/build/
 
 .endmacro
 .
@@ -95,13 +95,13 @@ function generate_artifacts(path_prefix)
                 define my.match = generate->repository(\
                   repository->package.library = _dependency.name)
 
-                emit_import_copy(_repository, my.path_prefix, my.match.name)
+                emit_import_copy(_repository, generate->vs.path, my.path_prefix, my.match.name)
             endfor
         endnew
 
-        emit_import_copy(_repository, my.path_prefix, _repository.name)
+        emit_import_copy(_repository, generate->vs.path, my.path_prefix, _repository.name)
 
-        emit_project_props_copy(_repository, my.path_prefix)
+        emit_project_props_copy(_repository, generate->vs.path, my.path_prefix)
     endfor
 
 endfunction
