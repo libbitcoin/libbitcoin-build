@@ -265,62 +265,6 @@
       <job system="windows" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
-    <matrix>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <!-- <get name="swig" /> -->
-        <option value="--disable-static" />
-      </job>
-      <job system="osx" compiler="clang" link="static" >
-        <!-- <get name="swig" /> -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--build-boost" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-static" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <!-- <get name="swig" /> -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <!-- <get name="swig" /> -->
-        <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os -s'" />
-        <option value="CXXFLAGS='-Os -s'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <exclude path="clone/*" />
-        <!-- <get name="swig" /> -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="windows" compiler="x64" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="x64" link="static" />
-      <job system="windows" compiler="Win32" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="Win32" link="static" />
-    </matrix>
-
   </repository>
 
   <repository name="libbitcoin-system" version="4.0.0" email="eric@voskuil.org" >
@@ -663,68 +607,6 @@
       <job system="windows" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
-    <matrix>
-      <!-- Default boost fails on Travis default macOS platform, so bumped to xcode12.2. -->
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--with-icu" />
-        <option value="--build-icu" />
-        <option value="--disable-static" />  
-      </job>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--with-icu" />
-        <option value="--build-icu" />
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--build-boost" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-static" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--with-icu" />
-        <option value="--build-icu" />
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os -s'" />
-        <option value="CXXFLAGS='-Os -s'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--with-icu" />
-        <option value="--build-icu" />
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <!-- Coverage is only enabled on linux/gcc/static/coverage jobs. -->
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="windows" compiler="x64" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="x64" link="static">
-      </job>
-      <job system="windows" compiler="Win32" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="Win32" link="static">
-      </job>
-    </matrix>
-
   </repository>
 
   <repository name="libbitcoin-network" version="4.0.0" email="eric@voskuil.org" >
@@ -934,57 +816,6 @@
       <job system="windows" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
-    <matrix>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--disable-static" />
-      </job>
-      <job system="osx" compiler="clang" link="static" >
-        <!-- these allow unused build to complete -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--build-boost" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-static" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os -s'" />
-        <option value="CXXFLAGS='-Os -s'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="windows" compiler="x64" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="x64" link="static" />
-      <job system="windows" compiler="Win32" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="Win32" link="static" />
-    </matrix>
-
   </repository>
 
   <repository name="libbitcoin-protocol" version="4.0.0" email="eric@voskuil.org" >
@@ -1188,63 +1019,6 @@
       <job system="windows" compiler="Win32" assert="debug" link="static" />
       <job system="windows" compiler="Win32" assert="ndebug" link="static" />
     </ci>
-
-    <matrix>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-static" />
-      </job>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-static" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os -s'" />
-        <option value="CXXFLAGS='-Os -s'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <exclude path="interface.pb.*" />
-        <option value="--build-boost" />
-        <option value="--build-zmq" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="windows" compiler="x64" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="x64" link="static" />
-      <job system="windows" compiler="Win32" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="Win32" link="static" />
-    </matrix>
 
   </repository>
 
@@ -1823,53 +1597,6 @@
       <job system="windows" compiler="x64" assert="ndebug" link="static" />
     </ci>
 
-    <matrix>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--disable-static" />
-      </job>
-      <job system="osx" compiler="clang" link="static" >
-        <!-- these allow unused build to complete -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--build-boost" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-static" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os -s'" />
-        <option value="CXXFLAGS='-Os -s'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="windows" compiler="x64" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="x64" link="static" />
-    </matrix>
-
   </repository>
 
   <repository name="libbitcoin-blockchain" version="4.0.0" email="eric@voskuil.org" >
@@ -2077,54 +1804,6 @@
       <job system="windows" compiler="x64" assert="ndebug" link="static" />
     </ci>
 
-    <matrix>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <option value="--disable-static" />
-      </job>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--without-consensus" />
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--build-boost" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-static" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <option value="--without-consensus" />
-        <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os -s'" />
-        <option value="CXXFLAGS='-Os -s'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="windows" compiler="x64" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="x64" link="static" />
-    </matrix>
-
   </repository>
 
   <repository name="libbitcoin-node" version="4.0.0" email="eric@voskuil.org" >
@@ -2132,6 +1811,7 @@
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
     <configure>
+      <option type="with" name="consensus" default="yes" define="WITH_CONSENSUS" description="Link libbitcoin-consensus and use for consensus checks." />
       <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
@@ -2142,7 +1822,8 @@
       <dependency name="boost" version="1.76.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-      <dependency name="bitcoin-blockchain" version="4.0.0" />
+      <dependency name="bitcoin-database" version="4.0.0" />
+      <dependency name="bitcoin-consensus" version="4.0.0" option="consensus" />
       <dependency name="bitcoin-network" version="4.0.0" />
 
       <!-- General flags -->
@@ -2185,7 +1866,8 @@
       </product>
       <product prefix="lib" path="src" uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158" >
         <flag define="sysconfdir" />
-        <library name="bitcoin-blockchain" />
+        <library name="bitcoin-database" />
+        <library name="bitcoin-consensus" />
         <library name="bitcoin-network" />
         <headers path="include" />
         <sources path="src" />
@@ -2219,9 +1901,14 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
+      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-tools" cmake="-Dwith-tools=no" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" conditional="true" >
+        <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -2232,11 +1919,10 @@
     </install>
 
     <presets>
-      <mapping name="bitcoin-node" type="base" />
-      <mapping name="bitcoin-network" type="base" />
-      <mapping name="bitcoin-blockchain" type="add" parameter="consensus" />
+      <mapping name="bitcoin-node" type="remove" parameter="consensus" />
       <mapping name="bitcoin-consensus" type="base" />
       <mapping name="bitcoin-database" type="base" />
+      <mapping name="bitcoin-network" type="base" />
       <mapping name="bitcoin-system" type="add" parameter="icu" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
@@ -2331,61 +2017,6 @@
       <job system="windows" compiler="x64" assert="debug" link="static" />
       <job system="windows" compiler="x64" assert="ndebug" link="static" />
     </ci>
-
-    <matrix>
-      <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
-        <get name="boost" />
-        <get name="bash-completion" />
-        <option value="--disable-static" />
-        <option value="--with-bash-completiondir" />
-      </job>
-      <job system="osx" compiler="clang" link="static" >
-        <option value="--without-consensus" />
-        <!-- these allow unused build to complete -->
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-      </job>
-      <job system="linux" compiler="clang" link="dynamic" sudo="false" >
-        <option value="--build-boost" />
-        <option value="--disable-ndebug" />
-        <option value="--disable-static" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="clang" link="static" version="5.0" >
-        <option value="--disable-shared" />
-        <option value="--build-boost" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os'" />
-        <option value="CXXFLAGS='-Os'" />
-      </job>
-      <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
-        <get name="bash-completion" />
-        <option value="--without-consensus" />
-        <option value="--disable-static" />
-        <option value="--build-boost" />
-        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="CFLAGS='-Os -s'" />
-        <option value="CXXFLAGS='-Os -s'" />
-      </job>
-      <job system="linux" compiler="gcc" link="static" coverage="true" >
-        <get name="bash-completion" />
-        <option value="--build-boost" />
-        <option value="--disable-shared" />
-        <option value="--build-dir=my-build" />
-        <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
-        <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
-        <option value="CFLAGS='-Og -g --coverage'" />
-        <option value="CXXFLAGS='-Og -g --coverage'" />
-      </job>
-      <job system="windows" compiler="x64" link="static">
-        <option value="--disable-ndebug" />
-      </job>
-      <job system="windows" compiler="x64" link="static" />
-    </matrix>
 
   </repository>
 
@@ -2500,7 +2131,6 @@
       <mapping name="bitcoin-protocol" type="base" />
       <mapping name="bitcoin-node" type="base" />
       <mapping name="bitcoin-network" type="base" />
-      <mapping name="bitcoin-blockchain" type="add" parameter="consensus" />
       <mapping name="bitcoin-consensus" type="base" />
       <mapping name="bitcoin-database" type="base" />
       <mapping name="bitcoin-system" type="add" parameter="icu" />
@@ -2984,7 +2614,7 @@
     </resource>
   </nuget>
 
-  <vs>
+  <vs path="version4">
     <version value="vs2022" />
   </vs>
 
