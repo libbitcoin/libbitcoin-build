@@ -44,7 +44,7 @@ if not exist "$(my.msvc_path)\\build\\" call mkdir "$(my.msvc_path)\\build\\"
 call xcopy /y "props\\$(my.vs.path)\\nuget.config" "$(my.msvc_path)"
 .   emit_error_handler("Failed to copy nuget.config.")
 
-call xcopy /y "props\\build\\build_base.bat" "$(my.msvc_path)\\build\\"
+call xcopy /y "props\\$(my.vs.path)\\build\\build_base.bat" "$(my.msvc_path)\\build\\"
 .   emit_error_handler("Failed to copy build_base.bat.")
 
 .endmacro
