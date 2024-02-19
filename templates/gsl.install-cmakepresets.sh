@@ -428,53 +428,76 @@ make_jobs()
 .
 .macro build_from_tarball_icu()
     unpack_from_tarball "$ICU_ARCHIVE" "$ICU_URL" gzip "$BUILD_ICU"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS ${ICU_FLAGS[@]}"
     build_from_tarball "$ICU_ARCHIVE" source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_icu
 .
 .macro build_from_tarball_zmq()
     unpack_from_tarball "$ZMQ_ARCHIVE" "$ZMQ_URL" gzip "$BUILD_ZMQ"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS ${ZMQ_FLAGS[@]}"
     build_from_tarball "$ZMQ_ARCHIVE" . "$PARALLEL" "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_zmq
 .
 .macro build_from_tarball_mbedtls()
     unpack_from_tarball "$MBEDTLS_ARCHIVE" "$MBEDTLS_URL" gzip "$BUILD_MBEDTLS"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS ${MBEDTLS_FLAGS[@]}"
     build_from_tarball "$MBEDTLS_ARCHIVE" . "$PARALLEL" "$BUILD_MBEDTLS" "${MBEDTLS_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_mbedtls
 .
 .macro build_boost()
     unpack_from_tarball "$BOOST_ARCHIVE" "$BOOST_URL" bzip2 "$BUILD_BOOST"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS ${BOOST_FLAGS[@]}"
     build_from_tarball_boost "$BOOST_ARCHIVE" "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_boost
 .
 .macro build_github(build)
 .   define my.build = build_github.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
     create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS $(my.flags)"
 .   if (is_bitcoin_dependency(my.build))
     display_message "$(my.build.repository) PRESET ${REPO_PRESET[$(my.build.repository)]}"
     build_from_github_cmake $(my.build.repository) ${REPO_PRESET[$(my.build.repository)]} "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
 .   else
     build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS
 .   endif
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_github
 .
 .macro build_github_cmake(build)
 .   define my.build = build_github_cmake.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
     create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
     display_message "$(my.build.repository) PRESET ${REPO_PRESET[$(my.build.repository)]}"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS $(my.flags)"
     build_from_github_cmake $(my.build.repository) ${REPO_PRESET[$(my.build.repository)]} "$(my.parallel)" false  "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_github_cmake
 .
 .macro build_ci(build)
 .   define my.build = build_ci.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS $(my.flags)"
     if [[ ! ($CI == true) ]]; then
         create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
 .   if (is_bitcoin_dependency(my.build))
@@ -491,6 +514,7 @@ make_jobs()
         pop_directory
         pop_directory
     fi
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_ci
 .
 .macro define_build_all(install)
@@ -604,6 +628,11 @@ function generate_installer_cmake(path_prefix)
             heading1("Initialize the build environment.")
             define_initialization_calls()
             write_line("remove_install_options")
+
+            heading1("Define build flags.")
+            for _install.build as _build where count(_build.flag) > 0
+                define_build_flags(_config, _build)
+            endfor _build
 
             heading1("Define build options.")
             for _install.build as _build where count(_build.option) > 0

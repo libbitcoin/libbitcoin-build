@@ -604,6 +604,21 @@ set_with_boost_prefix()
 
 .endmacro # define_set_with_boost_prefix
 .
+.macro define_build_flags(configuration, build)
+.   define my.configuration = define_build_flags.configuration
+.   define my.build = define_build_flags.build
+.   heading2("Define $(my.build.name) flags.")
+$(my.build.name:upper,c)_FLAGS=(
+.   for my.build.flag as _flag
+.       if (defined(my.configuration.cmake) & defined(_flag.cmake))
+"$(_flag.cmake)"$(last() ?? ")" ? " \\")
+.       else
+"$(_flag.value)"$(last() ?? ")" ? " \\")
+.       endif
+.   endfor _flag
+
+.endmacro # define_build_flags
+
 .macro define_build_options(configuration, build)
 .   define my.configuration = define_build_options.configuration
 .   define my.build = define_build_options.build

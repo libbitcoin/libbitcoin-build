@@ -140,10 +140,12 @@
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
       <build name="boost" version="1.78.0" parallel="true" nuget="true" >
+        <flag value="-w" />
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
+        <flag value="-w" />
         <option value="--disable-tests" />
         <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
@@ -463,6 +465,7 @@
     <install>
       <!-- Building with our minimum (c++11 only) version of ICU. -->
       <build name="icu" version="55.2" parallel="true" >
+        <flag value="-w" />
         <!-- TODO: verify this with more recent ICU. -->
         <!-- Bug in ICU 55.2 build requires -enable-draft. -->
         <option value="--enable-draft" />
@@ -476,6 +479,7 @@
         <option value="--disable-samples" />
       </build>
       <build name="boost" version="1.78.0" parallel="true" nuget="true" >
+        <flag value="-w" />
         <option value="--with-chrono" />
         <option value="--with-iostreams" />
         <option value="--with-json" />
@@ -486,6 +490,7 @@
         <option value="--with-test" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version8" parallel="true" nuget="true" >
+        <flag value="-w" />
         <option value="--disable-tests" />
         <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
@@ -686,6 +691,7 @@
     <install>
       <!-- Building with our minimum (c++11 only) version of ICU. -->
       <build name="icu" version="55.2" parallel="true" >
+        <flag value="-w" />
         <!-- TODO: verify this with more recent ICU. -->
         <!-- Bug in ICU 55.2 build requires enable-draft. -->
         <option value="--enable-draft" />
@@ -699,6 +705,7 @@
         <option value="--disable-samples" />
       </build>
       <build name="boost" version="1.78.0" parallel="true" nuget="true" >
+        <flag value="-w" />
         <option value="--with-chrono" />
         <option value="--with-iostreams" />
         <option value="--with-json" />
@@ -904,6 +911,7 @@
 
     <install>
       <build name="zmq" version="4.3.5" parallel="true" nuget="true" >
+        <flag value="-w" />
         <option value="--disable-Werror" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
@@ -1106,6 +1114,7 @@
 
     <install>
       <build name="zmq" version="4.3.5" parallel="true" nuget="true" >
+        <flag value="-w" />
         <option value="--disable-Werror" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
@@ -1302,6 +1311,7 @@
 
     <install>
       <build name="icu" version="68.2" parallel="true" >
+        <flag value="-w" />
         <!-- Bug in ICU 55.2 build requires -enable-draft. -->
         <option value="--enable-rpath" />
         <option value="--enable-tools" />
