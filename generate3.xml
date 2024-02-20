@@ -137,7 +137,6 @@
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
       <build name="boost" version="1.73.0" parallel="true" nuget="true" >
-        <flag value="-w" />
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
@@ -391,7 +390,6 @@
         <option value="--disable-samples" />
       </build>
       <build name="boost" version="1.73.0" parallel="true" nuget="true" >
-        <flag value="-w" />
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />

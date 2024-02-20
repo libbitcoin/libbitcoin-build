@@ -281,10 +281,14 @@ make_jobs()
 .   define_disable_exit_on_error()
 .endmacro # define_utility_functions
 .
-.macro define_build_functions()
+.macro define_build_functions(install)
+.   define my.install = define_build_functions.install
 .   define_tarball_functions("true")
 .   define_github_functions()
-.   define_boost_build_functions()
+.   if (count(my.install.build, count.name = "boost") > 0)
+.       define my.build = my.install->build(name = "boost")
+.       define_boost_build_functions(my.build)
+.   endif
 .   define_initialize_object_directory()
 .endmacro # define_build_functions
 .
@@ -561,7 +565,7 @@ function generate_setup(path_prefix)
             define_display_configuration(_repository, _install)
 
             heading1("Define build functions.")
-            define_build_functions()
+            define_build_functions(_install)
 
             heading1("The master download/clone/sync function.")
             define_create_local_copies(_install)

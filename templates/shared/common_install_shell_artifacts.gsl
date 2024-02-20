@@ -1078,7 +1078,8 @@ initialize_boost_icu_configuration()
 
 .endmacro # define_boost_build_configuration_helpers
 .
-.macro define_boost_build_functions()
+.macro define_boost_build_functions(build)
+.   my.build = define_boost_build_functions.build
 .   define_boost_build_configuration_helpers()
 .
 # Because boost doesn't use autoconfig.
@@ -1145,6 +1146,7 @@ build_from_tarball_boost()
         "$BOOST_CXXFLAGS" \\
         "$BOOST_LINKFLAGS" \\
         "link=$BOOST_LINK" \\
+	"warnings=off" \\
         "boost.locale.iconv=$BOOST_ICU_ICONV" \\
         "boost.locale.posix=$BOOST_ICU_POSIX" \\
         "-sNO_BZIP2=1" \\
