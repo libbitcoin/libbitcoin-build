@@ -139,7 +139,7 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.78.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.78.0" parallel="true" nuget="true" prebuild="true" >
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
@@ -477,7 +477,7 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.78.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.78.0" parallel="true" nuget="true" prebuild="true" >
         <option value="--with-chrono" />
         <option value="--with-iostreams" />
         <option value="--with-json" />
@@ -702,7 +702,7 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.78.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.78.0" parallel="true" nuget="true" prebuild="true" >
         <option value="--with-chrono" />
         <option value="--with-iostreams" />
         <option value="--with-json" />
