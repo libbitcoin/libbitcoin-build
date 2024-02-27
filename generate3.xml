@@ -141,6 +141,7 @@
         <option value="--with-test" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
+        <flag value="-w" />
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -375,6 +376,7 @@
     <install>
       <!-- Building with our minimum (c++11 only) version of ICU. -->
       <build name="icu" version="55.2" parallel="true" >
+        <flag value="-w" />
         <!-- TODO: verify this with more recent ICU. -->
         <!-- Bug in ICU 55.2 build requires enable-draft. -->
         <option value="--enable-draft" />
@@ -402,6 +404,7 @@
         <option value="--with-test" />
       </build>
       <build name="secp256k1" github="libbitcoin" repository="secp256k1" branch="version7" parallel="true" nuget="true" >
+        <flag value="-w" />
         <option value="--disable-tests" />
         <option value="--enable-module-recovery" />
       </build>
@@ -785,6 +788,7 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build name="zmq" version="4.3.4" parallel="true" nuget="true" >
+        <flag value="-w" />
         <option value="--disable-Werror" />
       </build>
       <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="version3" parallel="true" >
@@ -2165,8 +2169,8 @@
     </configuration>
     <configuration name="gnu-optimized-size" description="Factored size optimization settings." hidden="true">
       <property name="cacheVariables" type="object">
-        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -Os -s" />
-        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Os -s" />
+        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -Os" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Os" />
       </property>
     </configuration>
     <configuration name="nix-gnu-debug-static" description="Debug build with static linking." hidden="false" display="*nix/GNU/Debug/Static">

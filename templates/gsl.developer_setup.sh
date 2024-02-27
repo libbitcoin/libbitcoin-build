@@ -281,10 +281,14 @@ make_jobs()
 .   define_disable_exit_on_error()
 .endmacro # define_utility_functions
 .
-.macro define_build_functions()
+.macro define_build_functions(install)
+.   define my.install = define_build_functions.install
 .   define_tarball_functions("true")
 .   define_github_functions()
-.   define_boost_build_functions()
+.   if (count(my.install.build, count.name = "boost") > 0)
+.       define my.build = my.install->build(name = "boost")
+.       define_boost_build_functions(my.build)
+.   endif
 .   define_initialize_object_directory()
 .endmacro # define_build_functions
 .
@@ -293,7 +297,10 @@ $(my.prefix)unpack_from_tarball $ICU_ARCHIVE $ICU_URL gzip "$BUILD_ICU"
 .endmacro # unpack_from_tarball_icu
 .
 .macro build_from_tarball_icu(prefix)
+local SAVE_CPPFLAGS="$CPPFLAGS"
+export CPPFLAGS="$CPPFLAGS ${ICU_FLAGS[@]}"
 $(my.prefix)build_from_tarball $ICU_ARCHIVE source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
+export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_from_tarball_icu
 .
 .macro unpack_from_tarball_zlib(prefix)
@@ -301,7 +308,10 @@ $(my.prefix)unpack_from_tarball $ZLIB_ARCHIVE $ZLIB_URL gzip "$BUILD_ZLIB"
 .endmacro # unpack_from_tarball_zlib
 .
 .macro build_from_tarball_zlib(prefix)
+local SAVE_CPPFLAGS="$CPPFLAGS"
+export CPPFLAGS="$CPPFLAGS ${ZLIB_FLAGS[@]}"
 $(my.prefix)build_from_tarball $ZLIB_ARCHIVE . "$PARALLEL" "$BUILD_ZLIB" "${ZLIB_OPTIONS[@]}" "$@"
+export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_from_tarball_zlib
 .
 .macro unpack_from_tarball_png(prefix)
@@ -309,7 +319,10 @@ $(my.prefix)unpack_from_tarball $PNG_ARCHIVE $PNG_URL xz "$BUILD_PNG"
 .endmacro # unpack_from_tarball_png
 .
 .macro build_from_tarball_png(prefix)
+local SAVE_CPPFLAGS="$CPPFLAGS"
+export CPPFLAGS="$CPPFLAGS ${PNG_FLAGS[@]}"
 $(my.prefix)build_from_tarball $PNG_ARCHIVE . "$PARALLEL" "$BUILD_PNG" "${PNG_OPTIONS[@]}" "$@"
+export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_from_tarball_png
 .
 .macro unpack_from_tarball_qrencode(prefix)
@@ -317,7 +330,10 @@ $(my.prefix)unpack_from_tarball $QRENCODE_ARCHIVE $QRENCODE_URL bzip2 "$BUILD_QR
 .endmacro # unpack_from_tarball_qrencode
 .
 .macro build_from_tarball_qrencode(prefix)
+local SAVE_CPPFLAGS="$CPPFLAGS"
+export CPPFLAGS="$CPPFLAGS ${QRENCODE_FLAGS[@]}"
 $(my.prefix)build_from_tarball $QRENCODE_ARCHIVE . "$PARALLEL" "$BUILD_QRENCODE" "${QRENCODE_OPTIONS[@]}" "$@"
+export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_from_tarball_qrencode
 .
 .macro unpack_from_tarball_zmq(prefix)
@@ -325,7 +341,10 @@ $(my.prefix)unpack_from_tarball $ZMQ_ARCHIVE $ZMQ_URL gzip "$BUILD_ZMQ"
 .endmacro # unpack_from_tarball_zmq
 .
 .macro build_from_tarball_zmq(prefix)
+local SAVE_CPPFLAGS="$CPPFLAGS"
+export CPPFLAGS="$CPPFLAGS ${ZMQ_FLAGS[@]}"
 $(my.prefix)build_from_tarball $ZMQ_ARCHIVE . $PARALLEL "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
+export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_from_tarball_zmq
 .
 .macro unpack_from_tarball_mbedtls(prefix)
@@ -333,7 +352,10 @@ $(my.prefix)unpack_from_tarball $MBEDTLS_ARCHIVE $MBEDTLS_URL gzip "$BUILD_MBEDT
 .endmacro # unpack_from_tarball_mbedtls
 .
 .macro build_from_tarball_mbedtls(prefix)
+local SAVE_CPPFLAGS="$CPPFLAGS"
+export CPPFLAGS="$CPPFLAGS ${MBEDTLS_FLAGS[@]}"
 $(my.prefix)build_from_tarball $MBEDTLS_ARCHIVE . $PARALLEL "$BUILD_MBEDTLS" "${MBEDTLS_OPTIONS[@]}" "$@"
+export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_from_tarball_mbedtls
 .
 .macro unpack_boost(prefix)
@@ -341,7 +363,10 @@ $(my.prefix)unpack_from_tarball $BOOST_ARCHIVE $BOOST_URL bzip2 "$BUILD_BOOST"
 .endmacro # unpack_boost
 .
 .macro build_boost(prefix)
+local SAVE_CPPFLAGS="$CPPFLAGS"
+export CPPFLAGS="$CPPFLAGS ${BOOST_FLAGS[@]}"
 $(my.prefix)build_from_tarball_boost $BOOST_ARCHIVE "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
+export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_boost
 .
 .macro create_github(build, prefix)
@@ -354,16 +379,24 @@ $(my.prefix)create_from_github $(my.build.github) $(my.build.repository) $(my.bu
 .   define my.build = build_github.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
+local SAVE_CPPFLAGS="$CPPFLAGS"
+export CPPFLAGS="$CPPFLAGS $(my.flags)"
 $(my.prefix)build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" "$@"
+export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_github_test
 .
 .macro build_github_test(build, prefix)
 .   define my.build = build_github_test.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
+local SAVE_CPPFLAGS="$CPPFLAGS"
+export CPPFLAGS="$CPPFLAGS $(my.flags)"
 $(my.prefix)build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" "$@"
+export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_github_test
 .
 .macro define_create_local_copies(install)
@@ -532,7 +565,7 @@ function generate_setup(path_prefix)
             define_display_configuration(_repository, _install)
 
             heading1("Define build functions.")
-            define_build_functions()
+            define_build_functions(_install)
 
             heading1("The master download/clone/sync function.")
             define_create_local_copies(_install)
@@ -542,6 +575,11 @@ function generate_setup(path_prefix)
 
             heading1("Initialize the build environment.")
             define_initialization_calls()
+
+            heading1("Define build flags.")
+            for _install.build as _build where count(_build.flag) > 0
+                define_build_flags(_config, _build)
+            endfor _build
 
             heading1("Define build options.")
             for _install.build as _build where count(_build.option) > 0

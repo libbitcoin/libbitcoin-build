@@ -156,46 +156,69 @@ make_jobs()
 .   define_disable_exit_on_error()
 .endmacro # define_utility_functions
 .
-.macro define_build_functions()
+.macro define_build_functions(install)
+.   define my.install = define_build_functions.install
 .   define_tarball_functions("false", "true")
 .   define_github_functions()
-.   define_boost_build_functions()
+.   if (count(my.install.build, count.name = "boost") > 0)
+.       define my.build = my.install->build(name = "boost")
+.       define_boost_build_functions(my.build)
+.   endif
 .endmacro # define_build_functions
 .
 .macro build_from_tarball_icu()
     unpack_from_tarball "$ICU_ARCHIVE" "$ICU_URL" gzip "$BUILD_ICU"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS ${ICU_FLAGS[@]}"
     build_from_tarball "$ICU_ARCHIVE" source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_icu
 .
 .macro build_from_tarball_zmq()
     unpack_from_tarball "$ZMQ_ARCHIVE" "$ZMQ_URL" gzip "$BUILD_ZMQ"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS ${ZMQ_FLAGS[@]}"
     build_from_tarball "$ZMQ_ARCHIVE" . "$PARALLEL" "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" "$@"
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_zmq
 .
 .macro build_from_tarball_mbedtls()
     unpack_from_tarball "$MBEDTLS_ARCHIVE" "$MBEDTLS_URL" gzip "$BUILD_MBEDTLS"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS ${MBEDTLS_FLAGS[@]}"
     build_from_tarball "$MBEDTLS_ARCHIVE" . "$PARALLEL" "$BUILD_MBEDTLS" "${MBEDTLS_OPTIONS[@]}" "$@"
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_mbedtls
 .
 .macro build_boost()
     unpack_from_tarball "$BOOST_ARCHIVE" "$BOOST_URL" bzip2 "$BUILD_BOOST"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS ${BOOST_FLAGS[@]}"
     build_from_tarball_boost "$BOOST_ARCHIVE" "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_boost
 .
 .macro build_github(build)
 .   define my.build = build_github.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
     create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS $(my.flags)"
     build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" "$@"
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_github
 .
 .macro build_ci(build)
 .   define my.build = build_ci.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
 .   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
+    local SAVE_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS $(my.flags)"
     if [[ ! ($CI == true) ]]; then
         create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
         build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" "$@"
@@ -206,6 +229,7 @@ make_jobs()
         pop_directory
         pop_directory
     fi
+    export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_ci
 .
 .macro define_build_all(install)
@@ -306,13 +330,18 @@ function generate_installer(path_prefix)
             define_display_configuration(_repository, _install)
 
             heading1("Define build functions.")
-            define_build_functions()
+            define_build_functions(_install)
 
             heading1("The master build function.")
             define_build_all(_install)
 
             heading1("Initialize the build environment.")
             define_initialization_calls()
+
+            heading1("Define build flags.")
+            for _install.build as _build where count(_build.flag) > 0
+                define_build_flags(_config, _build)
+            endfor _build
 
             heading1("Define build options.")
             for _install.build as _build where count(_build.option) > 0

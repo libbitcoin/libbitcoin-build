@@ -990,7 +990,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "$(compiler_id(_flag.compiler))")
 .       endif
 $(my.indent)check_cxx_compiler_flag( "-$(_flag.name)" HAS_FLAG_$(_flag.name:upper) )
 $(my.indent)if ( HAS_FLAG_$(_flag.name:upper) )
-    $(my.indent)add_compile_options( "-$(_flag.name)" )
+    $(my.indent)add_compile_options( $<$<COMPILE_LANGUAGE:CXX>:-$(_flag.name)> )
 $(my.indent)else()
     $(my.indent)message( FATAL_ERROR "Compiler does not support -$(_flag.name)" )
 $(my.indent)endif()
@@ -1117,7 +1117,7 @@ $(my.indent)check_cxx_compiler_flag("$(my.flags)" $(my.symbol_prefix)$(my.compou
 
 $(my.indent)if ($(my.symbol_prefix)$(my.compound.name:upper))
 .   for my.compound.flag as _flag where defined(_flag.name) & !is_empty(_flag.name)
-    $(my.indent)add_compile_options( "-$(_flag.name)" )
+    $(my.indent)add_compile_options( $<$<COMPILE_LANGUAGE:CXX>:-$(_flag.name)> )
 .   endfor
 .   if defined(my.compound->program)
     $(my.indent)set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )

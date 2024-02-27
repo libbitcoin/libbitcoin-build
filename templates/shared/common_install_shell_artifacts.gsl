@@ -604,6 +604,21 @@ set_with_boost_prefix()
 
 .endmacro # define_set_with_boost_prefix
 .
+.macro define_build_flags(configuration, build)
+.   define my.configuration = define_build_flags.configuration
+.   define my.build = define_build_flags.build
+.   heading2("Define $(my.build.name) flags.")
+$(my.build.name:upper,c)_FLAGS=(
+.   for my.build.flag as _flag
+.       if (defined(my.configuration.cmake) & defined(_flag.cmake))
+"$(_flag.cmake)"$(last() ?? ")" ? " \\")
+.       else
+"$(_flag.value)"$(last() ?? ")" ? " \\")
+.       endif
+.   endfor _flag
+
+.endmacro # define_build_flags
+
 .macro define_build_options(configuration, build)
 .   define my.configuration = define_build_options.configuration
 .   define my.build = define_build_options.build
@@ -1063,7 +1078,8 @@ initialize_boost_icu_configuration()
 
 .endmacro # define_boost_build_configuration_helpers
 .
-.macro define_boost_build_functions()
+.macro define_boost_build_functions(build)
+.   my.build = define_boost_build_functions.build
 .   define_boost_build_configuration_helpers()
 .
 # Because boost doesn't use autoconfig.
@@ -1112,7 +1128,17 @@ build_from_tarball_boost()
     display_message "BOOST_OPTIONS         : $*"
     display_message "--------------------------------------------------------------------"
 
+.
+.   if (defined(my.build.prebuild))
+    guessed_toolset=`./tools/build/src/engine/build.sh --guess-toolset`
+    CXXFLAGS="-w" ./tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
+    cp tools/build/src/engine/b2 .
+
+.   endif
     ./bootstrap.sh \\
+.   if (defined(my.build.prebuild))
+        "--with-bjam=./b2" \\
+.   endif
         "--prefix=$PREFIX" \\
         "--with-icu=$ICU_PREFIX"
 
@@ -1130,6 +1156,7 @@ build_from_tarball_boost()
         "$BOOST_CXXFLAGS" \\
         "$BOOST_LINKFLAGS" \\
         "link=$BOOST_LINK" \\
+	"warnings=off" \\
         "boost.locale.iconv=$BOOST_ICU_ICONV" \\
         "boost.locale.posix=$BOOST_ICU_POSIX" \\
         "-sNO_BZIP2=1" \\
