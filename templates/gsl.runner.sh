@@ -40,6 +40,7 @@ fi
 .
 BOOST_UNIT_TEST_OPTIONS=\\
 "--run_test=$(my.run) "\\
+"--log_level=warning "\\
 "--show_progress=no "\\
 "--detect_memory_leak=0 "\\
 "--report_level=no "\\

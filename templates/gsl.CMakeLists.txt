@@ -1446,6 +1446,7 @@ $(my.indent)add_executable( $(target_name(my.product, my.repository))
 .   define my.run = is_empty(my.tests) ?? "*" ? "$(my.tests)"
 $(my.indent)add_test( NAME $(target_name(my.product, my.repository)) COMMAND $(target_name(my.product, my.repository))
         $(my.indent)--run_test=$(my.run)
+        $(my.indent)--log_level=warning
         $(my.indent)--show_progress=no
         $(my.indent)--detect_memory_leak=0
         $(my.indent)--report_level=no
