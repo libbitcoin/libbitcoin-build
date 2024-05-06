@@ -1818,7 +1818,7 @@
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
     <configure>
-      <option type="with" name="consensus" default="yes" define="WITH_CONSENSUS" description="Link libbitcoin-consensus and use for consensus checks." />
+      <!--<option type="with" name="consensus" default="yes" define="WITH_CONSENSUS" description="Link libbitcoin-consensus and use for consensus checks." />-->
       <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
@@ -1830,7 +1830,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-database" version="4.0.0" />
-      <dependency name="bitcoin-consensus" version="4.0.0" option="consensus" />
+      <!--<dependency name="bitcoin-consensus" version="4.0.0" option="consensus" />-->
       <dependency name="bitcoin-network" version="4.0.0" />
 
       <!-- General flags -->
@@ -1874,7 +1874,7 @@
       <product prefix="lib" path="src" uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158" >
         <flag define="sysconfdir" />
         <library name="bitcoin-database" />
-        <library name="bitcoin-consensus" />
+        <!--<library name="bitcoin-consensus" />-->
         <library name="bitcoin-network" />
         <headers path="include" />
         <sources path="src" />
@@ -1914,11 +1914,11 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" conditional="true" >
+      <!--<build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" conditional="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
-      </build>
+      </build>-->
       <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1926,8 +1926,8 @@
     </install>
 
     <presets>
-      <mapping name="bitcoin-node" type="remove" parameter="consensus" />
-      <mapping name="bitcoin-consensus" type="base" />
+      <!--<mapping name="bitcoin-node" type="remove" parameter="consensus" />-->
+      <!--<mapping name="bitcoin-consensus" type="base" />-->
       <mapping name="bitcoin-database" type="base" />
       <mapping name="bitcoin-network" type="base" />
       <mapping name="bitcoin-system" type="add" parameter="icu" />
@@ -1948,14 +1948,14 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="consensus" with="true" without="true" recognized="true" />
+      <!--<axis name="consensus" with="true" without="true" recognized="true" />-->
 
       <job build="all" 
            system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <axis name="consensus" value="with" />
+        <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1964,7 +1964,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <axis name="consensus" value="without" />
+        <!--<axis name="consensus" value="without" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1975,7 +1975,7 @@
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
-        <axis name="consensus" value="with" />
+        <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1986,7 +1986,7 @@
            preset="nix-gnu-release-static-size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <axis name="consensus" value="with" />
+        <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1997,7 +1997,7 @@
            preset="nix-gnu-release-shared-size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
-        <axis name="consensus" value="without" />
+        <!--<axis name="consensus" value="without" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -2008,7 +2008,7 @@
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <axis name="consensus" value="with" />
+        <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -2018,7 +2018,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <axis name="consensus" value="with" />
+        <!--<axis name="consensus" value="with" />-->
       </job>
 
       <job system="windows" compiler="x64" assert="debug" link="static" />
