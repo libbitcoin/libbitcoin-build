@@ -374,7 +374,7 @@ build_from_github_cmake()
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
 
-    display_heading_message "Prepairing to build $REPO"
+    display_heading_message "Preparing to build $REPO"
 
     # Build the local repository clone.
     cmake_project_directory "$REPO" "$PRESET" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
