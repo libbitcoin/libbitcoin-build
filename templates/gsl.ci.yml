@@ -377,6 +377,19 @@ function get_job_cflags(integration, repository, job)
                 if (defined(my.dependency.path))
                     my.flags = "$(my.flags) -I$(my.dependency.path)/include"
                 endif
+
+                if (defined(my.dependency.defines))
+                    my.flags = "$(my.flags) $(my.dependency.defines)"
+                endif
+            endif
+        else
+            if (count(my.integration.dependency, ((count.name = _axis.name) & (count.os = my.job.system))) = 1)
+                define my.dependency = my.integration->dependency(\
+                    (name = _axis.name) & (os = my.job.system))
+
+                if (defined(my.dependency.defines))
+                    my.flags = "$(my.flags) $(my.dependency.defines)"
+                endif
             endif
         endif
     endfor
@@ -790,11 +803,12 @@ endfunction # get_sln_tests
 
 
       - name: Failure display otool output
-        if: ${{ failure() && (matrix.os == 'macos-latest') }}
+        if: ${{ failure() && startsWith(matrix.os, 'macos') }}
         run: |
           otool -L ${{ github.workspace }}/test/.libs/$(_repository.name)-test
+
       - name: Failure display DYLD_PRINT_LIBRARIES
-        if: ${{ failure() && (matrix.os == 'macos-latest') }}
+        if: ${{ failure() && startsWith(matrix.os, 'macos') }}
         run: |
           DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/$(_repository.name)-test
 
