@@ -183,7 +183,7 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx"  
+           system="osx" image="macos-13" 
            assert="ndebug" 
            link="dynamic" 
            optimization="size">
@@ -193,7 +193,7 @@
       </job>
 
       <job build="all" 
-           system="osx"  
+           system="osx" image="macos-13"
            assert="ndebug" 
            link="static" 
            optimization="size">
@@ -535,7 +535,7 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
@@ -543,7 +543,7 @@
       </job>
 
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13"  
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -751,7 +751,7 @@
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13"  
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
@@ -759,7 +759,7 @@
       </job>
 
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -949,7 +949,7 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="with" />
@@ -958,7 +958,7 @@
       </job>
 
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13"  
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1535,7 +1535,7 @@
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13"  
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1543,7 +1543,7 @@
       </job>
 
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1735,7 +1735,7 @@
       <axis name="consensus" with="true" without="true" recognized="true" />
 
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1744,7 +1744,7 @@
       </job>
 
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13"  
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1951,7 +1951,7 @@
       <!--<axis name="consensus" with="true" without="true" recognized="true" />-->
 
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1960,7 +1960,7 @@
       </job>
 
       <job build="all" 
-           system="osx" 
+           system="osx" image="macos-13" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -2674,7 +2674,7 @@
   </msvc>
 
   <integration>
-    <dependency name="boost" os="osx" package="boost" />
+    <dependency name="boost" os="osx" package="boost" defines="-DBOOST_NO_CXX98_FUNCTION_BASE" />
     <dependency name="icu" os="osx" package="icu4c" />
   </integration>
 
