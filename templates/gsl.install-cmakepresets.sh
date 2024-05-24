@@ -312,13 +312,8 @@ cmake_tests()
 
     # Build and run unit tests relative to the primary directory.
     # VERBOSE=1 ensures test runner output sent to console (gcc).
-    make -j"$JOBS" test "VERBOSE=1"
+    CTEST_OUTPUT_ON_FAILURE=ON make -j"$JOBS" test "VERBOSE=1"
     local RESULT=$?
-
-    # Test runners emit to the test.log file.
-    if [[ -e "test.log" ]]; then
-        cat "test.log"
-    fi
 
     if [[ $RESULT -ne 0 ]]; then
         exit $RESULT
