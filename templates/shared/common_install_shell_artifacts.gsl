@@ -146,8 +146,8 @@ function get_boost_url(install)
         trace1("get_boost_url:get_boost_file() = []")
         return
     endif
-    define my.base_url = "http\://downloads.sourceforge.net/project/boost/boost"
-    define my.url = "$(my.base_url)/$(my.version)/$(my.archive)"
+    define my.base_url = "https\://archives.boost.io/release"
+    define my.url = "$(my.base_url)/$(my.version)/source/$(my.archive)"
     trace1("get_boost_url = $(my.url)")
     return my.url
 endfunction
