@@ -1032,8 +1032,9 @@ AS_IF([test x${$(get_option_symbol(my.option))} != "xno"],
 .   else
 AX_CHECK_COMPILE_FLAG([$(my.flags)],
 .   endif
-    $(my.indent)[CXXFLAGS="$CXXFLAGS $(my.flags)";
-    $(my.indent) AC_DEFINE([$(my.compound.type:upper)_$(my.compound.name:upper)])],
+    $(my.indent)[AC_DEFINE([$(my.compound.type:upper)_$(my.compound.name:upper)])
+    $(my.indent) CXXFLAGS="$CXXFLAGS $(my.flags)";
+    $(my.indent) AC_SUBST([$(my.compound.name:lower)], [-D$(my.compound.type:upper)_$(my.compound.name:upper)])],
     $(my.indent)[AC_MSG_ERROR([$(my.flags) not supported.])],
 .   if defined(my.compound->program)
 .       define my.prog_indent = "    $(my.indent)"
