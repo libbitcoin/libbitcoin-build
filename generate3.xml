@@ -178,18 +178,18 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost"  value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -241,10 +241,10 @@
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" assert="debug" link="static" />
-      <job system="windows" compiler="x64" assert="ndebug" link="static" />
-      <job system="windows" compiler="Win32" assert="debug" link="static" />
-      <job system="windows" compiler="Win32" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="Win32" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
   </repository>
@@ -449,18 +449,18 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -512,10 +512,10 @@
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" link="static" assert="debug" />
-      <job system="windows" compiler="x64" link="static" assert="ndebug" />
-      <job system="windows" compiler="Win32" link="static" assert="debug" />
-      <job system="windows" compiler="Win32" link="static" assert="ndebug" />
+      <job system="windows" image="windows-2019" compiler="x64" link="static" assert="debug" />
+      <job system="windows" image="windows-2019" compiler="x64" link="static" assert="ndebug" />
+      <job system="windows" image="windows-2019" compiler="Win32" link="static" assert="debug" />
+      <job system="windows" image="windows-2019" compiler="Win32" link="static" assert="ndebug" />
     </ci>
 
   </repository>
@@ -628,18 +628,18 @@
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -691,10 +691,10 @@
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" assert="debug" link="static" />
-      <job system="windows" compiler="x64" assert="ndebug" link="static" />
-      <job system="windows" compiler="Win32" assert="debug" link="static" />
-      <job system="windows" compiler="Win32" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="Win32" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
   </repository>
@@ -829,20 +829,20 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
@@ -906,10 +906,10 @@
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" assert="debug" link="static" />
-      <job system="windows" compiler="x64" assert="ndebug" link="static" />
-      <job system="windows" compiler="Win32" assert="debug" link="static" />
-      <job system="windows" compiler="Win32" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="Win32" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
   </repository>
@@ -1030,19 +1030,19 @@
       <axis name="zmq" build="true" />
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1102,10 +1102,10 @@
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" assert="debug" link="static" />
-      <job system="windows" compiler="x64" assert="ndebug" link="static" />
-      <job system="windows" compiler="Win32" assert="debug" link="static" />
-      <job system="windows" compiler="Win32" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="Win32" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
   </repository>
@@ -1255,19 +1255,19 @@
       <axis name="zmq" build="true" />
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1327,10 +1327,10 @@
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" assert="debug" link="static" />
-      <job system="windows" compiler="x64" assert="ndebug" link="static" />
-      <job system="windows" compiler="Win32" assert="debug" link="static" />
-      <job system="windows" compiler="Win32" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="Win32" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="Win32" assert="ndebug" link="static" />
     </ci>
 
   </repository>
@@ -1442,18 +1442,18 @@
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1507,8 +1507,8 @@
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" assert="debug" link="static" />
-      <job system="windows" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="ndebug" link="static" />
     </ci>
 
   </repository>
@@ -1641,18 +1641,18 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="consensus" value="without" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1706,8 +1706,8 @@
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" assert="debug" link="static" />
-      <job system="windows" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="ndebug" link="static" />
     </ci>
 
   </repository>
@@ -1842,18 +1842,18 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx"
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="consensus" value="without" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1907,8 +1907,8 @@
         <axis name="icu" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" assert="debug" link="static" />
-      <job system="windows" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="ndebug" link="static" />
     </ci>
 
   </repository>
@@ -2048,19 +2048,19 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx"
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="consensus" value="without" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
@@ -2120,8 +2120,8 @@
         <axis name="zmq" value="build" />
       </job>
 
-      <job system="windows" compiler="x64" assert="debug" link="static" />
-      <job system="windows" compiler="x64" assert="ndebug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="debug" link="static" />
+      <job system="windows" image="windows-2019" compiler="x64" assert="ndebug" link="static" />
     </ci>
 
   </repository>

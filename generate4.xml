@@ -183,22 +183,22 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" 
            link="dynamic" 
            optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="with" />
+        <!-- <axis name="icu" value="with" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13"
+           system="osx"
            assert="ndebug" 
            link="static" 
            optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -272,6 +272,10 @@
 
     <package library="bitcoin-system" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin-system" >
       <flag value="@icu@" />
+      <flag value="@avx2@" />
+      <flag value="@avx512@" />
+      <flag value="@shani@" />
+      <flag value="@sse4@" />
     </package>
 
     <configure>
@@ -535,18 +539,18 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="with" />
+        <!-- <axis name="icu" value="with" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13"  
+           system="osx" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -751,18 +755,18 @@
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
       <job build="all" 
-           system="osx" image="macos-13"  
+           system="osx"  
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="with" />
+        <!-- <axis name="icu" value="with" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -949,19 +953,19 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="with" />
+        <!-- <axis name="icu" value="with" /> -->
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13"  
+           system="osx"  
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1535,18 +1539,18 @@
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
 
       <job build="all" 
-           system="osx" image="macos-13"  
+           system="osx"  
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1735,19 +1739,19 @@
       <axis name="consensus" with="true" without="true" recognized="true" />
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="consensus" value="with" />
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13"  
+           system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <axis name="consensus" value="without" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1951,19 +1955,19 @@
       <!--<axis name="consensus" with="true" without="true" recognized="true" />-->
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
 
       <job build="all" 
-           system="osx" image="macos-13" 
+           system="osx" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
+        <!-- <axis name="icu" value="build" /> -->
         <!--<axis name="consensus" value="without" />-->
         <option autotools="--enable-isystem" />
       </job>
