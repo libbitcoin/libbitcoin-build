@@ -275,7 +275,7 @@
       <flag value="@avx2@" />
       <flag value="@avx512@" />
       <flag value="@shani@" />
-      <flag value="@sse4@" />
+      <flag value="@sse41@" />
     </package>
 
     <configure>
@@ -285,7 +285,7 @@
       <option type="with" name="icu" default="no" define="BOOST_HAS_ICU" substitute="true" value="-DWITH_ICU" description="Compile with International Components for Unicode." />
       <option type="enable" name="avx2" default="no" description="Compile with avx2 intrinsics (specifically -mavx -mavx2)." />
       <option type="enable" name="avx512" default="no" description="Compile with avx512 intrinsics (specifically -mavx512bw -mavx512f)." />
-      <option type="enable" name="sse4" default="no" description="Compile with sse4 intrinsics (specifically -msse4.1)." />
+      <option type="enable" name="sse41" default="no" description="Compile with sse4.1 intrinsics (specifically -msse4.1)." />
       <option type="enable" name="shani" default="no" description="Compile with sha native intrinsics (specifically -msse4 -msha)" />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
@@ -399,7 +399,7 @@
           <loc>return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);</loc>
         </program>
       </compound>
-      <compound name="sse4" type="with" option="sse4" comment="Conditionally require sse4 intrinsics.">
+      <compound name="sse41" type="with" option="sse41" comment="Conditionally require sse4.1 intrinsics.">
         <flag name="msse4.1" />
         <program>
           <include header="stdint.h" />
