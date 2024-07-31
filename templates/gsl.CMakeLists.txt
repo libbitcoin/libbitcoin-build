@@ -34,15 +34,6 @@ function boost_component(name)
     endif
 endfunction
 
-function join_flags(container)
-    define my.container = join_flags.container
-    define my.result = ""
-    for my.container.flag as _flag where defined(_flag.name) & !is_empty(_flag.name)
-        my.result = join(my.result, "-$(_flag.name)", " ")
-    endfor
-    return my.result
-endfunction
-
 function get_cmake_system_from_name(name, sentinel)
     define my.result = my.sentinel
 
@@ -1107,7 +1098,7 @@ $(my.indent)$(my.name)( $(my.target_name)
 .   endif
 .
 .   define my.indent = defined(my.option) ?? "    " ? ""
-.   define my.flags = join_flags(my.compound)
+.   define my.flags = join_flags_name(my.compound)
 .   define my.symbol_prefix = defined(my.option) ?? "HAS_FLAGS_" ? my.define_prefix
 .
 .   if defined(my.option)

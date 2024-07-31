@@ -10,15 +10,6 @@
 # Functions
 ###############################################################################
 
-function join_flags(container)
-    define my.container = join_flags.container
-    define my.result = ""
-    for my.container.flag as _flag where defined(_flag.name) & !is_empty(_flag.name)
-        my.result = join(my.result, "-$(_flag.name)", " ")
-    endfor
-    return my.result
-endfunction
-
 function substitute_system_include(variable_name)
     return "`echo ${$(my.variable_name)} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`"
 endfunction
@@ -1022,7 +1013,7 @@ AC_MSG_NOTICE([$(my.cname)_BUILD_CPPFLAGS : ${$(my.cname)_BUILD_CPPFLAGS}])
 .   endif
 .
 .   define my.indent = defined(my.option) ?? "    " ? ""
-.   define my.flags = join_flags(my.compound)
+.   define my.flags = join_flags_name(my.compound)
 .   define my.terminator = "])"
 .
 .   if defined(my.option)
