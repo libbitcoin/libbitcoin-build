@@ -113,6 +113,24 @@ endfunction
 # Library utilities.
 #------------------------------------------------------------------------------
 
+function global.join_flags_name(container)
+    define my.container = join_flags_name.container
+    define my.result = ""
+    for my.container.flag as _flag where defined(_flag.name) & !is_empty(_flag.name)
+        my.result = join(my.result, "-$(_flag.name)", " ")
+    endfor
+    return my.result
+endfunction
+
+function global.join_flags_value(container)
+    define my.container = join_flags_value.container
+    define my.result = ""
+    for my.container.flag as _flag where defined(_flag.value) & !is_empty(_flag.value)
+        my.result = join(my.result, "$(_flag.value)", " ")
+    endfor
+    return my.result
+endfunction
+
 function global.canonical_path_name(repository)
     define my.repository = canonical_path_name.repository
     return defined(my.repository.path) ?? my.repository.path ?\
