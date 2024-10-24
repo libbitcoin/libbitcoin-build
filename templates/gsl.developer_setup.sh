@@ -251,7 +251,7 @@ make_jobs()
     local JOBS=$2
     shift 2
 
-    if [[ $PRECLEAN ]]; then
+    if [[ $PRECLEAN == true ]]; then
         display_message "Requested 'make clean'..."
         make clean
     fi
