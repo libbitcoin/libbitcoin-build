@@ -2,273 +2,6 @@
 <!-- Copyright (c) 2014-2023 libbitcoin developers (see COPYING). -->
 <generate language="en-us" >
 
-  <repository name="libbitcoin-consensus" version="4.0.0" email="eric@voskuil.org" >
-
-    <package library="bitcoin-consensus" description="Bitcoin Consensus Library (optional)" url="https://github.com/libbitcoin/libbitcoin-consensus" />
-
-    <configure>
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
-      <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <!-- <option type="with" name="java" default="no" conditional="true" description="Compile the Java bindings." /> -->
-      <!-- <option type="with" name="python" default="no" conditional="true" description="Compile the Python bindings." /> -->
-      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_TEST_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
-
-      <!-- Locate function declarations and define found header and export symbols. -->
-      <define header="byteswap.h" export="bswap_16" />
-      <define header="byteswap.h" export="bswap_32" />
-      <define header="byteswap.h" export="bswap_64" />
-
-      <define header="endian.h" export="le16toh" />
-      <define header="endian.h" export="le32toh" />
-      <define header="endian.h" export="le64toh" />
-      <define header="endian.h" export="htole16" />
-      <define header="endian.h" export="htole32" />
-      <define header="endian.h" export="htole64" />
-      <define header="endian.h" export="be16toh" />
-      <define header="endian.h" export="be32toh" />
-      <define header="endian.h" export="be64toh" />
-      <define header="endian.h" export="htobe16" />
-      <define header="endian.h" export="htobe32" />
-      <define header="endian.h" export="htobe64" />
-
-      <define header="sys/endian.h" export="le16toh" />
-      <define header="sys/endian.h" export="le32toh" />
-      <define header="sys/endian.h" export="le64toh" />
-      <define header="sys/endian.h" export="htole16" />
-      <define header="sys/endian.h" export="htole32" />
-      <define header="sys/endian.h" export="htole64" />
-      <define header="sys/endian.h" export="be16toh" />
-      <define header="sys/endian.h" export="be32toh" />
-      <define header="sys/endian.h" export="be64toh" />
-      <define header="sys/endian.h" export="htobe16" />
-      <define header="sys/endian.h" export="htobe32" />
-      <define header="sys/endian.h" export="htobe64" />
-
-      <dependency name="boost" version="1.76.0" option="tests" />
-      <dependency name="boost_unit_test_framework" option="tests" />
-      <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
-      <dependency name="secp256k1" version="0.1.0.20" />
-      <!-- <dependency name="java" option="java" /> -->
-      <!-- <dependency name="python" version="2.7" option="python" /> -->
-
-      <!-- General flags -->
-      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
-
-      <flag name="Wall" comment="Warn on all stuff." context="c" />
-      <flag name="Wall" comment="Warn on all stuff." context="c++" />
-      <flag name="Wextra" comment="Warn on extra stuff." context="c" />
-      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
-      <!-- <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" /> -->
-      <!-- <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" /> -->
-      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
-      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
-      <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
-      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
-
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
-      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-
-      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c++" /> -->
-
-      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
-      <flag name="fstack-protector" comment="Protect stack." context="link" />
-      <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-
-      <!-- Project specific flags -->
-      <flag name="Wno-unused-parameter" comment="Suppress frequent warning in cloned files." context="c++" />
-      <flag name="Wno-c++17-extensions" compiler="clang" comment="Suppress frequent warning in cloned files." context="c++" />
-    </configure>
-
-    <make>
-      <product prefix="pkgconfig" >
-        <file path="libbitcoin-consensus.pc" />
-      </product>
-      <product prefix="doc" >
-        <file path="AUTHORS" />
-        <file path="COPYING" />
-        <file path="ChangeLog" />
-        <file path="INSTALL" />
-        <file path="NEWS" />
-        <file path="README" />
-      </product>
-      <product prefix="lib" path="src" uuid="6c521d95-00ce-4120-97d1-430e2870d738" >
-        <library name="secp256k1" />
-        <headers path="include" />
-        <headers path="src" />
-        <headers path="src/clone" />
-        <sources path="src" />
-      </product>
-      <product prefix="bin" path="test" target_name="libbitcoin-consensus-test" test="true" option="tests" uuid="d282ef8c-6217-483c-ac47-864b2fba50fd" >
-        <runner/>
-        <library name="bitcoin-consensus" />
-        <library name="boost" />
-        <library name="boost_unit_test_framework" />
-        <headers path="include" />
-        <headers path="src" />
-        <headers path="src/clone" />
-        <sources path="test" />
-      </product>
-      <product prefix="include" container="bitcoin" >
-        <files path="include/bitcoin" />
-      </product>
-      <!-- <product prefix="lib" path="bindings/java/wrap" target_name="libbitcoin-consensus-jni" option="java" >
-        <library name="bitcoin-consensus" />
-        <library name="java" />
-        <headers path="include" />
-        <sources path="bindings/java/wrap" />
-      </product> -->
-      <!-- <product prefix="javaexec" distribute="true" install="false" option="java" >
-        <files path="bindings/java/proxy/org/libbitcoin/consensus" />
-      </product> -->
-      <!-- <product prefix="jarexec" distribute="false" install="true" option="java" >
-        <file path="org.libbitcoin.consensus-${VERSION}.jar" />
-      </product> -->
-      <!-- <product prefix="pkgpyexec" path="bindings/python/wrap" target_name="_bitcoin-consensus" unprefixed="true" option="python" >
-        <library name="bitcoin-consensus" />
-        <library name="python" />
-        <headers path="include" />
-        <sources path="bindings/python/wrap" />
-      </product> -->
-      <!-- <product prefix="pkgpython" option="python" >
-        <files path="bindings/python/proxy" />
-      </product> -->
-    </make>
-
-    <install>
-      <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.78.0" parallel="true" nuget="true" prebuild="true" >
-        <flag value="-Wno-enum-constexpr-conversion" />
-        <option value="--with-system" />
-        <option value="--with-test" />
-      </build>
-      <build name="secp256k1" github="bitcoin-core" repository="secp256k1" branch="v0.5.1" parallel="true" nuget="true" >
-        <flag value="-w" />
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
-      </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" >
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-    </install>
-
-    <presets>
-      <mapping name="bitcoin-consensus" type="base" />
-      <configuration name="nix-base" />
-      <configuration name="gnu-debug" />
-      <configuration name="gnu-release" />
-      <configuration name="static" />
-      <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
-      <configuration name="nix-gnu-debug-static" />
-      <configuration name="nix-gnu-debug-shared" />
-      <configuration name="nix-gnu-release-static" />
-      <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
-    </presets>
-
-    <ci>
-      <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-
-      <coverage>
-        <exclude path="src/clone/*" />
-      </coverage>
-
-      <!-- image="xcode12.2" equivalent? -->
-      <!-- prefix variance? -->
-      <job build="all" 
-           system="osx" 
-           assert="ndebug" 
-           link="dynamic" 
-           optimization="size">
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="with" /> -->
-        <option autotools="--enable-isystem" />
-      </job>
-
-      <job build="all" 
-           system="osx"
-           assert="ndebug" 
-           link="static" 
-           optimization="size">
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
-        <option autotools="--enable-isystem" />
-      </job>
-
-      <job build="all" 
-           system="linux" image="ubuntu-22.04"
-           compiler="clang" version="15" 
-           assert="debug" 
-           link="dynamic" 
-           optimization="debug" 
-           preset="nix-gnu-debug-shared">
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
-        <option autotools="--enable-isystem" />
-      </job>
-      
-      <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
-           assert="ndebug" 
-           link="static" 
-           optimization="size" 
-           preset="nix-gnu-release-static-size">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-        <option autotools="--enable-isystem" />
-      </job>
-
-      <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
-           assert="ndebug" 
-           link="dynamic" 
-           optimization="size" 
-           preset="nix-gnu-release-shared-size">
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
-        <option autotools="--enable-isystem" />
-      </job>
-
-      <job build="autotools" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
-           assert="ndebug" 
-           link="static" 
-           optimization="size" 
-           coverage="true">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-        <option autotools="--enable-isystem" />
-      </job>
-
-      <job build="cmake" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
-           assert="ndebug" 
-           link="static" 
-           optimization="size">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-      </job>
-
-      <job system="windows" compiler="x64" assert="debug" link="static" />
-      <job system="windows" compiler="x64" assert="ndebug" link="static" />
-      <job system="windows" compiler="Win32" assert="debug" link="static" />
-      <job system="windows" compiler="Win32" assert="ndebug" link="static" />
-    </ci>
-
-  </repository>
-
   <repository name="libbitcoin-system" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-system" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin-system" >
@@ -507,27 +240,16 @@
     </install>
 
     <presets>
-      <mapping name="bitcoin-system" type="remove" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
-      <configuration name="with_icu" />
-      <configuration name="without_icu" />
-      <configuration name="nix-gnu-debug-static-with_icu" />
-      <configuration name="nix-gnu-debug-static-without_icu" />
-      <configuration name="nix-gnu-debug-shared-with_icu" />
-      <configuration name="nix-gnu-debug-shared-without_icu" />
-      <configuration name="nix-gnu-release-static-with_icu" />
-      <configuration name="nix-gnu-release-static-without_icu" />
-      <configuration name="nix-gnu-release-shared-with_icu" />
-      <configuration name="nix-gnu-release-shared-without_icu" />
-      <configuration name="nix-gnu-release-static-size-with_icu" />
-      <configuration name="nix-gnu-release-static-size-without_icu" />
-      <configuration name="nix-gnu-release-shared-size-with_icu" />
-      <configuration name="nix-gnu-release-shared-size-without_icu" />
+      <configuration name="nix-gnu-debug-static" />
+      <configuration name="nix-gnu-debug-shared" />
+      <configuration name="nix-gnu-release-static" />
+      <configuration name="nix-gnu-release-shared" />
     </presets>
 
     <ci>
@@ -560,7 +282,7 @@
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
            assert="debug" link="dynamic" optimization="debug" 
-           preset="nix-gnu-debug-shared-without_icu">
+           preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <option autotools="--enable-isystem" />
@@ -572,7 +294,7 @@
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
            assert="ndebug" link="static" optimization="size" 
-           preset="nix-gnu-release-static-size-with_icu">
+           preset="nix-gnu-release-static">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <option autotools="--enable-isystem" />
@@ -583,7 +305,7 @@
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
            assert="ndebug" link="dynamic" optimization="size" 
-           preset="nix-gnu-release-shared-size-without_icu">
+           preset="nix-gnu-release-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <option autotools="--enable-isystem" />
@@ -734,19 +456,16 @@
 
     <presets>
       <mapping name="bitcoin-network" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
@@ -787,7 +506,7 @@
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
            assert="ndebug" link="static" optimization="size" 
-           preset="nix-gnu-release-static-size">
+           preset="nix-gnu-release-static">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <option autotools="--enable-isystem" />
@@ -797,7 +516,7 @@
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
            assert="ndebug" link="dynamic" optimization="size" 
-           preset="nix-gnu-release-shared-size">
+           preset="nix-gnu-release-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <option autotools="--enable-isystem" />
@@ -933,19 +652,16 @@
 
     <presets>
       <mapping name="bitcoin-protocol" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
@@ -988,7 +704,7 @@
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
            assert="ndebug" link="static" optimization="size" 
-           preset="nix-gnu-release-static-size">
+           preset="nix-gnu-release-static">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="zmq" value="build" />
@@ -999,7 +715,7 @@
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
            assert="ndebug" link="dynamic" optimization="size" 
-           preset="nix-gnu-release-shared-size">
+           preset="nix-gnu-release-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="zmq" value="build" />
@@ -1136,19 +852,16 @@
     <presets>
       <mapping name="bitcoin-client" type="base" />
       <mapping name="bitcoin-protocol" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <matrix>
@@ -1348,19 +1061,16 @@
       <mapping name="bitcoin-network" type="base" />
       <mapping name="bitcoin-client" type="base" />
       <mapping name="bitcoin-protocol" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <matrix>
@@ -1522,19 +1232,16 @@
 
     <presets>
       <mapping name="bitcoin-database" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
@@ -1571,7 +1278,7 @@
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
            assert="ndebug" link="static" optimization="size" 
-           preset="nix-gnu-release-static-size">
+           preset="nix-gnu-release-static">
         <!-- version="5.0" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
@@ -1582,7 +1289,7 @@
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
            assert="ndebug" link="dynamic" optimization="size" 
-           preset="nix-gnu-release-shared-size">
+           preset="nix-gnu-release-shared">
         <!-- version="4.8" -->
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
@@ -1605,213 +1312,6 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-      </job>
-
-      <job system="windows" compiler="x64" assert="debug" link="static" />
-      <job system="windows" compiler="x64" assert="ndebug" link="static" />
-    </ci>
-
-  </repository>
-
-  <repository name="libbitcoin-blockchain" version="4.0.0" email="eric@voskuil.org" >
-
-    <package library="bitcoin-blockchain" description="Bitcoin Blockchain Library" url="https://github.com/libbitcoin/libbitcoin-blockchain" />
-
-    <configure>
-      <option type="with" name="consensus" default="yes" define="WITH_CONSENSUS" description="Link libbitcoin-consensus and use for consensus checks." />
-      <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
-      <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="with" name="tools" default="yes" conditional="true" description="Compile with tools." />
-      <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
-      <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
-
-      <dependency name="boost" version="1.76.0" />
-      <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="bitcoin-database" version="4.0.0" />
-      <dependency name="bitcoin-consensus" version="4.0.0" option="consensus" />
-
-      <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
-
-      <!-- General flags -->
-      <flag name="Wall" comment="Warn on all stuff." context="c" />
-      <flag name="Wall" comment="Warn on all stuff." context="c++" />
-      <flag name="Wextra" comment="Warn on extra stuff." context="c" />
-      <flag name="Wextra" comment="Warn on extra stuff." context="c++" />
-      <!-- <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c" /> -->
-      <!-- <flag name="Wpedantic" alternate="pedantic" comment="Be really annoying." context="c++" /> -->
-      <flag name="Wno-reorder" comment="Disallow warning on style order of declarations." context="c++" />
-      <flag name="Wno-missing-field-initializers" comment="Suppress warning for incomplete field initialization." context="c++" />
-      <flag name="Wno-missing-braces" comment="Conform to style." context="c++" />
-      <flag name="Wno-comment" comment="Ignore comments within comments or commenting of backslash extended lines." context="c++" />
-      <flag name="Wno-deprecated-copy" comment="Suppress warning for copy of implicitly generated copy constructor." context="c++" />
-
-      <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
-      <!-- This varies by dependency build, such as boost. So we do not enforce. -->
-      <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-
-      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
-
-      <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
-      <flag name="fstack-protector" comment="Protect stack." context="link" />
-      <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
-    </configure>
-
-    <make>
-      <product prefix="pkgconfig" >
-        <file path="libbitcoin-blockchain.pc" />
-      </product>
-      <product prefix="doc" >
-        <file path="AUTHORS" />
-        <file path="COPYING" />
-        <file path="ChangeLog" />
-        <file path="INSTALL" />
-        <file path="NEWS" />
-        <file path="README" />
-      </product>
-      <product prefix="lib" path="src" uuid="868dab9e-fd33-497f-9468-c9000b3d7801" >
-        <library name="bitcoin-database" />
-        <library name="bitcoin-consensus" />
-        <headers path="include" />
-        <sources path="src" />
-      </product>
-      <product prefix="bin" path="test" target_name="libbitcoin-blockchain-test" test="true" option="tests" uuid="cec6de45-b67a-487f-b3ad-3d14e83ad032" >
-        <runner/>
-        <library name="bitcoin-blockchain" />
-        <library name="boost_unit_test_framework" />
-        <headers path="include" />
-        <sources path="test" />
-      </product>
-      <product prefix="bin" path="tools/initchain" project_name="libbitcoin-blockchain-tools" target_name="initchain" install="false" option="tools" uuid="b9ced930-2ec0-4639-9427-d8edb9a677ac" >
-        <library name="bitcoin-blockchain" />
-        <headers path="include" />
-        <sources path="tools/initchain" />
-      </product>
-      <product prefix="include" container="bitcoin" >
-        <files path="include/bitcoin" />
-      </product>
-    </make>
-
-    <install>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
-        <option value="--without-tests" cmake="-Dwith-tests=no" />
-        <option value="--without-tools" cmake="-Dwith-tools=no" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" conditional="true" >
-        <option value="--without-tests" cmake="-Dwith-tests=no" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      <build name="bitcoin-blockchain" github="libbitcoin" repository="libbitcoin-blockchain" branch="master" parallel="true" >
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-    </install>
-
-    <presets>
-      <mapping name="bitcoin-blockchain" type="base" />
-      <mapping name="bitcoin-consensus" type="base" />
-      <mapping name="bitcoin-database" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
-      <configuration name="nix-base" />
-      <configuration name="gnu-debug" />
-      <configuration name="gnu-release" />
-      <configuration name="static" />
-      <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
-      <configuration name="with_consensus" />
-      <configuration name="without_consensus" />
-      <configuration name="nix-gnu-debug-static-with_consensus" />
-      <configuration name="nix-gnu-debug-static-without_consensus" />
-      <configuration name="nix-gnu-debug-shared-with_consensus" />
-      <configuration name="nix-gnu-debug-shared-without_consensus" />
-      <configuration name="nix-gnu-release-static-with_consensus" />
-      <configuration name="nix-gnu-release-static-without_consensus" />
-      <configuration name="nix-gnu-release-shared-with_consensus" />
-      <configuration name="nix-gnu-release-shared-without_consensus" />
-      <configuration name="nix-gnu-release-static-size-with_consensus" />
-      <configuration name="nix-gnu-release-static-size-without_consensus" />
-      <configuration name="nix-gnu-release-shared-size-with_consensus" />
-      <configuration name="nix-gnu-release-shared-size-without_consensus" />
-    </presets>
-
-    <ci>
-      <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="consensus" with="true" without="true" recognized="true" />
-
-      <job build="all" 
-           system="osx" 
-           assert="ndebug" link="dynamic" optimization="size">
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
-        <axis name="consensus" value="with" />
-        <option autotools="--enable-isystem" />
-      </job>
-
-      <job build="all" 
-           system="osx"
-           assert="ndebug" link="static" optimization="size">
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
-        <axis name="consensus" value="without" />
-        <option autotools="--enable-isystem" />
-      </job>
-
-      <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
-           assert="debug" link="dynamic" optimization="debug" 
-           preset="nix-gnu-debug-shared-with_consensus">
-        <axis name="boost" value="build" />
-        <!-- axis name="icu" /> -->
-        <axis name="consensus" value="with" />
-        <option autotools="--enable-isystem" />
-      </job>
-
-      <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
-           assert="ndebug" link="static" optimization="size" 
-           preset="nix-gnu-release-static-size-with_consensus">
-        <!-- version="5.0" -->
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-        <axis name="consensus" value="with" />
-        <option autotools="--enable-isystem" />
-      </job>
-
-      <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
-           assert="ndebug" link="dynamic" optimization="size" 
-           preset="nix-gnu-release-shared-size-without_consensus">
-        <!-- version="4.8" -->
-        <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
-        <axis name="consensus" value="without" />
-        <option autotools="--enable-isystem" />
-      </job>
-
-      <job build="autotools" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="size" 
-           coverage="true">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-        <axis name="consensus" value="with" />
-        <option autotools="--enable-isystem" />
-      </job>
-
-      <job build="cmake" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="size">
-        <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
-        <axis name="consensus" value="with" />
       </job>
 
       <job system="windows" compiler="x64" assert="debug" link="static" />
@@ -1937,19 +1437,16 @@
       <!--<mapping name="bitcoin-consensus" type="base" />-->
       <mapping name="bitcoin-database" type="base" />
       <mapping name="bitcoin-network" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
@@ -1990,7 +1487,7 @@
            system="linux" image="ubuntu-22.04" 
            compiler="clang" version="15" 
            assert="ndebug" link="static" optimization="size" 
-           preset="nix-gnu-release-static-size">
+           preset="nix-gnu-release-static">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <!--<axis name="consensus" value="with" />-->
@@ -2001,7 +1498,7 @@
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
            assert="ndebug" link="dynamic" optimization="size" 
-           preset="nix-gnu-release-shared-size">
+           preset="nix-gnu-release-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <!--<axis name="consensus" value="without" />-->
@@ -2147,19 +1644,16 @@
       <mapping name="bitcoin-network" type="base" />
       <mapping name="bitcoin-consensus" type="base" />
       <mapping name="bitcoin-database" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <matrix>
@@ -2227,7 +1721,7 @@
 
   <presets>
     <configuration name="nix-base" description="Factored base settings for non-windows *nix based platforms." hidden="true" inherits="">
-      <property name="installDir" value="${sourceParentDir}/../../prefix/${presetName}" />
+      <property name="installDir" value="${sourceParentDir}/../../../prefix/${presetName}" />
       <property name="binaryDir" value="${sourceParentDir}/../obj/${presetName}" />
       <property name="condition" type="object">
         <property name="type" value="inList" />
@@ -2238,8 +1732,8 @@
         </property>
       </property>
       <property name="cacheVariables" type="object">
-        <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../prefix/${presetName}" type="PATH" />
-        <property name="CMAKE_LIBRARY_PATH" value="${sourceParentDir}/../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}" type="PATH" />
+        <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
+        <property name="CMAKE_LIBRARY_PATH" value="${sourceParentDir}/../../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}" type="PATH" />
       </property>
     </configuration>
     <configuration name="gnu-debug" description="Factored debug settings." hidden="true">
@@ -2686,33 +2180,52 @@
   </integration>
 
   <templates source="generate4.xml">
+    <!-- common sources -->
     <template name="gsl.version.hpp" />
     <template name="gsl.include.hpp" />
-    <!-- <template name="gsl.interface.swg" /> -->
-    <!-- <template name="gsl.bindings.sh" /> -->
-    <!-- <template name="gsl.bindings.bat" /> -->
+
+    <!-- common artifacts -->
+    <template name="gsl.package.pc.in" />
+
+    <!-- autotools -->
     <template name="gsl.autogen.sh" />
     <template name="gsl.configure.ac" />
     <template name="gsl.Makefile.am" />
-    <template name="gsl.package.pc.in" />
-    <template name="gsl.install.sh" />
-    <template name="gsl.install-cmake.sh" />
-    <template name="gsl.install-cmakepresets.sh" />
     <template name="gsl.runner.sh" />
-    <!-- <template name="gsl.travis.yml" /> -->
-    <template name="gsl.build.cmd" />
-    <!-- <template name="gsl.build.ps1" /> -->
-    <!-- <template name="gsl.appveyor.yml" /> -->
+
+    <!-- msvc -->
     <template name="gsl.debug.natvis" />
     <template name="gsl.packages.config" />
     <template name="gsl.sln" />
     <template name="gsl.vcxproj" />
     <template name="gsl.vcxproj.filters" />
+    <template name="gsl.build.cmd" />
+
+    <!-- cmake -->
     <!-- <template name="gsl.Find.cmake" /> -->
     <template name="gsl.CMakeLists.txt" />
     <template name="gsl.CMakePresets.json" />
     <!-- <template name="gsl.gitignore" /> -->
+
+    <!-- installation scripts -->
+    <template name="gsl.install.sh" />
+    <template name="gsl.install-cmake.sh" />
+    <template name="gsl.install-cmakepresets.sh" />
+
+    <!-- github actions ci -->
     <template name="gsl.ci.yml" />
+
+    <!-- vscode -->
+    <template name="gsl.vscode.settings.json" />
+    <template name="gsl.code-workspace" />
+
+    <!-- no longer supported -->
+    <!-- <template name="gsl.interface.swg" /> -->
+    <!-- <template name="gsl.bindings.sh" /> -->
+    <!-- <template name="gsl.bindings.bat" /> -->
+    <!-- <template name="gsl.travis.yml" /> -->
+    <!-- <template name="gsl.build.ps1" /> -->
+    <!-- <template name="gsl.appveyor.yml" /> -->
   </templates>
 
 </generate>

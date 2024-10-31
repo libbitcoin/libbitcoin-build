@@ -2,7 +2,7 @@
 ###############################################################################
 # Copyright (c) 2014-2023 libbitcoin developers (see COPYING).
 #
-# GSL generate libbitcoin .vscode/settings.json.
+# GSL generate libbitcoin builds/vscode/{project}.code-workspace.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
@@ -13,32 +13,52 @@
 function workflow_relative_path(repository, path_prefix)
     define my.repository = workflow_relative_path.repository
     require(my.repository, "repository", "name")
-    define my.subpath = ".vscode"
+    define my.subpath = "builds/vscode"
     return append_path(append_path(my.path_prefix,\
         canonical_path_name(my.repository)), my.subpath)
+endfunction
+
+function has_repository(build)
+    define my.build = has_repository.build
+    return defined(my.build.repository)
+endfunction
+
+function is_libbitcoin_project(build)
+    define my.build = is_libbitcoin_project.build
+    return defined(my.build.github) & (my.build.github = "libbitcoin")
 endfunction
 
 # Generation
 ###############################################################################
 .endtemplate
 .template 1
-.macro generate_vscode_settings_json(path_prefix)
+.macro generate_code_workspace(path_prefix)
 .for generate.repository by name as _repository
 .   require(_repository, "repository", "name")
 .   my.absolute_path = join(join(global.root, my.path_prefix), _repository.name)
 .   my.output_path = workflow_relative_path(_repository, my.path_prefix)
 .   create_directory(my.output_path)
-.   define my.out_file = "$(my.output_path)/settings.json"
+.   define my.name = string.substr(_repository.name, 11, string.length(_repository.name))
+.   define my.out_file = "$(my.output_path)/$(my.name).code-workspace"
 .   notify(my.out_file)
 .   output(my.out_file)
 {
-    "cmake.sourceDirectory": "${workspaceFolder}/builds/cmake",
-    "cmake.useCMakePresets": "always"
+    "folders": [
+.   new projects as _cumulative
+.       cumulative_install(_cumulative, generate, _repository)
+.       for _cumulative.build as _build where is_libbitcoin_project(_build) & has_repository(_build)
+        {
+            "path": "../../../$(_build.repository)"
+        }$(last() ?? "" ? ",")
+.       endfor
+.   endnew
+    ],
+    "settings": {}
 }
 .
 .       close
 .endfor _repository
-.endmacro # generate_vscode_settings_json
+.endmacro # generate_code_workspace
 .endtemplate
 .template 0
 ###############################################################################
@@ -54,6 +74,6 @@ gsl from "library/string.gsl"
 gsl from "library/collections.gsl"
 gsl from "utilities.gsl"
 
-generate_vscode_settings_json("output")
+generate_code_workspace("output")
 
 .endtemplate
