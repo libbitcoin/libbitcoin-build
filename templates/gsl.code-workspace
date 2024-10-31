@@ -18,6 +18,16 @@ function workflow_relative_path(repository, path_prefix)
         canonical_path_name(my.repository)), my.subpath)
 endfunction
 
+function has_repository(build)
+    define my.build = has_repository.build
+    return defined(my.build.repository)
+endfunction
+
+function is_libbitcoin_project(build)
+    define my.build = is_libbitcoin_project.build
+    return defined(my.build.github) & (my.build.github = "libbitcoin")
+endfunction
+
 # Generation
 ###############################################################################
 .endtemplate
@@ -34,9 +44,14 @@ endfunction
 .   output(my.out_file)
 {
     "folders": [
+.   new projects as _cumulative
+.       cumulative_install(_cumulative, generate, _repository)
+.       for _cumulative.build as _build where is_libbitcoin_project(_build) & has_repository(_build)
         {
-	    "path": "../../../$(_repository.name)"
-	}
+            "path": "../../../$(_build.repository)"
+        }$(last() ?? "" ? ",")
+.       endfor
+.   endnew
     ],
     "settings": {}
 }
