@@ -1721,7 +1721,7 @@
 
   <presets>
     <configuration name="nix-base" description="Factored base settings for non-windows *nix based platforms." hidden="true" inherits="">
-      <property name="installDir" value="${sourceParentDir}/../../prefix/${presetName}" />
+      <property name="installDir" value="${sourceParentDir}/../../../prefix/${presetName}" />
       <property name="binaryDir" value="${sourceParentDir}/../obj/${presetName}" />
       <property name="condition" type="object">
         <property name="type" value="inList" />
@@ -1732,8 +1732,8 @@
         </property>
       </property>
       <property name="cacheVariables" type="object">
-        <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../prefix/${presetName}" type="PATH" />
-        <property name="CMAKE_LIBRARY_PATH" value="${sourceParentDir}/../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}" type="PATH" />
+        <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
+        <property name="CMAKE_LIBRARY_PATH" value="${sourceParentDir}/../../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}" type="PATH" />
       </property>
     </configuration>
     <configuration name="gnu-debug" description="Factored debug settings." hidden="true">
