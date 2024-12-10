@@ -255,6 +255,7 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
+      <axis name="secp256k1" build="true" />
 
       <coverage>
         <exclude path="src/wallet/addresses/qrencode/*" />
@@ -266,6 +267,7 @@
            system="osx" 
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
+        <axis name="secp256k1" value="build" />
         <!-- <axis name="icu" value="with" /> -->
         <option autotools="--enable-isystem" />
       </job>
@@ -274,6 +276,7 @@
            system="osx" 
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
+        <axis name="secp256k1" value="build" />
         <!-- <axis name="icu" value="build" /> -->
         <option autotools="--enable-isystem" />
       </job>
@@ -285,6 +288,7 @@
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
+	<axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
         <option autotools="--enable-avx2" cmake="-Denable-avx2=on" />
         <option autotools="--enable-sse4" cmake="-Denable-sse4=on" />
@@ -297,6 +301,7 @@
            preset="nix-gnu-release-static">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
         <option autotools="--enable-avx2" cmake="-Denable-avx2=on" />
       </job>
@@ -308,6 +313,7 @@
            preset="nix-gnu-release-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
         <option autotools="--enable-sse4" cmake="-Denable-sse4=on" />
       </job>
@@ -319,6 +325,7 @@
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
         <!-- <option autotools="-\-enable-avx512" cmake="-Denable-avx512=on" /> -->
       </job>
@@ -329,6 +336,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <!-- <option autotools="-\-enable-avx512" cmake="-Denable-avx512=on" /> -->
       </job>
 
@@ -471,6 +479,7 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
+      <axis name="secp256k1" build="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
@@ -481,6 +490,7 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="with" /> -->
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -489,6 +499,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -499,6 +510,7 @@
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -509,6 +521,7 @@
            preset="nix-gnu-release-static">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -519,6 +532,7 @@
            preset="nix-gnu-release-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -529,6 +543,7 @@
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -538,6 +553,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
       </job>
 
       <job system="windows" compiler="x64" assert="debug" link="static" />
@@ -667,6 +683,7 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
+      <axis name="secp256k1" build="true" />
       <axis name="zmq" build="true" />
 
       <!-- image="xcode12.2" equivalent? -->
@@ -676,6 +693,7 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="with" /> -->
+        <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -685,6 +703,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
+        <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -696,6 +715,7 @@
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
+        <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -707,6 +727,7 @@
            preset="nix-gnu-release-static">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -718,6 +739,7 @@
            preset="nix-gnu-release-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -729,6 +751,7 @@
         <!-- coverage="true" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -739,6 +762,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
@@ -1247,12 +1271,14 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
+      <axis name="secp256k1" build="true" />
 
       <job build="all" 
            system="osx"  
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1261,6 +1287,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1271,6 +1298,7 @@
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1282,6 +1310,7 @@
         <!-- version="5.0" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1293,6 +1322,7 @@
         <!-- version="4.8" -->
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1303,6 +1333,7 @@
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1312,6 +1343,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
       </job>
 
       <job system="windows" compiler="x64" assert="debug" link="static" />
@@ -1452,6 +1484,7 @@
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
+      <axis name="secp256k1" build="true" />
       <!--<axis name="consensus" with="true" without="true" recognized="true" />-->
 
       <job build="all" 
@@ -1459,6 +1492,7 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
+        <axis name="secp256k1" value="build" />
         <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
@@ -1468,6 +1502,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
+        <axis name="secp256k1" value="build" />
         <!--<axis name="consensus" value="without" />-->
         <option autotools="--enable-isystem" />
       </job>
@@ -1479,6 +1514,7 @@
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
+        <axis name="secp256k1" value="build" />
         <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
@@ -1490,6 +1526,7 @@
            preset="nix-gnu-release-static">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
@@ -1501,6 +1538,7 @@
            preset="nix-gnu-release-shared">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
+        <axis name="secp256k1" value="build" />
         <!--<axis name="consensus" value="without" />-->
         <option autotools="--enable-isystem" />
       </job>
@@ -1512,6 +1550,7 @@
            coverage="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
@@ -1522,6 +1561,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
+        <axis name="secp256k1" value="build" />
         <!--<axis name="consensus" value="with" />-->
       </job>
 
