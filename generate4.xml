@@ -201,7 +201,7 @@
 
     <install>
       <!-- Building with our minimum (c++11 only) version of ICU. -->
-      <build name="icu" version="55.2" parallel="true" >
+      <build name="icu" version="55.2" parallel="true" presentation="ICU" conditional="true" >
         <flag value="-w" />
         <!-- TODO: verify this with more recent ICU. -->
         <!-- Bug in ICU 55.2 build requires -enable-draft. -->
@@ -215,7 +215,7 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.78.0" parallel="true" nuget="true" prebuild="true" >
+      <build name="boost" version="1.78.0" parallel="true" nuget="true" prebuild="true" presentation="Boost" conditional="true" >
         <flag value="-Wno-enum-constexpr-conversion" />
         <option value="--with-chrono" />
         <option value="--with-iostreams" />
@@ -226,7 +226,7 @@
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="bitcoin-core" repository="secp256k1" branch="v0.5.1" parallel="true" nuget="true" >
+      <build name="secp256k1" github="bitcoin-core" repository="secp256k1" branch="v0.5.1" parallel="true" nuget="true" presentation="libsecp256k1" conditional="true" >
         <flag value="-w" />
         <option value="--disable-tests" />
         <option value="--enable-experimental" />
@@ -416,7 +416,7 @@
 
     <install>
       <!-- Building with our minimum (c++11 only) version of ICU. -->
-      <build name="icu" version="55.2" parallel="true" >
+      <build name="icu" version="55.2" parallel="true" presentation="ICU" conditional="true" >
         <flag value="-w" />
         <!-- TODO: verify this with more recent ICU. -->
         <!-- Bug in ICU 55.2 build requires enable-draft. -->
@@ -430,7 +430,7 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.78.0" parallel="true" nuget="true" prebuild="true" >
+      <build name="boost" version="1.78.0" parallel="true" nuget="true" prebuild="true" presentation="Boost" conditional="true" >
         <flag value="-Wno-enum-constexpr-conversion" />
         <option value="--with-chrono" />
         <option value="--with-iostreams" />
@@ -633,7 +633,7 @@
     </make>
 
     <install>
-      <build name="zmq" version="4.3.5" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.5" parallel="true" nuget="true" presentation="ZeroMQ" conditional="true" >
         <flag value="-w" />
         <option value="--disable-Werror" />
       </build>
@@ -833,7 +833,7 @@
     </make>
 
     <install>
-      <build name="zmq" version="4.3.5" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.5" parallel="true" nuget="true" presentation="ZeroMQ" conditional="true" >
         <flag value="-w" />
         <option value="--disable-Werror" />
       </build>
@@ -1027,7 +1027,7 @@
     </make>
 
     <install>
-      <build name="icu" version="68.2" parallel="true" >
+      <build name="icu" version="68.2" parallel="true" presentation="ICU" conditional="true" >
         <flag value="-w" />
         <!-- Bug in ICU 55.2 build requires -enable-draft. -->
         <option value="--enable-rpath" />

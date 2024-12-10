@@ -136,7 +136,7 @@
 
     <install>
       <!-- Boost.system is necessary for detection, which is only required for test. -->
-      <build name="boost" version="1.73.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.73.0" parallel="true" nuget="true" presentation="Boost" conditional="true" >
         <option value="--with-system" />
         <option value="--with-test" />
       </build>
@@ -158,13 +158,10 @@
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
@@ -375,7 +372,7 @@
 
     <install>
       <!-- Building with our minimum (c++11 only) version of ICU. -->
-      <build name="icu" version="55.2" parallel="true" >
+      <build name="icu" version="55.2" parallel="true" presentation="ICU" conditional="true" >
         <flag value="-w" />
         <!-- TODO: verify this with more recent ICU. -->
         <!-- Bug in ICU 55.2 build requires enable-draft. -->
@@ -389,7 +386,7 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.73.0" parallel="true" nuget="true" >
+      <build name="boost" version="1.73.0" parallel="true" nuget="true" presentation="Boost" conditional="true" >
         <option value="--with-atomic" />
         <option value="--with-chrono" />
         <option value="--with-date_time" />
@@ -415,27 +412,16 @@
     </install>
 
     <presets>
-      <mapping name="bitcoin-system" type="remove" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
-      <configuration name="with_icu" />
-      <configuration name="without_icu" />
-      <configuration name="nix-gnu-debug-static-with_icu" />
-      <configuration name="nix-gnu-debug-static-without_icu" />
-      <configuration name="nix-gnu-debug-shared-with_icu" />
-      <configuration name="nix-gnu-debug-shared-without_icu" />
-      <configuration name="nix-gnu-release-static-with_icu" />
-      <configuration name="nix-gnu-release-static-without_icu" />
-      <configuration name="nix-gnu-release-shared-with_icu" />
-      <configuration name="nix-gnu-release-shared-without_icu" />
-      <configuration name="nix-gnu-release-static-size-with_icu" />
-      <configuration name="nix-gnu-release-static-size-without_icu" />
-      <configuration name="nix-gnu-release-shared-size-with_icu" />
-      <configuration name="nix-gnu-release-shared-size-without_icu" />
+      <configuration name="nix-gnu-debug-static" />
+      <configuration name="nix-gnu-debug-shared" />
+      <configuration name="nix-gnu-release-static" />
+      <configuration name="nix-gnu-release-shared" />
     </presets>
 
     <ci>
@@ -604,19 +590,16 @@
 
     <presets>
       <mapping name="bitcoin-network" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
@@ -787,7 +770,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="zmq" version="4.3.5" parallel="true" nuget="true" >
+      <build name="zmq" version="4.3.5" parallel="true" nuget="true" presentation="ZeroMQ" conditional="true" >
         <flag value="-w" />
         <option value="--disable-Werror" />
       </build>
@@ -801,25 +784,21 @@
 
     <presets>
       <mapping name="bitcoin-protocol" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
       <axis name="boost" build="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="mbedtls" build="true" />
       <axis name="zmq" build="true" />
 
       <coverage>
@@ -833,7 +812,6 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
-        <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -843,7 +821,6 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
-        <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -855,7 +832,6 @@
            preset="nix-gnu-debug-shared">
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
-        <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -867,7 +843,6 @@
            preset="nix-gnu-release-static-size">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -879,7 +854,6 @@
            preset="nix-gnu-release-shared-size">
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
-        <!-- <axis name="mbedtls" /> -->
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -891,7 +865,6 @@
         <!-- coverage="true" -->
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -902,7 +875,6 @@
            assert="ndebug" link="static" optimization="debug">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
-        <axis name="mbedtls" value="build" />
         <axis name="zmq" value="build" />
       </job>
 
@@ -1009,19 +981,16 @@
     <presets>
       <mapping name="bitcoin-client" type="base" />
       <mapping name="bitcoin-protocol" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
@@ -1234,19 +1203,16 @@
       <mapping name="bitcoin-network" type="base" />
       <mapping name="bitcoin-client" type="base" />
       <mapping name="bitcoin-protocol" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
@@ -1422,19 +1388,16 @@
 
     <presets>
       <mapping name="bitcoin-database" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
@@ -1595,7 +1558,7 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" conditional="true" >
+      <build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="version3" parallel="true" option="consensus" conditional="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1607,30 +1570,19 @@
     </install>
 
     <presets>
-      <mapping name="bitcoin-blockchain" type="remove" parameter="consensus" />
+      <mapping name="bitcoin-blockchain" type="base" />
       <mapping name="bitcoin-consensus" type="base" />
       <mapping name="bitcoin-database" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
-      <configuration name="with_consensus" />
-      <configuration name="without_consensus" />
-      <configuration name="nix-gnu-debug-static-with_consensus" />
-      <configuration name="nix-gnu-debug-static-without_consensus" />
-      <configuration name="nix-gnu-debug-shared-with_consensus" />
-      <configuration name="nix-gnu-debug-shared-without_consensus" />
-      <configuration name="nix-gnu-release-static-with_consensus" />
-      <configuration name="nix-gnu-release-static-without_consensus" />
-      <configuration name="nix-gnu-release-shared-with_consensus" />
-      <configuration name="nix-gnu-release-shared-without_consensus" />
-      <configuration name="nix-gnu-release-static-size-with_consensus" />
-      <configuration name="nix-gnu-release-static-size-without_consensus" />
-      <configuration name="nix-gnu-release-shared-size-with_consensus" />
-      <configuration name="nix-gnu-release-shared-size-without_consensus" />
+      <configuration name="nix-gnu-debug-static" />
+      <configuration name="nix-gnu-debug-shared" />
+      <configuration name="nix-gnu-release-static" />
+      <configuration name="nix-gnu-release-shared" />
     </presets>
 
     <ci>
@@ -1816,22 +1768,19 @@
     <presets>
       <mapping name="bitcoin-node" type="base" />
       <mapping name="bitcoin-network" type="base" />
-      <mapping name="bitcoin-blockchain" type="add" parameter="consensus" />
+      <mapping name="bitcoin-blockchain" type="base" />
       <mapping name="bitcoin-consensus" type="base" />
       <mapping name="bitcoin-database" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
@@ -2021,22 +1970,19 @@
       <mapping name="bitcoin-protocol" type="base" />
       <mapping name="bitcoin-node" type="base" />
       <mapping name="bitcoin-network" type="base" />
-      <mapping name="bitcoin-blockchain" type="add" parameter="consensus" />
+      <mapping name="bitcoin-blockchain" type="base" />
       <mapping name="bitcoin-consensus" type="base" />
       <mapping name="bitcoin-database" type="base" />
-      <mapping name="bitcoin-system" type="add" parameter="icu" />
+      <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
       <configuration name="gnu-debug" />
       <configuration name="gnu-release" />
       <configuration name="static" />
       <configuration name="shared" />
-      <configuration name="gnu-optimized-size" />
       <configuration name="nix-gnu-debug-static" />
       <configuration name="nix-gnu-debug-shared" />
       <configuration name="nix-gnu-release-static" />
       <configuration name="nix-gnu-release-shared" />
-      <configuration name="nix-gnu-release-static-size" />
-      <configuration name="nix-gnu-release-shared-size" />
     </presets>
 
     <ci>
