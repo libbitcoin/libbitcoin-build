@@ -335,8 +335,6 @@ function emit_dependencies(repository)
         elsif (is_java_dependency(_dependency))
             emit_java_dependency_option(_dependency, my.repository->configure, "")
         elsif (is_python_dependency(_dependency))
-        elsif (is_mbedtls_dependency(_dependency))
-            emit_find_mbedtls_option(_dependency, my.repository->configure, "")
         elsif (is_package_dependency(_dependency))
             emit_find_dependency_option(_dependency, my.repository->configure, "")
         elsif (is_pthread_dependency(_dependency))
@@ -1332,21 +1330,6 @@ $(my.indent)endif()
 .       endif
 .   endif
 .endmacro # emit_find_dependency_option
-.
-.macro emit_find_mbedtls_option(dependency, configure, indent)
-.   define my.dependency = emit_find_mbedtls_option.dependency
-.   define my.configure = emit_find_mbedtls_option.configure
-.
-.   new configure as _dependencies
-.       copy my.dependency to _dependencies
-.       if (defined(_dependencies->dependency.version))
-.           _dependencies->dependency.version = ""
-.       endif
-.
-.       emit_find_dependency_option(_dependencies->dependency, my.configure,\
-            my.indent)
-.   endnew
-.endmacro # emit_find_mbedtls_option
 .
 .macro emit_java_dependency(dependency, configure, indent)
 .   define my.dependency = emit_java_dependency.dependency

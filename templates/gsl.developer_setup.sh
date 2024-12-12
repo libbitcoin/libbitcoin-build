@@ -347,17 +347,6 @@ $(my.prefix)build_from_tarball $ZMQ_ARCHIVE . $PARALLEL "$BUILD_ZMQ" "${ZMQ_OPTI
 export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_from_tarball_zmq
 .
-.macro unpack_from_tarball_mbedtls(prefix)
-$(my.prefix)unpack_from_tarball $MBEDTLS_ARCHIVE $MBEDTLS_URL gzip "$BUILD_MBEDTLS"
-.endmacro # unpack_from_tarball_mbedtls
-.
-.macro build_from_tarball_mbedtls(prefix)
-local SAVE_CPPFLAGS="$CPPFLAGS"
-export CPPFLAGS="$CPPFLAGS ${MBEDTLS_FLAGS[@]}"
-$(my.prefix)build_from_tarball $MBEDTLS_ARCHIVE . $PARALLEL "$BUILD_MBEDTLS" "${MBEDTLS_OPTIONS[@]}" "$@"
-export CPPFLAGS=$SAVE_CPPFLAGS
-.endmacro # build_from_tarball_mbedtls
-.
 .macro unpack_boost(prefix)
 $(my.prefix)unpack_from_tarball $BOOST_ARCHIVE $BOOST_URL bzip2 "$BUILD_BOOST"
 .endmacro # unpack_boost
@@ -371,14 +360,14 @@ export CPPFLAGS=$SAVE_CPPFLAGS
 .
 .macro create_github(build, prefix)
 .   define my.build = create_github.build
-.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.conditional = get_conditional_parameter(my.build)
 $(my.prefix)create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
 .endmacro # create_github
 .
 .macro build_github(build, prefix)
 .   define my.build = build_github.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
-.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.conditional = get_conditional_parameter(my.build)
 .   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
 local SAVE_CPPFLAGS="$CPPFLAGS"
@@ -390,7 +379,7 @@ export CPPFLAGS=$SAVE_CPPFLAGS
 .macro build_github_test(build, prefix)
 .   define my.build = build_github_test.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
-.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.conditional = get_conditional_parameter(my.build)
 .   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
 local SAVE_CPPFLAGS="$CPPFLAGS"
@@ -417,10 +406,6 @@ create_local_copies()
 .           elsif (is_zmq_build(_build))
     if [[ $(test_produce_dependencies()) ]]; then
 .               unpack_from_tarball_zmq(my.prefix)
-    fi
-.           elsif (is_mbedtls_build(_build))
-    if [[ $(test_produce_dependencies()) ]]; then
-.               unpack_from_tarball_mbedtls(my.prefix)
     fi
 .           elsif (is_boost_build(_build))
     if [[ $(test_produce_dependencies()) ]]; then
@@ -466,10 +451,6 @@ build_local_copies()
 .           elsif (is_zmq_build(_build))
     if [[ $(test_produce_dependencies()) ]]; then
 .               build_from_tarball_zmq(my.prefix)
-    fi
-.           elsif (is_mbedtls_build(_build))
-    if [[ $(test_produce_dependencies()) ]]; then
-.               build_from_tarball_mbedtls(my.prefix)
     fi
 .           elsif (is_boost_build(_build))
     if [[ $(test_produce_dependencies()) ]]; then
@@ -542,7 +523,6 @@ function generate_setup(path_prefix)
             define_build_variables(_repository)
             define_icu(_install)
             define_zmq(_install)
-            define_mbedtls(_install)
             define_boost(_install)
 
             heading1("Define utility functions.")

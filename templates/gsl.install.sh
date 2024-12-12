@@ -182,14 +182,6 @@ make_jobs()
     export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_zmq
 .
-.macro build_from_tarball_mbedtls()
-    unpack_from_tarball "$MBEDTLS_ARCHIVE" "$MBEDTLS_URL" gzip "$BUILD_MBEDTLS"
-    local SAVE_CPPFLAGS="$CPPFLAGS"
-    export CPPFLAGS="$CPPFLAGS ${MBEDTLS_FLAGS[@]}"
-    build_from_tarball "$MBEDTLS_ARCHIVE" . "$PARALLEL" "$BUILD_MBEDTLS" "${MBEDTLS_OPTIONS[@]}" "$@"
-    export CPPFLAGS=$SAVE_CPPFLAGS
-.endmacro # build_mbedtls
-.
 .macro build_boost()
     unpack_from_tarball "$BOOST_ARCHIVE" "$BOOST_URL" bzip2 "$BUILD_BOOST"
     local SAVE_CPPFLAGS="$CPPFLAGS"
@@ -201,7 +193,7 @@ make_jobs()
 .macro build_github(build)
 .   define my.build = build_github.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
-.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.conditional = get_conditional_parameter(my.build)
 .   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
     create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
@@ -214,7 +206,7 @@ make_jobs()
 .macro build_ci(build)
 .   define my.build = build_ci.build
 .   define my.parallel = is_true(my.build.parallel) ?? "$PARALLEL" ? "$SEQUENTIAL"
-.   define my.conditional = is_true(my.build.conditional) ?? "$WITH_$(my.build.name:upper,c)" ? "yes"
+.   define my.conditional = get_conditional_parameter(my.build)
 .   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
     local SAVE_CPPFLAGS="$CPPFLAGS"
@@ -245,8 +237,6 @@ build_all()
 .               build_from_tarball_icu()
 .           elsif (is_zmq_build(_build))
 .               build_from_tarball_zmq()
-.           elsif (is_mbedtls_build(_build))
-.               build_from_tarball_mbedtls()
 .           elsif (is_boost_build(_build))
 .               build_boost()
 .           elsif (is_github_build(_build))
@@ -307,7 +297,6 @@ function generate_installer(path_prefix)
             define_build_variables(_repository)
             define_icu(_install)
             define_zmq(_install)
-            define_mbedtls(_install)
             define_boost(_install)
 
             heading1("Define utility functions.")

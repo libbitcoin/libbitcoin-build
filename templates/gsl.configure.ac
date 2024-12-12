@@ -944,59 +944,6 @@ AC_MSG_NOTICE([$(my.cname)_BUILD_CPPFLAGS : ${$(my.cname)_BUILD_CPPFLAGS}])
 .endmacro
 .
 .#-----------------------------------------------------------------------------
-.# MBEDTLS
-.#-----------------------------------------------------------------------------
-.macro check_mbedtls_base(dependency, configure, indent, prefix, suffix)
-.   define my.dependency = check_mbedtls.dependency
-.   define my.configure = check_mbedtls.configure
-.   require(my.dependency, "dependency", "name")
-.   require(my.dependency, "dependency", "version")
-.
-.   define my.name = my.dependency.name
-.   define my.cname = "$(my.dependency.name:c)"
-.
-$(my.prefix)AC_SUBST([$(my.cname)_INCLUDEDIR], [])
-$(my.indent)AC_SUBST([$(my.cname)_OTHER_CPPFLAGS], [])
-$(my.indent)AC_SUBST([$(my.cname)_CPPFLAGS], [])
-$(my.indent)AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [])
-$(my.indent)AC_SUBST([$(my.cname)_LIBS], ["-lmbedtls -lmbedcrypto -lmbedx509"])
-$(my.indent)AC_MSG_NOTICE([$(my.cname) presumed, not detected - absence of -lmbedtls -lmbedcrypto -lmbedx509 may result in link error.])$(my.suffix)
-.endmacro
-.
-.macro check_mbedtls(dependency, configure)
-.   define my.dependency = check_mbedtls.dependency
-.   define my.configure = check_mbedtls.configure
-.   require(my.dependency, "dependency", "name")
-.   require(my.dependency, "dependency", "version")
-.
-.   define my.name = my.dependency.name
-.   define my.cname = "$(my.dependency.name:c)"
-.   define my.version = my.dependency.version
-.   define my.symbol = find_option_symbol(my.dependency, my.configure)?
-.   heading2("Require $(my.name) of at least version $(my.version) and output ${$(my.cname)_CPPFLAGS/LIBS/PKG}.")
-.   if (!is_empty(my.dependency.comment))
-.       heading3("$(my.dependency.comment)")
-.   endif
-.
-.   if (is_empty(my.symbol))
-.       check_mbedtls_base(my.dependency, my.configure, "", "", "")
-.   elsif (is_empty(my.dependency.extract))
-AS_CASE([${$(my.symbol)}], [yes],
-.       check_mbedtls_base(my.dependency, my.configure, "     ", "    [", "], [])")
-.   else
-AS_CASE([${$(my.symbol)}], [yes],
-.       check_mbedtls_base(my.dependency, my.configure, "     ", "    [", "], [])")
-.   endif
-
-AS_CASE([${enable_isystem}],[yes],
-    [AC_SUBST([$(my.cname)_BUILD_CPPFLAGS], [${$(my.cname)_ISYS_CPPFLAGS}])],
-    [AC_SUBST([$(my.cname)_BUILD_CPPFLAGS], [${$(my.cname)_CPPFLAGS}])])
-
-AC_MSG_NOTICE([$(my.cname)_BUILD_CPPFLAGS : ${$(my.cname)_BUILD_CPPFLAGS}])
-
-.endmacro
-.
-.#-----------------------------------------------------------------------------
 .# Compound flags AX_CHECK_COMPILE_FLAG
 .#-----------------------------------------------------------------------------
 .macro render_compound_flags(compound, repository)
@@ -1155,8 +1102,6 @@ for generate.repository by name as _repository
                 check_boost(_dependency)
             elsif (is_boost_lib_dependency(_dependency))
                 check_boost_lib(_dependency, my.configure)
-            elsif (is_mbedtls_dependency(_dependency))
-                check_mbedtls(_dependency, my.configure)
             elsif (is_java_dependency(_dependency))
                 check_java(_dependency, my.configure)
             elsif (is_python_dependency(_dependency))
