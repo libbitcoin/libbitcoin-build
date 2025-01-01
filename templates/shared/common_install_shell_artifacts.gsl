@@ -500,7 +500,7 @@ normalize_static_and_shared_options()
 .
 .macro define_remove_build_options()
 remove_build_options()
-{    
+{
     # Purge custom build options so they don't break configure.
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
 }
