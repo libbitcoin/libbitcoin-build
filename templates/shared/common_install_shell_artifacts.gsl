@@ -1178,6 +1178,17 @@ initialize_object_directory()
 .endmacro # define_initialize_object_directory
 .
 .
+.macro define_github_branches(install)
+.   define my.install = define_github_branches.install
+.
+.   heading2("Branches for github dependencies.")
+.   for my.install.build as _build where defined(_build.branch)
+$(_build.name:upper,c)_BRANCH="$(_build.branch)"
+.   endfor
+
+.endmacro # define_github_branches
+.
+.
 .macro define_build_variables(repository)
 .   define my.repository = define_build_variables.repository
 .

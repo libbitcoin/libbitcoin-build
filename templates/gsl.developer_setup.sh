@@ -54,6 +54,7 @@ endfunction
     display_message "  --build-obj-dir=<path>   Location of intermediate object files."
     display_message "                             Has no default, required."
     display_message "  --build-sync-only        Restrict actions to syncing necessary targets."
+    display_message "  --build-tag=<value>      Use as branch for libbitcoin projects."
 .endmacro # custom_help
 .
 .macro custom_documentation(repository, install)
@@ -81,6 +82,7 @@ endfunction
             (--build-mode=*)        BUILD_MODE="${OPTION#*=}";;
             (--build-target=*)      BUILD_TARGET="${OPTION#*=}";;
             (--build-sync-only)     SYNC_ONLY="yes";;
+            (--build-tag=*)         BUILD_TAG="${OPTION#*=}";;
 .endmacro # custom_script_options
 .
 .macro define_build_variables_custom(repository)
@@ -99,7 +101,8 @@ BUILD_TARGET="unknown"
 .
 .endmacro # define_build_variables_custom
 .
-.macro define_handle_custom_options()
+.macro define_handle_custom_options(install)
+.   define my.install = define_handle_custom_options.install
 .   heading2("Process script specific options.")
 handle_custom_options()
 {
@@ -131,6 +134,14 @@ handle_custom_options()
         display_error ""
         display_help
         exit 1
+    fi
+
+    if [[ $BUILD_TAG ]]; then
+.   for my.install.build as _build where defined(_build.branch)
+.       if (starts_with(_build.name, "bitcoin-") & (is_github_build(_build)) & starts_with("libbitcoin", _build.github))
+        $(_build.name:upper,c)_BRANCH=${BUILD_TAG}
+.       endif
+.   endfor
     fi
 }
 
@@ -361,7 +372,8 @@ export CPPFLAGS=$SAVE_CPPFLAGS
 .macro create_github(build, prefix)
 .   define my.build = create_github.build
 .   define my.conditional = get_conditional_parameter(my.build)
-$(my.prefix)create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
+.   define my.branch = "${$(my.build.name:upper,c)_BRANCH}"
+$(my.prefix)create_from_github $(my.build.github) $(my.build.repository) $(my.branch) "$(my.conditional)"
 .endmacro # create_github
 .
 .macro build_github(build, prefix)
@@ -520,6 +532,7 @@ function generate_setup(path_prefix)
             documentation(_repository, _install)
 
             heading1("Define constants.")
+            define_github_branches(_install)
             define_build_variables(_repository)
             define_icu(_install)
             define_zmq(_install)
@@ -537,7 +550,7 @@ function generate_setup(path_prefix)
             define_set_os_specific_compiler_settings()
             define_link_to_standard_library()
             define_normalized_configure_options()
-            define_handle_custom_options()
+            define_handle_custom_options(_install)
             define_remove_build_options()
             define_set_prefix()
             define_set_pkgconfigdir(_config)
