@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2023 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
 #
 # GSL generate install-cmakepresets.sh.
 #
@@ -447,7 +447,8 @@ make_jobs()
 .   define my.conditional = is_true(my.build.conditional) ?? "$$(get_build_conditional_variable(my.build))" ? "yes"
 .   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-    create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
+.   define my.branch = "${$(my.build.name:upper,c)_BRANCH}"
+    create_from_github $(my.build.github) $(my.build.repository) $(my.branch) "$(my.conditional)"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS $(my.flags)"
 .   if (is_bitcoin_dependency(my.build))
@@ -465,7 +466,8 @@ make_jobs()
 .   define my.conditional = get_conditional_parameter(my.build)
 .   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
-    create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
+.   define my.branch = "${$(my.build.name:upper,c)_BRANCH}"
+    create_from_github $(my.build.github) $(my.build.repository) $(my.branch) "$(my.conditional)"
     display_message "$(my.build.repository) PRESET ${REPO_PRESET[$(my.build.repository)]}"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS $(my.flags)"
@@ -479,10 +481,11 @@ make_jobs()
 .   define my.conditional = get_conditional_parameter(my.build)
 .   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
+.   define my.branch = "${$(my.build.name:upper,c)_BRANCH}"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS $(my.flags)"
     if [[ ! ($CI == true) ]]; then
-        create_from_github $(my.build.github) $(my.build.repository) $(my.build.branch) "$(my.conditional)"
+        create_from_github $(my.build.github) $(my.build.repository) $(my.branch) "$(my.conditional)"
 .   if (is_bitcoin_dependency(my.build))
         display_message "$(my.build.repository) PRESET ${REPO_PRESET[$(my.build.repository)]}"
         build_from_github_cmake $(my.build.repository) ${REPO_PRESET[$(my.build.repository)]} "$(my.parallel)" true  "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
@@ -573,6 +576,7 @@ function generate_installer_cmake(path_prefix)
             documentation(_repository, _install)
 
             heading1("Define constants.")
+            define_github_branches(_install)
             define_custom_build_variables(_repository)
             define_build_variables(_repository)
             define_icu(_install)

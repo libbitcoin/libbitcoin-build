@@ -1,6 +1,6 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2023 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
 #
 # GSL generate libbitcoin ci.yml.
 #
@@ -306,7 +306,7 @@ function get_job_cc(job)
     endif
 
     return "$(my.compiler)$(my.version)"
-endfunction # get_job_cc 
+endfunction # get_job_cc
 
 function get_job_cxx(job)
     define my.job = get_job_cxx.job
@@ -327,7 +327,7 @@ function get_job_cxx(job)
     endif
 
     return "$(my.compiler)$(my.version)"
-endfunction # get_job_cxx 
+endfunction # get_job_cxx
 
 function get_job_link(job)
     define my.job = get_job_link.job
@@ -549,7 +549,7 @@ function get_sln_tests(repository)
 
     define my.product = my.repository->make->product(\
         defined(_product->runner), _product)?
- 
+
     define my.tests = get_product_tests(my.product)
 
     return is_empty(my.tests) ?? "*" ? "$(my.tests)"
@@ -644,7 +644,7 @@ endfunction # get_sln_tests
           sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.packages }}
 
       - name: Prepare toolchain [brew]
-        if: ${{ matrix.packager == 'brew' }} 
+        if: ${{ matrix.packager == 'brew' }}
         run: |
           brew install autoconf automake libtool ${{ matrix.packages }}
 .
@@ -790,7 +790,7 @@ endfunction # get_sln_tests
         if: ${{ failure() }}
         run: |
           env
- 
+
       - name: Failure list libdir
         if: ${{ failure() }}
         run: |
