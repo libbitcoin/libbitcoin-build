@@ -106,9 +106,8 @@ BUILD_TARGET="unknown"
 .   heading2("Process script specific options.")
 handle_custom_options()
 {
-    if [[ ($BUILD_MODE != "sync") && ($BUILD_MODE != "configure") && ($BUILD_MODE != "build") ]]; then
-        display_error "Unsupported build-mode: $BUILD_MODE"
-        display_error "Supported values are: sync, configure, build"
+    if [[ ! ($BUILD_SRC_DIR) ]]; then
+        display_error "Missing build-src-dir required."
         display_error ""
         display_help
         exit 1
@@ -122,18 +121,21 @@ handle_custom_options()
         exit 1
     fi
 
-    if [[ ! ($BUILD_SRC_DIR) ]]; then
-        display_error "Missing build-src-dir required."
-        display_error ""
-        display_help
-        exit 1
-    fi
+    if [[ ! ($SYNC_ONLY) ]]; then
+        if [[ ($BUILD_MODE != "sync") && ($BUILD_MODE != "configure") && ($BUILD_MODE != "build") ]]; then
+            display_error "Unsupported build-mode: $BUILD_MODE"
+            display_error "Supported values are: sync, configure, build"
+            display_error ""
+            display_help
+            exit 1
+        fi
 
-    if [[ ! ($BUILD_OBJ_DIR) ]]; then
-        display_error "Missing build-obj-dir required."
-        display_error ""
-        display_help
-        exit 1
+        if [[ ! ($BUILD_OBJ_DIR) ]]; then
+            display_error "Missing build-obj-dir required."
+            display_error ""
+            display_help
+            exit 1
+        fi
     fi
 
     if [[ $BUILD_TAG ]]; then
@@ -498,7 +500,9 @@ else
     display_configuration
     push_directory "$BUILD_SRC_DIR"
     initialize_git
-    initialize_object_directory
+    if [[ ! ($SYNC_ONLY) ]]; then
+        initialize_object_directory
+    fi
     create_local_copies
     if [[ $SYNC_ONLY ]]; then
         display_message "Skipping build due to --sync-only."

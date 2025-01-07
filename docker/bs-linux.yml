@@ -1,0 +1,25 @@
+networks:
+  net:
+
+services:
+  bitcoin-server:
+    container_name: bitcoin-server
+    hostname: bitcoin-server
+    image: libbitcoin/bitcoin-server:${VERSION_BITCOIN_SERVER}
+    # restart: unless-stopped
+    ports:
+      - 8333:8333/tcp
+      - 8333:8333/udp
+      - 9081:9081/tcp
+      - 9082:9082/tcp
+      - 9083:9083/tcp
+      - 9084:9084/tcp
+      - 9091:9091/tcp
+      - 9092:9092/tcp
+      - 9093:9093/tcp
+      - 9094:9094/tcp
+    volumes:
+      - ${STORAGE_BITCOIN_DATA}:/bitcoin/blockchain
+      - ${STORAGE_BITCOIN_CONF}:/bitcoin/conf
+    networks:
+      - net
