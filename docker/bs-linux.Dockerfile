@@ -30,8 +30,13 @@ RUN /build/developer_setup.sh \
 
 FROM alpine:latest AS runtime
 
-COPY --from=build /build/prefix/bin/bs /bitcoin
+ENV BUILD_DEPS="build-base linux-headers gcc make autoconf automake libtool pkgconf git wget bash"
 
+RUN apk update && \
+    apk add --update ${BUILD_DEPS}
+
+COPY --from=build /build/prefix/bin/bs /bitcoin/bs
+COPY bs-linux-startup.sh /bitcoin/startup.sh
 # Bitcoin P2P
 EXPOSE 8333/tcp
 EXPOSE 8333/udp
@@ -52,6 +57,6 @@ EXPOSE 9093/tcp
 EXPOSE 9084/tcp
 EXPOSE 9094/tcp
 
-VOLUME ["/bitcoin/data", "/bitcoin/conf"]
-ENTRYPOINT ["/bitcoin/bs"]
-CMD ["-c", "/bitcoin/conf/bs.cfg", "-i", "/bitcoin/data"]
+WORKDIR /bitcoin
+VOLUME ["/bitcoin/blockchain", "/bitcoin/conf"]
+CMD [ "/bitcoin/startup.sh" ]

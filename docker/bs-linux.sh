@@ -2,6 +2,8 @@
 
 set -e
 
+SCRIPT_IDENTITY=$(basename "$0")
+
 display_message()
 {
     printf "%s\n" "$@"
@@ -12,17 +14,6 @@ display_error()
     >&2 printf "%s\n" "$@"
 }
 
-display_help()
-{
-    display_message "Usage: ./bs-linux.sh [OPTION]..."
-    display_message "Manage the generation of a docker image of bitcoin-server (bs)."
-    display_message "Script options:"
-    display_message "  --build-dir=<value>  Directory for building docker image"
-    display_message "  --source=<value>     xml file for gsl generation."
-    display_message "  --tag=<value>        git tag to utilize with source instructions."
-    display_message ""
-}
-
 fatal_error()
 {
     display_error "$@"
@@ -31,12 +22,43 @@ fatal_error()
     exit 1
 }
 
+display_help()
+{
+    display_message "Usage: ./${SCRIPT_IDENTITY} [OPTION]..."
+    display_message "Manage the generation of a docker image of bitcoin-server (bs)."
+    display_message "Script options:"
+    display_message "  --build-dir=<value>  Directory for building docker image"
+    display_message "  --source=<value>     xml file for gsl generation."
+    display_message "  --tag=<value>        git tag to utilize with source instructions."
+    display_message "  --build-only         docker build without reinitializing build-dir."
+    display_message "  --init-only          Initialize build-dir for docker image building."
+    display_message ""
+}
+
+parse_command_line_options()
+{
+    for OPTION in "$@"; do
+        case ${OPTION} in
+            # Specific
+            (--build-dir=*)     DIR_BUILD="${OPTION#*=}";;
+            (--source=*)        SOURCE="${OPTION#*=}";;
+            (--tag=*)           TAG="${OPTION#*=}";;
+            (--build-only)      BUILD_ONLY="yes";;
+            (--init-only)       INIT_ONLY="yes";;
+            # Standard
+            (--help)            DISPLAY_HELP="yes";;
+        esac
+    done
+}
+
 display_state()
 {
     display_message "Parameters:"
     display_message "  DIR_BUILD        : ${DIR_BUILD}"
     display_message "  SOURCE           : ${SOURCE}"
     display_message "  TAG              : ${TAG}"
+    display_message "  BUILD_ONLY       : ${BUILD_ONLY}"
+    display_message "  INIT_ONLY        : ${INIT_ONLY}"
     display_message "Deduced:"
     display_message "  DIR_BUILD_PROJ   : ${DIR_BUILD_PROJ}"
     display_message "  VERSION          : ${VERSION}"
@@ -47,6 +69,17 @@ dispatch_help()
     if [[ ${DISPLAY_HELP} ]]; then
         display_help
         exit 0
+    fi
+}
+
+validate_parameterization()
+{
+    if [ -z ${DIR_BUILD} ]; then
+        fatal_error "  --build-dir=<value> required."
+    fi
+
+    if [ -z ${SOURCE} ]; then
+        fatal_error "  --source=<value> required."
     fi
 }
 
@@ -79,44 +112,6 @@ initialize_environment()
             VERSION="${TAG}"
         fi
     fi
-
-    # cleanup build directory
-    if [ -d ${DIR_BUILD} ]; then
-        display_message "Directory '${DIR_BUILD}' found, emptying..."
-        pushd ${DIR_BUILD}
-        rm -rf Dockerfile developer_setup.sh src/
-        mkdir -p "${DIR_BUILD}/src"
-        popd
-    else
-        display_message "Directory '${DIR_BUILD}' not found, building..."
-        mkdir -p "${DIR_BUILD}/src"
-    fi
-}
-
-validate_parameterization()
-{
-    if [ -z ${DIR_BUILD} ]; then
-        fatal_error "  --build-dir=<value> required."
-    fi
-
-    if [ -z ${SOURCE} ]; then
-        fatal_error "  --source=<value> required."
-    fi
-}
-
-parse_command_line_options()
-{
-    for OPTION in "$@"; do
-        case ${OPTION} in
-            # Specific
-            (--build-dir=*) DIR_BUILD="${OPTION#*=}";;
-            (--source=*)    SOURCE="${OPTION#*=}";;
-            (--tag=*)       TAG="${OPTION#*=}";;
-
-            # Standard
-            (--help)        DISPLAY_HELP="yes";;
-        esac
-    done
 }
 
 generate_instructions()
@@ -130,10 +125,40 @@ generate_instructions()
     popd
 }
 
+emit_compose()
+{
+    cp ${DIR_BUILD_PROJ}/docker/bs-linux.yml ${DIR_BUILD}/bs-linux.yml
+    sed "s/%version%/${VERSION}/" \
+        ${DIR_BUILD_PROJ}/docker/bs-linux.env.in > ${DIR_BUILD}/bs-linux.env
+}
+
+clean_build_directory()
+{
+    # cleanup build directory
+    if [ -d ${DIR_BUILD} ]; then
+        display_message "Directory '${DIR_BUILD}' found, emptying..."
+        pushd ${DIR_BUILD}
+        rm -rf bs-linux-startup.sh developer_setup.sh src/
+        mkdir -p "${DIR_BUILD}/src"
+        popd
+    else
+        display_message "Directory '${DIR_BUILD}' not found, building..."
+        mkdir -p "${DIR_BUILD}/src"
+    fi
+}
+
 initialize_build_directory()
 {
+    if [[ $BUILD_ONLY ]]; then
+        return 0
+    fi
+
+    clean_build_directory
+    generate_instructions
+
     display_message "Initialize build directory contents..."
     cp ${DIR_BUILD_PROJ}/output/libbitcoin-server/developer_setup.sh ${DIR_BUILD}
+    cp ${DIR_BUILD_PROJ}/docker/bs-linux-startup.sh ${DIR_BUILD}
 
     pushd ${DIR_BUILD}
 
@@ -150,10 +175,16 @@ initialize_build_directory()
         --build-target=all
 
     popd
+
+    emit_compose
 }
 
 dockerize()
 {
+    if [[ $INIT_ONLY ]]; then
+        return 0
+    fi
+
     pushd ${DIR_BUILD}
     display_message "----------------------------------------------------------------------"
     display_message "docker build           : libbitcoin/bitcoin-server:${VERSION}"
@@ -166,7 +197,6 @@ parse_command_line_options "$@"
 dispatch_help
 validate_parameterization
 initialize_environment
-display_state
-generate_instructions
 initialize_build_directory
+display_state
 dockerize
