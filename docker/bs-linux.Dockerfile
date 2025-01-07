@@ -30,10 +30,10 @@ RUN /build/developer_setup.sh \
 
 FROM alpine:latest AS runtime
 
-ENV BUILD_DEPS="build-base linux-headers gcc make autoconf automake libtool pkgconf git wget bash"
+ENV RUNTIME_DEPS="bash gcc"
 
 RUN apk update && \
-    apk add --update ${BUILD_DEPS}
+    apk add --update ${RUNTIME_DEPS}
 
 COPY --from=build /build/prefix/bin/bs /bitcoin/bs
 COPY bs-linux-startup.sh /bitcoin/startup.sh
