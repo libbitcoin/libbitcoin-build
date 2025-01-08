@@ -1,5 +1,29 @@
 # dockerized libbitcoin
 
+## bitcoin explorer
+
+A linux image can be generated with the script below. Currently, this is only tested against the `version3` branch with or without the `v3.8.0` tag.
+
+### linux
+
+The following outlines usage of the `bx-linux` artifacts.
+
+#### Image construction
+
+The image construction can then continue via an other invocatio with the following parameters:
+
+```
+./bx-linux.sh --build-dir=<image build dir> --source=<gsl xml source>
+```
+
+#### Container usage
+
+The generated image can be used to execute the `bx` tool via the following:
+
+```
+docker run --interactive --tty --rm --user $(id -u):$(id -g) libbitcoin/bitcoin-explorer:<version>
+```
+
 ## bitcoin server
 
 A linux image can be generated with the script below. Currently, this is only tested against the `version3` branch with or without the `v3.8.0` tag.
