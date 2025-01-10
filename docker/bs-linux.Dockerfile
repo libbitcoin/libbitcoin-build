@@ -14,7 +14,9 @@ RUN mkdir -p /build/src /build/obj /build/prefix
 COPY developer_setup.sh /build
 COPY src/ /build/src
 
-RUN /build/developer_setup.sh \
+WORKDIR /build
+
+RUN ./developer_setup.sh \
     --build-target=dependencies \
     --build-src-dir=/build/src \
     --build-obj-dir=/build/obj \
@@ -22,14 +24,14 @@ RUN /build/developer_setup.sh \
     --build-mode=configure \
     --disable-shared \
     --enable-static \
-    --enable-isystem \
-    --without-consensus \
     --with-icu \
     --build-icu \
     --build-boost \
     --build-zmq
 
-RUN /build/developer_setup.sh \
+ENV BOOST_ROOT="/build/prefix"
+
+RUN ./developer_setup.sh \
     --build-target=libbitcoin \
     --build-src-dir=/build/src \
     --build-obj-dir=/build/obj \
@@ -40,11 +42,9 @@ RUN /build/developer_setup.sh \
     --enable-isystem \
     --without-consensus \
     --with-icu \
-    --build-icu \
-    --build-boost \
-    --build-zmq
+    --with-boost=/build/prefix
 
-RUN /build/developer_setup.sh \
+RUN ./developer_setup.sh \
     --build-target=project \
     --build-src-dir=/build/src \
     --build-obj-dir=/build/obj \
@@ -55,9 +55,7 @@ RUN /build/developer_setup.sh \
     --enable-isystem \
     --without-consensus \
     --with-icu \
-    --build-icu \
-    --build-boost \
-    --build-zmq
+    --with-boost=/build/prefix
 
 RUN rm -rf /build/src /build/obj
 
