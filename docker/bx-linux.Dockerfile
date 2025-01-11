@@ -62,12 +62,11 @@ RUN rm -rf /build/src /build/obj
 
 FROM alpine:latest AS runtime
 
-ENV RUNTIME_DEPS="gcc"
+ENV RUNTIME_DEPS="libstdc++"
 
 RUN apk update && \
     apk add --update ${RUNTIME_DEPS}
 
 COPY --from=build /build/prefix/bin/bx /bitcoin/bx
 
-WORKDIR /bitcoin
 ENTRYPOINT [ "/bitcoin/bx" ]
