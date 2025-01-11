@@ -23,7 +23,6 @@ RUN /build/developer_setup.sh \
     --disable-shared \
     --enable-static \
     --enable-isystem \
-    --without-consensus \
     --with-icu \
     --build-icu \
     --build-boost \
@@ -38,7 +37,6 @@ RUN /build/developer_setup.sh \
     --disable-shared \
     --enable-static \
     --enable-isystem \
-    --without-consensus \
     --with-icu \
     --build-icu \
     --build-boost \
@@ -53,11 +51,11 @@ RUN /build/developer_setup.sh \
     --disable-shared \
     --enable-static \
     --enable-isystem \
-    --without-consensus \
     --with-icu \
     --build-icu \
     --build-boost \
-    --build-zmq
+    --build-zmq \
+    --without-tests
 
 RUN rm -rf /build/src /build/obj
 
@@ -65,34 +63,12 @@ RUN rm -rf /build/src /build/obj
 
 FROM alpine:latest AS runtime
 
-ENV RUNTIME_DEPS="bash gcc"
+ENV RUNTIME_DEPS="gcc"
 
 RUN apk update && \
     apk add --update ${RUNTIME_DEPS}
 
-COPY --from=build /build/prefix/bin/bs /bitcoin/bs
-COPY bs-linux-startup.sh /bitcoin/startup.sh
-
-# Bitcoin P2P
-EXPOSE 8333/tcp
-EXPOSE 8333/udp
-
-# Query Service (Secure/Public)
-EXPOSE 9081/tcp
-EXPOSE 9091/tcp
-
-# Heartbeat Service (Secure/Public)
-EXPOSE 9082/tcp
-EXPOSE 9092/tcp
-
-# Block Service (Secure/Public)
-EXPOSE 9083/tcp
-EXPOSE 9093/tcp
-
-# Transaction Service (Secure/Public)
-EXPOSE 9084/tcp
-EXPOSE 9094/tcp
+COPY --from=build /build/prefix/bin/bx /bitcoin/bx
 
 WORKDIR /bitcoin
-VOLUME ["/bitcoin/blockchain", "/bitcoin/conf"]
-CMD [ "/bitcoin/startup.sh" ]
+ENTRYPOINT [ "/bitcoin/bx" ]
