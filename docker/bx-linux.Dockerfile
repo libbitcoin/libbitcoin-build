@@ -1,7 +1,7 @@
 FROM alpine:latest AS build
 
 ENV OPTIMIZATION="-O3"
-ENV BUILD_DEPS="build-base linux-headers gcc make autoconf automake libtool pkgconf git wget bash"
+ENV BUILD_DEPS="build-base linux-headers g++ make autoconf automake libtool pkgconf git wget bash"
 
 ENV CFLAGS="${OPTIMIZATION}"
 ENV CXXFLAGS="${OPTIMIZATION}"

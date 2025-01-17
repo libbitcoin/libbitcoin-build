@@ -65,5 +65,9 @@ docker compose --env-file bs-linux.env --file bs-linux.yml up -t 3600 -d
 
 ##### Terminating container
 ```
-docker compose --env-file bs-linux.env --file bs-linux.yml down -t 3600 -v
+docker compose --env-file bs-linux.env --file bs-linux.yml down -t 3600
 ```
+
+Note that `-v` would remove listed volumes.
+In the case of `bs`, this includes blockchain storage.
+
