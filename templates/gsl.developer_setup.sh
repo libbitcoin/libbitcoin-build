@@ -128,6 +128,10 @@ handle_custom_options()
             display_error ""
             display_help
             exit 1
+        elif [[ ($BUILD_MODE != "build") ]]; then
+            BUILD_PRECLEAN=true
+        else
+            BUILD_PRECLEAN=false
         fi
 
         if [[ ! ($BUILD_OBJ_DIR) ]]; then
@@ -231,7 +235,7 @@ make_project_directory()
     PROJ_CONFIG_DIR=\$(pwd)
 
     if [[ -f "$PROJ_NAME/configure" ]]; then
-        if [[ $BUILD_MODE != "reuse" ]]; then
+        if [[ $BUILD_MODE != "build" ]]; then
             # reconfigure using autoreconf
             autoreconf -i
         fi
@@ -242,7 +246,7 @@ make_project_directory()
 
     push_obj_directory "$PROJ_NAME"
     configure_options "$PROJ_CONFIG_DIR" "$@"
-    make_jobs true "$JOBS"
+    make_jobs $BUILD_PRECLEAN "$JOBS"
 
     if [[ $TEST == true ]]; then
         make_tests "$JOBS"

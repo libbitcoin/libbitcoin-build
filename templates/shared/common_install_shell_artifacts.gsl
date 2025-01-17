@@ -708,7 +708,7 @@ configure_options()
 .
 .macro define_make_tests(has_preclean_option)
 .   define my.make_jobs_preclean = is_true(my.has_preclean_option) \
-        ?? "make_jobs true" ? "make_jobs"
+        ?? "make_jobs $BUILD_PRECLEAN" ? "make_jobs"
 .   define my.make_jobs_noclean = is_true(my.has_preclean_option) \
         ?? "make_jobs false" ? "make_jobs"
 .
