@@ -291,7 +291,7 @@
 	<axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
         <option autotools="--enable-avx2" cmake="-Denable-avx2=on" />
-        <option autotools="--enable-sse4" cmake="-Denable-sse4=on" />
+        <option autotools="--enable-sse41" cmake="-Denable-sse41=on" />
       </job>
 
       <job build="all" 
@@ -315,14 +315,14 @@
         <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
-        <option autotools="--enable-sse4" cmake="-Denable-sse4=on" />
+        <option autotools="--enable-sse41" cmake="-Denable-sse41=on" />
       </job>
 
       <job build="autotools" 
            system="linux" image="ubuntu-22.04" 
            compiler="gcc" version="11" 
            assert="ndebug" link="static" optimization="size" 
-           coverage="true">
+           coverage="true" detectcpuflags="true">
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />

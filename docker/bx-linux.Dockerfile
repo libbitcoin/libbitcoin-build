@@ -1,7 +1,7 @@
 FROM alpine:latest AS build
 
 ENV OPTIMIZATION="-O3"
-ENV BUILD_DEPS="build-base linux-headers gcc make autoconf automake libtool pkgconf git wget bash"
+ENV BUILD_DEPS="build-base linux-headers g++ make autoconf automake libtool pkgconf git wget bash"
 
 ENV CFLAGS="${OPTIMIZATION}"
 ENV CXXFLAGS="${OPTIMIZATION}"
@@ -14,7 +14,9 @@ RUN mkdir -p /build/src /build/obj /build/prefix
 COPY developer_setup.sh /build
 COPY src/ /build/src
 
-RUN /build/developer_setup.sh \
+WORKDIR /build
+
+RUN ./developer_setup.sh \
     --build-target=dependencies \
     --build-src-dir=/build/src \
     --build-obj-dir=/build/obj \
@@ -22,13 +24,14 @@ RUN /build/developer_setup.sh \
     --build-mode=configure \
     --disable-shared \
     --enable-static \
-    --enable-isystem \
     --with-icu \
     --build-icu \
     --build-boost \
     --build-zmq
 
-RUN /build/developer_setup.sh \
+ENV BOOST_ROOT="/build/prefix"
+
+RUN ./developer_setup.sh \
     --build-target=libbitcoin \
     --build-src-dir=/build/src \
     --build-obj-dir=/build/obj \
@@ -38,11 +41,9 @@ RUN /build/developer_setup.sh \
     --enable-static \
     --enable-isystem \
     --with-icu \
-    --build-icu \
-    --build-boost \
-    --build-zmq
+    --with-boost=/build/prefix
 
-RUN /build/developer_setup.sh \
+RUN ./developer_setup.sh \
     --build-target=project \
     --build-src-dir=/build/src \
     --build-obj-dir=/build/obj \
@@ -52,9 +53,7 @@ RUN /build/developer_setup.sh \
     --enable-static \
     --enable-isystem \
     --with-icu \
-    --build-icu \
-    --build-boost \
-    --build-zmq \
+    --with-boost=/build/prefix \
     --without-tests
 
 RUN rm -rf /build/src /build/obj
@@ -63,12 +62,11 @@ RUN rm -rf /build/src /build/obj
 
 FROM alpine:latest AS runtime
 
-ENV RUNTIME_DEPS="gcc"
+ENV RUNTIME_DEPS="libstdc++"
 
 RUN apk update && \
     apk add --update ${RUNTIME_DEPS}
 
 COPY --from=build /build/prefix/bin/bx /bitcoin/bx
 
-WORKDIR /bitcoin
 ENTRYPOINT [ "/bitcoin/bx" ]
