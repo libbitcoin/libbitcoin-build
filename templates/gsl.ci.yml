@@ -497,8 +497,20 @@ function get_job_coverage(job)
         my.coverage = "cov"
     endif
 
-return my.coverage
+    return my.coverage
 endfunction # get_job_coverage
+
+function get_job_cpuflag_detection(job)
+    define my.job = get_job_cpuflag_detection.job
+    define my.value = "ignore"
+
+    if (defined(my.job.detectcpuflags) & !is_empty(my.job.detectcpuflags) &\
+      (my.job.detectcpuflags = "true"))
+        my.value = "detect"
+    endif
+
+    return my.value
+endfunction # get_job_cpuflag_detection
 
 function get_coverage_exclusions(ci)
     define my.ci = get_coverage_exclusions.ci
@@ -578,6 +590,7 @@ endfunction # get_sln_tests
             optimization: "$(get_job_optimization(my.job))"
             assert: "$(get_job_assert(my.job))"
             coverage: "$(get_job_coverage(my.job))"
+            detectcpuflags: "$(get_job_cpuflag_detection(my.job))"
 .       for my.ci.axis by "$(name)" as _axis
             $(_axis.name): "$( get_job_shell_axis_value(my.config, my.integration, my.job, _axis))"
 .       endfor
@@ -649,6 +662,39 @@ endfunction # get_sln_tests
           brew install autoconf automake libtool ${{ matrix.packages }}
 .
 .endmacro # emit_step_prepare_toolchain
+.
+.macro emit_step_cpuflag_determination(configuration, repository)
+.   define my.config = emit_step_cpuflag_determination.configuration
+.   define my.repository = emit_step_cpuflag_determination.repository
+.
+.   define my.sse41 = defined(my.config.cmake) ?? "-Denable-sse41=on" ? "--enable-sse41"
+.   define my.avx2 = defined(my.config.cmake) ?? "-Denable-avx2=on" ? "--enable-avx2"
+.   define my.avx512 = defined(my.config.cmake) ?? "-Denable-avx512=on" ? "--enable-avx512"
+.   define my.shani = defined(my.config.cmake) ?? "-Denable-shani=on" ? "--enable-shani"
+.
+      - name: Determine CPU flags
+        shell: bash
+        run: |
+          if [[ -n \$(cat /proc/cpuinfo | grep flags | grep " sse4_1 ") ]]; then
+              echo "CPU_SUPPORT_SSE41=$(my.sse41)" >> $GITHUB_ENV
+          fi
+
+          if [[ -n \$(cat /proc/cpuinfo | grep flags | grep " avx " | grep " avx2 ") ]]; then
+              echo "CPU_SUPPORT_AVX2=$(my.avx2)" >> $GITHUB_ENV
+          fi
+
+          if [[ -n \$(cat /proc/cpuinfo | grep flags | grep " avx512bw ") ]]; then
+              echo "CPU_SUPPORT_AVX512=$(my.avx512)" >> $GITHUB_ENV
+          fi
+
+          if [[ -n \$(cat /proc/cpuinfo | grep flags | grep " sha_ni ") ]]; then
+              echo "CPU_SUPPORT_SHANI=$(my.shani)" >> $GITHUB_ENV
+          fi
+
+          if [[ ${{ matrix.detectcpuflags }} == 'detect' ]]; then
+              echo "CPU_SUPPORTED_FLAGS='$CPU_SUPPORT_SSE41 $CPU_SUPPORT_AVX2 $CPU_SUPPORT_AVX512 $CPU_SUPPORT_SHANI'" >> $GITHUB_ENV
+          fi
+.endmacro # emit_step_cpuflag_determination
 .
 .macro emit_step_display_environment(configuration, repository)
 .   define my.config = emit_step_display_environment.configuration
@@ -739,6 +785,7 @@ endfunction # get_sln_tests
 .   endif
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
+          ${{ env.CPU_SUPPORTED_FLAGS }}
 .       for my.ci.axis as _axis
           ${{ matrix.$(_axis.name) }}
 .       endfor
@@ -860,6 +907,8 @@ endfunction # get_sln_tests
         uses: actions/checkout@v4
 
 .   emit_step_prepare_toolchain(my.config)
+
+.   emit_step_cpuflag_determination(my.config, my.repository)
 
 .   emit_step_parameter_denormalization(my.config, my.repository)
 
