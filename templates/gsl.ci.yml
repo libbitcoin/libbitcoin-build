@@ -806,9 +806,9 @@ endfunction # get_sln_tests
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
-          lcov --directory . --capture --ignore-errors version --output-file coverage.info
-          lcov --remove coverage.info $(my.exclusions) --output-file --ignore-errors version coverage.info
-          lcov --list --ignore-errors version coverage.info
+          lcov --ignore-errors version,gcov,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info $(my.exclusions) --output-file coverage.info
+          lcov --list coverage.info
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
