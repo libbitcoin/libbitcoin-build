@@ -253,9 +253,10 @@
     </presets>
 
     <ci>
-      <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="secp256k1" build="true" />
+      <axis name="llvm" valued="true" />
+      <axis name="boost" build="true" param="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
+      <axis name="secp256k1" build="true" param="true" />
 
       <coverage>
         <exclude path="src/wallet/addresses/qrencode/*" />
@@ -264,8 +265,9 @@
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" 
+           system="osx"
            assert="ndebug" link="dynamic" optimization="size">
+        <axis name="llvm" value="llvm@16" />
         <axis name="boost" value="build" />
         <axis name="secp256k1" value="build" />
         <!-- <axis name="icu" value="with" /> -->
@@ -273,8 +275,9 @@
       </job>
 
       <job build="all" 
-           system="osx" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
+        <axis name="llvm" value="llvm@16" />
         <axis name="boost" value="build" />
         <axis name="secp256k1" value="build" />
         <!-- <axis name="icu" value="build" /> -->
@@ -282,10 +285,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="clang" version="16"
            assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
 	<axis name="secp256k1" value="build" />
@@ -295,10 +299,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="clang" version="16"
            assert="ndebug" link="static" optimization="size" 
            preset="nix-gnu-release-static">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -307,10 +312,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="dynamic" optimization="size" 
            preset="nix-gnu-release-shared">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
@@ -319,10 +325,11 @@
       </job>
 
       <job build="autotools" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="static" optimization="size" 
            coverage="true" detectcpuflags="true">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -331,9 +338,10 @@
       </job>
 
       <job build="cmake" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="static" optimization="size">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -477,17 +485,19 @@
     </presets>
 
     <ci>
-      <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="secp256k1" build="true" />
+      <axis name="llvm" valued="true" />
+      <axis name="boost" build="true" param="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
+      <axis name="secp256k1" build="true" param="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
       <job build="all" 
-           system="osx"  
+           system="osx"
            assert="ndebug" link="dynamic" optimization="size">
+        <axis name="llvm" value="llvm@16" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="with" /> -->
         <axis name="secp256k1" value="build" />
@@ -495,8 +505,9 @@
       </job>
 
       <job build="all" 
-           system="osx" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
+        <axis name="llvm" value="llvm@16" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
         <axis name="secp256k1" value="build" />
@@ -504,10 +515,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="clang" version="16"
            assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
@@ -515,10 +527,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="clang" version="16"
            assert="ndebug" link="static" optimization="size" 
            preset="nix-gnu-release-static">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -526,10 +539,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="dynamic" optimization="size" 
            preset="nix-gnu-release-shared">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
@@ -537,10 +551,11 @@
       </job>
 
       <job build="autotools" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="static" optimization="size" 
-           coverage="true">
+           coverage="true" detectcpuflags="true">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -548,9 +563,10 @@
       </job>
 
       <job build="cmake" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="static" optimization="size">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -681,16 +697,18 @@
     </presets>
 
     <ci>
-      <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="secp256k1" build="true" />
-      <axis name="zmq" build="true" />
+      <axis name="llvm" valued="true" />
+      <axis name="boost" build="true" param="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
+      <axis name="secp256k1" build="true" param="true" />
+      <axis name="zmq" build="true" param="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <job build="all" 
-           system="osx" 
+           system="osx"
            assert="ndebug" link="dynamic" optimization="size">
+        <axis name="llvm" value="llvm@16" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="with" /> -->
         <axis name="secp256k1" value="build" />
@@ -699,8 +717,9 @@
       </job>
 
       <job build="all" 
-           system="osx"  
+           system="osx"
            assert="ndebug" link="static" optimization="size">
+        <axis name="llvm" value="llvm@16" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
         <axis name="secp256k1" value="build" />
@@ -709,10 +728,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="clang" version="16"
            assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
@@ -721,10 +741,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="clang" version="16"
            assert="ndebug" link="static" optimization="size" 
            preset="nix-gnu-release-static">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -733,10 +754,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="dynamic" optimization="size" 
            preset="nix-gnu-release-shared">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
@@ -745,10 +767,12 @@
       </job>
 
       <job build="autotools" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
-           assert="ndebug" link="static" optimization="size">
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
+           assert="ndebug" link="static" optimization="size"
+           detectcpuflags="true">
         <!-- coverage="true" -->
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -757,9 +781,10 @@
       </job>
 
       <job build="cmake" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="static" optimization="size">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -1269,13 +1294,15 @@
     </presets>
 
     <ci>
-      <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="secp256k1" build="true" />
+      <axis name="llvm" valued="true" />
+      <axis name="boost" build="true" param="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
+      <axis name="secp256k1" build="true" param="true" />
 
       <job build="all" 
-           system="osx"  
+           system="osx"
            assert="ndebug" link="dynamic" optimization="size">
+        <axis name="llvm" value="llvm@16" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
         <axis name="secp256k1" value="build" />
@@ -1283,8 +1310,9 @@
       </job>
 
       <job build="all" 
-           system="osx" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
+        <axis name="llvm" value="llvm@16" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
         <axis name="secp256k1" value="build" />
@@ -1292,10 +1320,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="clang" version="16"
            assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
@@ -1303,11 +1332,12 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="clang" version="16"
            assert="ndebug" link="static" optimization="size" 
            preset="nix-gnu-release-static">
         <!-- version="5.0" -->
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -1315,11 +1345,12 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="dynamic" optimization="size" 
            preset="nix-gnu-release-shared">
         <!-- version="4.8" -->
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
@@ -1327,10 +1358,11 @@
       </job>
 
       <job build="autotools" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="static" optimization="size" assert="ndebug" 
-           coverage="true">
+           coverage="true" detectcpuflags="true">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -1338,9 +1370,10 @@
       </job>
 
       <job build="cmake" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="static" optimization="size">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -1482,14 +1515,16 @@
     </presets>
 
     <ci>
-      <axis name="boost" build="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" />
-      <axis name="secp256k1" build="true" />
+      <axis name="llvm" valued="true" />
+      <axis name="boost" build="true" param="true" />
+      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
+      <axis name="secp256k1" build="true" param="true" />
       <!--<axis name="consensus" with="true" without="true" recognized="true" />-->
 
       <job build="all" 
-           system="osx" 
+           system="osx"
            assert="ndebug" link="dynamic" optimization="size">
+        <axis name="llvm" value="llvm@16" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
         <axis name="secp256k1" value="build" />
@@ -1498,8 +1533,9 @@
       </job>
 
       <job build="all" 
-           system="osx" 
+           system="osx"
            assert="ndebug" link="static" optimization="size">
+        <axis name="llvm" value="llvm@16" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
         <axis name="secp256k1" value="build" />
@@ -1508,10 +1544,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="clang" version="16"
            assert="debug" link="dynamic" optimization="debug" 
            preset="nix-gnu-debug-shared">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
@@ -1520,10 +1557,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="clang" version="15" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="clang" version="16"
            assert="ndebug" link="static" optimization="size" 
            preset="nix-gnu-release-static">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -1532,10 +1570,11 @@
       </job>
 
       <job build="all" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="dynamic" optimization="size" 
            preset="nix-gnu-release-shared">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
@@ -1544,10 +1583,11 @@
       </job>
 
       <job build="autotools" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="static" optimization="size" 
-           coverage="true">
+           coverage="true" detectcpuflags="true">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -1556,9 +1596,10 @@
       </job>
 
       <job build="cmake" 
-           system="linux" image="ubuntu-22.04" 
-           compiler="gcc" version="11" 
+           system="linux" image="ubuntu-24.04" 
+           compiler="gcc" version="12" 
            assert="ndebug" link="static" optimization="size">
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
@@ -2217,6 +2258,7 @@
   <integration>
     <dependency name="boost" os="osx" package="boost" defines="-DBOOST_NO_CXX98_FUNCTION_BASE" />
     <dependency name="icu" os="osx" package="icu4c" />
+    <dependency name="llvm" os="osx" package="llvm@16" />
   </integration>
 
   <templates source="generate4.xml">

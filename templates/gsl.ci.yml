@@ -437,6 +437,10 @@ function get_job_axis_value(configuration, decl, job, axis)
         endif
 
         my.value = "$(my.axis_without)"
+    elsif (defined(my.decl.valued) & (my.decl.valued = "true"))
+        if (defined(my.axis.value))
+            my.value = "$(my.axis.value)"
+        endif
     else
         abort "Unrecognized value '$(my.axis.value)' provided for axis '$(my.axis.name)'."
     endif
@@ -591,7 +595,7 @@ endfunction # get_sln_tests
             assert: "$(get_job_assert(my.job))"
             coverage: "$(get_job_coverage(my.job))"
             detectcpuflags: "$(get_job_cpuflag_detection(my.job))"
-.       for my.ci.axis by "$(name)" as _axis
+.       for my.ci.axis by "$(name)" as _axis where !defined(_axis.silent)
             $(_axis.name): "$( get_job_shell_axis_value(my.config, my.integration, my.job, _axis))"
 .       endfor
             cc: "$(get_job_cc(my.job))"
@@ -660,6 +664,9 @@ endfunction # get_sln_tests
         if: ${{ matrix.packager == 'brew' }}
         run: |
           brew install autoconf automake libtool ${{ matrix.packages }}
+          if [[ -n ${{ matrix.llvm }} ]]; then
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
+          fi
 .
 .endmacro # emit_step_prepare_toolchain
 .
@@ -786,7 +793,7 @@ endfunction # get_sln_tests
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
           ${{ env.CPU_SUPPORTED_FLAGS }}
-.       for my.ci.axis as _axis
+.       for my.ci.axis as _axis where (defined(_axis.param) & (_axis.param = "true"))
           ${{ matrix.$(_axis.name) }}
 .       endfor
 .endmacro # emit_step_execute_shell
@@ -799,9 +806,9 @@ endfunction # get_sln_tests
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
-          lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info $(my.exclusions) --output-file coverage.info
-          lcov --list coverage.info
+          lcov --directory . --capture --ignore-errors version --output-file coverage.info
+          lcov --remove coverage.info $(my.exclusions) --output-file --ignore-errors version coverage.info
+          lcov --list --ignore-errors version coverage.info
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
