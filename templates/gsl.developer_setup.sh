@@ -523,6 +523,7 @@ fi
 # Generation
 ###############################################################################
 function generate_setup(path_prefix)
+    define my.integration = generate->integration
     for generate.repository by name as _repository
         require(_repository, "repository", "name")
         define my.output_path = join(my.path_prefix, _repository.name)
@@ -555,7 +556,7 @@ function generate_setup(path_prefix)
             define_handle_help_line_option()
             define_set_operating_system()
             define_parallelism()
-            define_set_os_specific_compiler_settings()
+            define_set_os_specific_compiler_settings(my.integration)
             define_link_to_standard_library()
             define_normalized_configure_options()
             define_handle_custom_options(_install)

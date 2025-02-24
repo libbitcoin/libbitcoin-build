@@ -67,6 +67,21 @@ function get_conditional_parameter(build)
     return is_true(my.build.conditional) ?? "$$(get_build_conditional_variable(my.build))" ? "yes"
 endfunction
 
+function get_integration_dependency_condition(dependency)
+    define my.dependency = get_integration_dependency_condition.dependency
+    define my.result = ""
+
+    if (my.dependency.os = "osx")
+        my.result = "($OS == Darwin) && ($CC == clang*)"
+    elsif (my.dependency.os = "linux")
+        my.result = "($OS == Linux)"
+    else
+        abort "get_integration_dependency_condition failed due to unsupported os value '$(my.dependency.os)."
+    endif
+
+    return my.result
+endfunction
+
 # Functions with specific knowledge of ICU archive file name and URL structure.
 
 function get_icu_file(install)
@@ -453,7 +468,9 @@ configure_build_parallelism()
 
 .endmacro # define_parallelism
 .
-.macro define_set_os_specific_compiler_settings()
+.macro define_set_os_specific_compiler_settings(integration)
+.   define my.integration = define_set_os_specific_compiler_settings.integration
+.
 set_os_specific_compiler_settings()
 {
     if [[ $OS == Darwin ]]; then
@@ -468,6 +485,14 @@ set_os_specific_compiler_settings()
     else # Linux
         STDLIB="stdc++"
     fi
+.   for my.integration.dependency as _dependency where defined(_dependency.defines)
+.       define my.condition = get_integration_dependency_condition(_dependency)
+
+    if [[ $(my.condition) ]]; then
+        CFLAGS="${CFLAGS} $(_dependency.defines)"
+        CXXFLAGS="${CXXFLAGS} $(_dependency.defines)"
+    fi
+.   endfor
 }
 
 .endmacro # define_set_os_specific_compiler_settings

@@ -377,19 +377,6 @@ function get_job_cflags(integration, repository, job)
                 if (defined(my.dependency.path))
                     my.flags = "$(my.flags) -I$(my.dependency.path)/include"
                 endif
-
-                if (defined(my.dependency.defines))
-                    my.flags = "$(my.flags) $(my.dependency.defines)"
-                endif
-            endif
-        else
-            if (count(my.integration.dependency, ((count.name = _axis.name) & (count.os = my.job.system))) = 1)
-                define my.dependency = my.integration->dependency(\
-                    (name = _axis.name) & (os = my.job.system))
-
-                if (defined(my.dependency.defines))
-                    my.flags = "$(my.flags) $(my.dependency.defines)"
-                endif
             endif
         endif
     endfor
