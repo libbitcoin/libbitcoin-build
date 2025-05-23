@@ -6,6 +6,7 @@
 
 Libbitcoin Build uses templates and XML data to generate build artifacts for the following libbitcoin libraries.
 
+See [MAINTAINED.md](MAINTAINED.md) for a list of artifacts maintained by this project.
 
 * [![libbitcoin](https://github.com/libbitcoin/libbitcoin-system/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-system) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-system/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-system) libbitcoin-system
 * [![libbitcoin-blockchain](https://github.com/libbitcoin/libbitcoin-blockchain/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-blockchain) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-blockchain/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-blockchain) libbitcoin-blockchain
