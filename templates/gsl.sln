@@ -116,6 +116,10 @@ EndGlobal
 \t\tStaticDebug|x64 = StaticDebug|x64
 \t\tStaticRelease|Win32 = StaticRelease|Win32
 \t\tStaticRelease|x64 = StaticRelease|x64
+\t\tStaticDebug|ARM = StaticDebug|ARM
+\t\tStaticDebug|ARM64 = StaticDebug|ARM64
+\t\tStaticRelease|ARM = StaticRelease|ARM
+\t\tStaticRelease|ARM64 = StaticRelease|ARM64
 \tEndGlobalSection
 .endmacro emit_presolution
 .
@@ -136,6 +140,14 @@ EndGlobal
 \t\t{$(my.uuid:upper)}.StaticRelease|Win32.Build.0 = ReleaseLIB|Win32
 \t\t{$(my.uuid:upper)}.StaticRelease|x64.ActiveCfg = ReleaseLIB|x64
 \t\t{$(my.uuid:upper)}.StaticRelease|x64.Build.0 = ReleaseLIB|x64
+\t\t{$(my.uuid:upper)}.StaticDebug|ARM.ActiveCfg = DebugLIB|ARM
+\t\t{$(my.uuid:upper)}.StaticDebug|ARM.Build.0 = DebugLIB|ARM
+\t\t{$(my.uuid:upper)}.StaticDebug|ARM64.ActiveCfg = DebugLIB|ARM64
+\t\t{$(my.uuid:upper)}.StaticDebug|ARM64.Build.0 = DebugLIB|ARM64
+\t\t{$(my.uuid:upper)}.StaticRelease|ARM.ActiveCfg = ReleaseLIB|ARM
+\t\t{$(my.uuid:upper)}.StaticRelease|ARM.Build.0 = ReleaseLIB|ARM
+\t\t{$(my.uuid:upper)}.StaticRelease|ARM64.ActiveCfg = ReleaseLIB|ARM64
+\t\t{$(my.uuid:upper)}.StaticRelease|ARM64.Build.0 = ReleaseLIB|ARM64
 .endmacro emit_library_crossproduct
 .
 .macro emit_binary_crossproduct(uuid)
@@ -147,6 +159,14 @@ EndGlobal
 \t\t{$(my.uuid:upper)}.StaticRelease|Win32.Build.0 = ReleaseSEXE|Win32
 \t\t{$(my.uuid:upper)}.StaticRelease|x64.ActiveCfg = ReleaseSEXE|x64
 \t\t{$(my.uuid:upper)}.StaticRelease|x64.Build.0 = ReleaseSEXE|x64
+\t\t{$(my.uuid:upper)}.StaticDebug|ARM.ActiveCfg = DebugSEXE|ARM
+\t\t{$(my.uuid:upper)}.StaticDebug|ARM.Build.0 = DebugSEXE|ARM
+\t\t{$(my.uuid:upper)}.StaticDebug|ARM64.ActiveCfg = DebugSEXE|ARM64
+\t\t{$(my.uuid:upper)}.StaticDebug|ARM64.Build.0 = DebugSEXE|ARM64
+\t\t{$(my.uuid:upper)}.StaticRelease|ARM.ActiveCfg = ReleaseSEXE|ARM
+\t\t{$(my.uuid:upper)}.StaticRelease|ARM.Build.0 = ReleaseSEXE|ARM
+\t\t{$(my.uuid:upper)}.StaticRelease|ARM64.ActiveCfg = ReleaseSEXE|ARM64
+\t\t{$(my.uuid:upper)}.StaticRelease|ARM64.Build.0 = ReleaseSEXE|ARM64
 .endmacro emit_binary_crossproduct
 .
 .macro emit_solution_properties()
