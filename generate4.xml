@@ -29,16 +29,11 @@
       <!-- https://svn.boost.org/trac/boost/ticket/8973 [gcc, 1.54] -->
       <!-- https://svn.boost.org/trac/boost/ticket/6851 [gcc, 1.50-1.53] -->
       <!-- [compiler failure]                           [vc120 1.62-1.72] -->
-      <dependency name="boost" version="1.76.0" />
-      <!-- boost atomic is header-only for lock-free cases. -->
-      <dependency name="boost_chrono" />
-      <dependency name="boost_container" m4="none" />
+      <dependency name="boost" version="1.86.0" />
       <dependency name="boost_iostreams" />
-      <!-- boost json is not used in the header-only configuration. -->
-      <dependency name="boost_json" />
       <dependency name="boost_locale" />
       <dependency name="boost_program_options" />
-      <dependency name="boost_system" />
+      <!-- boost_locale creates a dependency on boost_thread for thread local storage. -->
       <dependency name="boost_thread" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="pthread" system_exclude="android" />
@@ -69,8 +64,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-
-      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -153,12 +146,10 @@
       <product prefix="lib" path="src" uuid="39f60708-ff48-4c22-952d-43470866f684" >
         <flag substitute="icu" />
         <library name="boost" />
-        <library name="boost_chrono" />
         <library name="boost_iostreams" />
-        <library name="boost_json" />
         <library name="boost_locale" />
         <library name="boost_program_options" />
-        <library name="boost_system" />
+        <!-- boost_locale creates a dependency on boost_thread for thread local storage. -->
         <library name="boost_thread" />
         <library name="pthread" />
         <library name="rt" />
@@ -205,14 +196,11 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.78.0" parallel="true" nuget="true" prebuild="true" presentation="Boost" conditional="true" >
+      <build name="boost" version="1.86.0" parallel="true" nuget="true" prebuild="true" presentation="Boost" conditional="true" >
         <flag value="-Wno-enum-constexpr-conversion" />
-        <option value="--with-chrono" />
         <option value="--with-iostreams" />
-        <option value="--with-json" />
         <option value="--with-locale" />
         <option value="--with-program_options" />
-        <option value="--with-system" />
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
@@ -356,7 +344,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost" version="1.86.0" />
       <dependency name="boost_regex" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="4.0.0" />
@@ -379,8 +367,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-
-      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -436,15 +422,12 @@
         <option value="--disable-tests" />
         <option value="--disable-samples" />
       </build>
-      <build name="boost" version="1.78.0" parallel="true" nuget="true" prebuild="true" presentation="Boost" conditional="true" >
+      <build name="boost" version="1.86.0" parallel="true" nuget="true" prebuild="true" presentation="Boost" conditional="true" >
         <flag value="-Wno-enum-constexpr-conversion" />
-        <option value="--with-chrono" />
         <option value="--with-iostreams" />
-        <option value="--with-json" />
         <option value="--with-locale" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
-        <option value="--with-system" />
         <option value="--with-thread" />
         <option value="--with-test" />
       </build>
@@ -580,7 +563,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost" version="1.86.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
       <dependency name="zmq" version="4.3.5" />
@@ -604,8 +587,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-
-      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -800,7 +781,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost" version="1.86.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="4.0.0" />
       <dependency name="bitcoin-protocol" version="4.0.0" />
@@ -823,8 +804,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-
-      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -973,7 +952,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost" version="1.86.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="4.0.0" />
@@ -1000,8 +979,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-
-      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -1192,7 +1169,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost" version="1.86.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="4.0.0" />
 
@@ -1214,8 +1191,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-
-      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -1380,7 +1355,6 @@
     <package library="bitcoin-node" description="Bitcoin Full Node" url="https://github.com/libbitcoin/libbitcoin-node" />
 
     <configure>
-      <!--<option type="with" name="consensus" default="yes" define="WITH_CONSENSUS" description="Link libbitcoin-consensus and use for consensus checks." />-->
       <option type="with" name="bash-completiondir" default="no" example="[=DIR]" unprefixed="true" substitute="true" conditional="true" description="Install bash completion support, optionally specifying the directory. This option may require elevated permissions." />
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
@@ -1388,11 +1362,10 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost" version="1.86.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-database" version="4.0.0" />
-      <!--<dependency name="bitcoin-consensus" version="4.0.0" option="consensus" />-->
       <dependency name="bitcoin-network" version="4.0.0" />
 
       <!-- General flags -->
@@ -1414,8 +1387,6 @@
       <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
 
-      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
-
       <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
       <flag name="fstack-protector-all" comment="Protect stack comprehensively." context="link" />
@@ -1436,7 +1407,6 @@
       <product prefix="lib" path="src" uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158" >
         <flag define="sysconfdir" />
         <library name="bitcoin-database" />
-        <!--<library name="bitcoin-consensus" />-->
         <library name="bitcoin-network" />
         <headers path="include" />
         <sources path="src" />
@@ -1476,11 +1446,6 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <!--<build name="bitcoin-consensus" github="libbitcoin" repository="libbitcoin-consensus" branch="master" parallel="true" conditional="true" >
-        <option value="--without-tests" cmake="-Dwith-tests=no" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>-->
       <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1489,7 +1454,6 @@
 
     <presets>
       <mapping name="bitcoin-node" type="base" />
-      <!--<mapping name="bitcoin-consensus" type="base" />-->
       <mapping name="bitcoin-database" type="base" />
       <mapping name="bitcoin-network" type="base" />
       <mapping name="bitcoin-system" type="base" />
@@ -1509,7 +1473,6 @@
       <axis name="boost" build="true" param="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
       <axis name="secp256k1" build="true" param="true" />
-      <!--<axis name="consensus" with="true" without="true" recognized="true" />-->
 
       <job build="all" 
            system="osx"
@@ -1518,7 +1481,6 @@
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
         <axis name="secp256k1" value="build" />
-        <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1529,7 +1491,6 @@
         <axis name="boost" value="build" />
         <!-- <axis name="icu" value="build" /> -->
         <axis name="secp256k1" value="build" />
-        <!--<axis name="consensus" value="without" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1542,7 +1503,6 @@
         <axis name="boost" value="build" />
         <!-- axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
-        <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1555,7 +1515,6 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
-        <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1568,7 +1527,6 @@
         <axis name="boost" value="build" />
         <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
-        <!--<axis name="consensus" value="without" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1581,7 +1539,6 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
-        <!--<axis name="consensus" value="with" />-->
         <option autotools="--enable-isystem" />
       </job>
 
@@ -1593,7 +1550,6 @@
         <axis name="boost" value="build" />
         <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
-        <!--<axis name="consensus" value="with" />-->
       </job>
 
       <job system="windows" compiler="x64" assert="debug" link="static" />
@@ -1614,7 +1570,7 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <dependency name="boost" version="1.76.0" />
+      <dependency name="boost" version="1.86.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
@@ -1639,8 +1595,6 @@
       <flag name="Wno-mismatched-tags" compiler="clang" comment="Conflict in stdlib under clang." context="c++" />
       <!-- This varies by dependency build, such as boost. So we do not enforce. -->
       <!-- <flag name="fvisibility=hidden" compiler="gcc" comment="Hide internal functions from external libs." context="c++" /> -->
-
-      <!-- <flag name="DBOOST_EXCEPTION_DISABLE" comment="Disable ENABLE_CURRENT_EXCEPTION and ENABLE_ERROR_INFO integration in throw." context="c" /> -->
 
       <flag name="no_fixup_chains" comment="Address -undefined dynamic_lookup MacOS error." context="link" />
       <flag name="fstack-protector" comment="Protect stack." context="link" />
@@ -1713,7 +1667,6 @@
       <mapping name="bitcoin-protocol" type="base" />
       <mapping name="bitcoin-node" type="base" />
       <mapping name="bitcoin-network" type="base" />
-      <mapping name="bitcoin-consensus" type="base" />
       <mapping name="bitcoin-database" type="base" />
       <mapping name="bitcoin-system" type="base" />
       <configuration name="nix-base" />
@@ -1824,7 +1777,6 @@
         <option value="--with-bash-completiondir" />
       </job>
       <job system="osx" compiler="clang" link="static" >
-        <option value="--without-consensus" />
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
@@ -1850,7 +1802,6 @@
       </job>
       <job system="linux" compiler="gcc" link="dynamic" version="4.8" sudo="false" >
         <get name="bash-completion" />
-        <option value="--without-consensus" />
         <option value="--disable-static" />
         <option value="--build-boost" />
         <option value="--build-zmq" />
@@ -2079,110 +2030,88 @@
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="with_consensus" description="Factored consensus inclusion flag." hidden="true">
-      <property name="cacheVariables" type="object">
-        <property name="with-consensus" value="ON" type="BOOL" />
-      </property>
-    </configuration>
-    <configuration name="without_consensus" description="Factored consensus exclusion flag." hidden="true">
-      <property name="cacheVariables" type="object">
-        <property name="with-consensus" value="OFF" type="BOOL" />
-      </property>
-    </configuration>
-    <configuration name="nix-gnu-debug-static-with_consensus" description="Debug build with static linking and with consensus." hidden="false" display="*nix/GNU/Debug/Static/WithConsensus">
+    <configuration name="nix-gnu-debug-static" description="Debug build with static linking." hidden="false" display="*nix/GNU/Debug/Static/WithConsensus">
       <property name="inherits" type="list">
-        <property value="with_consensus" />
         <property value="static" />
         <property value="gnu-debug" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-debug-static-without_consensus" description="Debug build with static linking and without consensus." hidden="false" display="*nix/GNU/Debug/Static/WithoutConsensus">
+    <configuration name="nix-gnu-debug-static" description="Debug build with static linking." hidden="false" display="*nix/GNU/Debug/Static/WithoutConsensus">
       <property name="inherits" type="list">
-        <property value="without_consensus" />
         <property value="static" />
         <property value="gnu-debug" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-release-static-with_consensus" description="Release build with static linking and standard optimizations and with consensus." hidden="false" display="*nix/GNU/Release/Static/WithConsensus">
+    <configuration name="nix-gnu-release-static" description="Release build with static linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Static/WithConsensus">
       <property name="inherits" type="list">
-        <property value="with_consensus" />
         <property value="static" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-release-static-without_consensus" description="Release build with static linking and standard optimizations and without consensus." hidden="false" display="*nix/GNU/Release/Static/WithoutConsensus">
+    <configuration name="nix-gnu-release-static" description="Release build with static linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Static/WithoutConsensus">
       <property name="inherits" type="list">
-        <property value="without_consensus" />
         <property value="static" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-debug-shared-with_consensus" description="Debug build with shared linking and with consensus." hidden="false" display="*nix/GNU/Debug/Shared/WithConsensus">
+    <configuration name="nix-gnu-debug-shared" description="Debug build with shared linking." hidden="false" display="*nix/GNU/Debug/Shared/WithConsensus">
       <property name="inherits" type="list">
-        <property value="with_consensus" />
         <property value="shared" />
         <property value="gnu-debug" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-debug-shared-without_consensus" description="Debug build with shared linking and without consensus." hidden="false" display="*nix/GNU/Debug/Shared/WithoutConsensus">
+    <configuration name="nix-gnu-debug-shared" description="Debug build with shared linking." hidden="false" display="*nix/GNU/Debug/Shared/WithoutConsensus">
       <property name="inherits" type="list">
-        <property value="without_consensus" />
         <property value="shared" />
         <property value="gnu-debug" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-release-shared-with_consensus" description="Release build with shared linking and standard optimizations and with consensus." hidden="false" display="*nix/GNU/Release/Shared/WithConsensus">
+    <configuration name="nix-gnu-release-shared" description="Release build with shared linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Shared/WithConsensus">
       <property name="inherits" type="list">
-        <property value="with_consensus" />
         <property value="shared" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-release-shared-without_consensus" description="Release build with shared linking and standard optimizations and without consensus." hidden="false" display="*nix/GNU/Release/Shared/WithoutConsensus">
+    <configuration name="nix-gnu-release-shared" description="Release build with shared linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Shared/WithoutConsensus">
       <property name="inherits" type="list">
-        <property value="without_consensus" />
         <property value="shared" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-release-static-size-with_consensus" description="Release build with static linking and optimizations for size and with consensus." hidden="false" display="*nix/GNU/Release/Static/Size/WithConsensus">
+    <configuration name="nix-gnu-release-static-size" description="Release build with static linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size/WithConsensus">
       <property name="inherits" type="list">
-        <property value="with_consensus" />
         <property value="gnu-optimized-size" />
         <property value="static" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-release-static-size-without_consensus" description="Release build with static linking and optimizations for size and without consensus." hidden="false" display="*nix/GNU/Release/Static/Size/WithoutConsensus">
+    <configuration name="nix-gnu-release-static-size" description="Release build with static linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size/WithoutConsensus">
       <property name="inherits" type="list">
-        <property value="without_consensus" />
         <property value="gnu-optimized-size" />
         <property value="static" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-release-shared-size-with_consensus" description="Release build with shared linking and optimizations for size and with consensus." hidden="false" display="*nix/GNU/Release/Shared/Size/WithConsensus">
+    <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size/WithConsensus">
       <property name="inherits" type="list">
-        <property value="with_consensus" />
         <property value="gnu-optimized-size" />
         <property value="shared" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-release-shared-size-without_consensus" description="Release build with shared linking and optimizations for size and without consensus." hidden="false" display="*nix/GNU/Release/Shared/Size/WithoutConsensus">
+    <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size/WithoutConsensus">
       <property name="inherits" type="list">
-        <property value="without_consensus" />
         <property value="gnu-optimized-size" />
         <property value="shared" />
         <property value="gnu-release" />
@@ -2193,39 +2122,14 @@
 
   <nuget>
     <resource canonical="boost">
-      <package compiler="vc141" name="boost" version="1.76.0.0" />
-      <package compiler="vc142" name="boost" version="1.76.0.0" />
+      <!--<package compiler="vc141" name="boost" version="1.76.0.0" />-->
+      <package compiler="vc142" name="boost" version="1.76.0.0" />-->
       <package compiler="vc143" name="boost" version="1.86.0" />
-    </resource>
-    <!-- boost atomic is header-only for lock-free cases. -->
-    <!-- www.boost.org/doc/libs/1_78_0/doc/html/atomic/interface.html -->
-    <!--<resource canonical="boost_atomic">
-      <package compiler="vc141" name="boost_atomic-vc141" version="1.72.0.0" />
-    </resource>-->
-    <!-- boost chrono appears to be a dependency of another boost dependency. -->
-    <resource canonical="boost_chrono">
-      <package compiler="vc141" name="boost_chrono-vc141" version="1.76.0.0" />
-      <package compiler="vc142" name="boost_chrono-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_chrono-vc143" version="1.86.0" />
-    </resource>
-    <resource canonical="boost_container">
-      <!-- boost container is a header-only library, except if you use -->
-      <!-- Extended Allocators or some Polymorphic Memory Resources classes. -->
-      <!-- www.boost.org/doc/libs/1_68_0/doc/html/container.html -->
-      <!-- These are required by use of boost json (even as headers only). -->
-      <package compiler="vc141" name="boost_container-vc141" version="1.76.0.0" />
-      <package compiler="vc142" name="boost_container-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_container-vc143" version="1.86.0" />
     </resource>
     <resource canonical="boost_iostreams">
       <package compiler="vc141" name="boost_iostreams-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_iostreams-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_iostreams-vc143" version="1.86.0" />
-    </resource>
-    <resource canonical="boost_json">
-      <package compiler="vc141" name="boost_json-vc141" version="1.76.0.0" />
-      <package compiler="vc142" name="boost_json-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_json-vc143" version="1.86.0" />
     </resource>
     <resource canonical="boost_locale">
       <package compiler="vc141" name="boost_locale-vc141" version="1.76.0.0" />
@@ -2241,11 +2145,6 @@
       <package compiler="vc141" name="boost_regex-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_regex-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_regex-vc143" version="1.86.0" />
-    </resource>
-    <resource canonical="boost_system">
-      <package compiler="vc141" name="boost_system-vc141" version="1.76.0.0" />
-      <package compiler="vc142" name="boost_system-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_system-vc143" version="1.86.0" />
     </resource>
     <resource canonical="boost_thread">
       <package compiler="vc141" name="boost_thread-vc141" version="1.76.0.0" />
