@@ -28,23 +28,16 @@
       <!-- https://trac.macports.org/ticket/42282       [clang, 1.55] -->
       <!-- https://svn.boost.org/trac/boost/ticket/8973 [gcc, 1.54] -->
       <!-- https://svn.boost.org/trac/boost/ticket/6851 [gcc, 1.50-1.53] -->
-      <!-- [log rotation derivation for customization]  [???? 1.56] -->
       <!-- [compiler failure]                           [vc120 1.62-1.72] -->
       <dependency name="boost" version="1.76.0" />
       <!-- boost atomic is header-only for lock-free cases. -->
-      <!-- www.boost.org/doc/libs/1_78_0/doc/html/atomic/interface.html
-      <dependency name="boost_atomic" m4="none" />
-      -->
       <dependency name="boost_chrono" />
       <dependency name="boost_container" m4="none" />
-      <!-- <dependency name="boost_date_time" /> -->
-      <!-- <dependency name="boost_filesystem" /> -->
       <dependency name="boost_iostreams" />
       <!-- boost json is not used in the header-only configuration. -->
       <dependency name="boost_json" />
       <dependency name="boost_locale" />
       <dependency name="boost_program_options" />
-      <!-- <dependency name="boost_regex" /> -->
       <dependency name="boost_system" />
       <dependency name="boost_thread" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -161,13 +154,10 @@
         <flag substitute="icu" />
         <library name="boost" />
         <library name="boost_chrono" />
-        <!-- <library name="boost_date_time" /> -->
-        <!-- <library name="boost_filesystem" /> -->
         <library name="boost_iostreams" />
         <library name="boost_json" />
         <library name="boost_locale" />
         <library name="boost_program_options" />
-        <!-- <library name="boost_regex" /> -->
         <library name="boost_system" />
         <library name="boost_thread" />
         <library name="pthread" />
@@ -2117,7 +2107,7 @@
     <resource canonical="boost">
       <package compiler="vc141" name="boost" version="1.76.0.0" />
       <package compiler="vc142" name="boost" version="1.76.0.0" />
-      <package compiler="vc143" name="boost" version="1.78.0" />
+      <package compiler="vc143" name="boost" version="1.86.0" />
     </resource>
     <!-- boost atomic is header-only for lock-free cases. -->
     <!-- www.boost.org/doc/libs/1_78_0/doc/html/atomic/interface.html -->
@@ -2128,7 +2118,7 @@
     <resource canonical="boost_chrono">
       <package compiler="vc141" name="boost_chrono-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_chrono-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_chrono-vc143" version="1.78.0" />
+      <package compiler="vc143" name="boost_chrono-vc143" version="1.86.0" />
     </resource>
     <resource canonical="boost_container">
       <!-- boost container is a header-only library, except if you use -->
@@ -2137,57 +2127,47 @@
       <!-- These are required by use of boost json (even as headers only). -->
       <package compiler="vc141" name="boost_container-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_container-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_container-vc143" version="1.78.0" />
+      <package compiler="vc143" name="boost_container-vc143" version="1.86.0" />
     </resource>
-    <!-- <resource canonical="boost_date_time">
-      <package compiler="vc141" name="boost_date_time-vc141" version="1.76.0.0" />
-      <package compiler="vc142" name="boost_date_time-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_date_time-vc143" version="1.78.0" />
-    </resource> -->
-    <!-- <resource canonical="boost_filesystem">
-      <package compiler="vc141" name="boost_filesystem-vc141" version="1.76.0.0" />
-      <package compiler="vc142" name="boost_filesystem-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_filesystem-vc143" version="1.78.0" />
-    </resource> -->
     <resource canonical="boost_iostreams">
       <package compiler="vc141" name="boost_iostreams-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_iostreams-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_iostreams-vc143" version="1.78.0" />
+      <package compiler="vc143" name="boost_iostreams-vc143" version="1.86.0" />
     </resource>
     <resource canonical="boost_json">
       <package compiler="vc141" name="boost_json-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_json-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_json-vc143" version="1.78.0" />
+      <package compiler="vc143" name="boost_json-vc143" version="1.86.0" />
     </resource>
     <resource canonical="boost_locale">
       <package compiler="vc141" name="boost_locale-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_locale-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_locale-vc143" version="1.78.0" />
+      <package compiler="vc143" name="boost_locale-vc143" version="1.86.0" />
     </resource>
     <resource canonical="boost_program_options">
       <package compiler="vc141" name="boost_program_options-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_program_options-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_program_options-vc143" version="1.78.0" />
+      <package compiler="vc143" name="boost_program_options-vc143" version="1.86.0" />
     </resource>
     <resource canonical="boost_regex">
       <package compiler="vc141" name="boost_regex-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_regex-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_regex-vc143" version="1.78.0" />
+      <package compiler="vc143" name="boost_regex-vc143" version="1.86.0" />
     </resource>
     <resource canonical="boost_system">
       <package compiler="vc141" name="boost_system-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_system-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_system-vc143" version="1.78.0" />
+      <package compiler="vc143" name="boost_system-vc143" version="1.86.0" />
     </resource>
     <resource canonical="boost_thread">
       <package compiler="vc141" name="boost_thread-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_thread-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_thread-vc143" version="1.78.0" />
+      <package compiler="vc143" name="boost_thread-vc143" version="1.86.0" />
     </resource>
     <resource canonical="boost_unit_test_framework">
       <package compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
-      <package compiler="vc143" name="boost_unit_test_framework-vc143" version="1.78.0" />
+      <package compiler="vc143" name="boost_unit_test_framework-vc143" version="1.86.0" />
     </resource>
     <resource canonical="secp256k1">
       <!-- The vc120 secp256k1 nuget package is no longer supported -->
@@ -2300,14 +2280,6 @@
     <!-- vscode -->
     <template name="gsl.vscode.settings.json" />
     <template name="gsl.code-workspace" />
-
-    <!-- no longer supported -->
-    <!-- <template name="gsl.interface.swg" /> -->
-    <!-- <template name="gsl.bindings.sh" /> -->
-    <!-- <template name="gsl.bindings.bat" /> -->
-    <!-- <template name="gsl.travis.yml" /> -->
-    <!-- <template name="gsl.build.ps1" /> -->
-    <!-- <template name="gsl.appveyor.yml" /> -->
   </templates>
 
 </generate>
