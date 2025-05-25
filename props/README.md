@@ -31,7 +31,7 @@ There is generally no good reason to change the `.props` files as overrides are 
 
 Note that all `.props' files are assumed to be in a common directory, despite the repo structure.
 
-The following combinations are achieved by referencing the desired build configuration (e.g. `DynamicDLL.props`) as shown above.
+The following combinations are achieved by referencing the desired build configuration (e.g. `DynamicDLL.props`) as shown above. The same six are also available for ARM/ARM64.
 
 **Dynamic libraries linked dynamically to CRT**
 ```
