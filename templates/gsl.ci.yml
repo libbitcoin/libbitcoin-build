@@ -358,6 +358,10 @@ function get_job_cflags(integration, repository, job)
         abort "get_job_cflags unsupported job.optimization value '$(my.job.optimization)."
     endif
 
+    if (defined(my.job.cflags))
+        my.flags = "$(my.flags) $(my.job.cflags)"
+    endif
+
     if (!is_empty(my.job.coverage) & (my.job.coverage = "true"))
         my.flags = "$(my.flags) -g --coverage"
     endif
