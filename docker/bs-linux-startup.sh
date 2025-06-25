@@ -47,7 +47,7 @@ parse_command_line_options()
             (--unconditional-init)  INIT_UNCONDITIONAL="yes";;
 
             # Standard
-            (--help)                DISPLAY_HELP="yes";;
+            (--help|-h)             DISPLAY_HELP="yes";;
         esac
     done
 }
