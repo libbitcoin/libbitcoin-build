@@ -46,7 +46,7 @@ parse_command_line_options()
             (--build-only)      BUILD_ONLY="yes";;
             (--init-only)       INIT_ONLY="yes";;
             # Standard
-            (--help)            DISPLAY_HELP="yes";;
+            (--help|-h)         DISPLAY_HELP="yes";;
         esac
     done
 }
