@@ -35,6 +35,7 @@
       <dependency name="boost_program_options" />
       <!-- boost_locale creates a dependency on boost_thread for thread local storage. -->
       <dependency name="boost_thread" />
+      <dependency name="boost_url" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="pthread" system_exclude="android" />
       <dependency name="rt" function="clock_gettime" system="linux" system_exclude="android" />
@@ -151,6 +152,7 @@
         <library name="boost_program_options" />
         <!-- boost_locale creates a dependency on boost_thread for thread local storage. -->
         <library name="boost_thread" />
+        <library name="boost_url" />
         <library name="pthread" />
         <library name="rt" />
         <library name="icu-i18n" />
@@ -202,6 +204,7 @@
         <option value="--with-locale" />
         <option value="--with-program_options" />
         <option value="--with-thread" />
+        <option value="--with-url" />
         <option value="--with-test" />
       </build>
       <build name="secp256k1" github="bitcoin-core" repository="secp256k1" branch="v0.7.0" parallel="true" nuget="true" presentation="libsecp256k1" conditional="true" >
@@ -427,6 +430,7 @@
         <option value="--with-program_options" />
         <option value="--with-regex" />
         <option value="--with-thread" />
+        <option value="--with-url" />
         <option value="--with-test" />
       </build>
       <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
@@ -1982,6 +1986,11 @@
       <package compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_unit_test_framework-vc143" version="1.86.0" />
+      </resource>
+    <resource canonical="boost_url">
+      <package compiler="vc141" name="boost_url-vc141" version="1.86.0" />
+      <package compiler="vc142" name="boost_url-vc142" version="1.86.0" />
+      <package compiler="vc143" name="boost_url-vc143" version="1.86.0" />
     </resource>
     <resource canonical="secp256k1">
       <!-- The vc120 secp256k1 nuget package is no longer supported -->
