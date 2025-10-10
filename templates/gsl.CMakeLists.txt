@@ -1135,7 +1135,7 @@ $(my.indent)endif()
 .
 $(my.indent)if ( $(my.define_prefix)$(my.compound.name:upper) )
     $(my.indent)add_compile_definitions( $(my.define_prefix)$(my.compound.name:upper) )
-    $(my.indent)set( $(my.compound.name:lower) "-D$(my.compound.type:upper)_$(my.compound.name:upper)" )
+    $(my.indent)set( $(my.compound.name:lower) "$(my.flags)" )
 $(my.indent)else()
     $(my.indent)message( FATAL_ERROR "Failed to enable $(my.define_prefix)$(my.compound.name:upper)" )
 $(my.indent)endif()
