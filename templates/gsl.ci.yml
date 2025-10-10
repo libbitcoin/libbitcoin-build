@@ -655,7 +655,7 @@ endfunction # get_sln_tests
         if: ${{ matrix.packager == 'brew' }}
         run: |
           brew install autoconf automake libtool ${{ matrix.packages }}
-          if [[ -n ${{ matrix.llvm }} ]]; then
+          if [[ -n "${{ matrix.llvm }}" ]]; then
               echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
           fi
 .
