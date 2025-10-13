@@ -49,14 +49,14 @@ endfunction
 .endmacro # custom_documentation
 .
 .macro custom_configuration(repository, install)
-    display_message "BUILD_DIR                      : $BUILD_DIR"
+    display_message "BUILD_SRC_DIR                  : $BUILD_SRC_DIR"
     display_message "CUMULATIVE_FILTERED_ARGS       : $CUMULATIVE_FILTERED_ARGS"
     display_message "CUMULATIVE_FILTERED_ARGS_CMAKE : $CUMULATIVE_FILTERED_ARGS_CMAKE"
 .endmacro # custom_configuration
 .
 .macro custom_script_options()
             # Unique script options.
-            (--build-dir=*)         BUILD_DIR="${OPTION#*=}";;
+            (--build-dir=*)         BUILD_SRC_DIR="${OPTION#*=}";;
 
             # Handle ndebug declarations due to disabled argument passthrough
             (--enable-ndebug)       ENABLE_NDEBUG="yes";;
@@ -67,7 +67,7 @@ endfunction
 .macro define_build_variables_custom(repository)
 .   define my.repo = define_build_variables_custom.repository
 .   heading2("The default build directory.")
-BUILD_DIR="build-$(my.repo.name)"
+BUILD_SRC_DIR="build-$(my.repo.name)"
 
 PRESUMED_CI_PROJECT_PATH=\$(pwd)
 
@@ -279,13 +279,13 @@ make_jobs()
     shift 1
 
     VERBOSITY=""
-    if [[ DISPLAY_VERBOSE ]]; then
+    if [[ $DISPLAY_VERBOSE ]]; then
         VERBOSITY="VERBOSE=1"
     fi
 
     SEQUENTIAL=1
     # Avoid setting -j1 (causes problems on single threaded systems [TRAVIS]).
-    if [[ $JOBS > $SEQUENTIAL ]]; then
+    if [[ $JOBS -gt $SEQUENTIAL ]]; then
         make -j"$JOBS" "$@" $VERBOSITY
     else
         make "$@" $VERBOSITY
@@ -436,10 +436,10 @@ build_all()
 display_configuration
 
 if [[ ! ($CI == true) ]]; then
-    create_directory "$BUILD_DIR"
-    push_directory "$BUILD_DIR"
+    create_directory "$BUILD_SRC_DIR"
+    push_directory "$BUILD_SRC_DIR"
 else
-    push_directory "$BUILD_DIR"
+    push_directory "$BUILD_SRC_DIR"
 fi
 
 initialize_git
