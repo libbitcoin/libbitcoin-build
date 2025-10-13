@@ -37,6 +37,4 @@ eval chmod +x generate_artifacts.sh
 eval ./copy_modules.sh
 eval ./copy_properties.sh
 eval ./generate_artifacts.sh
-
-# Copy outputs to all repositories.
-eval cp -rf "output/." "../"
+eval ./copy_projects.sh "$@"
