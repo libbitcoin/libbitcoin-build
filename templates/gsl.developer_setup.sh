@@ -274,7 +274,7 @@ make_jobs()
     fi
 
     # Avoid setting -j1 (causes problems on Travis).
-    if [[ $JOBS > $SEQUENTIAL ]]; then
+    if [[ $JOBS -gt $SEQUENTIAL ]]; then
         make -j"$JOBS" "$@"
     else
         make "$@"
