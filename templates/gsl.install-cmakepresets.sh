@@ -80,7 +80,7 @@ declare -A REPO_PRESET
 .macro define_build_variables_custom(repository)
 .   define my.repo = define_build_variables_custom.repository
 .   heading2("The default build directory.")
-BUILD_SRC_DIR="build-$(my.repo.name)"
+BUILD_SRC_DIR="\$(pwd)/build-$(my.repo.name)"
 
 PRESUMED_CI_PROJECT_PATH=\$(pwd)
 
