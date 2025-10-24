@@ -49,7 +49,7 @@ endfunction
 .endmacro # custom_documentation
 .
 .macro custom_configuration(repository, install)
-    display_message "BUILD_SRC_DIR          : $BUILD_SRC_DIR"
+    display_message "BUILD_SRC_DIR         : $BUILD_SRC_DIR"
 .endmacro # custom_configuration
 .
 .macro custom_script_options()
