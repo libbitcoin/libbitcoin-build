@@ -9,9 +9,7 @@ Libbitcoin Build uses templates and XML data to generate build artifacts for the
 See [MAINTAINED.md](MAINTAINED.md) for a list of artifacts maintained by this project.
 
 * [![libbitcoin](https://github.com/libbitcoin/libbitcoin-system/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-system) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-system/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-system) libbitcoin-system
-* [![libbitcoin-blockchain](https://github.com/libbitcoin/libbitcoin-blockchain/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-blockchain) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-blockchain/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-blockchain) libbitcoin-blockchain
 * [![libbitcoin-client](https://github.com/libbitcoin/libbitcoin-client/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-client) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-client/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-client) libbitcoin-client
-* [![libbitcoin-consensus](https://github.com/libbitcoin/libbitcoin-consensus/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-consensus) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-consensus/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-consensus) libbitcoin-consensus
 * [![libbitcoin-database](https://github.com/libbitcoin/libbitcoin-database/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-database) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-database/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-database) libbitcoin-database
 * [![libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-explorer) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-explorer/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-explorer) libbitcoin-explorer
 * [![libbitcoin-network](https://github.com/libbitcoin/libbitcoin-network/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-network) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-network/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-network) libbitcoin-network
@@ -55,13 +53,13 @@ builds/msvc/[edition]/[library].sln
 
 These artifacts are merged into their respective repositories by libbitcoin maintainers. There is no need to build libbitcoin-build if you are not a maintainer in the process of applying a build configuration change.
 
-The build system has a dependency on [iMatix GSL](https://github.com/imatix/gsl), recently moved to the [ZeroMQ repository](https://github.com/zeromq/gsl). There are Linux/OSX and Visual Studio builds of GSL. A recent version is recommended. There is also a Windows single file executable available for [download](https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe).
+The build system has a dependency on [ZeroMQ GSL](https://github.com/zeromq/gsl). There are Linux/macOS and Visual Studio builds of GSL. A recent version is recommended, and an executable . There is also a Windows single file executable available for [download](https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe).
 
 ![Dependencies](https://raw.githubusercontent.com/libbitcoin/libbitcoin-build/master/img/dependencies.png)
 
 ### Quick Start
 
-This is similar to the [.travis.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.travis.yml) and is useful for local generation. In addition to `generate.sh` there is a `generate.cmd` for the native Windows environment.
+This is similar to the [.travis.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.travis.yml) and is useful for local generation. In addition to `generate4.sh` there is a `generate4.cmd` for the native Windows environment.
 
 #### Linux
 ```
@@ -80,10 +78,8 @@ cd ../../
 
 # Clone all libbitcoin repositories.
 git clone https://github.com/libbitcoin/libbitcoin-system.git
-git clone https://github.com/libbitcoin/libbitcoin-blockchain.git
 git clone https://github.com/libbitcoin/libbitcoin-build.git
 git clone https://github.com/libbitcoin/libbitcoin-client.git
-git clone https://github.com/libbitcoin/libbitcoin-consensus.git
 git clone https://github.com/libbitcoin/libbitcoin-database.git
 git clone https://github.com/libbitcoin/libbitcoin-explorer.git
 git clone https://github.com/libbitcoin/libbitcoin-network.git
@@ -94,21 +90,19 @@ git clone https://github.com/libbitcoin/libbitcoin-server.git
 # Run the libbitcoin-build generation script.
 # Newly generated build files are copied to the cloned repos.
 cd libbitcoin-build
-./generate.sh
+./generate4.sh
 ```
 #### Windows
 ```
-REM Create a top-level work_directory.
+# Create a top-level work_directory.
 set work_directory=%USERPROFILE%\work
 if not exist %work_directory% mkdir %work_directory%
 cd %work_directory%
 
-REM Clone all libbitcoin repositories.
+# Clone all libbitcoin repositories.
 git clone https://github.com/libbitcoin/libbitcoin-system.git
-git clone https://github.com/libbitcoin/libbitcoin-blockchain.git
 git clone https://github.com/libbitcoin/libbitcoin-build.git
 git clone https://github.com/libbitcoin/libbitcoin-client.git
-git clone https://github.com/libbitcoin/libbitcoin-consensus.git
 git clone https://github.com/libbitcoin/libbitcoin-database.git
 git clone https://github.com/libbitcoin/libbitcoin-explorer.git
 git clone https://github.com/libbitcoin/libbitcoin-network.git
@@ -116,13 +110,13 @@ git clone https://github.com/libbitcoin/libbitcoin-node.git
 git clone https://github.com/libbitcoin/libbitcoin-protocol.git
 git clone https://github.com/libbitcoin/libbitcoin-server.git
 
-REM Download the gsl dependency manually from 
-REM https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe.
-REM Copy the gsl.exe manually to the libbitcoin-build folder in your work 
-REM directory. 
+# Download the gsl dependency manually from 
+# https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe.
+# Copy the gsl.exe manually to the libbitcoin-build folder in your work 
+# directory. 
 
-REM Run the libbitcoin-build generation script.
-REM Newly generated build files are copied to the cloned repos.
+# Run the libbitcoin-build generation script.
+# Newly generated build files are copied to the cloned repos.
 cd libbitcoin-build
-./generate.cmd
+./generate4.cmd
 ```
