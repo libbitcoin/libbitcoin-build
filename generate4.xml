@@ -1581,7 +1581,6 @@
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
 
       <dependency name="bitcoin-node" version="4.0.0" />
-      <!--<dependency name="bitcoin-protocol" version="4.0.0" />-->
 
       <!-- General flags -->
       <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
@@ -1621,7 +1620,6 @@
       </product>
       <product prefix="lib" path="src" uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0" >
         <flag define="sysconfdir" />
-        <!--<library name="bitcoin-protocol" />-->
         <library name="bitcoin-node" />
         <headers path="include" />
         <sources path="src" />
@@ -1656,14 +1654,6 @@
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <!--
-      <build name="bitcoin-protocol" github="libbitcoin" repository="libbitcoin-protocol" branch="master" parallel="true" >
-        <option value="--without-tests" cmake="-Dwith-tests=no" />
-        <option value="--without-examples" cmake="-Dwith-examples=no" />
-        <option value="${with_boost}" />
-        <option value="${with_pkgconfigdir}" />
-      </build>
-      -->
       <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="master" parallel="true" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
@@ -1672,7 +1662,6 @@
 
     <presets>
       <mapping name="bitcoin-server" type="base" />
-      <!--<mapping name="bitcoin-protocol" type="base" />-->
       <mapping name="bitcoin-node" type="base" />
       <mapping name="bitcoin-network" type="base" />
       <mapping name="bitcoin-database" type="base" />
@@ -1780,7 +1769,6 @@
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
-        <!--<option value="--build-zmq" />-->
         <option value="--disable-static" />
         <option value="--with-bash-completiondir" />
       </job>
@@ -1788,12 +1776,10 @@
         <!-- these allow unused build to complete -->
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <!--<option value="--build-zmq" />-->
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
       </job>
       <job system="linux" compiler="clang" link="dynamic" sudo="false" >
         <option value="--build-boost" />
-        <!--<option value="--build-zmq" />-->
         <option value="--disable-ndebug" />
         <option value="--disable-static" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
@@ -1803,7 +1789,6 @@
       <job system="linux" compiler="clang" link="static" version="5.0" >
         <option value="--disable-shared" />
         <option value="--build-boost" />
-        <!--<option value="--build-zmq" />-->
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os'" />
         <option value="CXXFLAGS='-Os'" />
@@ -1812,7 +1797,6 @@
         <get name="bash-completion" />
         <option value="--disable-static" />
         <option value="--build-boost" />
-        <!--<option value="--build-zmq" />-->
         <option value="--with-bash-completiondir=$TRAVIS_BUILD_DIR/my-prefix/share/bash-completion/completions" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
         <option value="CFLAGS='-Os -s'" />
@@ -1821,7 +1805,6 @@
       <job system="linux" compiler="gcc" link="static" coverage="true" >
         <get name="bash-completion" />
         <option value="--build-boost" />
-        <!--<option value="--build-zmq" />-->
         <option value="--disable-shared" />
         <option value="--build-dir=my-build" />
         <option value="--prefix=$TRAVIS_BUILD_DIR/my-prefix" />
