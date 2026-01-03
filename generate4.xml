@@ -43,8 +43,8 @@
       <!-- TODO: verify this with more recent ICU. -->
       <!-- -ldl is missing from icu package config. -->
       <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
-      <!-- This custom version prevents inadvertent use of breaking changes in the origin repo. -->
-      <dependency name="secp256k1" version="0.1.0.20" />
+      <!-- Arbitrary minimum version, current nuget package is v0.6.1. -->
+      <dependency name="secp256k1" version="0.5.1.0" />
 
       <!-- General flags -->
       <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
@@ -555,6 +555,7 @@
 
   </repository>
 
+  <!-- libbitcoin-protocol is deprecated -->
   <repository name="libbitcoin-protocol" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-protocol" description="Bitcoin Blockchain Query Protocol" url="https://github.com/libbitcoin/libbitcoin-protocol" />
@@ -772,6 +773,7 @@
 
   </repository>
 
+  <!-- libbitcoin-client is deprecated -->
   <repository name="libbitcoin-client" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-client" description="Bitcoin Client Query Library" url="https://github.com/libbitcoin/libbitcoin-client" />
@@ -1985,7 +1987,7 @@
       <!-- The vc120 secp256k1 nuget package is no longer supported -->
       <package compiler="vc141" name="secp256k1_vc141" version="0.1.0.20" />
       <package compiler="vc142" name="secp256k1_vc142" version="0.1.0.20" />
-      <package compiler="vc143" name="secp256k1_vc143" version="0.1.0.21" />
+      <package compiler="vc143" name="secp256k1_vc143" version="0.6.1" />
     </resource>
     <resource canonical="zmq">
       <!-- We specify zmq explicitly to require a version with tweetnacl. -->
