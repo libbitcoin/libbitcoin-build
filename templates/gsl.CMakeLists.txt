@@ -320,8 +320,9 @@ function emit_defines(repository)
         endfor
     endnew
 
-    for my.repository->configure.define as _define
-        emit_define(_define)
+    for my.repository->configure.define as _define \
+        where is_empty(_define.header)
+        emit_define_simple(_define)
     endfor
 endfunction
 
@@ -1195,6 +1196,19 @@ if (HAVE_$(my.uname))
 endif()
 
 .endmacro # emit_header
+.
+.macro emit_define_simple(define)
+.   define my.define = emit_define_simple.define
+.   require(my.define, "define", "name")
+.   define my.uname = "$(my.define.name:upper,c)"
+.
+.   if (defined(my.define.value))
+add_definitions( -D$(my.uname)=$my.define.value )
+.   else
+add_definitions( -D$(my.uname) )
+.   endif
+.
+.endmacro # emit_define_simple
 .
 .macro emit_define(define)
 .   define my.define = emit_define.define
