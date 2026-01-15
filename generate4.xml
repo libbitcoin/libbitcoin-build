@@ -347,6 +347,9 @@
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
+      <!-- WOLFSSL_USER_SETTINGS enables import of "user_settings.h" into wolfssl without source modification. -->
+      <define name="WOLFSSL_USER_SETTINGS"/>
+      
       <dependency name="boost" version="1.86.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="4.0.0" />
@@ -390,6 +393,7 @@
       <product prefix="lib" path="src" uuid="564eb540-d6b6-425c-b8db-b0bee8970c18" >
         <library name="bitcoin-system" />
         <headers path="include" />
+        <headers path="include/bitcoin/ssl" />
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-network-test" test="true" option="tests" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff" >
@@ -400,6 +404,7 @@
         <library name="bitcoin-network" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
+        <headers path="include/bitcoin/ssl" />
         <sources path="test" />
       </product>
       <product prefix="include" container="bitcoin" >

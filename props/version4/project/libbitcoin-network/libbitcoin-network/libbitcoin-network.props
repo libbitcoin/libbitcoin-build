@@ -11,11 +11,15 @@
 
   <ItemDefinitionGroup>
     <ClCompile>
+      <!-- include\bitcoin\ssl\ is a directory clone of a subset of wolfssl sources, plus config. -->
+      <AdditionalIncludeDirectories>$(RepoRoot)include\bitcoin\ssl\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories>$(RepoRoot)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>false</EnablePREfast>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'DynamicLibrary'">BCT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'StaticLibrary'">BCT_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- WOLFSSL_USER_SETTINGS enables import of "user_settings.h" into wolfssl without source modification. -->
+      <PreprocessorDefinitions>WOLFSSL_USER_SETTINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
 
