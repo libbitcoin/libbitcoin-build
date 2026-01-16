@@ -349,6 +349,8 @@
 
       <!-- WOLFSSL_USER_SETTINGS enables import of "user_settings.h" into wolfssl without source modification. -->
       <define name="WOLFSSL_USER_SETTINGS"/>
+      <!-- NO_MAIN_DRIVER and NO_TESTSUITE_MAIN_DRIVER exclude test mains. -->
+      <PreprocessorDefinitions>NO_MAIN_DRIVER;NO_TESTSUITE_MAIN_DRIVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       
       <dependency name="boost" version="1.86.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -405,6 +407,7 @@
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <headers path="include/bitcoin/ssl" />
+        <headers path="test/ssl" />
         <sources path="test" />
       </product>
       <product prefix="include" container="bitcoin" >
