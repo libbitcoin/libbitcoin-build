@@ -11,7 +11,11 @@
 
   <ItemDefinitionGroup>
     <ClCompile>
+      <!-- test\ssl\ is a directory clone of a subset of wolfssl test sources. -->
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\..\libbitcoin-network\test\ssl\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
+      <!-- NO_MAIN_DRIVER enables use of boost test for wolfssl test execution. -->
+      <PreprocessorDefinitions>NO_MAIN_DRIVER;NO_TESTSUITE_MAIN_DRIVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent Condition="'$(DebugOrRelease)' == 'release'">
       <Command>"$(TargetPath)" --log_level=warning --run_test=* --show_progress=no --build_info=yes</Command>
