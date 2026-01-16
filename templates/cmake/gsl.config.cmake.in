@@ -1,0 +1,179 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL generate Libbitcoin-<Project>Config.cmake.in.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+function enumerate_dependencies(repository, repositories)
+    my.repository = enumerate_dependencies.repository
+    my.repositories = enumerate_dependencies.repositories
+
+    for my.repository->configure.dependency as _dependency
+        # boost
+        if (is_boost_dependency(_dependency))
+            emit_dependency_boost(_dependency, my.repository)
+        # boost sublib (handled above)
+        elsif (is_boost_lib_dependency(_dependency))
+        # pthread
+        elsif (is_pthread_dependency(_dependency))
+            emit_dependency_pthread(_dependency, my.repository)
+        # versioned implies package
+        elsif (is_versioned_dependency(_dependency))
+            emit_dependency_versioned(_dependency, my.repository)
+        else
+            # rt
+            # icu-i8n
+            # dl
+            # secp256k1
+            # zmq
+            # bash-completion
+            emit_dependency(_dependency, my.repository)
+        endif
+    endfor
+endfunction
+
+function emit_dependency_boost(dependency, repository, indent)
+    define my.prefix = "boost_"
+    define my.dependency = emit_dependency_boost.dependency
+    define my.repository = emit_dependency_boost.repository
+    define my.indent = defined(emit_dependency_boost.indent) ?? emit_dependency_boost.indent ? ""
+
+    new features as _features
+        # locate boost components
+        populate_features(_features, my.prefix, my.repository)
+
+        # emit
+        emit_boost_use_static_libs()
+        emit_find_dependency(my.dependency, _features)
+    endnew
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro initialize(repository)
+.   define my.repository = initialize.repository
+@PACKAGE_INIT@
+
+if($(my.repository->package.library:neat)_FOUND)
+    return()
+endif()
+
+include(CMakeFindDependencyMacro)
+
+set( $(my.repository->package.library:neat)_VERSION @PACKAGE_VERSION@ )
+set( $(my.repository->package.library:neat)_INCLUDE_DIRS @includedir@ )
+set( $(my.repository->package.library:neat)_LIBRARIES "-L@libdir@ -l$(my.repository->package.library)" )
+
+.
+.endmacro # initialize
+.
+.macro finalize(repository)
+.   define my.repository = finalize.repository
+set( $(my.repository->package.library:neat)_FOUND TRUE )
+.endmacro # finalize
+.
+.endtemplate
+.
+.macro emit_dependency(dependency, repository, indent)
+.endmacro # emit_dependency
+.
+.macro emit_dependency_pthread(dependency, repository, indent)
+.endmacro # emit_dependency_pthread
+.
+.macro emit_dependency_versioned(dependency, repository, indent)
+.endmacro # emit_dependency_versioned
+.
+.macro emit_find_dependency(dependency, features, indent)
+.   define my.dependency = emit_find_dependency.dependency
+.   define my.features = emit_find_dependency.features
+.   define my.indent = defined(emit_find_dependency.indent) ?? emit_find_dependency.indent ? ""
+.   require(my.dependency, "dependency", "name")
+.   define my.name = "$(my.dependency.name)"
+.   define my.version = ""
+.   if (defined(my.dependency.version))
+.       my.version = " $(my.dependency.version)"
+.   endif
+.
+.   if (count(my.features.element) > 0)
+$(my.indent)find_dependency( $(my.name:neat)$(my.version) REQUIRED COMPONENTS
+.       for my.features.element as _element
+    $(my.indent)$(_element.name)$(last() ?? " )" ? "")
+.       endfor
+
+.       for my.features.element as _element
+$(my.indent)set( $(my.name)_$(_element.name)_LIBS "-l$(my.name)_$(_element.name)" )
+.       endfor
+.   else
+    $(my.indent)find_dependency( $(my.name:neat)$(my.version) )
+.   endif
+
+$(my.indent)if (enable-ndebug)
+    $(my.indent)set( $(my.name:neat)_LIBRARY_DIR "\${$(my.name:neat)_LIBRARY_DIR_RELEASE}" )
+$(my.indent)else()
+    $(my.indent)set( $(my.name:neat)_LIBRARY_DIR "\${$(my.name:neat)_LIBRARY_DIR_DEBUG}" )
+$(my.indent)endif()
+
+$(my.indent)set( $(my.name)_CPPFLAGS "-I\${$(my.name:neat)_INCLUDE_DIR}" )
+$(my.indent)set( $(my.name)_LDFLAGS "-L\${$(my.name:neat)_LIBRARY_DIR}" )
+
+.endmacro # emit_find_dependency
+.
+.template 0
+###############################################################################
+# Generation
+function generate_ConfigCmake(path_prefix)
+for generate.repository by name as _repository\
+    where defined(_repository->package)
+
+    define my.make = _repository->make
+    define my.configure = _repository->configure
+
+    for _repository.package as _package
+        require(_repository, "repository", "name")
+        my.output_path = join(join(my.path_prefix, canonical_path_name(_repository)), "builds/cmake")
+        create_directory(my.output_path)
+        define my.package_name = "$(_package.library:neat)"
+        define my.out_file = "$(my.output_path)/$(my.package_name)-config.cmake.in"
+        notify(my.out_file)
+        output(my.out_file)
+
+        copyleft(_repository.name)
+
+        initialize(_repository)
+
+        enumerate_dependencies(_repository, generate)
+
+        finalize(_repository)
+        close
+    endfor _package
+endfor _repository
+endfunction # generate_ConfigCmake
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "templates/cmake/utilities.gsl"
+gsl from "utilities.gsl"
+
+generate_ConfigCmake("output")
+
+.endtemplate
