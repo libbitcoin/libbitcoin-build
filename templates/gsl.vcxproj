@@ -102,29 +102,33 @@ endfunction
 ###
 ### generic assistance functions
 ###
+function unsuffix(name)
+    return string.substr(my.name, 0, string.locate_last(my.name, ".") - 1)
+endfunction
+
 function match_name(element, name)
     define my.element = match_name.element
     return defined(my.element) & (my.element.name = my.name)
 endfunction
 
-function exists_unsuffixed_collision(root, name)
-    define my.root = exists_unsuffixed_collision.root
-    define my.unsuffixed = string.substr(my.name, 0, string.locate_last(my.name, "."))
-    return count(my.root.collision, match_name(count, my.unsuffixed)) > 0
+function match_unsuffixed(element, name)
+    define my.element = match_unsuffixed.element
+    if (unsuffix(my.element.name) = unsuffix(my.name))
+    endif
+
+    return defined(my.element) & (unsuffix(my.element.name) = unsuffix(my.name))
 endfunction
 
 function exists_collision(root, name)
     define my.root = exists_collision.root
-    return count(my.root.collision, match_name(count, my.name)) > 0
+    return count(my.root.collision, match_unsuffixed(count, my.name)) > 0
 endfunction
 
 function add_collision(root, name)
     define my.root = add_collision.root
-    define my.unsuffixed = string.substr(my.name, 0, string.locate_last(my.name, "."))
-
-    if (defined(my.root) & !exists_collision(my.root, my.unsuffixed))
+    if (defined(my.root) & !exists_collision(my.root, my.name))
         new my.root.collision as _collision
-            _collision.name = my.unsuffixed
+            _collision.name = my.name
         endnew
     endif
     return my.root
@@ -132,7 +136,7 @@ endfunction
 
 function collides_file_name(root, name)
     define my.root = collides_file_name.root
-    return count(my.root.file, match_name(count, my.name)) > 1
+    return count(my.root.file, match_unsuffixed(count, my.name)) > 1
 endfunction
 
 function populate_collisions(collisions, file_data)
@@ -806,7 +810,7 @@ endfunction emit_project
 .   define my.collisions = emit_compile_item.collisions
 .   define my.file_record = emit_compile_item.file_record
 .
-.   if (!exists_unsuffixed_collision(my.collisions, my.file_record.name))
+.   if (!exists_collision(my.collisions, my.file_record.name))
 .       emit_file_record_item("ClCompile", my.file_record)
 .   else
 .       emit_item_with_object("ClCompile", my.file_record)
