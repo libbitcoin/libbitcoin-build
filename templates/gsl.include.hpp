@@ -19,15 +19,16 @@ function render_headers(files, folder, base_trim, path_trim, product)
     define my.files = render_headers.files
     define my.product = render_headers.product
     define my.directory = open_directory(my.folder)
+    get_product_files(my.files, my.folder, my.base_trim, my.product)
+    if (!table_empty(my.files))
+        for my.files.row as _row
+            write_include(join(my.product.container, _row.name))
+        endfor
+        table_clear(my.files)
+    endif
+
     for my.directory.directory as _directory by _directory.name
         define my.subfolder = "$(_directory.path)$(_directory.name)"
-        get_product_files(my.files, my.subfolder, my.base_trim, my.product)
-        if (!table_empty(my.files))
-            for my.files.row as _row
-                write_include(join(my.product.container, _row.name))
-            endfor
-            table_clear(my.files)
-        endif
         render_headers(my.files, my.subfolder, my.base_trim, my.path_trim,\
             my.product)
     endfor
@@ -52,7 +53,8 @@ function write_local_includes(files, product, root, repository)
     define my.folder = "$(my.root)$(my.files.path)/"
     define my.root_length = string.length(my.folder)
     define my.path_length = string.length(my.files.path)
-    render_files_headers(my.folder, my.root_length, my.path_length,\
+    define my.primary_folder = "$(my.folder)$(bitcoin_to_include(my.repository.name))/"
+    render_files_headers(my.primary_folder, my.root_length, my.path_length,\
         my.product)
 return
 endfunction
