@@ -1,0 +1,163 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin utilities for cmake related files.
+#
+# This is a code generator built using the iMatix GSL code generation:
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Common cmake string wrappers
+###############################################################################
+
+function project_relative_cmake_path()
+    return "builds/cmake"
+endfunction
+
+function compiler_id(name)
+    if (my.name = "clang")
+        return "Clang"
+    elsif (my.name = "gcc")
+        return "GNU"
+    else
+        abort("Unsupported compiler: $(my.name)")
+    endif
+endfunction
+
+function default_defined(value, default)
+    define my.default = defined(default_defined.default) ?? default_defined.default ? ""
+    return defined(default.defined.value) ?? default.defined.value ? my.default
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+
+function extract_suffix(prefix, value)
+    define my.prefix = extract_suffix.prefix
+    define my.value = extract_suffix.value
+    if (starts_with(my.value, my.prefix))
+        define length = (string.length(my.value) - string.length(my.prefix))
+        return right(my.value, length)
+    endif
+    return ""
+endfunction
+
+function populate_features(features, component_prefix, repository)
+    define my.features = populate_features.features
+    define my.prefix = populate_features.component_prefix
+    define my.repository = populate_features.repository
+
+    for my.repository->configure.dependency as _dependency
+        define my.component_name = extract_suffix(my.prefix, _dependency.name)
+        if (!is_empty(my.component_name))
+            new my.features.element as _element
+                _element.name = my.component_name
+            endnew
+        endif
+    endfor
+endfunction
+
+function get_option_type(option)
+    define my.option = get_option_type.option
+    require(my.option, "option", "type")
+    if (my.option.type = "enable" | my.option.type = "with")
+        return my.option.type
+    endif
+    abort "Invalid repository.option.type: $(my.option.type)."
+endfunction
+
+function get_option_data_type(option)
+    define my.option = get_option_data_type.option
+
+    if (!defined(my.option.data_type))
+        return "BOOL"
+    elsif (is_option_boolean(my.option))
+        return "BOOL"
+    elsif (is_option_filepath(my.option))
+        return "FILEPATH"
+    elsif (is_option_internal(my.option))
+        return "INTERNAL"
+    elsif (is_option_path(my.option))
+        return "PATH"
+    elsif (is_option_string(my.option))
+        return "STRING"
+    endif
+
+    abort("Unrecognized data_type : $(my.option.data_type)")
+endfunction
+
+function is_option_boolean(option)
+    define my.option = is_option_boolean.option
+    return defined(my.option.data_type) & (my.option.data_type = "bool")
+endfunction
+
+function is_option_filepath(option)
+    define my.option = is_option_filepath.option
+    return defined(my.option.data_type) & (my.option.data_type = "filepath")
+endfunction
+
+function is_option_internal(option)
+    define my.option = is_option_internal.option
+    return defined(my.option.data_type) & (my.option.data_type = "internal")
+endfunction
+
+function is_option_path(option)
+    define my.option = is_option_path.option
+    return defined(my.option.data_type) & (my.option.data_type = "path")
+endfunction
+
+function is_option_string(option)
+    define my.option = is_option_string.option
+    return defined(my.option.data_type) & (my.option.data_type = "string")
+endfunction
+
+function get_option_default(option)
+    define my.option = get_option_default.option
+
+    if (is_option_boolean(my.option))
+        return get_option_default_boolean(my.option)
+    endif
+
+    if (defined(my.option.default))
+        return my.option.default
+    endif
+
+    abort("No default for option: $(my.option.name)")
+endfunction
+
+function get_option_define_clause(option, symbol)
+    define my.option = get_option_define_clause.option
+
+    if (!defined(my.option.inherited))
+        return my.symbol
+    endif
+
+    if (my.option.name = "ndebug")
+        return "NOT CMAKE_BUILD_TYPE MATCHES Debug"
+    endif
+
+    if (my.option.name = "shared")
+        return "BUILD_SHARED_LIBS"
+    endif
+
+    abort "Unrecognized inherited option, cannot form clause: $(my.option.name)"
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_boost_use_static_libs()
+.
+if (BUILD_SHARED_LIBS)
+    set( Boost_USE_STATIC_LIBS "off" )
+else()
+    set( Boost_USE_STATIC_LIBS "on" )
+endif()
+
+.endmacro # emit_boost_use_static_libs
+.
+.endtemplate

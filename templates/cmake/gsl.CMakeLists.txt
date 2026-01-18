@@ -1,0 +1,360 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin CMakeLists.txt.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+function emit_CMakeLists(repository, repositories)
+    define my.repository = emit_CMakeLists.repository
+    define my.repositories = emit_CMakeLists.repositories
+
+    copyleft(my.repository.name)
+
+    emit_initialization(my.repository)
+
+    emit_includes()
+
+    emit_pkgconfig_matching_variables()
+
+    emit_flags(my.repository)
+
+    emit_options(my.repository)
+
+    emit_compound_flags(my.repository)
+
+    emit_defines(my.repository)
+
+    emit_dependencies(my.repository)
+endfunction
+
+function emit_flags(repository)
+    define my.repository = emit_flags.repository
+    define my.std_prefix = "std=c++"
+
+    if (count(my.repository->configure.flag, starts_with(count.name, my.std_prefix) > 0))
+        define my.std_flag = my.repository->configure->flag(\
+            starts_with(_flag.name, my.std_prefix), _flag)
+        define my.standard = right(my.std_flag.name,\
+            string.length(my.std_flag.name) - string.length(my.std_prefix))
+        emit_cxx_standard(my.standard)
+    endif
+
+    new compile_options as _options
+        for my.repository->configure.flag as _flag
+            if (starts_with(_flag.name, my.std_prefix))
+                next
+            endif
+
+            if (((_flag.context = "c") | (_flag.context = "c++")) &\
+                (count(_options.flag, (count.name = _flag.name)) = 0))
+                copy _flag to _options
+            endif
+        endfor
+        emit_add_compile_options(_options)
+    endnew
+endfunction
+
+function emit_options(repository)
+    define my.repository = emit_options.repository
+    for my.repository->configure.option as _option
+        emit_option(_option)
+    endfor
+endfunction
+
+function emit_compound_flags(repository)
+    define my.repository = emit_compound_flags.repository
+    for my.repository->configure.compound as _compound
+        emit_compound_flag(_compound, my.repository)
+    endfor
+endfunction
+
+function emit_dependencies(repository)
+    define my.repository = emit_dependencies.repository
+
+    for my.repository->configure.dependency as _dependency
+        if (is_boost_dependency(_dependency))
+            emit_dependency_boost(_dependency, my.repository)
+        elsif (is_boost_lib_dependency(_dependency))
+        elsif (is_pthread_dependency(_dependency))
+            emit_dependency_pthread(_dependency, my.repository)
+        elsif (is_versioned_dependency(_dependency))
+            emit_dependency_versioned(_dependency, my.repository)
+        else
+            emit_dependency(_dependency, my.repository)
+        endif
+    endfor
+endfunction
+
+function emit_dependency_boost(dependency, repository, indent)
+    define my.prefix = "boost_"
+    define my.dependency = emit_dependency_boost.dependency
+    define my.repository = emit_dependency_boost.repository
+    define my.indent = default_defined(emit_dependency_boost.indent)
+
+    new features as _features
+        # locate boost components
+        populate_features(_features, my.prefix, my.repository)
+
+        # emit
+        emit_boost_use_static_libs()
+        emit_find_package(my.dependency, _features, my.indent)
+    endnew
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_initialization(repository, indent)
+.   define my.repository = emit_initialization.repository
+.   define my.indent = default_defined(emit_initialization.indent)
+.   heading2("Cmake project initialization.")
+$(my.indent)cmake_minimum_required( VERSION 3.18 FATAL_ERROR )
+
+$(my.indent)project( $(my.repository.name) LANGUAGES C CXX )
+
+$(my.indent)enable_testing()
+
+$(my.indent)set( CANONICAL_LIB_NAME $<IF:$<BOOL:${MSVC}>,"$(my.repository.name)","$(my.repository->package.library)"> )
+
+$(my.indent)set_property( GLOBAL PROPERTY USE_FOLDERS ON )
+$(my.indent)set( PACKAGE_VERSION "$(my.repository.version)" )
+$(my.indent)set( VERSION "${PACKAGE_VERSION}" )
+
+.endmacro # emit_initialization
+.
+.macro emit_includes(indent)
+.   define my.indent = default_defined(emit_includes.indent)
+.   heading2("Common includes.")
+$(my.indent)list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
+
+$(my.indent)include(CheckCXXCompilerFlag)
+$(my.indent)include(CheckCXXSourceCompiles)
+$(my.indent)include(CheckCXXSymbolExists)
+$(my.indent)include(CheckIncludeFiles)
+$(my.indent)include(CheckLinkerFlag)
+$(my.indent)include(CheckSymbolExists)
+$(my.indent)include(CMakePackageConfigHelpers)
+$(my.indent)include(FindThreads)
+$(my.indent)include(GNUInstallDirs)
+
+.endmacro # emit_includes
+.
+.macro emit_pkgconfig_matching_variables(indent)
+.   define my.indent = default_defined(emit_pkgconfig_matching_variables.indent)
+.   heading2("Match pkg-config.in expected variables.")
+$(my.indent)set( prefix "${CMAKE_PREFIX_PATH}" )
+$(my.indent)set( exec_prefix "\${prefix}" )
+$(my.indent)set( libdir "\${exec_prefix}/lib" )
+$(my.indent)set( includedir "\${exec_prefix}/include" )
+
+.endmacro # emit_pkgconfig_matching_variables
+.
+.macro emit_cxx_standard(standard, indent)
+.   define my.indent = default_defined(emit_cxx_standard.indent)
+.   heading2("Check for baseline language coverage in the compiler for the C++$(my.standard) standard.")
+$(my.indent)set( CMAKE_CXX_STANDARD $(my.standard) )
+$(my.indent)set( CMAKE_CXX_STANDARD_REQUIRED ON )
+
+.endmacro # emit_cxx_standard
+.
+.macro emit_add_compile_options(options, indent)
+.   define my.indent = default_defined(emit_add_compile_options.indent)
+.   define my.options = emit_add_compile_options.options
+.
+.   heading2("Add compiler options")
+.   for my.options.flag as _flag by defined(_flag.compiler) ?? _flag.compiler ? ""
+.       define my.opt_indent = defined(_flag.compiler) ?? join("    ", my.indent, "") ? "$(my.indent)"
+# $(_flag.comment)
+.       if (defined(_flag.compiler))
+$(my.indent)if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "$(compiler_id(_flag.compiler))")
+.       endif
+$(my.opt_indent)check_cxx_compiler_flag( "-$(_flag.name)" HAS_FLAG_$(_flag.name:upper) )
+$(my.opt_indent)if ( HAS_FLAG_$(_flag.name:upper) )
+    $(my.opt_indent)add_compile_options( $<$<COMPILE_LANGUAGE:CXX>:-$(_flag.name)> )
+$(my.opt_indent)else()
+    $(my.opt_indent)message( FATAL_ERROR "Compiler does not support -$(_flag.name)" )
+$(my.opt_indent)endif()
+.       if defined(_flag.compiler)
+$(my.indent)endif()
+.       endif
+
+.   endfor
+.endmacro # emit_add_compile_options
+.
+.macro emit_option(option, indent)
+.   define my.indent = default_defined(emit_option.indent)
+.   define my.option = emit_option.option
+.   require(my.option, "option", "description")
+.   require(my.option, "option", "name")
+.   require(my.option, "option", "type")
+.
+.   define my.type = get_option_type(my.option)
+.   define my.symbol = get_option_symbol_generic(my.option, "-", "false")
+.   define my.data_type = get_option_data_type(my.option)
+.
+.   define my.implement = is_true(my.option.inherited) ?? "Inherit" ? "Implement"
+.   define my.output = is_true(my.option.substitute) ?? " and output ${$(my.option.name)}" ? ""
+.   define my.defines = defined(my.option.define) ?? " and define $(my.option.define:upper,c)" ? ""
+.   define my.conditional = is_true(my.option.conditional) ?? " and declare $(my.symbol)" ? ""
+.   heading2("$(my.implement) -D$(my.symbol)$(my.defines)$(my.output)$(my.conditional).")
+.
+.   if (!is_true(my.option.inherited))
+$(my.indent)set( $(my.symbol) "$(get_option_default(my.option))" CACHE $(my.data_type:upper) "$(my.option.description)" )
+
+.   endif
+.
+.   if (!is_empty(my.option.define))
+.       define my.define_clause = get_option_define_clause(my.option, my.symbol)
+.
+$(my.indent)if ($(my.define_clause))
+    $(my.indent)add_definitions( -D$(my.option.define) )
+$(my.indent)endif()
+
+.   endif
+.
+.   if (is_true(my.option.substitute) & defined(my.option.value))
+$(my.indent)if ($(my.symbol))
+    $(my.indent)set( $(my.option.name:c) "$(my.option.value)" )
+$(my.indent)endif()
+
+.   endif
+.endmacro # emit_option
+.
+.macro emit_compound_flag(compound, repository, indent)
+.   define my.indent = default_defined(emit_compound_flag.indent)
+.   define my.compound = emit_compound_flag.compound
+.   define my.repository = emit_compound_flag.repository
+.   define my.define_prefix = "$(my.compound.type:upper)_"
+.
+.   if defined(my.compound.option)
+.       define my.option = my.repository->configure->option(name = my.compound.name)
+.       if !defined(my.option)
+.           abort("Matching option '$(my.compound.option)' not found for '$(my.compound.name)'.")
+.       endif
+.   endif
+.
+.   my.opt_indent = defined(my.option) ?? join("   ", my.indent, "") ? "$(my.indent)"
+.   define my.flags = join_flags_name(my.compound)
+.   define my.symbol_prefix = defined(my.option) ?? "HAS_FLAGS_" ? my.define_prefix
+.
+.   if defined(my.option)
+$(my.indent)if ($(get_option_symbol_generic(my.option, "-", "false")))
+.   endif
+$(my.opt_indent)check_cxx_compiler_flag("$(my.flags)" $(my.symbol_prefix)$(my.compound.name:upper))
+
+$(my.opt_indent)if ($(my.symbol_prefix)$(my.compound.name:upper))
+.   for my.compound.flag as _flag where defined(_flag.name) & !is_empty(_flag.name)
+    $(my.opt_indent)add_compile_options( $<$<COMPILE_LANGUAGE:CXX>:-$(_flag.name)> )
+.   endfor
+.   if defined(my.compound->program)
+    $(my.opt_indent)set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+    $(my.opt_indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} $(my.flags)" )
+.   endif
+$(my.opt_indent)endif()
+
+.   if defined(my.compound->program)
+$(my.opt_indent)check_cxx_source_compiles("
+.       for my.compound->program.include as _include
+    $(my.opt_indent)#include <$(_include.header)>
+.       endfor
+    $(my.opt_indent)int main() {
+.       for my.compound->program.loc as _loc
+        $(my.opt_indent)$(_loc)
+.       endfor
+    $(my.opt_indent)}" $(my.define_prefix)$(my.compound.name:upper))
+
+$(my.opt_indent)if ($(my.symbol_prefix)$(my.compound.name:upper))
+    $(my.opt_indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+$(my.opt_indent)endif()
+
+.   endif
+.
+$(my.opt_indent)if ( $(my.define_prefix)$(my.compound.name:upper) )
+    $(my.opt_indent)add_compile_definitions( $(my.define_prefix)$(my.compound.name:upper) )
+    $(my.opt_indent)set( $(my.compound.name:lower) "-D$(my.compound.type:upper)_$(my.compound.name:upper)" )
+$(my.opt_indent)else()
+    $(my.opt_indent)message( FATAL_ERROR "Failed to enable $(my.define_prefix)$(my.compound.name:upper)" )
+$(my.opt_indent)endif()
+.   if defined(my.option)
+$(my.indent)endif()
+.   endif
+
+.endmacro # emit_compound_flag
+.
+.macro emit_find_package(dependency, features, indent)
+.   define my.dependency = emit_find_package.dependency
+.   define my.features = emit_find_package.features
+.   define my.indent = default_defined(emit_find_package.indent)
+.   require(my.dependency, "dependency", "name")
+.
+.   heading2("Find $(my.dependency.name)")
+.   if (count(my.features.element) > 0)
+$(my.indent)find_package( $(my.dependency.name:neat) $(my.dependency.version) REQUIRED COMPONENTS
+.       for my.features.element as _element
+    $(my.indent)$(_element.name)$(last() ?? " )" ? "")
+.       endfor
+
+.       for my.features.element as _element
+$(my.indent)set( $(my.dependency.name)_$(_element.name)_LIBS "-l$(my.dependency.name)_$(_element.name)" )
+.       endfor
+.   else
+$(my.indent)find_package( $(my.dependency.name) $(my.dependency.version) )
+.   endif
+
+.# NOTE: enable-ndebug hardcoded match to configuration option
+$(my.indent)set( $(my.dependency.name:neat)_LIBRARY_DIR $<IF:$<BOOL:${enable-ndebug}>,"\${$(my.dependency.name:neat)_LIBRARY_DIR_RELEASE}","\${$(my.dependency.name:neat)_LIBRARY_DIR_DEBUG}">)
+
+$(my.indent)set( $(my.dependency.name)_CPPFLAGS "-I\${$(my.dependency.name:neat)_INCLUDE_DIR}" )
+$(my.indent)set( $(my.dependency.name)_LDFLAGS "-L\${$(my.dependency.name:neat)_LIBRARY_DIR}" )
+
+.endmacro # emit_find_package
+.
+.endtemplate
+.template 0
+###############################################################################
+# Generation
+###############################################################################
+function generate_CMakeLists(path_prefix, repositories)
+    define my.repositories = generate_CMakeLists.repositories
+    define my.proj_relative = project_relative_cmake_path()
+    define my.filename = "CMakeLists.txt"
+
+    for my.repositories.repository as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = append_path(append_path(my.path_prefix,\
+            _repository.name), my.proj_relative)
+        create_directory(my.output_path)
+        define my.out_file = append_path(my.output_path, my.filename)
+        notify(my.out_file)
+        output(my.out_file)
+        emit_CMakeLists(_repository, my.repositories)
+        close
+     endfor _repository
+endfunction # generate_cmakelists
+
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/math.gsl"
+gsl from "library/string.gsl"
+gsl from "library/collections.gsl"
+gsl from "templates/cmake/utilities.gsl"
+gsl from "utilities.gsl"
+
+generate_CMakeLists("output", generate)
+
+.endtemplate
