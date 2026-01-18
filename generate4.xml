@@ -349,8 +349,6 @@
 
       <!-- WOLFSSL_USER_SETTINGS causes import of "user_settings.h". -->
       <define name="WOLFSSL_USER_SETTINGS"/>
-      <!-- NO_MAIN_DRIVER and NO_TESTSUITE_MAIN_DRIVER exclude test mains. -->
-      <PreprocessorDefinitions>NO_MAIN_DRIVER;NO_TESTSUITE_MAIN_DRIVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       
       <dependency name="boost" version="1.86.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
@@ -397,7 +395,6 @@
         <headers path="include" />
         <headers path="include/bitcoin/ssl" />
         <sources path="src" />
-        <sources path="src/ssl/wolfssl" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-network-test" test="true" option="tests" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff" >
         <runner>
@@ -408,8 +405,7 @@
         <library name="boost_unit_test_framework" />
         <headers path="include" />
         <headers path="include/bitcoin/ssl" />
-        <sources path="src/ssl/wolfssl" />
-        <headers path="test/ssl" />
+        <headers path="test/ssl/wolfssl" />
         <sources path="test" />
       </product>
       <product prefix="include" container="bitcoin" >
