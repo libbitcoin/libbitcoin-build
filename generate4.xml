@@ -393,8 +393,8 @@
       <product prefix="lib" path="src" uuid="564eb540-d6b6-425c-b8db-b0bee8970c18" >
         <library name="bitcoin-system" />
         <headers path="include" />
-        <!-- TODO: exclude if WITH_SSL not defined -->
-        <headers path="include/bitcoin/ssl" />
+        <!-- TODO: exclude if WITH_SSL not defined. -->
+        <headers path="include/bitcoin/network/ssl" />
         <sources path="src" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-network-test" test="true" option="tests" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff" >
@@ -405,9 +405,9 @@
         <library name="bitcoin-network" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
-        <!-- TODO: exclude if WITH_SSL not defined -->
-        <headers path="include/bitcoin/ssl" />
-        <!-- TODO: exclude if WITH_SSL not defined -->
+        <!-- TODO: exclude if WITH_SSL not defined. -->
+        <headers path="include/bitcoin/network/ssl" />
+        <!-- TODO: exclude if WITH_SSL not defined. -->
         <headers path="test/ssl/wolfssl" />
         <sources path="test" />
       </product>
