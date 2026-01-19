@@ -16,7 +16,7 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="examples" default="yes" conditional="true" description="Compile with examples." />
-      <option type="with" name="icu" default="no" define="BOOST_HAS_ICU" substitute="true" value="-DWITH_ICU" description="Compile with International Components for Unicode." />
+      <option type="with" name="icu" default="no" define="WITH_ICU" substitute="true" value="-DWITH_ICU" description="Compile with International Components for Unicode." />
       <option type="enable" name="avx2" default="no" description="Compile with avx2 intrinsics (specifically -mavx -mavx2)." />
       <option type="enable" name="avx512" default="no" description="Compile with avx512 intrinsics (specifically -mavx512bw -mavx512f)." />
       <option type="enable" name="sse41" default="no" description="Compile with sse4.1 intrinsics (specifically -msse4.1)." />
@@ -339,17 +339,17 @@
 
   <repository name="libbitcoin-network" version="4.0.0" email="eric@voskuil.org" >
 
-    <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" />
+    <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" >
+      <flag value="@ssl@" />
+    </package>
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
+      <option type="with" name="ssl" default="yes" define="WOLFSSL_USER_SETTINGS" substitute="true" value="-DWOLFSSL_USER_SETTINGS" description="Compile with internal ssl." />
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
-      <!-- WOLFSSL_USER_SETTINGS causes import of "user_settings.h". -->
-      <define name="WOLFSSL_USER_SETTINGS"/>
-      
       <dependency name="boost" version="1.86.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="4.0.0" />
@@ -393,6 +393,7 @@
       <product prefix="lib" path="src" uuid="564eb540-d6b6-425c-b8db-b0bee8970c18" >
         <library name="bitcoin-system" />
         <headers path="include" />
+        <!-- TODO: exclude if WITH_SSL not defined -->
         <headers path="include/bitcoin/ssl" />
         <sources path="src" />
       </product>
@@ -404,7 +405,9 @@
         <library name="bitcoin-network" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
+        <!-- TODO: exclude if WITH_SSL not defined -->
         <headers path="include/bitcoin/ssl" />
+        <!-- TODO: exclude if WITH_SSL not defined -->
         <headers path="test/ssl/wolfssl" />
         <sources path="test" />
       </product>
@@ -1587,7 +1590,6 @@
       <dependency name="boost" version="1.86.0" />
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
-
       <dependency name="bitcoin-node" version="4.0.0" />
 
       <!-- General flags -->
