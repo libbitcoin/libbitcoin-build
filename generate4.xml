@@ -341,6 +341,7 @@
 
     <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" >
       <flag value="@ssl@" />
+      <include name="ssl" suffix="bitcoin/network/ssl" />
     </package>
 
     <configure>
@@ -1485,7 +1486,7 @@
       <configuration name="nix-gnu-release-shared" />
     </presets>
 
-    <ci hackinclude="include/bitcoin/ssl">
+    <ci>
       <axis name="llvm" valued="true" />
       <axis name="boost" build="true" param="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
@@ -1687,7 +1688,7 @@
       <configuration name="nix-gnu-release-shared" />
     </presets>
 
-    <ci hackinclude="include/bitcoin/ssl">
+    <ci>
       <axis name="llvm" valued="true" />
       <axis name="boost" build="true" param="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />

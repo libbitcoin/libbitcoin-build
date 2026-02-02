@@ -163,11 +163,16 @@ endfunction
 .endtemplate
 .template 1
 .
-.macro initialize_package_substitutions()
+.macro initialize_package_substitutions(package)
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
+.for my.package.include as _include
+.   if (defined(_include.name) & defined(_include.suffix))
+$(_include.name)_includedir=@includedir@/$(_include.suffix)
+.   endif
+.endfor
 
 .
 .endmacro # initialize_package_substitutions
@@ -205,7 +210,7 @@ for generate.repository by name as _repository\
         copyleft(_repository.name)
 
         heading1("Substitutions")
-        initialize_package_substitutions()
+        initialize_package_substitutions(_package)
 
         heading1("Metadata")
         initialize_package_metadata(_package)
