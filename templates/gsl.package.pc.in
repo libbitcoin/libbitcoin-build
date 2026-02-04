@@ -115,15 +115,6 @@ function define_package_variables(variables, package, make, configure, repositor
     # Add explicit package.library declarations.
     format_libs(my.variables, my.package)
 
-    # for unconditional defines
-    for my.configure.define as _define where is_empty(_define.header)
-        if (defined(_define.value))
-            my.variables.cflags += " -D$(_define.name:upper,c)=$(_define.value)"
-        else
-            my.variables.cflags += " -D$(_define.name:upper,c)"
-        endif
-    endfor
-
     # Get the lib product that corresponds to the package.
     define my.product = find_library_product(my.package.library, my.make,\
         my.repository)?

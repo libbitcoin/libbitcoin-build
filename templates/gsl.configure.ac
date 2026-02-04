@@ -86,10 +86,11 @@ function get_package_files(repository)
     return my.packages
 endfunction
 
-function render_define_item(item)
+function render_define_item(item, configure)
     define my.define = render_define_item.item
+    define my.configure = render_define_item.configure
     if defined(my.define.name)
-        render_define(my.define)
+        render_define(my.define, my.configure)
     elsif (defined(my.define.export))
         render_define_export(my.define)
     else
@@ -359,21 +360,48 @@ AM_CONDITIONAL([$(my.symbol:upper)], [test x$$(my.symbol) != xno])
 .#-----------------------------------------------------------------------------
 .# AC_DEFINE
 .#-----------------------------------------------------------------------------
-.macro render_define(item)
+.macro render_define(item, configure)
 .   define my.define = render_define.item
+.   define my.configure = render_define.configure
 .   require(my.define, "define", "name")
 .   define my.uname = "$(my.define.name:upper,c)"
-.   heading2("Unconditionally define the preprocessor symbol $(my.uname).")
+.   define my.heading = defined(my.define.option) ?? \
+        "Conditionally define the preprocessor symbol $(my.uname)." ? \
+        "Unconditionally define the preprocessor symbol $(my.uname)."
+.
+.   define my.define_prefix = defined(my.define.option) ?? "    " ? ""
+.
+.   heading2(my.heading)
+
 .   if (!is_empty(my.define.comment))
 .       heading3(my.define.comment)
 .   endif
 .
-.   if (defined(my.define.value))
-AC_DEFINE([$(my.uname)], [$(my.define.value)])
-.   else
-AC_DEFINE([$(my.uname)])
+.   if (defined(my.define.option))
+.       define my.option = my.configure->option(option.name = my.define.option)
+.       if (!defined(my.option))
+.       endif
+.       define my.symbol = get_option_symbol(my.option)
+.       define my.type = get_option_type(my.option)
+.
+AS_IF([test x${$(my.symbol)} != "xno"], [
 .   endif
-
+.
+.   if (defined(my.define.value))
+$(my.define_prefix)AC_DEFINE([$(my.uname)], [$(my.define.value)])
+.   else
+$(my.define_prefix)AC_DEFINE([$(my.uname)])
+.   endif
+.
+.   if (defined(my.define.substitute))
+.       define my.subvalue = defined(my.define.value) ?? my.define.value ? "-D$(my.uname)"
+$(my.define_prefix)AC_SUBST([$(my.define.substitute)], $(my.subvalue)])
+.   endif
+.
+.   if (defined(my.define.option))
+    ])
+.   endif
+.
 .endmacro
 .
 .#-----------------------------------------------------------------------------
@@ -1000,16 +1028,12 @@ AX_CHECK_COMPILE_FLAG([$(my.flags)],
 .   define my.compiler_pattern = is_empty(my.flag.compiler) ?? "*" ? "*$(my.flag.compiler)*"
 .   heading2("$(my.flag.comment)$(my.show_compiler)")
 .
-.   if (!defined(my.flag.alternate))
-AS_CASE([${CC}], [$(my.compiler_pattern)],
-    [AX_CHECK_$(my.flags_check)_FLAG([-$(my.flag.name)],
-        [$(my.flags_variable)="$$(my.flags_variable) -$(my.flag.name)"])])
-.   endif
+.   define my.check_terminator = defined(my.flag.alternate) ?? "," ? ")])"
 .
-.   if (defined(my.flag.alternate))
 AS_CASE([${CC}], [$(my.compiler_pattern)],
     [AX_CHECK_$(my.flags_check)_FLAG([-$(my.flag.name)],
-        [$(my.flags_variable)="$$(my.flags_variable) -$(my.flag.name)"],
+        [$(my.flags_variable)="$$(my.flags_variable) -$(my.flag.name)"]$(my.check_terminator)
+.   if (defined(my.flag.alternate))
         [AX_CHECK_$(my.flags_check)_FLAG([-$(my.flag.alternate)],
             [$(my.flags_variable)="$$(my.flags_variable) -$(my.flag.alternate)"])])])
 .   endif
@@ -1077,7 +1101,7 @@ for generate.repository by name as _repository
     if (defined(my.configure->define))
         heading1("Set preprocessor defines.")
         for my.configure.define as _define
-            render_define_item(_define)
+            render_define_item(_define, my.configure)
         endfor
     endif
 
