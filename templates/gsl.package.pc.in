@@ -41,9 +41,15 @@ function format_conditional_pkg(dependency)
     return "$(my.package) >= $(my.dependency.version)"
 endfunction
 
-function initialize_package_variables(variables)
+function initialize_package_variables(variables, package)
     define my.variables = initialize_package_variables.variables
+    define my.package = initialize_package_variables.package
     my.variables.cflags = " -I${includedir}"
+
+    for my.package.includedir as _include
+        my.variables.cflags = "$(my.variables.cflags) @$(_include.name)@"
+    endfor
+
     my.variables.libs = " -L${libdir}"
     my.variables.libs_private = ""
     my.variables.requires = ""
@@ -107,22 +113,13 @@ function define_package_variables(variables, package, make, configure, repositor
     define my.configure = define_package_variables.configure
     define my.repository = define_package_variables.repository
     require(my.package, "package", "library")
-    initialize_package_variables(_variables)
+    initialize_package_variables(_variables, my.package)
 
     # Add explicit package.flag declarations.
     format_cflags(my.variables, my.package)
 
     # Add explicit package.library declarations.
     format_libs(my.variables, my.package)
-
-    # for unconditional defines
-    for my.configure.define as _define where is_empty(_define.header)
-        if (defined(_define.value))
-            my.variables.cflags += " -D$(_define.name:upper,c)=$(_define.value)"
-        else
-            my.variables.cflags += " -D$(_define.name:upper,c)"
-        endif
-    endfor
 
     # Get the lib product that corresponds to the package.
     define my.product = find_library_product(my.package.library, my.make,\
@@ -163,12 +160,16 @@ endfunction
 .endtemplate
 .template 1
 .
-.macro initialize_package_substitutions()
+.macro initialize_package_substitutions(package)
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
-
+.for my.package.include as _include
+.   if (defined(_include.name) & defined(_include.suffix))
+$(_include.name)_includedir=@includedir@/$(_include.suffix)
+.   endif
+.endfor
 .
 .endmacro # initialize_package_substitutions
 .
@@ -205,7 +206,7 @@ for generate.repository by name as _repository\
         copyleft(_repository.name)
 
         heading1("Substitutions")
-        initialize_package_substitutions()
+        initialize_package_substitutions(_package)
 
         heading1("Metadata")
         initialize_package_metadata(_package)

@@ -341,12 +341,16 @@
 
     <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" >
       <flag value="@ssl@" />
+      <flag value="@wolfssl@" />
+      <includedir name="ssl_include" />
     </package>
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="with" name="ssl" default="yes" define="WOLFSSL_USER_SETTINGS" substitute="true" value="-DWOLFSSL_USER_SETTINGS" description="Compile with internal ssl." />
+      <option type="with" name="ssl" default="yes" define="WITH_SSL" substitute="true" value="-DWITH_SSL" description="Compile with internal ssl.">
+        <include symbol="ssl_include" value="-I${includedir}/bitcoin/network/ssl" />
+      </option>
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
@@ -354,6 +358,7 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <dependency name="bitcoin-system" version="4.0.0" />
 
+      <define name="WOLFSSL_USER_SETTINGS" substitute="wolfssl"  option="ssl" />
       <!-- General flags -->
       <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
 
@@ -1485,7 +1490,7 @@
       <configuration name="nix-gnu-release-shared" />
     </presets>
 
-    <ci hackinclude="include/bitcoin/ssl">
+    <ci>
       <axis name="llvm" valued="true" />
       <axis name="boost" build="true" param="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
@@ -1687,7 +1692,7 @@
       <configuration name="nix-gnu-release-shared" />
     </presets>
 
-    <ci hackinclude="include/bitcoin/ssl">
+    <ci>
       <axis name="llvm" valued="true" />
       <axis name="boost" build="true" param="true" />
       <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
