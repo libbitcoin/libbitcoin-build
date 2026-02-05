@@ -17,106 +17,122 @@ jobs:
         include:
           - os: ubuntu-latest
             script: generate4.sh
+            branch: master
 
           - os: ubuntu-latest
             script: generate3.sh
+            branch: version3
 
-          - os: macos-13
+          - os: macos-latest
             script: generate4.sh
+            branch: master
 
-          - os: macos-13
+          - os: macos-latest
             script: generate3.sh
+            branch: version3
 
           - os: windows-latest
             script: generate4.cmd
+            branch: master
 
           - os: windows-latest
             script: generate3.cmd
+            branch: version3
 
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-build'
           repository: ${{ github.repository }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-system'
           repository: '${{ github.repository_owner }}/libbitcoin-system'
+          ref: ${{ matrix.branch }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-protocol'
           repository: '${{ github.repository_owner }}/libbitcoin-protocol'
+          ref: ${{ matrix.branch }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-client'
           repository: '${{ github.repository_owner }}/libbitcoin-client'
+          ref: ${{ matrix.branch }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-explorer'
           repository: '${{ github.repository_owner }}/libbitcoin-explorer'
+          ref: ${{ matrix.branch }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-network'
           repository: '${{ github.repository_owner }}/libbitcoin-network'
+          ref: ${{ matrix.branch }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-consensus'
           repository: '${{ github.repository_owner }}/libbitcoin-consensus'
+          ref: ${{ matrix.branch }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-database'
           repository: '${{ github.repository_owner }}/libbitcoin-database'
+          ref: ${{ matrix.branch }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-blockchain'
           repository: '${{ github.repository_owner }}/libbitcoin-blockchain'
+          ref: ${{ matrix.branch }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-node'
           repository: '${{ github.repository_owner }}/libbitcoin-node'
+          ref: ${{ matrix.branch }}
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-server'
           repository: '${{ github.repository_owner }}/libbitcoin-server'
+          ref: ${{ matrix.branch }}
 
       - name: Checkout repository
         if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'gsl'
@@ -137,8 +153,16 @@ jobs:
         if: ${{ startsWith(matrix.os, 'windows') }}
         uses: microsoft/setup-msbuild@v1.1
 
-      - name: Build gsl [macos, ubuntu]
-        if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
+      - name: Build gsl [macos]
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        run: |
+          pushd "gsl/src"
+          CPPFLAGS="-I/opt/homebrew/include ${CPPFLAGS}" make --silent
+          sudo make install
+          popd
+          
+      - name: Build gsl [ubuntu]
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           pushd "gsl/src"
           make --silent
