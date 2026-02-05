@@ -41,9 +41,15 @@ function format_conditional_pkg(dependency)
     return "$(my.package) >= $(my.dependency.version)"
 endfunction
 
-function initialize_package_variables(variables)
+function initialize_package_variables(variables, package)
     define my.variables = initialize_package_variables.variables
+    define my.package = initialize_package_variables.package
     my.variables.cflags = " -I${includedir}"
+
+    for my.package.includedir as _include
+        my.variables.cflags = "$(my.variables.cflags) @$(_include.name)@"
+    endfor
+
     my.variables.libs = " -L${libdir}"
     my.variables.libs_private = ""
     my.variables.requires = ""
@@ -107,7 +113,7 @@ function define_package_variables(variables, package, make, configure, repositor
     define my.configure = define_package_variables.configure
     define my.repository = define_package_variables.repository
     require(my.package, "package", "library")
-    initialize_package_variables(_variables)
+    initialize_package_variables(_variables, my.package)
 
     # Add explicit package.flag declarations.
     format_cflags(my.variables, my.package)
@@ -164,7 +170,6 @@ includedir=@includedir@
 $(_include.name)_includedir=@includedir@/$(_include.suffix)
 .   endif
 .endfor
-
 .
 .endmacro # initialize_package_substitutions
 .

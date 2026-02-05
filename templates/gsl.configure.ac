@@ -351,6 +351,10 @@ AS_CASE([${$(my.symbol)}], [yes], AC_SUBST([$(my.option.name:c)], [$(my.option.v
 AC_SUBST([$(my.symbol)])
 .   endif
 .
+.       for my.option.include as _include where defined(_include.symbol) & defined(_include.value)
+AS_CASE([${$(my.symbol)}], [yes], AC_SUBST([$(_include.symbol:c)], [$(_include.value)]))
+.       endfor
+.
 .   if (is_true(my.option.conditional))
 AM_CONDITIONAL([$(my.symbol:upper)], [test x$$(my.symbol) != xno])
 .   endif
@@ -900,66 +904,48 @@ AS_CASE([${$(my.symbol)}], [yes],
 .   define my.prefix = is_true(my.dependency.unprefixed) ?? "" ? "lib"
 .   define my.symbol = find_option_symbol(my.dependency, my.configure)?
 .   define my.check = "$(my.prefix)$(my.name) >= $(my.version)"
+.
 .   if (defined(my.symbol))
 .       define my.option = my.configure->option(option.name = my.dependency.option)
 .       define my.option.type = get_option_type(my.option)
 .   endif
+.
 .   heading2("Require $(my.name) of at least version $(my.version) and output ${$(my.cname)_CPPFLAGS/LIBS/PKG}.")
 .   if (!is_empty(my.dependency.comment))
 .       heading3("$(my.dependency.comment)")
 .   endif
 .
+.   define my.indent = is_empty(my.symbol) ?? "" ? "    "
+.   define my.indent_wrapped = is_empty(my.symbol) ?? "" ? "     "
+.   define my.wrap_lead = is_empty(my.symbol) ?? "" ? "["
+.   define my.wrap_trail = is_empty(my.symbol) ?? "" ? "],"
+.   define my.end_section = "],"
+.   if (!is_empty(my.symbol))
+AS_CASE([${$(my.symbol)}], [yes],
+.   endif
+.
+$(my.indent)$(my.wrap_lead)PKG_CHECK_MODULES([$(my.cname)], [$(my.check)], [],
+    $(my.indent)[
 .   if (is_empty(my.symbol))
-PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
-    [$(my.cname)_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "$(my.check)" 2>/dev/null`"
-     $(my.cname)_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "$(my.check)" 2>/dev/null`"],
-    [AC_MSG_ERROR([$(my.check) is required but was not found.])])
-AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
-AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
-AS_IF([test x${$(my.cname)_INCLUDEDIR} != "x"],
-    [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], ["-isystem${$(my.cname)_INCLUDEDIR} ${$(my.cname)_OTHER_CFLAGS}"])],
-    [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [${$(my.cname)_OTHER_CFLAGS}])])
-AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
-AC_MSG_NOTICE([$(my.cname)_ISYS_CPPFLAGS : ${$(my.cname)_ISYS_CPPFLAGS}])
-AC_MSG_NOTICE([$(my.cname)_OTHER_CFLAGS : ${$(my.cname)_OTHER_CFLAGS}])
-AC_MSG_NOTICE([$(my.cname)_INCLUDEDIR : ${$(my.cname)_INCLUDEDIR}])
-AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
+      $(my.indent)AC_MSG_ERROR([$(my.check) is required but was not found.])
 .   elsif (is_empty(my.dependency.extract))
-AS_CASE([${$(my.symbol)}], [yes],
-    [PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
-        [$(my.cname)_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "$(my.check)" 2>/dev/null`"
-         $(my.cname)_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "$(my.check)" 2>/dev/null`"],
-        [AC_MSG_ERROR([--$(my.option.type)-$(my.option.name) specified but $(my.check) was not found.])])
-     AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
-     AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
-     AS_IF([test x${$(my.cname)_INCLUDEDIR} != "x"],
-        [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], ["-isystem${$(my.cname)_INCLUDEDIR} ${$(my.cname)_OTHER_CFLAGS}"])],
-        [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [${$(my.cname)_OTHER_CFLAGS}])])
-     AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
-     AC_MSG_NOTICE([$(my.cname)_ISYS_CPPFLAGS : ${$(my.cname)_ISYS_CPPFLAGS}])
-     AC_MSG_NOTICE([$(my.cname)_OTHER_CFLAGS : ${$(my.cname)_OTHER_CFLAGS}])
-     AC_MSG_NOTICE([$(my.cname)_INCLUDEDIR : ${$(my.cname)_INCLUDEDIR}])
-     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
-    [AC_SUBST([$(my.cname)_PKG], [])])
+      $(my.indent)AC_MSG_ERROR([--$(my.option.type)-$(my.option.name) specified but $(my.check) was not found.])
 .   else
-AS_CASE([${$(my.symbol)}], [yes],
-    [PKG_CHECK_MODULES([$(my.cname)], [$(my.check)],
-        [$(my.cname)_INCLUDEDIR="`$PKG_CONFIG --variable=includedir "$(my.check)" 2>/dev/null`"
-         $(my.cname)_OTHER_CFLAGS="`$PKG_CONFIG --cflags-only-other "$(my.check)" 2>/dev/null`"
-         $(my.symbol)="`$PKG_CONFIG --variable=$(my.dependency.extract) "$(my.check)" 2>/dev/null`"],
-        [$(my.cname)_INCLUDEDIR=""
-         $(my.cname)_OTHER_CFLAGS=""
-         $(my.symbol)="$(my.default)"])
-     AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
-     AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
-     AS_IF([test x${$(my.cname)_INCLUDEDIR} != "x"],
-        [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], ["-isystem${$(my.cname)_INCLUDEDIR} ${$(my.cname)_OTHER_CFLAGS}"])],
-        [AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [${$(my.cname)_OTHER_CFLAGS}])])
-     AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
-     AC_MSG_NOTICE([$(my.cname)_ISYS_CPPFLAGS : ${$(my.cname)_ISYS_CPPFLAGS}])
-     AC_MSG_NOTICE([$(my.cname)_OTHER_CFLAGS : ${$(my.cname)_OTHER_CFLAGS}])
-     AC_MSG_NOTICE([$(my.cname)_INCLUDEDIR : ${$(my.cname)_INCLUDEDIR}])
-     AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])],
+      $(my.indent)$(my.cname)_INCLUDEDIR=""
+      $(my.indent)$(my.cname)_OTHER_CFLAGS=""
+      $(my.indent)$(my.symbol)="$(my.default)"
+.   endif
+    $(my.indent)])
+$(my.indent_wrapped)AC_SUBST([$(my.cname)_PKG], ['$(my.check)'])
+$(my.indent_wrapped)AC_SUBST([$(my.cname)_CPPFLAGS], [${$(my.cname)_CFLAGS}])
+$(my.indent_wrapped)AC_SUBST([$(my.cname)_ISYS_CPPFLAGS], [$(substitute_system_include("$(my.cname)_CPPFLAGS"))]])
+$(my.indent_wrapped)AC_MSG_NOTICE([$(my.cname)_CPPFLAGS : ${$(my.cname)_CPPFLAGS}])
+$(my.indent_wrapped)AC_MSG_NOTICE([$(my.cname)_ISYS_CPPFLAGS : ${$(my.cname)_ISYS_CPPFLAGS}])
+$(my.indent_wrapped)AC_MSG_NOTICE([$(my.cname)_OTHER_CFLAGS : ${$(my.cname)_OTHER_CFLAGS}])
+$(my.indent_wrapped)AC_MSG_NOTICE([$(my.cname)_INCLUDEDIR : ${$(my.cname)_INCLUDEDIR}])
+$(my.indent_wrapped)AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])$(my.wrap_trail)
+.
+.   if (!is_empty(my.symbol))
     [AC_SUBST([$(my.cname)_PKG], [])])
 .   endif
 
@@ -969,7 +955,7 @@ AS_CASE([${enable_isystem}],[yes],
 
 AC_MSG_NOTICE([$(my.cname)_BUILD_CPPFLAGS : ${$(my.cname)_BUILD_CPPFLAGS}])
 
-.endmacro
+.endmacro # check_package
 .
 .#-----------------------------------------------------------------------------
 .# Compound flags AX_CHECK_COMPILE_FLAG

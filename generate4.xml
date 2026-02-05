@@ -342,13 +342,15 @@
     <package library="bitcoin-network" description="Bitcoin P2P Network Library" url="https://github.com/libbitcoin/libbitcoin-network" >
       <flag value="@ssl@" />
       <flag value="@wolfssl@" />
-      <include name="ssl" suffix="bitcoin/network/ssl" />
+      <includedir name="ssl_include" />
     </package>
 
     <configure>
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
-      <option type="with" name="ssl" default="yes" define="WITH_SSL" substitute="true" value="-DWITH_SSL" description="Compile with internal ssl." />
+      <option type="with" name="ssl" default="yes" define="WITH_SSL" substitute="true" value="-DWITH_SSL" description="Compile with internal ssl.">
+        <include symbol="ssl_include" value="-I${includedir}/bitcoin/network/ssl" />
+      </option>
       <option type="enable" name="ndebug" default="yes" define="NDEBUG" description="Compile without debug assertions." />
       <option type="enable" name="shared" default="yes" define="BOOST_ALL_DYN_LINK" inherited="true" description="Required for dynamically linking boost test." />
 
