@@ -1,0 +1,286 @@
+<?xml version = "1.0" ?>
+<configuration language="en-us">
+
+  <repository name="libbitcoin-system"
+    version="4.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin Cross-Platform C++ Development Toolkit">
+
+    <language value="C" />
+    <language value="CXX" />
+
+    <library
+      uuid="39f60708-ff48-4c22-952d-43470866f684">
+
+      <sources path="src" recursive="true" />
+      <headers path="include" recursive="true" />
+
+      <!-- Exposed knobs -->
+      <option name="icu" type="with" default="no" />
+      <option name="avx2" type="enable" default="no" />
+      <option name="avx512" type="enable" default="no" />
+      <option name="sse41" type="enable" default="no" />
+      <option name="shani" type="enable" default="no" />
+
+      <!-- Dependencies -->
+      <dependency name="pthread">
+        <system exclude="android" />
+      </dependency>
+
+      <dependency name="dl" function="dlopen">
+        <system required="linux" />
+        </dependency>
+
+      <dependency name="rt" function="clock_gettime">
+        <system required="linux" />
+        <system exclude="android" />
+      </dependency>
+
+      <dependency name="icu" version="55.2" option="icu">
+        <component name="i18n" />
+        <component name="uc" />
+        <component name="data" />
+      </dependency>
+
+      <dependency name="secp256k1" version="0.7.0" />
+
+      <dependency name="boost" version="1.86.0">
+        <component name="iostreams" />
+        <component name="locale" />
+        <component name="program_options" />
+        <component name="thread" />
+        <component name="url" />
+      </dependency>
+
+      <compiler>
+        <flag option="avx2"
+          comment="Conditionally require avx2 intrinsics."
+          compound="true"
+          type="public">
+          <flag value="mavx" />
+          <flag value="mavx2" />
+
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m256i a = _mm256_set_epi32(8, 7, 6, 5, 4, 3, 2, 1);</loc>
+            <loc>return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);</loc>
+          </program>
+        </flag>
+
+        <flag option="avx512"
+          comment="Conditionally require avx512 intrinsics."
+          compound="true"
+          type="public">
+          <flag value="mavx512f" />
+          <flag value="mavx512bw" />
+
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);</loc>
+            <loc>return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1);</loc>
+          </program>
+        </flag>
+
+        <flag option="shani"
+          comment="Conditionally require sha native intrincis."
+          compound="true"
+          type="public">
+          <flag value="msse4" />
+          <flag value="msha" />
+
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m128i a = _mm_set1_epi32(0);</loc>
+            <loc>__m128i b = _mm_set1_epi32(15);</loc>
+            <loc>__m128i k = _mm_set1_epi32(31);</loc>
+            <loc>return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);</loc>
+          </program>
+        </flag>
+
+        <flag option="sse41"
+          comment="Conditionally require sse4.1 intrinsics."
+          compound="true"
+          type="public">
+          <flag value="msse4.1" />
+
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m128i a = _mm_set1_epi32(0);</loc>
+            <loc>__m128i b = _mm_set1_epi32(15);</loc>
+            <loc>return _mm_extract_epi32(_mm_add_epi64(a, b), 2);</loc>
+          </program>
+        </flag>
+
+        <flag option="icu"
+          comment="Use ICU libraries."
+          value="-DWITH_ICU"
+          type="public">
+          <context language="c" />
+          <context language="c++" />
+        </flag>
+
+        <flag value="Wall"
+          comment="Enable questionable/easy to avoid error warnings."
+          type="private">
+
+          <context language="c" />
+          <context language="c++" />
+        </flag>
+
+        <flag value="Wextra"
+          comment="Enables extra warnings not enabled by -Wall."
+          type="private">
+
+          <context language="c" />
+          <context language="c++" />
+        </flag>
+
+        <!--<flag value="Wpedantic"
+          comment="Enables all warnings demanded by strict ISO C/C+."
+          type="private">
+
+          <context language="c" />
+          <context language="c++" />
+        </flag>-->
+
+        <flag value="Wno-reorder"
+          comment="Disallow warning on style order of declarations."
+          type="private"
+          language="c++" />
+
+        <flag value="Wno-missing-field-initializers"
+          comment="Suppress warning for incomplete field initialization."
+          type="private"
+          language="c++" />
+
+        <flag value="Wno-missing-braces"
+          comment="Conform to style."
+          type="private"
+          language="c++" />
+
+        <flag value="Wno-comment"
+          comment="Ignore comments within comments or commenting of backslash extended lines."
+          type="private"
+          language="c++" />
+
+        <flag value="Wno-deprecated-copy"
+          comment="Suppress warning for copy of implicitly generated copy constructor."
+          type="private"
+          language="c++" />
+
+        <flag value="Wno-ignored-attributes"
+          comment="Suppress warning for ignored attributes (arising on template arguments)."
+          type="private"
+          language="c++" />
+
+        <flag value="Wno-mismatched-tags"
+          comment="Conflict in stdlib under clang."
+          type="private"
+          language="c++"
+          compiler="clang" />
+
+        <!-- This varies by dependency build, such as boost. So we do not enforce. -->
+        <!-- <flag value="fvisibility=hidden"
+          comment="Hide internal functions from external libs."
+          type="private"
+          language="c++"
+          compiler="gcc" /> -->
+
+        <flag value="Wno-long-long"
+          comment="Allow use of C99 'long long' type."
+          type="private"
+          language="c" />
+
+        <flag value="fno-var-tracking-assignments"
+          comment="Limit delays and warnings."
+          type="private"
+          language="c++"
+          compiler="gcc" />
+      </compiler>
+
+      <linkage>
+        <flag value="no_fixup_chains"
+          comment="Address -undefined dynamic_lookup MacOS error." />
+
+        <flag value="fstack-protector"
+          comment="Protect stack." />
+
+        <flag value="fstack-protector-all"
+          comment="Protect stack comprehensively." />
+      </linkage>
+
+    </library>
+
+    <test option="with"
+      uuid="51a424a9-2c12-4211-8d40-e49d1534c541">
+
+      <sources path="test" recursive="true" />
+
+      <dependency name="boost" version="1.86.0">
+        <component name="unit_test_framework" />
+      </dependency>
+    </test>
+
+    <binary name="examples" option="with"
+      install="false"
+      uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e">
+
+      <sources path="examples" />
+    </binary>
+
+    <ci />
+  </repository>
+
+  <repository name="libbitcoin-network" 
+    version="4.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin P2P Network Library">
+
+    <language value="C" />
+    <language value="CXX" />
+
+  </repository>
+
+  <repository name="libbitcoin-database"
+    version="4.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin High Performance Blockchain Database">
+
+    <language value="C" />
+    <language value="CXX" />
+
+  </repository>
+
+  <repository name="libbitcoin-node"
+    version="4.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin Full Node">
+
+    <language value="C" />
+    <language value="CXX" />
+
+  </repository>
+
+  <repository name="libbitcoin-server"
+    version="4.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin Full Node and Query Server">
+
+    <language value="C" />
+    <language value="CXX" />
+
+  </repository>
+
+  <templates source="version4.xml" resultpath="../output/version4">
+    <!-- resultpath provided relative to expected evaluation - libbitcoin-build/process -->
+    <template name="CMakeLists.txt.gsl"
+      path="cmake"
+      outpath="builds/cmake">
+    </template>
+    <!--<template name="gsl.config.cmake" path="cmake" />-->
+  </templates>
+</configuration>

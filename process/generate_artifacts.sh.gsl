@@ -1,0 +1,62 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL generate generate_artifacts.sh.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.macro generate_artifacts()
+.   define out_file = "process/generate_artifacts.sh"
+.   notify(out_file)
+.   output(out_file)
+.   shebang("bash")
+.   copyleft("libbitcoin-build")
+
+# Exit this script on the first build error.
+set -e
+
+# Do everything relative to this file location.
+cd `dirname "$0"`
+
+# Cleanup output directory
+rm -rf "$(configuration->templates.resultpath)"
+
+declare -a generator=( \\
+.   for configuration->templates.template as _template
+    "../templates/$(_template.path)/$(_template.name)" \\
+.   endfor
+)
+
+# Generate build artifacts.
+for generate in "\${generator[@]}"
+do
+    echo "gsl -q -script:\$generate ../$(configuration->templates.source)"
+    gsl -q -script:\$generate ../$(configuration->templates.source)
+done
+
+# Make generated scripts executable.
+eval chmod +x "output/*/*.sh"
+
+.endmacro generate_artifacts
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "lib/output.gsl"
+gsl from "lib/shell.gsl"
+
+generate_artifacts()
+
+.endtemplate

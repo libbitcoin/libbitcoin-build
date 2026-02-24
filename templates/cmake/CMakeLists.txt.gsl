@@ -1,0 +1,97 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin CMakeLists.txt.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Functions
+###############################################################################
+
+function language_list(repository)
+    define my.repository = language_list.repository
+    define my.result = ""
+
+    for my.repository.language as _lang
+        if (!is_empty(my.result))
+            my.result = "$(my.result) $(_lang.value)"
+        else
+            my.result = "$(_lang.value)"
+        endif
+    endfor
+
+    return my.result
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_CMakeLists(repository)
+.   define my.repository = emit_CMakeLists.repository
+.
+cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
+
+project($(my.repository.name)
+  VERSION $(my.repository.version)
+  DESCRIPTION $(my.repository.description)
+  LANGUAGES $(language_list(my.repository)))
+.endmacro # emit_CMakeLists
+.
+.endtemplate
+.template 0
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 0
+function generate_CMakeLists(configuration)
+    define my.configuration = generate_CMakeLists.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+    define my.generator_config = my.configuration->templates->template(name = "CMakeLists.txt.gsl")
+    if (!defined(my.generator_config))
+        abort "Generator configuration missing."
+    endif
+
+    require(my.generator_config, "template", "outpath")
+
+    define my.project_path_suffix = my.generator_config.outpath
+
+    for my.configuration.repository by name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+        echo "output_path: $(my.output_path)"
+        create_directory(my.output_path)
+        define my.out_file = path_append(my.output_path, "CMakeLists.txt")
+        notify(my.out_file)
+        output(my.out_file)
+        emit_CMakeLists(_repository)
+        close
+     endfor _repository
+endfunction # generate_CMakeLists
+
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+#gsl from "library/math.gsl"
+#gsl from "library/string.gsl"
+#gsl from "library/collections.gsl"
+#gsl from "utilities.gsl"
+
+generate_CMakeLists(configuration)
+
+.endtemplate

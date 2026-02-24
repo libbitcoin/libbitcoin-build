@@ -1,0 +1,50 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin filesystem utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+gsl from "../library/string.gsl"
+
+###############################################################################
+# Functions
+###############################################################################
+
+#------------------------------------------------------------------------------
+# Path manipulation tools.
+#------------------------------------------------------------------------------
+function path_append(basepath, baserelativepath)
+    if (!is_empty(my.basepath))
+        if (!ends_with(my.basepath, "/") & !ends_with(my.basepath, "\\"))
+            return "$(my.basepath)/$(my.baserelativepath)"
+        else
+            return "$(my.basepath)$(my.baserelativepath)"
+        endif
+    endif
+    return "$(my.baserelativepath)"
+endfunction
+
+#------------------------------------------------------------------------------
+# I/O utilities.
+#------------------------------------------------------------------------------
+function create_directory(path)
+    define my.result = directory.create(my.path)
+    if (my.result = 0)
+        return
+    endif
+    abort "Directory creation failure: $(error_text)"
+endfunction
+
+.endtemplate
+.template 1
+.
+.##############################################################################
+.# Macros
+.##############################################################################
+.
+.endtemplate
+
