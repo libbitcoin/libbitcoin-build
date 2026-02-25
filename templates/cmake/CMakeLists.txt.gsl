@@ -7,9 +7,10 @@
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
+
+###############################################################################
 # Functions
 ###############################################################################
-
 function language_list(repository)
     define my.repository = language_list.repository
     define my.result = ""
@@ -25,22 +26,281 @@ function language_list(repository)
     return my.result
 endfunction
 
+function namespace_name(name)
+    return string.replace(my.name, "-|::")
+endfunction
+
+function option_default(option)
+    define my.option = option_default.option
+
+    if (!defined(my.option.default))
+        abort("Missing expected default.")
+    endif
+
+    define my.result = ""
+
+    if (my.option.default = "no")
+        my.result = "OFF"
+    elsif (my.option.default = "yes")
+        my.result = "ON"
+    else
+        my.result = "$(my.option.default:upper)"
+    endif
+
+    return my.result
+endfunction
+
+function merge_components(dependencies, element)
+    define my.dependencies = merge_components.dependencies
+    define my.element = merge_components.element
+
+    if (count(my.dependencies.dependency, dependency.name = my.element.name) > 0)
+        define my.destination = my.dependencies->dependency(dependency.name = my.element.name)
+
+        for my.element.component as _component
+            if (count(my.destination.component, component.name = _component.name) = 0)
+                copy _component to my.destination
+            endif
+        endfor
+    else
+        copy my.element to my.dependencies
+    endif
+endfunction
+
+function dependency_discovery(repository)
+    define my.repository = dependency_discovery.repository
+
+    new discoverables as _disc
+        for my.repository.library as _library
+            for _library.dependency as _dep
+                merge_components(_disc, _dep)
+            endfor
+        endfor
+        for my.repository.test as _test
+            for _test.dependency as _dep
+                merge_components(_disc, _dep)
+            endfor
+        endfor
+        for my.repository.binary as _binary
+            for _binary.dependency as _dep
+                merge_components(_disc, _dep)
+            endfor
+        endfor
+
+        emit_find_dependencies(_disc)
+
+        # detect fixups
+        if (defined(_disc->dependency(dependency.name = "boost")) & \
+            defined(_disc->dependency(dependency.name = "icu")))
+
+            emit_boost_icu_fixups()
+        endif
+    endnew # _disc
+endfunction
+
+function get_cmake_package(name)
+    define my.name = get_cmake_package.name
+    if (defined(configuration->dependencies->dependency(dependency.name = my.name)))
+        define my.registry = configuration->dependencies->dependency(dependency.name = my.name)
+        if (defined(my.registry->cmake) & defined(my.registry->cmake.package))
+            return my.registry->cmake.package
+        endif
+    endif
+    return my.name
+endfunction
+
+function get_target_name(target)
+    define target = get_target_name.target
+
+    if (!defined(target.name))
+        abort("Expected target name defined.")
+    endif
+
+    return target.name
+endfunction
+
+function render_target(target, repository, root_path)
+    define target = render_target.target
+    define repository = render_target.repository
+    define root_path = render_target.root_path
+    define indent = defined(target.option) ?? "  " ? ""
+
+    if (defined(target.option))
+        write_line("if ($(target.type:lower)-$(target.option:lower))")
+    endif
+
+    if (name(target) = "library")
+    else
+        
+    endif
+
+    if (name(target) = "test")
+        emit_add_test(target, indent)
+    endif
+
+    if (defined(target.option))
+        write_line("endif()")
+    endif
+endfunction
+
+function accumulate_tests(target)
+    define result = "*"
+
+    if (count(target.trigger) > 0)
+        result = ""
+    endif
+
+    for target.trigger as _trigger
+        if (first())
+            result = "$(_trigger.test)"
+        else
+            result = "$(result),$(_trigger.test)"
+        endif
+    endfor
+
+    return result
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
 .endtemplate
 .template 1
 .
-.macro emit_CMakeLists(repository)
+.macro emit_CMakeLists(repository, root_path)
 .   define my.repository = emit_CMakeLists.repository
+.   define my.root_path = emit_CMakeLists.root_path
 .
+.   copyleft(my.repository.name)
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
 
 project($(my.repository.name)
   VERSION $(my.repository.version)
   DESCRIPTION $(my.repository.description)
   LANGUAGES $(language_list(my.repository)))
+
+list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
+
+if (MSVC)
+  set( CMAKE_STATIC_LIBRARY_PREFIX "lib" )
+  set( CMAKE_SHARED_LIBRARY_PREFIX "lib" )
+endif()
+
+.   heading("Project options.")
+.   emit_repository_options(my.repository)
+
+.   if (!defined(my.repository->library))
+.       abort("Missing expected <library> element.")
+.   endif
+.   for my.repository.library as _library
+add_library( $(_library.name) )
+add_library( $(namespace_name(_library.name)) ALIAS $(_library.name) )
+.   endfor
+
+.   heading("Dependencies")
+.   dependency_discovery(my.repository)
+.
+.   for my.repository.library as _library
+
+.       heading("$(get_target_name(_library)) library")
+.       render_target(_library, my.repository, my.root_path)
+.
+.   endfor
+.
+.   for my.repository.test as _test
+
+.       heading("$(get_target_name(_test)) tests")
+.       render_target(_test, my.repository, my.root_path)
+.   endfor
+.
+.   for my.repository.binary as _binary
+
+.       heading("$(get_target_name(_binary)) executable")
+.       render_target(_binary, my.repository, my.root_path)
+.   endfor
+.
 .endmacro # emit_CMakeLists
+.
+.macro emit_repository_options(repository)
+.   define my.repository = emit_repository_options.repository
+.
+.   for my.repository.library as _library
+.       emit_options(_library)
+.   endfor
+.   for my.repository.test as _test
+.       emit_options(_test)
+.   endfor
+.   for my.repository.binary as _binary
+.       emit_options(_binary)
+.   endfor
+.endmacro # emit_repository_options
+.
+.macro emit_options(context)
+.   define my.context = emit_options.context
+.
+.   if (defined(my.context.type))
+option( $(my.context.type:lower)-$(my.context.option:lower) "Build $(my.context.option)." $(option_default(my.context)) )
+.   endif
+.
+.   for my.context.option as _option
+option( $(_option.type:lower)-$(_option.name:lower) $(_option.comment) $(option_default(_option)) )
+.   endfor
+.endmacro # emit_options
+.
+.macro emit_find_dependencies(dependencies)
+.   define my.dependencies = emit_find_dependencies.dependencies
+.
+if (BUILD_SHARED_LIBS)
+.   for my.dependencies.dependency as _dep
+  set( $(get_cmake_package(_dep.name))_USE_STATIC_LIBS "OFF" )
+.   endfor
+else()
+.   for my.dependencies.dependency as _dep
+  set( $(get_cmake_package(_dep.name))_USE_STATIC_LIBS "ON" )
+.   endfor
+endif()
+.
+.   for my.dependencies.dependency as _dep
+.       define has_components = (count(_dep.component) > 0)
+.       define has_version = defined(_dep.version)
+.
+
+find_package( $(get_cmake_package(_dep.name)) $(defined(_dep.version) ?? "$(_dep.version) " ? "")REQUIRED$(has_components ?? "" ? " )")
+.       if (has_components)
+    COMPONENTS
+.           for _dep.component as _component
+      $(_component.name)
+.           endfor
+  )
+.       endif
+.   endfor
+.endmacro # emit_find_dependencies
+.
+.macro emit_boost_icu_fixups()
+
+if (with-icu)
+  include(InTargetProperty)
+  remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icudata )
+  remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icui18n )
+  remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icuuc )
+endif()
+.endmacro # emit_boost_icu_fixups
+.
+.macro emit_add_test(target, indent)
+.   define tests = accumulate_tests(target)
+.
+$(indent)enable_testing()
+
+$(indent)add_test( NAME $(get_target_name(target))
+  $(indent)COMMAND $(get_target_name(target))
+  $(indent)--run_test=$(tests)
+  $(indent)--log_level=warning
+  $(indent)--show_progress=no
+  $(indent)--detect_memory_leak=0
+  $(indent)--report_level=no
+  $(indent)--build_info=yes
+
+.endmacro # emit_add_test
 .
 .endtemplate
 .template 0
@@ -58,20 +318,21 @@ function generate_CMakeLists(configuration)
     endif
 
     require(my.generator_config, "template", "outpath")
+    require(my.generator_config->cmake, "cmake", "rootpath")
 
     define my.project_path_suffix = my.generator_config.outpath
+    define my.root_path = my.generator_config->cmake.rootpath
 
     for my.configuration.repository by name as _repository
         require(_repository, "repository", "name")
         define my.output_path = path_append(my.configuration->templates.resultpath, \
             path_append(my.path_prefix, \
                 path_append(_repository.name, my.project_path_suffix)))
-        echo "output_path: $(my.output_path)"
         create_directory(my.output_path)
         define my.out_file = path_append(my.output_path, "CMakeLists.txt")
         notify(my.out_file)
         output(my.out_file)
-        emit_CMakeLists(_repository)
+        emit_CMakeLists(_repository, my.root_path)
         close
      endfor _repository
 endfunction # generate_CMakeLists
@@ -87,10 +348,7 @@ endfunction # generate_CMakeLists
 gsl from "../lib/debug.gsl"
 gsl from "../lib/filesystem.gsl"
 gsl from "../lib/output.gsl"
-#gsl from "library/math.gsl"
-#gsl from "library/string.gsl"
-#gsl from "library/collections.gsl"
-#gsl from "utilities.gsl"
+gsl from "../lib/cmake.gsl"
 
 generate_CMakeLists(configuration)
 

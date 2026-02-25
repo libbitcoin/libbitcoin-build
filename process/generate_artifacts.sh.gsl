@@ -40,9 +40,11 @@ do
     gsl -q -script:\$generate ../$(configuration->templates.source)
 done
 
+.if (count(configuration->templates.template, ends_with(count.name, ".sh.gsl")) > 0)
 # Make generated scripts executable.
-eval chmod +x "output/*/*.sh"
+eval chmod -R +x "$(configuration->templates.resultpath)/*/*.sh"
 
+.endif
 .endmacro generate_artifacts
 .endtemplate
 .template 0
@@ -56,6 +58,7 @@ eval chmod +x "output/*/*.sh"
 # Note: expected context root libbitcoin-build directory
 gsl from "lib/output.gsl"
 gsl from "lib/shell.gsl"
+gsl from "library/string.gsl"
 
 generate_artifacts()
 
