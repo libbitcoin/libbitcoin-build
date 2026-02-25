@@ -27,7 +27,7 @@ function language_list(repository)
 endfunction
 
 function namespace_name(name)
-    return string.replace(my.name, "-|::")
+    return string.replace(name, "-|::")
 endfunction
 
 function option_default(option)
@@ -100,6 +100,7 @@ endfunction
 
 function get_cmake_package(name)
     define my.name = get_cmake_package.name
+
     if (defined(configuration->dependencies->dependency(dependency.name = my.name)))
         define my.registry = configuration->dependencies->dependency(dependency.name = my.name)
         if (defined(my.registry->cmake) & defined(my.registry->cmake.package))
@@ -110,55 +111,55 @@ function get_cmake_package(name)
 endfunction
 
 function get_target_name(target)
-    define target = get_target_name.target
+    define my.target = get_target_name.target
 
-    if (!defined(target.name))
+    if (!defined(my.target.name))
         abort("Expected target name defined.")
     endif
 
-    return target.name
+    return my.target.name
 endfunction
 
 function render_target(target, repository, root_path)
-    define target = render_target.target
-    define repository = render_target.repository
-    define root_path = render_target.root_path
-    define indent = defined(target.option) ?? "  " ? ""
+    define my.target = render_target.target
+    define my.repository = render_target.repository
+    define my.indent = defined(my.target.option) ?? "  " ? ""
 
-    if (defined(target.option))
-        write_line("if ($(target.type:lower)-$(target.option:lower))")
+    if (defined(my.target.option))
+        write_line("if ($(my.target.type:lower)-$(my.target.option:lower))")
     endif
 
-    if (name(target) = "library")
+    if (name(my.target) = "library")
     else
         
     endif
 
-    if (name(target) = "test")
-        emit_add_test(target, indent)
+    if (name(my.target) = "test")
+        emit_add_test(my.target, my.indent)
     endif
 
-    if (defined(target.option))
+    if (defined(my.target.option))
         write_line("endif()")
     endif
 endfunction
 
 function accumulate_tests(target)
-    define result = "*"
+    define my.target = accumulate_tests.target
+    define my.result = "*"
 
-    if (count(target.trigger) > 0)
-        result = ""
+    if (count(my.target.trigger) > 0)
+        my.result = ""
     endif
 
-    for target.trigger as _trigger
+    for my.target.trigger as _trigger
         if (first())
-            result = "$(_trigger.test)"
+            my.result = "$(_trigger.test)"
         else
-            result = "$(result),$(_trigger.test)"
+            my.result = "$(my.result),$(_trigger.test)"
         endif
     endfor
 
-    return result
+    return my.result
 endfunction
 
 ###############################################################################
@@ -287,18 +288,20 @@ endif()
 .endmacro # emit_boost_icu_fixups
 .
 .macro emit_add_test(target, indent)
-.   define tests = accumulate_tests(target)
+.   define my.target = emit_add_test.target
+.   define my.indent = emit_add_test.indent
+.   define my.tests = accumulate_tests(my.target)
 .
-$(indent)enable_testing()
+$(my.indent)enable_testing()
 
-$(indent)add_test( NAME $(get_target_name(target))
-  $(indent)COMMAND $(get_target_name(target))
-  $(indent)--run_test=$(tests)
-  $(indent)--log_level=warning
-  $(indent)--show_progress=no
-  $(indent)--detect_memory_leak=0
-  $(indent)--report_level=no
-  $(indent)--build_info=yes
+$(my.indent)add_test( NAME $(get_target_name(my.target))
+  $(my.indent)COMMAND $(get_target_name(my.target))
+  $(my.indent)--run_test=$(my.tests)
+  $(my.indent)--log_level=warning
+  $(my.indent)--show_progress=no
+  $(my.indent)--detect_memory_leak=0
+  $(my.indent)--report_level=no
+  $(my.indent)--build_info=yes
 
 .endmacro # emit_add_test
 .
@@ -312,7 +315,9 @@ $(indent)add_test( NAME $(get_target_name(target))
 function generate_CMakeLists(configuration)
     define my.configuration = generate_CMakeLists.configuration
     require(my.configuration->templates, "templates", "resultpath")
+
     define my.generator_config = my.configuration->templates->template(name = "CMakeLists.txt.gsl")
+
     if (!defined(my.generator_config))
         abort "Generator configuration missing."
     endif
@@ -325,14 +330,19 @@ function generate_CMakeLists(configuration)
 
     for my.configuration.repository by name as _repository
         require(_repository, "repository", "name")
-        define my.output_path = path_append(my.configuration->templates.resultpath, \
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
             path_append(my.path_prefix, \
                 path_append(_repository.name, my.project_path_suffix)))
+
         create_directory(my.output_path)
+
         define my.out_file = path_append(my.output_path, "CMakeLists.txt")
         notify(my.out_file)
         output(my.out_file)
+
         emit_CMakeLists(_repository, my.root_path)
+
         close
      endfor _repository
 endfunction # generate_CMakeLists
