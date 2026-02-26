@@ -6,8 +6,8 @@
     email="eric@voskuil.org"
     description="Bitcoin Cross-Platform C++ Development Toolkit">
 
-    <language value="C" />
-    <language value="CXX" />
+    <language id="C" />
+    <language id="CXX" />
 
     <library
       name="bitcoin-system"
@@ -24,6 +24,23 @@
       <option name="shani" type="enable" default="no" comment="Use Intel SHA Extensions." />
 
       <!-- Dependencies -->
+      <dependency name="boost" version="1.86.0">
+        <component name="iostreams" />
+        <component name="locale" />
+        <component name="program_options" />
+        <component name="thread" />
+        <component name="url" />
+      </dependency>
+
+      <dependency name="icu" version="55.2" option="icu">
+        <component name="i18n" />
+        <component name="uc" />
+        <component name="data" />
+      </dependency>
+
+      <dependency name="secp256k1" version="0.7.0" />
+
+      <!--
       <dependency name="pthread">
         <system exclude="android" />
       </dependency>
@@ -36,22 +53,7 @@
         <system required="linux" />
         <system exclude="android" />
       </dependency>
-
-      <dependency name="icu" version="55.2" option="icu">
-        <component name="i18n" />
-        <component name="uc" />
-        <component name="data" />
-      </dependency>
-
-      <dependency name="secp256k1" version="0.7.0" />
-
-      <dependency name="boost" version="1.86.0">
-        <component name="iostreams" />
-        <component name="locale" />
-        <component name="program_options" />
-        <component name="thread" />
-        <component name="url" />
-      </dependency>
+      -->
 
       <compiler standard="20">
         <flag option="avx2"
@@ -158,9 +160,11 @@
 
       <sources path="test" recursive="true" />
 
-      <dependency name="boost" version="1.86.0">
+      <dependency name="boost" version="1.86.0" private="true">
         <component name="unit_test_framework" />
       </dependency>
+
+      <dependency name="bitcoin-system" private="true" />
 
       <!-- <trigger test="t2" /> -->
     </test>
@@ -169,7 +173,10 @@
       option="examples" type="with" default="yes"
       install="false"
       uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e">
+
       <sources path="examples" />
+
+      <dependency name="bitcoin-system" private="true" />
     </binary>
 
     <ci />
@@ -180,8 +187,8 @@
     email="eric@voskuil.org"
     description="Bitcoin P2P Network Library">
 
-    <language value="C" />
-    <language value="CXX" />
+    <language id="C" />
+    <language id="CXX" />
 
     <library name="bitcoin-network"
       uuid="564eb540-d6b6-425c-b8db-b0bee8970c18">
@@ -232,7 +239,7 @@
       <sources path="test" recursive="true" />
       <compiler>
         <flag option="ssl"
-          value="DCERT_PREFIX=&quot;\&quot;${src_dir}/test/ssl/wolfssl/wolfcrypt/test/\&quot;&quot;"
+          id="DCERT_PREFIX=&quot;\&quot;${src_dir}/test/ssl/wolfssl/wolfcrypt/test/\&quot;&quot;"
           comment="WolfSSL test data parameter."
           option="ssl"
           type="private" />
@@ -246,8 +253,8 @@
     email="eric@voskuil.org"
     description="Bitcoin High Performance Blockchain Database">
 
-    <language value="C" />
-    <language value="CXX" />
+    <language id="C" />
+    <language id="CXX" />
 
     <library name="bitcoin-database"
       uuid="62d7fbee-4d52-424a-8938-59756e13d9f5">
@@ -284,7 +291,8 @@
       <sources path="test" recursive="true" />
     </test>
 
-    <binary name="initchain" option="with"
+    <binary name="initchain"
+      option="tools" type="with" default="yes"
       install="false"
       uuid="005f2a86-f937-4ab5-b041-0f21b67eec66">
       <sources path="tools/initchain" />
@@ -297,8 +305,8 @@
     email="eric@voskuil.org"
     description="Bitcoin Full Node">
 
-    <language value="C" />
-    <language value="CXX" />
+    <language id="C" />
+    <language id="CXX" />
 
     <library name="bitcoin-node"
       uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158">
@@ -343,8 +351,8 @@
     email="eric@voskuil.org"
     description="Bitcoin Full Node and Query Server">
 
-    <language value="C" />
-    <language value="CXX" />
+    <language id="C" />
+    <language id="CXX" />
 
     <library name="bitcoin-server"
       uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0">
@@ -389,6 +397,18 @@
     </binary>
 
   </repository>
+
+  <languages>
+    <language id="C">
+      <sources suffix="c" />
+      <headers suffix="h" />
+    </language>
+    <language id="CXX">
+      <sources suffix="cpp" />
+      <headers suffix="hpp" />
+      <headers suffix="ipp" />
+    </language>
+  </languages>
 
   <canonical>
     <compiler>
@@ -466,28 +486,59 @@
       </linkage>
   </canonical>
 
-  <dependencies>
-    <dependency name="icu">
-      <cmake package="ICU" />
-    </dependency>
-    <dependency name="boost">
-      <cmake package="Boost" />
-    </dependency>
-    <dependency name="secp256k1">
-      <cmake package="libsecp256k1" target="libsecp256k1::secp256k1" />
-    </dependency>
-    <dependency name="dl">
-      <cmake package="Dl" />
-    </dependency>
-    <dependency name="rt">
-      <cmake package="Rt" />
-    </dependency>
-    <dependency name="pthread">
-      <cmake package="Threads" target="Threads::Threads">
+  <registrar id="dependency">
+    <element name="bitcoin-system">
+      <cmake namespace="bitcoin"
+        package="bitcoin-system"
+        target="bitcoin::system" />
+    </element>
+    <element name="bitcoin-database">
+      <cmake namespace="bitcoin"
+        package="bitcoin-database"
+        target="bitcoin::database" />
+    </element>
+    <element name="bitcoin-network">
+      <cmake namespace="bitcoin"
+        package="bitcoin-network"
+        target="bitcoin::network" />
+    </element>
+    <element name="bitcoin-node">
+      <cmake namespace="bitcoin"
+        package="bitcoin-node"
+        target="bitcoin::node" />
+    </element>
+    <element name="bitcoin-server">
+      <cmake namespace="bitcoin"
+        package="bitcoin-server"
+        target="bitcoin::server" />
+    </element>
+    <element name="icu">
+      <cmake namespace="ICU"
+        package="ICU" />
+    </element>
+    <element name="boost">
+      <cmake namespace="Boost"
+        package="Boost" />
+    </element>
+    <element name="secp256k1">
+      <cmake namespace="libsecp256k1"
+        package="libsecp256k1"
+        target="libsecp256k1::secp256k1" />
+    </element>
+    <element name="dl">
+      <cmake namespace="Dl" package="Dl" target="Dl" />
+    </element>
+    <element name="rt">
+      <cmake namespace="Rt" package="Rt" target="Rt" />
+    </element>
+    <element name="pthread">
+      <cmake namespace="Threads"
+       package="Threads"
+       target="Threads::Threads">
         <set variable="THREAD_PREFER_PTHREAD_FLAG" value="TRUE" />
       </cmake>
-    </dependency>
-  </dependencies>
+    </element>
+  </registrar>
 
   <templates source="version4.xml" resultpath="../output/version4">
     <!-- resultpath provided relative to expected evaluation - libbitcoin-build/process -->

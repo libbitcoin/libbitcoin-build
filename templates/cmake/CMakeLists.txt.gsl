@@ -11,15 +11,84 @@
 ###############################################################################
 # Functions
 ###############################################################################
+function registry(registrar, query)
+    define my.registrar = registry.registrar
+    define my.query = registry.query
+
+    if !defined(my.query.name)
+        abort("Malformed query: $(my.query)")
+    endif
+
+    return my.registrar->element(element.name = my.query.name)
+endfunction
+
+function package_name(query)
+    define my.query = package_name.query
+    define my.registry = registry(configuration->registrar(id = "dependency"), my.query)
+
+    if !defined(my.registry)
+        abort("Missing registry for $(my.query)")
+    endif
+
+    if !defined(my.registry->cmake) | !defined(my.registry->cmake.package)
+        abort("Missing registry details for $(my.query)")
+    endif
+
+    return my.registry->cmake.package
+endfunction
+
+function qualified_component_name(dependency, component)
+    define my.dependency = qualified_component_name.dependency
+    define my.component = qualified_component_name.component
+    define my.registry = registry(configuration->registrar(id = "dependency"), my.dependency)
+
+    if !defined(my.registry)
+        abort("Missing registry for $(my.dependency)")
+    endif
+
+    if !defined(my.registry->cmake) | !defined(my.registry->cmake.namespace)
+        abort("Missing registry details for $(my.dependency)")
+    endif
+
+    if !defined(my.component) | !defined(my.component.name)
+        abort("Component undefined or missing 'name' property.")
+    endif
+
+    return "$(my.registry->cmake.namespace)::$(my.component.name)"
+endfunction
+
+function qualified_target_name(query)
+    define my.query = qualified_target_name.query
+    define my.registry = registry(configuration->registrar(id = "dependency"), my.query)
+
+    if !defined(my.registry)
+        abort("Missing registry for $(my.query)")
+    endif
+
+    if !defined(my.registry->cmake) | !defined(my.registry->cmake.target)
+        abort("Missing registry details for $(my.query)")
+    endif
+
+    return my.registry->cmake.target
+endfunction
+
+function target_name(element)
+    if !defined(target_name.element.name)
+        abort("Missing 'name'.")
+    endif
+
+    return target_name.element.name
+endfunction
+
 function language_list(repository)
     define my.repository = language_list.repository
     define my.result = ""
 
     for my.repository.language as _lang
         if (!is_empty(my.result))
-            my.result = "$(my.result) $(_lang.value)"
+            my.result = "$(my.result) $(_lang.id)"
         else
-            my.result = "$(_lang.value)"
+            my.result = "$(_lang.id)"
         endif
     endfor
 
@@ -98,51 +167,6 @@ function dependency_discovery(repository)
     endnew # _disc
 endfunction
 
-function get_cmake_package(name)
-    define my.name = get_cmake_package.name
-
-    if (defined(configuration->dependencies->dependency(dependency.name = my.name)))
-        define my.registry = configuration->dependencies->dependency(dependency.name = my.name)
-        if (defined(my.registry->cmake) & defined(my.registry->cmake.package))
-            return my.registry->cmake.package
-        endif
-    endif
-    return my.name
-endfunction
-
-function get_target_name(target)
-    define my.target = get_target_name.target
-
-    if (!defined(my.target.name))
-        abort("Expected target name defined.")
-    endif
-
-    return my.target.name
-endfunction
-
-function render_target(target, repository, root_path)
-    define my.target = render_target.target
-    define my.repository = render_target.repository
-    define my.indent = defined(my.target.option) ?? "  " ? ""
-
-    if (defined(my.target.option))
-        write_line("if ($(my.target.type:lower)-$(my.target.option:lower))")
-    endif
-
-    if (name(my.target) = "library")
-    else
-        
-    endif
-
-    if (name(my.target) = "test")
-        emit_add_test(my.target, my.indent)
-    endif
-
-    if (defined(my.target.option))
-        write_line("endif()")
-    endif
-endfunction
-
 function accumulate_tests(target)
     define my.target = accumulate_tests.target
     define my.result = "*"
@@ -190,34 +214,26 @@ endif()
 .   heading("Project options.")
 .   emit_repository_options(my.repository)
 
-.   if (!defined(my.repository->library))
-.       abort("Missing expected <library> element.")
-.   endif
-.   for my.repository.library as _library
-add_library( $(_library.name) )
-add_library( $(namespace_name(_library.name)) ALIAS $(_library.name) )
-.   endfor
-
 .   heading("Dependencies")
 .   dependency_discovery(my.repository)
 .
 .   for my.repository.library as _library
 
-.       heading("$(get_target_name(_library)) library")
-.       render_target(_library, my.repository, my.root_path)
+.       heading("$(target_name(_library)) library")
+.       emit_target(_library, my.repository, my.root_path)
 .
 .   endfor
 .
 .   for my.repository.test as _test
 
-.       heading("$(get_target_name(_test)) tests")
-.       render_target(_test, my.repository, my.root_path)
+.       heading("$(target_name(_test)) tests")
+.       emit_target(_test, my.repository, my.root_path)
 .   endfor
 .
 .   for my.repository.binary as _binary
 
-.       heading("$(get_target_name(_binary)) executable")
-.       render_target(_binary, my.repository, my.root_path)
+.       heading("$(target_name(_binary)) executable")
+.       emit_target(_binary, my.repository, my.root_path)
 .   endfor
 .
 .endmacro # emit_CMakeLists
@@ -253,11 +269,11 @@ option( $(_option.type:lower)-$(_option.name:lower) $(_option.comment) $(option_
 .
 if (BUILD_SHARED_LIBS)
 .   for my.dependencies.dependency as _dep
-  set( $(get_cmake_package(_dep.name))_USE_STATIC_LIBS "OFF" )
+  set( $(package_name(_dep))_USE_STATIC_LIBS "OFF" )
 .   endfor
 else()
 .   for my.dependencies.dependency as _dep
-  set( $(get_cmake_package(_dep.name))_USE_STATIC_LIBS "ON" )
+  set( $(package_name(_dep))_USE_STATIC_LIBS "ON" )
 .   endfor
 endif()
 .
@@ -266,7 +282,7 @@ endif()
 .       define has_version = defined(_dep.version)
 .
 
-find_package( $(get_cmake_package(_dep.name)) $(defined(_dep.version) ?? "$(_dep.version) " ? "")REQUIRED$(has_components ?? "" ? " )")
+find_package( $(package_name(_dep)) $(defined(_dep.version) ?? "$(_dep.version) " ? "")REQUIRED$(has_components ?? "" ? " )")
 .       if (has_components)
     COMPONENTS
 .           for _dep.component as _component
@@ -292,18 +308,91 @@ endif()
 .   define my.indent = emit_add_test.indent
 .   define my.tests = accumulate_tests(my.target)
 .
+
 $(my.indent)enable_testing()
 
-$(my.indent)add_test( NAME $(get_target_name(my.target))
-  $(my.indent)COMMAND $(get_target_name(my.target))
+$(my.indent)add_test( NAME $(target_name(my.target))
+  $(my.indent)COMMAND $(target_name(my.target))
   $(my.indent)--run_test=$(my.tests)
   $(my.indent)--log_level=warning
   $(my.indent)--show_progress=no
   $(my.indent)--detect_memory_leak=0
   $(my.indent)--report_level=no
   $(my.indent)--build_info=yes
-
+.
 .endmacro # emit_add_test
+.
+.macro emit_target(target, repository, root_path)
+.   define my.target = emit_target.target
+.   define my.repository = emit_target.repository
+.   define my.indent = defined(my.target.option) ?? "  " ? ""
+.
+.   if (defined(my.target.option))
+if ($(my.target.type:lower)-$(my.target.option:lower))
+.   endif
+.
+.   if (name(my.target) = "library")
+$(my.indent)add_library( $(target_name(my.target)) )
+$(my.indent)add_library( $(qualified_target_name(my.target))) ALIAS $(target_name(my.target)) )
+.   else
+$(my.indent)add_executable( $(target_name(my.target)) )
+.   endif
+.
+.   if (name(my.target) = "test")
+.       emit_add_test(my.target, my.indent)
+.   endif
+.
+.   emit_target_sources(my.target, my.indent)
+.
+.   emit_target_headers(my.target, my.indent)
+.
+.   emit_target_link_libraries(my.target, my.indent)
+.
+.   if (defined(my.target.option))
+endif()
+.   endif
+.endmacro # emit_target
+.
+.macro emit_target_link_libraries_parameterized(target, mode, indent)
+.   define my.target = emit_target_link_libraries_parameterized.target
+.   define my.mode = emit_target_link_libraries_parameterized.mode
+.   define my.indent = emit_target_link_libraries_parameterized.indent
+.
+.   if (count(my.target.dependency, (my.mode = "PRIVATE") ?? \
+      defined(dependency.private) ? !defined(dependency.private)) > 0)
+
+target_link_libraries( $(target_name(my.target))
+  $(my.mode:upper)
+.       for my.target.dependency as _dep where (my.mode = "PRIVATE") ?? \
+          defined(_dep.private) ? !defined(_dep.private)
+.           if (count(_dep.component) > 0)
+.               for _dep.component as _comp
+    $(qualified_component_name(_dep, _comp))
+.               endfor
+.           else
+    $(qualified_target_name(_dep))
+.           endif
+.       endfor
+)
+
+.   endif
+.endmacro # emit_target_link_libraries_parameterized
+.
+.macro emit_target_link_libraries(target, indent)
+.   define my.target = emit_target_link_libraries.target
+.   define my.indent = emit_target_link_libraries.indent
+.
+.
+.   emit_target_link_libraries_parameterized(my.target, "PUBLIC", my.indent)
+.   emit_target_link_libraries_parameterized(my.target, "PRIVATE", my.indent)
+.
+.endmacro # emit_target_link_libraries
+.
+.macro emit_target_sources(target, indent)
+.endmacro # emit_target_sources
+.
+.macro emit_target_headers(target, indent)
+.endmacro # emit_target_headers
 .
 .endtemplate
 .template 0
@@ -316,17 +405,17 @@ function generate_CMakeLists(configuration)
     define my.configuration = generate_CMakeLists.configuration
     require(my.configuration->templates, "templates", "resultpath")
 
-    define my.generator_config = my.configuration->templates->template(name = "CMakeLists.txt.gsl")
+    define template = my.configuration->templates->template(name = "CMakeLists.txt.gsl")
 
-    if (!defined(my.generator_config))
+    if (!defined(template))
         abort "Generator configuration missing."
     endif
 
-    require(my.generator_config, "template", "outpath")
-    require(my.generator_config->cmake, "cmake", "rootpath")
+    require(template, "template", "outpath")
+    require(template->cmake, "cmake", "rootpath")
 
-    define my.project_path_suffix = my.generator_config.outpath
-    define my.root_path = my.generator_config->cmake.rootpath
+    define my.project_path_suffix = template.outpath
+    define my.root_path = template->cmake.rootpath
 
     for my.configuration.repository by name as _repository
         require(_repository, "repository", "name")
