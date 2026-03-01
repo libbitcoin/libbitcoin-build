@@ -37,12 +37,12 @@
       <dependency name="boost_thread" />
       <dependency name="boost_url" />
       <dependency name="boost_unit_test_framework" option="tests" />
-      <dependency name="pthread" system_exclude="android" />
-      <dependency name="rt" function="clock_gettime" system="linux" system_exclude="android" />
+      <!-- <dependency name="pthread" system_exclude="android" /> -->
+      <!-- <dependency name="rt" function="clock_gettime" system="linux" system_exclude="android" /> -->
       <dependency name="icu-i18n" version="55.2" unprefixed="true" option="icu" />
       <!-- TODO: verify this with more recent ICU. -->
       <!-- -ldl is missing from icu package config. -->
-      <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
+      <!--<dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />-->
       <!-- Arbitrary minimum version, current nuget package is v0.6.1. -->
       <dependency name="secp256k1" version="0.5.1.0" />
 
@@ -153,12 +153,12 @@
         <!-- boost_locale creates a dependency on boost_thread for thread local storage. -->
         <library name="boost_thread" />
         <library name="boost_url" />
-        <library name="pthread" />
-        <library name="rt" />
+        <!--<library name="pthread" />-->
+        <!-- <library name="rt" /> -->
         <library name="icu-i18n" />
         <!-- TODO: verify this with more recent ICU. -->
         <!-- -ldl is missing from icu package config. -->
-        <library name="dl" />
+        <!-- <library name="dl" /> -->
         <library name="secp256k1" />
         <headers path="include" />
         <sources path="src" />
@@ -184,7 +184,7 @@
 
     <install>
       <!-- Building with our minimum (c++11 only) version of ICU. -->
-      <build name="icu" version="55.2" parallel="true" presentation="ICU" conditional="true" >
+      <build name="icu" version="78.2" parallel="true" presentation="ICU" conditional="true" >
         <flag value="-w" />
         <!-- TODO: verify this with more recent ICU. -->
         <!-- Bug in ICU 55.2 build requires -enable-draft. -->
@@ -248,10 +248,10 @@
       <job build="all" 
            system="osx"
            assert="ndebug" link="dynamic" optimization="size">
-        <axis name="llvm" value="" />
+      <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="secp256k1" value="build" />
-        <!-- <axis name="icu" value="with" /> -->
+        <axis name="icu" value="with" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -261,7 +261,7 @@
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="secp256k1" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
+        <axis name="icu" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -424,7 +424,7 @@
 
     <install>
       <!-- Building with our minimum (c++11 only) version of ICU. -->
-      <build name="icu" version="55.2" parallel="true" presentation="ICU" conditional="true" >
+      <build name="icu" version="78.2" parallel="true" presentation="ICU" conditional="true" >
         <flag value="-w" />
         <!-- TODO: verify this with more recent ICU. -->
         <!-- Bug in ICU 55.2 build requires enable-draft. -->
@@ -489,7 +489,7 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="with" /> -->
+        <axis name="icu" value="with" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -499,7 +499,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
+        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -699,7 +699,7 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="with" /> -->
+        <axis name="icu" value="with" />
         <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
@@ -710,7 +710,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
+        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
@@ -1062,7 +1062,7 @@
     </make>
 
     <install>
-      <build name="icu" version="68.2" parallel="true" presentation="ICU" conditional="true" >
+      <build name="icu" version="78.2" parallel="true" presentation="ICU" conditional="true" >
         <flag value="-w" />
         <!-- Bug in ICU 55.2 build requires -enable-draft. -->
         <option value="--enable-rpath" />
@@ -1288,7 +1288,7 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
+        <axis name="icu" value="with" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1298,7 +1298,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
+        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1502,7 +1502,7 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
+        <axis name="icu" value="with" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1512,7 +1512,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
+        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1704,7 +1704,7 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
+        <axis name="icu" value="with" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1714,7 +1714,7 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" value="build" /> -->
+        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>

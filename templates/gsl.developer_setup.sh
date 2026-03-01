@@ -144,7 +144,7 @@ handle_custom_options()
 
     if [[ $BUILD_TAG ]]; then
 .   for my.install.build as _build where defined(_build.branch)
-.       if (starts_with(_build.name, "bitcoin-") & (is_github_build(_build)) & starts_with("libbitcoin", _build.github))
+.       if (starts_with(_build.name, "bitcoin-") & (is_github_build(_build)))
         $(_build.name:upper,c)_BRANCH=${BUILD_TAG}
 .       endif
 .   endfor

@@ -25,7 +25,7 @@ endfunction
 
 function is_libbitcoin_project(build)
     define my.build = is_libbitcoin_project.build
-    return defined(my.build.github) & (my.build.github = "libbitcoin")
+    return defined(my.build.github) & starts_with(my.build.repository, "libbitcoin")
 endfunction
 
 # Generation
