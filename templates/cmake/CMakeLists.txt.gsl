@@ -80,6 +80,24 @@ function target_name(element)
     return target_name.element.name
 endfunction
 
+function is_defined_negative(node, attribute)
+    define my.node = is_defined_negative.node
+    if (!defined(my.node))
+        abort "Missing context node for attribute '$(my.attribute)'."
+    endif
+    return defined(my.node.$(my.attribute)) &\
+        ((my.node.$(my.attribute) = "false") | (my.node.$(my.attribute) = "no"))
+endfunction
+
+function is_defined_positive(node, attribute)
+    define my.node = is_defined_positive.node
+    if (!defined(my.node))
+        abort "Missing context node for attribute '$(my.attribute)'."
+    endif
+    return defined(my.node.$(my.attribute)) &\
+        ((my.node.$(my.attribute) = "true") | (my.node.$(my.attribute) = "yes"))
+endfunction
+
 function language_list(repository)
     define my.repository = language_list.repository
     define my.result = ""
@@ -108,15 +126,20 @@ function option_default(option)
 
     define my.result = ""
 
-    if (my.option.default = "no")
-        my.result = "OFF"
-    elsif (my.option.default = "yes")
+    if (is_defined_positive(my.option, "default"))
         my.result = "ON"
+    elsif (is_defined_negative(my.option, "default"))
+        my.result = "OFF"
     else
         my.result = "$(my.option.default:upper)"
     endif
 
     return my.result
+endfunction
+
+function target_installable(target)
+    define my.target = target_installable.target
+    return (name(my.target) = "library") | is_defined_positive(my.target, "install")
 endfunction
 
 function merge_components(dependencies, element)
@@ -136,8 +159,8 @@ function merge_components(dependencies, element)
     endif
 endfunction
 
-function dependency_discovery(repository)
-    define my.repository = dependency_discovery.repository
+function render_dependency_discovery(repository)
+    define my.repository = render_dependency_discovery.repository
 
     new discoverables as _disc
         for my.repository.library as _library
@@ -154,6 +177,11 @@ function dependency_discovery(repository)
             for _binary.dependency as _dep
                 merge_components(_disc, _dep)
             endfor
+        endfor
+        for my.repository.library as _library
+            if (count(_disc.dependency, name = _library.name) > 0)
+                delete _disc->dependency(name = _library.name)
+            endif
         endfor
 
         emit_find_dependencies(_disc)
@@ -182,6 +210,24 @@ function accumulate_tests(target)
             my.result = "$(my.result),$(_trigger.test)"
         endif
     endfor
+
+    return my.result
+endfunction
+
+function get_option(reference, target)
+    define my.reference = get_option.reference
+    define my.target = get_option.target
+    define my.result = ""
+
+    if (defined(my.reference.option))
+        define my.option = my.target->option(name = my.reference.option)
+
+        if (!defined(my.option))
+            abort "Target '$(my.target.name)' missing option '$(my.reference.option)'."
+        endif
+
+        my.result = "$(my.option.type:lower)-$(my.option.name:lower)"
+    endif
 
     return my.result
 endfunction
@@ -215,7 +261,7 @@ endif()
 .   emit_repository_options(my.repository)
 
 .   heading("Dependencies")
-.   dependency_discovery(my.repository)
+.   render_dependency_discovery(my.repository)
 .
 .   for my.repository.library as _library
 
@@ -237,6 +283,24 @@ endif()
 .   endfor
 .
 .endmacro # emit_CMakeLists
+.
+.macro emit_list_dependency(dependency, target, indent)
+.   define my.dependency = emit_list_dependency.dependency
+.   define my.target = emit_list_dependency.target
+.   define my.indent = emit_list_dependency.indent
+.   define my.prefix = defined(my.dependency.option) ?? \
+        "$<$<BOOL:${$(get_option(my.dependency, my.target))}>:" ? ""
+.   define my.suffix = defined(my.dependency.option) ?? \
+        ">" ? ""
+.
+.   if (count(my.dependency.component) > 0)
+.       for my.dependency.component as _comp
+$(my.indent)$(my.prefix)$(qualified_component_name(_dep, _comp))$(my.suffix)
+.       endfor
+.   else
+$(my.indent)$(my.prefix)$(qualified_target_name(_dep))$(my.suffix)
+.   endif
+.endmacro # emit_list_dependencies
 .
 .macro emit_repository_options(repository)
 .   define my.repository = emit_repository_options.repository
@@ -284,11 +348,11 @@ endif()
 
 find_package( $(package_name(_dep)) $(defined(_dep.version) ?? "$(_dep.version) " ? "")REQUIRED$(has_components ?? "" ? " )")
 .       if (has_components)
-    COMPONENTS
+  COMPONENTS
 .           for _dep.component as _component
-      $(_component.name)
+    $(_component.name)
 .           endfor
-  )
+)
 .       endif
 .   endfor
 .endmacro # emit_find_dependencies
@@ -319,12 +383,14 @@ $(my.indent)add_test( NAME $(target_name(my.target))
   $(my.indent)--detect_memory_leak=0
   $(my.indent)--report_level=no
   $(my.indent)--build_info=yes
+$(my.indent))
 .
 .endmacro # emit_add_test
 .
 .macro emit_target(target, repository, root_path)
 .   define my.target = emit_target.target
 .   define my.repository = emit_target.repository
+.   define my.root_path = emit_target.root_path
 .   define my.indent = defined(my.target.option) ?? "  " ? ""
 .
 .   if (defined(my.target.option))
@@ -342,56 +408,89 @@ $(my.indent)add_executable( $(target_name(my.target)) )
 .       emit_add_test(my.target, my.indent)
 .   endif
 .
-.   emit_target_sources(my.target, my.indent)
+.   emit_target_compiler_features(my.target, my.repository, my.indent)
 .
-.   emit_target_headers(my.target, my.indent)
+.   emit_target_sources(my.target, my.repository, my.indent)
 .
-.   emit_target_link_libraries(my.target, my.indent)
+.   emit_target_headers(my.target, my.repository, my.indent)
+.
+.   emit_target_include_directories(my.target, my.repository, my.root_path, my.indent)
+.
+.   emit_target_link_libraries(my.target, my.repository, my.indent)
 .
 .   if (defined(my.target.option))
 endif()
 .   endif
 .endmacro # emit_target
 .
-.macro emit_target_link_libraries_parameterized(target, mode, indent)
-.   define my.target = emit_target_link_libraries_parameterized.target
-.   define my.mode = emit_target_link_libraries_parameterized.mode
-.   define my.indent = emit_target_link_libraries_parameterized.indent
+.macro emit_target_include_directories(target, repository, root_path, indent)
+.   define my.target = emit_target_include_directories.target
+.   define my.repository = emit_target_include_directories.repository
+.   define my.root_path = emit_target_include_directories.root_path
+.   define my.indent = emit_target_include_directories.indent
+.   define my.indent_element = "    $(my.indent)"
 .
-.   if (count(my.target.dependency, (my.mode = "PRIVATE") ?? \
-      defined(dependency.private) ? !defined(dependency.private)) > 0)
+.   if (count(my.target.headers) > 0)
 
-target_link_libraries( $(target_name(my.target))
-  $(my.mode:upper)
-.       for my.target.dependency as _dep where (my.mode = "PRIVATE") ?? \
-          defined(_dep.private) ? !defined(_dep.private)
-.           if (count(_dep.component) > 0)
-.               for _dep.component as _comp
-    $(qualified_component_name(_dep, _comp))
-.               endfor
-.           else
-    $(qualified_target_name(_dep))
-.           endif
-.       endfor
-)
-
+$(my.indent)target_include_directories( $(target_name(my.target))
+  $(my.indent)$((name(my.target) = "library")?? "PUBLIC" ? "PRIVATE")
+.   for my.target.headers as _header
+    $(my.indent)<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)$(_header.path)>
+.       if (target_installable(my.target))
+$(my.indent_element)<INSTALL_INTERFACE:$(_header.path)>
+.       endif
+.   endfor
+.#   for my.target.dependency as _dep
+.#       emit_list_dependency(_dep, my.target, my.indent_element)
+.#   endfor
+$(my.indent))
 .   endif
-.endmacro # emit_target_link_libraries_parameterized
+.endmacro # emit_target_include_directories
 .
-.macro emit_target_link_libraries(target, indent)
+.macro emit_target_link_libraries(target, repository, indent)
 .   define my.target = emit_target_link_libraries.target
+.   define my.repository = emit_target_link_libraries.repository
 .   define my.indent = emit_target_link_libraries.indent
+.   define my.indent_element = "    $(my.indent)"
 .
-.
-.   emit_target_link_libraries_parameterized(my.target, "PUBLIC", my.indent)
-.   emit_target_link_libraries_parameterized(my.target, "PRIVATE", my.indent)
+.   if (count(my.target.dependency) > 0)
+
+$(my.indent)target_link_libraries( $(target_name(my.target))
+.       if (count(my.target.dependency, is_defined_positive(count, "private")) > 0)
+  $(my.indent)PRIVATE
+.           for my.target.dependency as _dep where is_defined_positive(_dep, "private")
+.               emit_list_dependency(_dep, my.target, my.indent_element)
+.           endfor
+.       elsif (count(my.target.dependency, !is_defined_positive(count, "private")) > 0)
+  $(my.indent)PUBLIC
+.           for my.target.dependency as _dep where !is_defined_positive(_dep, "private")
+.               emit_list_dependency(_dep, my.target, my.indent_element)
+.           endfor
+.       endif
+$(my.indent))
+.   endif
 .
 .endmacro # emit_target_link_libraries
 .
-.macro emit_target_sources(target, indent)
+.macro emit_target_compiler_features(target, repository, indent)
+.   define my.target = emit_target_compiler_features.target
+.   define my.repository = emit_target_compiler_features.repository
+.   define my.indent = emit_target_compiler_features.indent
+.
+.   if (defined(my.target->compiler) & defined(my.target->compiler.standard))
+
+$(my.indent)target_compile_features( $(my.target.name)
+  $(my.indent)PUBLIC
+    $(my.indent)cxx_std_$(my.target->compiler.standard)
+$(my.indent))
+.   endif
+.
+.endmacro # emit_target_compiler_features
+.
+.macro emit_target_sources(target, repository, indent)
 .endmacro # emit_target_sources
 .
-.macro emit_target_headers(target, indent)
+.macro emit_target_headers(target, repository, indent)
 .endmacro # emit_target_headers
 .
 .endtemplate
