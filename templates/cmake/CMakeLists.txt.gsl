@@ -8,9 +8,119 @@
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
 
+# Note: expected context root libbitcoin-build directory
+[gsl].ignorecase = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/cmake.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+
 ###############################################################################
-# Functions
+# Generation
 ###############################################################################
+function generate_CMakeLists(configuration)
+    define my.configuration = generate_CMakeLists.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.filename = "CMakeLists.txt"
+    define my.template = my.configuration->templates->template(.name = "CMakeLists.txt.gsl")
+
+    if (!defined(my.template))
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+    require(my.template->cmake, "cmake", "rootpath")
+
+    define my.project_path_suffix = my.template.outpath
+    define my.root_path = my.template->cmake.rootpath
+
+    for my.configuration.repository by .name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+        create_directory(my.output_path)
+
+        define my.out_file = path_append(my.output_path, my.filename)
+        notify(my.out_file)
+        output(my.out_file)
+
+        emit_CMakeLists(_repository, my.root_path)
+
+        close
+     endfor _repository
+endfunction
+
+###############################################################################
+# Library-able?
+###############################################################################
+function is_defined_value(node, attribute, value)
+    define my.node = is_defined_value.node
+    define my.value = is_defined_value.value
+    if (!defined(my.node))
+        abort "Missing context node for attribute '$(my.attribute)'."
+    endif
+    return defined(my.node.$(my.attribute)) &\
+        (my.node.$(my.attribute) = my.value)
+endfunction
+
+function is_defined_negative(node, attribute)
+    define my.node = is_defined_negative.node
+    if (!defined(my.node))
+        abort "Missing context node for attribute '$(my.attribute)'."
+    endif
+    return defined(my.node.$(my.attribute)) &\
+        ((my.node.$(my.attribute) = "false") | (my.node.$(my.attribute) = "no"))
+endfunction
+
+function is_defined_positive(node, attribute)
+    define my.node = is_defined_positive.node
+    if (!defined(my.node))
+        abort "Missing context node for attribute '$(my.attribute)'."
+    endif
+    return defined(my.node.$(my.attribute)) &\
+        ((my.node.$(my.attribute) = "true") | (my.node.$(my.attribute) = "yes"))
+endfunction
+
+function merge_children_select(destination, source, name, identifier)
+    define my.destination = merge_children_select.destination
+    define my.source = merge_children_select.source
+    define my.name = merge_children_select.name
+    define my.identifier = merge_children_select.identifier
+
+    for my.source.$(my.name) as _child
+        if (count(my.destination->$(my.name), $(my.name).$(identifier) = _child.$(identifier)) = 0)
+            copy _child to my.destination
+        endif
+    endfor
+endfunction
+
+function canonicalize(result, host, canonical, name, identifier)
+    define my.result = canonicalize.result
+    define my.host = canonicalize.host
+    define my.canonical = canonicalize.canonical
+    define my.name = canonicalize.name
+    define my.identifier = canonicalize.identifier
+
+    for my.host.$(my.name) as _element
+        if (!defined(_element.$(my.identifier)))
+            copy _element to my.result
+        elsif (count(my.result.$(name), defined(.$(my.identifier)) & (.$(my.identifier) = _element.$(my.identifier))) = 0)
+            if (count(my.canonical.$(my.name), .$(my.identifier) = _element.$(my.identifier)) > 0)
+                copy my.canonical->$(my.name)(.$(my.identifier) = _element.$(my.identifier)) to my.result
+            else
+                copy _element to my.result
+            endif
+        endif
+    endfor
+endfunction
+
 function registry(registrar, query)
     define my.registrar = registry.registrar
     define my.query = registry.query
@@ -22,6 +132,9 @@ function registry(registrar, query)
     return my.registrar->element(element.name = my.query.name)
 endfunction
 
+###############################################################################
+# Functions
+###############################################################################
 function package_name(query)
     define my.query = package_name.query
     define my.registry = registry(configuration->registrar(id = "dependency"), my.query)
@@ -80,24 +193,6 @@ function target_name(element)
     return target_name.element.name
 endfunction
 
-function is_defined_negative(node, attribute)
-    define my.node = is_defined_negative.node
-    if (!defined(my.node))
-        abort "Missing context node for attribute '$(my.attribute)'."
-    endif
-    return defined(my.node.$(my.attribute)) &\
-        ((my.node.$(my.attribute) = "false") | (my.node.$(my.attribute) = "no"))
-endfunction
-
-function is_defined_positive(node, attribute)
-    define my.node = is_defined_positive.node
-    if (!defined(my.node))
-        abort "Missing context node for attribute '$(my.attribute)'."
-    endif
-    return defined(my.node.$(my.attribute)) &\
-        ((my.node.$(my.attribute) = "true") | (my.node.$(my.attribute) = "yes"))
-endfunction
-
 function language_list(repository)
     define my.repository = language_list.repository
     define my.result = ""
@@ -149,11 +244,7 @@ function merge_components(dependencies, element)
     if (count(my.dependencies.dependency, dependency.name = my.element.name) > 0)
         define my.destination = my.dependencies->dependency(dependency.name = my.element.name)
 
-        for my.element.component as _component
-            if (count(my.destination.component, component.name = _component.name) = 0)
-                copy _component to my.destination
-            endif
-        endfor
+        merge_children_select(my.destination, my.element, "component", "name")
     else
         copy my.element to my.dependencies
     endif
@@ -214,13 +305,52 @@ function accumulate_tests(target)
     return my.result
 endfunction
 
-function get_option(reference, target)
+function find_option_declaration(name, target, repository)
+    define my.name = find_option_declaration.name
+    define my.target = find_option_declaration.target
+    define my.repository = find_option_declaration.repository
+
+    if (count(my.target.option, .name = my.name) > 0)
+        define my.target_option = my.target->option(option.name = my.name)
+
+        if defined(my.target_option)
+            return my.target_option
+        endif
+    endif
+
+    for my.target.dependency as _depend
+        if (count(my.repository.library, library.name = _depend.name) > 0)
+            if defined(my.repository->library(library.name = _depend.name)->option(option.name = my.name))
+                return my.repository->library(name = _depend.name)->option(name = my.name)
+            endif
+        else
+            for configuration.repository as _repo
+                if (count(_repo.library, library.name = _depend.name) > 0)
+                    if defined(_repo->library(name = _depend.name)->option(name = my.name))
+                        return _repo->library(name = _depend.naem)->option(name = my.name)
+                    endif
+                endif
+            endfor
+        endif
+    endfor
+
+    echo "find_option: name: $(my.name)"
+    echo "find_option: target: $(my.target.string())"
+    for my.target.option as _option
+        echo "find_option: option: $(_option.name)"
+    endfor
+
+    abort "Missing option matching name '$(my.name)'."
+endfunction
+
+function get_option(reference, target, repository)
     define my.reference = get_option.reference
     define my.target = get_option.target
+    define my.repository = get_option.repository
     define my.result = ""
 
     if (defined(my.reference.option))
-        define my.option = my.target->option(name = my.reference.option)
+        define my.option = find_option_declaration(my.reference.option, my.target, my.repository)
 
         if (!defined(my.option))
             abort "Target '$(my.target.name)' missing option '$(my.reference.option)'."
@@ -232,7 +362,129 @@ function get_option(reference, target)
     return my.result
 endfunction
 
-###############################################################################
+function compiler_identifier(context)
+    define my.context = compiler_identifier.context
+
+    if !defined(my.context.compiler)
+        abort "Missing 'compiler' property."
+    endif
+
+    if (my.context.compiler = "clang")
+        return "Clang"
+    elsif (my.context.compiler = "gnu")
+        return "GNU"
+    else
+        abort "Unrecognized compiler value '$(my.context.compiler)'."
+    endif
+endfunction
+
+function supported_language(element, default)
+    define my.element = supported_language.element
+    define my.default = supported_language.default
+
+    if (count(my.element.context, defined(context.language)) = 0)
+        return my.default
+    elsif (count(my.element.context, defined(context.language)) = 1)
+        define my.language = my.element->context(defined(context.language)).language
+
+        if (my.language = "c++")
+            return "CXX"
+        elsif (my.language = "c")
+            return "C"
+        else
+            abort "Unrecognized language value '$(my.language)'"
+        endif
+    endif
+
+    return my.default
+endfunction
+
+function symbol(flag)
+    define my.flag = symbol.flag
+    define my.result = ""
+
+    if (count(my.flag.symbol) > 0)
+        for my.flag.symbol as _symbol
+            if (!first())
+                my.result = "$(my.result) $(_symbol.value)"
+            else
+                my.result = "$(_symbol.value)"
+            endif
+        endfor
+    else
+        if !defined(my.flag.symbol)
+            abort "$(name(my.target)) | Flag requires 'symbol'."
+        endif
+        my.result = "$(my.flag.symbol)"
+    endif
+
+    return my.result
+endfunction
+
+function flag_name(flag)
+    define my.flag = flag_name.flag
+
+    if defined(my.flag.option)
+        return my.flag.option
+    elsif defined(my.flag.name)
+        return my.flag.name
+    elsif defined(my.flag.id)
+        return my.flag.id
+    else
+        abort "Flag does not have a determinable 'name'."
+    endif
+endfunction
+
+function render_unique_flags(encountered, target, repository)
+    define my.encountered = render_unique_flags.encountered
+    define my.target = render_unique_flags.target
+    define my.repository = render_unique_flags.repository
+
+    for my.target->compiler.flag as _flag
+        if !defined(_flag.id)
+            emit_compiler_flag_check(_flag, my.target, my.repository)
+        elsif (count(my.encountered.flag, .id = _flag.id) = 0)
+            if (count(configuration->canonical->compiler.flag, .id = _flag.id) > 0)
+                copy configuration->canonical->compiler->flag(.id = _flag.id) to my.encountered
+            emit_compiler_flag_check(configuration->canonical->compiler->flag(.id = _flag.id), my.target, my.repository)
+            else
+                copy _flag to my.encountered
+                emit_compiler_flag_check(_flag, my.target, my.repository)
+            endif
+        endif
+    endfor
+
+endfunction
+
+function render_compiler_checks(repository)
+    define my.repository = render_compiler_checks.repository
+
+    new compiler as _compiler
+        for my.repository.library as _library
+            if !defined(_library->compiler)
+                next
+            endif
+
+            render_unique_flags(_compiler, _library, my.repository)
+        endfor
+        for my.repository.test as _test
+            if !defined(_test->compiler)
+                next
+            endif
+
+            render_unique_flags(_compiler, _test, my.repository)
+        endfor
+        for my.repository.binary as _binary
+            if !defined(_binary->compiler)
+                next
+            endif
+
+            render_unique_flags(_compiler, _binary, my.repository)
+        endfor
+    endnew
+endfunction
+
+.###############################################################################
 # Macros
 ###############################################################################
 .endtemplate
@@ -245,14 +497,14 @@ endfunction
 .   copyleft(my.repository.name)
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
 
-project($(my.repository.name)
+project( $(my.repository.name)
   VERSION $(my.repository.version)
   DESCRIPTION $(my.repository.description)
-  LANGUAGES $(language_list(my.repository)))
+  LANGUAGES $(language_list(my.repository)) )
 
 list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
 
-if (MSVC)
+if ( MSVC )
   set( CMAKE_STATIC_LIBRARY_PREFIX "lib" )
   set( CMAKE_SHARED_LIBRARY_PREFIX "lib" )
 endif()
@@ -260,8 +512,11 @@ endif()
 .   heading("Project options.")
 .   emit_repository_options(my.repository)
 
-.   heading("Dependencies")
+.   heading("Dependencies.")
 .   render_dependency_discovery(my.repository)
+.
+.   heading("Compiler options.")
+.   render_compiler_checks(my.repository)
 .
 .   for my.repository.library as _library
 
@@ -284,12 +539,13 @@ endif()
 .
 .endmacro # emit_CMakeLists
 .
-.macro emit_list_dependency(dependency, target, indent)
+.macro emit_list_dependency(dependency, target, repository, indent)
 .   define my.dependency = emit_list_dependency.dependency
 .   define my.target = emit_list_dependency.target
+.   define my.repository = emit_list_dependency.repository
 .   define my.indent = emit_list_dependency.indent
 .   define my.prefix = defined(my.dependency.option) ?? \
-        "$<$<BOOL:${$(get_option(my.dependency, my.target))}>:" ? ""
+        "$<$<BOOL:${$(get_option(my.dependency, my.target, my.repository))}>:" ? ""
 .   define my.suffix = defined(my.dependency.option) ?? \
         ">" ? ""
 .
@@ -324,14 +580,14 @@ option( $(my.context.type:lower)-$(my.context.option:lower) "Build $(my.context.
 .   endif
 .
 .   for my.context.option as _option
-option( $(_option.type:lower)-$(_option.name:lower) $(_option.comment) $(option_default(_option)) )
+option( $(_option.type:lower)-$(_option.name:lower) "$(_option.comment)" $(option_default(_option)) )
 .   endfor
 .endmacro # emit_options
 .
 .macro emit_find_dependencies(dependencies)
 .   define my.dependencies = emit_find_dependencies.dependencies
 .
-if (BUILD_SHARED_LIBS)
+if ( BUILD_SHARED_LIBS )
 .   for my.dependencies.dependency as _dep
   set( $(package_name(_dep))_USE_STATIC_LIBS "OFF" )
 .   endfor
@@ -359,8 +615,8 @@ find_package( $(package_name(_dep)) $(defined(_dep.version) ?? "$(_dep.version) 
 .
 .macro emit_boost_icu_fixups()
 
-if (with-icu)
-  include(InTargetProperty)
+if ( with-icu )
+  include( InTargetProperty )
   remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icudata )
   remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icui18n )
   remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icuuc )
@@ -394,7 +650,7 @@ $(my.indent))
 .   define my.indent = defined(my.target.option) ?? "  " ? ""
 .
 .   if (defined(my.target.option))
-if ($(my.target.type:lower)-$(my.target.option:lower))
+if ( $(my.target.type:lower)-$(my.target.option:lower) )
 .   endif
 .
 .   if (name(my.target) = "library")
@@ -408,7 +664,13 @@ $(my.indent)add_executable( $(target_name(my.target)) )
 .       emit_add_test(my.target, my.indent)
 .   endif
 .
-.   emit_target_compiler_features(my.target, my.repository, my.indent)
+.   emit_target_compile_features(my.target, my.repository, my.indent)
+.
+.   emit_target_compile_assignment("target_compile_options", "flag", \
+        my.target, my.repository, my.indent)
+.
+.   emit_target_compile_assignment("target_compile_definitions", "define", \
+        my.target, my.repository, my.indent)
 .
 .   emit_target_sources(my.target, my.repository, my.indent)
 .
@@ -441,7 +703,7 @@ $(my.indent_element)<INSTALL_INTERFACE:$(_header.path)>
 .       endif
 .   endfor
 .#   for my.target.dependency as _dep
-.#       emit_list_dependency(_dep, my.target, my.indent_element)
+.#       emit_list_dependency(_dep, my.target, my.repository, my.indent_element)
 .#   endfor
 $(my.indent))
 .   endif
@@ -459,12 +721,12 @@ $(my.indent)target_link_libraries( $(target_name(my.target))
 .       if (count(my.target.dependency, is_defined_positive(count, "private")) > 0)
   $(my.indent)PRIVATE
 .           for my.target.dependency as _dep where is_defined_positive(_dep, "private")
-.               emit_list_dependency(_dep, my.target, my.indent_element)
+.               emit_list_dependency(_dep, my.target, my.repository, my.indent_element)
 .           endfor
 .       elsif (count(my.target.dependency, !is_defined_positive(count, "private")) > 0)
   $(my.indent)PUBLIC
 .           for my.target.dependency as _dep where !is_defined_positive(_dep, "private")
-.               emit_list_dependency(_dep, my.target, my.indent_element)
+.               emit_list_dependency(_dep, my.target, my.repository, my.indent_element)
 .           endfor
 .       endif
 $(my.indent))
@@ -472,10 +734,10 @@ $(my.indent))
 .
 .endmacro # emit_target_link_libraries
 .
-.macro emit_target_compiler_features(target, repository, indent)
-.   define my.target = emit_target_compiler_features.target
-.   define my.repository = emit_target_compiler_features.repository
-.   define my.indent = emit_target_compiler_features.indent
+.macro emit_target_compile_features(target, repository, indent)
+.   define my.target = emit_target_compile_features.target
+.   define my.repository = emit_target_compile_features.repository
+.   define my.indent = emit_target_compile_features.indent
 .
 .   if (defined(my.target->compiler) & defined(my.target->compiler.standard))
 
@@ -485,7 +747,123 @@ $(my.indent)target_compile_features( $(my.target.name)
 $(my.indent))
 .   endif
 .
-.endmacro # emit_target_compiler_features
+.endmacro # emit_target_compile_features
+.
+.macro emit_target_compile_assignment(property, element, target, repository, indent)
+.   define my.property = emit_target_compile_assignment.property
+.   define my.element = emit_target_compile_assignment.element
+.   define my.target = emit_target_compile_assignment.target
+.   define my.repository = emit_target_compile_assignment.repository
+.   define my.indent = emit_target_compile_assignment.indent
+.   define my.indent_item = "    $(my.indent)"
+.
+.   new compiler as _compiler
+.   canonicalize(_compiler, my.target->compiler, configuration->canonical->compiler, my.element, "id")
+.   if (count(_compiler.$(my.element)) > 0)
+
+$(my.indent)$(my.property)( $(my.target.name)
+.       if (count(_compiler.$(my.element), is_defined_value($(my.element), "type", "public")) > 0)
+  $(my.indent)PUBLIC
+.           for _compiler.$(my.element) as _ele where is_defined_value(_ele, "type", "public")
+.               emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
+.           endfor
+.       endif
+.       if (count(_compiler.$(my.element), is_defined_value($(my.element), "type", "private")) > 0)
+  $(my.indent)PRIVATE
+.           for _compiler.$(my.element) as _ele where is_defined_value(_ele, "type", "private")
+.               emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
+.           endfor
+.       endif
+$(my.indent))
+.   endif
+.   endnew
+.
+.endmacro # emit_target_compile_assignment
+.
+.macro emit_compiler_element(element, target, repository, indent)
+.   define my.element = emit_compiler_element.element
+.   define my.target = emit_compiler_element.target
+.   define my.repository = emit_compiler_element.repository
+.   define my.indent = emit_compiler_element.indent
+.
+.   define my.symbol = symbol(my.element)
+.
+.   if defined(my.element.option)
+$(my.indent)$<$<BOOL:${$(get_option(my.element, my.target, my.repository))}>:$(my.symbol)>
+.   elsif defined(my.element.compiler)
+$(my.indent)$<$<CXX_COMPILER_ID:$(compiler_identifier(my.element))>:$(my.symbol)>
+.   elsif (!(supported_language(my.element, "") = ""))
+$(my.indent)$<$<COMPILE_LANGUAGE:$(supported_language(my.element, ""))>:$(my.symbol)>
+.   else
+$(my.indent)$(my.symbol)
+.   endif
+.endmacro # emit_compiler_element
+.
+.macro emit_compiler_flag_check(flag, target, repository)
+.   define my.flag = emit_compiler_flag_check.flag
+.   define my.target = emit_compiler_flag_check.target
+.   define my.repository = emit_compiler_flag_check.repository
+.
+.   define my.indent = ""
+.   define my.step = "  "
+
+.   if defined(my.flag.option)
+$(my.indent)if ( $(get_option(my.flag, my.target, my.repository)) )
+.       define my.indent = "$(my.step)$(my.indent)"
+.   endif
+.   if defined(my.flag.compiler)
+$(my.indent)if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "$(compiler_identifier(my.flag))" )
+.       define my.indent = "$(my.step)$(my.indent)"
+.   endif
+.   if defined(my.flag->program)
+.       emit_check_source_compiles(my.flag, my.repository, my.indent)
+.   else
+.       emit_check_compiler_flag(my.flag, my.repository, my.indent)
+.   endif
+.   if defined(my.flag.compiler)
+.       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
+$(my.indent)endif()
+.   endif
+.   if defined(my.flag.option)
+.       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
+$(my.indent)endif()
+.   endif
+.endmacro # emit_compiler_flag_check
+
+.macro emit_check_source_compiles(flag, repository, indent)
+.   define my.flag = emit_check_source_compiles.flag
+.   define my.repository = emit_check_source_compiles.repository
+.   define my.indent = emit_check_source_compiles.indent
+.
+.   define my.language = supported_language(my.flag, "cxx")
+$(my.indent)set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+$(my.indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} $(symbol(my.flag))" )
+$(my.indent)check_$(my.language:lower)_source_compiles( "
+.   for my.flag->program.include as _include
+  $(my.indent)#include <$(_include.header)>
+.   endfor
+    $(my.indent)int main() {
+.   for my.flag->program.loc as _loc
+    $(my.indent)$(_loc)
+.   endfor
+    $(my.indent)}" SUPPORTS_FLAG_$(flag_name(my.flag):upper) )
+$(my.indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+$(my.indent)if ( !SUPPORTS_FLAG_$(flag_name(my.flag):upper) )
+  $(my.indent)message( FATAL_ERROR "Compiler does not support '$(symbol(my.flag))'." )
+$(my.indent)endif()
+.endmacro # emit_check_source_compiles
+.
+.macro emit_check_compiler_flag(flag, repository, indent)
+.   define my.flag = emit_check_compiler_flag.flag
+.   define my.repository = emit_check_compiler_flag.repository
+.   define my.indent = emit_check_compiler_flag.indent
+.
+.   define my.language = supported_language(my.flag, "cxx")
+$(my.indent)check_$(my.language:lower)_compiler_flag( "$(symbol(my.flag))" HAS_FLAG_$(flag_name(my.flag):upper) )
+$(my.indent)if ( !HAS_FLAG_$(flag_name(my.flag):upper) )
+    $(my.indent)message( FATAL_ERROR "Compiler does not support '$(symbol(my.flag))'." )
+$(my.indent)endif()
+.endmacro # emit_check_compiler_flag
 .
 .macro emit_target_sources(target, repository, indent)
 .endmacro # emit_target_sources
@@ -496,57 +874,8 @@ $(my.indent))
 .endtemplate
 .template 0
 ###############################################################################
-# Generation
-###############################################################################
-.endtemplate
-.template 0
-function generate_CMakeLists(configuration)
-    define my.configuration = generate_CMakeLists.configuration
-    require(my.configuration->templates, "templates", "resultpath")
-
-    define template = my.configuration->templates->template(name = "CMakeLists.txt.gsl")
-
-    if (!defined(template))
-        abort "Generator configuration missing."
-    endif
-
-    require(template, "template", "outpath")
-    require(template->cmake, "cmake", "rootpath")
-
-    define my.project_path_suffix = template.outpath
-    define my.root_path = template->cmake.rootpath
-
-    for my.configuration.repository by name as _repository
-        require(_repository, "repository", "name")
-        define my.output_path = path_append(\
-            my.configuration->templates.resultpath, \
-            path_append(my.path_prefix, \
-                path_append(_repository.name, my.project_path_suffix)))
-
-        create_directory(my.output_path)
-
-        define my.out_file = path_append(my.output_path, "CMakeLists.txt")
-        notify(my.out_file)
-        output(my.out_file)
-
-        emit_CMakeLists(_repository, my.root_path)
-
-        close
-     endfor _repository
-endfunction # generate_CMakeLists
-
-###############################################################################
 # Execution
 ###############################################################################
-[global].root = ".."
-[global].trace = 0
-[gsl].ignorecase = 0
-
-# Note: expected context root libbitcoin-build directory
-gsl from "../lib/debug.gsl"
-gsl from "../lib/filesystem.gsl"
-gsl from "../lib/output.gsl"
-gsl from "../lib/cmake.gsl"
 
 generate_CMakeLists(configuration)
 
