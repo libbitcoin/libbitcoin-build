@@ -690,24 +690,51 @@ endif()
 .   define my.repository = emit_target_include_directories.repository
 .   define my.root_path = emit_target_include_directories.root_path
 .   define my.indent = emit_target_include_directories.indent
-.   define my.indent_element = "    $(my.indent)"
+.   define my.indent_item = "    $(my.indent)"
 .
-.   if (count(my.target.headers) > 0)
+.   if (count(my.target.headers, is_defined_positive(this, "root"), this) = 0)
+.       return
+.   endif
 
 $(my.indent)target_include_directories( $(target_name(my.target))
   $(my.indent)$((name(my.target) = "library")?? "PUBLIC" ? "PRIVATE")
-.   for my.target.headers as _header
-    $(my.indent)<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)$(_header.path)>
-.       if (target_installable(my.target))
-$(my.indent_element)<INSTALL_INTERFACE:$(_header.path)>
-.       endif
+.   for my.target.headers as _header where is_defined_positive(_header, "root")
+.       emit_target_path(_header, my.target, my.repository, my.indent_item, my.root_path)
+.       for _header.conditional as _condition where is_defined_positive(_condition, "root")
+.           emit_target_path(_condition, my.target, my.repository, my.indent_item, my.root_path)
+.       endfor
 .   endfor
-.#   for my.target.dependency as _dep
-.#       emit_list_dependency(_dep, my.target, my.repository, my.indent_element)
-.#   endfor
 $(my.indent))
-.   endif
 .endmacro # emit_target_include_directories
+.
+.macro emit_target_path(pathholder, target, repository, indent, root_path)
+.   define my.pathholder = emit_target_path.pathholder
+.   define my.target = emit_target_path.target
+.   define my.repository = emit_target_path.repository
+.   define my.indent = emit_target_path.indent
+.   define my.root_path = emit_target_path.root_path
+.
+.   define my.prefix = ""
+.   define my.suffix = ""
+.   define my.indent_content = my.indent
+.
+.   if defined(my.pathholder.option)
+.       my.prefix = "$<$<BOOL:${$(get_option(my.pathholder, my.target, my.repository))}>:"
+.       my.suffix = ">"
+.       my.indent_content = "  $(my.indent)"
+.   endif
+.
+.   if !is_empty(my.prefix)
+$(my.indent)$(my.prefix)
+.   endif
+$(my.indent_content)$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)/$(my.pathholder.path)>
+.   if (target_installable(my.target))
+$(my.indent_content)$<INSTALL_INTERFACE:$(my.pathholder.path)>
+.   endif
+.   if !is_empty(my.prefix)
+$(my.indent)$(my.suffix)
+.   endif
+.endmacro
 .
 .macro emit_target_link_libraries(target, repository, indent)
 .   define my.target = emit_target_link_libraries.target

@@ -14,7 +14,7 @@
       uuid="39f60708-ff48-4c22-952d-43470866f684">
 
       <sources path="src" recursive="true" />
-      <headers path="include" recursive="true" />
+      <headers path="include" recursive="true" root="true" />
 
       <!-- Exposed knobs -->
       <option name="icu" type="with" default="no" comment="Build using ICU libraries." />
@@ -189,9 +189,12 @@
     <library name="bitcoin-network"
       uuid="564eb540-d6b6-425c-b8db-b0bee8970c18">
 
-      <sources path="src" recursive="true" />
-      <headers path="include" recursive="true" includeroot="true" />
-      <headers path="include/bitcoin/network/ssl" recursive="true" option="ssl" />
+      <sources path="src" recursive="true">
+        <conditional path="src/ssl" recursive="true" option="ssl" />
+      </sources>
+      <headers path="include" recursive="true" root="true">
+        <conditional path="include/bitcoin/network/ssl" recursive="true" root="true" option="ssl" />
+      </headers>
 
       <!-- Exposed knobs -->
       <option name="ssl" type="with" default="yes" comment="Use embedded ssl library." />
@@ -256,7 +259,7 @@
       uuid="62d7fbee-4d52-424a-8938-59756e13d9f5">
 
       <sources path="src" recursive="true" />
-      <headers path="include" recursive="true" includeroot="true" />
+      <headers path="include" recursive="true" root="true" />
 
       <dependency name="bitcoin-system" version="4.0.0" />
 
@@ -311,7 +314,7 @@
       uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158">
 
       <sources path="src" recursive="true" />
-      <headers path="include" recursive="true" includeroot="true" />
+      <headers path="include" recursive="true" root="true" />
 
       <dependency name="bitcoin-database" version="4.0.0" />
       <dependency name="bitcoin-network" version="4.0.0" />
@@ -360,7 +363,7 @@
       uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0">
 
       <sources path="src" recursive="true" />
-      <headers path="include" recursive="true" includeroot="true" />
+      <headers path="include" recursive="true" root="true" />
 
       <dependency name="bitcoin-node" version="4.0.0" />
 
@@ -574,7 +577,7 @@
     <template name="CMakeLists.txt.gsl"
       path="cmake"
       outpath="builds/cmake">
-      <cmake rootpath="../../" />
+      <cmake rootpath="../.." />
     </template>
     <!--<template name="gsl.config.cmake" path="cmake" />-->
   </templates>
