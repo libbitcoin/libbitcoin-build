@@ -344,12 +344,6 @@ function find_option_declaration(name, target, repository)
         endif
     endfor
 
-    echo "find_option: name: $(my.name)"
-    echo "find_option: target: $(my.target.string())"
-    for my.target.option as _option
-        echo "find_option: option: $(_option.name)"
-    endfor
-
     abort "Missing option matching name '$(my.name)'."
 endfunction
 
@@ -545,7 +539,82 @@ endif()
 .       emit_target(_binary, my.repository, my.root_path)
 .   endfor
 .
+.   heading("Installation routine.")
+.   emit_installation(my.repository, my.root_path)
+.
 .endmacro # emit_CMakeLists
+.
+.macro emit_installation(repository, root_path)
+.   define my.repository = emit_installation.repository
+.   define my.root_path = emit_installation.root_path
+.
+include( GNUInstallDirs )
+include( CMakePackageConfigHelpers )
+
+.   for my.repository.library as _target
+.       emit_install_target(_target, my.repository, my.root_path)
+.   endfor
+.
+.   for my.repository.binary as _target where is_defined_positive(_target, "install")
+.       emit_install_target(_target, my.repository, my.root_path)
+.   endfor
+.
+.endmacro # emit_installation
+.
+.macro emit_install_target(target, repository, root_path)
+.   define my.target = emit_install_target.target
+.   define my.repository = emit_install_target.repository
+.   define my.root_path = emit_install_target.root_path
+.
+.   define my.indent = defined(my.target.option) ?? "  " ? ""
+.
+.   if defined(my.target.option)
+.       if !defined(my.target.type)
+.           abort "Missing expected 'type' definition from target '$(my.target.name)'."
+.       endif
+if ( $(my.target.type:lower)-$(my.target.option:lower) )
+.   endif
+$(my.indent)install( TARGETS $(my.target.name)
+  $(my.indent)EXPORT $(my.target.name)-targets
+  $(my.indent)LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  $(my.indent)ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  $(my.indent)RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  $(my.indent)INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  $(my.indent)FILE_SET HEADERS
+$(my.indent))
+
+.   if (name(my.target) = "library")
+$(my.indent)install( EXPORT $(my.target.name)-targets
+  $(my.indent)NAMESPACE bitcoin::
+  $(my.indent)DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/$(my.target.name)
+  $(my.indent)FILE $(my.target.name)-targets.cmake
+$(my.indent))
+
+$(my.indent)configure_package_config_file(
+  $(my.indent)${CMAKE_CURRENT_SOURCE_DIR}/$(my.target.name)-config.cmake.in
+  $(my.indent)${CMAKE_CURRENT_BINARY_DIR}/$(my.target.name)-config.cmake
+  $(my.indent)INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/$(my.target.name)
+$(my.indent))
+
+$(my.indent)write_basic_package_version_file(
+  $(my.indent)$(my.target.name)-config-version.cmake
+  $(my.indent)VERSION ${PACKAGE_VERSION}
+  $(my.indent)COMPATABILITY AnyNewerVersion
+$(my.indent))
+
+$(my.indent)install(
+  $(my.indent)FILES
+    $(my.indent)${CMAKE_CURRENT_BINARY_DIR}/$(my.target.name)-config.cmake
+    $(my.indent)${CMAKE_CURRENT_BINARY_DIR}/$(my.target.name)-config-version.cmake
+  $(my.indent)DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/$(my.target.name)
+$(my.indent))
+.   endif
+.
+.   if defined(my.target.option)
+endif()
+.   endif
+.
+.endmacro # emit_install_target
 .
 .macro emit_list_dependency(dependency, target, repository, indent)
 .   define my.dependency = emit_list_dependency.dependency
@@ -970,9 +1039,7 @@ $(my.indent))
 
 $(my.indent)file( GLOB_RECURSE $(my.target.name:c)_$(name(my.item):upper)$(my.suffix) CONFIGURE_DEPENDS
 .   for _languages.language as _lang
-.       echo "lang: $(_lang.string())"
 .       for _lang.$(name(my.item)) as _entry where defined(_entry.suffix)
-.           echo "entry: $(_entry.string())"
   $(my.indent)"${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)/$(my.item.path)/*.$(_entry.suffix)"
 .       endfor
 .   endfor
