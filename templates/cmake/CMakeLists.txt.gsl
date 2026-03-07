@@ -193,15 +193,25 @@ function target_name(element)
     return target_name.element.name
 endfunction
 
+function cmake_language(lang)
+    define my.lang = cmake_language.lang
+
+    if (count(configuration->canonical.language, .id = my.lang) = 0)
+        abort "Missing definition for language '$(my.lang)'."
+    endif
+
+    return configuration->canonical->language(this.id = my.lang, this).cmake
+endfunction
+
 function language_list(repository)
     define my.repository = language_list.repository
     define my.result = ""
 
     for my.repository.language as _lang
         if (!is_empty(my.result))
-            my.result = "$(my.result) $(_lang.id)"
+            my.result = "$(my.result) $(cmake_language(_lang.id))"
         else
-            my.result = "$(_lang.id)"
+            my.result = cmake_language(_lang.id)
         endif
     endfor
 
@@ -383,20 +393,18 @@ function supported_language(element, default)
     define my.default = supported_language.default
 
     if (count(my.element.context, defined(context.language)) = 0)
-        return my.default
+        return cmake_language(my.default)
     elsif (count(my.element.context, defined(context.language)) = 1)
         define my.language = my.element->context(defined(context.language)).language
 
-        if (my.language = "c++")
-            return "CXX"
-        elsif (my.language = "c")
-            return "C"
-        else
+        if !((my.language = "c++") | (my.language = "c"))
             abort "Unrecognized language value '$(my.language)'"
+        else
+            return cmake_language(my.language)
         endif
     endif
 
-    return my.default
+    return cmake_language(my.default)
 endfunction
 
 function symbol(flag)
@@ -817,7 +825,7 @@ $(my.indent))
 $(my.indent)$<$<BOOL:${$(get_option(my.element, my.target, my.repository))}>:$(my.symbol)>
 .   elsif defined(my.element.compiler)
 $(my.indent)$<$<CXX_COMPILER_ID:$(compiler_identifier(my.element))>:$(my.symbol)>
-.   elsif (!(supported_language(my.element, "") = ""))
+.   elsif (count(my.element.context, defined(context.language)) = 1)
 $(my.indent)$<$<COMPILE_LANGUAGE:$(supported_language(my.element, ""))>:$(my.symbol)>
 .   else
 $(my.indent)$(my.symbol)
@@ -860,7 +868,7 @@ $(my.indent)endif()
 .   define my.repository = emit_check_source_compiles.repository
 .   define my.indent = emit_check_source_compiles.indent
 .
-.   define my.language = supported_language(my.flag, "cxx")
+.   define my.language = supported_language(my.flag, "c++")
 $(my.indent)set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
 $(my.indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} $(symbol(my.flag))" )
 $(my.indent)check_$(my.language:lower)_source_compiles( "
@@ -883,7 +891,7 @@ $(my.indent)endif()
 .   define my.repository = emit_check_compiler_flag.repository
 .   define my.indent = emit_check_compiler_flag.indent
 .
-.   define my.language = supported_language(my.flag, "cxx")
+.   define my.language = supported_language(my.flag, "c++")
 $(my.indent)check_$(my.language:lower)_compiler_flag( "$(symbol(my.flag))" HAS_FLAG_$(flag_name(my.flag):upper) )
 $(my.indent)if ( !HAS_FLAG_$(flag_name(my.flag):upper) )
     $(my.indent)message( FATAL_ERROR "Compiler does not support '$(symbol(my.flag))'." )
@@ -908,15 +916,19 @@ $(my.indent)endif()
 .       return
 .   endif
 .
-.   for my.target.headers as _headers
-.       for _headers.headers as _optional
+.   if (has_headers)
+.       emit_files_declaration(my.target->headers, my.target, my.repository, my.root_path, my.indent)
+.       for my.target->headers.headers as _optional
+.           emit_files_declaration(_optional, my.target, my.repository, my.root_path, my.indent)
 .       endfor
-.   endfor
+.   endif
 .
-.   for my.target.sources as _sources
-.       for _sources.sources as _optional
+.   if (has_sources)
+.       emit_files_declaration(my.target->sources, my.target, my.repository, my.root_path, my.indent)
+.       for my.target->sources.sources as _optional
+.           emit_files_declaration(_optional, my.target, my.repository, my.root_path, my.indent)
 .       endfor
-.   endfor
+.   endif
 
 $(my.indent)target_sources( $(my.target.name) 
 .   if has_headers
@@ -924,28 +936,62 @@ $(my.indent)target_sources( $(my.target.name)
     $(my.indent)FILE_SET HEADERS
     $(my.indent)BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)/$(my.target->headers.path)"
     $(my.indent)FILES
-.       emit_files_entry(my.target->headers, my.target, my.repository, my.indent_headers)
+.       emit_target_sources_entry(my.target->headers, my.target, my.repository, my.indent_headers)
 .
 .       for my.target->headers.headers as _optional
-.           emit_files_entry(_optional, my.target, my.repository, my.indent_headers)
+.           emit_target_sources_entry(_optional, my.target, my.repository, my.indent_headers)
 .       endfor
 .   endif
 .   if has_sources
   $(my.indent)PRIVATE
-.       emit_files_entry(my.target->sources, my.target, my.repository, my.indent_sources)
+.       emit_target_sources_entry(my.target->sources, my.target, my.repository, my.indent_sources)
 .
 .       for my.target->sources.sources as _optional
-.           emit_files_entry(_optional, my.target, my.repository, my.indent_sources)
+.           emit_target_sources_entry(_optional, my.target, my.repository, my.indent_sources)
 .       endfor
 .   endif
 $(my.indent))
 .endmacro # emit_target_files
 .
-.macro emit_files_entry(item, target, repository, indent)
-.   define my.item = emit_files_entry.item
-.   define my.target = emit_files_entry.target
-.   define my.repository = emit_files_entry.repository
-.   define my.indent = emit_files_entry.indent
+.macro emit_files_declaration(item, target, repository, root_path, indent)
+.   define my.item = emit_files_declaration.item
+.   define my.target = emit_files_declaration.target
+.   define my.repository = emit_files_declaration.repository
+.   define my.root_path = emit_files_declaration.root_path
+.   define my.indent = emit_files_declaration.indent
+.
+.   new languages as _languages
+.   canonicalize(_languages, my.repository, configuration->canonical, "language", "id")
+.
+.   define my.suffix = ""
+.   if defined(my.item.option)
+.       my.suffix = "$(my.suffix)_$(my.item.option:upper)"
+.   endif
+
+$(my.indent)file( GLOB_RECURSE $(my.target.name:c)_$(name(my.item):upper)$(my.suffix) CONFIGURE_DEPENDS
+.   for _languages.language as _lang
+.       echo "lang: $(_lang.string())"
+.       for _lang.$(name(my.item)) as _entry where defined(_entry.suffix)
+.           echo "entry: $(_entry.string())"
+  $(my.indent)"${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)/$(my.item.path)/*.$(_entry.suffix)"
+.       endfor
+.   endfor
+$(my.indent))
+.
+.   endnew
+.
+.   if !is_empty(my.suffix)
+
+$(my.indent)list( REMOVE_ITEM $(my.target.name:c)_$(name(my.item):upper) ${$(my.target.name:c)_$(name(my.item):upper)$(my.suffix)} )
+.   endif
+.
+.endmacro # emit_files_declaration
+.
+.macro emit_target_sources_entry(item, target, repository, indent)
+.   define my.item = emit_target_sources_entry.item
+.   define my.target = emit_target_sources_entry.target
+.   define my.repository = emit_target_sources_entry.repository
+.   define my.indent = emit_target_sources_entry.indent
 .
 .   define my.type = "$(name(my.item):upper)"
 .   define my.prefix = ""
@@ -959,7 +1005,7 @@ $(my.indent))
 .   endif
 .
 $(my.indent)$(my.prefix)${$(my.target.name:c)_$(my.type:upper)$(my.var_suffix)}$(my.suffix)
-.endmacro # emit_files_entry
+.endmacro # emit_target_sources_entry
 .
 .endtemplate
 .template 0
