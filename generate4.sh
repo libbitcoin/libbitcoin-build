@@ -18,7 +18,6 @@ cd `dirname "$0"`
 eval rm -rf "output"
 
 # Generate property copiers and artifact generators.
-eval gsl -q -script:gsl.copy_modules.sh generate4.xml
 eval gsl -q -script:gsl.copy_properties.sh generate4.xml
 eval gsl -q -script:gsl.generate_artifacts.sh generate4.xml
 
@@ -37,4 +36,5 @@ eval chmod +x generate_artifacts.sh
 eval ./copy_modules.sh
 eval ./copy_properties.sh
 eval ./generate_artifacts.sh
+eval ./generate.sh version4.xml
 eval ./copy_projects.sh "$@"

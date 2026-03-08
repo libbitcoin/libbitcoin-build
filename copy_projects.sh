@@ -14,12 +14,14 @@ mkdir -p "$dest_dir"
 
 # If no subdirectory arguments are provided, copy all subdirectories
 if [ "$#" -eq 0 ]; then
-    echo "No substrings specified. Copying all subdirectories from '$source_dir' to '$dest_dir'..."
+    echo "No substrings specified. Copying all 'libbitcoin' subdirectories from '$source_dir' to '$dest_dir'..."
     for subdir in "$source_dir"/*/ ; do
         if [ -d "$subdir" ]; then
             subdir_name=$(basename "$subdir")
-            echo "Copying '$subdir_name' to '$dest_dir'..."
-            cp -r "$subdir" "$dest_dir/"
+            if [[ "$subdir_name" == *"libbitcoin-"* ]]; then
+                echo "Copying '$subdir_name' to '$dest_dir'..."
+                cp -r "$subdir" "$dest_dir/"
+            fi
         fi
     done
 else
