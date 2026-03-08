@@ -8,7 +8,7 @@
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
 
-# Note: expected context root libbitcoin-build directory
+# Note: expected context root libbitcoin-build/process directory
 [gsl].ignorecase = 0
 
 gsl from "../library/math.gsl"
@@ -121,35 +121,9 @@ function canonicalize(result, host, canonical, name, identifier)
     endfor
 endfunction
 
-function registry(registrar, query)
-    define my.registrar = registry.registrar
-    define my.query = registry.query
-
-    if !defined(my.query.name)
-        abort("Malformed query: $(my.query)")
-    endif
-
-    return my.registrar->element(element.name = my.query.name)
-endfunction
-
 ###############################################################################
 # Functions
 ###############################################################################
-function package_name(query)
-    define my.query = package_name.query
-    define my.registry = registry(configuration->registrar(id = "dependency"), my.query)
-
-    if !defined(my.registry)
-        abort("Missing registry for $(my.query)")
-    endif
-
-    if !defined(my.registry->cmake) | !defined(my.registry->cmake.package)
-        abort("Missing registry details for $(my.query)")
-    endif
-
-    return my.registry->cmake.package
-endfunction
-
 function qualified_component_name(dependency, component)
     define my.dependency = qualified_component_name.dependency
     define my.component = qualified_component_name.component
@@ -260,41 +234,66 @@ function merge_components(dependencies, element)
     endif
 endfunction
 
-function render_dependency_discovery(repository)
-    define my.repository = render_dependency_discovery.repository
+function render_dependencies(repository)
+    define my.repository = render_dependencies.repository
 
-    new discoverables as _disc
+    new unique_merged_dependencies as _dependencies
         for my.repository.library as _library
             for _library.dependency as _dep
-                merge_components(_disc, _dep)
+                merge_components(_dependencies, _dep)
             endfor
         endfor
         for my.repository.test as _test
             for _test.dependency as _dep
-                merge_components(_disc, _dep)
+                merge_components(_dependencies, _dep)
             endfor
         endfor
         for my.repository.binary as _binary
             for _binary.dependency as _dep
-                merge_components(_disc, _dep)
+                merge_components(_dependencies, _dep)
             endfor
         endfor
         for my.repository.library as _library
-            if (count(_disc.dependency, name = _library.name) > 0)
-                delete _disc->dependency(name = _library.name)
+            if (count(_dependencies.dependency, name = _library.name) > 0)
+                delete _dependencies->dependency(name = _library.name)
             endif
         endfor
 
-        emit_find_dependencies(_disc)
+        emit_shared_static_detection(_dependencies)
+
+        for _dependencies.dependency as _depend
+            define my.found = 0
+            for my.repository.library as _target where (my.found = 0)
+                if (count(_target.dependency, .name = _depend.name) > 0)
+                    emit_find_dependency(_depend, _target, my.repository, "find_package")
+                    my.found = 1
+                endif
+            endfor
+            for my.repository.test as _target where (my.found = 0)
+                if (count(_target.dependency, .name = _depend.name) > 0)
+                    emit_find_dependency(_depend, _target, my.repository, "find_package")
+                    my.found = 1
+                endif
+            endfor
+            for my.repository.binary as _target where (my.found = 0)
+                if (count(_target.dependency, .name = _depend.name) > 0)
+                    emit_find_dependency(_depend, _target, my.repository, "find_package")
+                    my.found = 1
+                endif
+            endfor
+            if (my.found = 0)
+                abort "Dependency '$(_depend.name)' compiled but not found on target."
+            endif
+        endfor
 
         # detect fixups
-        if (defined(_disc->dependency(dependency.name = "boost")) & \
-            defined(_disc->dependency(dependency.name = "icu")))
+        if (defined(_dependencies->dependency(dependency.name = "boost")) & \
+            defined(_dependencies->dependency(dependency.name = "icu")))
 
             emit_boost_icu_fixups()
         endif
-    endnew # _disc
-endfunction
+     endnew
+ endfunction
 
 function accumulate_tests(target)
     define my.target = accumulate_tests.target
@@ -311,57 +310,6 @@ function accumulate_tests(target)
             my.result = "$(my.result),$(_trigger.test)"
         endif
     endfor
-
-    return my.result
-endfunction
-
-function find_option_declaration(name, target, repository)
-    define my.name = find_option_declaration.name
-    define my.target = find_option_declaration.target
-    define my.repository = find_option_declaration.repository
-
-    if (count(my.target.option, .name = my.name) > 0)
-        define my.target_option = my.target->option(option.name = my.name)
-
-        if defined(my.target_option)
-            return my.target_option
-        endif
-    endif
-
-    for my.target.dependency as _depend
-        if (count(my.repository.library, library.name = _depend.name) > 0)
-            if defined(my.repository->library(library.name = _depend.name)->option(option.name = my.name))
-                return my.repository->library(name = _depend.name)->option(name = my.name)
-            endif
-        else
-            for configuration.repository as _repo
-                if (count(_repo.library, library.name = _depend.name) > 0)
-                    if defined(_repo->library(name = _depend.name)->option(name = my.name))
-                        return _repo->library(name = _depend.naem)->option(name = my.name)
-                    endif
-                endif
-            endfor
-        endif
-    endfor
-
-    abort "Missing option matching name '$(my.name)'."
-endfunction
-
-function get_option(reference, target, repository)
-    define my.reference = get_option.reference
-    define my.target = get_option.target
-    define my.repository = get_option.repository
-    define my.result = ""
-
-    if (defined(my.reference.option))
-        define my.option = find_option_declaration(my.reference.option, my.target, my.repository)
-
-        if (!defined(my.option))
-            abort "Target '$(my.target.name)' missing option '$(my.reference.option)'."
-        endif
-
-        my.result = "$(my.option.type:lower)-$(my.option.name:lower)"
-    endif
 
     return my.result
 endfunction
@@ -486,7 +434,7 @@ function render_compiler_checks(repository)
     endnew
 endfunction
 
-.###############################################################################
+###############################################################################
 # Macros
 ###############################################################################
 .endtemplate
@@ -515,7 +463,7 @@ endif()
 .   emit_repository_options(my.repository)
 
 .   heading("Dependencies.")
-.   render_dependency_discovery(my.repository)
+.   render_dependencies(my.repository)
 .
 .   heading("Compiler options.")
 .   render_compiler_checks(my.repository)
@@ -661,34 +609,23 @@ option( $(_option.type:lower)-$(_option.name:lower) "$(_option.comment)" $(optio
 .   endfor
 .endmacro # emit_options
 .
-.macro emit_find_dependencies(dependencies)
-.   define my.dependencies = emit_find_dependencies.dependencies
+.macro emit_shared_static_detection(dependencies)
+.   define my.dependencies = emit_shared_static_detection.dependencies
 .
+.   if (count(my.dependencies.dependency) = 0)
+.       return
+.   endif
+
 if ( BUILD_SHARED_LIBS )
-.   for my.dependencies.dependency as _dep
-  set( $(package_name(_dep))_USE_STATIC_LIBS "OFF" )
+.   for my.dependencies.dependency as _depend
+  set( $(package_name(_depend))_USE_STATIC_LIBS "OFF" )
 .   endfor
 else()
-.   for my.dependencies.dependency as _dep
-  set( $(package_name(_dep))_USE_STATIC_LIBS "ON" )
+.   for my.dependencies.dependency as _depend
+  set( $(package_name(_depend))_USE_STATIC_LIBS "ON" )
 .   endfor
 endif()
-.
-.   for my.dependencies.dependency as _dep
-.       define has_components = (count(_dep.component) > 0)
-.       define has_version = defined(_dep.version)
-.
-
-find_package( $(package_name(_dep)) $(defined(_dep.version) ?? "$(_dep.version) " ? "")REQUIRED$(has_components ?? "" ? " )")
-.       if (has_components)
-  COMPONENTS
-.           for _dep.component as _component
-    $(_component.name)
-.           endfor
-)
-.       endif
-.   endfor
-.endmacro # emit_find_dependencies
+.endmacro # emit_shared_static_detection
 .
 .macro emit_boost_icu_fixups()
 
