@@ -227,15 +227,25 @@ cmake_tests()
 cmake_project_directory()
 {
     local PROJ_NAME=$1
-    local JOBS=$2
-    local TEST=$3
-    shift 3
+    local MAKEFILE_PATH=$2
+    local JOBS=$3
+    local TEST=$4
+    shift 4
 
     push_directory "$PROJ_NAME"
     local PROJ_CONFIG_DIR
     PROJ_CONFIG_DIR=\$(pwd)
 
-    cmake -LA $@ builds/cmake
+    create_directory "build-cmake"
+    push_directory "build-cmake"
+
+    VERBOSITY=""
+    if [[ $DISPLAY_VERBOSE ]]; then
+        VERBOSITY="-DCMAKE_VERBOSE_MAKEFILE=ON"
+    fi
+
+    cmake ${VERBOSITY} -LA $@ "../${MAKEFILE_PATH}"
+
     make_jobs "$JOBS"
 
     if [[ $TEST == true ]]; then
@@ -244,7 +254,8 @@ cmake_project_directory()
 
     make install
     configure_links
-    pop_directory
+    pop_directory # build-cmake
+    pop_directory # PROJ_NAME
 }
 
 build_from_github_cmake()
@@ -353,8 +364,8 @@ make_jobs()
     create_from_github $(my.build.github) $(my.build.repository) $(my.branch) "$(my.conditional)"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS $(my.flags)"
-.   if (is_bitcoin_dependency(my.build))
-    build_from_github_cmake $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+.   if (is_buildable_cmake(my.build))
+    build_from_github_cmake $(my.build.repository) "$(my.build.cmake)" "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
 .   else
     build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS
 .   endif
@@ -371,7 +382,7 @@ make_jobs()
     create_from_github $(my.build.github) $(my.build.repository) $(my.branch) "$(my.conditional)"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS $(my.flags)"
-    build_from_github_cmake $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+    build_from_github_cmake $(my.build.repository) "$(my.build.cmake)" "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
     export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_github_cmake
 .
@@ -382,19 +393,19 @@ make_jobs()
 .   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
 .   define my.branch = "${$(my.build.name:upper,c)_BRANCH}"
+.
+.   if !is_buildable_cmake(my.build)
+.       abort "Expected cmake build step '$(my.build.name)'."
+.   endif
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS $(my.flags)"
     if [[ ! ($CI == true) ]]; then
         create_from_github $(my.build.github) $(my.build.repository) $(my.branch) "$(my.conditional)"
-.   if (is_bitcoin_dependency(my.build))
-        build_from_github_cmake $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
-.   else
-        build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS
-.   endif
+    build_from_github_cmake $(my.build.repository) "$(my.build.cmake)" "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
     else
         push_directory "$PRESUMED_CI_PROJECT_PATH"
         push_directory ".."
-        build_from_github_cmake $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+        build_from_github_cmake $(my.build.repository) "$(my.build.cmake)" "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
         pop_directory
         pop_directory
     fi
@@ -496,6 +507,7 @@ function generate_installer_cmake(path_prefix)
             define_remove_install_options()
             define_set_prefix()
             define_set_pkgconfigdir(_config)
+            define_set_with_icu_prefix(_config)
             define_set_with_boost_prefix(_config)
             define_display_configuration(_repository, _install)
 

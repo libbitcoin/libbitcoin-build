@@ -12,6 +12,11 @@
 
 # General repository query functions.
 
+function is_buildable_cmake(build)
+    define my.build = is_buildable_cmake.build
+    return defined(my.build.cmake)
+endfunction
+
 function is_archive_match(build, name)
     define my.build = is_archive_match.build
     trace1("is_archive_match($(my.name)) : $(my.build.name)")
@@ -332,6 +337,7 @@ normalize_static_and_shared_options "$@"
 remove_build_options
 set_prefix
 set_pkgconfigdir
+set_with_icu_prefix
 set_with_boost_prefix
 
 .endmacro # define_initialization_calls
@@ -579,6 +585,18 @@ set_pkgconfigdir()
 
 .endmacro # define_set_pkgconfigdir
 .
+.macro define_set_with_icu_prefix(configuration)
+.   define my.configuration = define_set_with_icu_prefix.configuration
+set_with_icu_prefix()
+{
+    if [[ $BUILD_ICU ]]; then
+        with_icu="ICU_ROOT=${PREFIX}"
+        export ICU_ROOT="$PREFIX"
+    fi
+}
+
+.endmacro # define_set_with_boost_prefix
+.
 .macro define_set_with_boost_prefix(configuration)
 .   define my.configuration = define_set_with_boost_prefix.configuration
 set_with_boost_prefix()
@@ -788,16 +806,20 @@ initialize_icu_packages()
         # Update PKG_CONFIG_PATH for ICU package installations on OSX.
         # OSX provides libicucore.dylib with no pkgconfig and doesn't support
         # renaming or important features, so we can't use that.
-        local HOMEBREW_USR_ICU_PKG_CONFIG="/usr/local/opt/icu4c/lib/pkgconfig"
-        local HOMEBREW_OPT_ICU_PKG_CONFIG="/opt/homebrew/opt/icu4c/lib/pkgconfig"
-        local MACPORTS_ICU_PKG_CONFIG="/opt/local/lib/pkgconfig"
+        local HOMEBREW_USR_ICU="/usr/local/opt/icu4c"
+        local HOMEBREW_OPT_ICU="/opt/homebrew/opt/icu4c"
+        local MACPORTS_ICU="/opt/local"
+        local PKG_CONFIG_SUFFIX="lib/pkgconfig"
 
-        if [[ -d "$HOMEBREW_USR_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_USR_ICU_PKG_CONFIG"
-        elif [[ -d "$HOMEBREW_OPT_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_OPT_ICU_PKG_CONFIG"
-        elif [[ -d "$MACPORTS_ICU_PKG_CONFIG" ]]; then
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$MACPORTS_ICU_PKG_CONFIG"
+        if [[ -d "${HOMEBREW_USR_ICU}/${PKG_CONFIG_SUFFIX}" ]]; then
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${HOMEBREW_USR_ICU}/${PKG_CONFIG_SUFFIX}"
+            export ICU_ROOT="${HOMEBREW_USR_ICU}"
+        elif [[ -d "${HOMEBREW_OPT_ICU}/${PKG_CONFIG_SUFFIX}" ]]; then
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${HOMEBREW_OPT_ICU}/${PKG_CONFIG_SUFFIX}"
+            export ICU_ROOT="${HOMEBREW_OPT_ICU}"
+        elif [[ -d "${MACPORTS_ICU}/${PKG_CONFIG_SUFFIX}" ]]; then
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${MACPORTS_ICU}/${PKG_CONFIG_SUFFIX}"
+            export ICU_ROOT="${MACPORTS_ICU}"
         fi
     fi
 }

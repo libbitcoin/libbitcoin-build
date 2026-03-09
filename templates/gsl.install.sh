@@ -319,6 +319,7 @@ function generate_installer(path_prefix)
             define_remove_build_options()
             define_set_prefix()
             define_set_pkgconfigdir(_config)
+            define_set_with_icu_prefix(_config)
             define_set_with_boost_prefix(_config)
             define_display_configuration(_repository, _install)
 

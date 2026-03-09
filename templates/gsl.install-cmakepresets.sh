@@ -451,7 +451,7 @@ make_jobs()
     create_from_github $(my.build.github) $(my.build.repository) $(my.branch) "$(my.conditional)"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS $(my.flags)"
-.   if (is_bitcoin_dependency(my.build))
+.   if (is_buildable_cmake(my.build))
     display_message "$(my.build.repository) PRESET ${REPO_PRESET[$(my.build.repository)]}"
     build_from_github_cmake $(my.build.repository) ${REPO_PRESET[$(my.build.repository)]} "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
 .   else
@@ -482,6 +482,10 @@ make_jobs()
 .   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
 .   define my.branch = "${$(my.build.name:upper,c)_BRANCH}"
+.
+.   if !is_buildable_cmake(my.build)
+.       abort "Expected cmake build step '$(my.build.name)'."
+.   endif
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS $(my.flags)"
     if [[ ! ($CI == true) ]]; then
@@ -601,6 +605,7 @@ function generate_installer_cmake(path_prefix)
             define_remove_install_options()
             define_set_prefix()
             define_set_pkgconfigdir(_config)
+            define_set_with_icu_prefix(_config)
             define_set_with_boost_prefix(_config)
             define_display_configuration(_repository, _install)
 
