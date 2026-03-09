@@ -28,12 +28,10 @@ eval gsl -q -script:gsl.generate_artifacts.sh generate4.xml
 # endfor
 
 # Make property copiers and artifact generators executable.
-eval chmod +x copy_modules.sh
 eval chmod +x copy_properties.sh
 eval chmod +x generate_artifacts.sh
 
 # Execute property copiers and artifact generators.
-eval ./copy_modules.sh
 eval ./copy_properties.sh
 eval ./generate_artifacts.sh
 eval ./generate.sh version4.xml

@@ -180,14 +180,22 @@
         <option value="--with-url" />
         <option value="--with-test" />
       </build>
-      <build name="secp256k1" github="bitcoin-core" repository="secp256k1" branch="v0.7.0" parallel="true" nuget="true" presentation="libsecp256k1" conditional="true" >
+      <build name="secp256k1"
+        github="bitcoin-core" repository="secp256k1" branch="v0.7.0"
+        parallel="true"
+        nuget="true"
+        cmake="." presentation="libsecp256k1"
+        conditional="true" >
         <flag value="-w" />
-        <option value="--disable-tests" />
-        <option value="--enable-experimental" />
-        <option value="--enable-module-recovery" />
-        <option value="--enable-module-schnorrsig" />
+        <option value="--disable-tests" cmake="-DSECP256K1_BUILD_TESTS=OFF" />
+        <option value="--enable-experimental" cmake="-DSECP256K1_EXPERIMENTAL=ON" />
+        <option value="--enable-module-recovery" cmake="-DSECP256K1_ENABLE_MODULE_RECOVERY=ON" />
+        <option value="--enable-module-schnorrsig" cmake="-DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system"
+        github="libbitcoin" repository="libbitcoin-system" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -398,13 +406,19 @@
         <option value="--with-url" />
         <option value="--with-test" />
       </build>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system"
+        github="libbitcoin" repository="libbitcoin-system" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network"
+        github="libbitcoin" repository="libbitcoin-network" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -607,12 +621,18 @@
     </make>
 
     <install>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network"
+        github="libbitcoin" repository="libbitcoin-network" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-explorer" github="libbitcoin" repository="libbitcoin-explorer" branch="master" parallel="true" >
+      <build name="bitcoin-explorer"
+        github="libbitcoin" repository="libbitcoin-explorer" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -767,13 +787,19 @@
     </make>
 
     <install>
-      <build name="bitcoin-system" github="libbitcoin" repository="libbitcoin-system" branch="master" parallel="true" >
+      <build name="bitcoin-system"
+        github="libbitcoin" repository="libbitcoin-system" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-examples" cmake="-Dwith-examples=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-database"
+        github="libbitcoin" repository="libbitcoin-database" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -966,18 +992,27 @@
     </make>
 
     <install>
-      <build name="bitcoin-network" github="libbitcoin" repository="libbitcoin-network" branch="master" parallel="true" >
+      <build name="bitcoin-network"
+        github="libbitcoin" repository="libbitcoin-network" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-database" github="libbitcoin" repository="libbitcoin-database" branch="master" parallel="true" >
+      <build name="bitcoin-database"
+        github="libbitcoin" repository="libbitcoin-database" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-tools" cmake="-Dwith-tools=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node"
+        github="libbitcoin" repository="libbitcoin-node" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1164,13 +1199,19 @@
     </make>
 
     <install>
-      <build name="bitcoin-node" github="libbitcoin" repository="libbitcoin-node" branch="master" parallel="true" >
+      <build name="bitcoin-node"
+        github="libbitcoin" repository="libbitcoin-node" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-console" cmake="-Dwith-console=no" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build name="bitcoin-server" github="libbitcoin" repository="libbitcoin-server" branch="master" parallel="true" >
+      <build name="bitcoin-server"
+        github="libbitcoin" repository="libbitcoin-server" branch="master"
+        parallel="true"
+        cmake="builds/cmake" >
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
