@@ -409,6 +409,8 @@ endfunction
 function render_compiler_checks(repository)
     define my.repository = render_compiler_checks.repository
 
+    emit_compiler_check_includes(my.repository)
+
     new compiler as _compiler
         for my.repository.library as _library
             if !defined(_library->compiler)
@@ -449,7 +451,7 @@ cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
 
 project( $(my.repository.name)
   VERSION $(my.repository.version)
-  DESCRIPTION $(my.repository.description)
+  DESCRIPTION "$(my.repository.description)"
   LANGUAGES $(language_list(my.repository)) )
 
 list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
@@ -545,9 +547,9 @@ $(my.indent)configure_package_config_file(
 $(my.indent))
 
 $(my.indent)write_basic_package_version_file(
-  $(my.indent)$(my.target.name)-config-version.cmake
+  $(my.indent)"${CMAKE_CURRENT_BINARY_DIR}/$(my.target.name)-config-version.cmake"
   $(my.indent)VERSION ${PACKAGE_VERSION}
-  $(my.indent)COMPATABILITY AnyNewerVersion
+  $(my.indent)COMPATIBILITY AnyNewerVersion
 $(my.indent))
 
 $(my.indent)install(
@@ -669,7 +671,7 @@ if ( $(my.target.type:lower)-$(my.target.option:lower) )
 .
 .   if (name(my.target) = "library")
 $(my.indent)add_library( $(target_name(my.target)) )
-$(my.indent)add_library( $(qualified_target_name(my.target))) ALIAS $(target_name(my.target)) )
+$(my.indent)add_library( $(qualified_target_name(my.target)) ALIAS $(target_name(my.target)) )
 .   else
 $(my.indent)add_executable( $(target_name(my.target)) )
 .   endif
@@ -837,6 +839,15 @@ $(my.indent)$<$<COMPILE_LANGUAGE:$(supported_language(my.element, ""))>:$(my.sym
 $(my.indent)$(my.symbol)
 .   endif
 .endmacro # emit_compiler_element
+.
+.macro emit_compiler_check_includes(repository)
+.   define my.repository = emit_compiler_check_includes.repository
+.
+
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+include(CheckCXXSourceCompiles)
+.endmacro # emit_compiler_check_includes
 .
 .macro emit_compiler_flag_check(flag, target, repository)
 .   define my.flag = emit_compiler_flag_check.flag
