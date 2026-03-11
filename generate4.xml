@@ -5,7 +5,6 @@
   <repository name="libbitcoin-system" version="4.0.0" email="eric@voskuil.org" >
 
     <package library="bitcoin-system" description="Bitcoin Cross-Platform C++ Development Toolkit" url="https://github.com/libbitcoin/libbitcoin-system" >
-      <flag value="@icu@" />
       <flag value="@avx2@" />
       <flag value="@avx512@" />
       <flag value="@shani@" />
@@ -16,7 +15,6 @@
       <option type="with" name="pkgconfigdir" default="${libdir}/pkgconfig" example="=DIR" unprefixed="true" substitute="true" description="Path to pkgconfig directory." data_type="path" />
       <option type="with" name="tests" default="yes" conditional="true" description="Compile with unit tests." />
       <option type="with" name="examples" default="yes" conditional="true" description="Compile with examples." />
-      <option type="with" name="icu" default="no" define="WITH_ICU" substitute="true" value="-DWITH_ICU" description="Compile with International Components for Unicode." />
       <option type="enable" name="avx2" default="no" description="Compile with avx2 intrinsics (specifically -mavx -mavx2)." />
       <option type="enable" name="avx512" default="no" description="Compile with avx512 intrinsics (specifically -mavx512bw -mavx512f)." />
       <option type="enable" name="sse41" default="no" description="Compile with sse4.1 intrinsics (specifically -msse4.1)." />
@@ -39,10 +37,6 @@
       <dependency name="boost_unit_test_framework" option="tests" />
       <!-- <dependency name="pthread" system_exclude="android" /> -->
       <!-- <dependency name="rt" function="clock_gettime" system="linux" system_exclude="android" /> -->
-      <dependency name="icu-i18n" version="55.2" unprefixed="true" option="icu" />
-      <!-- TODO: verify this with more recent ICU. -->
-      <!-- -ldl is missing from icu package config. -->
-      <!--<dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />-->
       <!-- Arbitrary minimum version, current nuget package is v0.6.1. -->
       <dependency name="secp256k1" version="0.5.1.0" />
 
@@ -145,7 +139,6 @@
         <file path="README" />
       </product>
       <product prefix="lib" path="src" uuid="39f60708-ff48-4c22-952d-43470866f684" >
-        <flag substitute="icu" />
         <library name="boost" />
         <library name="boost_iostreams" />
         <library name="boost_locale" />
@@ -155,23 +148,18 @@
         <library name="boost_url" />
         <!--<library name="pthread" />-->
         <!-- <library name="rt" /> -->
-        <library name="icu-i18n" />
-        <!-- TODO: verify this with more recent ICU. -->
-        <!-- -ldl is missing from icu package config. -->
         <!-- <library name="dl" /> -->
         <library name="secp256k1" />
         <headers path="include" />
         <sources path="src" />
       </product>
       <product prefix="bin" path="examples" install="false" option="examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e" >
-        <flag substitute="icu" />
         <library name="bitcoin-system" />
         <headers path="include" />
         <sources path="examples" />
       </product>
       <product prefix="bin" path="test" target_name="libbitcoin-system-test" test="true" option="tests" uuid="51a424a9-2c12-4211-8d40-e49d1534c541" >
         <runner/>
-        <flag substitute="icu" />
         <library name="bitcoin-system" />
         <library name="boost_unit_test_framework" />
         <headers path="include" />
@@ -183,21 +171,6 @@
     </make>
 
     <install>
-      <!-- Building with our minimum (c++11 only) version of ICU. -->
-      <build name="icu" version="78.2" parallel="true" presentation="ICU" conditional="true" >
-        <flag value="-w" />
-        <!-- TODO: verify this with more recent ICU. -->
-        <!-- Bug in ICU 55.2 build requires -enable-draft. -->
-        <option value="--enable-draft" />
-        <option value="--enable-rpath" />
-        <option value="--enable-tools" />
-        <option value="--disable-extras" />
-        <option value="--disable-icuio" />
-        <option value="--disable-layout" />
-        <option value="--disable-layoutex" />
-        <option value="--disable-tests" />
-        <option value="--disable-samples" />
-      </build>
       <build name="boost" version="1.86.0" parallel="true" nuget="true" prebuild="true" presentation="Boost" conditional="true" >
         <flag value="-Wno-enum-constexpr-conversion" />
         <option value="--with-iostreams" />
@@ -236,7 +209,6 @@
     <ci>
       <axis name="llvm" valued="true" />
       <axis name="boost" build="true" param="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
       <axis name="secp256k1" build="true" param="true" />
 
       <coverage>
@@ -248,10 +220,9 @@
       <job build="all" 
            system="osx"
            assert="ndebug" link="dynamic" optimization="size">
-      <axis name="llvm" value="" />
+        <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="secp256k1" value="build" />
-        <axis name="icu" value="with" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -261,7 +232,6 @@
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
         <axis name="secp256k1" value="build" />
-        <axis name="icu" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
@@ -272,8 +242,7 @@
            preset="nix-gnu-debug-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- axis name="icu" /> -->
-	<axis name="secp256k1" value="build" />
+	      <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
         <option autotools="--enable-avx2" cmake="-Denable-avx2=on" />
         <option autotools="--enable-sse41" cmake="-Denable-sse41=on" />
@@ -286,7 +255,6 @@
            preset="nix-gnu-release-static">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
         <option autotools="--enable-avx2" cmake="-Denable-avx2=on" />
@@ -299,7 +267,6 @@
            preset="nix-gnu-release-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
         <option autotools="--enable-sse41" cmake="-Denable-sse41=on" />
@@ -312,7 +279,6 @@
            coverage="true" detectcpuflags="true">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
         <!-- <option autotools="-\-enable-avx512" cmake="-Denable-avx512=on" /> -->
@@ -324,7 +290,6 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <!-- <option autotools="-\-enable-avx512" cmake="-Denable-avx512=on" /> -->
       </job>
@@ -423,21 +388,6 @@
     </make>
 
     <install>
-      <!-- Building with our minimum (c++11 only) version of ICU. -->
-      <build name="icu" version="78.2" parallel="true" presentation="ICU" conditional="true" >
-        <flag value="-w" />
-        <!-- TODO: verify this with more recent ICU. -->
-        <!-- Bug in ICU 55.2 build requires enable-draft. -->
-        <option value="--enable-draft" />
-        <option value="--enable-rpath" />
-        <option value="--enable-tools" />
-        <option value="--disable-extras" />
-        <option value="--disable-icuio" />
-        <option value="--disable-layout" />
-        <option value="--disable-layoutex" />
-        <option value="--disable-tests" />
-        <option value="--disable-samples" />
-      </build>
       <build name="boost" version="1.86.0" parallel="true" nuget="true" prebuild="true" presentation="Boost" conditional="true" >
         <flag value="-Wno-enum-constexpr-conversion" />
         <option value="--with-iostreams" />
@@ -477,88 +427,80 @@
     <ci>
       <axis name="llvm" valued="true" />
       <axis name="boost" build="true" param="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
       <axis name="secp256k1" build="true" param="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
       <!-- boost version from 'brew' incompatible (1.72/1.76 break in asio?) -->
       <!-- boost error from asio if from brew -->
-      <job build="all" 
+      <job build="all"
            system="osx"
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="with" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
+      <job build="all"
            system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
            compiler="clang" version="18"
-           assert="debug" link="dynamic" optimization="debug" 
+           assert="debug" link="dynamic" optimization="debug"
            preset="nix-gnu-debug-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
            compiler="clang" version="18"
-           assert="ndebug" link="static" optimization="size" 
+           assert="ndebug" link="static" optimization="size"
            preset="nix-gnu-release-static">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
-           compiler="gcc" version="12" 
-           assert="ndebug" link="dynamic" optimization="size" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
+           compiler="gcc" version="12"
+           assert="ndebug" link="dynamic" optimization="size"
            preset="nix-gnu-release-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="autotools" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="autotools"
+           system="linux" image="ubuntu-24.04"
            compiler="gcc"
-           assert="ndebug" link="static" optimization="size" 
+           assert="ndebug" link="static" optimization="size"
            coverage="true" detectcpuflags="true">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="cmake" 
-           system="linux" image="ubuntu-24.04" 
-           compiler="gcc" version="12" 
+      <job build="cmake"
+           system="linux" image="ubuntu-24.04"
+           compiler="gcc" version="12"
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
       </job>
 
@@ -688,94 +630,86 @@
     <ci>
       <axis name="llvm" valued="true" />
       <axis name="boost" build="true" param="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
       <axis name="secp256k1" build="true" param="true" />
       <axis name="zmq" build="true" param="true" />
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job build="all" 
+      <job build="all"
            system="osx"
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="with" />
         <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
+      <job build="all"
            system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
            compiler="clang" version="18"
-           assert="debug" link="dynamic" optimization="debug" 
+           assert="debug" link="dynamic" optimization="debug"
            preset="nix-gnu-debug-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
            compiler="clang" version="18"
-           assert="ndebug" link="static" optimization="size" 
+           assert="ndebug" link="static" optimization="size"
            preset="nix-gnu-release-static">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
-           compiler="gcc" version="12" 
-           assert="ndebug" link="dynamic" optimization="size" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
+           compiler="gcc" version="12"
+           assert="ndebug" link="dynamic" optimization="size"
            preset="nix-gnu-release-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="autotools" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="autotools"
+           system="linux" image="ubuntu-24.04"
            compiler="gcc"
            assert="ndebug" link="static" optimization="size"
            detectcpuflags="true">
         <!-- coverage="true" -->
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="cmake" 
-           system="linux" image="ubuntu-24.04" 
-           compiler="gcc" version="12" 
+      <job build="cmake"
+           system="linux" image="ubuntu-24.04"
+           compiler="gcc" version="12"
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <axis name="zmq" value="build" />
       </job>
@@ -976,9 +910,6 @@
       <dependency name="bash-completion" version="2.0.0" option="bash-completiondir" unprefixed="true" extract="completionsdir" default="${datadir}/bash-completion/completions" />
       <dependency name="bitcoin-client" version="4.0.0" />
       <dependency name="bitcoin-network" version="4.0.0" />
-        <!-- TODO: verify this with more recent ICU. -->
-      <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
-      <dependency name="dl" function="dlopen" system="linux" optionXXX="icu" />
 
       <!-- General flags -->
       <flag name="std=c++20" comment="Require c++20 for all c++ products." context="c++" />
@@ -1023,9 +954,6 @@
         <flag define="sysconfdir" />
         <library name="bitcoin-client" />
         <library name="bitcoin-network" />
-        <!-- TODO: verify this with more recent ICU. -->
-        <!-- -ldl is missing from icu package config and ends up out of order from libbitcoin inclusion. -->
-        <library name="dl" />
         <headers path="include" />
         <sources path="src" />
       </product>
@@ -1062,18 +990,6 @@
     </make>
 
     <install>
-      <build name="icu" version="78.2" parallel="true" presentation="ICU" conditional="true" >
-        <flag value="-w" />
-        <!-- Bug in ICU 55.2 build requires -enable-draft. -->
-        <option value="--enable-rpath" />
-        <option value="--enable-tools" />
-        <option value="--disable-extras" />
-        <option value="--disable-icuio" />
-        <option value="--disable-layout" />
-        <option value="--disable-layoutex" />
-        <option value="--disable-tests" />
-        <option value="--disable-samples" />
-      </build>
       <build name="bitcoin-client" github="libbitcoin" repository="libbitcoin-client" branch="master" parallel="true" >
         <option value="--without-tests" cmake="-Dwith-tests=no" />
         <option value="--without-examples" cmake="-Dwith-examples=no" />
@@ -1110,12 +1026,9 @@
 
     <matrix>
       <!-- Default boost fails on default macOS platform, so bump to xcode12.2. -->
-      <!-- ICU 68.2 include fail (Wc++11-extensions) on default macOS platform, so bump to xcode12.2. -->
       <job system="osx" image="xcode12.2" compiler="clang" link="dynamic" >
         <get name="boost" />
         <get name="bash-completion" />
-        <option value="--with-icu" />
-        <option value="--build-icu" />
         <option value="--build-zmq" />
         <option value="--with-bash-completiondir" />
         <option value="--disable-static" />
@@ -1280,86 +1193,78 @@
     <ci>
       <axis name="llvm" valued="true" />
       <axis name="boost" build="true" param="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
       <axis name="secp256k1" build="true" param="true" />
 
-      <job build="all" 
+      <job build="all"
            system="osx"
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="with" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
+      <job build="all"
            system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
            compiler="clang" version="18"
-           assert="debug" link="dynamic" optimization="debug" 
+           assert="debug" link="dynamic" optimization="debug"
            preset="nix-gnu-debug-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
            compiler="clang" version="18"
-           assert="ndebug" link="static" optimization="size" 
+           assert="ndebug" link="static" optimization="size"
            preset="nix-gnu-release-static">
         <!-- version="5.0" -->
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
-           compiler="gcc" version="12" 
-           assert="ndebug" link="dynamic" optimization="size" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
+           compiler="gcc" version="12"
+           assert="ndebug" link="dynamic" optimization="size"
            preset="nix-gnu-release-shared">
         <!-- version="4.8" -->
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="autotools" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="autotools"
+           system="linux" image="ubuntu-24.04"
            compiler="gcc"
-           assert="ndebug" link="static" optimization="size" assert="ndebug" 
+           assert="ndebug" link="static" optimization="size"
            coverage="true" detectcpuflags="true">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="cmake" 
-           system="linux" image="ubuntu-24.04" 
-           compiler="gcc" version="12" 
+      <job build="cmake"
+           system="linux" image="ubuntu-24.04"
+           compiler="gcc" version="12"
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
       </job>
 
@@ -1494,84 +1399,76 @@
     <ci>
       <axis name="llvm" valued="true" />
       <axis name="boost" build="true" param="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
       <axis name="secp256k1" build="true" param="true" />
 
-      <job build="all" 
+      <job build="all"
            system="osx"
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="with" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
+      <job build="all"
            system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
            compiler="clang" version="18"
-           assert="debug" link="dynamic" optimization="debug" 
+           assert="debug" link="dynamic" optimization="debug"
            preset="nix-gnu-debug-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
            compiler="clang" version="18"
-           assert="ndebug" link="static" optimization="size" 
+           assert="ndebug" link="static" optimization="size"
            preset="nix-gnu-release-static">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
-           compiler="gcc" version="12" 
-           assert="ndebug" link="dynamic" optimization="size" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
+           compiler="gcc" version="12"
+           assert="ndebug" link="dynamic" optimization="size"
            preset="nix-gnu-release-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="autotools" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="autotools"
+           system="linux" image="ubuntu-24.04"
            compiler="gcc"
-           assert="ndebug" link="static" optimization="size" 
+           assert="ndebug" link="static" optimization="size"
            coverage="true" detectcpuflags="true">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="cmake" 
-           system="linux" image="ubuntu-24.04" 
-           compiler="gcc" version="12" 
+      <job build="cmake"
+           system="linux" image="ubuntu-24.04"
+           compiler="gcc" version="12"
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
       </job>
 
@@ -1696,7 +1593,6 @@
     <ci>
       <axis name="llvm" valued="true" />
       <axis name="boost" build="true" param="true" />
-      <axis name="icu" build="true" with="true" buildwith="true" recognized="true" param="true" />
       <axis name="secp256k1" build="true" param="true" />
 
       <job build="all"
@@ -1704,7 +1600,6 @@
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="with" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1714,7 +1609,6 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1726,7 +1620,6 @@
            preset="nix-gnu-debug-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1738,7 +1631,6 @@
            preset="nix-gnu-release-static">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1750,7 +1642,6 @@
            preset="nix-gnu-release-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <!-- <axis name="icu" /> -->
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1762,7 +1653,6 @@
            coverage="true" detectcpuflags="true">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
         <option autotools="--enable-isystem" />
       </job>
@@ -1773,7 +1663,6 @@
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
-        <axis name="icu" value="build" />
         <axis name="secp256k1" value="build" />
       </job>
 
@@ -2066,7 +1955,6 @@
   <integration>
     <!--<dependency name="boost" os="osx" package="boost" defines="-DBOOST_NO_CXX98_FUNCTION_BASE" />-->
     <dependency name="boost" os="osx" package="boost" />
-    <dependency name="icu" os="osx" package="icu4c" />
     <!-- <dependency name="llvm" os="osx" package="llvm@16" /> -->
   </integration>
 
