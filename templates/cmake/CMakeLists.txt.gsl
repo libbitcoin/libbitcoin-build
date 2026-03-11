@@ -159,9 +159,27 @@ function qualified_target_name(query)
     return my.registry->cmake.target
 endfunction
 
+function short_name(element)
+    if !defined(short_name.element.name)
+        abort "Missing 'name'."
+    endif
+
+    define my.name = short_name.element.name
+    define my.bitcoin = "bitcoin-"
+    define my.libbitcoin = "libbitcoin-"
+
+    if (starts_with(my.name, my.bitcoin))
+        my.name = right(my.name, string.length(my.name) - string.length(my.bitcoin))
+    elsif (starts_with(my.name, my.libbitcoin))
+        my.name = right(my.name, string.length(my.name) - string.length(my.libbitcoin))
+    endif
+
+    return my.name
+endfunction
+
 function target_name(element)
     if !defined(target_name.element.name)
-        abort("Missing 'name'.")
+        abort "Missing 'name'."
     endif
 
     return target_name.element.name
@@ -436,6 +454,34 @@ function render_compiler_checks(repository)
     endnew
 endfunction
 
+function has_repository_dependency(repository, dependency)
+    define my.repository = has_repository_dependency.repository
+    define my.name = has_repository_dependency.dependency
+
+    if (count(my.repository.library) > 0)
+        define has_lib = (count(my.repository->library.dependency, .name = my.name) > 0)
+    endif
+
+    if (count(my.repository.test) > 0)
+        define has_test = (count(my.repository->test.dependency, .name = my.name) > 0)
+    endif
+
+    if (count(my.repository.binary) > 0)
+        define has_bin = (count(my.repository->binary.dependency, .name = my.name) > 0)
+    endif
+
+    return (defined(has_lib) & has_lib) | \
+        (defined(has_test) & has_test) | \
+        (defined(has_bin) & has_bin)
+endfunction
+
+function uses_modules(repository)
+    define my.repository = uses_modules.repository
+
+    return has_repository_dependency(my.repository, "boost") & \
+        has_repository_dependency(my.repository, "icu")
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -454,7 +500,11 @@ project( $(my.repository.name)
   DESCRIPTION "$(my.repository.description)"
   LANGUAGES $(language_list(my.repository)) )
 
+.   if (uses_modules(my.repository))
 list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
+.   endif
+
+set( repository_root_dir "${CMAKE_CURRENT_SOURCE_DIR}/../../" )
 
 if ( MSVC )
   set( CMAKE_STATIC_LIBRARY_PREFIX "lib" )
@@ -578,10 +628,10 @@ endif()
 .
 .   if (count(my.dependency.component) > 0)
 .       for my.dependency.component as _comp
-$(my.indent)$(my.prefix)$(qualified_component_name(_dep, _comp))$(my.suffix)
+$(my.indent)$(my.prefix)$(qualified_component_name(my.dependency, _comp))$(my.suffix)
 .       endfor
 .   else
-$(my.indent)$(my.prefix)$(qualified_target_name(_dep))$(my.suffix)
+$(my.indent)$(my.prefix)$(qualified_target_name(my.dependency))$(my.suffix)
 .   endif
 .endmacro # emit_list_dependencies
 .
@@ -693,6 +743,17 @@ $(my.indent)add_executable( $(target_name(my.target)) )
 .   emit_target_include_directories(my.target, my.repository, my.root_path, my.indent)
 .
 .   emit_target_link_libraries(my.target, my.repository, my.indent)
+.
+.   if (target_installable(my.target))
+.       define .shortname = short_name(my.target)
+
+$(my.indent)set_target_properties($(my.target.name)
+  $(my.indent)PROPERTIES
+    $(my.indent)VERSION ${PROJECT_VERSION}
+    $(my.indent)SOVERSION ${PROJECT_VERSION_MAJOR}
+    $(my.indent)EXPORT_NAME $(.shortname)
+$(my.indent))
+.   endif
 .
 .   if (defined(my.target.option))
 endif()
@@ -949,23 +1010,28 @@ $(my.indent)endif()
 
 $(my.indent)target_sources( $(my.target.name) 
 .   if has_headers
+.       if is_defined_positive(my.target->headers, "private")
+  $(my.indent)PRIVATE
+    $(my.indent)FILE_SET HEADERS
+.       else
   $(my.indent)PUBLIC
     $(my.indent)FILE_SET HEADERS
+.       endif
     $(my.indent)BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)/$(my.target->headers.path)"
     $(my.indent)FILES
 .       emit_target_sources_entry(my.target->headers, my.target, my.repository, my.indent_headers)
 .
-.       for my.target->headers.headers as _optional
-.           emit_target_sources_entry(_optional, my.target, my.repository, my.indent_headers)
-.       endfor
+.#       for my.target->headers.headers as _optional
+.#           emit_target_sources_entry(_optional, my.target, my.repository, my.indent_headers)
+.#       endfor
 .   endif
 .   if has_sources
   $(my.indent)PRIVATE
 .       emit_target_sources_entry(my.target->sources, my.target, my.repository, my.indent_sources)
 .
-.       for my.target->sources.sources as _optional
-.           emit_target_sources_entry(_optional, my.target, my.repository, my.indent_sources)
-.       endfor
+.#       for my.target->sources.sources as _optional
+.#           emit_target_sources_entry(_optional, my.target, my.repository, my.indent_sources)
+.#       endfor
 .   endif
 $(my.indent))
 .endmacro # emit_target_files
@@ -995,9 +1061,11 @@ $(my.indent))
 .
 .   endnew
 .
-.   if !is_empty(my.suffix)
+.   if defined(my.item.option)
 
-$(my.indent)list( REMOVE_ITEM $(my.target.name:c)_$(name(my.item):upper) ${$(my.target.name:c)_$(name(my.item):upper)$(my.suffix)} )
+$(my.indent)if ( !$(get_option(my.item, my.target, my.repository)) )
+  $(my.indent)list( REMOVE_ITEM $(my.target.name:c)_$(name(my.item):upper) ${$(my.target.name:c)_$(name(my.item):upper)$(my.suffix)} )
+$(my.indent)endif()
 .   endif
 .
 .endmacro # emit_files_declaration
