@@ -17,6 +17,7 @@ generate_input()
 
     # Generate process scripts (explict enumeration).
     eval gsl -q -script:process/generate_artifacts.sh.gsl ${CONFIGURATION}
+    eval gsl -q -script:process/copy_statics.sh.gsl ${CONFIGURATION}
     eval gsl -q -script:process/copy_projects.sh.gsl ${CONFIGURATION}
 
     # Make process scripts executable.
@@ -26,6 +27,7 @@ generate_input()
     echo "Generating artifacts for configuration ${CONFIGURATION}..."
     eval ./process/generate_artifacts.sh
     pushd process
+    eval ./copy_statics.sh "$@"
     eval ./copy_projects.sh "$@"
     popd
     echo "Generation for configuration ${CONFIGURATION} complete."
