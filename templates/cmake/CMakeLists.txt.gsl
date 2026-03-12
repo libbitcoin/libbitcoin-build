@@ -616,7 +616,7 @@ $(my.indent))
 $(my.indent)write_basic_package_version_file(
   $(my.indent)"${CMAKE_CURRENT_BINARY_DIR}/$(my.target.name)-config-version.cmake"
   $(my.indent)VERSION ${PACKAGE_VERSION}
-  $(my.indent)COMPATIBILITY AnyNewerVersion
+  $(my.indent)COMPATIBILITY SameMajorVersion
 $(my.indent))
 
 $(my.indent)install(
