@@ -438,11 +438,30 @@ function render_unique_flags(encountered, target, repository)
             endif
         endif
     endfor
-
 endfunction
 
-function render_compiler_checks(repository)
-    define my.repository = render_compiler_checks.repository
+function render_unique_link_option(encountered, target, repository)
+    define my.encountered = render_unique_link_option.encountered
+    define my.target = render_unique_link_option.target
+    define my.repository = render_unique_link_option.repository
+
+    for my.target->compiler.link as _link
+        if !defined(_link.id)
+            emit_link_option_check(_link, my.target, my.repository)
+        elsif (count(my.encountered.link, .id = _link.id) = 0)
+            if (count(configuration->canonical->compiler.link, .id = _link.id) > 0)
+                copy configuration->canonical->compiler->link(.id = _link.id) to my.encountered
+            emit_link_option_check(configuration->canonical->compiler->link(.id = _link.id), my.target, my.repository)
+            else
+                copy _link to my.encountered
+                emit_link_option_check(_link, my.target, my.repository)
+            endif
+        endif
+    endfor
+endfunction
+
+function render_compiler_option_checks(repository)
+    define my.repository = render_compiler_option_checks.repository
 
     emit_compiler_check_includes(my.repository)
 
@@ -467,6 +486,36 @@ function render_compiler_checks(repository)
             endif
 
             render_unique_flags(_compiler, _binary, my.repository)
+        endfor
+    endnew
+endfunction
+
+function render_link_option_checks(repository)
+    define my.repository = render_link_option_checks.repository
+
+    emit_link_option_check_includes(my.repository)
+
+    new compiler as _compiler
+        for my.repository.library as _library
+            if !defined(_library->compiler)
+                next
+            endif
+
+            render_unique_link_option(_compiler, _library, my.repository)
+        endfor
+        for my.repository.test as _test
+            if !defined(_test->compiler)
+                next
+            endif
+
+            render_unique_link_option(_compiler, _test, my.repository)
+        endfor
+        for my.repository.binary as _binary
+            if !defined(_binary->compiler)
+                next
+            endif
+
+            render_unique_link_option(_compiler, _binary, my.repository)
         endfor
     endnew
 endfunction
@@ -533,9 +582,12 @@ endif()
 
 .   heading("Dependencies.")
 .   render_dependencies(my.repository)
-.
+
 .   heading("Compiler options.")
-.   render_compiler_checks(my.repository)
+.   render_compiler_option_checks(my.repository)
+
+.   heading("Linker options.")
+.   render_link_option_checks(my.repository)
 .
 .   for my.repository.library as _library
 
@@ -755,6 +807,9 @@ $(my.indent)add_executable( $(target_name(my.target)) )
 .   emit_target_compile_assignment("target_compile_definitions", "define", \
         my.target, my.repository, my.indent)
 .
+.   emit_target_compile_assignment("target_link_options", "link", \
+        my.target, my.repository, my.indent)
+.
 .   emit_target_files(my.target, my.repository, my.root_path, my.indent)
 .
 .   emit_target_include_directories(my.target, my.repository, my.root_path, my.indent)
@@ -937,6 +992,13 @@ include(CheckCXXCompilerFlag)
 include(CheckCXXSourceCompiles)
 .endmacro # emit_compiler_check_includes
 .
+.macro emit_link_option_check_includes(repository)
+.   define my.repository = emit_link_option_check_includes.repository
+.
+
+include(CheckLinkerFlag)
+.endmacro # emit_link_option_check_includes
+.
 .macro emit_compiler_flag_check(flag, target, repository)
 .   define my.flag = emit_compiler_flag_check.flag
 .   define my.target = emit_compiler_flag_check.target
@@ -967,6 +1029,39 @@ $(my.indent)endif()
 $(my.indent)endif()
 .   endif
 .endmacro # emit_compiler_flag_check
+
+.macro emit_link_option_check(linkage, target, repository)
+.   define my.linkage = emit_link_option_check.linkage
+.   define my.target = emit_link_option_check.target
+.   define my.repository = emit_link_option_check.repository
+.
+.   define my.indent = ""
+.   define my.step = "  "
+.
+.   if defined(my.linkage.option)
+$(my.indent)if ( $(get_option(my.linkage, my.target, my.repository)) )
+.       define my.indent = "$(my.step)$(my.indent)"
+.   endif
+.   if defined(my.linkage.compiler)
+$(my.indent)if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "$(compiler_identifier(my.linkage))" )
+.       define my.indent = "$(my.step)$(my.indent)"
+.   endif
+.
+.   define my.language = supported_language(my.linkage, "c++")
+
+$(my.indent)check_linker_flag( $(my.language:upper) $(symbol(my.linkage)) SUPPORTS_$(my.linkage.id:upper) )
+$(my.indent)if ( !SUPPORTS_$(my.linkage.id:upper) )
+  $(my.indent)message( FATAL_ERROR "Linker does not support '$(symbol(my.linkage)))'." )
+$(my.indent)endif()
+.   if defined(my.linkage.compiler)
+.       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
+$(my.indent)endif()
+.   endif
+.   if defined(my.linkage.option)
+.       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
+$(my.indent)endif()
+.   endif
+.endmacro # emit_link_option_check
 
 .macro emit_check_source_compiles(flag, repository, indent)
 .   define my.flag = emit_check_source_compiles.flag

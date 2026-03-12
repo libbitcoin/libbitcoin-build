@@ -123,14 +123,10 @@
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
-
-      </compiler>
-
-      <linkage>
-        <flag id="no_fixup_chains" />
-        <flag id="fstack-protector" />
         <flag id="fstack-protector-all" />
-      </linkage>
+
+        <link id="no_fixup_chains" />
+       </compiler>
 
     </library>
 
@@ -160,7 +156,10 @@
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
-      </compiler>
+        <flag id="fstack-protector-all" />
+
+        <link id="no_fixup_chains" />
+       </compiler>
 
       <!-- <trigger test="t2" /> -->
     </test>
@@ -188,7 +187,10 @@
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
-      </compiler>
+        <flag id="fstack-protector-all" />
+
+        <link id="no_fixup_chains" />
+       </compiler>
 
     </binary>
 
@@ -235,14 +237,10 @@
         <flag id="Wno-comment" />
         <flag id="Wno-deprecated-copy" />
         <flag id="Wno-mismatched-tags" />
-
-      </compiler>
-
-      <linkage>
-        <flag id="no_fixup_chains" />
-        <flag id="fstack-protector" />
         <flag id="fstack-protector-all" />
-      </linkage>
+
+        <link id="no_fixup_chains" />
+       </compiler>
 
     </library>
 
@@ -280,7 +278,10 @@
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
-      </compiler>
+        <flag id="fstack-protector-all" />
+
+        <link id="no_fixup_chains" />
+       </compiler>
     </test>
 
   </repository>
@@ -312,13 +313,10 @@
         <flag id="Wno-deprecated-copy" />
         <flag id="Wno-mismatched-tags" />
         <!-- <flag id="fvisibility=hidden" /> -->>
-      </compiler>
-
-      <linkage>
-        <flag id="no_fixup_chains" />
-        <flag id="fstack-protector" />
         <flag id="fstack-protector-all" />
-      </linkage>
+
+        <link id="no_fixup_chains" />
+       </compiler>
 
     </library>
 
@@ -348,7 +346,10 @@
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
-      </compiler>
+        <flag id="fstack-protector-all" />
+
+        <link id="no_fixup_chains" />
+       </compiler>
 
     </test>
 
@@ -374,7 +375,10 @@
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
-      </compiler>
+        <flag id="fstack-protector-all" />
+
+        <link id="no_fixup_chains" />
+       </compiler>
 
     </binary>
 
@@ -408,13 +412,10 @@
         <flag id="Wno-deprecated-copy" />
         <flag id="Wno-mismatched-tags" />
         <!-- <flag id="fvisibility=hidden" /> -->>
-      </compiler>
-
-      <linkage>
-        <flag id="no_fixup_chains" />
-        <flag id="fstack-protector" />
         <flag id="fstack-protector-all" />
-      </linkage>
+
+        <link id="no_fixup_chains" />
+       </compiler>
 
     </library>
 
@@ -444,7 +445,10 @@
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
-      </compiler>
+        <flag id="fstack-protector-all" />
+
+        <link id="no_fixup_chains" />
+       </compiler>
 
     </test>
 
@@ -477,15 +481,12 @@
         <flag id="Wno-deprecated-copy" />
         <flag id="Wno-mismatched-tags" />
         <!-- <flag id="fvisibility=hidden" /> -->>
-      </compiler>
-
-      <linkage>
-        <flag id="no_fixup_chains" />
-        <flag id="fstack-protector" />
         <flag id="fstack-protector-all" />
-      </linkage>
 
-    </library>
+        <link id="no_fixup_chains" />
+       </compiler>
+
+   </library>
 
     <test name="libbitcoin-server-tests"
       option="test" type="with" default="yes"
@@ -513,7 +514,10 @@
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
-      </compiler>
+        <flag id="fstack-protector-all" />
+
+        <link id="no_fixup_chains" />
+       </compiler>
 
     </test>
 
@@ -540,7 +544,10 @@
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
-      </compiler>
+        <flag id="fstack-protector-all" />
+
+        <link id="no_fixup_chains" />
+       </compiler>
 
     </binary>
 
@@ -643,17 +650,24 @@
           <symbol value="-fno-var-tracking-assignments" />
           <context language="c++" />
         </flag>
-     </compiler>
-
-      <linkage>
-        <flag id="no_fixup_chains"
-          comment="Address -undefined dynamic_lookup MacOS error." />
         <flag id="fstack-protector"
-          comment="Protect stack." />
+          comment="Protect stack."
+          type="private">
+          <symbol value="-fstack-protector" />
+        </flag>
         <flag id="fstack-protector-all"
-          comment="Protect stack comprehensively." />
-      </linkage>
-  </canonical>
+          comment="Protect stack comprehensively." 
+          type="private">
+          <symbol value="-fstack-protector-all" />
+        </flag>
+ 
+        <link id="no_fixup_chains"
+          comment="Address -undefined dynamic_lookup MacOS error."
+          type="private">
+          <symbol value="-no_fixup_chains" />
+        </link>
+     </compiler>
+ </canonical>
 
   <registrar id="dependency">
     <element name="libbitcoin-system">
