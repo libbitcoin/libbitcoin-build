@@ -9,9 +9,8 @@
     <language id="c" />
     <language id="c++" />
 
-    <library
-      name="bitcoin-system"
-      uuid="39f60708-ff48-4c22-952d-43470866f684">
+    <library name="libbitcoin-system"
+      uuid="9f60708-ff48-4c22-952d-43470866f684">
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
@@ -39,21 +38,6 @@
       </dependency>
 
       <dependency name="secp256k1" version="0.7.0" />
-
-      <!--
-      <dependency name="pthread">
-        <system exclude="android" />
-      </dependency>
-
-      <dependency name="dl" function="dlopen">
-        <system required="linux" />
-        </dependency>
-
-      <dependency name="rt" function="clock_gettime">
-        <system required="linux" />
-        <system exclude="android" />
-      </dependency>
-      -->
 
       <compiler standard="20">
         <flag option="avx2"
@@ -150,7 +134,7 @@
 
     </library>
 
-    <test name="bitcoin-system-test"
+    <test name="libbitcoin-system-test"
       option="test" type="with" default="yes"
       uuid="51a424a9-2c12-4211-8d40-e49d1534c541">
 
@@ -160,7 +144,23 @@
         <component name="unit_test_framework" />
       </dependency>
 
-      <dependency name="bitcoin-system" private="true" />
+      <dependency name="libbitcoin-system" private="true" />
+
+      <compiler>
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+      </compiler>
 
       <!-- <trigger test="t2" /> -->
     </test>
@@ -172,7 +172,24 @@
 
       <sources path="examples" />
 
-      <dependency name="bitcoin-system" private="true" />
+      <dependency name="libbitcoin-system" private="true" />
+
+      <compiler>
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+      </compiler>
+
     </binary>
 
     <ci />
@@ -186,7 +203,7 @@
     <language id="c" />
     <language id="c++" />
 
-    <library name="bitcoin-network"
+    <library name="libbitcoin-network"
       uuid="564eb540-d6b6-425c-b8db-b0bee8970c18">
 
       <sources path="src" recursive="true">
@@ -199,7 +216,7 @@
       <!-- Exposed knobs -->
       <option name="ssl" type="with" default="yes" comment="Use embedded ssl library." />
 
-      <dependency name="bitcoin-system" version="4.0.0" />
+      <dependency name="libbitcoin-system" version="4.0.0" />
 
       <compiler standard="20">
         <define option="ssl"
@@ -233,15 +250,36 @@
       option="test" type="with" default="yes"
       uuid="d28fc18a-8b81-4247-92ee-6967feefeeff">
 
+      <headers path="test" private="true" recursive="true" root="true">
+        <headers path="test/ssl/wolfssl" private="true" recursive="true" root="true" option="ssl" />
+      </headers>
       <sources path="test" recursive="true" />
 
-      <dependency name="bitcoin-network" private="true" />
+      <dependency name="boost" version="1.86.0" private="true">
+        <component name="unit_test_framework" />
+      </dependency>
+
+      <dependency name="libbitcoin-network" private="true" />
 
       <compiler>
         <define option="ssl"
-          symbol="CERT_PREFIX=&quot;\&quot;${src_dir}/test/ssl/wolfssl/wolfcrypt/test/\&quot;&quot;"
+          symbol="CERT_PREFIX=&quot;${repository_root_dir}/test/ssl/wolfssl/wolfcrypt/test/&quot;"
           comment="WolfSSL test data parameter."
           type="private" />
+
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
       </compiler>
     </test>
 
@@ -255,13 +293,13 @@
     <language id="c" />
     <language id="c++" />
 
-    <library name="bitcoin-database"
+    <library name="libbitcoin-database"
       uuid="62d7fbee-4d52-424a-8938-59756e13d9f5">
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
 
-      <dependency name="bitcoin-system" version="4.0.0" />
+      <dependency name="libbitcoin-system" version="4.0.0" />
 
       <compiler standard="20">
         <flag id="Wall" />
@@ -290,14 +328,54 @@
 
       <sources path="test" recursive="true" />
 
-      <dependency name="bitcoin-database" private="true" />
+      <dependency name="boost" version="1.86.0" private="true">
+        <component name="unit_test_framework" />
+      </dependency>
+
+      <dependency name="libbitcoin-database" private="true" />
+
+      <compiler>
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+      </compiler>
+
     </test>
 
-    <binary name="initchain"
+    <binary name="libbitcoin-database-tools" output="initchain"
       option="tools" type="with" default="yes"
       install="false"
       uuid="005f2a86-f937-4ab5-b041-0f21b67eec66">
       <sources path="tools/initchain" />
+
+      <dependency name="libbitcoin-database" private="true" />
+
+      <compiler>
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+      </compiler>
+
     </binary>
 
   </repository>
@@ -310,14 +388,14 @@
     <language id="c" />
     <language id="c++" />
 
-    <library name="bitcoin-node"
+    <library name="libbitcoin-node"
       uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158">
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
 
-      <dependency name="bitcoin-database" version="4.0.0" />
-      <dependency name="bitcoin-network" version="4.0.0" />
+      <dependency name="libbitcoin-database" version="4.0.0" />
+      <dependency name="libbitcoin-network" version="4.0.0" />
 
       <compiler standard="20">
         <flag id="Wall" />
@@ -346,7 +424,28 @@
 
       <sources path="test" recursive="true" />
 
-      <dependency name="bitcoin-node" private="true" />
+      <dependency name="boost" version="1.86.0" private="true">
+        <component name="unit_test_framework" />
+      </dependency>
+
+      <dependency name="libbitcoin-node" private="true" />
+
+      <compiler>
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+      </compiler>
+
     </test>
 
   </repository>
@@ -359,13 +458,13 @@
     <language id="c" />
     <language id="c++" />
 
-    <library name="bitcoin-server"
+    <library name="libbitcoin-server"
       uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0">
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
 
-      <dependency name="bitcoin-node" version="4.0.0" />
+      <dependency name="libbitcoin-node" version="4.0.0" />
 
       <compiler standard="20">
         <flag id="Wall" />
@@ -394,17 +493,55 @@
 
       <sources path="test" recursive="true" />
 
-      <dependency name="bitcoin-server" private="true" />
+      <dependency name="boost" version="1.86.0" private="true">
+        <component name="unit_test_framework" />
+      </dependency>
+
+      <dependency name="libbitcoin-server" private="true" />
+
+      <compiler>
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+      </compiler>
+
     </test>
 
-    <binary name="bitcoin-server"
+    <binary name="bitcoin-server" output="bs"
       option="console" type="with" default="yes"
       install="true"
       uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe">
 
       <sources path="console" />
 
-      <dependency name="bitcoin-server" private="true" />
+      <dependency name="libbitcoin-server" private="true" />
+
+      <compiler>
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+      </compiler>
+
     </binary>
 
   </repository>
@@ -519,29 +656,29 @@
   </canonical>
 
   <registrar id="dependency">
-    <element name="bitcoin-system">
+    <element name="libbitcoin-system">
       <cmake namespace="bitcoin"
-        package="bitcoin-system"
+        package="libbitcoin-system"
         target="bitcoin::system" />
     </element>
-    <element name="bitcoin-database">
+    <element name="libbitcoin-database">
       <cmake namespace="bitcoin"
-        package="bitcoin-database"
+        package="libbitcoin-database"
         target="bitcoin::database" />
     </element>
-    <element name="bitcoin-network">
+    <element name="libbitcoin-network">
       <cmake namespace="bitcoin"
-        package="bitcoin-network"
+        package="libbitcoin-network"
         target="bitcoin::network" />
     </element>
-    <element name="bitcoin-node">
+    <element name="libbitcoin-node">
       <cmake namespace="bitcoin"
-        package="bitcoin-node"
+        package="libbitcoin-node"
         target="bitcoin::node" />
     </element>
-    <element name="bitcoin-server">
+    <element name="libbitcoin-server">
       <cmake namespace="bitcoin"
-        package="bitcoin-server"
+        package="libbitcoin-server"
         target="bitcoin::server" />
     </element>
     <element name="icu">
@@ -578,6 +715,7 @@
       path="cmake"
       outpath="builds/cmake">
       <cmake rootpath="../.." />
+      <file source="cmake/InTargetProperty.cmake" destination="builds/cmake/modules" />
     </template>
     <template name="config.cmake.in.gsl"
       path="cmake"

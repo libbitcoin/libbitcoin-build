@@ -43,7 +43,6 @@ done
 .if (count(configuration->templates.template, ends_with(count.name, ".sh.gsl")) > 0)
 # Make generated scripts executable.
 eval chmod -R +x "$(configuration->templates.resultpath)/*/*.sh"
-
 .endif
 .endmacro generate_artifacts
 .endtemplate

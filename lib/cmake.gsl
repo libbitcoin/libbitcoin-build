@@ -16,7 +16,11 @@ function registry(registrar, query)
     define my.query = registry.query
 
     if !defined(my.query.name)
-        abort("Malformed query: $(my.query)")
+        abort "Malformed query: $(my.query)"
+    endif
+
+    if !(count(my.registrar->element(element.name = my.query.name)) = 1)
+        abort "Registrar lacks single entry for '$(my.query.name)'."
     endif
 
     return my.registrar->element(element.name = my.query.name)
@@ -27,11 +31,11 @@ function package_name(query)
     define my.registry = registry(configuration->registrar(id = "dependency"), my.query)
 
     if !defined(my.registry)
-        abort("Missing registry for $(my.query)")
+        abort "Missing registry for '$(my.query)'."
     endif
 
     if !defined(my.registry->cmake) | !defined(my.registry->cmake.package)
-        abort("Missing registry details for $(my.query)")
+        abort "Missing registry details for '$(my.query)'."
     endif
 
     return my.registry->cmake.package

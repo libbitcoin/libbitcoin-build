@@ -10,6 +10,14 @@
 
 generate_input()
 {
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: ${BASH_SOURCE[0]##*/} configuration [targets...]"
+        echo ""
+        echo "   configuration      required xml file"
+        echo "   targets            all targets to be copied"
+        exit 1
+    fi
+
     CONFIGURATION=$1
     shift
 

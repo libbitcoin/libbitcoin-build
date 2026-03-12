@@ -159,6 +159,22 @@ function qualified_target_name(query)
     return my.registry->cmake.target
 endfunction
 
+function unprefixed_name(element, prefix)
+    if !defined(unprefixed_name.element.name)
+        abort "Missing 'name'."
+    endif
+
+    define my.name = unprefixed_name.element.name
+    define my.prefix = unprefixed_name.prefix
+    define my.result = ""
+
+    if (starts_with(my.name, my.prefix))
+        my.result = right(my.name, string.length(my.name) - string.length(my.prefix))
+    endif
+
+    return my.result
+endfunction
+
 function short_name(element)
     if !defined(short_name.element.name)
         abort "Missing 'name'."
@@ -167,14 +183,15 @@ function short_name(element)
     define my.name = short_name.element.name
     define my.bitcoin = "bitcoin-"
     define my.libbitcoin = "libbitcoin-"
+    define my.result = ""
 
     if (starts_with(my.name, my.bitcoin))
-        my.name = right(my.name, string.length(my.name) - string.length(my.bitcoin))
+        my.result = right(my.name, string.length(my.name) - string.length(my.bitcoin))
     elsif (starts_with(my.name, my.libbitcoin))
-        my.name = right(my.name, string.length(my.name) - string.length(my.libbitcoin))
+        my.result = right(my.name, string.length(my.name) - string.length(my.libbitcoin))
     endif
 
-    return my.name
+    return my.result
 endfunction
 
 function target_name(element)
@@ -744,16 +761,26 @@ $(my.indent)add_executable( $(target_name(my.target)) )
 .
 .   emit_target_link_libraries(my.target, my.repository, my.indent)
 .
-.   if (target_installable(my.target))
-.       define .shortname = short_name(my.target)
 
-$(my.indent)set_target_properties($(my.target.name)
+$(my.indent)set_target_properties( $(my.target.name)
   $(my.indent)PROPERTIES
     $(my.indent)VERSION ${PROJECT_VERSION}
     $(my.indent)SOVERSION ${PROJECT_VERSION_MAJOR}
-    $(my.indent)EXPORT_NAME $(.shortname)
-$(my.indent))
+.   if (target_installable(my.target))
+.       define my.short = short_name(my.target)
+.       if !is_empty(my.short)
+    $(my.indent)EXPORT_NAME $(my.short)
+.       endif
 .   endif
+.   if (defined(my.target.output))
+    $(my.indent)OUTPUT_NAME $(my.target.output)
+.   elsif (name(my.target) = "library")
+.       define my.unprefixed = unprefixed_name(my.target, "lib")
+.       if !is_empty(my.unprefixed)
+    $(my.indent)OUTPUT_NAME $(my.unprefixed)
+.       endif
+.   endif
+$(my.indent))
 .
 .   if (defined(my.target.option))
 endif()

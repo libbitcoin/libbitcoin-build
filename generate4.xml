@@ -225,7 +225,7 @@
 
       <!-- image="xcode12.2" equivalent? -->
       <!-- prefix variance? -->
-      <job build="all" 
+      <job build="all"
            system="osx"
            assert="ndebug" link="dynamic" optimization="size">
         <axis name="llvm" value="" />
@@ -234,7 +234,7 @@
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
+      <job build="all"
            system="osx"
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
@@ -243,10 +243,10 @@
         <option autotools="--enable-isystem" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
            compiler="clang" version="18"
-           assert="debug" link="dynamic" optimization="debug" 
+           assert="debug" link="dynamic" optimization="debug"
            preset="nix-gnu-debug-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
@@ -256,10 +256,10 @@
         <option autotools="--enable-sse41" cmake="-Denable-sse41=on" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
            compiler="clang" version="18"
-           assert="ndebug" link="static" optimization="size" 
+           assert="ndebug" link="static" optimization="size"
            preset="nix-gnu-release-static">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
@@ -268,10 +268,10 @@
         <option autotools="--enable-avx2" cmake="-Denable-avx2=on" />
       </job>
 
-      <job build="all" 
-           system="linux" image="ubuntu-24.04" 
-           compiler="gcc" version="12" 
-           assert="ndebug" link="dynamic" optimization="size" 
+      <job build="all"
+           system="linux" image="ubuntu-24.04"
+           compiler="gcc" version="12"
+           assert="ndebug" link="dynamic" optimization="size"
            preset="nix-gnu-release-shared">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
@@ -280,10 +280,10 @@
         <option autotools="--enable-sse41" cmake="-Denable-sse41=on" />
       </job>
 
-      <job build="autotools" 
-           system="linux" image="ubuntu-24.04" 
+      <job build="autotools"
+           system="linux" image="ubuntu-24.04"
            compiler="gcc"
-           assert="ndebug" link="static" optimization="size" 
+           assert="ndebug" link="static" optimization="size"
            coverage="true" detectcpuflags="true">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
@@ -292,9 +292,9 @@
         <!-- <option autotools="-\-enable-avx512" cmake="-Denable-avx512=on" /> -->
       </job>
 
-      <job build="cmake" 
-           system="linux" image="ubuntu-24.04" 
-           compiler="gcc" version="12" 
+      <job build="cmake"
+           system="linux" image="ubuntu-24.04"
+           compiler="gcc" version="12"
            assert="ndebug" link="static" optimization="size">
         <axis name="llvm" value="" />
         <axis name="boost" value="build" />
@@ -410,8 +410,8 @@
         github="libbitcoin" repository="libbitcoin-system" branch="master"
         parallel="true"
         cmake="builds/cmake" >
-        <option value="--without-tests" cmake="-Dwith-tests=no" />
-        <option value="--without-examples" cmake="-Dwith-examples=no" />
+        <option value="--without-tests" cmake="-Dwith-tests:BOOL=OFF" />
+        <option value="--without-examples" cmake="-Dwith-examples:BOOL=OFF" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -625,7 +625,7 @@
         github="libbitcoin" repository="libbitcoin-network" branch="master"
         parallel="true"
         cmake="builds/cmake" >
-        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-tests" cmake="-Dwith-tests:BOOL=OFF" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -791,8 +791,8 @@
         github="libbitcoin" repository="libbitcoin-system" branch="master"
         parallel="true"
         cmake="builds/cmake" >
-        <option value="--without-tests" cmake="-Dwith-tests=no" />
-        <option value="--without-examples" cmake="-Dwith-examples=no" />
+        <option value="--without-tests" cmake="-Dwith-tests:BOOL=OFF" />
+        <option value="--without-examples" cmake="-Dwith-examples:BOOL=OFF" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -996,7 +996,7 @@
         github="libbitcoin" repository="libbitcoin-network" branch="master"
         parallel="true"
         cmake="builds/cmake" >
-        <option value="--without-tests" cmake="-Dwith-tests=no" />
+        <option value="--without-tests" cmake="-Dwith-tests:BOOL=OFF" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1004,8 +1004,8 @@
         github="libbitcoin" repository="libbitcoin-database" branch="master"
         parallel="true"
         cmake="builds/cmake" >
-        <option value="--without-tests" cmake="-Dwith-tests=no" />
-        <option value="--without-tools" cmake="-Dwith-tools=no" />
+        <option value="--without-tests" cmake="-Dwith-tests:BOOL=OFF" />
+        <option value="--without-tools" cmake="-Dwith-tools:BOOL=OFF" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
@@ -1203,8 +1203,8 @@
         github="libbitcoin" repository="libbitcoin-node" branch="master"
         parallel="true"
         cmake="builds/cmake" >
-        <option value="--without-tests" cmake="-Dwith-tests=no" />
-        <option value="--without-console" cmake="-Dwith-console=no" />
+        <option value="--without-tests" cmake="-Dwith-tests:BOOL=OFF" />
+        <option value="--without-console" cmake="-Dwith-console:BOOL=OFF" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
