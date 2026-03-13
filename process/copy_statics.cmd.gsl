@@ -12,17 +12,63 @@
 .endtemplate
 .template 1
 .macro generate_copy_script()
-.   define out_file = "process/copy_statics.sh"
+.   define out_file = "process/copy_statics.cmd"
 .   notify(out_file)
 .   output(out_file)
-.   shebang("bash")
 .   copyleft("libbitcoin-build")
-.
-.   define path_suffix = "../"
-# Exit this script on the first build error.
-set -e
 
-result_dir="$(configuration->templates.resultpath)"
+.   common_initialization()
+
+.   define path_suffix = "../"
+
+:copy_file
+    set "destination=%~1"
+    set "source=%~2"
+
+    if "%destination%"=="" (
+        echo Error: No destination directory specified.
+        exit /b 1
+    )
+
+    if "%source%"=="" (
+        echo Error: No source specified.
+        exit /b 1
+    )
+
+    :: Check if source exists
+    if not exist %source% (
+        echo Error: Source file not found '"%source%"'.
+        exit /b 1
+    )
+
+    :: Remove any trailing backslash from dest_dir
+    if "%destination:~-1"=="\" (
+        set "destination=%destination:~0,-1%"
+    )
+
+    :: Create destination if it does not exist
+    if not exist "%destination%" (
+        echo Creating directory '"%destination%'.
+        mkdir "%destination%" 2>nul
+        if errorlevel 1 (
+            echo Error: Failed to create directory '"%destination%"'.
+            exit /b 1
+        )
+    )
+
+    :: Perform the copy
+    echo Copying "%source%" to "%destination%\"
+    copy /Y "%source%" "%destination%" >nul
+
+    if errorlevel 1 (
+        echo Error: copy of '"%source%"' failed.
+        exit /b 1
+    )
+
+    exit /b 0
+
+# Assign arguments
+set "result_dir=$(configuration->templates.resultpath)"
 
 # Check if source directory exists
 if [ ! -d "$result_dir" ]; then
@@ -33,15 +79,7 @@ fi
 .   for configuration.repository as _repository
 .       for configuration->templates.template as _template
 .           for _template.file as _file
-mkdir -p ${result_dir}/$(_repository.name)/$(_file.destination)
-.           endfor
-.       endfor
-.   endfor
-.
-.   for configuration.repository as _repository
-.       for configuration->templates.template as _template
-.           for _template.file as _file
-cp $(path_suffix)$(_file.source) ${result_dir}/$(_repository.name)/$(_file.destination)
+:copy_file "${result_dir}/$(_repository.name)/$(_file.destination)" "$(path_suffix)$(_file.source)"
 .           endfor
 .       endfor
 .   endfor
@@ -58,7 +96,7 @@ cp $(path_suffix)$(_file.source) ${result_dir}/$(_repository.name)/$(_file.desti
 
 # Note: expected context root libbitcoin-build directory
 gsl from "lib/output.gsl"
-gsl from "lib/sh.gsl"
+gsl from "lib/cmd.gsl"
 gsl from "library/string.gsl"
 
 generate_copy_script()
