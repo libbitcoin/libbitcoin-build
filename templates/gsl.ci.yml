@@ -474,7 +474,6 @@ function get_job_shell_axis_value(configuration, integration, job, decl)
         my.value = get_job_axis_value(my.config, my.integration, my.decl, my.job,\
           my.job->axis(name = my.decl.name))
     else
-        echo "caller: get_job_shell_axis_value"
         my.value = get_job_axis_default(my.config, my.integration, my.decl, my.job)
     endif
 
