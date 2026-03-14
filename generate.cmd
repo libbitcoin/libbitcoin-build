@@ -49,14 +49,13 @@ pushd process
 for /L %%i in (1,1,%names.length%) do (
     call !names[%%i]!.cmd !targets!
     if %errorlevel% neq 0 (
-        pause
         exit /b %errorlevel%
     )
 )
 popd
 
 echo "Generation for configuration %CONFIGURATION% complete."
-pause
+::pause
 exit /b 0
 
 :populate_targets
