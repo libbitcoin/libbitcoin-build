@@ -18,20 +18,12 @@
 .   common_initialization()
 .   copyleft("libbitcoin-build")
 
-call :sanitize_input %*
-if %errorlevel% neq 0 (
-    exit /b %errorlevel%
-)
-
-set "config=%~1"
-shift
-
-REM Do everything relative to this file location.\
-REM cd /d "%dp0"
+REM Do everything relative to this file location.
+cd /d "%dp0"
 
 REM Cleanup output directory
-if exist "$(path(configuration->templates.resultpath))" (
-    rmdir /s /q "$(path(configuration->templates.resultpath))"
+if exist "$(path(configuration->templates.resultpath))\\" (
+    rmdir /s /q "$(path(configuration->templates.resultpath))\\"
     if %errorlevel% neq 0 (
         echo Failure to remove path "$(path(configuration->templates.resultpath))"
         exit /b %errorlevel%
@@ -57,15 +49,6 @@ for /L %%i in (1,1,%templates.length%) do (
 )
 
 exit /b 0
-
-:sanitize_input
-    if "%~1"=="" (
-        echo Usage %~nx0 configuration
-        echo.
-        echo   configuration        required xml file
-        exit /b 1
-    )
-    exit /b 0
 .
 .endmacro # generate_artifacts
 .endtemplate
