@@ -30,10 +30,12 @@ REM Do everything relative to this file location.\
 REM cd /d "%dp0"
 
 REM Cleanup output directory
-rmdir /s /q "$(configuration->templates.resultpath)"
+rmdir /s /q "$(path(configuration->templates.resultpath))"
 if %errorlevel% neq 0 (
-    echo Failure to remove path "$(configuration->templates.resultpath)"
+    echo Failure to remove path "$(path(configuration->templates.resultpath))"
     exit /b %errorlevel%
+) else (
+    echo Removed path '$(path(configuration->templates.resultpath))'
 )
 
 .   define index = 0
