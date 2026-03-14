@@ -15,13 +15,15 @@
 .   define out_file = "process/copy_projects.cmd"
 .   notify(out_file)
 .   output(out_file)
+.   common_initialization()
 .   copyleft("libbitcoin-build")
 
-.   common_initialization()
+:: Do everything relative to this file location.
+pushd %~dp0
 
 :: Assign arguments
-set "source_dir=$(configuration->templates.resultpath)"
-set "dest_dir=..\.."
+set "source_dir=$(path(configuration->templates.resultpath))"
+set "dest_dir=..\\.."
 
 :: Check if source directory exists
 if not exist "%source_dir%\" (
@@ -36,18 +38,18 @@ if not exist "%dest_dir%\" (
 )
 
 :: If no substring arguments are provided, copy all subdriectories
+set copied=0
 if "%~1"=="" (
     echo No substrings specified. Copying all 'libbitcoin' subdirectories from "%source_dir%" to "%dest_dir"...
 
-    for /d %%i in ("%source_dir%\libbitcoin*") do (
+    for /d %%i in ("%source_dir%\\libbitcoin*") do (
         echo Copying "%%~nxi' to '%dest_dir%'...
         xcopy "%%i" "%dest_dir%\%%~nxi\" /E /I /Y
+        set /a copied+=1
     )
-)
-else (
+) else (
     :: Copy subdirectories whose names contain any of the provided substrings
-    set copied=0
-    for /d %%i in ("%source_dir%\*") do (
+    for /d %%i in ("%source_dir%\\*") do (
         set "subdir=%%~nxi"
         set found=0
         for %%j in (%*) do (
@@ -62,8 +64,12 @@ else (
     )
     if !copied! equ 0 (
         echo Warning: No subdriectories found in "%source_dir%" matching any provided substrings.
+    ) else (
+        echo Copied !copied! repositories.
     )
 )
+
+popd
 
 echo Copy operation completed.
 endlocal

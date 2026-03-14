@@ -15,76 +15,73 @@
 .   define out_file = "process/copy_statics.cmd"
 .   notify(out_file)
 .   output(out_file)
+.   common_initialization()
 .   copyleft("libbitcoin-build")
 
-.   common_initialization()
+:: Do everything relative to this file location.
+pushd %~dp0
 
-.   define path_suffix = "../"
+set "result_dir=$(path(configuration->templates.resultpath))"
 
-:copy_file
-    set "destination=%~1"
-    set "source=%~2"
+if not exist "%result_dir%" (
+    echo Error: result directory '%result_dir%' does not exist.
+    exit /b 1
+)
 
-    if "%destination%"=="" (
+.   define path_suffix = "..\\"
+.   define index = 0
+.   for configuration.repository as _repository
+.       for configuration->templates.template as _template
+.           for _template.file as _file
+.               index = index + 1
+set "source[$(index)]=$(path_suffix)$(path(_file.source))"
+set "destination[$(index)]=%result_dir%\\$(_repository.name)\\$(path(_file.destination))"
+.           endfor
+.       endfor
+.   endfor
+set "length=$(index)"
+
+for /L %%i in (1,1,%length%) do (
+    if "!destination[%%i]!"=="" (
         echo Error: No destination directory specified.
         exit /b 1
     )
 
-    if "%source%"=="" (
+    if "!source[%%i]!"=="" (
         echo Error: No source specified.
         exit /b 1
     )
 
     :: Check if source exists
-    if not exist %source% (
-        echo Error: Source file not found '"%source%"'.
+    if not exist !source[%%i]! (
+        echo Error: Source file not found '"!source[%%i]!"'.
         exit /b 1
     )
 
-    :: Remove any trailing backslash from dest_dir
-    if "%destination:~-1"=="\" (
-        set "destination=%destination:~0,-1%"
-    )
-
     :: Create destination if it does not exist
-    if not exist "%destination%" (
-        echo Creating directory '"%destination%'.
-        mkdir "%destination%" 2>nul
+    if not exist "!destination[%%i]!" (
+        echo Creating directory '!destination[%%i]!'.
+        mkdir "!destination[%%i]!" 2>nul
         if errorlevel 1 (
-            echo Error: Failed to create directory '"%destination%"'.
+            echo Error: Failed to create directory '!destination[%%i]!'.
             exit /b 1
         )
     )
 
-    :: Perform the copy
-    echo Copying "%source%" to "%destination%\"
-    copy /Y "%source%" "%destination%" >nul
+   :: Perform the copy
+    echo Copying "!source[%%i]!" to "!destination[%%i]!"
+    copy /Y "!source[%%i]!" "!destination[%%i]!" >nul
 
     if errorlevel 1 (
-        echo Error: copy of '"%source%"' failed.
+        echo Error: copy of '!source[%%i]!' failed.
         exit /b 1
     )
+)
 
-    exit /b 0
-
-# Assign arguments
-set "result_dir=$(configuration->templates.resultpath)"
-
-# Check if source directory exists
-if [ ! -d "$result_dir" ]; then
-    echo "Error: result directory '${reuslt_dir}' does not exist."
-    exit 1
-fi
-.
-.   for configuration.repository as _repository
-.       for configuration->templates.template as _template
-.           for _template.file as _file
-:copy_file "${result_dir}/$(_repository.name)/$(_file.destination)" "$(path_suffix)$(_file.source)"
-.           endfor
-.       endfor
-.   endfor
+popd
 .
 .endmacro # generate_copy_script
+.
 .endtemplate
 .template 0
 ###############################################################################

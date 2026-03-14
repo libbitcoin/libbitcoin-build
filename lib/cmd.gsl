@@ -11,9 +11,8 @@
 ###############################################################################
 # Functions
 ###############################################################################
-
-function global.common_initialization()
-    write_line("@echo off")
+function global.path(input)
+    return string.replace(path.input, "/|\\")
 endfunction
 
 .endtemplate

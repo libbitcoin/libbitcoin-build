@@ -1,4 +1,6 @@
 @echo off
+setlocal EnableDelayedExpansion
+
 REM ###########################################################################
 REM  Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
 REM
@@ -22,21 +24,47 @@ if "%~1"=="" (
     exit /b 1
 )
 
-set "CONFIGURATION=%~1"
+set "configuration=%~1"
 shift
 
-REM Generate process scripts (explicit enumeration).
-gsl -q -script:process/generate_artifacts.cmd.gsl "%CONFIGURATION%"
-gsl -q -script:process/copy_statics.cmd.gsl "%CONFIGURATION%"
-gsl -q -script:process/copy_projects.sh.gsl "%CONFIGURATION%"
+set "targets="
+call :populate_targets %*
+
+set "names[1]=generate_artifacts"
+set "names[2]=copy_statics"
+set "names[3]=copy_projects"
+set "names.length=3"
+
+for /L %%i in (1,1,%names.length%) do (
+    echo gsl -q -script:"process\!names[%%i]!.cmd.gsl" "!configuration!"
+    gsl -q -script:"process\!names[%%i]!.cmd.gsl" "!configuration!"
+    if %errorlevel% neq 0 (
+        echo FAILURE: evaluating "process\!names[%%i]!.cmd.gsl".
+        exit /b %errorlevel%
+    )
+)
 
 REM Execute process scripts (explicit enumeration).
-call process\generate_artifacts.cmd
 pushd process
-call copy_statics.cmd %*
-call copy_projects.cmd %*
+for /L %%i in (1,1,%names.length%) do (
+    call !names[%%i]!.cmd !targets!
+    if %errorlevel% neq 0 (
+        pause
+        exit /b %errorlevel%
+    )
+)
 popd
-echo "Generation for configuration %CONFIGURATION% complete."
 
-REM Delay for manual confirmation.
-call pause
+echo "Generation for configuration %CONFIGURATION% complete."
+pause
+exit /b 0
+
+:populate_targets
+    shift
+    :begin
+    if "%1"=="" goto done
+    set "targets=%targets% %~1"
+    shift
+    goto begin
+    :done
+    exit /b 0
