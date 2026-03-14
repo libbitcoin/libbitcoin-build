@@ -15,11 +15,10 @@
 .   define out_file = "process/copy_projects.cmd"
 .   notify(out_file)
 .   output(out_file)
-.   common_initialization()
+.   initialize_echo_local()
 .   copyleft("libbitcoin-build")
 
-:: Do everything relative to this file location.
-pushd %~dp0
+.   initialize_path()
 
 :: Assign arguments
 set "source_dir=$(path(configuration->templates.resultpath))"

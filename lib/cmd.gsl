@@ -31,9 +31,14 @@ REM #
 REM ###########################################################################
 .endmacro
 .
-.macro global.common_initialization()
+.macro global.initialize_echo_local()
 @echo off
 setlocal EnableDelayedExpansion
+.endmacro
+.
+.macro global.initialize_path()
+:: Do everything relative to this file location.
+cd /d "%~dp0"
 .endmacro
 .
 .endtemplate
