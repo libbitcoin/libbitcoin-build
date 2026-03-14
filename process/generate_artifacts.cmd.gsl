@@ -22,13 +22,14 @@ REM Do everything relative to this file location.
 cd /d "%dp0"
 
 REM Cleanup output directory
-if exist "$(path(configuration->templates.resultpath))\\" (
-    rmdir /s /q "$(path(configuration->templates.resultpath))\\"
+set "output_path=$(path(configuration->templates.resultpath))"
+if exist "%output_path%" (
+    rmdir /s /q "%output_path%"
     if %errorlevel% neq 0 (
-        echo Failure to remove path "$(path(configuration->templates.resultpath))"
+        echo Failure to remove path '%output_path%'
         exit /b %errorlevel%
     ) else (
-        echo Removed path '$(path(configuration->templates.resultpath))'
+        echo Removed path '%output_path%'
     )
 )
 
