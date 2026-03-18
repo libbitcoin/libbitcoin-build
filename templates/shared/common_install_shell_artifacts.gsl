@@ -342,7 +342,6 @@ normalize_static_and_shared_options "$@"
 remove_build_options
 set_prefix
 set_pkgconfigdir
-set_with_icu_prefix
 set_with_boost_prefix
 
 .endmacro # define_initialization_calls
@@ -405,32 +404,6 @@ set_operating_system()
 }
 
 .endmacro #define_set_operating_system
-.
-.macro define_icu(install)
-.   define my.install = define_icu.install
-.   define my.url = get_icu_url(my.install)?
-.   if (!defined(my.url))
-.       #abort "A version of icu is not defined."
-.       return
-.   endif
-.   heading2("ICU archive.")
-ICU_URL="$(my.url)"
-ICU_ARCHIVE="$(get_icu_file(my.install))"
-
-.endmacro # define_icu
-.
-.macro define_zmq(install)
-.   define my.install = define_zmq.install
-.   define my.url = get_zmq_url(my.install)?
-.   if (!defined(my.url))
-.       #abort "A version of ZMQ is not defined."
-.       return
-.   endif
-.   heading2("ZMQ archive.")
-ZMQ_URL="$(my.url)"
-ZMQ_ARCHIVE="$(get_zmq_file(my.install))"
-
-.endmacro # define_zmq
 .
 .macro define_boost(install)
 .   define my.install = define_boost.install
@@ -589,18 +562,6 @@ set_pkgconfigdir()
 }
 
 .endmacro # define_set_pkgconfigdir
-.
-.macro define_set_with_icu_prefix(configuration)
-.   define my.configuration = define_set_with_icu_prefix.configuration
-set_with_icu_prefix()
-{
-    if [[ $BUILD_ICU ]]; then
-        with_icu="ICU_ROOT=${PREFIX}"
-        export ICU_ROOT="$PREFIX"
-    fi
-}
-
-.endmacro # define_set_with_boost_prefix
 .
 .macro define_set_with_boost_prefix(configuration)
 .   define my.configuration = define_set_with_boost_prefix.configuration

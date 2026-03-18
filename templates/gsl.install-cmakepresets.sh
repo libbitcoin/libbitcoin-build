@@ -106,26 +106,6 @@ PRESUMED_CI_PROJECT_PATH=\$(pwd)
     display_message "REPO_PRESET[$(my.target)]=${REPO_PRESET[$(my.target)]}"
 .endmacro # define_valid_base_to_base
 .
-.macro define_valid_preset_base_to_icu(target)
-.   define my.target = define_valid_preset_base_to_icu.target
-    if [[ $WITH_ICU ]]; then
-        REPO_PRESET[$(my.target)]="$BASE_PRESET_ID-with_icu"
-    else
-        REPO_PRESET[$(my.target)]="$BASE_PRESET_ID-without_icu"
-    fi
-    display_message "REPO_PRESET[$(my.target)]=${REPO_PRESET[$(my.target)]}"
-.endmacro # define_valid_preset_base_to_icu
-.
-.macro define_valid_preset_base_to_consensus(target)
-.   define my.target = define_valid_preset_base_to_consensus.target
-    if [[ $WITH_BITCOIN_CONSENSUS ]]; then
-        REPO_PRESET[$(my.target)]="$BASE_PRESET_ID-with_consensus"
-    else
-        REPO_PRESET[$(my.target)]="$BASE_PRESET_ID-without_consensus"
-    fi
-    display_message "REPO_PRESET[$(my.target)]=${REPO_PRESET[$(my.target)]}"
-.endmacro # define_valid_preset_base_to_consensus
-.
 .macro emit_mapping_to_base(mapping)
 .   define my.mapping = emit_mapping_to_base.mapping
 .
@@ -143,14 +123,6 @@ PRESUMED_CI_PROJECT_PATH=\$(pwd)
 .
 .   if (my.mapping.type = "base")
 .       define_valid_base_to_base("lib$(my.mapping.name)")
-.   elsif (my.mapping.type = "add")
-.       if (my.mapping.parameter = "consensus")
-.           define_valid_preset_base_to_consensus("lib$(my.mapping.name)")
-.       elsif (my.mapping.parameter = "icu")
-.           define_valid_preset_base_to_icu("lib$(my.mapping.name)")
-.       else
-.           abort "Unsupported mapping by context: $(my.mapping.parameter)"
-.       endif
 .   else
 .       abort "Unsupported mapping by context: $(my.mapping.type)"
 .   endif
@@ -223,15 +195,6 @@ handle_custom_options()
             export CMAKE_LIBRARY_PATH="${PREFIX}/lib:${CMAKE_LIBRARY_PATH}"
         fi
     fi
-.
-.   if (have_build(my.repository->install, "icu"))
-
-    # Process ICU
-    if [[ $WITH_ICU ]]; then
-        CUMULATIVE_FILTERED_ARGS+=" --with-icu"
-        CUMULATIVE_FILTERED_ARGS_CMAKE+=" -Dwith-icu=yes"
-    fi
-.   endif
 .
 }
 
@@ -482,22 +445,6 @@ make_jobs()
 .   endif
 .endmacro # define_build_functions
 .
-.macro build_from_tarball_icu()
-    unpack_from_tarball "$ICU_ARCHIVE" "$ICU_URL" gzip "$BUILD_ICU"
-    local SAVE_CPPFLAGS="$CPPFLAGS"
-    export CPPFLAGS="$CPPFLAGS ${ICU_FLAGS[@]}"
-    build_from_tarball "$ICU_ARCHIVE" source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
-    export CPPFLAGS=$SAVE_CPPFLAGS
-.endmacro # build_icu
-.
-.macro build_from_tarball_zmq()
-    unpack_from_tarball "$ZMQ_ARCHIVE" "$ZMQ_URL" gzip "$BUILD_ZMQ"
-    local SAVE_CPPFLAGS="$CPPFLAGS"
-    export CPPFLAGS="$CPPFLAGS ${ZMQ_FLAGS[@]}"
-    build_from_tarball "$ZMQ_ARCHIVE" . "$PARALLEL" "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
-    export CPPFLAGS=$SAVE_CPPFLAGS
-.endmacro # build_zmq
-.
 .macro build_boost()
     unpack_from_tarball "$BOOST_ARCHIVE" "$BOOST_URL" bzip2 "$BUILD_BOOST"
     local SAVE_CPPFLAGS="$CPPFLAGS"
@@ -569,11 +516,7 @@ build_all()
 .       if !defined(my.build_$(_build.name:c))
 .           define my.build_$(_build.name:c) = 0
 .
-.           if (is_icu_build(_build))
-.               build_from_tarball_icu()
-.           elsif (is_zmq_build(_build))
-.               build_from_tarball_zmq()
-.           elsif (is_boost_build(_build))
+.           if (is_boost_build(_build))
 .               build_boost()
 .           elsif (is_github_build(_build))
 .               if (!last())
@@ -637,8 +580,6 @@ function generate_installer_cmake(path_prefix)
             define_github_branches(_install)
             define_custom_build_variables(_repository)
             define_build_variables(_repository)
-            define_icu(_install)
-            define_zmq(_install)
             define_boost(_install)
 
             heading1("Define utility functions.")
@@ -658,7 +599,6 @@ function generate_installer_cmake(path_prefix)
             define_remove_install_options()
             define_set_prefix()
             define_set_pkgconfigdir(_config)
-            define_set_with_icu_prefix(_config)
             define_set_with_boost_prefix(_config)
             define_display_configuration(_repository, _install)
 
