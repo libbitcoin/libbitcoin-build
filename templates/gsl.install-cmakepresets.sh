@@ -209,6 +209,7 @@ remove_install_options()
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--enable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--disable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose=*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--preset=*/}")
 }
 
