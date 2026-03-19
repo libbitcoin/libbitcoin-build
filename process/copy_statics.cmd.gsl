@@ -1,0 +1,100 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate copy_statics.sh.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.macro generate_copy_script()
+.   define out_file = "process/copy_statics.cmd"
+.   notify(out_file)
+.   output(out_file)
+.   initialize_echo_local()
+.   copyleft("libbitcoin-build")
+
+.   initialize_path()
+
+set "result_dir=$(path(configuration->templates.resultpath))"
+
+if not exist "%result_dir%" (
+    echo Error: result directory '%result_dir%' does not exist.
+    exit /b 1
+)
+
+.   define path_suffix = "..\\"
+.   define index = 0
+.   for configuration.repository as _repository
+.       for configuration->templates.template as _template
+.           for _template.file as _file
+.               index = index + 1
+set "source[$(index)]=$(path_suffix)$(path(_file.source))"
+set "destination[$(index)]=%result_dir%\\$(_repository.name)\\$(path(_file.destination))"
+.           endfor
+.       endfor
+.   endfor
+set "length=$(index)"
+
+for /L %%i in (1,1,%length%) do (
+    if "!destination[%%i]!"=="" (
+        echo Error: No destination directory specified.
+        exit /b 1
+    )
+
+    if "!source[%%i]!"=="" (
+        echo Error: No source specified.
+        exit /b 1
+    )
+
+    :: Check if source exists
+    if not exist !source[%%i]! (
+        echo Error: Source file not found '"!source[%%i]!"'.
+        exit /b 1
+    )
+
+    :: Create destination if it does not exist
+    if not exist "!destination[%%i]!" (
+        echo Creating directory '!destination[%%i]!'.
+        mkdir "!destination[%%i]!" 2>nul
+        if errorlevel 1 (
+            echo Error: Failed to create directory '!destination[%%i]!'.
+            exit /b 1
+        )
+    )
+
+   :: Perform the copy
+    echo Copying "!source[%%i]!" to "!destination[%%i]!"
+    copy /Y "!source[%%i]!" "!destination[%%i]!" >nul
+
+    if errorlevel 1 (
+        echo Error: copy of '!source[%%i]!' failed.
+        exit /b 1
+    )
+)
+
+popd
+.
+.endmacro # generate_copy_script
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "lib/output.gsl"
+gsl from "lib/cmd.gsl"
+gsl from "library/string.gsl"
+
+generate_copy_script()
+
+.endtemplate

@@ -299,8 +299,6 @@ function generate_installer(path_prefix)
             heading1("Define constants.")
             define_github_branches(_install)
             define_build_variables(_repository)
-            define_icu(_install)
-            define_zmq(_install)
             define_boost(_install)
 
             heading1("Define utility functions.")

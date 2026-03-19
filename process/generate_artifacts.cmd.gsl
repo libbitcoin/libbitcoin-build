@@ -1,0 +1,71 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate generate_artifacts.cmd.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.macro generate_artifacts()
+.   define out_file = "process/generate_artifacts.cmd"
+.   notify(out_file)
+.   output(out_file)
+.   initialize_echo_local()
+.   copyleft("libbitcoin-build")
+
+.   initialize_path()
+
+:: Cleanup output directory
+set "output_path=$(path(configuration->templates.resultpath))"
+if exist "%output_path%" (
+    rmdir /s /q "%output_path%"
+    if %errorlevel% neq 0 (
+        echo Failure to remove path '%output_path%'
+        exit /b %errorlevel%
+    ) else (
+        echo Removed path '%output_path%'
+    )
+)
+
+.   define index = 0
+.   for configuration->templates.template as _template
+.       index = index + 1
+set "templates[$(index)]=..\\templates\\$(path(_template.path))\\$(_template.name)"
+.   endfor
+set "templates.length=$(count(configuration->templates.template))"
+set "configuration=..\\$(path(configuration->templates.source))"
+
+for /L %%i in (1,1,%templates.length%) do (
+    echo gsl -q -script:"!templates[%%i]!" "%configuration%"
+    gsl -q -script:"!templates[%%i]!" "%configuration%"
+    if %errorlevel% neq 0 (
+        echo Failure: "!templates[%%i]!" produced error.
+        exit /b %errorlevel%
+    )
+)
+
+exit /b 0
+.
+.endmacro # generate_artifacts
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "lib/output.gsl"
+gsl from "lib/cmd.gsl"
+gsl from "library/string.gsl"
+
+generate_artifacts()
+
+.endtemplate

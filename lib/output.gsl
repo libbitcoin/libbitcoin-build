@@ -1,0 +1,29 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-202666666itcoin developers (see COPYING).
+#
+# GSL libbitcoin output utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+
+function global.notify(filename)
+    echo "Generating $(my.filename)..."
+endfunction
+
+.endtemplate
+.template 1
+.##############################################################################
+.# Macros
+.##############################################################################
+.
+.macro global.write_line(text)
+$(my.text ? "")
+.endmacro
+.
+.endtemplate

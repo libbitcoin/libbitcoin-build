@@ -1,0 +1,45 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin windows shell utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+function global.path(input)
+    return string.replace(path.input, "/|\\")
+endfunction
+
+.endtemplate
+.template 1
+.
+.##############################################################################
+.# Macros
+.##############################################################################
+.
+.macro global.copyleft(name)
+REM ###########################################################################
+REM #  Copyright (c) 2014-2026 $(my.name) developers (see COPYING).
+REM #
+REM #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+REM #
+REM ###########################################################################
+.endmacro
+.
+.macro global.initialize_echo_local()
+@echo off
+setlocal EnableDelayedExpansion
+.endmacro
+.
+.macro global.initialize_path()
+:: Do everything relative to this file location.
+cd /d "%~dp0"
+.endmacro
+.
+.endtemplate
+

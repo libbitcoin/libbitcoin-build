@@ -19,26 +19,13 @@ jobs:
             script: generate4.sh
             branch: master
 
-          - os: ubuntu-latest
-            script: generate3.sh
-            branch: version3
-
           - os: macos-latest
             script: generate4.sh
             branch: master
 
-          - os: macos-latest
-            script: generate3.sh
-            branch: version3
-
           - os: windows-latest
             script: generate4.cmd
             branch: master
-
-          - os: windows-latest
-            script: generate3.cmd
-            branch: version3
-
 
     runs-on: ${{ matrix.os }}
 

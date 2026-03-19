@@ -18,7 +18,6 @@ REM Clean directories for generated build artifacts.
 rmdir /s /q "output" 2>NUL
 
 REM Generate property copiers and artifact generators.
-gsl -q -script:gsl.copy_modules.cmd generate4.xml
 gsl -q -script:gsl.copy_properties.cmd generate4.xml
 gsl -q -script:gsl.generate_artifacts.cmd generate4.xml
 
@@ -29,9 +28,9 @@ REM     call ..\\$(_repo.name)\\bindings.bat
 REM endfor
 
 REM Execute property copiers and artifact generators.
-call copy_modules.cmd
 call copy_properties.cmd
 call generate_artifacts.cmd
+call generate.cmd version4.xml %*
 call copy_projects.cmd %*
 
 REM Restore directory.

@@ -1,0 +1,66 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate copy_statics.sh.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.macro generate_copy_script()
+.   define out_file = "process/copy_statics.sh"
+.   notify(out_file)
+.   output(out_file)
+.   shebang("bash")
+.   copyleft("libbitcoin-build")
+.
+.   define path_suffix = "../"
+# Exit this script on the first build error.
+set -e
+
+result_dir="$(configuration->templates.resultpath)"
+
+# Check if source directory exists
+if [ ! -d "$result_dir" ]; then
+    echo "Error: result directory '${reuslt_dir}' does not exist."
+    exit 1
+fi
+.
+.   for configuration.repository as _repository
+.       for configuration->templates.template as _template
+.           for _template.file as _file
+mkdir -p ${result_dir}/$(_repository.name)/$(_file.destination)
+.           endfor
+.       endfor
+.   endfor
+.
+.   for configuration.repository as _repository
+.       for configuration->templates.template as _template
+.           for _template.file as _file
+cp $(path_suffix)$(_file.source) ${result_dir}/$(_repository.name)/$(_file.destination)
+.           endfor
+.       endfor
+.   endfor
+.
+.endmacro # generate_copy_script
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "lib/output.gsl"
+gsl from "lib/sh.gsl"
+gsl from "library/string.gsl"
+
+generate_copy_script()
+
+.endtemplate

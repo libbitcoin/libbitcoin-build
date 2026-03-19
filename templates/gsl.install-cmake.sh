@@ -86,10 +86,10 @@ handle_custom_options()
         exit 1
     elif [[ $DISABLE_NDEBUG ]]; then
         CUMULATIVE_FILTERED_ARGS="--disable-ndebug"
-        CUMULATIVE_FILTERED_ARGS_CMAKE="-Denable-ndebug=no"
+        CUMULATIVE_FILTERED_ARGS_CMAKE="-DCMAKE_BUILD_TYPE=Debug"
     else
         CUMULATIVE_FILTERED_ARGS="--enable-ndebug"
-        CUMULATIVE_FILTERED_ARGS_CMAKE="-Denable-ndebug=yes"
+        CUMULATIVE_FILTERED_ARGS_CMAKE="-DCMAKE_BUILD_TYPE=Release"
     fi
 
     # Process link declaration
@@ -152,6 +152,7 @@ remove_install_options()
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--enable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--disable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose=*/}")
 }
 
 .endmacro # define_remove_install_options()
@@ -227,15 +228,25 @@ cmake_tests()
 cmake_project_directory()
 {
     local PROJ_NAME=$1
-    local JOBS=$2
-    local TEST=$3
-    shift 3
+    local CMAKE_PATH=$2
+    local JOBS=$3
+    local TEST=$4
+    shift 4
 
     push_directory "$PROJ_NAME"
     local PROJ_CONFIG_DIR
     PROJ_CONFIG_DIR=\$(pwd)
 
-    cmake -LA $@ builds/cmake
+    create_directory "build-cmake"
+    push_directory "build-cmake"
+
+    VERBOSITY=""
+    if [[ $DISPLAY_VERBOSE ]]; then
+        VERBOSITY="-DCMAKE_VERBOSE_MAKEFILE=ON"
+    fi
+
+    cmake ${VERBOSITY} -LA $@ "../${CMAKE_PATH}"
+
     make_jobs "$JOBS"
 
     if [[ $TEST == true ]]; then
@@ -244,17 +255,19 @@ cmake_project_directory()
 
     make install
     configure_links
-    pop_directory
+    pop_directory # build-cmake
+    pop_directory # PROJ_NAME
 }
 
 build_from_github_cmake()
 {
     local REPO=$1
-    local JOBS=$2
-    local TEST=$3
-    local BUILD=$4
-    local OPTIONS=$5
-    shift 5
+    local CMAKE_PATH=$2
+    local JOBS=$3
+    local TEST=$4
+    local BUILD=$5
+    local OPTIONS=$6
+    shift 6
 
     if [[ ! ($BUILD) || ($BUILD == "no") ]]; then
         return
@@ -266,7 +279,7 @@ build_from_github_cmake()
     display_heading_message "Preparing to build $REPO"
 
     # Build the local repository clone.
-    cmake_project_directory "$REPO" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
+    cmake_project_directory "$REPO" "$CMAKE_PATH" "$JOBS" "$TEST" "${CONFIGURATION[@]}"
 }
 
 .endmacro # define_cmake_analogous_functions
@@ -319,22 +332,6 @@ make_jobs()
 .   endif
 .endmacro # define_build_functions
 .
-.macro build_from_tarball_icu()
-    unpack_from_tarball "$ICU_ARCHIVE" "$ICU_URL" gzip "$BUILD_ICU"
-    local SAVE_CPPFLAGS="$CPPFLAGS"
-    export CPPFLAGS="$CPPFLAGS ${ICU_FLAGS[@]}"
-    build_from_tarball "$ICU_ARCHIVE" source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
-    export CPPFLAGS=$SAVE_CPPFLAGS
-.endmacro # build_icu
-.
-.macro build_from_tarball_zmq()
-    unpack_from_tarball "$ZMQ_ARCHIVE" "$ZMQ_URL" gzip "$BUILD_ZMQ"
-    local SAVE_CPPFLAGS="$CPPFLAGS"
-    export CPPFLAGS="$CPPFLAGS ${ZMQ_FLAGS[@]}"
-    build_from_tarball "$ZMQ_ARCHIVE" . "$PARALLEL" "$BUILD_ZMQ" "${ZMQ_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
-    export CPPFLAGS=$SAVE_CPPFLAGS
-.endmacro # build_zmq
-.
 .macro build_boost()
     unpack_from_tarball "$BOOST_ARCHIVE" "$BOOST_URL" bzip2 "$BUILD_BOOST"
     local SAVE_CPPFLAGS="$CPPFLAGS"
@@ -353,8 +350,8 @@ make_jobs()
     create_from_github $(my.build.github) $(my.build.repository) $(my.branch) "$(my.conditional)"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS $(my.flags)"
-.   if (is_bitcoin_dependency(my.build))
-    build_from_github_cmake $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+.   if (is_buildable_cmake(my.build))
+    build_from_github_cmake $(my.build.repository) "$(my.build.cmake)" "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
 .   else
     build_from_github $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS
 .   endif
@@ -371,7 +368,7 @@ make_jobs()
     create_from_github $(my.build.github) $(my.build.repository) $(my.branch) "$(my.conditional)"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS $(my.flags)"
-    build_from_github_cmake $(my.build.repository) "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+    build_from_github_cmake $(my.build.repository) "$(my.build.cmake)" "$(my.parallel)" false "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
     export CPPFLAGS=$SAVE_CPPFLAGS
 .endmacro # build_github_cmake
 .
@@ -382,19 +379,19 @@ make_jobs()
 .   define my.flags = "${$(my.build.name:upper,c)_FLAGS[@]}"
 .   define my.options = "${$(my.build.name:upper,c)_OPTIONS[@]}"
 .   define my.branch = "${$(my.build.name:upper,c)_BRANCH}"
+.
+.   if !is_buildable_cmake(my.build)
+.       abort "Expected cmake build step '$(my.build.name)'."
+.   endif
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS $(my.flags)"
     if [[ ! ($CI == true) ]]; then
         create_from_github $(my.build.github) $(my.build.repository) $(my.branch) "$(my.conditional)"
-.   if (is_bitcoin_dependency(my.build))
-        build_from_github_cmake $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
-.   else
-        build_from_github $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS
-.   endif
+    build_from_github_cmake $(my.build.repository) "$(my.build.cmake)" "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
     else
         push_directory "$PRESUMED_CI_PROJECT_PATH"
         push_directory ".."
-        build_from_github_cmake $(my.build.repository) "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+        build_from_github_cmake $(my.build.repository) "$(my.build.cmake)" "$(my.parallel)" true "$(my.conditional)" "$(my.options)" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
         pop_directory
         pop_directory
     fi
@@ -410,11 +407,7 @@ build_all()
 .       if !defined(my.build_$(_build.name:c))
 .           define my.build_$(_build.name:c) = 0
 .
-.           if (is_icu_build(_build))
-.               build_from_tarball_icu()
-.           elsif (is_zmq_build(_build))
-.               build_from_tarball_zmq()
-.           elsif (is_boost_build(_build))
+.           if (is_boost_build(_build))
 .               build_boost()
 .           elsif (is_github_build(_build))
 .               if (!last())
@@ -475,8 +468,6 @@ function generate_installer_cmake(path_prefix)
             heading1("Define constants.")
             define_github_branches(_install)
             define_build_variables(_repository)
-            define_icu(_install)
-            define_zmq(_install)
             define_boost(_install)
 
             heading1("Define utility functions.")

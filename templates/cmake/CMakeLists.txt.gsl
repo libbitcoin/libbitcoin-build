@@ -1,0 +1,1223 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin CMakeLists.txt.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/cmake.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_CMakeLists(configuration)
+    define my.configuration = generate_CMakeLists.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.filename = "CMakeLists.txt"
+    define my.template = my.configuration->templates->template(.name = "CMakeLists.txt.gsl")
+
+    if (!defined(my.template))
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+    require(my.template->cmake, "cmake", "rootpath")
+
+    define my.project_path_suffix = my.template.outpath
+    define my.root_path = my.template->cmake.rootpath
+
+    for my.configuration.repository by .name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+        create_directory(my.output_path)
+
+        define my.out_file = path_append(my.output_path, my.filename)
+        notify(my.out_file)
+        output(my.out_file)
+
+        emit_CMakeLists(_repository, my.root_path)
+
+        close
+     endfor _repository
+endfunction
+
+###############################################################################
+# Library-able?
+###############################################################################
+function is_defined_value(node, attribute, value)
+    define my.node = is_defined_value.node
+    define my.value = is_defined_value.value
+    if (!defined(my.node))
+        abort "Missing context node for attribute '$(my.attribute)'."
+    endif
+    return defined(my.node.$(my.attribute)) &\
+        (my.node.$(my.attribute) = my.value)
+endfunction
+
+function is_defined_negative(node, attribute)
+    define my.node = is_defined_negative.node
+    if (!defined(my.node))
+        abort "Missing context node for attribute '$(my.attribute)'."
+    endif
+    return defined(my.node.$(my.attribute)) &\
+        ((my.node.$(my.attribute) = "false") | (my.node.$(my.attribute) = "no"))
+endfunction
+
+function is_defined_positive(node, attribute)
+    define my.node = is_defined_positive.node
+    if (!defined(my.node))
+        abort "Missing context node for attribute '$(my.attribute)'."
+    endif
+    return defined(my.node.$(my.attribute)) &\
+        ((my.node.$(my.attribute) = "true") | (my.node.$(my.attribute) = "yes"))
+endfunction
+
+function merge_children_select(destination, source, name, identifier)
+    define my.destination = merge_children_select.destination
+    define my.source = merge_children_select.source
+    define my.name = merge_children_select.name
+    define my.identifier = merge_children_select.identifier
+
+    for my.source.$(my.name) as _child
+        if (count(my.destination->$(my.name), $(my.name).$(identifier) = _child.$(identifier)) = 0)
+            copy _child to my.destination
+        endif
+    endfor
+endfunction
+
+function canonicalize(result, host, canonical, name, identifier)
+    define my.result = canonicalize.result
+    define my.host = canonicalize.host
+    define my.canonical = canonicalize.canonical
+    define my.name = canonicalize.name
+    define my.identifier = canonicalize.identifier
+
+    for my.host.$(my.name) as _element
+        if (!defined(_element.$(my.identifier)))
+            copy _element to my.result
+        elsif (count(my.result.$(name), defined(.$(my.identifier)) & (.$(my.identifier) = _element.$(my.identifier))) = 0)
+            if (count(my.canonical.$(my.name), .$(my.identifier) = _element.$(my.identifier)) > 0)
+                copy my.canonical->$(my.name)(.$(my.identifier) = _element.$(my.identifier)) to my.result
+            else
+                copy _element to my.result
+            endif
+        endif
+    endfor
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+function qualified_component_name(dependency, component)
+    define my.dependency = qualified_component_name.dependency
+    define my.component = qualified_component_name.component
+    define my.registry = registry(configuration->registrar(id = "dependency"), my.dependency)
+
+    if !defined(my.registry)
+        abort("Missing registry for $(my.dependency)")
+    endif
+
+    if !defined(my.registry->cmake) | !defined(my.registry->cmake.namespace)
+        abort("Missing registry details for $(my.dependency)")
+    endif
+
+    if !defined(my.component) | !defined(my.component.name)
+        abort("Component undefined or missing 'name' property.")
+    endif
+
+    return "$(my.registry->cmake.namespace)::$(my.component.name)"
+endfunction
+
+function qualified_target_name(query)
+    define my.query = qualified_target_name.query
+    define my.registry = registry(configuration->registrar(id = "dependency"), my.query)
+
+    if !defined(my.registry)
+        abort("Missing registry for $(my.query)")
+    endif
+
+    if !defined(my.registry->cmake) | !defined(my.registry->cmake.target)
+        abort("Missing registry details for $(my.query)")
+    endif
+
+    return my.registry->cmake.target
+endfunction
+
+function unprefixed_name(element, prefix)
+    if !defined(unprefixed_name.element.name)
+        abort "Missing 'name'."
+    endif
+
+    define my.name = unprefixed_name.element.name
+    define my.prefix = unprefixed_name.prefix
+    define my.result = ""
+
+    if (starts_with(my.name, my.prefix))
+        my.result = right(my.name, string.length(my.name) - string.length(my.prefix))
+    endif
+
+    return my.result
+endfunction
+
+function short_name(element)
+    if !defined(short_name.element.name)
+        abort "Missing 'name'."
+    endif
+
+    define my.name = short_name.element.name
+    define my.bitcoin = "bitcoin-"
+    define my.libbitcoin = "libbitcoin-"
+    define my.result = ""
+
+    if (starts_with(my.name, my.bitcoin))
+        my.result = right(my.name, string.length(my.name) - string.length(my.bitcoin))
+    elsif (starts_with(my.name, my.libbitcoin))
+        my.result = right(my.name, string.length(my.name) - string.length(my.libbitcoin))
+    endif
+
+    return my.result
+endfunction
+
+function target_name(element)
+    if !defined(target_name.element.name)
+        abort "Missing 'name'."
+    endif
+
+    return target_name.element.name
+endfunction
+
+function cmake_language(lang)
+    define my.lang = cmake_language.lang
+
+    if (count(configuration->canonical.language, .id = my.lang) = 0)
+        abort "Missing definition for language '$(my.lang)'."
+    endif
+
+    return configuration->canonical->language(this.id = my.lang, this).cmake
+endfunction
+
+function language_list(repository)
+    define my.repository = language_list.repository
+    define my.result = ""
+
+    for my.repository.language as _lang
+        if (!is_empty(my.result))
+            my.result = "$(my.result) $(cmake_language(_lang.id))"
+        else
+            my.result = cmake_language(_lang.id)
+        endif
+    endfor
+
+    return my.result
+endfunction
+
+function namespace_name(name)
+    return string.replace(name, "-|::")
+endfunction
+
+function option_default(option)
+    define my.option = option_default.option
+
+    if (!defined(my.option.default))
+        abort("Missing expected default.")
+    endif
+
+    define my.result = ""
+
+    if (is_defined_positive(my.option, "default"))
+        my.result = "ON"
+    elsif (is_defined_negative(my.option, "default"))
+        my.result = "OFF"
+    else
+        my.result = "$(my.option.default:upper)"
+    endif
+
+    return my.result
+endfunction
+
+function target_installable(target)
+    define my.target = target_installable.target
+    return (name(my.target) = "library") | is_defined_positive(my.target, "install")
+endfunction
+
+function merge_components(dependencies, element)
+    define my.dependencies = merge_components.dependencies
+    define my.element = merge_components.element
+
+    if (count(my.dependencies.dependency, dependency.name = my.element.name) > 0)
+        define my.destination = my.dependencies->dependency(dependency.name = my.element.name)
+
+        merge_children_select(my.destination, my.element, "component", "name")
+    else
+        copy my.element to my.dependencies
+    endif
+endfunction
+
+function render_dependencies(repository)
+    define my.repository = render_dependencies.repository
+
+    new unique_merged_dependencies as _dependencies
+        for my.repository.library as _library
+            for _library.dependency as _dep
+                merge_components(_dependencies, _dep)
+            endfor
+        endfor
+        for my.repository.test as _test
+            for _test.dependency as _dep
+                merge_components(_dependencies, _dep)
+            endfor
+        endfor
+        for my.repository.binary as _binary
+            for _binary.dependency as _dep
+                merge_components(_dependencies, _dep)
+            endfor
+        endfor
+        for my.repository.library as _library
+            if (count(_dependencies.dependency, name = _library.name) > 0)
+                delete _dependencies->dependency(name = _library.name)
+            endif
+        endfor
+
+        emit_shared_static_detection(_dependencies)
+
+        for _dependencies.dependency as _depend
+            define my.found = 0
+            for my.repository.library as _target where (my.found = 0)
+                if (count(_target.dependency, .name = _depend.name) > 0)
+                    emit_find_dependency(_depend, _target, my.repository, "find_package")
+                    my.found = 1
+                endif
+            endfor
+            for my.repository.test as _target where (my.found = 0)
+                if (count(_target.dependency, .name = _depend.name) > 0)
+                    emit_find_dependency(_depend, _target, my.repository, "find_package")
+                    my.found = 1
+                endif
+            endfor
+            for my.repository.binary as _target where (my.found = 0)
+                if (count(_target.dependency, .name = _depend.name) > 0)
+                    emit_find_dependency(_depend, _target, my.repository, "find_package")
+                    my.found = 1
+                endif
+            endfor
+            if (my.found = 0)
+                abort "Dependency '$(_depend.name)' compiled but not found on target."
+            endif
+        endfor
+
+        # detect fixups
+        if (defined(_dependencies->dependency(dependency.name = "boost")) & \
+            defined(_dependencies->dependency(dependency.name = "icu")))
+
+            emit_boost_icu_fixups()
+        endif
+     endnew
+ endfunction
+
+function accumulate_tests(target)
+    define my.target = accumulate_tests.target
+    define my.result = "*"
+
+    if (count(my.target.trigger) > 0)
+        my.result = ""
+    endif
+
+    for my.target.trigger as _trigger
+        if (first())
+            my.result = "$(_trigger.test)"
+        else
+            my.result = "$(my.result),$(_trigger.test)"
+        endif
+    endfor
+
+    return my.result
+endfunction
+
+function compiler_identifier(context)
+    define my.context = compiler_identifier.context
+
+    if !defined(my.context.compiler)
+        abort "Missing 'compiler' property."
+    endif
+
+    if (my.context.compiler = "clang")
+        return "Clang"
+    elsif (my.context.compiler = "gnu")
+        return "GNU"
+    else
+        abort "Unrecognized compiler value '$(my.context.compiler)'."
+    endif
+endfunction
+
+function supported_language(element, default)
+    define my.element = supported_language.element
+    define my.default = supported_language.default
+
+    if (count(my.element.context, defined(context.language)) = 0)
+        return cmake_language(my.default)
+    elsif (count(my.element.context, defined(context.language)) = 1)
+        define my.language = my.element->context(defined(context.language)).language
+
+        if !((my.language = "c++") | (my.language = "c"))
+            abort "Unrecognized language value '$(my.language)'"
+        else
+            return cmake_language(my.language)
+        endif
+    endif
+
+    return cmake_language(my.default)
+endfunction
+
+function symbol(flag)
+    define my.flag = symbol.flag
+    define my.result = ""
+
+    if (count(my.flag.symbol) > 0)
+        for my.flag.symbol as _symbol
+            if (!first())
+                my.result = "$(my.result) $(_symbol.value)"
+            else
+                my.result = "$(_symbol.value)"
+            endif
+        endfor
+    else
+        if !defined(my.flag.symbol)
+            abort "$(name(my.target)) | Flag requires 'symbol'."
+        endif
+        my.result = "$(my.flag.symbol)"
+    endif
+
+    return my.result
+endfunction
+
+function flag_name(flag)
+    define my.flag = flag_name.flag
+
+    if defined(my.flag.option)
+        return my.flag.option
+    elsif defined(my.flag.name)
+        return my.flag.name
+    elsif defined(my.flag.id)
+        return my.flag.id
+    else
+        abort "Flag does not have a determinable 'name'."
+    endif
+endfunction
+
+function render_unique_flags(encountered, target, repository)
+    define my.encountered = render_unique_flags.encountered
+    define my.target = render_unique_flags.target
+    define my.repository = render_unique_flags.repository
+
+    for my.target->compiler.flag as _flag
+        if !defined(_flag.id)
+            emit_compiler_flag_check(_flag, my.target, my.repository)
+        elsif (count(my.encountered.flag, .id = _flag.id) = 0)
+            if (count(configuration->canonical->compiler.flag, .id = _flag.id) > 0)
+                copy configuration->canonical->compiler->flag(.id = _flag.id) to my.encountered
+            emit_compiler_flag_check(configuration->canonical->compiler->flag(.id = _flag.id), my.target, my.repository)
+            else
+                copy _flag to my.encountered
+                emit_compiler_flag_check(_flag, my.target, my.repository)
+            endif
+        endif
+    endfor
+endfunction
+
+function render_unique_link_option(encountered, target, repository)
+    define my.encountered = render_unique_link_option.encountered
+    define my.target = render_unique_link_option.target
+    define my.repository = render_unique_link_option.repository
+
+    for my.target->compiler.link as _link
+        if !defined(_link.id)
+            emit_link_option_check(_link, my.target, my.repository)
+        elsif (count(my.encountered.link, .id = _link.id) = 0)
+            if (count(configuration->canonical->compiler.link, .id = _link.id) > 0)
+                copy configuration->canonical->compiler->link(.id = _link.id) to my.encountered
+            emit_link_option_check(configuration->canonical->compiler->link(.id = _link.id), my.target, my.repository)
+            else
+                copy _link to my.encountered
+                emit_link_option_check(_link, my.target, my.repository)
+            endif
+        endif
+    endfor
+endfunction
+
+function render_compiler_option_checks(repository)
+    define my.repository = render_compiler_option_checks.repository
+
+    emit_compiler_check_includes(my.repository)
+
+    new compiler as _compiler
+        for my.repository.library as _library
+            if !defined(_library->compiler)
+                next
+            endif
+
+            render_unique_flags(_compiler, _library, my.repository)
+        endfor
+        for my.repository.test as _test
+            if !defined(_test->compiler)
+                next
+            endif
+
+            render_unique_flags(_compiler, _test, my.repository)
+        endfor
+        for my.repository.binary as _binary
+            if !defined(_binary->compiler)
+                next
+            endif
+
+            render_unique_flags(_compiler, _binary, my.repository)
+        endfor
+    endnew
+endfunction
+
+function render_link_option_checks(repository)
+    define my.repository = render_link_option_checks.repository
+
+    emit_link_option_check_includes(my.repository)
+
+    new compiler as _compiler
+        for my.repository.library as _library
+            if !defined(_library->compiler)
+                next
+            endif
+
+            render_unique_link_option(_compiler, _library, my.repository)
+        endfor
+        for my.repository.test as _test
+            if !defined(_test->compiler)
+                next
+            endif
+
+            render_unique_link_option(_compiler, _test, my.repository)
+        endfor
+        for my.repository.binary as _binary
+            if !defined(_binary->compiler)
+                next
+            endif
+
+            render_unique_link_option(_compiler, _binary, my.repository)
+        endfor
+    endnew
+endfunction
+
+function has_repository_dependency(repository, dependency)
+    define my.repository = has_repository_dependency.repository
+    define my.name = has_repository_dependency.dependency
+
+    if (count(my.repository.library) > 0)
+        define has_lib = (count(my.repository->library.dependency, .name = my.name) > 0)
+    endif
+
+    if (count(my.repository.test) > 0)
+        define has_test = (count(my.repository->test.dependency, .name = my.name) > 0)
+    endif
+
+    if (count(my.repository.binary) > 0)
+        define has_bin = (count(my.repository->binary.dependency, .name = my.name) > 0)
+    endif
+
+    return (defined(has_lib) & has_lib) | \
+        (defined(has_test) & has_test) | \
+        (defined(has_bin) & has_bin)
+endfunction
+
+function uses_modules(repository)
+    define my.repository = uses_modules.repository
+
+    return has_repository_dependency(my.repository, "boost") & \
+        has_repository_dependency(my.repository, "icu")
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_CMakeLists(repository, root_path)
+.   define my.repository = emit_CMakeLists.repository
+.   define my.root_path = emit_CMakeLists.root_path
+.
+.   copyleft(my.repository.name)
+cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
+
+project( $(my.repository.name)
+  VERSION $(my.repository.version)
+  DESCRIPTION "$(my.repository.description)"
+  LANGUAGES $(language_list(my.repository)) )
+
+.   if (uses_modules(my.repository))
+list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
+.   endif
+
+set( repository_root_dir "${CMAKE_CURRENT_SOURCE_DIR}/../../" )
+
+if ( MSVC )
+  set( CMAKE_STATIC_LIBRARY_PREFIX "lib" )
+  set( CMAKE_SHARED_LIBRARY_PREFIX "lib" )
+endif()
+
+.   heading("Project options.")
+.   emit_repository_options(my.repository)
+
+.   heading("Dependencies.")
+.   render_dependencies(my.repository)
+
+.   heading("Compiler options.")
+.   render_compiler_option_checks(my.repository)
+
+.   heading("Linker options.")
+.   render_link_option_checks(my.repository)
+.
+.   for my.repository.library as _library
+
+.       heading("$(target_name(_library)) library")
+.       emit_target(_library, my.repository, my.root_path)
+.
+.   endfor
+.
+.   for my.repository.test as _test
+
+.       heading("$(target_name(_test)) tests")
+.       emit_target(_test, my.repository, my.root_path)
+.   endfor
+.
+.   for my.repository.binary as _binary
+
+.       heading("$(target_name(_binary)) executable")
+.       emit_target(_binary, my.repository, my.root_path)
+.   endfor
+.
+.   heading("Installation routine.")
+.   emit_installation(my.repository, my.root_path)
+.
+.endmacro # emit_CMakeLists
+.
+.macro emit_installation(repository, root_path)
+.   define my.repository = emit_installation.repository
+.   define my.root_path = emit_installation.root_path
+.
+include( GNUInstallDirs )
+include( CMakePackageConfigHelpers )
+
+.   for my.repository.library as _target
+.       emit_install_target(_target, my.repository, my.root_path)
+.   endfor
+.
+.   for my.repository.binary as _target where is_defined_positive(_target, "install")
+.       emit_install_target(_target, my.repository, my.root_path)
+.   endfor
+.
+.endmacro # emit_installation
+.
+.macro emit_install_target(target, repository, root_path)
+.   define my.target = emit_install_target.target
+.   define my.repository = emit_install_target.repository
+.   define my.root_path = emit_install_target.root_path
+.
+.   define my.indent = defined(my.target.option) ?? "  " ? ""
+.
+.   if defined(my.target.option)
+.       if !defined(my.target.type)
+.           abort "Missing expected 'type' definition from target '$(my.target.name)'."
+.       endif
+if ( $(my.target.type:lower)-$(my.target.option:lower) )
+.   endif
+$(my.indent)install( TARGETS $(my.target.name)
+  $(my.indent)EXPORT $(my.target.name)-targets
+  $(my.indent)LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  $(my.indent)ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  $(my.indent)RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  $(my.indent)INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  $(my.indent)FILE_SET HEADERS
+$(my.indent))
+
+.   if (name(my.target) = "library")
+$(my.indent)install( EXPORT $(my.target.name)-targets
+  $(my.indent)NAMESPACE bitcoin::
+  $(my.indent)DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/$(my.target.name)
+  $(my.indent)FILE $(my.target.name)-targets.cmake
+$(my.indent))
+
+$(my.indent)configure_package_config_file(
+  $(my.indent)${CMAKE_CURRENT_SOURCE_DIR}/$(my.target.name)-config.cmake.in
+  $(my.indent)${CMAKE_CURRENT_BINARY_DIR}/$(my.target.name)-config.cmake
+  $(my.indent)INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/$(my.target.name)
+$(my.indent))
+
+$(my.indent)write_basic_package_version_file(
+  $(my.indent)"${CMAKE_CURRENT_BINARY_DIR}/$(my.target.name)-config-version.cmake"
+  $(my.indent)VERSION ${PACKAGE_VERSION}
+  $(my.indent)COMPATIBILITY SameMajorVersion
+$(my.indent))
+
+$(my.indent)install(
+  $(my.indent)FILES
+    $(my.indent)${CMAKE_CURRENT_BINARY_DIR}/$(my.target.name)-config.cmake
+    $(my.indent)${CMAKE_CURRENT_BINARY_DIR}/$(my.target.name)-config-version.cmake
+  $(my.indent)DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/$(my.target.name)
+$(my.indent))
+.   endif
+.
+.   if defined(my.target.option)
+endif()
+.   endif
+.
+.endmacro # emit_install_target
+.
+.macro emit_list_dependency(dependency, target, repository, indent)
+.   define my.dependency = emit_list_dependency.dependency
+.   define my.target = emit_list_dependency.target
+.   define my.repository = emit_list_dependency.repository
+.   define my.indent = emit_list_dependency.indent
+.   define my.prefix = defined(my.dependency.option) ?? \
+        "$<$<BOOL:${$(get_option(my.dependency, my.target, my.repository))}>:" ? ""
+.   define my.suffix = defined(my.dependency.option) ?? \
+        ">" ? ""
+.
+.   if (count(my.dependency.component) > 0)
+.       for my.dependency.component as _comp
+$(my.indent)$(my.prefix)$(qualified_component_name(my.dependency, _comp))$(my.suffix)
+.       endfor
+.   else
+$(my.indent)$(my.prefix)$(qualified_target_name(my.dependency))$(my.suffix)
+.   endif
+.endmacro # emit_list_dependencies
+.
+.macro emit_repository_options(repository)
+.   define my.repository = emit_repository_options.repository
+.
+.   for my.repository.library as _library
+.       emit_options(_library)
+.   endfor
+.   for my.repository.test as _test
+.       emit_options(_test)
+.   endfor
+.   for my.repository.binary as _binary
+.       emit_options(_binary)
+.   endfor
+.endmacro # emit_repository_options
+.
+.macro emit_options(context)
+.   define my.context = emit_options.context
+.
+.   if (defined(my.context.type))
+option( $(my.context.type:lower)-$(my.context.option:lower) "Build $(my.context.option)." $(option_default(my.context)) )
+.   endif
+.
+.   for my.context.option as _option
+option( $(_option.type:lower)-$(_option.name:lower) "$(_option.comment)" $(option_default(_option)) )
+.   endfor
+.endmacro # emit_options
+.
+.macro emit_shared_static_detection(dependencies)
+.   define my.dependencies = emit_shared_static_detection.dependencies
+.
+.   if (count(my.dependencies.dependency) = 0)
+.       return
+.   endif
+
+if ( BUILD_SHARED_LIBS )
+.   for my.dependencies.dependency as _depend
+  set( $(package_name(_depend))_USE_STATIC_LIBS "OFF" )
+.   endfor
+else()
+.   for my.dependencies.dependency as _depend
+  set( $(package_name(_depend))_USE_STATIC_LIBS "ON" )
+.   endfor
+endif()
+.endmacro # emit_shared_static_detection
+.
+.macro emit_boost_icu_fixups()
+
+if ( with-icu )
+  include( InTargetProperty )
+  remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icudata )
+  remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icui18n )
+  remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icuuc )
+endif()
+.endmacro # emit_boost_icu_fixups
+.
+.macro emit_add_test(target, indent)
+.   define my.target = emit_add_test.target
+.   define my.indent = emit_add_test.indent
+.   define my.tests = accumulate_tests(my.target)
+.
+
+$(my.indent)enable_testing()
+
+$(my.indent)add_test( NAME $(target_name(my.target))
+  $(my.indent)COMMAND $(target_name(my.target))
+  $(my.indent)--run_test=$(my.tests)
+  $(my.indent)--log_level=warning
+  $(my.indent)--show_progress=no
+  $(my.indent)--detect_memory_leak=0
+  $(my.indent)--report_level=no
+  $(my.indent)--build_info=yes
+$(my.indent))
+.
+.endmacro # emit_add_test
+.
+.macro emit_target(target, repository, root_path)
+.   define my.target = emit_target.target
+.   define my.repository = emit_target.repository
+.   define my.root_path = emit_target.root_path
+.   define my.indent = defined(my.target.option) ?? "  " ? ""
+.
+.   if (defined(my.target.option))
+if ( $(my.target.type:lower)-$(my.target.option:lower) )
+.   endif
+.
+.   if (name(my.target) = "library")
+$(my.indent)add_library( $(target_name(my.target)) )
+$(my.indent)add_library( $(qualified_target_name(my.target)) ALIAS $(target_name(my.target)) )
+.   else
+$(my.indent)add_executable( $(target_name(my.target)) )
+.   endif
+.
+.   if (name(my.target) = "test")
+.       emit_add_test(my.target, my.indent)
+.   endif
+.
+.   emit_target_compile_features(my.target, my.repository, my.indent)
+.
+.   emit_target_compile_assignment("target_compile_options", "flag", \
+        my.target, my.repository, my.indent)
+.
+.   emit_target_compile_assignment("target_compile_definitions", "define", \
+        my.target, my.repository, my.indent)
+.
+.   emit_target_compile_assignment("target_link_options", "link", \
+        my.target, my.repository, my.indent)
+.
+.   emit_target_files(my.target, my.repository, my.root_path, my.indent)
+.
+.   emit_target_include_directories(my.target, my.repository, my.root_path, my.indent)
+.
+.   emit_target_link_libraries(my.target, my.repository, my.indent)
+.
+
+$(my.indent)set_target_properties( $(my.target.name)
+  $(my.indent)PROPERTIES
+    $(my.indent)VERSION ${PROJECT_VERSION}
+    $(my.indent)SOVERSION ${PROJECT_VERSION_MAJOR}
+.   if (target_installable(my.target))
+.       define my.short = short_name(my.target)
+.       if !is_empty(my.short)
+    $(my.indent)EXPORT_NAME $(my.short)
+.       endif
+.   endif
+.   if (defined(my.target.output))
+    $(my.indent)OUTPUT_NAME $(my.target.output)
+.   elsif (name(my.target) = "library")
+.       define my.unprefixed = unprefixed_name(my.target, "lib")
+.       if !is_empty(my.unprefixed)
+    $(my.indent)OUTPUT_NAME $(my.unprefixed)
+.       endif
+.   endif
+$(my.indent))
+.
+.   if (defined(my.target.option))
+endif()
+.   endif
+.endmacro # emit_target
+.
+.macro emit_target_include_directories(target, repository, root_path, indent)
+.   define my.target = emit_target_include_directories.target
+.   define my.repository = emit_target_include_directories.repository
+.   define my.root_path = emit_target_include_directories.root_path
+.   define my.indent = emit_target_include_directories.indent
+.   define my.indent_item = "    $(my.indent)"
+.
+.   if (count(my.target.headers, is_defined_positive(this, "root"), this) = 0)
+.       return
+.   endif
+
+$(my.indent)target_include_directories( $(target_name(my.target))
+  $(my.indent)$((name(my.target) = "library")?? "PUBLIC" ? "PRIVATE")
+.   for my.target.headers as _headers where is_defined_positive(_headers, "root")
+.       emit_target_path(_headers, my.target, my.repository, my.indent_item, my.root_path)
+.       for _headers.headers as _optional where is_defined_positive(_optional, "root")
+.           emit_target_path(_optional, my.target, my.repository, my.indent_item, my.root_path)
+.       endfor
+.   endfor
+$(my.indent))
+.endmacro # emit_target_include_directories
+.
+.macro emit_target_path(pathholder, target, repository, indent, root_path)
+.   define my.pathholder = emit_target_path.pathholder
+.   define my.target = emit_target_path.target
+.   define my.repository = emit_target_path.repository
+.   define my.indent = emit_target_path.indent
+.   define my.root_path = emit_target_path.root_path
+.
+.   define my.prefix = ""
+.   define my.suffix = ""
+.   define my.indent_content = my.indent
+.
+.   if defined(my.pathholder.option)
+.       my.prefix = "$<$<BOOL:${$(get_option(my.pathholder, my.target, my.repository))}>:"
+.       my.suffix = ">"
+.       my.indent_content = "  $(my.indent)"
+.   endif
+.
+.   if !is_empty(my.prefix)
+$(my.indent)$(my.prefix)
+.   endif
+$(my.indent_content)$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)/$(my.pathholder.path)>
+.   if (target_installable(my.target))
+$(my.indent_content)$<INSTALL_INTERFACE:$(my.pathholder.path)>
+.   endif
+.   if !is_empty(my.prefix)
+$(my.indent)$(my.suffix)
+.   endif
+.endmacro
+.
+.macro emit_target_link_libraries(target, repository, indent)
+.   define my.target = emit_target_link_libraries.target
+.   define my.repository = emit_target_link_libraries.repository
+.   define my.indent = emit_target_link_libraries.indent
+.   define my.indent_element = "    $(my.indent)"
+.
+.   if (count(my.target.dependency) > 0)
+
+$(my.indent)target_link_libraries( $(target_name(my.target))
+.       if (count(my.target.dependency, is_defined_positive(count, "private")) > 0)
+  $(my.indent)PRIVATE
+.           for my.target.dependency as _dep where is_defined_positive(_dep, "private")
+.               emit_list_dependency(_dep, my.target, my.repository, my.indent_element)
+.           endfor
+.       elsif (count(my.target.dependency, !is_defined_positive(count, "private")) > 0)
+  $(my.indent)PUBLIC
+.           for my.target.dependency as _dep where !is_defined_positive(_dep, "private")
+.               emit_list_dependency(_dep, my.target, my.repository, my.indent_element)
+.           endfor
+.       endif
+$(my.indent))
+.   endif
+.
+.endmacro # emit_target_link_libraries
+.
+.macro emit_target_compile_features(target, repository, indent)
+.   define my.target = emit_target_compile_features.target
+.   define my.repository = emit_target_compile_features.repository
+.   define my.indent = emit_target_compile_features.indent
+.
+.   if (defined(my.target->compiler) & defined(my.target->compiler.standard))
+
+$(my.indent)target_compile_features( $(my.target.name)
+  $(my.indent)PUBLIC
+    $(my.indent)cxx_std_$(my.target->compiler.standard)
+$(my.indent))
+.   endif
+.
+.endmacro # emit_target_compile_features
+.
+.macro emit_target_compile_assignment(property, element, target, repository, indent)
+.   define my.property = emit_target_compile_assignment.property
+.   define my.element = emit_target_compile_assignment.element
+.   define my.target = emit_target_compile_assignment.target
+.   define my.repository = emit_target_compile_assignment.repository
+.   define my.indent = emit_target_compile_assignment.indent
+.   define my.indent_item = "    $(my.indent)"
+.
+.   new compiler as _compiler
+.   canonicalize(_compiler, my.target->compiler, configuration->canonical->compiler, my.element, "id")
+.   if (count(_compiler.$(my.element)) > 0)
+
+$(my.indent)$(my.property)( $(my.target.name)
+.       if (count(_compiler.$(my.element), is_defined_value($(my.element), "type", "public")) > 0)
+  $(my.indent)PUBLIC
+.           for _compiler.$(my.element) as _ele where is_defined_value(_ele, "type", "public")
+.               emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
+.           endfor
+.       endif
+.       if (count(_compiler.$(my.element), is_defined_value($(my.element), "type", "private")) > 0)
+  $(my.indent)PRIVATE
+.           for _compiler.$(my.element) as _ele where is_defined_value(_ele, "type", "private")
+.               emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
+.           endfor
+.       endif
+$(my.indent))
+.   endif
+.   endnew
+.
+.endmacro # emit_target_compile_assignment
+.
+.macro emit_compiler_element(element, target, repository, indent)
+.   define my.element = emit_compiler_element.element
+.   define my.target = emit_compiler_element.target
+.   define my.repository = emit_compiler_element.repository
+.   define my.indent = emit_compiler_element.indent
+.
+.   define my.symbol = symbol(my.element)
+.
+.   if defined(my.element.option)
+$(my.indent)$<$<BOOL:${$(get_option(my.element, my.target, my.repository))}>:$(my.symbol)>
+.   elsif defined(my.element.compiler)
+$(my.indent)$<$<CXX_COMPILER_ID:$(compiler_identifier(my.element))>:$(my.symbol)>
+.   elsif (count(my.element.context, defined(context.language)) = 1)
+$(my.indent)$<$<COMPILE_LANGUAGE:$(supported_language(my.element, ""))>:$(my.symbol)>
+.   else
+$(my.indent)$(my.symbol)
+.   endif
+.endmacro # emit_compiler_element
+.
+.macro emit_compiler_check_includes(repository)
+.   define my.repository = emit_compiler_check_includes.repository
+.
+
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+include(CheckCXXSourceCompiles)
+.endmacro # emit_compiler_check_includes
+.
+.macro emit_link_option_check_includes(repository)
+.   define my.repository = emit_link_option_check_includes.repository
+.
+
+include(CheckLinkerFlag)
+.endmacro # emit_link_option_check_includes
+.
+.macro emit_compiler_flag_check(flag, target, repository)
+.   define my.flag = emit_compiler_flag_check.flag
+.   define my.target = emit_compiler_flag_check.target
+.   define my.repository = emit_compiler_flag_check.repository
+.
+.   define my.indent = ""
+.   define my.step = "  "
+
+.   if defined(my.flag.option)
+$(my.indent)if ( $(get_option(my.flag, my.target, my.repository)) )
+.       define my.indent = "$(my.step)$(my.indent)"
+.   endif
+.   if defined(my.flag.compiler)
+$(my.indent)if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "$(compiler_identifier(my.flag))" )
+.       define my.indent = "$(my.step)$(my.indent)"
+.   endif
+.   if defined(my.flag->program)
+.       emit_check_source_compiles(my.flag, my.repository, my.indent)
+.   else
+.       emit_check_compiler_flag(my.flag, my.repository, my.indent)
+.   endif
+.   if defined(my.flag.compiler)
+.       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
+$(my.indent)endif()
+.   endif
+.   if defined(my.flag.option)
+.       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
+$(my.indent)endif()
+.   endif
+.endmacro # emit_compiler_flag_check
+
+.macro emit_link_option_check(linkage, target, repository)
+.   define my.linkage = emit_link_option_check.linkage
+.   define my.target = emit_link_option_check.target
+.   define my.repository = emit_link_option_check.repository
+.
+.   define my.indent = ""
+.   define my.step = "  "
+.
+.   if defined(my.linkage.option)
+$(my.indent)if ( $(get_option(my.linkage, my.target, my.repository)) )
+.       define my.indent = "$(my.step)$(my.indent)"
+.   endif
+.   if defined(my.linkage.compiler)
+$(my.indent)if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "$(compiler_identifier(my.linkage))" )
+.       define my.indent = "$(my.step)$(my.indent)"
+.   endif
+.
+.   define my.language = supported_language(my.linkage, "c++")
+
+$(my.indent)check_linker_flag( $(my.language:upper) $(symbol(my.linkage)) SUPPORTS_$(my.linkage.id:upper) )
+$(my.indent)if ( !SUPPORTS_$(my.linkage.id:upper) )
+  $(my.indent)message( FATAL_ERROR "Linker does not support '$(symbol(my.linkage)))'." )
+$(my.indent)endif()
+.   if defined(my.linkage.compiler)
+.       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
+$(my.indent)endif()
+.   endif
+.   if defined(my.linkage.option)
+.       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
+$(my.indent)endif()
+.   endif
+.endmacro # emit_link_option_check
+
+.macro emit_check_source_compiles(flag, repository, indent)
+.   define my.flag = emit_check_source_compiles.flag
+.   define my.repository = emit_check_source_compiles.repository
+.   define my.indent = emit_check_source_compiles.indent
+.
+.   define my.language = supported_language(my.flag, "c++")
+$(my.indent)set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+$(my.indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} $(symbol(my.flag))" )
+$(my.indent)check_$(my.language:lower)_source_compiles( "
+.   for my.flag->program.include as _include
+  $(my.indent)#include <$(_include.header)>
+.   endfor
+    $(my.indent)int main() {
+.   for my.flag->program.loc as _loc
+    $(my.indent)$(_loc)
+.   endfor
+    $(my.indent)}" SUPPORTS_FLAG_$(flag_name(my.flag):upper) )
+$(my.indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+$(my.indent)if ( !SUPPORTS_FLAG_$(flag_name(my.flag):upper) )
+  $(my.indent)message( FATAL_ERROR "Compiler does not support '$(symbol(my.flag))'." )
+$(my.indent)endif()
+.endmacro # emit_check_source_compiles
+.
+.macro emit_check_compiler_flag(flag, repository, indent)
+.   define my.flag = emit_check_compiler_flag.flag
+.   define my.repository = emit_check_compiler_flag.repository
+.   define my.indent = emit_check_compiler_flag.indent
+.
+.   define my.language = supported_language(my.flag, "c++")
+$(my.indent)check_$(my.language:lower)_compiler_flag( "$(symbol(my.flag))" HAS_FLAG_$(flag_name(my.flag):upper) )
+$(my.indent)if ( !HAS_FLAG_$(flag_name(my.flag):upper) )
+    $(my.indent)message( FATAL_ERROR "Compiler does not support '$(symbol(my.flag))'." )
+$(my.indent)endif()
+.endmacro # emit_check_compiler_flag
+.
+.macro emit_target_files(target, repository, root_path, indent)
+.   define my.target = emit_target_files.target
+.   define my.repository = emit_target_files.repository
+.   define my.root_path = emit_target_files.root_path
+.   define my.indent = emit_target_files.indent
+.   define my.indent_headers = "      $(my.indent)"
+.   define my.indent_sources = "    $(my.indent)"
+.
+.   # NOTE: code assumes singular headers/sources elements - written with loops
+.   # for ease of maintanence and future modification, however assumption is exposed
+.   # in the BASE_DIRS of target_sources
+.   define has_headers = defined(my.target->headers)
+.   define has_sources = defined(my.target->sources)
+.
+.   if (!has_headers & !has_sources)
+.       return
+.   endif
+.
+.   if (has_headers)
+.       emit_files_declaration(my.target->headers, my.target, my.repository, my.root_path, my.indent)
+.       for my.target->headers.headers as _optional
+.           emit_files_declaration(_optional, my.target, my.repository, my.root_path, my.indent)
+.       endfor
+.   endif
+.
+.   if (has_sources)
+.       emit_files_declaration(my.target->sources, my.target, my.repository, my.root_path, my.indent)
+.       for my.target->sources.sources as _optional
+.           emit_files_declaration(_optional, my.target, my.repository, my.root_path, my.indent)
+.       endfor
+.   endif
+
+$(my.indent)target_sources( $(my.target.name) 
+.   if has_headers
+.       if is_defined_positive(my.target->headers, "private")
+  $(my.indent)PRIVATE
+    $(my.indent)FILE_SET HEADERS
+.       else
+  $(my.indent)PUBLIC
+    $(my.indent)FILE_SET HEADERS
+.       endif
+    $(my.indent)BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)/$(my.target->headers.path)"
+    $(my.indent)FILES
+.       emit_target_sources_entry(my.target->headers, my.target, my.repository, my.indent_headers)
+.
+.#       for my.target->headers.headers as _optional
+.#           emit_target_sources_entry(_optional, my.target, my.repository, my.indent_headers)
+.#       endfor
+.   endif
+.   if has_sources
+  $(my.indent)PRIVATE
+.       emit_target_sources_entry(my.target->sources, my.target, my.repository, my.indent_sources)
+.
+.#       for my.target->sources.sources as _optional
+.#           emit_target_sources_entry(_optional, my.target, my.repository, my.indent_sources)
+.#       endfor
+.   endif
+$(my.indent))
+.endmacro # emit_target_files
+.
+.macro emit_files_declaration(item, target, repository, root_path, indent)
+.   define my.item = emit_files_declaration.item
+.   define my.target = emit_files_declaration.target
+.   define my.repository = emit_files_declaration.repository
+.   define my.root_path = emit_files_declaration.root_path
+.   define my.indent = emit_files_declaration.indent
+.
+.   new languages as _languages
+.   canonicalize(_languages, my.repository, configuration->canonical, "language", "id")
+.
+.   define my.suffix = ""
+.   if defined(my.item.option)
+.       my.suffix = "$(my.suffix)_$(my.item.option:upper)"
+.   endif
+
+$(my.indent)file( GLOB_RECURSE $(my.target.name:c)_$(name(my.item):upper)$(my.suffix) CONFIGURE_DEPENDS
+.   for _languages.language as _lang
+.       for _lang.$(name(my.item)) as _entry where defined(_entry.suffix)
+  $(my.indent)"${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)/$(my.item.path)/*.$(_entry.suffix)"
+.       endfor
+.   endfor
+$(my.indent))
+.
+.   endnew
+.
+.   if defined(my.item.option)
+
+$(my.indent)if ( !$(get_option(my.item, my.target, my.repository)) )
+  $(my.indent)list( REMOVE_ITEM $(my.target.name:c)_$(name(my.item):upper) ${$(my.target.name:c)_$(name(my.item):upper)$(my.suffix)} )
+$(my.indent)endif()
+.   endif
+.
+.endmacro # emit_files_declaration
+.
+.macro emit_target_sources_entry(item, target, repository, indent)
+.   define my.item = emit_target_sources_entry.item
+.   define my.target = emit_target_sources_entry.target
+.   define my.repository = emit_target_sources_entry.repository
+.   define my.indent = emit_target_sources_entry.indent
+.
+.   define my.type = "$(name(my.item):upper)"
+.   define my.prefix = ""
+.   define my.suffix = ""
+.   define my.var_suffix = ""
+.
+.   if defined(my.item.option)
+.       my.prefix = "$<$<BOOL:${$(get_option(my.item, my.target, my.repository))}>:"
+.       my.suffix = ">"
+.       my.var_suffix = "_$(my.item.option:upper)"
+.   endif
+.
+$(my.indent)$(my.prefix)${$(my.target.name:c)_$(my.type:upper)$(my.var_suffix)}$(my.suffix)
+.endmacro # emit_target_sources_entry
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_CMakeLists(configuration)
+
+.endtemplate

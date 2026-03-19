@@ -1,0 +1,714 @@
+<?xml version = "1.0" ?>
+<configuration language="en-us">
+
+  <repository name="libbitcoin-system"
+    version="4.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin Cross-Platform C++ Development Toolkit">
+
+    <language id="c" />
+    <language id="c++" />
+
+    <library name="libbitcoin-system"
+      uuid="9f60708-ff48-4c22-952d-43470866f684">
+
+      <sources path="src" recursive="true" />
+      <headers path="include" recursive="true" root="true" />
+
+      <!-- Exposed knobs -->
+      <option name="avx2" type="enable" default="no" comment="Use Intel AVX2 intrinsics." />
+      <option name="avx512" type="enable" default="no" comment="Use Intel AVX512 intrinsics." />
+      <option name="sse41" type="enable" default="no" comment="Use SSE4.1 hardware instructions." />
+      <option name="shani" type="enable" default="no" comment="Use Intel SHA Extensions." />
+
+      <!-- Dependencies -->
+      <dependency name="boost" version="1.86.0">
+        <component name="iostreams" />
+        <component name="locale" />
+        <component name="program_options" />
+        <component name="thread" />
+        <component name="url" />
+      </dependency>
+
+      <dependency name="secp256k1" version="0.7.0" />
+
+      <compiler standard="20">
+        <flag option="avx2"
+          comment="Conditionally require avx2 intrinsics."
+          type="public">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-mavx" />
+          <symbol value="-mavx2" />
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m256i a = _mm256_set_epi32(8, 7, 6, 5, 4, 3, 2, 1);</loc>
+            <loc>return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);</loc>
+          </program>
+        </flag>
+
+        <flag option="avx512"
+          comment="Conditionally require avx512 intrinsics."
+          type="public">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-mavx512f" />
+          <symbol value="-mavx512bw" />
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);</loc>
+            <loc>return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1);</loc>
+          </program>
+        </flag>
+
+        <flag option="shani"
+          comment="Conditionally require sha native intrincis."
+          type="public">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-msse4" />
+          <symbol value="-msha" />
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m128i a = _mm_set1_epi32(0);</loc>
+            <loc>__m128i b = _mm_set1_epi32(15);</loc>
+            <loc>__m128i k = _mm_set1_epi32(31);</loc>
+            <loc>return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);</loc>
+          </program>
+        </flag>
+
+        <flag option="sse41"
+          comment="Conditionally require sse4.1 intrinsics."
+          type="public">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-msse4.1" />
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m128i a = _mm_set1_epi32(0);</loc>
+            <loc>__m128i b = _mm_set1_epi32(15);</loc>
+            <loc>return _mm_extract_epi32(_mm_add_epi64(a, b), 2);</loc>
+          </program>
+        </flag>
+
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+    </library>
+
+    <test name="libbitcoin-system-test"
+      option="test" type="with" default="yes"
+      uuid="51a424a9-2c12-4211-8d40-e49d1534c541">
+
+      <sources path="test" recursive="true" />
+
+      <dependency name="boost" version="1.86.0" private="true">
+        <component name="unit_test_framework" />
+      </dependency>
+
+      <dependency name="libbitcoin-system" private="true" />
+
+      <compiler standard="20">
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+      <!-- <trigger test="t2" /> -->
+    </test>
+
+    <binary name="examples"
+      option="examples" type="with" default="yes"
+      install="false"
+      uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e">
+
+      <sources path="examples" />
+
+      <dependency name="libbitcoin-system" private="true" />
+
+      <compiler standard="20">
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+    </binary>
+
+    <ci />
+  </repository>
+
+  <repository name="libbitcoin-network" 
+    version="4.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin P2P Network Library">
+
+    <language id="c" />
+    <language id="c++" />
+
+    <library name="libbitcoin-network"
+      uuid="564eb540-d6b6-425c-b8db-b0bee8970c18">
+
+      <sources path="src" recursive="true">
+        <sources path="src/ssl" recursive="true" option="ssl" />
+      </sources>
+      <headers path="include" recursive="true" root="true">
+        <headers path="include/bitcoin/network/ssl" recursive="true" root="true" option="ssl" />
+      </headers>
+
+      <!-- Exposed knobs -->
+      <option name="ssl" type="with" default="yes" comment="Use embedded ssl library." />
+
+      <dependency name="libbitcoin-system" version="4.0.0" />
+
+      <compiler standard="20">
+        <define option="ssl"
+          comment="Use embedded ssl libraries."
+          type="public">
+          <symbol value="WITH_SSL" />
+          <symbol value="WOLFSSL_USER_SETTINGS" />
+        </define>
+
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-mismatched-tags" />
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+    </library>
+
+    <test name="libbitcoin-network-tests"
+      option="test" type="with" default="yes"
+      uuid="d28fc18a-8b81-4247-92ee-6967feefeeff">
+
+      <headers path="test" private="true" recursive="true" root="true">
+        <headers path="test/ssl/wolfssl" private="true" recursive="true" root="true" option="ssl" />
+      </headers>
+      <sources path="test" recursive="true" />
+
+      <dependency name="boost" version="1.86.0" private="true">
+        <component name="unit_test_framework" />
+      </dependency>
+
+      <dependency name="libbitcoin-network" private="true" />
+
+      <compiler standard="20">
+        <define option="ssl"
+          symbol="CERT_PREFIX=&quot;${repository_root_dir}/test/ssl/wolfssl/wolfcrypt/test/&quot;"
+          comment="WolfSSL test data parameter."
+          type="private" />
+
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+    </test>
+
+  </repository>
+
+  <repository name="libbitcoin-database"
+    version="4.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin High Performance Blockchain Database">
+
+    <language id="c" />
+    <language id="c++" />
+
+    <library name="libbitcoin-database"
+      uuid="62d7fbee-4d52-424a-8938-59756e13d9f5">
+
+      <sources path="src" recursive="true" />
+      <headers path="include" recursive="true" root="true" />
+
+      <dependency name="libbitcoin-system" version="4.0.0" />
+
+      <compiler standard="20">
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+    </library>
+
+    <test name="libbitcoin-database-tests"
+      option="test" type="with" default="yes"
+      uuid="5c4da53a-8c06-4da6-a2a8-3c30f338ed70">
+
+      <sources path="test" recursive="true" />
+
+      <dependency name="boost" version="1.86.0" private="true">
+        <component name="unit_test_framework" />
+      </dependency>
+
+      <dependency name="libbitcoin-database" private="true" />
+
+      <compiler standard="20">
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+    </test>
+
+    <binary name="libbitcoin-database-tools" output="initchain"
+      option="tools" type="with" default="yes"
+      install="false"
+      uuid="005f2a86-f937-4ab5-b041-0f21b67eec66">
+      <sources path="tools/initchain" />
+
+      <dependency name="libbitcoin-database" private="true" />
+
+      <compiler standard="20">
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+    </binary>
+
+  </repository>
+
+  <repository name="libbitcoin-node"
+    version="4.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin Full Node">
+
+    <language id="c" />
+    <language id="c++" />
+
+    <library name="libbitcoin-node"
+      uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158">
+
+      <sources path="src" recursive="true" />
+      <headers path="include" recursive="true" root="true" />
+
+      <dependency name="libbitcoin-database" version="4.0.0" />
+      <dependency name="libbitcoin-network" version="4.0.0" />
+
+      <compiler standard="20">
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+    </library>
+
+    <test name="libbitcoin-node-tests"
+      option="test" type="with" default="yes"
+      uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8">
+
+      <sources path="test" recursive="true" />
+
+      <dependency name="boost" version="1.86.0" private="true">
+        <component name="unit_test_framework" />
+      </dependency>
+
+      <dependency name="libbitcoin-node" private="true" />
+
+      <compiler standard="20">
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+    </test>
+
+  </repository>
+
+  <repository name="libbitcoin-server"
+    version="4.0.0"
+    email="eric@voskuil.org"
+    description="Bitcoin Full Node and Query Server">
+
+    <language id="c" />
+    <language id="c++" />
+
+    <library name="libbitcoin-server"
+      uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0">
+
+      <sources path="src" recursive="true" />
+      <headers path="include" recursive="true" root="true" />
+
+      <dependency name="libbitcoin-node" version="4.0.0" />
+
+      <compiler standard="20">
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+   </library>
+
+    <test name="libbitcoin-server-tests"
+      option="test" type="with" default="yes"
+      uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea">
+
+      <sources path="test" recursive="true" />
+
+      <dependency name="boost" version="1.86.0" private="true">
+        <component name="unit_test_framework" />
+      </dependency>
+
+      <dependency name="libbitcoin-server" private="true" />
+
+      <compiler standard="20">
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+    </test>
+
+    <binary name="bitcoin-server" output="bs"
+      option="console" type="with" default="yes"
+      install="true"
+      uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe">
+
+      <sources path="console" />
+
+      <dependency name="libbitcoin-server" private="true" />
+
+      <compiler standard="20">
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+        <flag id="fstack-protector-all" />
+
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+
+    </binary>
+
+  </repository>
+
+  <canonical>
+    <language id="c" cmake="C">
+      <sources suffix="c" />
+      <headers suffix="h" />
+    </language>
+    <language id="c++" cmake="CXX">
+      <sources suffix="cpp" />
+      <headers suffix="hpp" />
+      <headers suffix="ipp" />
+    </language>
+
+    <compiler standard="20">
+        <flag id="Wall"
+          comment="Enable questionable/easy to avoid error warnings."
+          type="private">
+          <symbol value="-Wall" />
+          <context language="c" />
+          <context language="c++" />
+        </flag>
+        <flag id="Wextra"
+          comment="Enables extra warnings not enabled by -Wall."
+          type="private">
+          <symbol value="-Wextra" />
+          <context language="c" />
+          <context language="c++" />
+        </flag>
+        <flag id="Wpedantic"
+          comment="Enables all warnings demanded by strict ISO C/C+."
+          type="private">
+          <symbol value="-Wpedantic" />
+          <context language="c" />
+          <context language="c++" />
+        </flag>
+        <flag id="Wno-reorder"
+          comment="Disallow warning on style order of declarations."
+          type="private">
+          <symbol value="-Wno-reorder" />
+          <context language="c++" />
+        </flag>
+        <flag id="Wno-missing-field-initializers"
+          comment="Suppress warning for incomplete field initialization."
+          type="private">
+          <symbol value="-Wno-missing-field-initializers" />
+          <context language="c++" />
+        </flag>
+         <flag id="Wno-missing-braces"
+          comment="Conform to style."
+          type="private">
+          <symbol value="-Wno-missing-braces" />
+          <context language="c++" />
+        </flag>
+         <flag id="Wno-comment"
+          comment="Ignore comments within comments or commenting of backslash extended lines."
+          type="private">
+          <symbol value="-Wno-comment" />
+          <context language="c++" />
+        </flag>
+         <flag id="Wno-deprecated-copy"
+          comment="Suppress warning for copy of implicitly generated copy constructor."
+          type="private">
+          <symbol value="-Wno-deprecated-copy" />
+          <context language="c++" />
+        </flag>
+         <flag id="Wno-ignored-attributes"
+          comment="Suppress warning for ignored attributes (arising on template arguments)."
+          type="private">
+          <symbol value="-Wno-ignored-attributes" />
+          <context language="c++" />
+        </flag>
+         <flag id="Wno-mismatched-tags"
+          comment="Conflict in stdlib under clang."
+          type="private"
+          compiler="clang">
+          <symbol value="-Wno-mismatched-tags" />
+          <context language="c++" />
+        </flag>
+         <!-- This varies by dependency build, such as boost. So we do not enforce. -->
+        <flag id="fvisibility=hidden"
+          comment="Hide internal functions from external libs."
+          type="private"
+          compiler="gnu">
+          <symbol value="-fvisibility=hidden" />
+          <context language="c++" />
+        </flag>
+        <flag id="Wno-long-long"
+          comment="Allow use of C99 'long long' type."
+          type="private">
+          <symbol value="-Wno-long-long" />
+          <context language="c++" />
+        </flag>
+         <flag id="fno-var-tracking-assignments"
+          comment="Limit delays and warnings."
+          type="private"
+          compiler="gnu">
+          <symbol value="-fno-var-tracking-assignments" />
+          <context language="c++" />
+        </flag>
+        <flag id="fstack-protector"
+          comment="Protect stack."
+          type="private">
+          <symbol value="-fstack-protector" />
+        </flag>
+        <flag id="fstack-protector-all"
+          comment="Protect stack comprehensively." 
+          type="private">
+          <symbol value="-fstack-protector-all" />
+        </flag>
+
+        <!-- macos active between clang 13-16, deprecated 17, removed 18 -->
+        <link id="no_fixup_chains"
+          comment="Address -undefined dynamic_lookup MacOS error."
+          type="private">
+          <symbol value="-no_fixup_chains" />
+        </link>
+     </compiler>
+ </canonical>
+
+  <registrar id="dependency">
+    <element name="libbitcoin-system">
+      <cmake namespace="bitcoin"
+        package="libbitcoin-system"
+        target="bitcoin::system" />
+    </element>
+    <element name="libbitcoin-database">
+      <cmake namespace="bitcoin"
+        package="libbitcoin-database"
+        target="bitcoin::database" />
+    </element>
+    <element name="libbitcoin-network">
+      <cmake namespace="bitcoin"
+        package="libbitcoin-network"
+        target="bitcoin::network" />
+    </element>
+    <element name="libbitcoin-node">
+      <cmake namespace="bitcoin"
+        package="libbitcoin-node"
+        target="bitcoin::node" />
+    </element>
+    <element name="libbitcoin-server">
+      <cmake namespace="bitcoin"
+        package="libbitcoin-server"
+        target="bitcoin::server" />
+    </element>
+    <element name="boost">
+      <cmake namespace="Boost"
+        package="Boost" />
+    </element>
+    <element name="secp256k1">
+      <cmake namespace="libsecp256k1"
+        package="libsecp256k1"
+        target="libsecp256k1::secp256k1" />
+    </element>
+    <element name="pthread">
+      <cmake namespace="Threads"
+       package="Threads"
+       target="Threads::Threads">
+        <set variable="THREAD_PREFER_PTHREAD_FLAG" value="TRUE" />
+      </cmake>
+    </element>
+  </registrar>
+
+  <templates source="version4.xml" resultpath="../output/version4">
+    <!-- resultpath provided relative to expected evaluation - libbitcoin-build/process -->
+    <template name="CMakeLists.txt.gsl"
+      path="cmake"
+      outpath="builds/cmake">
+      <cmake rootpath="../.." />
+      <!--<file source="cmake/InTargetProperty.cmake" destination="builds/cmake/modules" />-->
+    </template>
+    <template name="config.cmake.in.gsl"
+      path="cmake"
+      outpath="builds/cmake" />
+  </templates>
+</configuration>

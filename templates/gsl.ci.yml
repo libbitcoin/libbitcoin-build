@@ -38,42 +38,37 @@ function is_job_config(configuration, job)
       | (my.job.build = my.config.job))
 endfunction
 
-function is_job_autotools(job)
-    define my.job = is_job_autotools.job
-    return defined(my.job.build) \
-      | (my.job.build = "auto") \
-      | (my.job.build = "all")
+function is_build_autotools(item)
+    define my.item = is_build_autotools.item
+    return defined(my.item.build) & \
+      ((my.item.build = "auto") | (my.item.build = "all"))
 endfunction
 
-function is_job_cmake(job)
-    define my.job = is_job_cmake.job
-    return defined(my.job.build) & \
-        ((my.job.build = "cmake") | (my.job.build = "all"))
+function is_build_cmake(item)
+    define my.item = is_build_cmake.item
+    return defined(my.item.build) & \
+        ((my.item.build = "cmake") | (my.item.build = "all"))
 endfunction
 
-function is_job_preset(job)
-    define my.job = is_job_preset.job
-    return defined(my.job.build) & \
-        ((my.job.build = "preset") | \
-        ((my.job.build = "all") & (defined(my.job.preset))))
+function is_build_preset(item)
+    define my.item = is_build_preset.item
+    return defined(my.item.build) & \
+        ((my.item.build = "preset") | (my.item.build = "all")) & defined(my.item.preset)
 endfunction
 
 function has_jobs_autotools(ci)
     define my.ci = has_jobs_autotools.ci
-    return (count(my.ci.job, (count.system = "linux") & is_job_autotools(count)) \
-        + count(my.ci.job, (count.system = "osx") & is_job_autotools(count))  > 0)
+    return (count(my.ci.job, is_build_autotools(count)) > 0)
 endfunction
 
 function has_jobs_cmake(ci)
     define my.ci = has_jobs_cmake.ci
-    return (count(my.ci.job, (count.system = "linux") & is_job_cmake(count)) \
-        + count(my.ci.job, (count.system = "osx") & is_job_cmake(count)) > 0)
+    return (count(my.ci.job, is_build_cmake(job)) > 0)
 endfunction
 
 function has_jobs_presets(ci)
     define my.ci = has_jobs_presets.ci
-    return (count(my.ci.job, (count.system = "linux") & is_job_preset(count)) \
-        + count(my.ci.job, (count.system = "osx") & is_job_preset(count)) > 0)
+    return (count(my.ci.job, is_build_preset(job)) > 0)
 endfunction
 
 function has_jobs_msbuild(ci)
@@ -388,8 +383,9 @@ function get_job_cflags(integration, repository, job)
     return "$(my.flags)"
 endfunction # get_job_cflags
 
-function get_job_axis_value(configuration, decl, job, axis)
+function get_job_axis_value(configuration, integration, decl, job, axis)
     define my.config = get_job_axis_value.configuration
+    define my.integration = get_job_axis_value.integration
     define my.decl = get_job_axis_value.decl
     define my.job = get_job_axis_value.job
     define my.axis = get_job_axis_value.axis
@@ -404,7 +400,8 @@ function get_job_axis_value(configuration, decl, job, axis)
     endif
 
     if (!defined(my.axis.value))
-        my.value = get_job_axis_default(my.decl, my.job)
+        echo "caller: get_job_axis_value"
+        my.value = get_job_axis_default(my.configuration, my.integration, my.decl, my.job)
     elsif (my.axis.value = "build")
         if (!defined(my.decl.build) | !(my.decl.build = "true"))
             abort "Disallowed value 'build' provided for axis '$(my.axis.name)'."
@@ -474,7 +471,7 @@ function get_job_shell_axis_value(configuration, integration, job, decl)
         (count.os = my.job.system) & defined(count.path)) = 1)
 
     if (my.declared)
-        my.value = get_job_axis_value(my.config, my.decl, my.job,\
+        my.value = get_job_axis_value(my.config, my.integration, my.decl, my.job,\
           my.job->axis(name = my.decl.name))
     else
         my.value = get_job_axis_default(my.config, my.integration, my.decl, my.job)
@@ -907,7 +904,7 @@ endfunction # get_sln_tests
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
 .   emit_step_prepare_toolchain(my.config)
 
@@ -944,7 +941,7 @@ endfunction # get_sln_tests
           msbuild-architecture: x64
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Initialize SDK
         shell: powershell
@@ -1016,41 +1013,41 @@ endfunction # get_sln_tests
 .       notify(my.out_file)
 .       output(my.out_file)
 .       copyleft(_repository.name)
-.       define my.ci = _repository->ci
 
 name: Continuous Integration Build
 
 on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
-.       if (has_jobs_autotools(my.ci))
+.       if (has_jobs_autotools(_repository->ci))
 .           new configuration as _config
 .               _config.job = "autotools"
 .               _config.accept_all = "true"
 .               _config.auto = "true"
-.               emit_job_shell(_config, my.integration, _repository, my.ci)
+.               emit_job_shell(_config, my.integration, _repository, _repository->ci)
 .           endnew _config
 .       endif
 .
-.       if (has_jobs_autotools(my.ci) & has_jobs_cmake(my.ci))
+.       if (has_jobs_autotools(_repository->ci) & has_jobs_cmake(_repository->ci))
 .           write_line("")
 .       endif
 .
-.       if (has_jobs_cmake(my.ci))
+.       if (has_jobs_cmake(_repository->ci))
 .           new configuration as _config
 .               _config.job = "cmake"
 .               _config.accept_all = "true"
 .               _config.cmake = "true"
 .               _config.suffix = "cmake"
-.               emit_job_shell(_config, my.integration, _repository, my.ci)
+.               emit_job_shell(_config, my.integration, _repository, _repository->ci)
 .           endnew _config
 .       endif
 .
-.       if ((has_jobs_autotools(my.ci) | has_jobs_cmake(my.ci)) & has_jobs_presets(my.ci))
+.       if ((has_jobs_autotools(_repository->ci) | \
+            has_jobs_cmake(_repository->ci)) & has_jobs_presets(_repository->ci))
 .           write_line("")
 .       endif
 .
-.       if (has_jobs_presets(my.ci))
+.       if (has_jobs_presets(_repository->ci))
 .           new configuration as _config
 .               _config.job = "preset"
 .               _config.accept_all = "true"
@@ -1058,16 +1055,18 @@ jobs:
 .               _config.cmake = "true"
 .               _config.use_preset = "true"
 .               _config.suffix = "cmakepresets"
-.               emit_job_shell(_config, my.integration, _repository, my.ci)
+.               emit_job_shell(_config, my.integration, _repository, _repository->ci)
 .           endnew _config
 .       endif
 .
-.       if ((has_jobs_autotools(my.ci) | has_jobs_cmake(my.ci) | has_jobs_presets(my.ci)) & has_jobs_msbuild(my.ci))
+.       if ((has_jobs_autotools(_repository->ci) | \
+            has_jobs_cmake(_repository->ci) | \
+            has_jobs_presets(_repository->ci)) & has_jobs_msbuild(_repository->ci))
 .           write_line("")
 .       endif
 .
-.       if (has_jobs_msbuild(my.ci))
-.         emit_job_msbuild(_repository, my.ci)
+.       if (has_jobs_msbuild(_repository->ci))
+.         emit_job_msbuild(_repository, _repository->ci)
 .       endif
 .
 .       close
