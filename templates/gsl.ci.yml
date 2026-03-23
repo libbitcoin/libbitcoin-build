@@ -725,15 +725,9 @@ endfunction # get_sln_tests
 .   endif
 .   # assert (ndebug)
           if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
-.   if defined(my.config.cmake)
-            echo "ASSERT_NDEBUG=--enable-ndebug -Denable-ndebug=yes" >> $GITHUB_ENV
-          else
-            echo "ASSERT_NDEBUG=--disable-ndebug -Denable-ndebug=no" >> $GITHUB_ENV
-.   else
             echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
           else
             echo "ASSERT_NDEBUG=--disable-ndebug" >> $GITHUB_ENV
-.   endif
           fi
 .   # link
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
