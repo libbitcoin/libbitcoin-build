@@ -655,17 +655,17 @@ create_directory()
         if [[ $(test_perform_sync()) ]]; then
             display_message "Reinitializing directory $DIRECTORY..."
             rm -rf "$DIRECTORY"
-            mkdir "$DIRECTORY"
+            mkdir -p "$DIRECTORY"
         else
             display_message "Reusing directory $DIRECTORY..."
         fi
     else
         display_message "Initializing directory $DIRECTORY..."
-        mkdir "$DIRECTORY"
+        mkdir -p "$DIRECTORY"
     fi
 .   else
     rm -rf "$DIRECTORY"
-    mkdir "$DIRECTORY"
+    mkdir -p "$DIRECTORY"
 .   endif
 }
 
