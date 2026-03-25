@@ -138,7 +138,7 @@ jobs:
 
       - name: Prepare toolchain [windows]
         if: ${{ startsWith(matrix.os, 'windows') }}
-        uses: microsoft/setup-msbuild@v1.1
+        uses: microsoft/setup-msbuild@v3
 
       - name: Build gsl [macos]
         if: ${{ startsWith(matrix.os, 'macos') }}
