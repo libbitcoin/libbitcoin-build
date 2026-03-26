@@ -50,10 +50,10 @@ for file in $(configuration->templates.resultpath)/**/*.sh; do
     if [[ -f "$file" ]]; then
         if chmod +x "$file"; then
             echo "✓ $file"
-            ((++modcount))
+            ((modcount += 1))
         else
             echo "✗ Failed: $file"
-            ((++failcount))
+            ((failcount += 1))
         fi
     fi
 done
