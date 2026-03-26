@@ -19,7 +19,9 @@
 .   copyleft("libbitcoin-build")
 
 # Exit this script on the first build error.
-set -e
+set -euo pipefail
+
+trap 'echo "FATAL ERROR: Command failed at line $LINENO: $BASH_COMMAND" >&2' ERR
 
 # Do everything relative to this file location.
 cd `dirname "$0"`
@@ -42,7 +44,28 @@ done
 
 .if (count(configuration->templates.template, ends_with(count.name, ".sh.gsl")) > 0)
 # Make generated scripts executable.
-eval chmod -R +x "$(configuration->templates.resultpath)/*/*.sh"
+modcount=0
+failcount=0
+shopt -s globstar nullglob
+for file in $(configuration->templates.resultpath)/**/*.sh; do
+    if [[ -f "$file" ]]; then
+        if chmod +x "$file"; then
+            echo "✓ $file"
+            ((++modcount))
+        else
+            echo "✗ Failed: $file"
+            ((++failcount))
+        fi
+    fi
+done
+shopt -u globstar
+
+if [[ $failcount -eq 0 ]]; then
+    echo "Made $modcount files executable."
+else
+    echo "Failed modifying $failcount files."
+    exit 1
+fi
 .endif
 .endmacro generate_artifacts
 .endtemplate
