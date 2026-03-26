@@ -90,6 +90,10 @@ endfunction
 .
 .   emit_documentation(my.meta, my.configuration, my.repository, "# ")
 .
+# Exit this script on the first error.
+set -euo pipefail
+trap 'echo "FATAL ERROR: Command filed at line $LINENO: $BASH_COMMAND" >&2' ERR
+
 .endmacro # emit_install_sh
 .
 .macro emit_documentation(meta, configuration, repository, prefix)

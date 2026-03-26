@@ -42,7 +42,8 @@ generate_input()
 }
 
 # Exit this script on the first build error.
-set -e
+set -euo pipefail
+trap 'echo "FATAL ERROR: Command failed at line $LINENO: $BASH_COMMAND" >&2' ERR
 
 # Do everything relative to this file location.
 BUILD_PATH=`dirname "$0"`

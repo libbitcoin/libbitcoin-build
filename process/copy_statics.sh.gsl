@@ -20,7 +20,8 @@
 .
 .   define path_suffix = "../"
 # Exit this script on the first build error.
-set -e
+set -euo pipefail
+trap 'echo "FATAL ERROR: Commnd failed at line $LINENO: $BASH_COMMAND" >&2' ERR
 
 result_dir="$(configuration->templates.resultpath)"
 
