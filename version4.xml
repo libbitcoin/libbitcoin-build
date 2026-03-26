@@ -657,43 +657,116 @@
 
   <registrar id="dependency">
     <element name="libbitcoin-system">
+      <github owner="libbitcoin" tag="master" />
+      <build method="gnu" filepath="." parallel="true">
+        <option value="--without-tests" target-ignore="true" />
+        <option value="--without-examples" target-ignore="true" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" target-ignore="true" />
+        <option value="-Dwith-examples:BOOL=OFF" target-ignore="true" />
+      </build>
       <cmake namespace="bitcoin"
         package="libbitcoin-system"
         target="bitcoin::system" />
     </element>
     <element name="libbitcoin-database">
+      <github owner="libbitcoin" tag="master" />
+      <build method="gnu" filepath="." parallel="true">
+        <option value="--without-tests" target-ignore="true" />
+        <option value="--without-tools" target-ignore="true" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" target-ignore="true" />
+        <option value="-Dwith-tools:BOOL=OFF" target-ignore="true" />
+      </build>
       <cmake namespace="bitcoin"
         package="libbitcoin-database"
         target="bitcoin::database" />
     </element>
     <element name="libbitcoin-network">
+      <github owner="libbitcoin" tag="master" />
+      <build method="gnu" filepath="." parallel="true">
+        <option value="--without-tests" target-ignore="true" />
+        <option value="--with-ssl" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" target-ignore="true" />
+        <option value="-Dwith-ssl:BOOL=ON" />
+      </build>
       <cmake namespace="bitcoin"
         package="libbitcoin-network"
         target="bitcoin::network" />
     </element>
     <element name="libbitcoin-node">
+      <github owner="libbitcoin" tag="master" />
+      <build method="gnu" filepath="." parallel="true">
+        <option value="--without-tests" target-ignore="true" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" target-ignore="true" />
+      </build>
       <cmake namespace="bitcoin"
         package="libbitcoin-node"
         target="bitcoin::node" />
     </element>
     <element name="libbitcoin-server">
+      <github owner="libbitcoin" tag="master" />
+      <build method="gnu" filepath="." parallel="true">
+        <option value="--without-tests" target-ignore="true" />
+        <option value="--without-console" target-ignore="true" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" target-ignore="true" />
+        <option value="-Dwith-console:BOOL=OFF" target-ignore="true" />
+      </build>
       <cmake namespace="bitcoin"
         package="libbitcoin-server"
         target="bitcoin::server" />
     </element>
     <element name="boost">
-      <cmake namespace="Boost"
-        package="Boost" />
+      <build method="bjam" version="1.86.0" conditional="true" parallel="true">
+        <option value="--with-iostreams" />
+        <option value="--with-locale" />
+        <option value="--with-program_options" />
+        <option value="--with-regex" />
+        <option value="--with-thread" />
+        <option value="--with-url" />
+        <option value="--with-test" />
+      </build>
+      <cmake namespace="Boost" package="Boost" />
     </element>
     <element name="secp256k1">
-      <cmake namespace="libsecp256k1"
-        package="libsecp256k1"
+      <github owner="bitcoin-core" tag="v0.7.0" />
+      <build method="gnu" filepath="." parallel="true">
+        <flag value="-w" />
+        <option value="--disable-tests" />
+        <option value="--enable-experimental" />
+        <option value="--enable-module-recovery" />
+        <option value="--enable-module-schnorrsig" />
+      </build>
+      <build method="cmake" filepath="." parallel="true">
+        <flag value="-w" />
+        <option value="-DSECP256K1_BUILD_TESTS=OFF" />
+        <option value="-DSECP256K1_EXPERIMENTAL=ON" />
+        <option value="-DSECP256K1_ENABLE_MODULE_RECOVERY=ON" />
+        <option value="-DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON" />
+      </build>
+      <cmake namespace="libsecp256k1" package="libsecp256k1"
         target="libsecp256k1::secp256k1" />
     </element>
     <element name="pthread">
-      <cmake namespace="Threads"
-       package="Threads"
-       target="Threads::Threads">
+      <cmake namespace="Threads" package="Threads" target="Threads::Threads">
         <set variable="THREAD_PREFER_PTHREAD_FLAG" value="TRUE" />
       </cmake>
     </element>
@@ -709,6 +782,15 @@
     </template>
     <template name="config.cmake.in.gsl"
       path="cmake"
+      outpath="builds/cmake" />
+    <template name="install-gnu.sh.gsl"
+      path="shell"
+      outpath="builds/gnu" />
+    <template name="install-cmake.sh.gsl"
+      path="shell"
+      outpath="builds/cmake" />
+    <template name="install-presets.sh.gsl"
+      path="shell"
       outpath="builds/cmake" />
   </templates>
 </configuration>
