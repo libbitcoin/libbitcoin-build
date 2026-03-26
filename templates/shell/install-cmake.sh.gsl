@@ -1,0 +1,43 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin install-cmake.sh.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../templates/shell/install-base.sh.gsl"
+
+###############################################################################
+# Functions
+###############################################################################
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+new metadata as _meta
+    new _meta.build as _build
+        _build.method = "cmake"
+    endnew
+    new _meta.build as _build
+        _build.method = "bjam"
+    endnew
+ 
+    generate_install_sh(_meta, configuration, "$(script)")
+endnew
+
+.endtemplate

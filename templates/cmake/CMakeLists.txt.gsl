@@ -17,6 +17,7 @@ gsl from "../lib/cmake.gsl"
 gsl from "../lib/debug.gsl"
 gsl from "../lib/filesystem.gsl"
 gsl from "../lib/output.gsl"
+gsl from "../lib/xml.gsl"
 
 ###############################################################################
 # Generation
@@ -58,76 +59,12 @@ function generate_CMakeLists(configuration)
 endfunction
 
 ###############################################################################
-# Library-able?
-###############################################################################
-function is_defined_value(node, attribute, value)
-    define my.node = is_defined_value.node
-    define my.value = is_defined_value.value
-    if (!defined(my.node))
-        abort "Missing context node for attribute '$(my.attribute)'."
-    endif
-    return defined(my.node.$(my.attribute)) &\
-        (my.node.$(my.attribute) = my.value)
-endfunction
-
-function is_defined_negative(node, attribute)
-    define my.node = is_defined_negative.node
-    if (!defined(my.node))
-        abort "Missing context node for attribute '$(my.attribute)'."
-    endif
-    return defined(my.node.$(my.attribute)) &\
-        ((my.node.$(my.attribute) = "false") | (my.node.$(my.attribute) = "no"))
-endfunction
-
-function is_defined_positive(node, attribute)
-    define my.node = is_defined_positive.node
-    if (!defined(my.node))
-        abort "Missing context node for attribute '$(my.attribute)'."
-    endif
-    return defined(my.node.$(my.attribute)) &\
-        ((my.node.$(my.attribute) = "true") | (my.node.$(my.attribute) = "yes"))
-endfunction
-
-function merge_children_select(destination, source, name, identifier)
-    define my.destination = merge_children_select.destination
-    define my.source = merge_children_select.source
-    define my.name = merge_children_select.name
-    define my.identifier = merge_children_select.identifier
-
-    for my.source.$(my.name) as _child
-        if (count(my.destination->$(my.name), $(my.name).$(identifier) = _child.$(identifier)) = 0)
-            copy _child to my.destination
-        endif
-    endfor
-endfunction
-
-function canonicalize(result, host, canonical, name, identifier)
-    define my.result = canonicalize.result
-    define my.host = canonicalize.host
-    define my.canonical = canonicalize.canonical
-    define my.name = canonicalize.name
-    define my.identifier = canonicalize.identifier
-
-    for my.host.$(my.name) as _element
-        if (!defined(_element.$(my.identifier)))
-            copy _element to my.result
-        elsif (count(my.result.$(name), defined(.$(my.identifier)) & (.$(my.identifier) = _element.$(my.identifier))) = 0)
-            if (count(my.canonical.$(my.name), .$(my.identifier) = _element.$(my.identifier)) > 0)
-                copy my.canonical->$(my.name)(.$(my.identifier) = _element.$(my.identifier)) to my.result
-            else
-                copy _element to my.result
-            endif
-        endif
-    endfor
-endfunction
-
-###############################################################################
 # Functions
 ###############################################################################
 function qualified_component_name(dependency, component)
     define my.dependency = qualified_component_name.dependency
     define my.component = qualified_component_name.component
-    define my.registry = registry(configuration->registrar(id = "dependency"), my.dependency)
+    define my.registry = registry(configuration->registrar(id = "dependency"), my.dependency, "dependency")
 
     if !defined(my.registry)
         abort("Missing registry for $(my.dependency)")
@@ -146,7 +83,7 @@ endfunction
 
 function qualified_target_name(query)
     define my.query = qualified_target_name.query
-    define my.registry = registry(configuration->registrar(id = "dependency"), my.query)
+    define my.registry = registry(configuration->registrar(id = "dependency"), my.query, "dependency")
 
     if !defined(my.registry)
         abort("Missing registry for $(my.query)")
@@ -256,19 +193,6 @@ function target_installable(target)
     return (name(my.target) = "library") | is_defined_positive(my.target, "install")
 endfunction
 
-function merge_components(dependencies, element)
-    define my.dependencies = merge_components.dependencies
-    define my.element = merge_components.element
-
-    if (count(my.dependencies.dependency, dependency.name = my.element.name) > 0)
-        define my.destination = my.dependencies->dependency(dependency.name = my.element.name)
-
-        merge_children_select(my.destination, my.element, "component", "name")
-    else
-        copy my.element to my.dependencies
-    endif
-endfunction
-
 function render_dependencies(repository)
     define my.repository = render_dependencies.repository
 
@@ -300,19 +224,19 @@ function render_dependencies(repository)
             define my.found = 0
             for my.repository.library as _target where (my.found = 0)
                 if (count(_target.dependency, .name = _depend.name) > 0)
-                    emit_find_dependency(_depend, _target, my.repository, "find_package")
+                    emit_find_dependency(_depend, _target, my.repository, configuration, "find_package")
                     my.found = 1
                 endif
             endfor
             for my.repository.test as _target where (my.found = 0)
                 if (count(_target.dependency, .name = _depend.name) > 0)
-                    emit_find_dependency(_depend, _target, my.repository, "find_package")
+                    emit_find_dependency(_depend, _target, my.repository, configuration, "find_package")
                     my.found = 1
                 endif
             endfor
             for my.repository.binary as _target where (my.found = 0)
                 if (count(_target.dependency, .name = _depend.name) > 0)
-                    emit_find_dependency(_depend, _target, my.repository, "find_package")
+                    emit_find_dependency(_depend, _target, my.repository, configuration, "find_package")
                     my.found = 1
                 endif
             endfor
@@ -739,11 +663,11 @@ option( $(_option.type:lower)-$(_option.name:lower) "$(_option.comment)" $(optio
 
 if ( BUILD_SHARED_LIBS )
 .   for my.dependencies.dependency as _depend
-  set( $(package_name(_depend))_USE_STATIC_LIBS "OFF" )
+  set( $(package_name(_depend, configuration))_USE_STATIC_LIBS "OFF" )
 .   endfor
 else()
 .   for my.dependencies.dependency as _depend
-  set( $(package_name(_depend))_USE_STATIC_LIBS "ON" )
+  set( $(package_name(_depend, configuration))_USE_STATIC_LIBS "ON" )
 .   endfor
 endif()
 .endmacro # emit_shared_static_detection

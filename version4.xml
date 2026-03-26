@@ -656,7 +656,7 @@
  </canonical>
 
   <registrar id="dependency">
-    <element name="libbitcoin-system">
+    <dependency name="libbitcoin-system">
       <github owner="libbitcoin" tag="master" />
       <build method="gnu" filepath="." parallel="true">
         <option value="--without-tests" target-ignore="true" />
@@ -671,8 +671,8 @@
       <cmake namespace="bitcoin"
         package="libbitcoin-system"
         target="bitcoin::system" />
-    </element>
-    <element name="libbitcoin-database">
+    </dependency>
+    <dependency name="libbitcoin-database">
       <github owner="libbitcoin" tag="master" />
       <build method="gnu" filepath="." parallel="true">
         <option value="--without-tests" target-ignore="true" />
@@ -687,8 +687,8 @@
       <cmake namespace="bitcoin"
         package="libbitcoin-database"
         target="bitcoin::database" />
-    </element>
-    <element name="libbitcoin-network">
+    </dependency>
+    <dependency name="libbitcoin-network">
       <github owner="libbitcoin" tag="master" />
       <build method="gnu" filepath="." parallel="true">
         <option value="--without-tests" target-ignore="true" />
@@ -703,8 +703,8 @@
       <cmake namespace="bitcoin"
         package="libbitcoin-network"
         target="bitcoin::network" />
-    </element>
-    <element name="libbitcoin-node">
+    </dependency>
+    <dependency name="libbitcoin-node">
       <github owner="libbitcoin" tag="master" />
       <build method="gnu" filepath="." parallel="true">
         <option value="--without-tests" target-ignore="true" />
@@ -717,8 +717,8 @@
       <cmake namespace="bitcoin"
         package="libbitcoin-node"
         target="bitcoin::node" />
-    </element>
-    <element name="libbitcoin-server">
+    </dependency>
+    <dependency name="libbitcoin-server">
       <github owner="libbitcoin" tag="master" />
       <build method="gnu" filepath="." parallel="true">
         <option value="--without-tests" target-ignore="true" />
@@ -733,8 +733,8 @@
       <cmake namespace="bitcoin"
         package="libbitcoin-server"
         target="bitcoin::server" />
-    </element>
-    <element name="boost">
+    </dependency>
+    <dependency name="boost" textname="Boost">
       <build method="bjam" version="1.86.0" conditional="true" parallel="true">
         <option value="--with-iostreams" />
         <option value="--with-locale" />
@@ -745,8 +745,8 @@
         <option value="--with-test" />
       </build>
       <cmake namespace="Boost" package="Boost" />
-    </element>
-    <element name="secp256k1">
+    </dependency>
+    <dependency name="secp256k1" textname="libsecp256k1">
       <github owner="bitcoin-core" tag="v0.7.0" />
       <build method="gnu" filepath="." parallel="true">
         <flag value="-w" />
@@ -764,12 +764,12 @@
       </build>
       <cmake namespace="libsecp256k1" package="libsecp256k1"
         target="libsecp256k1::secp256k1" />
-    </element>
-    <element name="pthread">
+    </dependency>
+    <dependency name="pthread">
       <cmake namespace="Threads" package="Threads" target="Threads::Threads">
         <set variable="THREAD_PREFER_PTHREAD_FLAG" value="TRUE" />
       </cmake>
-    </element>
+    </dependency>
   </registrar>
 
   <templates source="version4.xml" resultpath="../output/version4">

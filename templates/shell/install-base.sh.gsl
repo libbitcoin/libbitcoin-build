@@ -1,0 +1,151 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin install-base.sh.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+#[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/sh.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_install_sh(meta, configuration, id)
+    define my.meta = generate_install_sh.meta
+    define my.configuration = generate_install_sh.configuration
+    define my.id = generate_install_sh.id
+    define my.filename = left(my.id, string.length(my.id) - 4)
+    require(my.configuration->templates, "templates", "resultpath")
+
+    if !(ends_with(my.id, ".gsl"))
+        abort "Provided id '$(my.id)' does not end with '.gsl'"
+    endif
+
+    define my.template = my.configuration->templates->template(.name = my.id)
+
+    if (!defined(my.template))
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    define my.project_path_suffix = my.template.outpath
+
+    for my.configuration.repository by .name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+        create_directory(my.output_path)
+
+        define my.out_file = path_append(my.output_path, my.filename)
+        notify(my.out_file)
+        output(my.out_file)
+
+        emit_install_sh(my.meta, my.configuration, _repository)
+
+        close
+     endfor _repository
+endfunction
+
+###############################################################################
+# Library-able?
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+function textname(dependency)
+    define my.dependency = textname.dependency
+    return defined(my.dependency.textname) ?? my.dependency.textname ? my.dependency.name
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_install_sh(meta, configuration, repository)
+.   define my.meta = emit_install_sh.meta
+.   define my.configuration = emit_install_sh.configuration
+.   define my.repository = emit_install_sh.repository
+.
+.   copyleft(my.repository.name)
+.
+.   emit_documentation(my.meta, my.configuration, my.repository, "# ")
+.
+.endmacro # emit_install_sh
+.
+.macro emit_documentation(meta, configuration, repository, prefix)
+.   define my.meta = emit_documentation.meta
+.   define my.configuration = emit_documentation.configuration
+.   define my.repository = emit_documentation.repository
+.   define my.prefix = emit_documentation.prefix
+.
+$(my.prefix)Script managing the build and installation of $(my.repository.name) and its dependencies.
+$(my.prefix)
+$(my.prefix)Script options:
+.#  translated by installer
+$(my.prefix) --prefix=<path>          Library install location (defaults to /usr/local).
+.#  consumed by installer (specific)
+.
+.   new installable as _install
+.#       populate_dependencies(_install, my.repository)
+.       canonical_dependency_list(_install, my.repository, my.configuration)
+.
+.       for _install.dependency as _depend
+.           define my.matched = 0
+.
+.           if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
+.               next
+.           endif
+.
+.           if (my.matched = 0)
+.               for my.meta.build as _build
+.                   if (my.matched > 0)
+.                       next
+.                   endif
+.                   if (count(_depend->build, _build.method = _build.method) > 0)
+$(my.prefix) --build-$(_depend.name)  Build $(textname(_depend)) libraries.
+.                       my.matched = 1
+.                   endif
+.               endfor
+.           endif
+.       endfor
+.   endnew
+.
+.#  consumed by installer (generic)
+$(my.prefix) --build-src-dir=<path>   Location of sources.
+$(my.prefix) --build-obj-dir=<path>   Location of intermediate objects.
+$(my.prefix) --build-config=<mode>    Specifies the build configuration.
+$(my.prefix)                            Valid values: { debug, release }
+$(my.prefix) --build-link=<mode>      Specifies link mode.
+$(my.prefix)                            Valid values: { dynamic, static }
+$(my.prefix) --build-use-local-src    Use existing sources in build-src-dir path.
+$(my.prefix) --verbose                Display verbose script output.
+$(my.prefix) --help, h                Display usage, overriding script execution.
+.
+.endmacro # emit_documentation
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+.endtemplate

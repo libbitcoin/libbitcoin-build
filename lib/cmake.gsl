@@ -8,90 +8,11 @@
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
 
+### requires: xml.gsl
+
 ###############################################################################
 # Functions
 ###############################################################################
-function registry(registrar, query)
-    define my.registrar = registry.registrar
-    define my.query = registry.query
-
-    if !defined(my.query.name)
-        abort "Malformed query: $(my.query)"
-    endif
-
-    if !(count(my.registrar->element(element.name = my.query.name)) = 1)
-        abort "Registrar lacks single entry for '$(my.query.name)'."
-    endif
-
-    return my.registrar->element(element.name = my.query.name)
-endfunction
-
-function package_name(query)
-    define my.query = package_name.query
-    define my.registry = registry(configuration->registrar(id = "dependency"), my.query)
-
-    if !defined(my.registry)
-        abort "Missing registry for '$(my.query)'."
-    endif
-
-    if !defined(my.registry->cmake) | !defined(my.registry->cmake.package)
-        abort "Missing registry details for '$(my.query)'."
-    endif
-
-    return my.registry->cmake.package
-endfunction
-
-function find_option_declaration(name, target, repository)
-    define my.name = find_option_declaration.name
-    define my.target = find_option_declaration.target
-    define my.repository = find_option_declaration.repository
-
-    if (count(my.target.option, .name = my.name) > 0)
-        define my.target_option = my.target->option(option.name = my.name)
-
-        if defined(my.target_option)
-            return my.target_option
-        endif
-    endif
-
-    for my.target.dependency as _depend
-        if (count(my.repository.library, library.name = _depend.name) > 0)
-            if defined(my.repository->library(library.name = _depend.name)->option(option.name = my.name))
-                return my.repository->library(name = _depend.name)->option(name = my.name)
-            endif
-        else
-            for configuration.repository as _repo
-                if (count(_repo.library, library.name = _depend.name) > 0)
-                    if defined(_repo->library(name = _depend.name)->option(name = my.name))
-                        return _repo->library(name = _depend.naem)->option(name = my.name)
-                    endif
-                endif
-            endfor
-        endif
-    endfor
-
-    abort "Missing option matching name '$(my.name)'."
-endfunction
-
-function get_option(reference, target, repository)
-    define my.reference = get_option.reference
-    define my.target = get_option.target
-    define my.repository = get_option.repository
-    define my.result = ""
-
-    if (defined(my.reference.option))
-        define my.option = find_option_declaration(my.reference.option, my.target, my.repository)
-
-        if (!defined(my.option))
-            abort "Target '$(my.target.name)' missing option '$(my.reference.option)'."
-        endif
-
-        my.result = "$(my.option.type:lower)-$(my.option.name:lower)"
-    endif
-
-    return my.result
-endfunction
-
 .endtemplate
 .template 1
 .
@@ -114,10 +35,11 @@ endfunction
 #------------------------------------------------------------------------------
 .endmacro
 .
-.macro emit_find_dependency(dependency, target, repository, function_name)
+.macro emit_find_dependency(dependency, target, repository, host, function_name)
 .   define my.dependency = emit_find_dependency.dependency
 .   define my.target = emit_find_dependency.target
 .   define my.repository = emit_find_dependency.repository
+.   define my.host = emit_find_dependency.host
 .   define my.function_name = emit_find_dependency.function_name
 .
 .   define my.indent = ""
@@ -131,7 +53,7 @@ if ( $(get_option(my.dependency, my.target, my.repository)) )
 .   define my.has_components = (count(my.dependency.component) > 0)
 .   define my.eol = my.has_components ?? "" ? " )"
 .   define my.version = defined(my.dependency.version) ?? " $(my.dependency.version)" ? ""
-.   define my.name = package_name(my.dependency)
+.   define my.name = package_name(my.dependency, my.host)
 .
 $(my.indent)$(my.function_name)( $(my.name)$(my.version) REQUIRED$(my.eol)
 .
