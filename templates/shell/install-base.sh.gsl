@@ -86,20 +86,41 @@ endfunction
 .   define my.configuration = emit_install_sh.configuration
 .   define my.repository = emit_install_sh.repository
 .
-.   copyleft(my.repository.name)
+.   new installable as _install
+.       canonical_dependency_list(_install, my.repository, my.configuration)
 .
-.   emit_documentation(my.meta, my.configuration, my.repository, "# ")
+.       copyleft(my.repository.name)
+.
+.       emit_documentation(my.meta, my.configuration, my.repository, _install, "# ")
 .
 # Exit this script on the first error.
 set -euo pipefail
 trap 'echo "FATAL ERROR: Command filed at line $LINENO: $BASH_COMMAND" >&2' ERR
 
+.       define_constants(_install, my.repository, my.configuration)
+
+.       define_display_functions()
+.
+.       define_directory_functions()
+.
+.   endnew
+.
 .endmacro # emit_install_sh
 .
-.macro emit_documentation(meta, configuration, repository, prefix)
+.macro define_constants(install, repository, configuration)
+.   define my.install = define_constants.install
+.   define my.repository = define_constants.repository
+.   define my.configuration = define_constants.configuration
+.
+.   heading1("Emitted constants")
+.
+.endmacro # define_constants
+.
+.macro emit_documentation(meta, configuration, repository, install, prefix)
 .   define my.meta = emit_documentation.meta
 .   define my.configuration = emit_documentation.configuration
 .   define my.repository = emit_documentation.repository
+.   define my.install = emit_documentation.install
 .   define my.prefix = emit_documentation.prefix
 .
 $(my.prefix)Script managing the build and installation of $(my.repository.name) and its dependencies.
@@ -109,30 +130,25 @@ $(my.prefix)Script options:
 $(my.prefix) --prefix=<path>          Library install location (defaults to /usr/local).
 .#  consumed by installer (specific)
 .
-.   new installable as _install
-.#       populate_dependencies(_install, my.repository)
-.       canonical_dependency_list(_install, my.repository, my.configuration)
+.   for my.install.dependency as _depend
+.       define my.matched = 0
 .
-.       for _install.dependency as _depend
-.           define my.matched = 0
+.       if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
+.           next
+.       endif
 .
-.           if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
-.               next
-.           endif
-.
-.           if (my.matched = 0)
-.               for my.meta.build as _build
-.                   if (my.matched > 0)
-.                       next
-.                   endif
-.                   if (count(_depend->build, _build.method = _build.method) > 0)
+.       if (my.matched = 0)
+.           for my.meta.build as _build
+.               if (my.matched > 0)
+.                   next
+.               endif
+.               if (count(_depend->build, _build.method = _build.method) > 0)
 $(my.prefix) --build-$(_depend.name)  Build $(textname(_depend)) libraries.
-.                       my.matched = 1
-.                   endif
-.               endfor
-.           endif
-.       endfor
-.   endnew
+.                   my.matched = 1
+.               endif
+.           endfor
+.       endif
+.   endfor
 .
 .#  consumed by installer (generic)
 $(my.prefix) --build-src-dir=<path>   Location of sources.

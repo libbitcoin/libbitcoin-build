@@ -46,5 +46,72 @@ endfunction
 .macro global.heading3(text)
 # $(my.text)
 .endmacro
+.
+.macro global.define_display_functions()
+display_heading_message()
+{
+    printf "\\n********************** %s **********************\\n" "$@"
+}
+
+display_message()
+{
+    printf "%s\\n" "$@"
+}
+
+display_error()
+{
+    >&2 printf "%s\\n" "$@"
+}
+.endmacro
+.
+.macro global.define_directory_functions()
+create_directory()
+{
+    local DIRECTORY="$1"
+    local MODE="$2"
+
+    if [[ -d "${DIRECTORY}" ]]; then
+        if [[ $MODE == "-f" ]]; then
+            display_message "'${DIRECTORY}' reinitializing..."
+            rm -rf "${DIRECTORY}"
+            mkdir -p "${DIRECTORY}"
+        else
+            display_message "'${DIRECTORY}' exists, reusing..."
+        fi
+    else
+        display_message "'${DIRECTORY}' initializing..."
+        mkdir -p "${DIRECTORY}"
+    fi
+}
+
+force_create_directory()
+{
+    create_directory "$@" -f
+}
+
+pop_directory()
+{
+    popd >/dev/null
+}
+
+push_directory()
+{
+    local DIRECTORY="$1"
+    pushd "${DIRECTORY}" >/dev/null
+}
+.endmacro
+.
+.macro global.initialize_environment()
+ENABLE_OPTS="\$(set -euo pipefail)
+DISABLE_OPTS="\$(set +e)
+
+eval "${ENABLE_OPTS}"
+trap 'echo "FATAL ERROR: Command failed at line ${LINENO}: ${BASH_COMMAND}" >&2' ERR
+.endmacro
+.
+.macro global.define_error_functions()
+
+.endmacro
+.
 .endtemplate
 
