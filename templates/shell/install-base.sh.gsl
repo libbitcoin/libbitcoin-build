@@ -23,8 +23,7 @@ gsl from "../lib/sh.gsl"
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_install_sh(meta, configuration, id)
-    define my.meta = generate_install_sh.meta
+function generate_install_sh(configuration, id)
     define my.configuration = generate_install_sh.configuration
     define my.id = generate_install_sh.id
     define my.filename = left(my.id, string.length(my.id) - 4)
@@ -36,15 +35,8 @@ function generate_install_sh(meta, configuration, id)
 
     define my.template = my.configuration->templates->template(.name = my.id)
 
-    if (!defined(my.template))
-        abort "Generator configuration missing."
-    endif
-
     require(my.template, "template", "outpath")
     define my.project_path_suffix = my.template.outpath
-
-    require(my.template, "template", "column")
-    my.meta.column = my.template.column
 
     for my.configuration.repository by .name as _repository
         require(_repository, "repository", "name")
@@ -59,7 +51,7 @@ function generate_install_sh(meta, configuration, id)
         notify(my.out_file)
         output(my.out_file)
 
-        emit_install_sh(my.meta, my.configuration, _repository)
+        emit_install_sh(my.template, my.configuration, _repository)
 
         close
      endfor _repository
@@ -75,6 +67,42 @@ endfunction
 function textname(dependency)
     define my.dependency = textname.dependency
     return defined(my.dependency.textname) ?? my.dependency.textname ? my.dependency.name
+endfunction
+
+function substitute(datasource, value, instructions)
+    define my.datasource = substitute.datasource
+    define my.result = substitute.value
+    define my.instructions = substitute.instructions
+
+    for my.instructions.substitute as _sub
+        define my.data = ""
+        if (_sub.data = "version")
+            my.data = my.datasource->archive.version
+        else
+            abort "Unrecognized datasource '$(_sub.data)'."
+        endif
+
+        my.result = string.replace(my.result, "$(_sub.symbol)|$(my.data)")
+        my.result = "$(my.result:$(_sub.type))"
+    endfor
+
+    return my.result
+endfunction
+
+function urlbase(dependency, source_type)
+    define my.dependency = urlbase.dependency
+    define my.type = urlbase.source_type
+
+    define my.url = my.dependency->$(my.type)->url
+    return substitute(my.dependency, my.url.pattern, my.url)
+endfunction
+
+function filename(dependency, source_type)
+    define my.dependency = filename.dependency
+    define my.type = filename.source_type
+
+    define my.filename = my.dependency->$(my.type)->filename
+    return substitute(my.dependency, my.filename.pattern, my.filename)
 endfunction
 
 ###############################################################################
@@ -95,43 +123,173 @@ endfunction
 .
 .       emit_documentation(my.meta, my.configuration, my.repository, _install, "# ", "")
 .
-
-# Exit this script on the first error.
-set -euo pipefail
-trap 'echo "FATAL ERROR: Command filed at line $LINENO: $BASH_COMMAND" >&2' ERR
+.       initialize_environment()
 .
-.       define_constants(_install, my.repository, my.configuration)
+.       define_constants(my.meta, my.configuration, my.repository, _install)
 .
-.       define_directory_functions()
+.       define_main(my.meta, my.configuration, my.repository, _install)
+.
+.       define_display_constants( my.meta, my.configuration, my.repository, _install)
+.
+.       define_display_help(my.meta, my.configuration, my.repository, _install)
 .
 .       define_display_functions()
 .
-.       define_display_help(my.meta, _install, my.repository, my.configuration)
+.       define_directory_functions()
 .
+.       define_error_functions()
+
+main "$@"
 .   endnew
 .
 .endmacro # emit_install_sh
 .
-.macro define_constants(install, repository, configuration)
-.   define my.install = define_constants.install
+.macro define_constants(meta, configuration, repository, install)
+.   define my.meta = define_constants.meta
+.   define my.configuration = define_constants.configuration
 .   define my.repository = define_constants.repository
 .   define my.configuration = define_constants.configuration
+.   define my.install = define_constants.install
 .
-.   heading1("Emitted constants")
+.   for my.install.dependency as _depend
+.       define handled = 0
+.       for my.meta.source as _source
+.           if (handled > 0)
+.               next
+.           endif
+.
+.           if defined(_depend->$(_source.type))
+.               if (_source.type = "archive")
+
+if [[ -z ${$(_depend.name:c)_URLBASE} ]]; then
+    $(_depend.name:c)_URLBASE="$(urlbase(_depend, _source.type))"
+fi
+if [[ -z ${$(_depend.name:c)_FILENAME} ]]; then
+    $(_depend.name:c)_FILENAME="$(filename(_depend, _source.type))"
+fi
+.               elsif (_source.type = "github")
+
+if [[ -z ${$(_depend.name:c)_OWNER} ]]; then
+    $(_depend.name:c)_OWNER="$(_depend->$(_source.type).owner)"
+fi
+if [[ -z ${$(_depend.name:c)_REPOSITORY} ]]; then
+    $(_depend.name:c)_REPOSITORY="$(_depend.name)"
+fi
+if [[ -z ${$(_depend.name:c)_TAG} ]]; then
+    $(_depend.name:c)_TAG="$(_depend->$(_source.type).tag)"
+fi
+.               else
+.                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
+.               endif
+.
+.               handled = 1
+.           endif
+.       endfor
+.   endfor
 .
 .endmacro # define_constants
 .
-.macro define_display_help(meta, install, repository, configuration)
+.macro define_display_constants(meta, configuration, repository, install)
+.   define my.meta = define_display_constants.meta
+.   define my.configuration = define_display_constants.configuration
+.   define my.repository = define_display_constants.repository
+.   define my.configuration = define_display_constants.configuration
+.   define my.install = define_display_constants.install
+
+display_constants()
+{
+.   emit_constants(my.meta, my.configuration, my.repository, my.install, "    display_message \"", "\"")
+}
+.
+.endmacro # define_display_constants
+.
+.macro define_display_help(meta, configuration, repository, install)
 .   define my.meta = define_display_help.meta
-.   define my.install = define_display_help.install
+.   define my.configuration = define_display_help.configuration
 .   define my.repository = define_display_help.repository
 .   define my.configuration = define_display_help.configuration
+.   define my.install = define_display_help.install
 
 display_help()
 {
 .   emit_documentation(my.meta, my.configuration, my.repository, my.install, "    display_message \"", "\"")
 }
 .endmacro # define_display_help
+.
+.macro emit_declare_options(meta, configuration, repository, install, prefix, suffix)
+.   define my.meta = emit_declare_options.meta
+.   define my.configuration = emit_declare_options.configuration
+.   define my.repository = emit_declare_options.repository
+.   define my.install = emit_declare_options.install
+.   define my.prefix = emit_declare_options.prefix
+.   define my.suffix = emit_declare_options.suffix
+.
+.   for my.install.dependency as _depend
+.       define handled = 0
+.       for my.meta.source as _source
+.           if (handled > 0)
+.               next
+.           endif
+.
+.           if defined(_depend->$(_source.type))
+.               if (_source.type = "archive")
+$(my.prefix)$(pad("$(_depend.name:c)_URLBASE", my.column, " ")): ${$(_depend.name:c)_URLBASE}$(my.suffix)
+$(my.prefix)$(pad("$(_depend.name:c)_FILENAME", my.column, " ")): ${$(_depend.name:c)_FILENAME}$(my.suffix)
+.               elsif (_source.type = "github")
+
+$(my.prefix)$(pad("$(_depend.name:c)_OWNER", my.column, " ")): ${$(_depend.name:c)_OWNER}$(my.suffix)
+$(my.prefix)$(pad("$(_depend.name:c)_REPOSITORY", my.column, " ")): ${$(_depend.name:c)_REPOSITORY}$(my.suffix)
+$(my.prefix)$(pad("$(_depend.name:c)_TAG", my.column, " ")): ${$(_depend.name:c)_TAG}$(my.suffix)
+.               else
+.                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
+.               endif
+.
+.               handled = 1
+.           endif
+.       endfor
+.   endfor
+.endmacro # emit_options
+.
+.macro emit_constants(meta, configuration, repository, install, prefix, suffix)
+.   define my.meta = emit_constants.meta
+.   define my.configuration = emit_constants.configuration
+.   define my.repository = emit_constants.repository
+.   define my.install = emit_constants.install
+.   define my.prefix = emit_constants.prefix
+.   define my.suffix = emit_constants.suffix
+.
+.   if !defined(my.meta->column)
+.       abort "The provided template lacks 'column' data."
+.   endif
+.
+.   require(my.meta->column, "column", "const")
+.   define my.column = my.meta->column.const
+.
+.   for my.install.dependency as _depend
+.       define handled = 0
+.       for my.meta.source as _source
+.           if (handled > 0)
+.               next
+.           endif
+.
+.           if defined(_depend->$(_source.type))
+.               if (_source.type = "archive")
+$(my.prefix)$(pad("$(_depend.name:c)_URLBASE", my.column, " ")): ${$(_depend.name:c)_URLBASE}$(my.suffix)
+$(my.prefix)$(pad("$(_depend.name:c)_FILENAME", my.column, " ")): ${$(_depend.name:c)_FILENAME}$(my.suffix)
+.               elsif (_source.type = "github")
+
+$(my.prefix)$(pad("$(_depend.name:c)_OWNER", my.column, " ")): ${$(_depend.name:c)_OWNER}$(my.suffix)
+$(my.prefix)$(pad("$(_depend.name:c)_REPOSITORY", my.column, " ")): ${$(_depend.name:c)_REPOSITORY}$(my.suffix)
+$(my.prefix)$(pad("$(_depend.name:c)_TAG", my.column, " ")): ${$(_depend.name:c)_TAG}$(my.suffix)
+.               else
+.                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
+.               endif
+.
+.               handled = 1
+.           endif
+.       endfor
+.   endfor
+.endmacro # emit_constants
 .
 .macro emit_documentation(meta, configuration, repository, install, prefix, suffix)
 .   define my.meta = emit_documentation.meta
@@ -141,11 +299,18 @@ display_help()
 .   define my.prefix = emit_documentation.prefix
 .   define my.suffix = emit_documentation.suffix
 .
+.   if !defined(my.meta->column)
+.       abort "The provided template lacks 'column' data."
+.   endif
+.
+.   require(my.meta->column, "column", "help")
+.   define my.column = my.meta->column.help
+.
 $(my.prefix)Script managing the build and installation of $(my.repository.name) and its dependencies.$(my.suffix)
 $(my.prefix)$(my.suffix)
 $(my.prefix)Script options:$(my.suffix)
 .#  translated by installer
-$(my.prefix) $(pad("--prefix=<path>", my.meta.column, " "))Library install location (defaults to /usr/local).$(my.suffix)
+$(my.prefix) $(pad("--prefix=<path>", my.column, " "))Library install location (defaults to /usr/local).$(my.suffix)
 .#  consumed by installer (specific)
 .
 .   for my.install.dependency as _depend
@@ -161,7 +326,7 @@ $(my.prefix) $(pad("--prefix=<path>", my.meta.column, " "))Library install locat
 .                   next
 .               endif
 .               if (count(_depend->build, _build.method = _build.method) > 0)
-$(my.prefix) $(pad("--build-$(_depend.name)", my.meta.column, " "))Build $(textname(_depend)) libraries.$(my.suffix)
+$(my.prefix) $(pad("--build-$(_depend.name)", my.column, " "))Build $(textname(_depend)) libraries.$(my.suffix)
 .                   my.matched = 1
 .               endif
 .           endfor
@@ -169,20 +334,38 @@ $(my.prefix) $(pad("--build-$(_depend.name)", my.meta.column, " "))Build $(textn
 .   endfor
 .
 .#  consumed by installer (generic)
-$(my.prefix) $(pad("--build-src-dir=<path>", my.meta.column, " "))Location of sources.$(my.suffix)
-$(my.prefix) $(pad("--build-obj-dir=<path>", my.meta.column, " "))Location of intermediate objects.$(my.suffix)
-$(my.prefix) $(pad("--build-config=<mode>", my.meta.column, " "))Specifies the build configuration.$(my.suffix)
-$(my.prefix) $(pad("", my.meta.column, " "))  Valid values: { debug, release }$(my.suffix)
-$(my.prefix) $(pad("--build-link=<mode>", my.meta.column, " "))Specifies link mode.$(my.suffix)
-$(my.prefix) $(pad("", my.meta.column, " "))  Valid values: { dynamic, static }$(my.suffix)
-$(my.prefix) $(pad("--build-use-local-src", my.meta.column, " "))Use existing sources in build-src-dir path.$(my.suffix)
-$(my.prefix) $(pad("--verbose", my.meta.column, " "))Display verbose script output.$(my.suffix)
-$(my.prefix) $(pad("--help, h", my.meta.column, " "))Display usage, overriding script execution.$(my.suffix)
+$(my.prefix) $(pad("--build-src-dir=<path>", my.column, " "))Location of sources.$(my.suffix)
+$(my.prefix) $(pad("--build-obj-dir=<path>", my.column, " "))Location of intermediate objects.$(my.suffix)
+$(my.prefix) $(pad("--build-config=<mode>", my.column, " "))Specifies the build configuration.$(my.suffix)
+$(my.prefix) $(pad("", my.column, " "))  Valid values: { debug, release }$(my.suffix)
+$(my.prefix) $(pad("--build-link=<mode>", my.column, " "))Specifies link mode.$(my.suffix)
+$(my.prefix) $(pad("", my.column, " "))  Valid values: { dynamic, static }$(my.suffix)
+$(my.prefix) $(pad("--build-use-local-src", my.column, " "))Use existing sources in build-src-dir path.$(my.suffix)
+$(my.prefix) $(pad("--verbose", my.column, " "))Display verbose script output.$(my.suffix)
+$(my.prefix) $(pad("--help, h", my.column, " "))Display usage, overriding script execution.$(my.suffix)
 $(my.prefix)$(my.suffix)
 $(my.prefix)All unrecognized options provided shall be passed as configuration$(my.suffix)
 $(my.prefix)options for all dependencies.$(my.suffix)
 .
 .endmacro # emit_documentation
+.
+.macro define_main(meta, configuration, repository, install)
+.   define my.meta = define_main.meta
+.   define my.configuration = define_main.configuration
+.   define my.repository = define_main.repository
+.   define my.install = define_main.install
+.
+
+main()
+{
+    # initiaization
+    # argument consumption
+    # build
+    # completion
+    echo "Hello world!"
+}
+.endmacro # define_main
+.
 .endtemplate
 .template 0
 ###############################################################################

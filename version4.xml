@@ -735,6 +735,15 @@
         target="bitcoin::server" />
     </dependency>
     <dependency name="boost" textname="Boost">
+      <archive version="1.86.0">
+        <url pattern="https://archives.boost.io/release/version/source/">
+          <substitute data="version" symbol="version" type="no" />
+        </url>
+        <filename pattern="boost_version.tar.bz2" filetype="tar.bz2">
+          <substitute data="version" symbol="version" type="c" />
+        </filename>
+      </archive>
+      <github owner="boostorg" tag="boost-1.86.0" />
       <build method="bjam" version="1.86.0" conditional="true" parallel="true">
         <option value="--with-iostreams" />
         <option value="--with-locale" />
@@ -785,15 +794,24 @@
       outpath="builds/cmake" />
     <template name="install-gnu.sh.gsl"
       path="shell"
-      outpath="builds/gnu"
-      column="24" />
+      outpath="builds/gnu">
+      <column help="24" const="32" />
+      <source type="archive" />
+      <source type="github" />
+    </template>
     <template name="install-cmake.sh.gsl"
       path="shell"
-      outpath="builds/cmake"
-      column="24" />
+      outpath="builds/cmake">
+      <column help="24" const="32" />
+      <source type="archive" />
+      <source type="github" />
+    </template>
     <template name="install-presets.sh.gsl"
       path="shell"
-      outpath="builds/cmake"
-      column="24" />
+      outpath="builds/cmake">
+      <column help="24" const="32" />
+      <source type="github" />
+      <source type="archive" />
+    </template>
   </templates>
 </configuration>

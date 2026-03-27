@@ -33,18 +33,6 @@ gsl from "../templates/shell/install-base.sh.gsl"
 # Execution
 ###############################################################################
 
-new metadata as _meta
-    new _meta.build as _build
-        _build.method = "preset"
-    endnew
-    new _meta.build as _build
-        _build.method = "cmake"
-    endnew
-    new _meta.build as _build
-        _build.method = "bjam"
-    endnew
-
-    generate_install_sh(_meta, configuration, "$(script)")
-endnew
+generate_install_sh(configuration, "$(script)")
 
 .endtemplate

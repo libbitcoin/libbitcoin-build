@@ -74,7 +74,7 @@ create_directory()
     local MODE="$2"
 
     if [[ -d "${DIRECTORY}" ]]; then
-        if [[ $MODE == "-f" ]]; then
+        if [[ ${MODE} == "-f" ]]; then
             display_message "'${DIRECTORY}' reinitializing..."
             rm -rf "${DIRECTORY}"
             mkdir -p "${DIRECTORY}"
@@ -106,10 +106,10 @@ push_directory()
 .
 .macro global.initialize_environment()
 
-ENABLE_OPTS="\$(set -euo pipefail)
-DISABLE_OPTS="\$(set +e)
+OPTS_ENABLE="\$(set -euo pipefail)"
+OPTS_DISABLE="\$(set +e)"
 
-eval "${ENABLE_OPTS}"
+eval "${OPTS_ENABLE}"
 trap 'echo "FATAL ERROR: Command failed at line ${LINENO}: ${BASH_COMMAND}" >&2' ERR
 .endmacro
 .
@@ -117,12 +117,12 @@ trap 'echo "FATAL ERROR: Command failed at line ${LINENO}: ${BASH_COMMAND}" >&2'
 
 enable_error_on_exit()
 {
-    eval "${ENABLE_OPTS}"
+    eval "${OPTS_ENABLE}"
 }
 
 disable_error_on_exit()
 {
-    eval "${DISABLE_OPTS}"
+    eval "${OPTS_DISABLE}"
 }
 .endmacro
 .

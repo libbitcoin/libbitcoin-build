@@ -194,8 +194,6 @@ function canonical_dependency_list(result, repository, configuration)
     define my.configuration = canonical_dependency_list.configuration
 
     for my.repository.library as _target
-        canonicalize(my.result, _target, my.configuration->registrar(id = "dependency"), "dependency", "name")
-
         # for simplicity, assuming only libraries traversed recursively
         for _target.dependency as _dep
             if (count_matches_name(my.configuration, "repository", _dep.name) > 0)
@@ -203,6 +201,8 @@ function canonical_dependency_list(result, repository, configuration)
                 canonical_dependency_list(my.result, my.dep_rep, my.configuration)
             endif
         endfor
+
+        canonicalize(my.result, _target, my.configuration->registrar(id = "dependency"), "dependency", "name")
     endfor
     for my.repository.test as _target
         canonicalize(my.result, _target, my.configuration->registrar(id = "dependency"), "dependency", "name")
