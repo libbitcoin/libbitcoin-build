@@ -39,6 +39,7 @@ endfunction
 .endmacro
 .
 .macro global.heading2(text)
+
 # $(my.text)
 #------------------------------------------------------------------------------
 .endmacro
@@ -48,6 +49,7 @@ endfunction
 .endmacro
 .
 .macro global.define_display_functions()
+
 display_heading_message()
 {
     printf "\\n********************** %s **********************\\n" "$@"
@@ -65,6 +67,7 @@ display_error()
 .endmacro
 .
 .macro global.define_directory_functions()
+
 create_directory()
 {
     local DIRECTORY="$1"
@@ -102,6 +105,7 @@ push_directory()
 .endmacro
 .
 .macro global.initialize_environment()
+
 ENABLE_OPTS="\$(set -euo pipefail)
 DISABLE_OPTS="\$(set +e)
 
@@ -111,6 +115,15 @@ trap 'echo "FATAL ERROR: Command failed at line ${LINENO}: ${BASH_COMMAND}" >&2'
 .
 .macro global.define_error_functions()
 
+enable_error_on_exit()
+{
+    eval "${ENABLE_OPTS}"
+}
+
+disable_error_on_exit()
+{
+    eval "${DISABLE_OPTS}"
+}
 .endmacro
 .
 .endtemplate
