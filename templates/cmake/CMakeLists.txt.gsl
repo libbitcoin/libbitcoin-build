@@ -867,9 +867,7 @@ $(my.indent))
 .
 .   new compiler as _compiler
 .   canonicalize(_compiler, my.target->compiler, configuration->canonical->compiler, my.element, "id")
-    "CANONICAL_TARGET: $(my.property) | $(name(my.target)) | $(my.target.name)"
-    "---------------------------------------------"
-    $(_compiler.string())
+.
 .   if (count(_compiler.$(my.element)) > 0)
 
 $(my.indent)$(my.property)( $(my.target.name)

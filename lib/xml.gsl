@@ -62,7 +62,7 @@ function global.canonicalize(result, host, canonical, name, identifier)
     for my.host.$(my.name) as _element
         if (!defined(_element.$(my.identifier)))
             copy _element to my.result
-        elsif (count(my.result.$(my.name), defined(.$(my.identifier)) & (.$(my.identifier) = _element.$(my.identifier))) = 0)
+        elsif (count(my.result.$(my.name), defined(this.$(my.identifier)) & (this.$(my.identifier) = _element.$(my.identifier)), this) = 0)
             if (count(my.canonical.$(my.name), .$(my.identifier) = _element.$(my.identifier)) > 0)
                 copy my.canonical->$(my.name)(.$(my.identifier) = _element.$(my.identifier)) to my.result
             else
