@@ -105,6 +105,64 @@ function filename(dependency, source_type)
     return substitute(my.dependency, my.filename.pattern, my.filename)
 endfunction
 
+function build_hints(dependencies, meta, configuration, repository)
+    define my.dependencies = build_hints.dependencies
+    define my.meta = build_hints.meta
+    define my.configuration = build_hints.configuration
+    define my.repository = build_hints.repository
+
+    # hint source type
+    for my.dependencies.dependency as _depend
+        define my.handled_source = 0
+        for my.meta.source as _source
+            if (my.handled_source > 0)
+                next
+            endif
+
+            if defined(_depend->$(_source.type))
+                if !((_source.type = "archive") | (_source.type = "github"))
+                    abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
+                endif
+
+                _depend.hint_source = _source.type
+                my.handled_source = 1
+            endif
+        endfor
+
+        if (my.handled_source = 0)
+            abort "No source recognized for dependency '$(_depend.name)'."
+        endif
+
+        define my.handled_build = 0
+
+        for my.meta.build as _build
+            if (my.handled_build > 0)
+                next
+            endif
+
+            if defined(_depend->build(build.method = _build.method))
+                define my.active = _depend->build(build.method = _build.method)
+
+                if !((my.active.method = "gnu") | \
+                     (my.active.method = "cmake") | \
+                     (my.active.method = "presets") | \
+                     (my.active.method = "boost_build"))
+                    abort "Unrecognized build method '$(my.active.method)'."
+                endif
+
+                _depend.hint_build = _build.method
+                my.handled_build = 1
+            else
+                echo "Failed to match build method '$(_build.method)'."
+            endif
+        endfor
+
+        if (my.handled_build = 0)
+           abort "No build method recognized for dependency '$(_depend.name)'."
+        endif
+    endfor
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -118,6 +176,7 @@ endfunction
 .
 .   new installable as _install
 .       canonical_dependency_list(_install, my.repository, my.configuration)
+.       build_hints(_install, my.meta, my.configuration, my.repository)
 .
 .       copyleft(my.repository.name)
 .
@@ -152,39 +211,28 @@ main "$@"
 .   define my.install = define_constants.install
 .
 .   for my.install.dependency as _depend
-.       define my.handled = 0
-.       for my.meta.source as _source
-.           if (my.handled > 0)
-.               next
-.           endif
+.       if (!defined(_depend->$(_depend.hint_source)))
+.           abort "Expected hint_source value '$(_depend.hint_source)' not found for dependency '$(_depend.name)'."
+.       endif
 .
-.           if defined(_depend->$(_source.type))
-.               if (_source.type = "archive")
+.       if (_depend.hint_source = "archive")
 
 if [[ -z ${$(_depend.name:c)_URLBASE} ]]; then
-    $(_depend.name:c)_URLBASE="$(urlbase(_depend, _source.type))"
+    $(_depend.name:c)_URLBASE="$(urlbase(_depend, _depend.hint_source))"
 fi
 if [[ -z ${$(_depend.name:c)_FILENAME} ]]; then
-    $(_depend.name:c)_FILENAME="$(filename(_depend, _source.type))"
+    $(_depend.name:c)_FILENAME="$(filename(_depend, _depend.hint_source))"
 fi
-.               elsif (_source.type = "github")
+.       elsif (_depend.hint_source = "github")
 
 if [[ -z ${$(_depend.name:c)_OWNER} ]]; then
-    $(_depend.name:c)_OWNER="$(_depend->$(_source.type).owner)"
+    $(_depend.name:c)_OWNER="$(_depend->$(_depend.hint_source).owner)"
 fi
 if [[ -z ${$(_depend.name:c)_TAG} ]]; then
-    $(_depend.name:c)_TAG="$(_depend->$(_source.type).tag)"
+    $(_depend.name:c)_TAG="$(_depend->$(_depend.hint_source).tag)"
 fi
-.               else
-.                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
-.               endif
-.
-.               my.handled = 1
-.           endif
-.       endfor
-.
-.       if (my.handled = 0)
-.           abort "No source recognized for dependency '$(_depend.name)'."
+.       else
+.           abort "'$(_depend.name)': Declared source type '$(_depend.hint_source)' not supported."
 .       endif
 .   endfor
 .
@@ -225,43 +273,31 @@ display_help()
 .   define my.indent = emit_declare_options.indent
 .
 .   for my.install.dependency as _depend
-.       define my.handled = 0
-.       for my.meta.build as _build
-.           if (my.handled > 0)
-.               next
-.           endif
+.       if !defined(_depend->build(build.method = _depend.hint_build))
+.           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
+.       endif
 .
-.           if defined(_depend->build(build.method = _build.method))
-.               define my.active = _depend->build(build.method = _build.method)
+.       define my.active = _depend->build(build.method = _depend.hint_build)
 .
-.               if !((my.active.method = "gnu") | \
-                     (my.active.method = "cmake") | \
-                     (my.active.method = "presets") | \
-                     (my.active.method = "boost_build"))
-.                   abort "Unrecognized build method '$(my.active.method)'."
-.               endif
+.       if !((my.active.method = "gnu") | \
+            (my.active.method = "cmake") | \
+            (my.active.method = "presets") | \
+            (my.active.method = "boost_build"))
+.
+.           abort "Unrecognized build method '$(my.active.method)'."
+.       endif
 .
 
 $(my.indent)$(_depend.name:c)_FLAGS=($((count(my.active.flag) = 0) ?? ")" ? "")
-.               for my.active.flag as _flag
+.       for my.active.flag as _flag
     $(my.indent)"$(_flag.value)"$(last() ?? ")" ? "")
-.               endfor
+.       endfor
 .
 
 $(my.indent)$(_depend.name:c)_OPTIONS=($((count(my.active.option) = 0) ?? ")" ? "")
-.               for my.active.option as _option
+.       for my.active.option as _option
     $(my.indent)"$(_option.value)"$(last() ?? ")" ? "")
-.               endfor
-.
-.               my.handled = 1
-.           else
-.               echo "Failed to match build method '$(_build.method)'."
-.           endif
 .       endfor
-.
-.       if (my.handled = 0)
-           abort "No build method recognized for dependency '$(_depend.name)'."
-.       endif
 .   endfor
 .endmacro # emit_options
 .
@@ -281,30 +317,19 @@ $(my.indent)$(_depend.name:c)_OPTIONS=($((count(my.active.option) = 0) ?? ")" ? 
 .   define my.column = my.meta->column.const
 .
 .   for my.install.dependency as _depend
-.       define my.handled = 0
-.       for my.meta.source as _source
-.           if (my.handled > 0)
-.               next
-.           endif
+.       if !defined(_depend->$(_depend.hint_source))
+.           abort "Expected hint_source value '$(_depend.hint_source)' not found for dependency '$(_depend.name)'."
+.       endif
 .
-.           if defined(_depend->$(_source.type))
-.               if (_source.type = "archive")
+.       if (_depend.hint_source = "archive")
 $(my.prefix)$(pad("$(_depend.name:c)_URLBASE", my.column, " ")): ${$(_depend.name:c)_URLBASE}$(my.suffix)
 $(my.prefix)$(pad("$(_depend.name:c)_FILENAME", my.column, " ")): ${$(_depend.name:c)_FILENAME}$(my.suffix)
-.               elsif (_source.type = "github")
+.       elsif (_depend.hint_source = "github")
 
 $(my.prefix)$(pad("$(_depend.name:c)_OWNER", my.column, " ")): ${$(_depend.name:c)_OWNER}$(my.suffix)
 $(my.prefix)$(pad("$(_depend.name:c)_TAG", my.column, " ")): ${$(_depend.name:c)_TAG}$(my.suffix)
-.               else
-.                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
-.               endif
-.
-.               my.handled = 1
-.           endif
-.       endfor
-.
-.       if (my.handled = 0)
-.           abort "No source recognized for dependency '$(_depend.name)'."
+.       else
+.           abort "'$(_depend.name)': Declared source type '$(_depend.hint_source)' not supported."
 .       endif
 .   endfor
 .endmacro # emit_constants
@@ -332,23 +357,18 @@ $(my.prefix) $(pad("--prefix=<path>", my.column, " "))Library install location (
 .#  consumed by installer (specific)
 .
 .   for my.install.dependency as _depend
-.       define my.matched = 0
-.
 .       if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
 .           next
 .       endif
 .
-.       if (my.matched = 0)
-.           for my.meta.build as _build
-.               if (my.matched > 0)
-.                   next
-.               endif
-.               if (count(_depend->build, _build.method = _build.method) > 0)
-$(my.prefix) $(pad("--build-$(_depend.name)", my.column, " "))Build $(textname(_depend)) libraries.$(my.suffix)
-.                   my.matched = 1
-.               endif
-.           endfor
+.       # This condition can be turned to 'next' if dependencies are allowed to be present
+.       # without an installation routine in the installer.
+.       # (This may be necessary for tracy due to installation toolchain restrictions)
+.       if !defined(_depend->build(build.method = _depend.hint_build))
+.           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
 .       endif
+.
+$(my.prefix) $(pad("--build-$(_depend.name)", my.column, " "))Build $(textname(_depend)) libraries.$(my.suffix)
 .   endfor
 .
 .#  consumed by installer (generic)
