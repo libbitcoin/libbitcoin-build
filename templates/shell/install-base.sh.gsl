@@ -172,9 +172,6 @@ fi
 if [[ -z ${$(_depend.name:c)_OWNER} ]]; then
     $(_depend.name:c)_OWNER="$(_depend->$(_source.type).owner)"
 fi
-if [[ -z ${$(_depend.name:c)_REPOSITORY} ]]; then
-    $(_depend.name:c)_REPOSITORY="$(_depend.name)"
-fi
 if [[ -z ${$(_depend.name:c)_TAG} ]]; then
     $(_depend.name:c)_TAG="$(_depend->$(_source.type).tag)"
 fi
@@ -240,7 +237,7 @@ display_help()
 .               if !((my.active.method = "gnu") | \
                      (my.active.method = "cmake") | \
                      (my.active.method = "presets") | \
-                     (my.active.method = "bjam"))
+                     (my.active.method = "boost_build"))
 .                   abort "Unrecognized build method '$(my.active.method)'."
 .               endif
 .
@@ -297,7 +294,6 @@ $(my.prefix)$(pad("$(_depend.name:c)_FILENAME", my.column, " ")): ${$(_depend.na
 .               elsif (_source.type = "github")
 
 $(my.prefix)$(pad("$(_depend.name:c)_OWNER", my.column, " ")): ${$(_depend.name:c)_OWNER}$(my.suffix)
-$(my.prefix)$(pad("$(_depend.name:c)_REPOSITORY", my.column, " ")): ${$(_depend.name:c)_REPOSITORY}$(my.suffix)
 $(my.prefix)$(pad("$(_depend.name:c)_TAG", my.column, " ")): ${$(_depend.name:c)_TAG}$(my.suffix)
 .               else
 .                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
@@ -376,6 +372,7 @@ $(my.prefix)options for all dependencies.$(my.suffix)
 .   define my.configuration = define_main.configuration
 .   define my.repository = define_main.repository
 .   define my.install = define_main.install
+.   define my.step = "    "
 .
 
 main()
@@ -387,10 +384,92 @@ main()
     # declarations
 .   emit_declare_options(my.meta, my.configuration, my.repository, my.install, "    ")
 
-    # build
+.   for my.install.dependency as _depend
+.       define my.found_source = 0
+.       define my.vname = "$(_depend.name:c)"
+.       define my.priority_source = ""
+.       define my.indent = my.step
+.
 
-    # completion
-    echo "Hello world!"
+.       if (is_defined_positive(_depend, "conditional"))
+$(my.indent)if [[ -v BUILD_$(my.vname) ]] &&  [[ ${BUILD_$(my.vname)} == "yes" ]]; then
+.           my.indent = "$(my.step)$(my.indent)"
+.       endif
+.
+.       for my.meta.source as _source
+.           if (my.found_source > 0)
+.               next
+.           endif
+.
+.           if defined(_depend->$(_source.type))
+.               my.priority_source = _source.type
+.
+.               if (_source.type = "archive")
+.                   if !defined(_depend->archive->filename)
+.                       abort "Required 'filename' not present."
+.                   endif
+.
+.                   require(_depend->archive->filename, "filename", "compression")
+.                   define my.compression = _depend->$(_source.type)->filename.compression
+.
+$(my.indent)create_from_archive "${$(my.vname)_FILENAME}" "${$(my.vname)_URLBASE}" "$(my.compression)"
+.               elsif (_source.type = "github")
+.
+$(my.indent)create_from_github "${$(my.vname)_OWNER}" "$(_depend.name)" "${$(my.vname)_TAG}"
+.               else
+.                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
+.               endif
+.
+.               my.found_source = 1
+.           endif
+.       endfor
+.
+.       if (my.found_source = 0)
+.           abort "No matching source found for '$(_depend.name)'."
+.       endif
+.
+$(my.indent)local SAVE_CPPFLAGS="${CPPFLAGS}"
+$(my.indent)export CPPFLAGS="${CPPFLAGS} ${$(my.vname)_FLAGS[@]}"
+.       define my.found_build = 0
+.       for my.meta.build as _build
+.           if (my.found_build > 0)
+.               next
+.           endif
+.
+.           if defined(_depend->build(build.method = _build.method))
+.               define my.active_build = _depend->build(build.method = _build.method)
+.
+.               if (_build.method = "gnu")
+.                   require(my.active_build, "build", "filepath")
+$(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)"
+.               elsif (_build.method = "cmake")
+.                   require(my.active_build, "build", "filepath")
+$(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)"
+.               elsif (_build.method = "presets")
+.                   require(my.active_build, "build", "filepath")
+$(my.indent)build_presets "$(_depend.name)" "$(my.active_build.filepath)"
+.               elsif (_build.method = "boost_build")
+$(my.indent)build_boost "$(_depend.name)" "${$(my.vname)_OPTIONS[@]}"
+.               else
+.                   abort "Unrecognized build method '$(_build.method)'."
+.               endif
+.
+.               my.found_build = 1
+.           endif
+.       endfor
+.
+$(my.indent)export CPPFLAGS="${SAVE_CPPFLAGS}"
+.       if (is_defined_positive(_depend, "conditional"))
+.           my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
+$(my.indent)fi
+.       endif
+.
+.       if (my.found_build = 0)
+.           abort "No matching build found for '$(_depend.name)'."
+.       endif
+.   endfor
+
+    display_message "Completed successfully."
 }
 .endmacro # define_main
 .

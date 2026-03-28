@@ -734,17 +734,17 @@
         package="libbitcoin-server"
         target="bitcoin::server" />
     </dependency>
-    <dependency name="boost" textname="Boost">
+    <dependency name="boost" textname="Boost" conditional="true">
       <archive version="1.86.0">
         <url pattern="https://archives.boost.io/release/version/source/">
           <substitute data="version" symbol="version" type="no" />
         </url>
-        <filename pattern="boost_version.tar.bz2" filetype="tar.bz2">
+        <filename pattern="boost_version.tar.bz2" compression="bzip2">
           <substitute data="version" symbol="version" type="c" />
         </filename>
       </archive>
       <github owner="boostorg" tag="boost-1.86.0" />
-      <build method="bjam" version="1.86.0" conditional="true" parallel="true">
+      <build method="boost_build" version="1.86.0" parallel="true">
         <flag value="-Wno-enum-constexpr-conversion" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
@@ -756,7 +756,7 @@
       </build>
       <cmake namespace="Boost" package="Boost" />
     </dependency>
-    <dependency name="secp256k1" textname="libsecp256k1">
+    <dependency name="secp256k1" textname="libsecp256k1" conditional="true">
       <github owner="bitcoin-core" tag="v0.7.0" />
       <build method="gnu" filepath="." parallel="true">
         <flag value="-w" />
@@ -797,7 +797,7 @@
       path="shell"
       outpath="builds/gnu">
       <build method="gnu" />
-      <build method="bjam" />
+      <build method="boost_build" />
       <column help="24" const="32" />
       <source type="archive" />
       <source type="github" />
@@ -806,7 +806,7 @@
       path="shell"
       outpath="builds/cmake">
       <build method="cmake" />
-      <build method="bjam" />
+      <build method="boost_build" />
       <column help="24" const="32" />
       <source type="archive" />
       <source type="github" />
@@ -816,7 +816,7 @@
       outpath="builds/cmake">
       <build method="preset" />
       <build method="cmake" />
-      <build method="bjam" />
+      <build method="boost_build" />
       <column help="24" const="32" />
       <source type="github" />
       <source type="archive" />
