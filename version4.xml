@@ -745,6 +745,7 @@
       </archive>
       <github owner="boostorg" tag="boost-1.86.0" />
       <build method="bjam" version="1.86.0" conditional="true" parallel="true">
+        <flag value="-Wno-enum-constexpr-conversion" />
         <option value="--with-iostreams" />
         <option value="--with-locale" />
         <option value="--with-program_options" />
@@ -795,6 +796,8 @@
     <template name="install-gnu.sh.gsl"
       path="shell"
       outpath="builds/gnu">
+      <build method="gnu" />
+      <build method="bjam" />
       <column help="24" const="32" />
       <source type="archive" />
       <source type="github" />
@@ -802,6 +805,8 @@
     <template name="install-cmake.sh.gsl"
       path="shell"
       outpath="builds/cmake">
+      <build method="cmake" />
+      <build method="bjam" />
       <column help="24" const="32" />
       <source type="archive" />
       <source type="github" />
@@ -809,6 +814,9 @@
     <template name="install-presets.sh.gsl"
       path="shell"
       outpath="builds/cmake">
+      <build method="preset" />
+      <build method="cmake" />
+      <build method="bjam" />
       <column help="24" const="32" />
       <source type="github" />
       <source type="archive" />

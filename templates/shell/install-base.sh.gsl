@@ -152,9 +152,9 @@ main "$@"
 .   define my.install = define_constants.install
 .
 .   for my.install.dependency as _depend
-.       define handled = 0
+.       define my.handled = 0
 .       for my.meta.source as _source
-.           if (handled > 0)
+.           if (my.handled > 0)
 .               next
 .           endif
 .
@@ -182,9 +182,13 @@ fi
 .                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
 .               endif
 .
-.               handled = 1
+.               my.handled = 1
 .           endif
 .       endfor
+.
+.       if (my.handled = 0)
+.           abort "No source recognized for dependency '$(_depend.name)'."
+.       endif
 .   endfor
 .
 .endmacro # define_constants
@@ -216,37 +220,51 @@ display_help()
 }
 .endmacro # define_display_help
 .
-.macro emit_declare_options(meta, configuration, repository, install, prefix, suffix)
+.macro emit_declare_options(meta, configuration, repository, install, indent)
 .   define my.meta = emit_declare_options.meta
 .   define my.configuration = emit_declare_options.configuration
 .   define my.repository = emit_declare_options.repository
 .   define my.install = emit_declare_options.install
-.   define my.prefix = emit_declare_options.prefix
-.   define my.suffix = emit_declare_options.suffix
+.   define my.indent = emit_declare_options.indent
 .
 .   for my.install.dependency as _depend
-.       define handled = 0
-.       for my.meta.source as _source
-.           if (handled > 0)
+.       define my.handled = 0
+.       for my.meta.build as _build
+.           if (my.handled > 0)
 .               next
 .           endif
 .
-.           if defined(_depend->$(_source.type))
-.               if (_source.type = "archive")
-$(my.prefix)$(pad("$(_depend.name:c)_URLBASE", my.column, " ")): ${$(_depend.name:c)_URLBASE}$(my.suffix)
-$(my.prefix)$(pad("$(_depend.name:c)_FILENAME", my.column, " ")): ${$(_depend.name:c)_FILENAME}$(my.suffix)
-.               elsif (_source.type = "github")
-
-$(my.prefix)$(pad("$(_depend.name:c)_OWNER", my.column, " ")): ${$(_depend.name:c)_OWNER}$(my.suffix)
-$(my.prefix)$(pad("$(_depend.name:c)_REPOSITORY", my.column, " ")): ${$(_depend.name:c)_REPOSITORY}$(my.suffix)
-$(my.prefix)$(pad("$(_depend.name:c)_TAG", my.column, " ")): ${$(_depend.name:c)_TAG}$(my.suffix)
-.               else
-.                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
+.           if defined(_depend->build(build.method = _build.method))
+.               define my.active = _depend->build(build.method = _build.method)
+.
+.               if !((my.active.method = "gnu") | \
+                     (my.active.method = "cmake") | \
+                     (my.active.method = "presets") | \
+                     (my.active.method = "bjam"))
+.                   abort "Unrecognized build method '$(my.active.method)'."
 .               endif
 .
-.               handled = 1
+
+$(my.indent)$(_depend.name:c)_FLAGS=($((count(my.active.flag) = 0) ?? ")" ? "")
+.               for my.active.flag as _flag
+    $(my.indent)"$(_flag.value)"$(last() ?? ")" ? "")
+.               endfor
+.
+
+$(my.indent)$(_depend.name:c)_OPTIONS=($((count(my.active.option) = 0) ?? ")" ? "")
+.               for my.active.option as _option
+    $(my.indent)"$(_option.value)"$(last() ?? ")" ? "")
+.               endfor
+.
+.               my.handled = 1
+.           else
+.               echo "Failed to match build method '$(_build.method)'."
 .           endif
 .       endfor
+.
+.       if (my.handled = 0)
+           abort "No build method recognized for dependency '$(_depend.name)'."
+.       endif
 .   endfor
 .endmacro # emit_options
 .
@@ -266,9 +284,9 @@ $(my.prefix)$(pad("$(_depend.name:c)_TAG", my.column, " ")): ${$(_depend.name:c)
 .   define my.column = my.meta->column.const
 .
 .   for my.install.dependency as _depend
-.       define handled = 0
+.       define my.handled = 0
 .       for my.meta.source as _source
-.           if (handled > 0)
+.           if (my.handled > 0)
 .               next
 .           endif
 .
@@ -285,9 +303,13 @@ $(my.prefix)$(pad("$(_depend.name:c)_TAG", my.column, " ")): ${$(_depend.name:c)
 .                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
 .               endif
 .
-.               handled = 1
+.               my.handled = 1
 .           endif
 .       endfor
+.
+.       if (my.handled = 0)
+.           abort "No source recognized for dependency '$(_depend.name)'."
+.       endif
 .   endfor
 .endmacro # emit_constants
 .
@@ -358,9 +380,15 @@ $(my.prefix)options for all dependencies.$(my.suffix)
 
 main()
 {
-    # initiaization
+    # initialization
+
     # argument consumption
+
+    # declarations
+.   emit_declare_options(my.meta, my.configuration, my.repository, my.install, "    ")
+
     # build
+
     # completion
     echo "Hello world!"
 }
