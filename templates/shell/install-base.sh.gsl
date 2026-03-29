@@ -152,8 +152,6 @@ function build_hints(dependencies, meta, configuration, repository)
 
                 _depend.hint_build = _build.method
                 my.handled_build = 1
-            else
-                echo "Failed to match build method '$(_build.method)'."
             endif
         endfor
 
@@ -197,6 +195,46 @@ endfunction
 .       define_directory_functions()
 .
 .       define_error_functions()
+.
+.       new keys as _keys
+.           for _install.dependency as _depend
+.               if (count(_keys.method, method.name = _depend.hint_build) = 0)
+.                   new _keys.method as _method
+.                       _method.name = _depend.hint_build
+.                   endnew
+.               endif
+.
+.               if (count(_keys.source, source.name = _depend.hint_source) = 0)
+.                   new _keys.source as _source
+.                       _source.name = _depend.hint_source
+.                   endnew
+.               endif
+.           endfor
+.
+.           for _keys.source as _source
+.               if (_source.name = "archive")
+.                   define_source_archive()
+.               elsif (_source.name = "github")
+.                   define_source_github()
+.               else
+.                   abort "Unrecognized source '$(_source.name)'."
+.               endif
+.           endfor
+.
+.           for _keys.method as _method
+.               if (_method.name = "cmake")
+.                   define_build_cmake()
+.               elsif (_method.name = "preset")
+.                   define_build_preset()
+.               elsif (_method.name = "gnu")
+.                   define_build_gnu()
+.               elsif (_method.name = "boost_build")
+.                   define_build_boost()
+.               else
+.                   abort "Unrecognized build method '$(_method.name)'."
+.               endif
+.           endfor
+.       endnew
 
 main "$@"
 .   endnew
@@ -387,6 +425,69 @@ $(my.prefix)options for all dependencies.$(my.suffix)
 .
 .endmacro # emit_documentation
 .
+.macro define_source_archive()
+
+source_archive()
+{
+    echo "SOURCE ARCHIVE!"
+}
+.endmacro # define_source_archive
+.
+.macro define_source_github()
+
+source_github()
+{
+    echo "SOURCE GITHUB!"
+}
+.endmacro # define_source_github
+.
+.macro define_build_cmake()
+
+build_cmake()
+{
+    local PROJECT="$1"
+    local CMAKE_PATH="$2"
+    shift 2
+
+    echo "BUILD_CMAKE!"
+}
+.endmacro # define_build_cmake
+.
+.macro define_build_preset()
+
+build_preset()
+{
+    local P`ROJECT="$1"
+    local CMAKE_PATH="$2"
+    shift 2
+
+    echo "BUILD_PRESET!"
+}
+.endmacro # define_build_presets
+.
+.macro define_build_gnu()
+
+build_gnu()
+{
+    local PROJECT="$1"
+    local GNU_PATH="$2"
+    shift 2
+
+    echo "BUILD_GNU!"
+}
+.endmacro # define_build_gnu
+.
+.macro define_build_boost()
+
+build_boost()
+{
+    local PROJECT="$1"
+    shift
+
+    echo "BUILD_BOOST!"
+}
+.endmacro # define_build_boost
+.
 .macro define_main(meta, configuration, repository, install)
 .   define my.meta = define_main.meta
 .   define my.configuration = define_main.configuration
@@ -461,13 +562,13 @@ $(my.indent)export CPPFLAGS="${CPPFLAGS} ${$(my.vname)_FLAGS[@]}"
 .
 .               if (_build.method = "gnu")
 .                   require(my.active_build, "build", "filepath")
-$(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)"
+$(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)" "${$(my.vname)_OPTIONS[@]}"
 .               elsif (_build.method = "cmake")
 .                   require(my.active_build, "build", "filepath")
-$(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)"
+$(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "${$(my.vname)_OPTIONS[@]}"
 .               elsif (_build.method = "presets")
 .                   require(my.active_build, "build", "filepath")
-$(my.indent)build_presets "$(_depend.name)" "$(my.active_build.filepath)"
+$(my.indent)build_presets "$(_depend.name)" "$(my.active_build.filepath)" "${$(my.vname)_OPTIONS[@]}"
 .               elsif (_build.method = "boost_build")
 $(my.indent)build_boost "$(_depend.name)" "${$(my.vname)_OPTIONS[@]}"
 .               else
