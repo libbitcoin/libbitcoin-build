@@ -102,7 +102,9 @@ function filename(dependency, source_type)
     define my.type = filename.source_type
 
     define my.filename = my.dependency->$(my.type)->filename
-    return substitute(my.dependency, my.filename.pattern, my.filename)
+    define my.expanded_filename = difference(substitute(my.dependency, "v$(my.filename.pattern)", my.filename), 1)
+
+    return "$(my.expanded_filename)$(my.filename.filetype)"
 endfunction
 
 function build_hints(dependencies, meta, configuration, repository)
@@ -175,6 +177,8 @@ endfunction
 .   new installable as _install
 .       canonical_dependency_list(_install, my.repository, my.configuration)
 .       build_hints(_install, my.meta, my.configuration, my.repository)
+.
+.       shebang("bash")
 .
 .       copyleft(my.repository.name)
 .
@@ -429,7 +433,35 @@ $(my.prefix)options for all dependencies.$(my.suffix)
 
 source_archive()
 {
-    echo "SOURCE ARCHIVE!"
+    local PROJECT="$1"
+    local FILENAME="$2"
+    local URL_BASE="$3"
+    local COMPRESSION="$4"
+    shift 4
+
+    # push to srcdir
+
+    create_directory "${PROJECT}"
+    push_directory "${PROJECT}"
+
+    local TAR="tar"
+    local WGET="wget --quiet"
+
+    if [[ ${DISPLAY_VERBOSE} ]]; then
+        TAR="tar --verbose"
+        WGET="wget --verbose"
+    fi
+
+    # retrieve file
+    ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
+
+    # extract to expected path
+    ${TAR} --extract --file "${FILENAME}" "--${COMPRESSION}" --strip-components=1
+
+    # pop ${PROJECT}
+    pop_directory
+
+    display_message "Completed download and extraction successfully."
 }
 .endmacro # define_source_archive
 .
@@ -533,10 +565,10 @@ $(my.indent)if [[ -v BUILD_$(my.vname) ]] &&  [[ ${BUILD_$(my.vname)} == "yes" ]
 .                   require(_depend->archive->filename, "filename", "compression")
 .                   define my.compression = _depend->$(_source.type)->filename.compression
 .
-$(my.indent)create_from_archive "${$(my.vname)_FILENAME}" "${$(my.vname)_URLBASE}" "$(my.compression)"
+$(my.indent)source_archive "$(_depend.name)" "${$(my.vname)_FILENAME}" "${$(my.vname)_URLBASE}" "$(my.compression)"
 .               elsif (_source.type = "github")
 .
-$(my.indent)create_from_github "${$(my.vname)_OWNER}" "$(_depend.name)" "${$(my.vname)_TAG}"
+$(my.indent)source_github "${$(my.vname)_OWNER}" "$(_depend.name)" "${$(my.vname)_TAG}"
 .               else
 .                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
 .               endif
