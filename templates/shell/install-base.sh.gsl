@@ -439,29 +439,42 @@ source_archive()
     local COMPRESSION="$4"
     shift 4
 
-    # push to srcdir
+    # TODO change to appropriate src directory
 
-    create_directory "${PROJECT}"
-    push_directory "${PROJECT}"
+    if [ -d "${PROJECT}" ] && 
+       [[ -v BUILD_USE_LOCAL_SRC ]] &&
+       [[ "${BUILD_USE_LOCAL_SRC}" == "yes" ]]; then
+        display_message "Reusing existing '${PROJECT}' directory..."
+    else
+        if [ -d "${PROJECT}" ]; then
+            display_message "Encounted existing '${PROJECT}' directory, removing..."
+            recursive_remove_directory "${PROJECT}"
+        fi
 
-    local TAR="tar"
-    local WGET="wget --quiet"
+        display_message "Retrieving ${PROJECT}..."
 
-    if [[ ${DISPLAY_VERBOSE} ]]; then
-        TAR="tar --verbose"
-        WGET="wget --verbose"
+        create_directory "${PROJECT}"
+        push_directory "${PROJECT}"
+
+        local TAR="tar"
+        local WGET="wget --quiet"
+
+        if [[ ${DISPLAY_VERBOSE} ]]; then
+            TAR="tar --verbose"
+            WGET="wget --verbose"
+        fi
+
+        # retrieve file
+        ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
+
+        # extract to expected path
+        ${TAR} --extract --file "${FILENAME}" "--${COMPRESSION}" --strip-components=1
+
+        # pop ${PROJECT}
+        pop_directory
+
+        display_message "Completed download and extraction successfully."
     fi
-
-    # retrieve file
-    ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
-
-    # extract to expected path
-    ${TAR} --extract --file "${FILENAME}" "--${COMPRESSION}" --strip-components=1
-
-    # pop ${PROJECT}
-    pop_directory
-
-    display_message "Completed download and extraction successfully."
 }
 .endmacro # define_source_archive
 .
@@ -469,7 +482,35 @@ source_archive()
 
 source_github()
 {
-    echo "SOURCE GITHUB!"
+    local OWNER="$1"
+    local REPOSITORY="$2"
+    local TAG="$3"
+    shift 3
+
+    local ONESHOT=""
+
+    if [[ -v BUILD_SINGLE_USE_REPOSITORY ]] &&
+       [[ "${BUILD_SINGLE_USE_REPOSITORY}" == "yes" ]]; then
+        ONESHOT="--depth 1 --single-branch"
+    fi
+
+    # TODO: change to appropriate src directory
+
+    display_heading_message "Preparing to acquire ${OWNER}/${REPOSITORY}/${TAG}"
+
+    if [ -d "${REPOSITORY}" ] && 
+       [[ -v BUILD_USE_LOCAL_SRC ]] &&
+       [[ "${BUILD_USE_LOCAL_SRC}" == "yes" ]]; then
+        display_message "Reusing existing '${REPOSITORY}'..."
+    else
+        if [ -d "${REPOSITORY}" ]; then
+            display_message "Encounted existing '${REPOSITORY}' directory, removing..."
+            recursive_remove_directory "${REPOSITORY}"
+        fi
+
+        display_message "Cloning ${OWNER}/${REPOSITORY}/${TAG}..."
+        git clone ${ONESHOT} --branch "${TAG}" "https://github.com/${OWNER}/${REPOSITORY}"
+    fi
 }
 .endmacro # define_source_github
 .
