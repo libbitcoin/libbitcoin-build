@@ -735,6 +735,7 @@
         target="bitcoin::server" />
     </dependency>
     <dependency name="boost" textname="Boost" conditional="true">
+      <prefix root="true" with="true" />
       <archive version="1.86.0">
         <url pattern="https://archives.boost.io/release/version/source/">
           <substitute data="version" symbol="version" type="no" />
@@ -798,7 +799,7 @@
       outpath="builds/gnu">
       <build method="gnu" />
       <build method="boost_build" />
-      <column help="24" const="32" parse="28" />
+      <column help="28" const="32" parse="28" />
       <source type="archive" />
       <source type="github" />
     </template>
@@ -807,7 +808,7 @@
       outpath="builds/cmake">
       <build method="cmake" />
       <build method="boost_build" />
-      <column help="24" const="32" parse="28" />
+      <column help="28" const="32" parse="28" />
       <source type="archive" />
       <source type="github" />
     </template>
@@ -817,7 +818,7 @@
       <build method="preset" />
       <build method="cmake" />
       <build method="boost_build" />
-      <column help="24" const="32" parse="28" />
+      <column help="28" const="32" parse="28" />
       <source type="github" />
       <source type="archive" />
     </template>

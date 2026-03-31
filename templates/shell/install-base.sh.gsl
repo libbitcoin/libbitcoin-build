@@ -202,6 +202,8 @@ endfunction
 .
 .       define_error_functions()
 .
+.       define_strip_optimization()
+.
 .       new keys as _keys
 .           for _install.dependency as _depend
 .               if (count(_keys.method, method.name = _depend.hint_build) = 0)
@@ -246,6 +248,20 @@ main "$@"
 .   endnew
 .
 .endmacro # emit_install_sh
+.
+.macro define_strip_optimization()
+.
+
+strip_optimization()
+{
+    echo "$1" | sed -E '
+        s/-O([0-3]|s|fast|g|z|size|speed)?b?/ /g
+        s/-g([0-3]|gdb|dwarf[0-9]*)?\b?/ /g
+        s/[[:space:]]+/ /g
+        s/^ | $//g
+    '
+}
+.endmacro # define_strip_optimization
 .
 .macro define_constants(meta, configuration, repository, install)
 .   define my.meta = define_constants.meta
@@ -394,7 +410,15 @@ $(my.prefix)$(pad("BUILD_CONFIG", my.column, " ")): ${BUILD_CONFIG}$(my.suffix)
 $(my.prefix)$(pad("BUILD_LINK", my.column, " ")): ${BUILD_LINK}$(my.suffix)
 $(my.prefix)$(pad("BUILD_FULL_REPOSITORIES", my.column, " ")): ${BUILD_FULL_REPOSITORIES}$(my.suffix)
 $(my.prefix)$(pad("BUILD_USE_LOCAL_SRC", my.column, " ")): ${BUILD_USE_LOCAL_SRC}$(my.suffix)
+$(my.prefix)$(pad("PARALLEL", my.column, " ")): ${PARALLEL}$(my.suffix)
+$(my.prefix)$(pad("PREFIX", my.column, " ")): ${PREFIX}$(my.suffix)
 $(my.prefix)$(pad("DISPLAY_VERBOSE", my.column, " ")): ${DISPLAY_VERBOSE}$(my.suffix)
+
+.#
+.#$(my.prefix)if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+.#    $(my.prefix)$(pad("", my.column, " ")): ${}$(my.suffix)
+.#$(my.prefix)fi
+.#
 .endmacro # emit_build_variables
 .
 .macro emit_constants(meta, configuration, repository, install, prefix, suffix)
@@ -449,6 +473,8 @@ $(my.prefix)Script managing the build and installation of $(my.repository.name) 
 $(my.prefix)$(my.suffix)
 $(my.prefix)Script options:$(my.suffix)
 .#  translated by installer
+$(my.prefix) $(pad("--parallel=<int>", my.column, " "))Number of jobs to run simultaneously.$(my.suffix)
+$(my.prefix) $(pad("", my.column, " "))  Default: discovery$(my.suffix)
 $(my.prefix) $(pad("--prefix=<path>", my.column, " "))Library install location (defaults to /usr/local).$(my.suffix)
 .#  consumed by installer (specific)
 .
@@ -470,6 +496,7 @@ $(my.prefix) $(pad("--build-$(_depend.name)", my.column, " "))Build $(textname(_
 .#  consumed by installer (generic)
 $(my.prefix) $(pad("--build-src-dir=<path>", my.column, " "))Location of sources.$(my.suffix)
 $(my.prefix) $(pad("--build-obj-dir=<path>", my.column, " "))Location of intermediate objects.$(my.suffix)
+$(my.prefix) $(pad("(--build-obj-dir-relative)", my.column, " "))Use build-obj-dir as relative to project sources.$(my.suffix)
 $(my.prefix) $(pad("--build-config=<mode>", my.column, " "))Specifies the build configuration.$(my.suffix)
 $(my.prefix) $(pad("", my.column, " "))  Valid values: { debug, release }$(my.suffix)
 $(my.prefix) $(pad("--build-link=<mode>", my.column, " "))Specifies link mode.$(my.suffix)
@@ -493,9 +520,9 @@ source_archive()
     local COMPRESSION="$4"
     shift 4
 
-    push_directory "${BUILD_SRC_DIR}"
-
     display_heading_message "Preparing to acquire ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}"
 
     if [ -d "${PROJECT}" ] && 
        [[ -v BUILD_USE_LOCAL_SRC ]] &&
@@ -520,17 +547,12 @@ source_archive()
             WGET="wget --verbose"
         fi
 
-        if [[ -v SIMULATE ]] && [[ "${SIMULATE}" == "yes" ]]; then
-            TAR="SIMULATE | ${TAR}"
-            WGET="SIMULATE | ${WGET}"
-        fi
-
         # retrieve file
-        display_message "${WGET} --output-document '${FILENAME}' '${URL_BASE}${FILENAME}'"
+        ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
         # ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
 
         # extract to expected path
-        display_message "${TAR} --extract --file '${FILENAME}' '--${COMPRESSION}' --strip-components=1"
+        ${TAR} --extract --file "${FILENAME}" --${COMPRESSION} --strip-components=1
         # ${TAR} --extract --file "${FILENAME}" "--${COMPRESSION}" --strip-components=1
 
         # pop ${PROJECT}
@@ -553,6 +575,8 @@ source_github()
     local TAG="$3"
     shift 3
 
+    display_heading_message "Preparing to acquire ${OWNER}/${REPOSITORY}/${TAG}"
+
     local GIT_CLONE="git clone"
     local CLONE_OPTIONS="--depth 1 --single-branch"
 
@@ -562,8 +586,6 @@ source_github()
     fi
 
     push_directory "${BUILD_SRC_DIR}"
-
-    display_heading_message "Preparing to acquire ${OWNER}/${REPOSITORY}/${TAG}"
 
     if [ -d "${REPOSITORY}" ] && 
        [[ -v BUILD_USE_LOCAL_SRC ]] &&
@@ -577,11 +599,7 @@ source_github()
 
         display_message "Cloning ${OWNER}/${REPOSITORY}/${TAG}..."
 
-        if [[ -v SIMULATE ]] && [[ "${SIMULATE}" == "yes" ]]; then
-            GIT_CLONE="SIMULATE | ${GIT_CLONE}"
-        fi
-
-        display_message "${GIT_CLONE} ${CLONE_OPTIONS} --branch \"${TAG}\" \"https://github.com/${OWNER}/${REPOSITORY}\""
+        ${GIT_CLONE} ${CLONE_OPTIONS} --branch "${TAG}" "https://github.com/${OWNER}/${REPOSITORY}"
     fi
 
     # pop BUILD_SRC_DIR
@@ -640,7 +658,84 @@ build_boost()
 
     display_heading_message "Preparing to build ${PROJECT}"
 
-    echo "BUILD_BOOST!"
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    local SAVE_IFS="${IFS}"
+    IFS=' '
+
+    # Compute configuration
+    if [[ "${BUILD_LINK}" == "dynamic" ]]; then
+        BOOST_LINK="shared"
+    elif [[ "${BUILD_LINK}" == "static" ]]; then
+        BOOST_LINK="static"
+    else
+        BOOST_LINK="static,shared"
+    fi
+
+    if [[ -v CC ]]; then
+        BOOST_TOOLSET="toolset=${CC}"
+    fi
+
+    if [[ (${OS} == Linux && ${CC} == clang*) || (${OS} == OpenBSD) ]]; then
+        STDLIB_FLAG="-stdlib=lib${STDLIB}"
+        BOOST_CXXFLAGS="cxxflags=${STDLIB_FLAG}"
+        BOOST_LINKFLAGS="linkflags=${STDLIB_FLAG}"
+    fi
+
+    guessed_toolset=`${BUILD_SRC_DIR}/${PROJECT}/tools/build/src/engine/build.sh --guess-toolset`
+    CXXFLAGS="-w" ${BUILD_SRC_DIR}/${PROJECT}/tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
+    cp "${BUILD_SRC_DIR}/${PROJECT}/tools/build/src/engine/b2" .
+
+    if ! [[ -v BOOST_CXXFLAGS ]]; then
+        BOOST_CXXFLAGS="cxxflags=${BOOST_FLAGS[@]}"
+    else
+        BOOST_CXXFLAGS="${BOOST_CXXFLAGS} ${BOOST_FLAGS[@]}"
+    fi
+
+    # Prebuild status report
+    display_message "${PROJECT} configuration."
+    display_message "--------------------------------------------------------------------"
+    display_message "variant               : release"
+    display_message "threading             : multi"
+    display_message "toolset               : ${CC}"
+    display_message "boost cxxflags        : ${BOOST_CXXFLAGS}"
+    display_message "boost linkflags       : ${BOOST_LINKFLAGS}"
+    display_message "link                  : ${BOOST_LINK}"
+    display_message "-sNO_BZIP2            : 1"
+    display_message "-sNO_ZSTD             : 1"
+    display_message "-j                    : ${PARALLEL}"
+    display_message "-d0                   : [supress informational messages]"
+    display_message "-q                    : [stop at the first error]"
+    display_message "--reconfigure         : [ignore cached configuration]"
+    display_message "--prefix              : ${PREFIX}"
+    display_message "BOOST_OPTIONS         : $*"
+    display_message "cxxflags (ignored)    : ${CXXFLAGS}"
+    display_message "--------------------------------------------------------------------"
+
+    # Begin build
+    ./bootstrap.sh --with-bjam=./b2 --prefix=${PREFIX}
+
+    ./b2 install \\
+        "cxxstd=20" \\
+        "variant=release" \\
+        "threading=multi" \\
+        "${BOOST_TOOLSET}" \\
+        "${BOOST_CXXFLAGS}" \\
+        "${BOOST_LINKFLAGS}" \\
+        "link=${BOOST_LINK}" \\
+        "warnings=off" \\
+        "-sNO_BZIP2=1" \\
+        "-sNO_ZSTD=1" \\
+        "-j ${PARALLEL}" \\
+        "-d0" \\
+        "-q" \\
+        "--reconfigure" \\
+        "--prefix=${PREFIX}" \\
+        "$@"
+
+    IFS="${SAVE_IFS}"
+
+    pop_directory # BUILD_SRC_DIR
 }
 .endmacro # define_build_boost
 .
@@ -674,14 +769,15 @@ $(my.c_indent)case ${OPTION} in
 $(my.o_indent)$(pad("(--build-$(_depend.name))", my.column, " "))BUILD_$(_depend.name)="yes";;
 .   endfor
 .
-$(my.o_indent)$(pad("(--build-src-dir=*)", my.column, " "))BUILD_SRC_DIR="${OPTION=#*=}";;
+$(my.o_indent)$(pad("(--build-src-dir=*)", my.column, " "))BUILD_SRC_DIR="${OPTION#*=}";;
 $(my.o_indent)$(pad("(--build-obj-dir=*)", my.column, " "))BUILD_OBJ_DIR="${OPTION#*=}";;
 $(my.o_indent)$(pad("(--build-obj-dir-relative)", my.column, " "))BUILD_OBJ_DIR_RELATIVE="yes";;
 $(my.o_indent)$(pad("(--build-config=*)", my.column, " "))BUILD_CONFIG="${OPTION#*=}";;
 $(my.o_indent)$(pad("(--build-link=*)", my.column, " "))BUILD_LINK="${OPTION#*=}";;
 $(my.o_indent)$(pad("(--build-full-repositories)", my.column, " "))BUILD_FULL_REPOSITORIES="yes";;
 $(my.o_indent)$(pad("(--build-use-local-src)", my.column, " "))BUILD_USE_LOCAL_SRC="yes";;
-$(my.o_indent)$(pad("(--simulate|-s)", my.column, " "))SIMULATE="yes";;
+$(my.o_indent)$(pad("(--parallel=*|-j=)", my.column, " "))PARALLEL="${OPTION#*=}";;
+$(my.o_indent)$(pad("(--prefix=*)", my.column, " "))PREFIX="${OPTION#*=}";;
 $(my.o_indent)$(pad("(--verbose|-v)", my.column, " "))DISPLAY_VERBOSE="yes";;
 $(my.o_indent)$(pad("(--help|-h)", my.column, " "))DISPLAY_HELP="yes";;
 $(my.c_indent)esac
@@ -689,15 +785,17 @@ $(my.indent)done
 .
 .endmacro # define_parse_options
 .
-.macro define_sanitize_input(meta, configuration, repository, install, indent)
+.macro define_sanitize_input(meta, configuration, repository, install)
 .   my.meta = define_sanitize_input.meta
 .   my.configuration = define_sanitize_input.configuration
 .   my.repository = define_sanitize_input.repository
 .   my.install = define_sanitize_input.install
-.   my.indent = define_sanitize_input.indent
 .
 
-    # defaults and sanitization
+    OS=\$(uname -s)
+
+    # defaults and sanitization: script static options
+
     # --build-src-dir
     if ! [[ -v BUILD_SRC_DIR ]]; then
         BUILD_SRC_DIR="\$(pwd)"
@@ -736,7 +834,7 @@ $(my.indent)done
             BUILD_OBJ_DIR="\$(pwd)"
             pop_directory
             display_message_verbose "Determined absolute path for build-obj-dir '${BUILD_OBJ_DIR}'."
-        else
+       else
             create_directory "${BUILD_OBJ_DIR}"
             push_directory "${BUILD_OBJ_DIR}"
             BUILD_OBJ_DIR="\$(pwd)"
@@ -749,21 +847,181 @@ $(my.indent)done
     if ! [[ -v BUILD_CONFIG ]]; then
         BUILD_CONFIG="release"
         display_message_verbose "No build-config specified, defaulting to '${BUILD_CONFIG}'."
-    elif [[ "${BUILD_CONFIG}" == "debug" ]] || [[ "${BUILD_CONFIG}" == "release" ]]; then
+    elif [[ "${BUILD_CONFIG}" != "debug" ]] && [[ "${BUILD_CONFIG}" != "release" ]]; then
         display_error "Provided build-config '${BUILD_CONFIG}' not a valid value."
         display_help
         exit 1
+    else
+        display_message_verbose "Using provided build-config '${BUILD_CONFIG}'"
     fi
 
     # --build-link
     if ! [[ -v BUILD_LINK ]]; then
         BUILD_LINK="static"
-        display_message "No build-link specified, defaulting to '${BUILD_LINK}'."
+        display_message_verbose "No build-link specified, defaulting to '${BUILD_LINK}'."
     elif [[ "${BUILD_LINK}" == "dynamic" ]] || [[ "${BUILD_LINK}" == "static" ]]; then
         display_error "Provided build-link ${BUILD_LINK}' not a valid value."
         display_help
         exit 1
     fi
+
+    # --prefix
+    if ! [[ -v PREFIX ]]; then
+        # Always set a prefix (required for OSX and lib detection).
+        PREFIX="/usr/local"
+        display_message_verbose "No prefix specified, defaulting to '${PREFIX}'."
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=${PREFIX}" )
+    else
+        # Incorporate the custom libdir into each object, for link time resolution
+        if [[ -v LD_RUN_PATH ]]; then
+            export LD_RUN_PATH="${LD_RUN_PATH}:${PREFIX}/lib"
+        else
+            export LD_RUN_PATH="${PREFIX}/lib"
+        fi
+
+        if [[ -v LD_LIBRARY_PATH ]]; then
+            export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${PREFIX}/lib"
+        else
+            export LD_LIBRARY_PATH="${PREFIX}/lib"
+        fi
+    fi
+
+    if [[ -v PREFIX ]]; then
+        # Set the prefix-based package config directory.
+        PREFIX_PKG_CONFIG_DIR="${PREFIX}/lib/pkgconfig"
+
+        # Prioritize prefix package config in PKG_CONFIG_PATH search path.
+        if [[ -v PKG_CONFIG_PATH ]]; then
+            export PKG_CONFIG_PATH="${PREFIX_PKG_CONFIG_DIR}:${PKG_CONFIG_PATH}"
+        else
+            export PKG_CONFIG_PATH="${PREFIX_PKG_CONFIG_PDIR}"
+        fi
+
+        with_pkgconfigdir="--with-pkgconfigdir=${PREFIX_PKG_CONFIG_DIR}"
+    fi
+
+    # --parallel
+    if ! [[ -v PARALLEL ]]; then
+        if [[ ${OS} == Linux ]]; then
+            PARALLEL=\$(nproc)
+        elif [[ ${OS} == Darwin ]] || [[ ${OS} == OpenBSD ]]; then
+            PARALLEL=\$(sysctl -n hw.ncpu)
+        else
+            display_error "Unsupported system: '${OS}'"
+            display_error "  Unable to determine value for '--parallel='"
+            display_error "  Please specify explicitly to continue."
+            display_error ""
+            display_help
+            exit 1
+        fi
+    fi
+
+    # state rationalization of standard build variables
+
+    if [[ ${OS} == OpenBSD ]]; then
+        make() { gmake "$@"; }
+    fi
+
+    if ! [[ -v ${STDLIB} ]]; then
+        if [[ ${OS} == Darwin ]]; then
+            STDLIB="c++"
+        elif [[ ${OS} == OpenBSD ]]; then
+            STDLIB="estdc++"
+        else
+            STDLIB="stdc++"
+        fi
+    else
+        define_message_verbose "STDLIB using defined value '${STDLIB}'"
+    fi
+
+    if ! [[ -v ${CC} ]]; then
+        if [[ ${OS} == Darwin ]]; then
+            export CC="clang"
+        elif [[ ${OS} == OpenBSD ]]; then
+            export CC="egcc"
+        fi
+    else
+        display_message_verbose "CC using defined value '${CC}'"
+    fi
+
+    if ! [[ -v ${CXX} ]]; then
+        if [[ ${OS} == Darwin ]]; then
+            export CXX="clang++"
+        elif [[ ${OS} == OpenBSD ]]; then
+            export CXX="eg++"
+        fi
+    else
+        display_message_verbose "CXX using defined value '${CXX}'"
+    fi
+
+    # translate BUILD_CONFIG to ZFLAGS
+    if [[ -v BUILD_CONFIG ]]; then
+        display_message_verbose "*** Build config specified, calculating flags..."
+
+        if [[ "${BUILD_CONFIG}" == "debug" ]]; then
+            BUILD_FLAGS="-Og -g"
+        elif [[ "${BUILD_CONFIG}" == "release" ]]; then
+            BUILD_FLAGS="-O3"
+        fi
+
+        if [[ -v CFLAGS ]]; then
+            display_message_verbose "CFLAGS intitally '${CFLAGS}'"
+            SANITIZED_CFLAGS=\$(strip_optimization "$CFLAGS")
+            export CFLAGS="${SANITIZED_CFLAGS} ${BUILD_FLAGS}"
+            display_message_verbose "CFLAGS modified to '${CFLAGS}'"
+        else
+            export CFLAGS="${BUILD_FLAGS}"
+            display_message_verbose "Exporting CFLAGS '${CFLAGS}'"
+        fi
+
+        if [[ -v CXXFLAGS ]]; then
+            display_message_verbose "CXXFLAGS intitally '${CXXFLAGS}'"
+            SANITIZED_CXXFLAGS=\$(strip_optimization "$CXXFLAGS")
+            export CXXFLAGS="${SANITIZED_CXXFLAGS} ${BUILD_FLAGS}"
+            display_message_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
+        else
+            export CXXFLAGS="${BUILD_FLAGS}"
+            display_message_verbose "Exporting CXXFLAGS '${CXXFLAGS}'"
+        fi
+    fi
+
+    # TODO add --enable-ndebug for gnu to CONFIGURE_OPTIONS
+
+    # translace BUILD_LINK to appropriate arguments
+    if [[ -v BUILD_LINK ]]; then
+        display_message_verbose "BUILD_LINK translating into passthrough arguments."
+    fi
+
+    if [[ ${OS} == Linux && ${CC} == clang* ]] || [[ ${OS} == OpenBSD ]]; then
+        export LDLIBS="-l${STDLIB} ${LDLIBS}"
+        display_message_verbose "LDLIBS has been manipulated to encode STDLIB linkage."
+    fi
+
+    # defaults and sanitization: generated options
+.
+.   for my.install.dependency as _depend where is_defined_positive(_depend, "conditional")
+.       if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
+.           next
+.       endif
+.
+.       if defined(_depend->prefix)
+.           define my.hint_root = is_defined_positive(_depend->prefix, "root")
+.           define my.hint_with = is_defined_positive(_depend->prefix, "with")
+.
+.           if (my.hint_root | my.hint_with)
+
+    if [[ -v BUILD_$(_depend.name:c) ]]; then
+.               if (my.hint_root)
+        export $(_depend.name:upper)_ROOT="${PREFIX}"
+.               endif
+.               if (my.hint_with)
+        with_$(_depend.name:c)="--with-${$(_depend.name:c)}=${PREFIX}"
+.               endif
+    fi
+.           endif
+.       endif
+.   endfor
+
 .
 .endmacro # define_sanitize_input
 .
@@ -779,8 +1037,12 @@ main()
 {
     # argument consumption
 .   define_parse_options(my.meta, my.configuration, my.repository, my.install, "    ")
-.
-.   define_sanitize_input(my.meta, my.configuration, my.repository, my.install, "    ")
+
+    if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+        display_build_variables
+    fi
+
+.   define_sanitize_input(my.meta, my.configuration, my.repository, my.install)
 
     # handle help
     if [[ -v DISPLAY_HELP ]] && [[ "${DISPLAY_HELP}" == "yes" ]]; then
@@ -790,8 +1052,11 @@ main()
 
     display_heading_message "Configuration"
     display_build_variables
-    display_heading_message "State"
-    display_constants
+
+    if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+        display_heading_message "State"
+        display_constants
+    fi
 
     # declarations
 .   emit_declare_options(my.meta, my.configuration, my.repository, my.install, "    ")
@@ -802,6 +1067,8 @@ main()
 .       define my.priority_source = ""
 .       define my.indent = my.step
 .
+.       # TODO remove when done testing argument calculation
+.       next
 
 .       if (is_defined_positive(_depend, "conditional"))
 $(my.indent)if [[ -v BUILD_$(my.vname) ]] &&  [[ ${BUILD_$(my.vname)} == "yes" ]]; then
