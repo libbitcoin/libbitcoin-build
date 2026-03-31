@@ -60,6 +60,13 @@ display_message()
     printf "%s\\n" "$@"
 }
 
+display_message_verbose()
+{
+    if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+        display_message "$@"
+    fi
+}
+
 display_error()
 {
     >&2 printf "%s\\n" "$@"
@@ -72,6 +79,12 @@ create_directory()
 {
     local DIRECTORY="$1"
     local MODE="$2"
+
+    if [[ -v SIMULATE ]] &&
+       [[ "${SIMULATE}" == "yes" ]]; then
+        display_message "SIMULATE | create_directory '${DIRECTORY}' '${MODE}'"
+        return 0
+    fi
 
     if [[ -d "${DIRECTORY}" ]]; then
         if [[ ${MODE} == "-f" ]]; then
@@ -94,20 +107,48 @@ force_create_directory()
 
 pop_directory()
 {
+    if [[ -v SIMULATE ]] &&
+       [[ "${SIMULATE}" == "yes" ]]; then
+
+        display_message "SIMULATE | popd >/dev/null"
+        return 0
+    fi
+
     popd >/dev/null
+
 }
 
 push_directory()
 {
     local DIRECTORY="$1"
+
+    if [[ -v SIMULATE ]] &&
+       [[ "${SIMULATE}" == "yes" ]]; then
+
+        display_message "SIMULATE | pushd '${DIRECTORY}' >/dev/null"
+        return 0
+    fi
+
     pushd "${DIRECTORY}" >/dev/null
+}
+
+remove_directory_force()
+{
+    if [[ -v SIMULATE ]] &&
+       [[ "${SIMULATE}" == "yes" ]]; then
+
+        display_message "SIMULATE | rm -rf '$@'"
+        return 0
+    fi
+
+    rm -rf "$@"
 }
 .endmacro
 .
 .macro global.initialize_environment()
 
-OPTS_ENABLE="\$(set -euo pipefail)"
-OPTS_DISABLE="\$(set +e)"
+OPTS_ENABLE="set -eo pipefail"
+OPTS_DISABLE="set +e"
 
 eval "${OPTS_ENABLE}"
 trap 'echo "FATAL ERROR: Command failed at line ${LINENO}: ${BASH_COMMAND}" >&2' ERR

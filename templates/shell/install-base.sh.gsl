@@ -190,7 +190,9 @@ endfunction
 .
 .       define_main(my.meta, my.configuration, my.repository, _install)
 .
-.       define_display_constants( my.meta, my.configuration, my.repository, _install)
+.       define_display_build_variables(my.meta, my.configuration, my.repository, _install)
+.
+.       define_display_constants(my.meta, my.configuration, my.repository, _install)
 .
 .       define_display_help(my.meta, my.configuration, my.repository, _install)
 .
@@ -284,7 +286,6 @@ fi
 .   define my.meta = define_display_constants.meta
 .   define my.configuration = define_display_constants.configuration
 .   define my.repository = define_display_constants.repository
-.   define my.configuration = define_display_constants.configuration
 .   define my.install = define_display_constants.install
 
 display_constants()
@@ -293,6 +294,19 @@ display_constants()
 }
 .
 .endmacro # define_display_constants
+.
+.macro define_display_build_variables(meta, configuration, repository, install)
+.   define my.meta = define_display_build_variables.meta
+.   define my.configuration = define_display_build_variables.configuration
+.   define my.repository = define_display_build_variables.repository
+.   define my.install = define_display_build_variables.install
+.
+
+display_build_variables()
+{
+.   emit_build_variables(my.meta, my.configuration, my.repository, my.install, "    display_message \"", "\"")
+}
+.endmacro # define_display_build_variables
 .
 .macro define_display_help(meta, configuration, repository, install)
 .   define my.meta = define_display_help.meta
@@ -342,6 +356,46 @@ $(my.indent)$(_depend.name:c)_OPTIONS=($((count(my.active.option) = 0) ?? ")" ? 
 .       endfor
 .   endfor
 .endmacro # emit_options
+.
+.macro emit_build_variables(meta, configuration, repository, install, prefix, suffix)
+.   define my.meta = emit_build_variables.meta
+.   define my.configuration = emit_build_variables.configuration
+.   define my.repository = emit_build_variables.repository
+.   define my.install = emit_build_variables.install
+.   define my.prefix = emit_build_variables.prefix
+.   define my.suffix = emit_build_variables.suffix
+.
+.   if !defined(my.meta->column)
+.       abort "The provided template lacks 'column' data."
+.   endif
+.
+.   require(my.meta->column, "column", "const")
+.   define my.column = my.meta->column.const
+.
+.   for my.install.dependency as _depend
+.       if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
+.           next
+.       endif
+.
+.       # This condition can be turned to 'next' if dependencies are allowed to be present
+.       # without an installation routine in the installer.
+.       # (This may be necessary for tracy due to installation toolchain restrictions)
+.       if !defined(_depend->build(build.method = _depend.hint_build))
+.           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
+.       endif
+.
+$(my.prefix)$(pad("BUILD_$(_depend.name)", my.column, " ")): ${BUILD_$(_depend.name)}$(my.suffix)
+.   endfor
+.
+$(my.prefix)$(pad("BUILD_SRC_DIR", my.column, " ")): ${BUILD_SRC_DIR}$(my.suffix)
+$(my.prefix)$(pad("BUILD_OBJ_DIR", my.column, " ")): ${BUILD_OBJ_DIR}$(my.suffix)
+$(my.prefix)$(pad("BUILD_OBJ_DIR_RELATIVE", my.column, " ")): ${BUILD_OBJ_DIR_RELATIVE}$(my.suffix)
+$(my.prefix)$(pad("BUILD_CONFIG", my.column, " ")): ${BUILD_CONFIG}$(my.suffix)
+$(my.prefix)$(pad("BUILD_LINK", my.column, " ")): ${BUILD_LINK}$(my.suffix)
+$(my.prefix)$(pad("BUILD_FULL_REPOSITORIES", my.column, " ")): ${BUILD_FULL_REPOSITORIES}$(my.suffix)
+$(my.prefix)$(pad("BUILD_USE_LOCAL_SRC", my.column, " ")): ${BUILD_USE_LOCAL_SRC}$(my.suffix)
+$(my.prefix)$(pad("DISPLAY_VERBOSE", my.column, " ")): ${DISPLAY_VERBOSE}$(my.suffix)
+.endmacro # emit_build_variables
 .
 .macro emit_constants(meta, configuration, repository, install, prefix, suffix)
 .   define my.meta = emit_constants.meta
@@ -439,7 +493,9 @@ source_archive()
     local COMPRESSION="$4"
     shift 4
 
-    # TODO change to appropriate src directory
+    push_directory "${BUILD_SRC_DIR}"
+
+    display_heading_message "Preparing to acquire ${PROJECT}"
 
     if [ -d "${PROJECT}" ] && 
        [[ -v BUILD_USE_LOCAL_SRC ]] &&
@@ -448,7 +504,7 @@ source_archive()
     else
         if [ -d "${PROJECT}" ]; then
             display_message "Encounted existing '${PROJECT}' directory, removing..."
-            recursive_remove_directory "${PROJECT}"
+            remove_directory_force "${PROJECT}"
         fi
 
         display_message "Retrieving ${PROJECT}..."
@@ -464,13 +520,23 @@ source_archive()
             WGET="wget --verbose"
         fi
 
+        if [[ -v SIMULATE ]] && [[ "${SIMULATE}" == "yes" ]]; then
+            TAR="SIMULATE | ${TAR}"
+            WGET="SIMULATE | ${WGET}"
+        fi
+
         # retrieve file
-        ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
+        display_message "${WGET} --output-document '${FILENAME}' '${URL_BASE}${FILENAME}'"
+        # ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
 
         # extract to expected path
-        ${TAR} --extract --file "${FILENAME}" "--${COMPRESSION}" --strip-components=1
+        display_message "${TAR} --extract --file '${FILENAME}' '--${COMPRESSION}' --strip-components=1"
+        # ${TAR} --extract --file "${FILENAME}" "--${COMPRESSION}" --strip-components=1
 
         # pop ${PROJECT}
+        pop_directory
+
+        # pop ${BUILD_SRC_DIR}
         pop_directory
 
         display_message "Completed download and extraction successfully."
@@ -487,14 +553,15 @@ source_github()
     local TAG="$3"
     shift 3
 
-    local ONESHOT=""
+    local GIT_CLONE="git clone"
+    local CLONE_OPTIONS="--depth 1 --single-branch"
 
-    if [[ -v BUILD_SINGLE_USE_REPOSITORY ]] &&
-       [[ "${BUILD_SINGLE_USE_REPOSITORY}" == "yes" ]]; then
-        ONESHOT="--depth 1 --single-branch"
+    if [[ -v BUILD_FULL_REPOSITORIES ]] &&
+       [[ "${BUILD_FULL_REPOSITORIES}" == "yes" ]]; then
+        CLONE_OPTIONS=""
     fi
 
-    # TODO: change to appropriate src directory
+    push_directory "${BUILD_SRC_DIR}"
 
     display_heading_message "Preparing to acquire ${OWNER}/${REPOSITORY}/${TAG}"
 
@@ -505,12 +572,20 @@ source_github()
     else
         if [ -d "${REPOSITORY}" ]; then
             display_message "Encounted existing '${REPOSITORY}' directory, removing..."
-            recursive_remove_directory "${REPOSITORY}"
+            remove_directory_force "${REPOSITORY}"
         fi
 
         display_message "Cloning ${OWNER}/${REPOSITORY}/${TAG}..."
-        git clone ${ONESHOT} --branch "${TAG}" "https://github.com/${OWNER}/${REPOSITORY}"
+
+        if [[ -v SIMULATE ]] && [[ "${SIMULATE}" == "yes" ]]; then
+            GIT_CLONE="SIMULATE | ${GIT_CLONE}"
+        fi
+
+        display_message "${GIT_CLONE} ${CLONE_OPTIONS} --branch \"${TAG}\" \"https://github.com/${OWNER}/${REPOSITORY}\""
     fi
+
+    # pop BUILD_SRC_DIR
+    pop_directory
 }
 .endmacro # define_source_github
 .
@@ -522,6 +597,8 @@ build_cmake()
     local CMAKE_PATH="$2"
     shift 2
 
+    display_heading_message "Preparing to build ${PROJECT}"
+
     echo "BUILD_CMAKE!"
 }
 .endmacro # define_build_cmake
@@ -530,9 +607,11 @@ build_cmake()
 
 build_preset()
 {
-    local P`ROJECT="$1"
+    local PROJECT="$1"
     local CMAKE_PATH="$2"
     shift 2
+
+    display_heading_message "Preparing to build ${PROJECT}"
 
     echo "BUILD_PRESET!"
 }
@@ -546,6 +625,8 @@ build_gnu()
     local GNU_PATH="$2"
     shift 2
 
+    display_heading_message "Preparing to build ${PROJECT}"
+
     echo "BUILD_GNU!"
 }
 .endmacro # define_build_gnu
@@ -557,9 +638,134 @@ build_boost()
     local PROJECT="$1"
     shift
 
+    display_heading_message "Preparing to build ${PROJECT}"
+
     echo "BUILD_BOOST!"
 }
 .endmacro # define_build_boost
+.
+.macro define_parse_options(meta, configuration, repository, install, indent)
+.   my.meta = define_parse_options.meta
+.   my.configuration = define_parse_options.configuration
+.   my.repository = define_parse_options.repository
+.   my.install = define_parse_options.install
+.   my.indent = define_parse_options.indent
+.
+.   require(my.meta->column, "column", "parse")
+.   my.column = my.meta->column.parse
+.   my.c_indent = "    $(my.indent)"
+.   my.o_indent = "    $(my.c_indent)"
+
+$(my.indent)for OPTION in "$@"; do
+$(my.c_indent)case ${OPTION} in
+.
+.   for my.install.dependency as _depend
+.       if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
+.           next
+.       endif
+.
+.       # This condition can be turned to 'next' if dependencies are allowed to be present
+.       # without an installation routine in the installer.
+.       # (This may be necessary for tracy due to installation toolchain restrictions)
+.       if !defined(_depend->build(build.method = _depend.hint_build))
+.           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
+.       endif
+.
+$(my.o_indent)$(pad("(--build-$(_depend.name))", my.column, " "))BUILD_$(_depend.name)="yes";;
+.   endfor
+.
+$(my.o_indent)$(pad("(--build-src-dir=*)", my.column, " "))BUILD_SRC_DIR="${OPTION=#*=}";;
+$(my.o_indent)$(pad("(--build-obj-dir=*)", my.column, " "))BUILD_OBJ_DIR="${OPTION#*=}";;
+$(my.o_indent)$(pad("(--build-obj-dir-relative)", my.column, " "))BUILD_OBJ_DIR_RELATIVE="yes";;
+$(my.o_indent)$(pad("(--build-config=*)", my.column, " "))BUILD_CONFIG="${OPTION#*=}";;
+$(my.o_indent)$(pad("(--build-link=*)", my.column, " "))BUILD_LINK="${OPTION#*=}";;
+$(my.o_indent)$(pad("(--build-full-repositories)", my.column, " "))BUILD_FULL_REPOSITORIES="yes";;
+$(my.o_indent)$(pad("(--build-use-local-src)", my.column, " "))BUILD_USE_LOCAL_SRC="yes";;
+$(my.o_indent)$(pad("(--simulate|-s)", my.column, " "))SIMULATE="yes";;
+$(my.o_indent)$(pad("(--verbose|-v)", my.column, " "))DISPLAY_VERBOSE="yes";;
+$(my.o_indent)$(pad("(--help|-h)", my.column, " "))DISPLAY_HELP="yes";;
+$(my.c_indent)esac
+$(my.indent)done
+.
+.endmacro # define_parse_options
+.
+.macro define_sanitize_input(meta, configuration, repository, install, indent)
+.   my.meta = define_sanitize_input.meta
+.   my.configuration = define_sanitize_input.configuration
+.   my.repository = define_sanitize_input.repository
+.   my.install = define_sanitize_input.install
+.   my.indent = define_sanitize_input.indent
+.
+
+    # defaults and sanitization
+    # --build-src-dir
+    if ! [[ -v BUILD_SRC_DIR ]]; then
+        BUILD_SRC_DIR="\$(pwd)"
+        display_message_verbose "No build-src-dir specified, using default '${BUILD_SRC_DIR}'."
+    fi
+
+    if [[ -d "${BUILD_SRC_DIR}" ]]; then
+        push_directory "${BUILD_SRC_DIR}"
+        BUILD_SRC_DIR="\$(pwd)"
+        pop_directory
+        display_message_verbose "Determined absolute path for build-src-dir '${BUILD_SRC_DIR}'."
+    else
+        create_directory "${BUILD_SRC_DIR}"
+        push_directory "${BUILD_SRC_DIR}"
+        BUILD_SRC_DIR="\$(pwd)"
+        pop_directory
+        display_message_verbose "Created build-src-dir '${BUILD_SRC_DIR}'."
+    fi
+
+    # --build-obj-dir
+    if ! [[ -v BUILD_OBJ_DIR ]]; then
+        if [[ -v BUILD_OBJ_DIR_RELATIVE ]] && [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+            BUILD_OBJ_DIR="obj"
+            display_message_verbose "No build-obj-dir specified, using relative default '${BUILD_OBJ_DIR}'."
+        else
+            BUILD_OBJ_DIR="\$(pwd)/obj"
+            display_message_verbose "No build-obj-dir specified, using default '${BUILD_OBJ_DIR}'."
+        fi
+    fi
+
+    if [[ -v BUILD_OBJ_DIR_RELATIVE ]] && [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        display_message_verbose "Deferring relative path action for build-obj-dir '${BUILD_OBJ_DIR}'."
+    else
+        if [[ -d "${BUILD_OBJ_DIR}" ]]; then
+            push_directory "${BUILD_OBJ_DIR}"
+            BUILD_OBJ_DIR="\$(pwd)"
+            pop_directory
+            display_message_verbose "Determined absolute path for build-obj-dir '${BUILD_OBJ_DIR}'."
+        else
+            create_directory "${BUILD_OBJ_DIR}"
+            push_directory "${BUILD_OBJ_DIR}"
+            BUILD_OBJ_DIR="\$(pwd)"
+            pop_directory
+            display_message_verbose "Created build-obj-dir '${BUILD_OBJ_DIR}'."
+        fi
+    fi
+
+    # --build-config
+    if ! [[ -v BUILD_CONFIG ]]; then
+        BUILD_CONFIG="release"
+        display_message_verbose "No build-config specified, defaulting to '${BUILD_CONFIG}'."
+    elif [[ "${BUILD_CONFIG}" == "debug" ]] || [[ "${BUILD_CONFIG}" == "release" ]]; then
+        display_error "Provided build-config '${BUILD_CONFIG}' not a valid value."
+        display_help
+        exit 1
+    fi
+
+    # --build-link
+    if ! [[ -v BUILD_LINK ]]; then
+        BUILD_LINK="static"
+        display_message "No build-link specified, defaulting to '${BUILD_LINK}'."
+    elif [[ "${BUILD_LINK}" == "dynamic" ]] || [[ "${BUILD_LINK}" == "static" ]]; then
+        display_error "Provided build-link ${BUILD_LINK}' not a valid value."
+        display_help
+        exit 1
+    fi
+.
+.endmacro # define_sanitize_input
 .
 .macro define_main(meta, configuration, repository, install)
 .   define my.meta = define_main.meta
@@ -571,13 +777,25 @@ build_boost()
 
 main()
 {
-    # initialization
-
     # argument consumption
+.   define_parse_options(my.meta, my.configuration, my.repository, my.install, "    ")
+.
+.   define_sanitize_input(my.meta, my.configuration, my.repository, my.install, "    ")
+
+    # handle help
+    if [[ -v DISPLAY_HELP ]] && [[ "${DISPLAY_HELP}" == "yes" ]]; then
+        display_help
+        return 0
+    fi
+
+    display_heading_message "Configuration"
+    display_build_variables
+    display_heading_message "State"
+    display_constants
 
     # declarations
 .   emit_declare_options(my.meta, my.configuration, my.repository, my.install, "    ")
-
+.
 .   for my.install.dependency as _depend
 .       define my.found_source = 0
 .       define my.vname = "$(_depend.name:c)"
