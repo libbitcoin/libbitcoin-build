@@ -107,6 +107,35 @@ function filename(dependency, source_type)
     return "$(my.expanded_filename)$(my.filename.filetype)"
 endfunction
 
+function verify_toolchains_supported(dependencies, meta, configuration, repository)
+    define my.dependencies = verify_toolchains_supported.dependencies
+    define my.meta = verify_toolchains_supported.meta
+    define my.configuration = verify_toolchains_supported.configuration
+    define my.repository = verify_toolchains_supported.repository
+
+    define my.cmake = defined(my.meta->build(build.method = "cmake"))
+    define my.gnu = defined(my.meta->build(build.method = "gnu"))
+    define my.preset = defined(my.meta->build(build.method = "preset"))
+
+    if (my.cmake | my.preset) & (my.gnu)
+        abort "Configurations mixing 'cmake'/'preset' and 'gnu' are not supported."
+    endif
+
+    if (my.cmake)
+        my.dependencies.toolchain = "cmake"
+        my.dependencies.hint_options = "cmake"
+    elsif (my.preset)
+        my.dependencies.toolchain = "preset"
+        my.dependencies.hint_options = "cmake"
+    elsif (my.gnu)
+        my.dependencies.toolchain = "gnu"
+        my.dependencies.hint_options = "gnu"
+    else
+        abort "Unexpected - missing primary toolchain."
+    endif
+
+endfunction
+
 function build_hints(dependencies, meta, configuration, repository)
     define my.dependencies = build_hints.dependencies
     define my.meta = build_hints.meta
@@ -163,6 +192,49 @@ function build_hints(dependencies, meta, configuration, repository)
     endfor
 endfunction
 
+function write_column_line(begin, end, align, pad, indent, prefix, suffix)
+    define my.begin = write_column_line.begin
+    define my.end = write_column_line.end
+    define my.align = write_column_line.align
+    define my.pad = write_column_line.pad ? " "
+    define my.indent = write_column_line.indent ? ""
+    define my.prefix = write_column_line.prefix ? ""
+    define my.suffix = write_column_line.suffix ? ""
+
+    return "$(my.indent)$(my.prefix)$(pad(my.begin, my.align, my.pad))$(my.end)$(my.suffix)"
+endfunction
+
+function indent_column(begin, end, column, indent, pad)
+    define my.begin = indent_column.begin
+    define my.end = indent_column.end
+    define my.column = indent_column.column
+    define my.indent = indent_column.indent ? ""
+    define my.pad = indent_column.pad ? " "
+
+    return write_column_line(my.begin, my.end, my.column, my.pad, my.indent, "", "")
+endfunction
+
+function fix_column(begin, end, column, prefix, suffix, pad)
+    define my.begin = fix_column.begin
+    define my.end = fix_column.end
+    define my.column = fix_column.column
+    define my.prefix = fix_column.prefix ? ""
+    define my.suffix = fix_column.suffix ? ""
+    define my.pad = fix_column.pad ? " "
+
+    return write_column_line(my.begin, my.end, my.column, my.pad, "", my.prefix, my.suffix)
+endfunction
+
+function column_variables(variable, align, prefix, suffix, pad)
+    define my.variable = column_variables.variable
+    define my.align = column_variables.align
+    define my.prefix = column_variables.prefix ? ""
+    define my.suffix = column_variables.suffix ? ""
+    define my.pad = column_variables.pad ? " "
+
+    return fix_column(my.variable, ": ${$(my.variable)}", my.align, my.prefix, my.suffix, my.pad)
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -176,6 +248,7 @@ endfunction
 .
 .   new installable as _install
 .       canonical_dependency_list(_install, my.repository, my.configuration)
+.       verify_toolchains_supported(_install, my.meta, my.configuration, my.repository)
 .       build_hints(_install, my.meta, my.configuration, my.repository)
 .
 .       shebang("bash")
@@ -400,20 +473,20 @@ $(my.indent)$(_depend.name:c)_OPTIONS=($((count(my.active.option) = 0) ?? ")" ? 
 .           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
 .       endif
 .
-$(my.prefix)$(pad("BUILD_$(_depend.name)", my.column, " ")): ${BUILD_$(_depend.name)}$(my.suffix)
+$(column_variables("BUILD_$(_depend.name)", my.column, my.prefix, my.suffix))
 .   endfor
 .
-$(my.prefix)$(pad("BUILD_SRC_DIR", my.column, " ")): ${BUILD_SRC_DIR}$(my.suffix)
-$(my.prefix)$(pad("BUILD_OBJ_DIR", my.column, " ")): ${BUILD_OBJ_DIR}$(my.suffix)
-$(my.prefix)$(pad("BUILD_OBJ_DIR_RELATIVE", my.column, " ")): ${BUILD_OBJ_DIR_RELATIVE}$(my.suffix)
-$(my.prefix)$(pad("BUILD_CONFIG", my.column, " ")): ${BUILD_CONFIG}$(my.suffix)
-$(my.prefix)$(pad("BUILD_LINK", my.column, " ")): ${BUILD_LINK}$(my.suffix)
-$(my.prefix)$(pad("BUILD_FULL_REPOSITORIES", my.column, " ")): ${BUILD_FULL_REPOSITORIES}$(my.suffix)
-$(my.prefix)$(pad("BUILD_USE_LOCAL_SRC", my.column, " ")): ${BUILD_USE_LOCAL_SRC}$(my.suffix)
-$(my.prefix)$(pad("PARALLEL", my.column, " ")): ${PARALLEL}$(my.suffix)
-$(my.prefix)$(pad("PREFIX", my.column, " ")): ${PREFIX}$(my.suffix)
-$(my.prefix)$(pad("DISPLAY_VERBOSE", my.column, " ")): ${DISPLAY_VERBOSE}$(my.suffix)
-
+$(column_variables("BUILD_SRC_DIR", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_OBJ_DIR", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_OBJ_DIR_RELATIVE", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_CONFIG", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_LINK", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_FULL_REPOSITORIES", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_USE_LOCAL_SRC", my.column, my.prefix, my.suffix))
+$(column_variables("PARALLEL", my.column, my.prefix, my.suffix))
+$(column_variables("PREFIX", my.column, my.prefix, my.suffix))
+$(column_variables("DISPLAY_VERBOSE", my.column, my.prefix, my.suffix))
+.
 .#
 .#$(my.prefix)if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
 .#    $(my.prefix)$(pad("", my.column, " ")): ${}$(my.suffix)
@@ -442,12 +515,12 @@ $(my.prefix)$(pad("DISPLAY_VERBOSE", my.column, " ")): ${DISPLAY_VERBOSE}$(my.su
 .       endif
 .
 .       if (_depend.hint_source = "archive")
-$(my.prefix)$(pad("$(_depend.name:c)_URLBASE", my.column, " ")): ${$(_depend.name:c)_URLBASE}$(my.suffix)
-$(my.prefix)$(pad("$(_depend.name:c)_FILENAME", my.column, " ")): ${$(_depend.name:c)_FILENAME}$(my.suffix)
+$(column_variables("$(_depend.name:c)_URLBASE", my.column, my.prefix, my.suffix))
+$(column_variables("$(_depend.name:c)_FILENAME", my.column, my.prefix, my.suffix))
 .       elsif (_depend.hint_source = "github")
 
-$(my.prefix)$(pad("$(_depend.name:c)_OWNER", my.column, " ")): ${$(_depend.name:c)_OWNER}$(my.suffix)
-$(my.prefix)$(pad("$(_depend.name:c)_TAG", my.column, " ")): ${$(_depend.name:c)_TAG}$(my.suffix)
+$(column_variables("$(_depend.name:c)_OWNER", my.column, my.prefix, my.suffix))
+$(column_variables("$(_depend.name:c)_TAG", my.column, my.prefix, my.suffix))
 .       else
 .           abort "'$(_depend.name)': Declared source type '$(_depend.hint_source)' not supported."
 .       endif
@@ -473,9 +546,6 @@ $(my.prefix)Script managing the build and installation of $(my.repository.name) 
 $(my.prefix)$(my.suffix)
 $(my.prefix)Script options:$(my.suffix)
 .#  translated by installer
-$(my.prefix) $(pad("--parallel=<int>", my.column, " "))Number of jobs to run simultaneously.$(my.suffix)
-$(my.prefix) $(pad("", my.column, " "))  Default: discovery$(my.suffix)
-$(my.prefix) $(pad("--prefix=<path>", my.column, " "))Library install location (defaults to /usr/local).$(my.suffix)
 .#  consumed by installer (specific)
 .
 .   for my.install.dependency as _depend
@@ -490,20 +560,36 @@ $(my.prefix) $(pad("--prefix=<path>", my.column, " "))Library install location (
 .           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
 .       endif
 .
-$(my.prefix) $(pad("--build-$(_depend.name)", my.column, " "))Build $(textname(_depend)) libraries.$(my.suffix)
+$(fix_column("--build-$(_depend.name)", "Build $(textname(_depend)) libraries", my.column, my.prefix, my.suffix))
 .   endfor
 .
 .#  consumed by installer (generic)
-$(my.prefix) $(pad("--build-src-dir=<path>", my.column, " "))Location of sources.$(my.suffix)
-$(my.prefix) $(pad("--build-obj-dir=<path>", my.column, " "))Location of intermediate objects.$(my.suffix)
-$(my.prefix) $(pad("(--build-obj-dir-relative)", my.column, " "))Use build-obj-dir as relative to project sources.$(my.suffix)
-$(my.prefix) $(pad("--build-config=<mode>", my.column, " "))Specifies the build configuration.$(my.suffix)
-$(my.prefix) $(pad("", my.column, " "))  Valid values: { debug, release }$(my.suffix)
-$(my.prefix) $(pad("--build-link=<mode>", my.column, " "))Specifies link mode.$(my.suffix)
-$(my.prefix) $(pad("", my.column, " "))  Valid values: { dynamic, static }$(my.suffix)
-$(my.prefix) $(pad("--build-use-local-src", my.column, " "))Use existing sources in build-src-dir path.$(my.suffix)
-$(my.prefix) $(pad("--verbose", my.column, " "))Display verbose script output.$(my.suffix)
-$(my.prefix) $(pad("--help, h", my.column, " "))Display usage, overriding script execution.$(my.suffix)
+$(fix_column("--build-src-dir=<path>", "Location of sources.", my.column, my.prefix, my.suffix))
+.
+$(fix_column("--build-obj-dir=<path>", "Location of intermedia objects.", my.column, my.prefix, my.suffix))
+$(fix_column("--build-obj-dir-relative", "Use build-obj-dir as relative to project sources.", my.column, my.prefix, my.suffix))
+.
+$(fix_column("--build-config=<mode>", "Specifies the build configuration.", my.column, my.prefix, my.suffix))
+$(fix_column("", "  Valid values: { debug, release }", my.column, my.prefix, my.suffix))
+.
+$(fix_column("--build-link=<mode>", "Specifies link mode.", my.column, my.prefix, my.suffix))
+$(fix_column("", "  Valid values: { dynamic, static }", my.column, my.prefix, my.suffix))
+.
+$(fix_column("--build-full-repositories", "Sync full github repositories.", my.column, my.prefix, my.suffix))
+$(fix_column("", "  Default clones depth 1, single branch", my.column, my.prefix, my.suffix))
+.
+$(fix_column("--build-parallel=<int>", "Number of jobs to run simultaneously.", my.column, my.prefix, my.suffix))
+$(fix_column("", "  Default: discovery", my.column, my.prefix, my.suffix))
+.
+$(fix_column("--build-use-local-src", "Use existing sources in build-src-dir path.", my.column, my.prefix, my.suffix))
+.
+$(fix_column("--prefix=<path>", "Library install location.", my.column, my.prefix, my.suffix))
+$(fix_column("", "  Default: /usr/local", my.column, my.prefix, my.suffix))
+.
+$(fix_column("--verbose", "Display verbose script output.", my.column, my.prefix, my.suffix))
+.
+$(fix_column("--help, h", "Display usage, overriding script execution.", my.column, my.prefix, my.suffix))
+.
 $(my.prefix)$(my.suffix)
 $(my.prefix)All unrecognized options provided shall be passed as configuration$(my.suffix)
 $(my.prefix)options for all dependencies.$(my.suffix)
@@ -766,22 +852,30 @@ $(my.c_indent)case ${OPTION} in
 .           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
 .       endif
 .
-$(my.o_indent)$(pad("(--build-$(_depend.name))", my.column, " "))BUILD_$(_depend.name)="yes";;
+$(indent_column("(--build-$(_depend.name))", "BUILD_$(_depend.name)=\"yes\";;", my.column, my.o_indent))
 .   endfor
 .
-$(my.o_indent)$(pad("(--build-src-dir=*)", my.column, " "))BUILD_SRC_DIR="${OPTION#*=}";;
-$(my.o_indent)$(pad("(--build-obj-dir=*)", my.column, " "))BUILD_OBJ_DIR="${OPTION#*=}";;
-$(my.o_indent)$(pad("(--build-obj-dir-relative)", my.column, " "))BUILD_OBJ_DIR_RELATIVE="yes";;
-$(my.o_indent)$(pad("(--build-config=*)", my.column, " "))BUILD_CONFIG="${OPTION#*=}";;
-$(my.o_indent)$(pad("(--build-link=*)", my.column, " "))BUILD_LINK="${OPTION#*=}";;
-$(my.o_indent)$(pad("(--build-full-repositories)", my.column, " "))BUILD_FULL_REPOSITORIES="yes";;
-$(my.o_indent)$(pad("(--build-use-local-src)", my.column, " "))BUILD_USE_LOCAL_SRC="yes";;
-$(my.o_indent)$(pad("(--parallel=*|-j=)", my.column, " "))PARALLEL="${OPTION#*=}";;
-$(my.o_indent)$(pad("(--prefix=*)", my.column, " "))PREFIX="${OPTION#*=}";;
-$(my.o_indent)$(pad("(--verbose|-v)", my.column, " "))DISPLAY_VERBOSE="yes";;
-$(my.o_indent)$(pad("(--help|-h)", my.column, " "))DISPLAY_HELP="yes";;
+$(indent_column("(--build-src-dir=*)", "BUILD_SRC_DIR=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(--build-obj-dir=*)", "BUILD_OBJ_DIR=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(--build-obj-dir-relative)", "BUILD_OBJ_DIR_RELATIVE=\"yes\";;", my.column, my.o_indent))
+$(indent_column("(--build-config=*)", "BUILD_CONFIG=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(--build-link=*)", "BUILD_LINK=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(--build-full-repositories)", "BUILD_FULL_REPOSITORIES=\"yes\";;", my.column, my.o_indent))
+$(indent_column("(--build-use-local-src)", "BUILD_USE_LOCAL_SRC=\"yes\";;", my.column, my.o_indent))
+$(indent_column("(--build-parallel=*)", "PARALLEL=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(--prefix=*)", "PREFIX=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(--verbose)", "DISPLAY_VERBOSE=\"yes\";;", my.column, my.o_indent))
+$(indent_column("(--help|-h)", "DISPLAY_HELP=\"yes\";;", my.column, my.o_indent))
 $(my.c_indent)esac
 $(my.indent)done
+
+$(my.indent)CONFIGURE_OPTIONS_ORIGINAL=("$@")
+$(my.indent)CONFIGURE_OPTIONS=("$@")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
+$(my.indent)display_message_verbose "CONFIGURE_OPTIONS INITIAL: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
+$(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 .
 .endmacro # define_parse_options
 .
@@ -985,7 +1079,21 @@ $(my.indent)done
         fi
     fi
 
-    # TODO add --enable-ndebug for gnu to CONFIGURE_OPTIONS
+.   if (my.install.hint_options = "gnu")
+    # Specify --enable-ndebug for gnu toolchain on release
+    if [[ -v BUILD_CONFIG ]] && [[ "${BUILD_CONFIG}" == "release" ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--enable-ndebug" )
+    fi
+.   elsif (my.install.hint_options = "cmake")
+    # Specify cmake build
+    if [[ -v BUILD_CONFIG ]] && [[ "${BUILD_CONFIG}" == "release" ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Release" )
+    elif
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Debug" )
+    fi
+.   else
+.       abort "Unexpected hint_options: '$(my.install.hint_options)'"
+.   endif
 
     # translace BUILD_LINK to appropriate arguments
     if [[ -v BUILD_LINK ]]; then
