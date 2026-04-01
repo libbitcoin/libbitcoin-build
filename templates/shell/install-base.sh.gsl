@@ -265,6 +265,8 @@ endfunction
 .
 .       define_display_build_variables(my.meta, my.configuration, my.repository, _install)
 .
+.       define_display_toolchain_variables(my.meta, my.configuration, my.repository, _install)
+.
 .       define_display_constants(my.meta, my.configuration, my.repository, _install)
 .
 .       define_display_help(my.meta, my.configuration, my.repository, _install)
@@ -384,6 +386,20 @@ display_constants()
 .
 .endmacro # define_display_constants
 .
+.
+.macro define_display_toolchain_variables(meta, configuration, repository, install)
+.   define my.meta = define_display_toolchain_variables.meta
+.   define my.configuration = define_display_toolchain_variables.configuration
+.   define my.repository = define_display_toolchain_variables.repository
+.   define my.install = define_display_toolchain_variables.install
+
+display_toolchain_variables()
+{
+.   emit_toolchain_variables(my.meta, my.configuration, my.repository, my.install, "    display_message \"", "\"")
+}
+.
+.endmacro # define_display_toolchain_variables
+.
 .macro define_display_build_variables(meta, configuration, repository, install)
 .   define my.meta = define_display_build_variables.meta
 .   define my.configuration = define_display_build_variables.configuration
@@ -446,6 +462,46 @@ $(my.indent)$(_depend.name:c)_OPTIONS=($((count(my.active.option) = 0) ?? ")" ? 
 .   endfor
 .endmacro # emit_options
 .
+.macro emit_toolchain_variables(meta, configuration, repository, install, prefix, suffix)
+.   define my.meta = emit_toolchain_variables.meta
+.   define my.configuration = emit_toolchain_variables.configuration
+.   define my.repository = emit_toolchain_variables.repository
+.   define my.install = emit_toolchain_variables.install
+.   define my.prefix = emit_toolchain_variables.prefix
+.   define my.suffix = emit_toolchain_variables.suffix
+.
+.   if !defined(my.meta->column)
+.       abort "The provided template lacks 'column' data."
+.   endif
+.
+.   require(my.meta->column, "column", "const")
+.   define my.column = my.meta->column.const
+.
+
+$(column_variables("CC", my.column, my.prefix, my.suffix))
+$(column_variables("CFLAGS", my.column, my.prefix, my.suffix))
+$(column_variables("CXX", my.column, my.prefix, my.suffix))
+$(column_variables("CXXFLAGS", my.column, my.prefix, my.suffix))
+$(column_variables("LD_RUN_PATH", my.column, my.prefix, my.suffix))
+$(column_variables("LD_LIBRARY_PATH", my.column, my.prefix, my.suffix))
+$(column_variables("PKG_CONFIG_PATH", my.column, my.prefix, my.suffix))
+$(column_variables("LDLIBS", my.column, my.prefix, my.suffix))
+.   for my.install.dependency as _depend where is_defined_positive(_depend, "conditional")
+.       if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
+.           next
+.       endif
+.       if defined(_depend->prefix) & is_defined_positive(_depend->prefix, "root")
+$(column_variables("$(_depend.name:upper)_ROOT", my.column, my.prefix, my.suffix))
+.       endif
+.   endfor
+.#   if (my.install.hint_options = "cmake")
+.#$(column_variables("CMAKE_PREFIX_PATH", my.column, my.prefix, my.suffix))
+.#$(column_variables("CMAKE_INSTALL_PREFIX_PATH", my.column, my.prefix, my.suffix))
+.#$(column_variables("CMAKE_INCLUDE_PATH", my.column, my.prefix, my.suffix))
+.#$(column_variables("CMAKE_LIBRARY_PATH", my.column, my.prefix, my.suffix))
+.#   endif
+.endmacro # emit_toolchain_variables
+.
 .macro emit_build_variables(meta, configuration, repository, install, prefix, suffix)
 .   define my.meta = emit_build_variables.meta
 .   define my.configuration = emit_build_variables.configuration
@@ -486,6 +542,11 @@ $(column_variables("BUILD_USE_LOCAL_SRC", my.column, my.prefix, my.suffix))
 $(column_variables("PARALLEL", my.column, my.prefix, my.suffix))
 $(column_variables("PREFIX", my.column, my.prefix, my.suffix))
 $(column_variables("DISPLAY_VERBOSE", my.column, my.prefix, my.suffix))
+$(fix_column("CONFIGURE_OPTIONS", ": ${CONFIGURE_OPTIONS[*]}", my.column, my.prefix, my.suffix))
+if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+$(fix_column("CONFIGURE_OPTIONS_ORIGINAL", ": ${CONFIGURE_OPTIONS_ORIGINAL[*]}", my.column, my.prefix, my.suffix))
+fi
+
 .
 .#
 .#$(my.prefix)if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
@@ -866,6 +927,14 @@ $(indent_column("(--build-parallel=*)", "PARALLEL=\"${OPTION#*=}\";;", my.column
 $(indent_column("(--prefix=*)", "PREFIX=\"${OPTION#*=}\";;", my.column, my.o_indent))
 $(indent_column("(--verbose)", "DISPLAY_VERBOSE=\"yes\";;", my.column, my.o_indent))
 $(indent_column("(--help|-h)", "DISPLAY_HELP=\"yes\";;", my.column, my.o_indent))
+.
+.   if (my.install.hint_options = "cmake")
+$(indent_column("(-DCMAKE_PREFIX_PATH=*)", "CMAKE_PREFIX_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(-DCMAKE_INSTALL_PREFIX_PATH=*)", "CMAKE_INSTALL_PREFIX_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(-DCMAKE_INCLUDE_PATH=*)", "CMAKE_INCLUDE_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(-DCMAKE_LIBRARY_PATH=*)", "CMAKE_LIBRARY_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
+.   endif
+.
 $(my.c_indent)esac
 $(my.indent)done
 
@@ -874,6 +943,12 @@ $(my.indent)CONFIGURE_OPTIONS=("$@")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
+.   if (my.install.hint_options = "cmake")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_PREFIX_PATH=*/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_INSTALL_PREFIX_PATH=*/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_INCLUDE_PATH=*/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_LIBRARY_PATH=*/}")
+.   endif
 $(my.indent)display_message_verbose "CONFIGURE_OPTIONS INITIAL: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
 $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 .
@@ -953,7 +1028,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
     if ! [[ -v BUILD_LINK ]]; then
         BUILD_LINK="static"
         display_message_verbose "No build-link specified, defaulting to '${BUILD_LINK}'."
-    elif [[ "${BUILD_LINK}" == "dynamic" ]] || [[ "${BUILD_LINK}" == "static" ]]; then
+    elif [[ "${BUILD_LINK}" != "dynamic" ]] && [[ "${BUILD_LINK}" != "static" ]]; then
         display_error "Provided build-link ${BUILD_LINK}' not a valid value."
         display_help
         exit 1
@@ -964,7 +1039,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
         # Always set a prefix (required for OSX and lib detection).
         PREFIX="/usr/local"
         display_message_verbose "No prefix specified, defaulting to '${PREFIX}'."
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=${PREFIX}" )
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=\"${PREFIX}\"" )
     else
         # Incorporate the custom libdir into each object, for link time resolution
         if [[ -v LD_RUN_PATH ]]; then
@@ -979,6 +1054,51 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
             export LD_LIBRARY_PATH="${PREFIX}/lib"
         fi
     fi
+.
+.   if (my.install.hint_options = "cmake")
+
+    if [[ -v CMAKE_PREFIX_PATH ]]; then
+        if [[ -v PREFIX ]]; then
+            display_error "Both PREFIX and CMAKE_PREFIX_PATH have been defined, please use --prefix exclusively."
+            display_help
+            exit 1
+        fi
+
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=\"${CMAKE_PREFIX_PATH}\"" )
+    elif [[ -v PREFIX ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=\"${PREFIX}\"" )
+    fi
+
+    if [[ -v CMAKE_INSTALL_PREFIX_PATH ]]; then
+        if [[ -v PREFIX ]]; then
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX_PATH=\"${PREFIX}:${CMAKE_PREFIX_PATH}\"" )
+        else
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX_PATH=\"${CMAKE_INSTALL_PREFIX_PATH}\"" )
+        fi
+    elif [[ -v PREFIX ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX_PATH=\"${PREFIX}\"" )
+    fi
+
+    if [[ -v CMAKE_INCLUDE_PATH ]]; then
+        if [[ -v PREFIX ]]; then
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=\"${PREFIX}/include:${CMAKE_INCLUDE_PATH}\"" )
+        else
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=\"${CMAKE_INCLUDE_PATH}\"" )
+        fi
+    elif [[ -v PREFIX ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=\"${PREFIX}/include\"" )
+    fi
+
+    if [[ -v CMAKE_LIBRARY_PATH ]]; then
+        if [[ -v PREFIX ]]; then
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=\"${PREFIX}/lib:${CMAKE_LIBRARY_PATH}\"" )
+        else
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=\"${CMAKE_LIBRARY_PATH}\"" )
+        fi
+    elif [[ -v PREFIX ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=\"${PREFIX}/lib\"" )
+    fi
+.   endif
 
     if [[ -v PREFIX ]]; then
         # Set the prefix-based package config directory.
@@ -1088,16 +1208,36 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
     # Specify cmake build
     if [[ -v BUILD_CONFIG ]] && [[ "${BUILD_CONFIG}" == "release" ]]; then
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Release" )
-    elif
+    elif [[ -v BUILD_CONFIG ]] && [[ "${BUILD_CONFIG}" == "debug" ]]; then
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Debug" )
     fi
 .   else
 .       abort "Unexpected hint_options: '$(my.install.hint_options)'"
 .   endif
 
-    # translace BUILD_LINK to appropriate arguments
+    # translate BUILD_LINK to appropriate arguments
     if [[ -v BUILD_LINK ]]; then
-        display_message_verbose "BUILD_LINK translating into passthrough arguments."
+.   if (my.install.hint_options = "gnu")
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--disable-shared=*}" )
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--enable-shared=*}" )
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--disable-static=*}" )
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--enable-static=*}" )
+
+        if [[ "${BUILD_LINK}" == "dynamic" ]]; then
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--enable-shared" "--disable-static" )
+        else
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--disable-shared" "--enable-static" )
+        fi
+
+.   elsif (my.install.hint_options = "cmake")
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DBUILD_SHARED_LIBS=*}" )
+
+        if [[ "${BUILD_LINK}" == "dynamic" ]]; then
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DBUILD_SHARED_LIBS=ON" )
+        else
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DBUILD_SHARED_LIBS=OFF" )
+        fi
+.   endif
     fi
 
     if [[ ${OS} == Linux && ${CC} == clang* ]] || [[ ${OS} == OpenBSD ]]; then
@@ -1162,6 +1302,11 @@ main()
     display_build_variables
 
     if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+        display_heading_message "Toolchain"
+        display_toolchain_variables
+    fi
+
+    if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
         display_heading_message "State"
         display_constants
     fi
@@ -1175,84 +1320,70 @@ main()
 .       define my.priority_source = ""
 .       define my.indent = my.step
 .
-.       # TODO remove when done testing argument calculation
-.       next
 
 .       if (is_defined_positive(_depend, "conditional"))
 $(my.indent)if [[ -v BUILD_$(my.vname) ]] &&  [[ ${BUILD_$(my.vname)} == "yes" ]]; then
 .           my.indent = "$(my.step)$(my.indent)"
 .       endif
 .
-.       for my.meta.source as _source
-.           if (my.found_source > 0)
-.               next
+.       if !defined(_depend.hint_source)
+.           abort "Expected hint_source for dependency '$(_depend.name)' not found."
+.       endif
+.
+.       if !defined(_depend->$(_depend.hint_source))
+.           abort "Expected hint_source value '$(_depend.hint_source)' not found for dependency '$(_depend.name)'."
+.       endif
+.
+.       define my.active_source = _depend->$(_depend.hint_source)
+.
+.       if (_depend.hint_source = "archive")
+.           if !defined(my.active_source->filename)
+.               abort "Required 'filename' not present."
 .           endif
 .
-.           if defined(_depend->$(_source.type))
-.               my.priority_source = _source.type
-.
-.               if (_source.type = "archive")
-.                   if !defined(_depend->archive->filename)
-.                       abort "Required 'filename' not present."
-.                   endif
-.
-.                   require(_depend->archive->filename, "filename", "compression")
-.                   define my.compression = _depend->$(_source.type)->filename.compression
+.           require(my.active_source->filename, "filename", "compression")
+.           define my.compression = my.active_source->filename.compression
 .
 $(my.indent)source_archive "$(_depend.name)" "${$(my.vname)_FILENAME}" "${$(my.vname)_URLBASE}" "$(my.compression)"
-.               elsif (_source.type = "github")
+.       elsif (_depend.hint_source = "github")
 .
 $(my.indent)source_github "${$(my.vname)_OWNER}" "$(_depend.name)" "${$(my.vname)_TAG}"
-.               else
-.                   abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
-.               endif
-.
-.               my.found_source = 1
-.           endif
-.       endfor
-.
-.       if (my.found_source = 0)
-.           abort "No matching source found for '$(_depend.name)'."
+.       else
+.           abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
 .       endif
 .
 $(my.indent)local SAVE_CPPFLAGS="${CPPFLAGS}"
 $(my.indent)export CPPFLAGS="${CPPFLAGS} ${$(my.vname)_FLAGS[@]}"
-.       define my.found_build = 0
-.       for my.meta.build as _build
-.           if (my.found_build > 0)
-.               next
-.           endif
 .
-.           if defined(_depend->build(build.method = _build.method))
-.               define my.active_build = _depend->build(build.method = _build.method)
+.       if !defined(_depend.hint_build)
+.           abort "Expected hint_build for dependency '$(_depend.name)' not found."
+.       endif
 .
-.               if (_build.method = "gnu")
-.                   require(my.active_build, "build", "filepath")
+.       if !defined(_depend->build(build.method = _depend.hint_build))
+.           abort "Expected hint_source value '$(_depend.hint_source)' not found for dependency '$(_depend.name)'."
+.       endif
+.
+.       define my.active_build = _depend->build(build.method = _depend.hint_build)
+.
+.       if (my.active_build.method = "gnu")
+.           require(my.active_build, "build", "filepath")
 $(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)" "${$(my.vname)_OPTIONS[@]}"
-.               elsif (_build.method = "cmake")
-.                   require(my.active_build, "build", "filepath")
+.       elsif (my.active_build.method = "cmake")
+.           require(my.active_build, "build", "filepath")
 $(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "${$(my.vname)_OPTIONS[@]}"
-.               elsif (_build.method = "presets")
-.                   require(my.active_build, "build", "filepath")
+.       elsif (my.active_build.method = "presets")
+.           require(my.active_build, "build", "filepath")
 $(my.indent)build_presets "$(_depend.name)" "$(my.active_build.filepath)" "${$(my.vname)_OPTIONS[@]}"
-.               elsif (_build.method = "boost_build")
+.       elsif (my.active_build.method = "boost_build")
 $(my.indent)build_boost "$(_depend.name)" "${$(my.vname)_OPTIONS[@]}"
-.               else
-.                   abort "Unrecognized build method '$(_build.method)'."
-.               endif
-.
-.               my.found_build = 1
-.           endif
-.       endfor
+.       else
+.           abort "Unrecognized build method '$(_build.method)'."
+.       endif
 .
 $(my.indent)export CPPFLAGS="${SAVE_CPPFLAGS}"
 .       if (is_defined_positive(_depend, "conditional"))
 .           my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
 $(my.indent)fi
-.       endif
-.
-.       if (my.found_build = 0)
-.           abort "No matching build found for '$(_depend.name)'."
 .       endif
 .   endfor
 
