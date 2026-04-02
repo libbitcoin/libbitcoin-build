@@ -62,7 +62,7 @@ display_message()
 
 display_message_verbose()
 {
-    if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+    if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
         display_message "$@"
     fi
 }
@@ -82,36 +82,41 @@ create_directory()
 
     if [[ -d "${DIRECTORY}" ]]; then
         if [[ ${MODE} == "-f" ]]; then
-            display_message "'${DIRECTORY}' reinitializing..."
+            display_message "Reinitializing '${DIRECTORY}'..."
             rm -rf "${DIRECTORY}"
             mkdir -p "${DIRECTORY}"
         else
-            display_message "'${DIRECTORY}' exists, reusing..."
+            display_message "Reusing existing '${DIRECTORY}'..."
         fi
     else
-        display_message "'${DIRECTORY}' initializing..."
+        display_message "Initializing '${DIRECTORY}'..."
         mkdir -p "${DIRECTORY}"
     fi
 }
 
-force_create_directory()
+create_directory_force()
 {
     create_directory "$@" -f
 }
 
 pop_directory()
 {
+    display_message_verbose "*** move  pre: '\$(pwd)'"
     popd >/dev/null
+    display_message_verbose "*** move post: '\$(pwd)'"
 }
 
 push_directory()
 {
+    display_message_verbose "*** move  pre: '\$(pwd)'"
     local DIRECTORY="$1"
     pushd "${DIRECTORY}" >/dev/null
+    display_message_verbose "*** move post: '\$(pwd)'"
 }
 
 remove_directory_force()
 {
+    display_message_verbose "*** removing: '$@'"
     rm -rf "$@"
 }
 .endmacro
@@ -127,12 +132,12 @@ trap 'echo "FATAL ERROR: Command failed at line ${LINENO}: ${BASH_COMMAND}" >&2'
 .
 .macro global.define_error_functions()
 
-enable_error_on_exit()
+enable_exit_on_error()
 {
     eval "${OPTS_ENABLE}"
 }
 
-disable_error_on_exit()
+disable_exit_on_error()
 {
     eval "${OPTS_DISABLE}"
 }

@@ -116,7 +116,7 @@
     </library>
 
     <test name="libbitcoin-system-test"
-      option="test" type="with" default="yes"
+      option="tests" type="with" default="yes"
       uuid="51a424a9-2c12-4211-8d40-e49d1534c541">
 
       <sources path="test" recursive="true" />
@@ -230,7 +230,7 @@
     </library>
 
     <test name="libbitcoin-network-tests"
-      option="test" type="with" default="yes"
+      option="tests" type="with" default="yes"
       uuid="d28fc18a-8b81-4247-92ee-6967feefeeff">
 
       <headers path="test" private="true" recursive="true" root="true">
@@ -306,7 +306,7 @@
     </library>
 
     <test name="libbitcoin-database-tests"
-      option="test" type="with" default="yes"
+      option="tests" type="with" default="yes"
       uuid="5c4da53a-8c06-4da6-a2a8-3c30f338ed70">
 
       <sources path="test" recursive="true" />
@@ -405,7 +405,7 @@
     </library>
 
     <test name="libbitcoin-node-tests"
-      option="test" type="with" default="yes"
+      option="tests" type="with" default="yes"
       uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8">
 
       <sources path="test" recursive="true" />
@@ -474,7 +474,7 @@
    </library>
 
     <test name="libbitcoin-server-tests"
-      option="test" type="with" default="yes"
+      option="tests" type="with" default="yes"
       uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea">
 
       <sources path="test" recursive="true" />
@@ -536,6 +536,89 @@
 
     </binary>
 
+    <ci>
+      <!-- image= runner image -->
+      <!-- compiler -->
+      <entry image="macos-latest" config="debug" link="dynamic">
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+      </entry>
+
+      <entry image="macos-latest" config="debug" link="static">
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="dynamic">
+        <compiler name="clang" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="static">
+        <compiler name="clang" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" value="nix-gnu-release-static" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="dynamic">
+        <compiler name="gcc" version="12" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" value="nix-gnu-release-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="dynamic">
+        <compiler name="gcc" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="static">
+        <compiler name="gcc" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu" coverage="true">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+      </entry>
+
+      <entry image="windows-latest" />
+    </ci>
   </repository>
 
   <canonical>
@@ -657,47 +740,47 @@
 
   <registrar id="dependency">
     <dependency name="libbitcoin-system">
-      <github owner="libbitcoin" tag="master" />
+      <github owner="pmienk" tag="installer-rewrite" />
       <build method="gnu" filepath="." parallel="true">
-        <option value="--without-tests" target-ignore="true" />
-        <option value="--without-examples" target-ignore="true" />
+        <option value="--without-tests" ignore="true" />
+        <option value="--without-examples" ignore="true" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" parallel="true">
-        <option value="-Dwith-tests:BOOL=OFF" target-ignore="true" />
-        <option value="-Dwith-examples:BOOL=OFF" target-ignore="true" />
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-examples:BOOL=OFF" ignore="true" />
       </build>
       <cmake namespace="bitcoin"
         package="libbitcoin-system"
         target="bitcoin::system" />
     </dependency>
     <dependency name="libbitcoin-database">
-      <github owner="libbitcoin" tag="master" />
+      <github owner="pmienk" tag="installer-rewrite" />
       <build method="gnu" filepath="." parallel="true">
-        <option value="--without-tests" target-ignore="true" />
-        <option value="--without-tools" target-ignore="true" />
+        <option value="--without-tests" ignore="true" />
+        <option value="--without-tools" ignore="true" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" parallel="true">
-        <option value="-Dwith-tests:BOOL=OFF" target-ignore="true" />
-        <option value="-Dwith-tools:BOOL=OFF" target-ignore="true" />
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-tools:BOOL=OFF" ignore="true" />
       </build>
       <cmake namespace="bitcoin"
         package="libbitcoin-database"
         target="bitcoin::database" />
     </dependency>
     <dependency name="libbitcoin-network">
-      <github owner="libbitcoin" tag="master" />
+      <github owner="pmienk" tag="installer-rewrite" />
       <build method="gnu" filepath="." parallel="true">
-        <option value="--without-tests" target-ignore="true" />
-        <option value="--with-ssl" />
+        <option value="--without-tests" ignore="true" />
+        <!-- <option value="--with-ssl" /> -->
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" parallel="true">
-        <option value="-Dwith-tests:BOOL=OFF" target-ignore="true" />
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-ssl:BOOL=ON" />
       </build>
       <cmake namespace="bitcoin"
@@ -705,30 +788,30 @@
         target="bitcoin::network" />
     </dependency>
     <dependency name="libbitcoin-node">
-      <github owner="libbitcoin" tag="master" />
+      <github owner="pmienk" tag="installer-rewrite" />
       <build method="gnu" filepath="." parallel="true">
-        <option value="--without-tests" target-ignore="true" />
+        <option value="--without-tests" ignore="true" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" parallel="true">
-        <option value="-Dwith-tests:BOOL=OFF" target-ignore="true" />
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
       </build>
       <cmake namespace="bitcoin"
         package="libbitcoin-node"
         target="bitcoin::node" />
     </dependency>
     <dependency name="libbitcoin-server">
-      <github owner="libbitcoin" tag="master" />
+      <github owner="pmienk" tag="installer-rewrite" />
       <build method="gnu" filepath="." parallel="true">
-        <option value="--without-tests" target-ignore="true" />
-        <option value="--without-console" target-ignore="true" />
+        <option value="--without-tests" ignore="true" />
+        <option value="--without-console" ignore="true" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" parallel="true">
-        <option value="-Dwith-tests:BOOL=OFF" target-ignore="true" />
-        <option value="-Dwith-console:BOOL=OFF" target-ignore="true" />
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-console:BOOL=OFF" ignore="true" />
       </build>
       <cmake namespace="bitcoin"
         package="libbitcoin-server"
@@ -785,36 +868,26 @@
 
   <templates source="version4.xml" resultpath="../output/version4">
     <!-- resultpath provided relative to expected evaluation - libbitcoin-build/process -->
-    <template name="CMakeLists.txt.gsl"
-      path="cmake"
-      outpath="builds/cmake">
+    <template name="CMakeLists.txt.gsl" path="cmake" outpath="builds/cmake">
       <cmake rootpath="../.." />
       <!--<file source="cmake/InTargetProperty.cmake" destination="builds/cmake/modules" />-->
     </template>
-    <template name="config.cmake.in.gsl"
-      path="cmake"
-      outpath="builds/cmake" />
-    <template name="install-gnu.sh.gsl"
-      path="shell"
-      outpath="builds/gnu">
+    <template name="config.cmake.in.gsl" path="cmake" outpath="builds/cmake" />
+    <template name="install-gnu.sh.gsl" path="shell" outpath="builds/gnu">
       <build method="gnu" />
       <build method="boost_build" />
       <column help="28" const="32" parse="28" />
       <source type="archive" />
       <source type="github" />
     </template>
-    <template name="install-cmake.sh.gsl"
-      path="shell"
-      outpath="builds/cmake">
+    <template name="install-cmake.sh.gsl" path="shell" outpath="builds/cmake">
       <build method="cmake" />
       <build method="boost_build" />
       <column help="28" const="32" parse="28" />
       <source type="archive" />
       <source type="github" />
     </template>
-    <template name="install-presets.sh.gsl"
-      path="shell"
-      outpath="builds/cmake">
+    <template name="install-presets.sh.gsl" path="shell" outpath="builds/cmake">
       <build method="preset" />
       <build method="cmake" />
       <build method="boost_build" />
@@ -822,5 +895,9 @@
       <source type="github" />
       <source type="archive" />
     </template>
+    <!--<template name="ci.yml.gsl" path="yml" outpath=".github/workflows">
+      <job type="shell" name="gnu" script="builds/gnu/install-gnu.sh" />
+      <job type="shell" name="cmake" script="builds/cmake/install-cmake.sh" />
+    </template>-->
   </templates>
 </configuration>

@@ -235,6 +235,17 @@ function column_variables(variable, align, prefix, suffix, pad)
     return fix_column(my.variable, ": ${$(my.variable)}", my.align, my.prefix, my.suffix, my.pad)
 endfunction
 
+function is_applicable(option, dependency, repository)
+    define my.option = is_applicable.option
+    define my.dependency = is_applicable.dependency
+    define my.repository = is_applicable.repository
+
+    define my.ignorable = (my.dependency.name = my.repository.name) &\
+        (defined(my.option.ignore) & (my.option.ignore = "true"))
+
+    return !(my.ignorable)
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -277,6 +288,8 @@ endfunction
 .
 .       define_error_functions()
 .
+.       define_display_configure_options()
+.
 .       define_strip_optimization()
 .
 .       new keys as _keys
@@ -303,6 +316,10 @@ endfunction
 .                   abort "Unrecognized source '$(_source.name)'."
 .               endif
 .           endfor
+.
+.           if (count(_keys.method, count.name = "cmake" | count.name = "preset" | count.name = "gnu") > 0)
+.               define_helpers_make()
+.           endif
 .
 .           for _keys.method as _method
 .               if (_method.name = "cmake")
@@ -345,6 +362,8 @@ strip_optimization()
 .   define my.configuration = define_constants.configuration
 .   define my.install = define_constants.install
 .
+
+SEQUENTIAL=1
 .   for my.install.dependency as _depend
 .       if (!defined(_depend->$(_depend.hint_source)))
 .           abort "Expected hint_source value '$(_depend.hint_source)' not found for dependency '$(_depend.name)'."
@@ -455,8 +474,8 @@ $(my.indent)$(_depend.name:c)_FLAGS=($((count(my.active.flag) = 0) ?? ")" ? "")
 .       endfor
 .
 
-$(my.indent)$(_depend.name:c)_OPTIONS=($((count(my.active.option) = 0) ?? ")" ? "")
-.       for my.active.option as _option
+$(my.indent)$(_depend.name:c)_OPTIONS=($((count(my.active.option, is_applicable(count, _depend, my.repository)) = 0) ?? ")" ? "")
+.       for my.active.option as _option where is_applicable(_option, _depend, my.repository)
     $(my.indent)"$(_option.value)"$(last() ?? ")" ? "")
 .       endfor
 .   endfor
@@ -494,12 +513,12 @@ $(column_variables("LDLIBS", my.column, my.prefix, my.suffix))
 $(column_variables("$(_depend.name:upper)_ROOT", my.column, my.prefix, my.suffix))
 .       endif
 .   endfor
-.#   if (my.install.hint_options = "cmake")
-.#$(column_variables("CMAKE_PREFIX_PATH", my.column, my.prefix, my.suffix))
-.#$(column_variables("CMAKE_INSTALL_PREFIX_PATH", my.column, my.prefix, my.suffix))
-.#$(column_variables("CMAKE_INCLUDE_PATH", my.column, my.prefix, my.suffix))
-.#$(column_variables("CMAKE_LIBRARY_PATH", my.column, my.prefix, my.suffix))
-.#   endif
+.   if (my.install.hint_options = "cmake")
+$(column_variables("CMAKE_PREFIX_PATH", my.column, my.prefix, my.suffix))
+$(column_variables("CMAKE_INSTALL_PREFIX", my.column, my.prefix, my.suffix))
+$(column_variables("CMAKE_INCLUDE_PATH", my.column, my.prefix, my.suffix))
+$(column_variables("CMAKE_LIBRARY_PATH", my.column, my.prefix, my.suffix))
+.   endif
 .endmacro # emit_toolchain_variables
 .
 .macro emit_build_variables(meta, configuration, repository, install, prefix, suffix)
@@ -543,13 +562,13 @@ $(column_variables("PARALLEL", my.column, my.prefix, my.suffix))
 $(column_variables("PREFIX", my.column, my.prefix, my.suffix))
 $(column_variables("DISPLAY_VERBOSE", my.column, my.prefix, my.suffix))
 $(fix_column("CONFIGURE_OPTIONS", ": ${CONFIGURE_OPTIONS[*]}", my.column, my.prefix, my.suffix))
-if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
 $(fix_column("CONFIGURE_OPTIONS_ORIGINAL", ": ${CONFIGURE_OPTIONS_ORIGINAL[*]}", my.column, my.prefix, my.suffix))
 fi
 
 .
 .#
-.#$(my.prefix)if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+.#$(my.prefix)if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
 .#    $(my.prefix)$(pad("", my.column, " ")): ${}$(my.suffix)
 .#$(my.prefix)fi
 .#
@@ -649,7 +668,7 @@ $(fix_column("", "  Default: /usr/local", my.column, my.prefix, my.suffix))
 .
 $(fix_column("--verbose", "Display verbose script output.", my.column, my.prefix, my.suffix))
 .
-$(fix_column("--help, h", "Display usage, overriding script execution.", my.column, my.prefix, my.suffix))
+$(fix_column("--help, -h", "Display usage, overriding script execution.", my.column, my.prefix, my.suffix))
 .
 $(my.prefix)$(my.suffix)
 $(my.prefix)All unrecognized options provided shall be passed as configuration$(my.suffix)
@@ -672,44 +691,44 @@ source_archive()
     push_directory "${BUILD_SRC_DIR}"
 
     if [ -d "${PROJECT}" ] && 
-       [[ -v BUILD_USE_LOCAL_SRC ]] &&
        [[ "${BUILD_USE_LOCAL_SRC}" == "yes" ]]; then
         display_message "Reusing existing '${PROJECT}' directory..."
-    else
-        if [ -d "${PROJECT}" ]; then
-            display_message "Encounted existing '${PROJECT}' directory, removing..."
-            remove_directory_force "${PROJECT}"
-        fi
-
-        display_message "Retrieving ${PROJECT}..."
-
-        create_directory "${PROJECT}"
-        push_directory "${PROJECT}"
-
-        local TAR="tar"
-        local WGET="wget --quiet"
-
-        if [[ ${DISPLAY_VERBOSE} ]]; then
-            TAR="tar --verbose"
-            WGET="wget --verbose"
-        fi
-
-        # retrieve file
-        ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
-        # ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
-
-        # extract to expected path
-        ${TAR} --extract --file "${FILENAME}" --${COMPRESSION} --strip-components=1
-        # ${TAR} --extract --file "${FILENAME}" "--${COMPRESSION}" --strip-components=1
-
-        # pop ${PROJECT}
-        pop_directory
-
-        # pop ${BUILD_SRC_DIR}
-        pop_directory
-
-        display_message "Completed download and extraction successfully."
+        return 0
     fi
+
+    if [ -d "${PROJECT}" ]; then
+        display_message "Encounted existing '${PROJECT}' directory, removing..."
+        remove_directory_force "${PROJECT}"
+    fi
+
+    display_message "Retrieving ${PROJECT}..."
+
+    create_directory "${PROJECT}"
+    push_directory "${PROJECT}"
+
+    local TAR="tar"
+    local WGET="wget --quiet"
+.
+.#    if [[ ${DISPLAY_VERBOSE} ]]; then
+.#        # TAR="tar --verbose"
+.#        WGET="wget --verbose"
+.#    fi
+
+    # retrieve file
+    ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
+    # ${WGET} --output-document "${FILENAME}" "${URL_BASE}${FILENAME}"
+
+    # extract to expected path
+    ${TAR} --extract --file "${FILENAME}" --${COMPRESSION} --strip-components=1
+    # ${TAR} --extract --file "${FILENAME}" "--${COMPRESSION}" --strip-components=1
+
+    # pop ${PROJECT}
+    pop_directory
+
+    # pop ${BUILD_SRC_DIR}
+    pop_directory
+
+    display_message "Completed download and extraction successfully."
 }
 .endmacro # define_source_archive
 .
@@ -727,44 +746,174 @@ source_github()
     local GIT_CLONE="git clone"
     local CLONE_OPTIONS="--depth 1 --single-branch"
 
-    if [[ -v BUILD_FULL_REPOSITORIES ]] &&
-       [[ "${BUILD_FULL_REPOSITORIES}" == "yes" ]]; then
+    if [[ "${BUILD_FULL_REPOSITORIES}" == "yes" ]]; then
         CLONE_OPTIONS=""
     fi
 
     push_directory "${BUILD_SRC_DIR}"
 
     if [ -d "${REPOSITORY}" ] && 
-       [[ -v BUILD_USE_LOCAL_SRC ]] &&
        [[ "${BUILD_USE_LOCAL_SRC}" == "yes" ]]; then
         display_message "Reusing existing '${REPOSITORY}'..."
-    else
-        if [ -d "${REPOSITORY}" ]; then
-            display_message "Encounted existing '${REPOSITORY}' directory, removing..."
-            remove_directory_force "${REPOSITORY}"
-        fi
-
-        display_message "Cloning ${OWNER}/${REPOSITORY}/${TAG}..."
-
-        ${GIT_CLONE} ${CLONE_OPTIONS} --branch "${TAG}" "https://github.com/${OWNER}/${REPOSITORY}"
+        pop_directory # BUILD_SRC_DIR
+        return 0
     fi
+
+    if [ -d "${REPOSITORY}" ]; then
+        display_message "Encounted existing '${REPOSITORY}' directory, removing..."
+        remove_directory_force "${REPOSITORY}"
+    fi
+
+    display_message "Cloning ${OWNER}/${REPOSITORY}/${TAG}..."
+
+    ${GIT_CLONE} ${CLONE_OPTIONS} --branch "${TAG}" "https://github.com/${OWNER}/${REPOSITORY}"
 
     # pop BUILD_SRC_DIR
     pop_directory
 }
 .endmacro # define_source_github
 .
+.macro define_display_configure_options()
+
+display_configure_options()
+{
+    display_message "configure options:"
+    for OPTION in "$@"; do
+        if [[ -n ${OPTION+set} ]]; then
+            display_message "${OPTION}"
+        fi
+    done
+}
+.endmacro # define_display_configure_options
+.
+.macro define_build_initialize_path()
+
+    # directory rationalization
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+    push_directory "${RELATIVE_PATH}"
+    local BUILD_PATH="\$(pwd)"
+    pop_directory
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        create_directory_force "${BUILD_OBJ_DIR}"
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}"
+        create_directory_force "${PROJECT}"
+        pop_directory
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+.endmacro # define_build_initialize_path
+.
+.macro define_helpers_make()
+
+install_make()
+{
+    local PROJECT="$1"
+    shift
+
+    display_message "Preparing to install ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    make install
+
+    if [[ ${OS} == Linux ]] && [[ "${PREFIX}" == "/usr/local" ]]; then
+        ldconfig
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    display_message "'${PROJECT}' installation compelete."
+}
+
+test_make()
+{
+    local PROJECT="$1"
+    local TARGET="$2"
+    local JOBS="$3"
+    shift 3
+
+    display_message "Preparing to test ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    disable_exit_on_error
+
+    if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
+        make -j${JOBS} ${TARGET} VERBOSE=1
+    else
+        make ${TARGET} VERBOSE=1
+    fi
+
+    local RESULT=$?
+
+    # Test runners emit to the test.log file.
+    if [[ -e "test.log" ]]; then
+        cat "test.log"
+    fi
+
+    enable_exit_on_error
+
+    if [[ ${RESULT} -ne 0 ]]; then
+        exit ${RESULT}
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    display_message "'${PROJECT}' test compelete."
+}
+.endmacro # define_helpers_make
+.
 .macro define_build_cmake()
 
 build_cmake()
 {
     local PROJECT="$1"
-    local CMAKE_PATH="$2"
-    shift 2
+    local RELATIVE_PATH="$2"
+    local JOBS="$3"
+    shift 3
+
+    local VERBOSITY_CMAKE=""
+    local VERBOSITY_MAKE=""
+
+    if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+        VERBOSITY_CMAKE="-DCMAKE_VERBOSE_MAKEFILE=ON"
+        VERBOSITY_MAKE="VERBOSE=1"
+    fi
 
     display_heading_message "Preparing to build ${PROJECT}"
 
-    echo "BUILD_CMAKE!"
+.   define_build_initialize_path()
+
+    display_configure_options "$@"
+
+    cmake ${VERBOSITY_CMAKE} -LA "$@" "${BUILD_SRC_DIR}/${PROJECT}/${RELATIVE_PATH}"
+
+    # make
+    if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
+        make -j${JOBS} ${VERBOSITY_MAKE}
+    else
+        make
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+    display_message "'${PROJECT}' built successfully."
 }
 .endmacro # define_build_cmake
 .
@@ -787,12 +936,41 @@ build_preset()
 build_gnu()
 {
     local PROJECT="$1"
-    local GNU_PATH="$2"
-    shift 2
+    local RELATIVE_PATH="$2"
+    local JOBS="$3"
+    shift 3
+
+    local VERBOSITY_GNU=""
+    local VERBOSITY_MAKE=""
+
+    if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+        VERBOSITY_GNU="--verbose"
+        VERBOSITY_MAKE="VERBOSE=1"
+    fi
 
     display_heading_message "Preparing to build ${PROJECT}"
 
-    echo "BUILD_GNU!"
+.   define_build_initialize_path()
+
+    # configuration
+    push_directory "${BUILD_PATH}"
+    autoreconf ${VERBOSITY_GNU} -i
+    pop_directory # BUILD_PATH
+
+    display_configure_options "$@"
+
+    "${BUILD_PATH}/configure" ${VERBOSITY_GNU} "$@"
+
+    # make
+    if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
+        make -j${JOBS} ${VERBOSITY_MAKE}
+    else
+        make
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+    display_message "'${PROJECT}' built successfully."
 }
 .endmacro # define_build_gnu
 .
@@ -819,7 +997,7 @@ build_boost()
         BOOST_LINK="static,shared"
     fi
 
-    if [[ -v CC ]]; then
+    if [[ -n ${CC} ]]; then
         BOOST_TOOLSET="toolset=${CC}"
     fi
 
@@ -833,10 +1011,10 @@ build_boost()
     CXXFLAGS="-w" ${BUILD_SRC_DIR}/${PROJECT}/tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
     cp "${BUILD_SRC_DIR}/${PROJECT}/tools/build/src/engine/b2" .
 
-    if ! [[ -v BOOST_CXXFLAGS ]]; then
-        BOOST_CXXFLAGS="cxxflags=${BOOST_FLAGS[@]}"
+    if [[ -n "${BOOST_CXXFLAGS}" ]]; then
+        BOOST_CXXFLAGS="${BOOST_CXXFLAGS} ${boost_FLAGS[@]}"
     else
-        BOOST_CXXFLAGS="${BOOST_CXXFLAGS} ${BOOST_FLAGS[@]}"
+        BOOST_CXXFLAGS="cxxflags=${boost_FLAGS[@]}"
     fi
 
     # Prebuild status report
@@ -930,7 +1108,7 @@ $(indent_column("(--help|-h)", "DISPLAY_HELP=\"yes\";;", my.column, my.o_indent)
 .
 .   if (my.install.hint_options = "cmake")
 $(indent_column("(-DCMAKE_PREFIX_PATH=*)", "CMAKE_PREFIX_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(-DCMAKE_INSTALL_PREFIX_PATH=*)", "CMAKE_INSTALL_PREFIX_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(-DCMAKE_INSTALL_PREFIX=*)", "CMAKE_INSTALL_PREFIX=\"${OPTION#*=}\";;", my.column, my.o_indent))
 $(indent_column("(-DCMAKE_INCLUDE_PATH=*)", "CMAKE_INCLUDE_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
 $(indent_column("(-DCMAKE_LIBRARY_PATH=*)", "CMAKE_LIBRARY_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
 .   endif
@@ -945,7 +1123,7 @@ $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
 .   if (my.install.hint_options = "cmake")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_PREFIX_PATH=*/}")
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_INSTALL_PREFIX_PATH=*/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_INSTALL_PREFIX=*/}")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_INCLUDE_PATH=*/}")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_LIBRARY_PATH=*/}")
 .   endif
@@ -966,7 +1144,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
     # defaults and sanitization: script static options
 
     # --build-src-dir
-    if ! [[ -v BUILD_SRC_DIR ]]; then
+    if [[ -z "${BUILD_SRC_DIR}" ]]; then
         BUILD_SRC_DIR="\$(pwd)"
         display_message_verbose "No build-src-dir specified, using default '${BUILD_SRC_DIR}'."
     fi
@@ -985,8 +1163,8 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
     fi
 
     # --build-obj-dir
-    if ! [[ -v BUILD_OBJ_DIR ]]; then
-        if [[ -v BUILD_OBJ_DIR_RELATIVE ]] && [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+    if [[ -z "${BUILD_OBJ_DIR}" ]]; then
+        if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
             BUILD_OBJ_DIR="obj"
             display_message_verbose "No build-obj-dir specified, using relative default '${BUILD_OBJ_DIR}'."
         else
@@ -995,7 +1173,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
         fi
     fi
 
-    if [[ -v BUILD_OBJ_DIR_RELATIVE ]] && [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
         display_message_verbose "Deferring relative path action for build-obj-dir '${BUILD_OBJ_DIR}'."
     else
         if [[ -d "${BUILD_OBJ_DIR}" ]]; then
@@ -1013,7 +1191,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
     fi
 
     # --build-config
-    if ! [[ -v BUILD_CONFIG ]]; then
+    if [[ -z "${BUILD_CONFIG}" ]]; then
         BUILD_CONFIG="release"
         display_message_verbose "No build-config specified, defaulting to '${BUILD_CONFIG}'."
     elif [[ "${BUILD_CONFIG}" != "debug" ]] && [[ "${BUILD_CONFIG}" != "release" ]]; then
@@ -1025,7 +1203,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
     fi
 
     # --build-link
-    if ! [[ -v BUILD_LINK ]]; then
+    if [[ -z "${BUILD_LINK}" ]]; then
         BUILD_LINK="static"
         display_message_verbose "No build-link specified, defaulting to '${BUILD_LINK}'."
     elif [[ "${BUILD_LINK}" != "dynamic" ]] && [[ "${BUILD_LINK}" != "static" ]]; then
@@ -1035,87 +1213,91 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
     fi
 
     # --prefix
-    if ! [[ -v PREFIX ]]; then
+    if [[ -z "${PREFIX}" ]]; then
         # Always set a prefix (required for OSX and lib detection).
         PREFIX="/usr/local"
         display_message_verbose "No prefix specified, defaulting to '${PREFIX}'."
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=\"${PREFIX}\"" )
     else
         # Incorporate the custom libdir into each object, for link time resolution
-        if [[ -v LD_RUN_PATH ]]; then
-            export LD_RUN_PATH="${LD_RUN_PATH}:${PREFIX}/lib"
-        else
+        if [[ -z "${LD_RUN_PATH}" ]]; then
             export LD_RUN_PATH="${PREFIX}/lib"
+        else
+            export LD_RUN_PATH="${LD_RUN_PATH}:${PREFIX}/lib"
         fi
 
-        if [[ -v LD_LIBRARY_PATH ]]; then
-            export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${PREFIX}/lib"
-        else
+        if [[ -z "${LD_LIBRARY_PATH}" ]]; then
             export LD_LIBRARY_PATH="${PREFIX}/lib"
+        else
+            export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${PREFIX}/lib"
         fi
     fi
 .
-.   if (my.install.hint_options = "cmake")
+.   if (my.install.hint_options = "gnu")
 
-    if [[ -v CMAKE_PREFIX_PATH ]]; then
-        if [[ -v PREFIX ]]; then
+    if [[ -n "${PREFIX}" ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=${PREFIX}" )
+    fi
+.   elsif (my.install.hint_options = "cmake")
+
+    if [[ -n "${CMAKE_PREFIX_PATH}" ]]; then
+        if [[ -n "${PREFIX}" ]]; then
             display_error "Both PREFIX and CMAKE_PREFIX_PATH have been defined, please use --prefix exclusively."
             display_help
             exit 1
         fi
 
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=\"${CMAKE_PREFIX_PATH}\"" )
-    elif [[ -v PREFIX ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=\"${PREFIX}\"" )
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" )
+    elif [[ -n "${PREFIX}" ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=${PREFIX}" )
     fi
 
-    if [[ -v CMAKE_INSTALL_PREFIX_PATH ]]; then
-        if [[ -v PREFIX ]]; then
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX_PATH=\"${PREFIX}:${CMAKE_PREFIX_PATH}\"" )
+    if [[ -n "${CMAKE_INSTALL_PREFIX}" ]]; then
+        if [[ -n "${PREFIX}" ]]; then
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX}:${CMAKE_PREFIX_PATH}" )
         else
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX_PATH=\"${CMAKE_INSTALL_PREFIX_PATH}\"" )
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}" )
         fi
-    elif [[ -v PREFIX ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX_PATH=\"${PREFIX}\"" )
+    elif [[ -n "${PREFIX}" ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX}" )
     fi
 
-    if [[ -v CMAKE_INCLUDE_PATH ]]; then
-        if [[ -v PREFIX ]]; then
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=\"${PREFIX}/include:${CMAKE_INCLUDE_PATH}\"" )
+    if [[ -n "${CMAKE_INCLUDE_PATH}" ]]; then
+        if [[ -n "${PREFIX}" ]]; then
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=${PREFIX}/include:${CMAKE_INCLUDE_PATH}" )
         else
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=\"${CMAKE_INCLUDE_PATH}\"" )
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=${CMAKE_INCLUDE_PATH}" )
         fi
-    elif [[ -v PREFIX ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=\"${PREFIX}/include\"" )
+    elif [[ -n "${PREFIX}" ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=${PREFIX}/include" )
     fi
 
-    if [[ -v CMAKE_LIBRARY_PATH ]]; then
-        if [[ -v PREFIX ]]; then
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=\"${PREFIX}/lib:${CMAKE_LIBRARY_PATH}\"" )
+    if [[ -n "${CMAKE_LIBRARY_PATH}" ]]; then
+        if [[ -n "${PREFIX}" ]]; then
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=${PREFIX}/lib:${CMAKE_LIBRARY_PATH}" )
         else
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=\"${CMAKE_LIBRARY_PATH}\"" )
+            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=${CMAKE_LIBRARY_PATH}" )
         fi
-    elif [[ -v PREFIX ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=\"${PREFIX}/lib\"" )
+    elif [[ -n "${PREFIX}" ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=${PREFIX}/lib" )
     fi
 .   endif
 
-    if [[ -v PREFIX ]]; then
+    if [[ -n "${PREFIX}" ]]; then
         # Set the prefix-based package config directory.
-        PREFIX_PKG_CONFIG_DIR="${PREFIX}/lib/pkgconfig"
+        PREFIX_PKG_CONFIG_PATH="${PREFIX}/lib/pkgconfig"
 
         # Prioritize prefix package config in PKG_CONFIG_PATH search path.
-        if [[ -v PKG_CONFIG_PATH ]]; then
-            export PKG_CONFIG_PATH="${PREFIX_PKG_CONFIG_DIR}:${PKG_CONFIG_PATH}"
+        if [[ -n "${PKG_CONFIG_PATH}" ]]; then
+            export PKG_CONFIG_PATH="${PREFIX_PKG_CONFIG_PATH}:${PKG_CONFIG_PATH}"
         else
-            export PKG_CONFIG_PATH="${PREFIX_PKG_CONFIG_PDIR}"
+            export PKG_CONFIG_PATH="${PREFIX_PKG_CONFIG_PATH}"
         fi
 
-        with_pkgconfigdir="--with-pkgconfigdir=${PREFIX_PKG_CONFIG_DIR}"
+        with_pkgconfigdir="--with-pkgconfigdir=${PREFIX_PKG_CONFIG_PATH}"
     fi
 
     # --parallel
-    if ! [[ -v PARALLEL ]]; then
+    if [[ -z "${PARALLEL}" ]]; then
         if [[ ${OS} == Linux ]]; then
             PARALLEL=\$(nproc)
         elif [[ ${OS} == Darwin ]] || [[ ${OS} == OpenBSD ]]; then
@@ -1136,7 +1318,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
         make() { gmake "$@"; }
     fi
 
-    if ! [[ -v ${STDLIB} ]]; then
+    if [[ -z "${STDLIB}" ]]; then
         if [[ ${OS} == Darwin ]]; then
             STDLIB="c++"
         elif [[ ${OS} == OpenBSD ]]; then
@@ -1148,7 +1330,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
         define_message_verbose "STDLIB using defined value '${STDLIB}'"
     fi
 
-    if ! [[ -v ${CC} ]]; then
+    if [[ -z "${CC}" ]]; then
         if [[ ${OS} == Darwin ]]; then
             export CC="clang"
         elif [[ ${OS} == OpenBSD ]]; then
@@ -1158,7 +1340,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
         display_message_verbose "CC using defined value '${CC}'"
     fi
 
-    if ! [[ -v ${CXX} ]]; then
+    if [[ -z "${CXX}" ]]; then
         if [[ ${OS} == Darwin ]]; then
             export CXX="clang++"
         elif [[ ${OS} == OpenBSD ]]; then
@@ -1169,7 +1351,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
     fi
 
     # translate BUILD_CONFIG to ZFLAGS
-    if [[ -v BUILD_CONFIG ]]; then
+    if [[ -n "${BUILD_CONFIG}" ]]; then
         display_message_verbose "*** Build config specified, calculating flags..."
 
         if [[ "${BUILD_CONFIG}" == "debug" ]]; then
@@ -1178,37 +1360,37 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
             BUILD_FLAGS="-O3"
         fi
 
-        if [[ -v CFLAGS ]]; then
+        if [[ -z "${CFLAGS}" ]]; then
+            export CFLAGS="${BUILD_FLAGS}"
+            display_message_verbose "Exporting CFLAGS '${CFLAGS}'"
+        else
             display_message_verbose "CFLAGS intitally '${CFLAGS}'"
             SANITIZED_CFLAGS=\$(strip_optimization "$CFLAGS")
             export CFLAGS="${SANITIZED_CFLAGS} ${BUILD_FLAGS}"
             display_message_verbose "CFLAGS modified to '${CFLAGS}'"
-        else
-            export CFLAGS="${BUILD_FLAGS}"
-            display_message_verbose "Exporting CFLAGS '${CFLAGS}'"
         fi
 
-        if [[ -v CXXFLAGS ]]; then
+        if [[ -z "${CXXFLAGS}" ]]; then
+            export CXXFLAGS="${BUILD_FLAGS}"
+            display_message_verbose "Exporting CXXFLAGS '${CXXFLAGS}'"
+        else
             display_message_verbose "CXXFLAGS intitally '${CXXFLAGS}'"
             SANITIZED_CXXFLAGS=\$(strip_optimization "$CXXFLAGS")
             export CXXFLAGS="${SANITIZED_CXXFLAGS} ${BUILD_FLAGS}"
             display_message_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
-        else
-            export CXXFLAGS="${BUILD_FLAGS}"
-            display_message_verbose "Exporting CXXFLAGS '${CXXFLAGS}'"
         fi
     fi
 
 .   if (my.install.hint_options = "gnu")
     # Specify --enable-ndebug for gnu toolchain on release
-    if [[ -v BUILD_CONFIG ]] && [[ "${BUILD_CONFIG}" == "release" ]]; then
+    if [[ "${BUILD_CONFIG}" == "release" ]]; then
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--enable-ndebug" )
     fi
 .   elsif (my.install.hint_options = "cmake")
     # Specify cmake build
-    if [[ -v BUILD_CONFIG ]] && [[ "${BUILD_CONFIG}" == "release" ]]; then
+    if [[ "${BUILD_CONFIG}" == "release" ]]; then
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Release" )
-    elif [[ -v BUILD_CONFIG ]] && [[ "${BUILD_CONFIG}" == "debug" ]]; then
+    elif [[ "${BUILD_CONFIG}" == "debug" ]]; then
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Debug" )
     fi
 .   else
@@ -1216,7 +1398,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
 .   endif
 
     # translate BUILD_LINK to appropriate arguments
-    if [[ -v BUILD_LINK ]]; then
+    if [[ -n "${BUILD_LINK}" ]]; then
 .   if (my.install.hint_options = "gnu")
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--disable-shared=*}" )
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--enable-shared=*}" )
@@ -1228,7 +1410,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
         else
             CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--disable-shared" "--enable-static" )
         fi
-
+.
 .   elsif (my.install.hint_options = "cmake")
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DBUILD_SHARED_LIBS=*}" )
 
@@ -1258,12 +1440,12 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
 .
 .           if (my.hint_root | my.hint_with)
 
-    if [[ -v BUILD_$(_depend.name:c) ]]; then
+    if [[ -n "${BUILD_$(_depend.name:c)}" ]]; then
 .               if (my.hint_root)
         export $(_depend.name:upper)_ROOT="${PREFIX}"
 .               endif
 .               if (my.hint_with)
-        with_$(_depend.name:c)="--with-${$(_depend.name:c)}=${PREFIX}"
+        with_$(_depend.name:c)="--with-$(_depend.name:c)=${PREFIX}"
 .               endif
     fi
 .           endif
@@ -1286,14 +1468,14 @@ main()
     # argument consumption
 .   define_parse_options(my.meta, my.configuration, my.repository, my.install, "    ")
 
-    if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+    if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
         display_build_variables
     fi
 
 .   define_sanitize_input(my.meta, my.configuration, my.repository, my.install)
 
     # handle help
-    if [[ -v DISPLAY_HELP ]] && [[ "${DISPLAY_HELP}" == "yes" ]]; then
+    if [[ "${DISPLAY_HELP}" == "yes" ]]; then
         display_help
         return 0
     fi
@@ -1301,12 +1483,10 @@ main()
     display_heading_message "Configuration"
     display_build_variables
 
-    if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
-        display_heading_message "Toolchain"
-        display_toolchain_variables
-    fi
+    display_heading_message "Toolchain Configuration Parameters"
+    display_toolchain_variables
 
-    if [[ -v DISPLAY_VERBOSE ]] && [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+    if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
         display_heading_message "State"
         display_constants
     fi
@@ -1322,7 +1502,7 @@ main()
 .
 
 .       if (is_defined_positive(_depend, "conditional"))
-$(my.indent)if [[ -v BUILD_$(my.vname) ]] &&  [[ ${BUILD_$(my.vname)} == "yes" ]]; then
+$(my.indent)if [[ ${BUILD_$(my.vname)} == "yes" ]]; then
 .           my.indent = "$(my.step)$(my.indent)"
 .       endif
 .
@@ -1367,13 +1547,21 @@ $(my.indent)export CPPFLAGS="${CPPFLAGS} ${$(my.vname)_FLAGS[@]}"
 .
 .       if (my.active_build.method = "gnu")
 .           require(my.active_build, "build", "filepath")
-$(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)" "${$(my.vname)_OPTIONS[@]}"
+$(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
+.           if last()
+$(my.indent)test_make "$(_depend.name)" "check" "${PARALLEL}"
+.           endif
+$(my.indent)install_make "$(_depend.name)"
 .       elsif (my.active_build.method = "cmake")
 .           require(my.active_build, "build", "filepath")
-$(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "${$(my.vname)_OPTIONS[@]}"
+$(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
+.           if last()
+$(my.indent)test_make "$(_depend.name)" "test" "${PARALLEL}"
+.           endif
+$(my.indent)install_make "$(_depend.name)"
 .       elsif (my.active_build.method = "presets")
 .           require(my.active_build, "build", "filepath")
-$(my.indent)build_presets "$(_depend.name)" "$(my.active_build.filepath)" "${$(my.vname)_OPTIONS[@]}"
+$(my.indent)build_presets "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
 .       elsif (my.active_build.method = "boost_build")
 $(my.indent)build_boost "$(_depend.name)" "${$(my.vname)_OPTIONS[@]}"
 .       else
