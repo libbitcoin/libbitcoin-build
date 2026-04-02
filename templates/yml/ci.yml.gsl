@@ -1,0 +1,147 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin <bitcoin library>-config.cmake.in.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/sh.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_ci_yml(configuration)
+    define my.configuration = generate_ci_yml.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.filename = "ci.yml"
+    define my.template = my.configuration->templates->template(.name = "ci.yml.gsl")
+
+    if (!defined(my.template))
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    define my.project_path_suffix = my.template.outpath
+
+    for my.configuration.repository by .name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+
+        if defined(_repository->ci)
+            create_directory(my.output_path)
+
+            define my.out_file = path_append(my.output_path, my.filename)
+            notify(my.out_file)
+            output(my.out_file)
+
+            emit_ci_yml(my.template, my.configuration, _repository)
+
+            close
+        endif
+     endfor _repository
+endfunction
+
+###############################################################################
+# Library-able?
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_ci_yml(meta, configuration, repository)
+.   define my.meta = emit_ci_yml.meta
+.   define my.configuration = emit_ci_yml.configuration
+.   define my.repository = emit_ci_yml.repository
+.
+.   copyleft(my.repository.name)
+
+name: Continuous Integration
+
+on: [ pull_request, push, workflow_dispatch ]
+
+jobs:
+.   for my.meta.job as _job where (_job.type = "shell")
+.       echo "JOBJOBJOB:::: $(_job.string())"
+.       define_ci_job(_job, my.meta, my.configuration, my.repository)
+.   endfor
+.
+.endmacro # emit_CMakeLists
+.
+.macro define_ci_job(job, meta, configuration, repository)
+.   define my.job = define_ci_job.job
+.   define my.meta = define_ci_job.meta
+.   define my.configuration = define_ci_job.configuration
+.   define my.repository = define_ci_job.repository
+.
+.   require(my.job, "job", "name")
+
+  $(my.job.name):
+
+    strategy:
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Execute installation
+        shell: bash
+        run: >
+.   require(my.job, "job", "script")
+          ./$(my.job.script)
+            --prefix=${{ env.LIBBITCOIN_SRC_PATH }}prefix
+            --build-src-dir=${{ env.LIBBITCOIN_SRC_PAT }}
+            --build-obj-dir="obj"
+            --build-obj-dir-relative
+            --build-use-local-src
+            --build-config=${{ matrix.config }}
+            --build-link=${{ matrix.link }}
+.   for my.repository->ci.axis as _axis where is_defined_positive(_axis, "param")
+.       required(_axis, "axis", "name")
+            ${{ matrix.$(_axis.name) }}
+.   endfor
+
+.endmacro # 
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_ci_yml(configuration)
+
+.endtemplate
