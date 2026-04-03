@@ -651,9 +651,11 @@ $(fix_column("--build-obj-dir-relative", "Use build-obj-dir as relative to proje
 .
 $(fix_column("--build-config=<mode>", "Specifies the build configuration.", my.column, my.prefix, my.suffix))
 $(fix_column("", "  Valid values: { debug, release }", my.column, my.prefix, my.suffix))
+$(fix_column("", "  Toolchain default behavior will occur if no value specified.", my.column, my.prefix, my.suffix))
 .
 $(fix_column("--build-link=<mode>", "Specifies link mode.", my.column, my.prefix, my.suffix))
 $(fix_column("", "  Valid values: { dynamic, static }", my.column, my.prefix, my.suffix))
+$(fix_column("", "  Toolchain default behavior will occur if no value specified.", my.column, my.prefix, my.suffix))
 .
 $(fix_column("--build-full-repositories", "Sync full github repositories.", my.column, my.prefix, my.suffix))
 $(fix_column("", "  Default clones depth 1, single branch", my.column, my.prefix, my.suffix))
@@ -779,7 +781,7 @@ display_configure_options()
 {
     display_message "configure options:"
     for OPTION in "$@"; do
-        if [[ -n ${OPTION+set} ]]; then
+        if [[ -n ${OPTION} ]]; then
             display_message "${OPTION}"
         fi
     done
@@ -1121,14 +1123,8 @@ $(my.indent)CONFIGURE_OPTIONS=("$@")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
-.   if (my.install.hint_options = "cmake")
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_PREFIX_PATH=*/}")
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_INSTALL_PREFIX=*/}")
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_INCLUDE_PATH=*/}")
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/-DCMAKE_LIBRARY_PATH=*/}")
-.   endif
-$(my.indent)display_message_verbose "CONFIGURE_OPTIONS INITIAL: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
-$(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OPTIONS[*]}"
+$(my.indent)display_message_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
+$(my.indent)display_message_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 .
 .endmacro # define_parse_options
 .
@@ -1192,8 +1188,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
 
     # --build-config
     if [[ -z "${BUILD_CONFIG}" ]]; then
-        BUILD_CONFIG="release"
-        display_message_verbose "No build-config specified, defaulting to '${BUILD_CONFIG}'."
+        display_message_verbose "No build-config specified."
     elif [[ "${BUILD_CONFIG}" != "debug" ]] && [[ "${BUILD_CONFIG}" != "release" ]]; then
         display_error "Provided build-config '${BUILD_CONFIG}' not a valid value."
         display_help
@@ -1204,8 +1199,7 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
 
     # --build-link
     if [[ -z "${BUILD_LINK}" ]]; then
-        BUILD_LINK="static"
-        display_message_verbose "No build-link specified, defaulting to '${BUILD_LINK}'."
+        display_message_verbose "No build-link specified."
     elif [[ "${BUILD_LINK}" != "dynamic" ]] && [[ "${BUILD_LINK}" != "static" ]]; then
         display_error "Provided build-link ${BUILD_LINK}' not a valid value."
         display_help
@@ -1239,46 +1233,25 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
     fi
 .   elsif (my.install.hint_options = "cmake")
 
-    if [[ -n "${CMAKE_PREFIX_PATH}" ]]; then
-        if [[ -n "${PREFIX}" ]]; then
-            display_error "Both PREFIX and CMAKE_PREFIX_PATH have been defined, please use --prefix exclusively."
-            display_help
-            exit 1
-        fi
-
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" )
+    if [[ -n "${PREFIX}" ]] && [[ -n "${CMAKE_INSTALL_PREFIX}" ]]; then
+        display_error "Both PREFIX and CMAKE_INSTALL_PREFIX have been defined differently."
+        display_help
+        exit 1
     elif [[ -n "${PREFIX}" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=${PREFIX}" )
-    fi
-
-    if [[ -n "${CMAKE_INSTALL_PREFIX}" ]]; then
-        if [[ -n "${PREFIX}" ]]; then
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX}:${CMAKE_PREFIX_PATH}" )
-        else
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}" )
-        fi
-    elif [[ -n "${PREFIX}" ]]; then
+        CMAKE_INSTALL_PREFIX="${PREFIX}"
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DCMAKE_INSTALL_PREFIX=*/}" )
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX}" )
     fi
 
-    if [[ -n "${CMAKE_INCLUDE_PATH}" ]]; then
-        if [[ -n "${PREFIX}" ]]; then
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=${PREFIX}/include:${CMAKE_INCLUDE_PATH}" )
-        else
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=${CMAKE_INCLUDE_PATH}" )
-        fi
+    if [[ -n "${PREFIX}" ]] && [[ -n "${CMAKE_PREFIX_PATH}" ]] &&
+       [[ "${PREFIX}" != "${CMAKE_PREFIX_PATH}" ]]; then
+        CMAKE_PREFIX_PATH="${PREFIX}:${CMAKE_PREFIX_PATH}"
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DCMAKE_PREFIX_PATH=*/}" )
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" )
     elif [[ -n "${PREFIX}" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INCLUDE_PATH=${PREFIX}/include" )
-    fi
-
-    if [[ -n "${CMAKE_LIBRARY_PATH}" ]]; then
-        if [[ -n "${PREFIX}" ]]; then
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=${PREFIX}/lib:${CMAKE_LIBRARY_PATH}" )
-        else
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=${CMAKE_LIBRARY_PATH}" )
-        fi
-    elif [[ -n "${PREFIX}" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_LIBRARY_PATH=${PREFIX}/lib" )
+        CMAKE_INSTALL_PREFIX="${PREFIX}"
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DCMAKE_PREFIX_PATH=*/}" )
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=${PREFIX}" )
     fi
 .   endif
 
@@ -1382,16 +1355,18 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
     fi
 
 .   if (my.install.hint_options = "gnu")
-    # Specify --enable-ndebug for gnu toolchain on release
-    if [[ "${BUILD_CONFIG}" == "release" ]]; then
+    # Specify or remove --enable-ndebug for gnu toolchain on release
+    if [[ "${BUILD_CONFIG}" == "debug" ]]; then
+        CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--enable-ndebug/}")
+    elif [[ "${BUILD_CONFIG}" == "release" ]]; then
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--enable-ndebug" )
     fi
 .   elsif (my.install.hint_options = "cmake")
     # Specify cmake build
-    if [[ "${BUILD_CONFIG}" == "release" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Release" )
-    elif [[ "${BUILD_CONFIG}" == "debug" ]]; then
+    if [[ "${BUILD_CONFIG}" == "debug" ]]; then
         CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Debug" )
+    elif [[ "${BUILD_CONFIG}" == "release" ]]; then
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Release" )
     fi
 .   else
 .       abort "Unexpected hint_options: '$(my.install.hint_options)'"
@@ -1452,6 +1427,14 @@ $(my.indent)display_message_verbose "CONFIGURE_OPTIONS SANITIZED: ${CONFIGURE_OP
 .       endif
 .   endfor
 
+    REMAP=()
+    for argument in "${CONFIGURE_OPTIONS[@]}"; do
+        if [[ -n "${argument}" ]]; then
+            REMAP+=( "${argument}" )
+        fi
+    done
+    CONFIGURE_OPTIONS=( "${REMAP[@]}" )
+    unset REMAP
 .
 .endmacro # define_sanitize_input
 .
