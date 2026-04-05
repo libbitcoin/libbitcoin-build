@@ -179,7 +179,11 @@
 
     </binary>
 
-    <ci />
+    <ci>
+      <coverage>
+        <exclude path="src/wallet/address/qrencode/*" />
+      </coverage>
+    </ci>
   </repository>
 
   <repository name="libbitcoin-network" 
@@ -537,30 +541,39 @@
     </binary>
 
     <ci>
-      <!-- image= runner image -->
-      <!-- compiler -->
-      <entry image="macos-latest" config="debug" link="dynamic">
+
+      <entry image="macos-latest" config="release" link="dynamic">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
         <build name="boost" />
         <build name="secp256k1" />
 
         <job name="gnu">
           <option value="--enable-isystem" />
         </job>
-        <job name="cmake" />
+        <job name="cmake">
+          <flag value="-DNDEBUG" />
+          <option value="--verbose" />
+        </job>
       </entry>
 
-      <entry image="macos-latest" config="debug" link="static">
+      <entry image="macos-latest" config="release" link="static">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
         <build name="boost" />
         <build name="secp256k1" />
 
         <job name="gnu">
           <option value="--enable-isystem" />
         </job>
-        <job name="cmake" />
+        <job name="cmake">
+          <option value="--verbose" />
+        </job>
       </entry>
 
       <entry image="ubuntu-24.04" config="debug" link="dynamic">
-        <compiler name="clang" version="18" />
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
         <build name="boost" />
         <build name="secp256k1" />
 
@@ -572,7 +585,8 @@
       </entry>
 
       <entry image="ubuntu-24.04" config="release" link="static">
-        <compiler name="clang" version="18" />
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
         <build name="boost" />
         <build name="secp256k1" />
 
@@ -584,7 +598,8 @@
       </entry>
 
       <entry image="ubuntu-24.04" config="release" link="dynamic">
-        <compiler name="gcc" version="12" />
+        <compiler lang="c" name="gcc" version="12" />
+        <compiler lang="cxx" name="g++" version="12" />
         <build name="boost" />
         <build name="secp256k1" />
 
@@ -595,19 +610,9 @@
         <job name="presets" value="nix-gnu-release-shared" />
       </entry>
 
-      <entry image="ubuntu-24.04" config="release" link="dynamic">
-        <compiler name="gcc" />
-        <build name="boost" />
-        <build name="secp256k1" />
-
-        <job name="gnu">
-          <option value="--enable-isystem" />
-        </job>
-        <job name="cmake" />
-      </entry>
-
       <entry image="ubuntu-24.04" config="debug" link="static">
-        <compiler name="gcc" />
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
         <build name="boost" />
         <build name="secp256k1" />
 
@@ -895,9 +900,9 @@
       <source type="github" />
       <source type="archive" />
     </template>
-    <!--<template name="ci.yml.gsl" path="yml" outpath=".github/workflows">
+    <template name="ci.yml.gsl" path="yml" outpath=".github/workflows">
       <job type="shell" name="gnu" script="builds/gnu/install-gnu.sh" />
       <job type="shell" name="cmake" script="builds/cmake/install-cmake.sh" />
-    </template>-->
+    </template>
   </templates>
 </configuration>
