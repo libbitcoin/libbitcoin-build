@@ -54,6 +54,7 @@ COLOR_CYAN='\\e[0;96m'
 COLOR_GREEN='\\e[0;92m'
 COLOR_RED='\\e[0;91m'
 COLOR_YELLOW='\\e[0;93m'
+COLOR_RESET='\\e[0m'
 
 msg_heading()
 {
@@ -63,7 +64,7 @@ msg_heading()
 msg_verbose()
 {
     if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
-        printf "${COLOR_CYAN}%s\\n" "$@"
+        printf "${COLOR_CYAN}%s${COLOR_RESET}\\n" "$@"
     fi
 }
 
@@ -74,17 +75,17 @@ msg()
 
 msg_success()
 {
-    printf "${COLOR_GREEN}%s\\n" "$@"
+    printf "${COLOR_GREEN}%s${COLOR_RESET}\\n" "$@"
 }
 
 msg_warn()
 {
-    printf "${COLOR_YELLOW}%s\\n" "$@"
+    printf "${COLOR_YELLOW}%s${COLOR_RESET}\\n" "$@"
 }
 
 msg_error()
 {
-    >&2 printf "${COLOR_RED}%s\\n" "$@"
+    >&2 printf "${COLOR_RED}%s${COLOR_RESET}\\n" "$@"
 }
 .endmacro
 .
