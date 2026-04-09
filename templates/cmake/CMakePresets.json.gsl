@@ -1,0 +1,231 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin CMakePresets.json.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_CMakePresets(configuration)
+    define my.configuration = generate_CMakePresets.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.template = my.configuration->templates->template(.name = "CMakePresets.json.gsl")
+
+    if (!defined(my.template))
+        abort "Generator configuration missing."
+    endif
+
+    if !(ends_with(my.template.name, ".gsl"))
+        abort "Provided template does not end with '.gsl'."
+    endif
+
+    define my.filename = left(my.template.name, string.length(my.template.name) - 4)
+
+    require(my.template, "template", "outpath")
+    define my.project_path_suffix = my.template.outpath
+
+    for my.configuration.repository by .name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+        new presets as _presets
+            calculate_presets(_presets, my.configuration, _repository)
+
+            if ((count(_presets.configuration, !is_defined_positive(count, "hidden")) = 0) |\
+                (count(_presets.target) = 0))
+                next
+            endif
+
+            create_directory(my.output_path)
+            define my.out_file = path_append(my.output_path, my.filename)
+            notify(my.out_file)
+            output(my.out_file)
+            emit_CMakePresets(_presets)
+        endnew
+
+        close
+     endfor _repository
+endfunction
+
+###############################################################################
+# Library-able?
+###############################################################################
+function calculate_presets(result, configuration, repository)
+    define my.result = calculate_presets.result
+    define my.configuration = calculate_presets.configuration
+    define my.repository = calculate_presets.repository
+
+    # targets
+    for my.repository.library as _library
+        new target as _target
+            _target.value = "$(_library.name)"
+            copy _target to my.result
+        endnew
+    endfor
+    for my.repository.test as _test
+        new target as _target
+            _target.value = "$(_test.name)"
+            copy _target to my.result
+        endnew
+    endfor
+    for my.repository.binary as _binary
+        new target as _target
+            _target.value = "$(_binary.name)"
+            copy _target to my.result
+        endnew
+    endfor
+
+    # configurations
+    if !defined(my.repository->presets)
+        return
+    endif
+
+    define my.registrar = my.configuration->registrar(id = "presets")?
+
+    if !defined(my.registrar)
+        return
+    endif
+
+    # shortcut - currently all presets are same, use registry
+    for my.registrar.configuration as _config
+        copy _config to my.result
+    endfor
+
+#    for my.repository->presets.configuration as _config
+#        define my.entry = registry(my.registrar, _config, "configuration")?
+#
+#        if defined(my.entry)
+#            copy my.entry to my.result
+#        else
+#            abort "Preset $(_config.name) absent from registry."
+#        endif
+#    endfor
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_CMakePresets(presets)
+.   define my.presets = emit_CMakePresets.presets
+.
+{
+    "version": 5,
+    "configurePresets": [
+.   for my.presets.configuration as _config
+        {
+.       emit_configuration_body(_config, "            ")
+        }$(last() ?? "" ? ",")
+.   endfor
+    ],
+    "buildPresets": [
+        {
+            "name": "nix-target-list",
+            "hidden": true,
+            "targets": [
+.   for my.presets.target as _target
+                "$(_target.value)"$(last() ?? "" ? ",")
+.   endfor
+            ]
+        },
+.   for my.presets.configuration as _config where !is_defined_positive(_config, "hidden")
+        {
+            "name": "$(_config.name)",
+            "displayName": "$(_config.display)",
+            "inherits": [ "nix-target-list" ],
+            "configurePreset": "$(_config.name)"
+        }$(last() ?? "" ? ",")
+.   endfor
+    ]
+}
+.
+.endmacro # emit_CMakePresets
+.
+.macro emit_configuration_body(config, indent)
+.   define my.config = emit_configuration_body.config
+.   define my.indent = emit_configuration_body.indent
+.
+$(my.indent)"name": "$(my.config.name)",
+.   if defined(my.config.display)
+$(my.indent)"displayName": "$(my.config.display)",
+.   endif
+.   if defined(my.config.description)
+$(my.indent)"description": "$(my.config.description)",
+.   endif
+.   if defined(my.config.hidden)
+$(my.indent)"hidden": $(my.config.hidden),
+.   endif
+.   for my.config.property as _property
+.       emit_property(_property, my.indent, !last() ?? "," ? " ", false)
+.   endfor
+.endmacro # emit_configuration_body
+.
+.macro emit_property(property, indent, post, listMember)
+.   define my.property = emit_property.property
+.   define my.indent = emit_property.indent
+.   define my.postfix = emit_property.post
+.
+.   if (defined(my.property.type))
+.       require(my.property, "property", "name")
+.       my.isObject = (my.property.type = "object")
+.       my.isList = (my.property.type = "list")
+.       if (my.isObject | my.isList)
+$(my.indent)"$(my.property.name)": $(my.isObject ?? "{" ? "[")
+.           for my.property.property as _property
+.               emit_property(_property, "    $(my.indent)", last() ?? "" ? ",", my.isList)
+.           endfor
+$(my.indent)$(my.isObject ?? "}" ? "]")$(my.postfix)
+.       else
+$(my.indent)"$(my.property.name)": {
+  $(my.indent)"type": "$(my.property.type)",
+  $(my.indent)"value": "$(my.property.value)"
+$(my.indent)}$(my.postfix)
+.       endif
+.   elsif (defined(my.property.value))
+.       if (defined(my.property.name))
+$(my.indent)"$(my.property.name)": "$(my.property.value)"$(my.postfix)
+.       elsif (emit_property.listMember)
+$(my.indent)"$(my.property.value)"$(my.postfix)
+.       else
+.           echo my.property.string()
+.           abort("Non-list-member property lacks name.")
+.       endif
+.   else
+.       abort("Unrecognized type-less, value-less property.")
+.   endif
+.endmacro #emit_property
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_CMakePresets(configuration)
+
+.endtemplate

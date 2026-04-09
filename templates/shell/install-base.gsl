@@ -29,7 +29,7 @@ function generate_install_sh(configuration, id)
     require(my.configuration->templates, "templates", "resultpath")
 
     if !(ends_with(my.id, ".gsl"))
-        abort "Provided id '$(my.id)' does not end with '.gsl'"
+        abort "Provided id '$(my.id)' does not end with '.gsl'."
     endif
 
     define my.template = my.configuration->templates->template(.name = my.id)

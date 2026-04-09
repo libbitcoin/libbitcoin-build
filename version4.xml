@@ -231,7 +231,7 @@
           <option value="--enable-isystem" />
         </job>
         <job name="cmake" />
-        <job name="presets" value="nix-gnu-release-static" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04" config="release" link="dynamic">
@@ -244,7 +244,7 @@
           <option value="--enable-isystem" />
         </job>
         <job name="cmake" />
-        <job name="presets" value="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-shared" />
       </entry>
 
       <entry image="ubuntu-24.04" config="debug" link="static">
@@ -412,7 +412,7 @@
           <option value="--enable-isystem" />
         </job>
         <job name="cmake" />
-        <job name="presets" value="nix-gnu-release-static" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04" config="release" link="dynamic">
@@ -425,7 +425,7 @@
           <option value="--enable-isystem" />
         </job>
         <job name="cmake" />
-        <job name="presets" value="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-shared" />
       </entry>
 
       <entry image="ubuntu-24.04" config="debug" link="static">
@@ -599,7 +599,7 @@
           <option value="--enable-isystem" />
         </job>
         <job name="cmake" />
-        <job name="presets" value="nix-gnu-release-static" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04" config="release" link="dynamic">
@@ -612,7 +612,7 @@
           <option value="--enable-isystem" />
         </job>
         <job name="cmake" />
-        <job name="presets" value="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-shared" />
       </entry>
 
       <entry image="ubuntu-24.04" config="debug" link="static">
@@ -761,7 +761,7 @@
           <option value="--enable-isystem" />
         </job>
         <job name="cmake" />
-        <job name="presets" value="nix-gnu-release-static" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04" config="release" link="dynamic">
@@ -774,7 +774,7 @@
           <option value="--enable-isystem" />
         </job>
         <job name="cmake" />
-        <job name="presets" value="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-shared" />
       </entry>
 
       <entry image="ubuntu-24.04" config="debug" link="static">
@@ -950,7 +950,7 @@
           <option value="--enable-isystem" />
         </job>
         <job name="cmake" />
-        <job name="presets" value="nix-gnu-release-static" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04" config="release" link="dynamic">
@@ -963,7 +963,7 @@
           <option value="--enable-isystem" />
         </job>
         <job name="cmake" />
-        <job name="presets" value="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-shared" />
       </entry>
 
       <entry image="ubuntu-24.04" config="debug" link="static">
@@ -1124,6 +1124,10 @@
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-examples:BOOL=OFF" ignore="true" />
       </build>
+      <build method="preset" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-examples:BOOL=OFF" ignore="true" />
+      </build>
       <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"
         package="libbitcoin-system"
@@ -1138,6 +1142,10 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-tools:BOOL=OFF" ignore="true" />
+      </build>
+      <build method="preset" filepath="builds/cmake" parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-tools:BOOL=OFF" ignore="true" />
       </build>
@@ -1158,6 +1166,10 @@
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-ssl:BOOL=ON" />
       </build>
+      <build method="preset" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-ssl:BOOL=ON" />
+      </build>
       <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"
         package="libbitcoin-network"
@@ -1171,6 +1183,9 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+      </build>
+      <build method="preset" filepath="builds/cmake" parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
       </build>
       <build method="msbuild" filepath="builds\msvc\%proj_version%" />
@@ -1187,6 +1202,10 @@
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-console:BOOL=OFF" ignore="true" />
+      </build>
+      <build method="preset" filepath="builds/cmake" parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-console:BOOL=OFF" ignore="true" />
       </build>
@@ -1248,11 +1267,149 @@
     </dependency>
   </registrar>
 
+  <registrar id="presets">
+    <configuration name="nix-base" description="Factored base settings for non-windows *nix based platforms." hidden="true" inherits="">
+      <property name="installDir" value="${sourceParentDir}/../../../prefix/${presetName}" />
+      <property name="binaryDir" value="${sourceParentDir}/../obj/${presetName}" />
+      <property name="condition" type="object">
+        <property name="type" value="inList" />
+        <property name="string" value="${hostSystemName}" />
+        <property name="list" type="list">
+          <property value="Darwin" />
+          <property value="Linux" />
+        </property>
+      </property>
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
+        <property name="CMAKE_INSTALL_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
+        <property name="CMAKE_LIBRARY_PATH" value="${sourceParentDir}/../../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}" type="PATH" />
+      </property>
+    </configuration>
+<configuration name="gnu-debug" description="Factored debug settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_BUILD_TYPE" value="Debug" />
+        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -Og -g --coverage" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Og -g --coverage" />
+        <property name="enable-ndebug" value="OFF" type="BOOL" />
+      </property>
+    </configuration>
+    <configuration name="gnu-release" description="Factored release settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_BUILD_TYPE" value="Release" />
+        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -O3" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -O3" />
+      </property>
+    </configuration>
+    <configuration name="static" description="Factored static linking settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="BUILD_SHARED_LIBS" value="OFF" type="BOOL" />
+      </property>
+    </configuration>
+    <configuration name="shared" description="Factored shared/dynamic linking settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="BUILD_SHARED_LIBS" value="ON" type="BOOL" />
+      </property>
+      </configuration>
+    <!--
+    <configuration name="gnu-optimized-size" description="Factored size optimization settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -Os" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Os" />
+      </property>
+    </configuration>-->
+    <configuration name="nix-gnu-debug-static" description="Debug build with static linking." hidden="false" display="*nix/GNU/Debug/Static">
+      <property name="inherits" type="list">
+        <property value="static" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-shared" description="Debug build with shared linking." hidden="false" display="*nix/GNU/Debug/Shared">
+      <property name="inherits" type="list">
+        <property value="shared" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static" description="Release build with static linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Static">
+      <property name="inherits" type="list">
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared" description="Release build with shared linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Shared">
+      <property name="inherits" type="list">
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <!--
+    <configuration name="nix-gnu-release-static-size" description="Release build with static linkin
+g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
+    <!--
+    <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
+    <!--
+    <configuration name="nix-gnu-release-static-size" description="Release build with static linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size/WithConsensus">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
+    <!--
+    <configuration name="nix-gnu-release-static-size" description="Release build with static linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size/WithoutConsensus">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
+    <!--
+    <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size/WithConsensus">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
+    <!--
+    <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size/WithoutConsensus">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
+  </registrar>
+
   <templates source="version4.xml" resultpath="../output/version4">
     <!-- resultpath provided relative to expected evaluation - libbitcoin-build/process -->
     <template name="CMakeLists.txt.gsl" path="cmake" outpath="builds/cmake">
       <cmake rootpath="../.." />
       <!--<file source="cmake/InTargetProperty.cmake" destination="builds/cmake/modules" />-->
+    </template>
+    <template name="CMakePresets.json.gsl" path="cmake" outpath="builds/cmake">
+      <!-- <cmake rootpath="../.." /> -->
     </template>
     <template name="config.cmake.in.gsl" path="cmake" outpath="builds/cmake" />
     <template name="install-gnu.sh.gsl" path="shell" outpath="builds/gnu">
@@ -1274,8 +1431,8 @@
       <build method="cmake" />
       <build method="boost_build" />
       <column help="28" const="32" parse="28" />
-      <source type="github" />
       <source type="archive" />
+      <source type="github" />
     </template>
     <template name="build-msvc.cmd.gsl" path="shell" outpath="builds/msvc" label="true">
       <column help="28" const="32" parse="28" />

@@ -182,7 +182,7 @@ help()
 .
 .       if !((my.active.method = "gnu") | \
             (my.active.method = "cmake") | \
-            (my.active.method = "presets") | \
+            (my.active.method = "preset") | \
             (my.active.method = "boost_build"))
 .
 .           abort "Unrecognized build method '$(my.active.method)'."
@@ -271,6 +271,10 @@ $(column_variables("CMAKE_LIBRARY_PATH", my.column, my.prefix, my.suffix))
 .
 $(column_variables("BUILD_$(_depend.name)", my.column, my.prefix, my.suffix))
 .   endfor
+.
+.   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
+$(column_variables("BUILD_PRESET", my.column, my.prefix, my.suffix))
+.   endif
 .
 $(column_variables("BUILD_SRC_DIR", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_OBJ_DIR", my.column, my.prefix, my.suffix))
@@ -372,6 +376,10 @@ $(my.prefix)Script options:$(my.suffix)
 .
 $(fix_column("--build-$(_depend.name)", "Build $(textname(_depend)) libraries", my.column, my.prefix, my.suffix))
 .   endfor
+.
+.   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
+$(fix_column("--build-preset=<preset>", "Preset configuration to build.", my.column, my.prefix, my.suffix))
+.   endif
 .
 .#  consumed by installer (generic)
 $(fix_column("--build-src-dir=<path>", "Location of sources.", my.column, my.prefix, my.suffix))
@@ -654,14 +662,38 @@ build_cmake()
 build_preset()
 {
     local PROJECT="$1"
-    local CMAKE_PATH="$2"
-    shift 2
+    local RELATIVE_PATH="$2"
+    local JOBS="$3"
+    shift 3
+
+    local VERBOSITY_CMAKE=""
+    local VERBOSITY_MAKE=""
+
+    if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+        VERBOSITY_CMAKE="-DCMAKE_VERBOSE_MAKEFILE=ON"
+        VERBOSITY_MAKE="VERBOSE=1"
+    fi
 
     msg_heading "Preparing to build ${PROJECT}"
 
-    echo "BUILD_PRESET!"
+.   define_build_initialize_path()
+
+    display_configure_options "$@"
+
+    cmake ${VERBOSITY_CMAKE} -LA --preset="${BUILD_PRESET}" "$@" "${BUILD_SRC_DIR}/${PROJECT}/${RELATIVE_PATH}"
+
+    # make
+    if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
+        make -j${JOBS} ${VERBOSITY_MAKE}
+    else
+        make
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+    msg_success "'${PROJECT}' built successfully."
 }
-.endmacro # define_build_presets
+.endmacro # define_build_preset
 .
 .macro define_build_gnu()
 
@@ -826,6 +858,10 @@ $(my.c_indent)case ${OPTION} in
 $(indent_column("(--build-$(_depend.name))", "BUILD_$(_depend.name)=\"yes\";;", my.column, my.o_indent))
 .   endfor
 .
+.   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
+$(indent_column("(--build-preset=*)", "BUILD_PRESET=\"${OPTION#*=}\";;", my.column, my.o_indent))
+.   endif
+.
 $(indent_column("(--build-src-dir=*)", "BUILD_SRC_DIR=\"${OPTION#*=}\";;", my.column, my.o_indent))
 $(indent_column("(--build-obj-dir=*)", "BUILD_OBJ_DIR=\"${OPTION#*=}\";;", my.column, my.o_indent))
 $(indent_column("(--build-obj-dir-relative)", "BUILD_OBJ_DIR_RELATIVE=\"yes\";;", my.column, my.o_indent))
@@ -868,6 +904,15 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
     OS=\$(uname -s)
 
     # defaults and sanitization: script static options
+.   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
+
+    # --build-preset
+    if [[ -z "${BUILD_PRESET}" ]]; then
+        msg_error "No build-preset specified."
+        help
+        exit 1
+    fi
+.   endif
 
     # --build-src-dir
     if [[ -z "${BUILD_SRC_DIR}" ]]; then
@@ -1272,9 +1317,9 @@ $(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "${PARAL
 $(my.indent)test_make "$(_depend.name)" "test" "${PARALLEL}"
 .           endif
 $(my.indent)install_make "$(_depend.name)"
-.       elsif (my.active_build.method = "presets")
+.       elsif (my.active_build.method = "preset")
 .           require(my.active_build, "build", "filepath")
-$(my.indent)build_presets "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
+$(my.indent)build_preset "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
 .       elsif (my.active_build.method = "boost_build")
 $(my.indent)build_boost "$(_depend.name)" "${$(my.vname)_OPTIONS[@]}"
 .       else
