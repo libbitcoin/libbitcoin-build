@@ -21,210 +21,12 @@ gsl from "../lib/filesystem.gsl"
 gsl from "../lib/sh.gsl"
 
 ###############################################################################
-# Generation
-###############################################################################
-function generate_install_sh(configuration, id)
-    define my.configuration = generate_install_sh.configuration
-    define my.id = generate_install_sh.id
-    define my.filename = left(my.id, string.length(my.id) - 4)
-    require(my.configuration->templates, "templates", "resultpath")
-
-    if !(ends_with(my.id, ".gsl"))
-        abort "Provided id '$(my.id)' does not end with '.gsl'"
-    endif
-
-    define my.template = my.configuration->templates->template(.name = my.id)
-
-    require(my.template, "template", "outpath")
-    define my.project_path_suffix = my.template.outpath
-
-    for my.configuration.repository by .name as _repository
-        require(_repository, "repository", "name")
-        define my.output_path = path_append(\
-            my.configuration->templates.resultpath, \
-            path_append(my.path_prefix, \
-                path_append(_repository.name, my.project_path_suffix)))
-
-        create_directory(my.output_path)
-
-        define my.out_file = path_append(my.output_path, my.filename)
-        notify(my.out_file)
-        output(my.out_file)
-
-        emit_install_sh(my.template, my.configuration, _repository)
-
-        close
-     endfor _repository
-endfunction
-
-###############################################################################
 # Library-able?
 ###############################################################################
 
 ###############################################################################
 # Functions
 ###############################################################################
-function textname(dependency)
-    define my.dependency = textname.dependency
-    return defined(my.dependency.textname) ?? my.dependency.textname ? my.dependency.name
-endfunction
-
-function substitute(datasource, value, instructions)
-    define my.datasource = substitute.datasource
-    define my.result = substitute.value
-    define my.instructions = substitute.instructions
-
-    for my.instructions.substitute as _sub
-        define my.data = ""
-        if (_sub.data = "version")
-            my.data = my.datasource->archive.version
-        else
-            abort "Unrecognized datasource '$(_sub.data)'."
-        endif
-
-        my.result = string.replace(my.result, "$(_sub.symbol)|$(my.data)")
-        my.result = "$(my.result:$(_sub.type))"
-    endfor
-
-    return my.result
-endfunction
-
-function urlbase(dependency, source_type)
-    define my.dependency = urlbase.dependency
-    define my.type = urlbase.source_type
-
-    define my.url = my.dependency->$(my.type)->url
-    return substitute(my.dependency, my.url.pattern, my.url)
-endfunction
-
-function filename(dependency, source_type)
-    define my.dependency = filename.dependency
-    define my.type = filename.source_type
-
-    define my.filename = my.dependency->$(my.type)->filename
-    define my.expanded_filename = difference(substitute(my.dependency, "v$(my.filename.pattern)", my.filename), 1)
-
-    return "$(my.expanded_filename)$(my.filename.filetype)"
-endfunction
-
-function verify_toolchains_supported(dependencies, meta, configuration, repository)
-    define my.dependencies = verify_toolchains_supported.dependencies
-    define my.meta = verify_toolchains_supported.meta
-    define my.configuration = verify_toolchains_supported.configuration
-    define my.repository = verify_toolchains_supported.repository
-
-    define my.cmake = defined(my.meta->build(build.method = "cmake"))
-    define my.gnu = defined(my.meta->build(build.method = "gnu"))
-    define my.preset = defined(my.meta->build(build.method = "preset"))
-
-    if (my.cmake | my.preset) & (my.gnu)
-        abort "Configurations mixing 'cmake'/'preset' and 'gnu' are not supported."
-    endif
-
-    if (my.cmake)
-        my.dependencies.toolchain = "cmake"
-        my.dependencies.hint_options = "cmake"
-    elsif (my.preset)
-        my.dependencies.toolchain = "preset"
-        my.dependencies.hint_options = "cmake"
-    elsif (my.gnu)
-        my.dependencies.toolchain = "gnu"
-        my.dependencies.hint_options = "gnu"
-    else
-        abort "Unexpected - missing primary toolchain."
-    endif
-
-endfunction
-
-function build_hints(dependencies, meta, configuration, repository)
-    define my.dependencies = build_hints.dependencies
-    define my.meta = build_hints.meta
-    define my.configuration = build_hints.configuration
-    define my.repository = build_hints.repository
-
-    # hint source type
-    for my.dependencies.dependency as _depend
-        define my.handled_source = 0
-        for my.meta.source as _source
-            if (my.handled_source > 0)
-                next
-            endif
-
-            if defined(_depend->$(_source.type))
-                if !((_source.type = "archive") | (_source.type = "github"))
-                    abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
-                endif
-
-                _depend.hint_source = _source.type
-                my.handled_source = 1
-            endif
-        endfor
-
-        if (my.handled_source = 0)
-            abort "No source recognized for dependency '$(_depend.name)'."
-        endif
-
-        define my.handled_build = 0
-
-        for my.meta.build as _build
-            if (my.handled_build > 0)
-                next
-            endif
-
-            if defined(_depend->build(build.method = _build.method))
-                define my.active = _depend->build(build.method = _build.method)
-
-                if !((my.active.method = "gnu") | \
-                     (my.active.method = "cmake") | \
-                     (my.active.method = "presets") | \
-                     (my.active.method = "boost_build"))
-                    abort "Unrecognized build method '$(my.active.method)'."
-                endif
-
-                _depend.hint_build = _build.method
-                my.handled_build = 1
-            endif
-        endfor
-
-        if (my.handled_build = 0)
-           abort "No build method recognized for dependency '$(_depend.name)'."
-        endif
-    endfor
-endfunction
-
-function write_column_line(begin, end, align, pad, indent, prefix, suffix)
-    define my.begin = write_column_line.begin
-    define my.end = write_column_line.end
-    define my.align = write_column_line.align
-    define my.pad = write_column_line.pad ? " "
-    define my.indent = write_column_line.indent ? ""
-    define my.prefix = write_column_line.prefix ? ""
-    define my.suffix = write_column_line.suffix ? ""
-
-    return "$(my.indent)$(my.prefix)$(pad(my.begin, my.align, my.pad))$(my.end)$(my.suffix)"
-endfunction
-
-function indent_column(begin, end, column, indent, pad)
-    define my.begin = indent_column.begin
-    define my.end = indent_column.end
-    define my.column = indent_column.column
-    define my.indent = indent_column.indent ? ""
-    define my.pad = indent_column.pad ? " "
-
-    return write_column_line(my.begin, my.end, my.column, my.pad, my.indent, "", "")
-endfunction
-
-function fix_column(begin, end, column, prefix, suffix, pad)
-    define my.begin = fix_column.begin
-    define my.end = fix_column.end
-    define my.column = fix_column.column
-    define my.prefix = fix_column.prefix ? ""
-    define my.suffix = fix_column.suffix ? ""
-    define my.pad = fix_column.pad ? " "
-
-    return write_column_line(my.begin, my.end, my.column, my.pad, "", my.prefix, my.suffix)
-endfunction
-
 function column_variables(variable, align, prefix, suffix, pad)
     define my.variable = column_variables.variable
     define my.align = column_variables.align
@@ -235,114 +37,33 @@ function column_variables(variable, align, prefix, suffix, pad)
     return fix_column(my.variable, ": ${$(my.variable)}", my.align, my.prefix, my.suffix, my.pad)
 endfunction
 
-function is_applicable(option, dependency, repository)
-    define my.option = is_applicable.option
-    define my.dependency = is_applicable.dependency
-    define my.repository = is_applicable.repository
-
-    define my.ignorable = (my.dependency.name = my.repository.name) &\
-        (defined(my.option.ignore) & (my.option.ignore = "true"))
-
-    return !(my.ignorable)
-endfunction
-
 ###############################################################################
 # Macros
 ###############################################################################
 .endtemplate
 .template 1
 .
-.macro emit_install_sh(meta, configuration, repository)
-.   define my.meta = emit_install_sh.meta
-.   define my.configuration = emit_install_sh.configuration
-.   define my.repository = emit_install_sh.repository
+.macro initialize_pre_copyleft()
+.   shebang("bash")
+.endmacro # initialize_pre_copyleft
 .
-.   new installable as _install
-.       canonical_dependency_list(_install, my.repository, my.configuration)
-.       verify_toolchains_supported(_install, my.meta, my.configuration, my.repository)
-.       build_hints(_install, my.meta, my.configuration, my.repository)
+.macro initialize_post_copyleft()
+.endmacro # initialize_post_copyleft
 .
-.       shebang("bash")
-.
-.       copyleft(my.repository.name)
-.
-.       emit_documentation(my.meta, my.configuration, my.repository, _install, "# ", "")
-.
-.       initialize_environment()
-.
-.       define_constants(my.meta, my.configuration, my.repository, _install)
-.
-.       define_main(my.meta, my.configuration, my.repository, _install)
-.
-.       define_display_build_variables(my.meta, my.configuration, my.repository, _install)
-.
-.       define_display_toolchain_variables(my.meta, my.configuration, my.repository, _install)
-.
-.       define_display_constants(my.meta, my.configuration, my.repository, _install)
-.
-.       define_display_help(my.meta, my.configuration, my.repository, _install)
-.
-.       define_display_functions()
-.
-.       define_directory_functions()
-.
-.       define_error_functions()
-.
-.       define_display_configure_options()
-.
-.       define_strip_optimization()
-.
-.       new keys as _keys
-.           for _install.dependency as _depend
-.               if (count(_keys.method, method.name = _depend.hint_build) = 0)
-.                   new _keys.method as _method
-.                       _method.name = _depend.hint_build
-.                   endnew
-.               endif
-.
-.               if (count(_keys.source, source.name = _depend.hint_source) = 0)
-.                   new _keys.source as _source
-.                       _source.name = _depend.hint_source
-.                   endnew
-.               endif
-.           endfor
-.
-.           for _keys.source as _source
-.               if (_source.name = "archive")
-.                   define_source_archive()
-.               elsif (_source.name = "github")
-.                   define_source_github()
-.               else
-.                   abort "Unrecognized source '$(_source.name)'."
-.               endif
-.           endfor
-.
-.           if (count(_keys.method, count.name = "cmake" | count.name = "preset" | count.name = "gnu") > 0)
-.               define_helpers_make()
-.           endif
-.
-.           for _keys.method as _method
-.               if (_method.name = "cmake")
-.                   define_build_cmake()
-.               elsif (_method.name = "preset")
-.                   define_build_preset()
-.               elsif (_method.name = "gnu")
-.                   define_build_gnu()
-.               elsif (_method.name = "boost_build")
-.                   define_build_boost()
-.               else
-.                   abort "Unrecognized build method '$(_method.name)'."
-.               endif
-.           endfor
-.       endnew
+.macro execute_main_logic()
 
 main "$@"
-.   endnew
+.endmacro # execute_main_logic
 .
-.endmacro # emit_install_sh
+.macro initialize_post_copyleft()
+.   initialize_environment()
+.endmacro # initialize_post_copyleft
 .
-.macro define_strip_optimization()
+.macro define_utility_functions()
 .
+.   define_display_configure_options()
+
+.   define_error_functions()
 
 strip_optimization()
 {
@@ -353,7 +74,7 @@ strip_optimization()
         s/^ | $//g
     '
 }
-.endmacro # define_strip_optimization
+.endmacro # define_utility_functions
 .
 .macro define_constants(meta, configuration, repository, install)
 .   define my.meta = define_constants.meta
@@ -400,7 +121,7 @@ fi
 
 display_constants()
 {
-.   emit_constants(my.meta, my.configuration, my.repository, my.install, "    display_message \"", "\"")
+.   emit_constants(my.meta, my.configuration, my.repository, my.install, "    msg \"", "\"")
 }
 .
 .endmacro # define_display_constants
@@ -414,7 +135,7 @@ display_constants()
 
 display_toolchain_variables()
 {
-.   emit_toolchain_variables(my.meta, my.configuration, my.repository, my.install, "    display_message \"", "\"")
+.   emit_toolchain_variables(my.meta, my.configuration, my.repository, my.install, "    msg \"", "\"")
 }
 .
 .endmacro # define_display_toolchain_variables
@@ -428,7 +149,7 @@ display_toolchain_variables()
 
 display_build_variables()
 {
-.   emit_build_variables(my.meta, my.configuration, my.repository, my.install, "    display_message \"", "\"")
+.   emit_build_variables(my.meta, my.configuration, my.repository, my.install, "    msg \"", "\"")
 }
 .endmacro # define_display_build_variables
 .
@@ -439,9 +160,9 @@ display_build_variables()
 .   define my.configuration = define_display_help.configuration
 .   define my.install = define_display_help.install
 
-display_help()
+help()
 {
-.   emit_documentation(my.meta, my.configuration, my.repository, my.install, "    display_message \"", "\"")
+.   emit_documentation(my.meta, my.configuration, my.repository, my.install, "    msg \"", "\"")
 }
 .endmacro # define_display_help
 .
@@ -565,7 +286,6 @@ $(fix_column("CONFIGURE_OPTIONS", ": ${CONFIGURE_OPTIONS[*]}", my.column, my.pre
 if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
 $(fix_column("CONFIGURE_OPTIONS_ORIGINAL", ": ${CONFIGURE_OPTIONS_ORIGINAL[*]}", my.column, my.prefix, my.suffix))
 fi
-
 .
 .#
 .#$(my.prefix)if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
@@ -606,6 +326,16 @@ $(column_variables("$(_depend.name:c)_TAG", my.column, my.prefix, my.suffix))
 .       endif
 .   endfor
 .endmacro # emit_constants
+.
+.macro emit_documentation_comment(meta, configuration, repository, install)
+.   define my.meta = emit_documentation_comment.meta
+.   define my.configuration = emit_documentation_comment.configuration
+.   define my.repository = emit_documentation_comment.repository
+.   define my.install = emit_documentation_comment.install
+.
+.   emit_documentation(my.meta, my.configuration, my.repository, my.install, "# ", "")
+.
+.endmacro # emit_documentation_comment
 .
 .macro emit_documentation(meta, configuration, repository, install, prefix, suffix)
 .   define my.meta = emit_documentation.meta
@@ -688,22 +418,22 @@ source_archive()
     local COMPRESSION="$4"
     shift 4
 
-    display_heading_message "Preparing to acquire ${PROJECT}"
+    msg_heading "Preparing to acquire ${PROJECT}"
 
     push_directory "${BUILD_SRC_DIR}"
 
     if [ -d "${PROJECT}" ] && 
        [[ "${BUILD_USE_LOCAL_SRC}" == "yes" ]]; then
-        display_message "Reusing existing '${PROJECT}' directory..."
+        msg_warn "Reusing existing '${PROJECT}' directory..."
         return 0
     fi
 
     if [ -d "${PROJECT}" ]; then
-        display_message "Encounted existing '${PROJECT}' directory, removing..."
+        msg_warn "Encounted existing '${PROJECT}' directory, removing..."
         remove_directory_force "${PROJECT}"
     fi
 
-    display_message "Retrieving ${PROJECT}..."
+    msg "Retrieving ${PROJECT}..."
 
     create_directory "${PROJECT}"
     push_directory "${PROJECT}"
@@ -730,7 +460,7 @@ source_archive()
     # pop ${BUILD_SRC_DIR}
     pop_directory
 
-    display_message "Completed download and extraction successfully."
+    msg_success "Completed download and extraction successfully."
 }
 .endmacro # define_source_archive
 .
@@ -743,7 +473,7 @@ source_github()
     local TAG="$3"
     shift 3
 
-    display_heading_message "Preparing to acquire ${OWNER}/${REPOSITORY}/${TAG}"
+    msg_heading "Preparing to acquire ${OWNER}/${REPOSITORY}/${TAG}"
 
     local GIT_CLONE="git clone"
     local CLONE_OPTIONS="--depth 1 --single-branch"
@@ -756,17 +486,17 @@ source_github()
 
     if [ -d "${REPOSITORY}" ] && 
        [[ "${BUILD_USE_LOCAL_SRC}" == "yes" ]]; then
-        display_message "Reusing existing '${REPOSITORY}'..."
+        msg_warn "Reusing existing '${REPOSITORY}'..."
         pop_directory # BUILD_SRC_DIR
         return 0
     fi
 
     if [ -d "${REPOSITORY}" ]; then
-        display_message "Encounted existing '${REPOSITORY}' directory, removing..."
+        msg_warn "Encounted existing '${REPOSITORY}' directory, removing..."
         remove_directory_force "${REPOSITORY}"
     fi
 
-    display_message "Cloning ${OWNER}/${REPOSITORY}/${TAG}..."
+    msg "Cloning ${OWNER}/${REPOSITORY}/${TAG}..."
 
     ${GIT_CLONE} ${CLONE_OPTIONS} --branch "${TAG}" "https://github.com/${OWNER}/${REPOSITORY}"
 
@@ -779,10 +509,10 @@ source_github()
 
 display_configure_options()
 {
-    display_message "configure options:"
+    msg "configure options:"
     for OPTION in "$@"; do
         if [[ -n ${OPTION} ]]; then
-            display_message "${OPTION}"
+            msg "${OPTION}"
         fi
     done
 }
@@ -814,7 +544,7 @@ install_make()
     local PROJECT="$1"
     shift
 
-    display_message "Preparing to install ${PROJECT}"
+    msg "Preparing to install ${PROJECT}"
 
     push_directory "${BUILD_SRC_DIR}/${PROJECT}"
 
@@ -833,7 +563,7 @@ install_make()
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
 
-    display_message "'${PROJECT}' installation compelete."
+    msg_success "'${PROJECT}' installation compelete."
 }
 
 test_make()
@@ -843,7 +573,7 @@ test_make()
     local JOBS="$3"
     shift 3
 
-    display_message "Preparing to test ${PROJECT}"
+    msg "Preparing to test ${PROJECT}"
 
     push_directory "${BUILD_SRC_DIR}/${PROJECT}"
 
@@ -877,7 +607,7 @@ test_make()
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
 
-    display_message "'${PROJECT}' test compelete."
+    msg_success "'${PROJECT}' test compelete."
 }
 .endmacro # define_helpers_make
 .
@@ -898,7 +628,7 @@ build_cmake()
         VERBOSITY_MAKE="VERBOSE=1"
     fi
 
-    display_heading_message "Preparing to build ${PROJECT}"
+    msg_heading "Preparing to build ${PROJECT}"
 
 .   define_build_initialize_path()
 
@@ -915,7 +645,7 @@ build_cmake()
 
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
-    display_message "'${PROJECT}' built successfully."
+    msg_success "'${PROJECT}' built successfully."
 }
 .endmacro # define_build_cmake
 .
@@ -927,7 +657,7 @@ build_preset()
     local CMAKE_PATH="$2"
     shift 2
 
-    display_heading_message "Preparing to build ${PROJECT}"
+    msg_heading "Preparing to build ${PROJECT}"
 
     echo "BUILD_PRESET!"
 }
@@ -950,7 +680,7 @@ build_gnu()
         VERBOSITY_MAKE="VERBOSE=1"
     fi
 
-    display_heading_message "Preparing to build ${PROJECT}"
+    msg_heading "Preparing to build ${PROJECT}"
 
 .   define_build_initialize_path()
 
@@ -972,7 +702,7 @@ build_gnu()
 
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
-    display_message "'${PROJECT}' built successfully."
+    msg_success "'${PROJECT}' built successfully."
 }
 .endmacro # define_build_gnu
 .
@@ -983,7 +713,7 @@ build_boost()
     local PROJECT="$1"
     shift
 
-    display_heading_message "Preparing to build ${PROJECT}"
+    msg_heading "Preparing to build ${PROJECT}"
 
     push_directory "${BUILD_SRC_DIR}/${PROJECT}"
 
@@ -1020,24 +750,24 @@ build_boost()
     fi
 
     # Prebuild status report
-    display_message "${PROJECT} configuration."
-    display_message "--------------------------------------------------------------------"
-    display_message "variant               : release"
-    display_message "threading             : multi"
-    display_message "toolset               : ${CC}"
-    display_message "boost cxxflags        : ${BOOST_CXXFLAGS}"
-    display_message "boost linkflags       : ${BOOST_LINKFLAGS}"
-    display_message "link                  : ${BOOST_LINK}"
-    display_message "-sNO_BZIP2            : 1"
-    display_message "-sNO_ZSTD             : 1"
-    display_message "-j                    : ${PARALLEL}"
-    display_message "-d0                   : [supress informational messages]"
-    display_message "-q                    : [stop at the first error]"
-    display_message "--reconfigure         : [ignore cached configuration]"
-    display_message "--prefix              : ${PREFIX}"
-    display_message "BOOST_OPTIONS         : $*"
-    display_message "cxxflags (ignored)    : ${CXXFLAGS}"
-    display_message "--------------------------------------------------------------------"
+    msg "${PROJECT} configuration."
+    msg "--------------------------------------------------------------------"
+    msg "variant               : release"
+    msg "threading             : multi"
+    msg "toolset               : ${CC}"
+    msg "boost cxxflags        : ${BOOST_CXXFLAGS}"
+    msg "boost linkflags       : ${BOOST_LINKFLAGS}"
+    msg "link                  : ${BOOST_LINK}"
+    msg "-sNO_BZIP2            : 1"
+    msg "-sNO_ZSTD             : 1"
+    msg "-j                    : ${PARALLEL}"
+    msg "-d0                   : [supress informational messages]"
+    msg "-q                    : [stop at the first error]"
+    msg "--reconfigure         : [ignore cached configuration]"
+    msg "--prefix              : ${PREFIX}"
+    msg "BOOST_OPTIONS         : $*"
+    msg "cxxflags (ignored)    : ${CXXFLAGS}"
+    msg "--------------------------------------------------------------------"
 
     # Begin build
     ./bootstrap.sh --with-bjam=./b2 --prefix=${PREFIX}
@@ -1123,8 +853,8 @@ $(my.indent)CONFIGURE_OPTIONS=("$@")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
 $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
-$(my.indent)display_message_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
-$(my.indent)display_message_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
+$(my.indent)msg_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
+$(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 .
 .endmacro # define_parse_options
 .
@@ -1142,67 +872,67 @@ $(my.indent)display_message_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
     # --build-src-dir
     if [[ -z "${BUILD_SRC_DIR}" ]]; then
         BUILD_SRC_DIR="\$(pwd)"
-        display_message_verbose "No build-src-dir specified, using default '${BUILD_SRC_DIR}'."
+        msg_verbose "No build-src-dir specified, using default '${BUILD_SRC_DIR}'."
     fi
 
     if [[ -d "${BUILD_SRC_DIR}" ]]; then
         push_directory "${BUILD_SRC_DIR}"
         BUILD_SRC_DIR="\$(pwd)"
         pop_directory
-        display_message_verbose "Determined absolute path for build-src-dir '${BUILD_SRC_DIR}'."
+        msg_verbose "Determined absolute path for build-src-dir '${BUILD_SRC_DIR}'."
     else
         create_directory "${BUILD_SRC_DIR}"
         push_directory "${BUILD_SRC_DIR}"
         BUILD_SRC_DIR="\$(pwd)"
         pop_directory
-        display_message_verbose "Created build-src-dir '${BUILD_SRC_DIR}'."
+        msg_verbose "Created build-src-dir '${BUILD_SRC_DIR}'."
     fi
 
     # --build-obj-dir
     if [[ -z "${BUILD_OBJ_DIR}" ]]; then
         if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
             BUILD_OBJ_DIR="obj"
-            display_message_verbose "No build-obj-dir specified, using relative default '${BUILD_OBJ_DIR}'."
+            msg_verbose "No build-obj-dir specified, using relative default '${BUILD_OBJ_DIR}'."
         else
             BUILD_OBJ_DIR="\$(pwd)/obj"
-            display_message_verbose "No build-obj-dir specified, using default '${BUILD_OBJ_DIR}'."
+            msg_verbose "No build-obj-dir specified, using default '${BUILD_OBJ_DIR}'."
         fi
     fi
 
     if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        display_message_verbose "Deferring relative path action for build-obj-dir '${BUILD_OBJ_DIR}'."
+        msg_verbose "Deferring relative path action for build-obj-dir '${BUILD_OBJ_DIR}'."
     else
         if [[ -d "${BUILD_OBJ_DIR}" ]]; then
             push_directory "${BUILD_OBJ_DIR}"
             BUILD_OBJ_DIR="\$(pwd)"
             pop_directory
-            display_message_verbose "Determined absolute path for build-obj-dir '${BUILD_OBJ_DIR}'."
+            msg_verbose "Determined absolute path for build-obj-dir '${BUILD_OBJ_DIR}'."
        else
             create_directory "${BUILD_OBJ_DIR}"
             push_directory "${BUILD_OBJ_DIR}"
             BUILD_OBJ_DIR="\$(pwd)"
             pop_directory
-            display_message_verbose "Created build-obj-dir '${BUILD_OBJ_DIR}'."
+            msg_verbose "Created build-obj-dir '${BUILD_OBJ_DIR}'."
         fi
     fi
 
     # --build-config
     if [[ -z "${BUILD_CONFIG}" ]]; then
-        display_message_verbose "No build-config specified."
+        msg_verbose "No build-config specified."
     elif [[ "${BUILD_CONFIG}" != "debug" ]] && [[ "${BUILD_CONFIG}" != "release" ]]; then
-        display_error "Provided build-config '${BUILD_CONFIG}' not a valid value."
-        display_help
+        msg_error "Provided build-config '${BUILD_CONFIG}' not a valid value."
+        help
         exit 1
     else
-        display_message_verbose "Using provided build-config '${BUILD_CONFIG}'"
+        msg_verbose "Using provided build-config '${BUILD_CONFIG}'"
     fi
 
     # --build-link
     if [[ -z "${BUILD_LINK}" ]]; then
-        display_message_verbose "No build-link specified."
+        msg_verbose "No build-link specified."
     elif [[ "${BUILD_LINK}" != "dynamic" ]] && [[ "${BUILD_LINK}" != "static" ]]; then
-        display_error "Provided build-link ${BUILD_LINK}' not a valid value."
-        display_help
+        msg_error "Provided build-link ${BUILD_LINK}' not a valid value."
+        help
         exit 1
     fi
 
@@ -1210,7 +940,7 @@ $(my.indent)display_message_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
     if [[ -z "${PREFIX}" ]]; then
         # Always set a prefix (required for OSX and lib detection).
         PREFIX="/usr/local"
-        display_message_verbose "No prefix specified, defaulting to '${PREFIX}'."
+        msg_verbose "No prefix specified, defaulting to '${PREFIX}'."
     else
         # Incorporate the custom libdir into each object, for link time resolution
         if [[ -z "${LD_RUN_PATH}" ]]; then
@@ -1234,8 +964,8 @@ $(my.indent)display_message_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 .   elsif (my.install.hint_options = "cmake")
 
     if [[ -n "${PREFIX}" ]] && [[ -n "${CMAKE_INSTALL_PREFIX}" ]]; then
-        display_error "Both PREFIX and CMAKE_INSTALL_PREFIX have been defined differently."
-        display_help
+        msg_error "Both PREFIX and CMAKE_INSTALL_PREFIX have been defined differently."
+        help
         exit 1
     elif [[ -n "${PREFIX}" ]]; then
         CMAKE_INSTALL_PREFIX="${PREFIX}"
@@ -1276,11 +1006,11 @@ $(my.indent)display_message_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
         elif [[ ${OS} == Darwin ]] || [[ ${OS} == OpenBSD ]]; then
             PARALLEL=\$(sysctl -n hw.ncpu)
         else
-            display_error "Unsupported system: '${OS}'"
-            display_error "  Unable to determine value for '--parallel='"
-            display_error "  Please specify explicitly to continue."
-            display_error ""
-            display_help
+            msg_error "Unsupported system: '${OS}'"
+            msg_error "  Unable to determine value for '--parallel='"
+            msg_error "  Please specify explicitly to continue."
+            msg_error ""
+            help
             exit 1
         fi
     fi
@@ -1310,7 +1040,7 @@ $(my.indent)display_message_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             export CC="egcc"
         fi
     else
-        display_message_verbose "CC using defined value '${CC}'"
+        msg_verbose "CC using defined value '${CC}'"
     fi
 
     if [[ -z "${CXX}" ]]; then
@@ -1320,12 +1050,12 @@ $(my.indent)display_message_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             export CXX="eg++"
         fi
     else
-        display_message_verbose "CXX using defined value '${CXX}'"
+        msg_verbose "CXX using defined value '${CXX}'"
     fi
 
     # translate BUILD_CONFIG to ZFLAGS
     if [[ -n "${BUILD_CONFIG}" ]]; then
-        display_message_verbose "*** Build config specified, calculating flags..."
+        msg_verbose "*** Build config specified, calculating flags..."
 
         if [[ "${BUILD_CONFIG}" == "debug" ]]; then
             BUILD_FLAGS="-Og -g"
@@ -1335,22 +1065,22 @@ $(my.indent)display_message_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 
         if [[ -z "${CFLAGS}" ]]; then
             export CFLAGS="${BUILD_FLAGS}"
-            display_message_verbose "Exporting CFLAGS '${CFLAGS}'"
+            msg_verbose "Exporting CFLAGS '${CFLAGS}'"
         else
-            display_message_verbose "CFLAGS intitally '${CFLAGS}'"
+            msg_verbose "CFLAGS intitally '${CFLAGS}'"
             SANITIZED_CFLAGS=\$(strip_optimization "$CFLAGS")
             export CFLAGS="${SANITIZED_CFLAGS} ${BUILD_FLAGS}"
-            display_message_verbose "CFLAGS modified to '${CFLAGS}'"
+            msg_verbose "CFLAGS modified to '${CFLAGS}'"
         fi
 
         if [[ -z "${CXXFLAGS}" ]]; then
             export CXXFLAGS="${BUILD_FLAGS}"
-            display_message_verbose "Exporting CXXFLAGS '${CXXFLAGS}'"
+            msg_verbose "Exporting CXXFLAGS '${CXXFLAGS}'"
         else
-            display_message_verbose "CXXFLAGS intitally '${CXXFLAGS}'"
+            msg_verbose "CXXFLAGS intitally '${CXXFLAGS}'"
             SANITIZED_CXXFLAGS=\$(strip_optimization "$CXXFLAGS")
             export CXXFLAGS="${SANITIZED_CXXFLAGS} ${BUILD_FLAGS}"
-            display_message_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
+            msg_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
         fi
     fi
 
@@ -1399,7 +1129,7 @@ $(my.indent)display_message_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 
     if [[ ${OS} == Linux && ${CC} == clang* ]] || [[ ${OS} == OpenBSD ]]; then
         export LDLIBS="-l${STDLIB} ${LDLIBS}"
-        display_message_verbose "LDLIBS has been manipulated to encode STDLIB linkage."
+        msg_verbose "LDLIBS has been manipulated to encode STDLIB linkage."
     fi
 
     # defaults and sanitization: generated options
@@ -1459,18 +1189,18 @@ main()
 
     # handle help
     if [[ "${DISPLAY_HELP}" == "yes" ]]; then
-        display_help
+        help
         return 0
     fi
 
-    display_heading_message "Configuration"
+    msg_heading "Configuration"
     display_build_variables
 
-    display_heading_message "Toolchain Configuration Parameters"
+    msg_heading "Toolchain Configuration Parameters"
     display_toolchain_variables
 
     if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
-        display_heading_message "State"
+        msg_heading "State"
         display_constants
     fi
 
@@ -1558,14 +1288,8 @@ $(my.indent)fi
 .       endif
 .   endfor
 
-    display_message "Completed successfully."
+    msg_success "Completed successfully."
 }
 .endmacro # define_main
 .
-.endtemplate
-.template 0
-###############################################################################
-# Execution
-###############################################################################
-
 .endtemplate

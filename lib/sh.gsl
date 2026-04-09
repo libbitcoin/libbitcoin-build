@@ -50,26 +50,41 @@ endfunction
 .
 .macro global.define_display_functions()
 
-display_heading_message()
+COLOR_CYAN='\\e[0;96m'
+COLOR_GREEN='\\e[0;92m'
+COLOR_RED='\\e[0;91m'
+COLOR_YELLOW='\\e[0;93m'
+
+msg_heading()
 {
     printf "\\n********************** %s **********************\\n" "$@"
 }
 
-display_message()
+msg_verbose()
+{
+    if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+        printf "${COLOR_CYAN}%s\\n" "$@"
+    fi
+}
+
+msg()
 {
     printf "%s\\n" "$@"
 }
 
-display_message_verbose()
+msg_success()
 {
-    if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
-        display_message "$@"
-    fi
+    printf "${COLOR_GREEN}%s\\n" "$@"
 }
 
-display_error()
+msg_warn()
 {
-    >&2 printf "%s\\n" "$@"
+    printf "${COLOR_YELLOW}%s\\n" "$@"
+}
+
+msg_error()
+{
+    >&2 printf "${COLOR_RED}%s\\n" "$@"
 }
 .endmacro
 .
@@ -82,14 +97,14 @@ create_directory()
 
     if [[ -d "${DIRECTORY}" ]]; then
         if [[ ${MODE} == "-f" ]]; then
-            display_message "Reinitializing '${DIRECTORY}'..."
+            msg_warn "Reinitializing '${DIRECTORY}'..."
             rm -rf "${DIRECTORY}"
             mkdir -p "${DIRECTORY}"
         else
-            display_message "Reusing existing '${DIRECTORY}'..."
+            msg_warn "Reusing existing '${DIRECTORY}'..."
         fi
     else
-        display_message "Initializing '${DIRECTORY}'..."
+        msg "Initializing '${DIRECTORY}'..."
         mkdir -p "${DIRECTORY}"
     fi
 }
@@ -101,22 +116,22 @@ create_directory_force()
 
 pop_directory()
 {
-    display_message_verbose "*** move  pre: '\$(pwd)'"
+    msg_verbose "*** move  pre: '\$(pwd)'"
     popd >/dev/null
-    display_message_verbose "*** move post: '\$(pwd)'"
+    msg_verbose "*** move post: '\$(pwd)'"
 }
 
 push_directory()
 {
-    display_message_verbose "*** move  pre: '\$(pwd)'"
+    msg_verbose "*** move  pre: '\$(pwd)'"
     local DIRECTORY="$1"
     pushd "${DIRECTORY}" >/dev/null
-    display_message_verbose "*** move post: '\$(pwd)'"
+    msg_verbose "*** move post: '\$(pwd)'"
 }
 
 remove_directory_force()
 {
-    display_message_verbose "*** removing: '$@'"
+    msg_verbose "*** removing: '$@'"
     rm -rf "$@"
 }
 .endmacro

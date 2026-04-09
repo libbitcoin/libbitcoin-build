@@ -60,10 +60,10 @@ exit /b 0
 
 :populate_targets
     shift
-    :begin
+:begin
     if "%1"=="" goto done
     set "targets=%targets% %~1"
     shift
     goto begin
-    :done
+:done
     exit /b 0
