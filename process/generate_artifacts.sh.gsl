@@ -20,10 +20,12 @@
 
 # Exit this script on the first build error.
 set -euo pipefail
-trap 'echo "FATAL ERROR: Command failed at line $LINENO: $BASH_COMMAND" >&2' ERR
+trap 'msg_error "FATAL ERROR: Command failed at line $LINENO: $BASH_COMMAND" >&2' ERR
 
 # Do everything relative to this file location.
 cd `dirname "$0"`
+
+.   define_display_functions()
 
 # Cleanup output directory
 rm -rf "$(configuration->templates.resultpath)"
@@ -37,7 +39,7 @@ declare -a generator=( \\
 # Generate build artifacts.
 for generate in "\${generator[@]}"
 do
-    echo "gsl -q -script:\$generate ../$(configuration->templates.source)"
+    msg_warn "gsl -q -script:\$generate ../$(configuration->templates.source)"
     gsl -q -script:\$generate ../$(configuration->templates.source)
 done
 
@@ -45,24 +47,21 @@ done
 # Make generated scripts executable.
 modcount=0
 failcount=0
-shopt -s globstar nullglob
-for file in $(configuration->templates.resultpath)/**/*.sh; do
-    if [[ -f "$file" ]]; then
-        if chmod +x "$file"; then
-            echo "✓ $file"
-            ((modcount += 1))
-        else
-            echo "✗ Failed: $file"
-            ((failcount += 1))
-        fi
-    fi
-done
-shopt -u globstar
 
-if [[ $failcount -eq 0 ]]; then
-    echo "Made $modcount files executable."
+while IFS= read -r -d '' file; do
+    if chmod +x "${file}"; then
+        msg "${COLOR_GREEN}✓${COLOR_RESET} ${file}"
+        ((modcount += 1))
+    else
+        msg "${COLOR_RED}✗${COLOR_RESET} Failed: ${file}"
+        ((failcount += 1))
+    fi
+done < <(find ../output/version4 -name "*.sh" -type f -print0)
+
+if [[ ${failcount} -eq 0 ]]; then
+    msg_success "Made ${modcount} files executable."
 else
-    echo "Failed modifying $failcount files."
+    msg_error "Failed modifying ${failcount} files."
     exit 1
 fi
 .endif
