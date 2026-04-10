@@ -164,6 +164,7 @@ jobs:
 
       - name: Execute generation [macos, ubuntu]
         if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
+        shell: bash
         run: |
           pushd libbitcoin-build
           ./${{ matrix.script }}
@@ -172,5 +173,8 @@ jobs:
       - name: Execute generation [windows]
         if: ${{ startsWith(matrix.os, 'windows') }}
         shell: cmd
-        run: .\libbitcoin-build\${{ matrix.script }}
+        run: |
+          pushd libbitcoin-build
+          ${{ matrix.script }}
+          popd
 
