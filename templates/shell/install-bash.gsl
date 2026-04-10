@@ -12,13 +12,8 @@
 [gsl].ignorecase = 0
 [gsl].shuffle = 0
 
-gsl from "../library/math.gsl"
-gsl from "../library/string.gsl"
-gsl from "../lib/xml.gsl"
-gsl from "../lib/output.gsl"
-gsl from "../lib/debug.gsl"
-gsl from "../lib/filesystem.gsl"
-gsl from "../lib/sh.gsl"
+gsl from "../lib/sh-output.gsl"
+gsl from "../templates/shell/install-base.gsl"
 
 ###############################################################################
 # Library-able?
@@ -384,6 +379,7 @@ $(fix_column("--build-preset=<preset>", "Preset configuration to build.", my.col
 .#  consumed by installer (generic)
 $(fix_column("--build-src-dir=<path>", "Location of sources.", my.column, my.prefix, my.suffix))
 .
+.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
 $(fix_column("--build-obj-dir=<path>", "Location of intermedia objects.", my.column, my.prefix, my.suffix))
 $(fix_column("--build-obj-dir-relative", "Use build-obj-dir as relative to project sources.", my.column, my.prefix, my.suffix))
 .
@@ -394,6 +390,7 @@ $(fix_column("", "  Toolchain default behavior will occur if no value specified.
 $(fix_column("--build-link=<mode>", "Specifies link mode.", my.column, my.prefix, my.suffix))
 $(fix_column("", "  Valid values: { dynamic, static }", my.column, my.prefix, my.suffix))
 $(fix_column("", "  Toolchain default behavior will occur if no value specified.", my.column, my.prefix, my.suffix))
+.   endif
 .
 $(fix_column("--build-full-repositories", "Sync full github repositories.", my.column, my.prefix, my.suffix))
 $(fix_column("", "  Default clones depth 1, single branch", my.column, my.prefix, my.suffix))
@@ -403,8 +400,10 @@ $(fix_column("", "  Default: discovery", my.column, my.prefix, my.suffix))
 .
 $(fix_column("--build-use-local-src", "Use existing sources in build-src-dir path.", my.column, my.prefix, my.suffix))
 .
+.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
 $(fix_column("--prefix=<path>", "Library install location.", my.column, my.prefix, my.suffix))
 $(fix_column("", "  Default: /usr/local", my.column, my.prefix, my.suffix))
+.   endif
 .
 $(fix_column("--verbose", "Display verbose script output.", my.column, my.prefix, my.suffix))
 .
@@ -863,14 +862,18 @@ $(indent_column("(--build-preset=*)", "BUILD_PRESET=\"${OPTION#*=}\";;", my.colu
 .   endif
 .
 $(indent_column("(--build-src-dir=*)", "BUILD_SRC_DIR=\"${OPTION#*=}\";;", my.column, my.o_indent))
+.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
 $(indent_column("(--build-obj-dir=*)", "BUILD_OBJ_DIR=\"${OPTION#*=}\";;", my.column, my.o_indent))
 $(indent_column("(--build-obj-dir-relative)", "BUILD_OBJ_DIR_RELATIVE=\"yes\";;", my.column, my.o_indent))
 $(indent_column("(--build-config=*)", "BUILD_CONFIG=\"${OPTION#*=}\";;", my.column, my.o_indent))
 $(indent_column("(--build-link=*)", "BUILD_LINK=\"${OPTION#*=}\";;", my.column, my.o_indent))
+.   endif
 $(indent_column("(--build-full-repositories)", "BUILD_FULL_REPOSITORIES=\"yes\";;", my.column, my.o_indent))
 $(indent_column("(--build-use-local-src)", "BUILD_USE_LOCAL_SRC=\"yes\";;", my.column, my.o_indent))
 $(indent_column("(--build-parallel=*)", "PARALLEL=\"${OPTION#*=}\";;", my.column, my.o_indent))
+.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
 $(indent_column("(--prefix=*)", "PREFIX=\"${OPTION#*=}\";;", my.column, my.o_indent))
+.   endif
 $(indent_column("(--verbose)", "DISPLAY_VERBOSE=\"yes\";;", my.column, my.o_indent))
 $(indent_column("(--help|-h)", "DISPLAY_HELP=\"yes\";;", my.column, my.o_indent))
 .
@@ -912,6 +915,40 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
         help
         exit 1
     fi
+
+.       new presets as _presets
+.           calculate_presets(_presets, my.configuration, my.repository)
+.
+.           for _presets.configuration as _config where !is_defined_positive(_config, "hidden")
+.               define my.config_value = ""
+.               if regexp.match("debug", _config.name)
+.                   my.config_value = "debug"
+.               elsif regexp.match("release", _config.name)
+.                   my.config_value = "release"
+.               else
+.                   abort "Preset does not match config pattern: '$(_config.name)'."
+.               endif
+.
+.               define my.link_value = ""
+.               if regexp.match("shared", _config.name)
+.                   my.link_value = "dynamic"
+.               elsif regexp.match("static", _config.name)
+.                   my.link_value = "static"
+.               else
+.                   abort "Preset does not match config pattern: '$(_config.name)'."
+.               endif
+.
+    $(!first() ?? "el" ? "")if [[ "${BUILD_PRESET}" == "$(_config.name)" ]]; then
+        msg_verbose "BUILD_PRESET value '$(_config.name)'."
+        BUILD_CONFIG="$(my.config_value)"
+        BUILD_LINK="$(my.link_value)"
+.           endfor
+    else
+        msg_error "Unrecognized build-preset value '${BUILD_PRESET}'."
+        help
+        exit 1
+    fi
+.       endnew
 .   endif
 
     # --build-src-dir
@@ -932,6 +969,15 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
         pop_directory
         msg_verbose "Created build-src-dir '${BUILD_SRC_DIR}'."
     fi
+.
+.   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
+.   # Embedded knowledge of CMakePresets: CMAKE_PREFIX_PATH, CMAKE_INSTALL_REFIX_PATH
+    # Embedded knowlege of CMakePresets: binaryDir
+
+    BUILD_OBJ_DIR="obj/${BUILD_PRESET}"
+    BUILD_OBJ_DIR_RELATIVE="yes"
+    PREFIX="${BUILD_SRC_DIR}/prefix/${BUILD_PRESET}"
+.   endif
 
     # --build-obj-dir
     if [[ -z "${BUILD_OBJ_DIR}" ]]; then
@@ -1310,6 +1356,7 @@ $(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLE
 $(my.indent)test_make "$(_depend.name)" "check" "${PARALLEL}"
 .           endif
 $(my.indent)install_make "$(_depend.name)"
+.
 .       elsif (my.active_build.method = "cmake")
 .           require(my.active_build, "build", "filepath")
 $(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
@@ -1317,11 +1364,18 @@ $(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "${PARAL
 $(my.indent)test_make "$(_depend.name)" "test" "${PARALLEL}"
 .           endif
 $(my.indent)install_make "$(_depend.name)"
+.
 .       elsif (my.active_build.method = "preset")
 .           require(my.active_build, "build", "filepath")
 $(my.indent)build_preset "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
+.           if last()
+$(my.indent)test_make "$(_depend.name)" "test" "${PARALLEL}"
+.           endif
+$(my.indent)install_make "$(_depend.name)"
+.
 .       elsif (my.active_build.method = "boost_build")
 $(my.indent)build_boost "$(_depend.name)" "${$(my.vname)_OPTIONS[@]}"
+.
 .       else
 .           abort "Unrecognized build method '$(_build.method)'."
 .       endif

@@ -212,6 +212,54 @@ function canonical_dependency_list(result, repository, configuration)
     endfor
 endfunction
 
+function calculate_presets(result, configuration, repository)
+    define my.result = calculate_presets.result
+    define my.configuration = calculate_presets.configuration
+    define my.repository = calculate_presets.repository
+
+    # targets
+    for my.repository.library as _library
+        new target as _target
+            _target.value = "$(_library.name)"
+            copy _target to my.result
+        endnew
+    endfor
+    for my.repository.test as _test
+        new target as _target
+            _target.value = "$(_test.name)"
+            copy _target to my.result
+        endnew
+    endfor
+    for my.repository.binary as _binary
+        new target as _target
+            _target.value = "$(_binary.name)"
+            copy _target to my.result
+        endnew
+    endfor
+
+    # configurations
+    define my.registrar = my.configuration->registrar(id = "presets")?
+
+    # shortcut - currently all presets are same, use registry
+    for my.registrar.configuration as _config
+        copy _config to my.result
+    endfor
+
+#    if !defined(my.repository->presets)
+#        return
+#    endif
+#
+#    for my.repository->presets.configuration as _config
+#        define my.entry = registry(my.registrar, _config, "configuration")?
+#
+#        if defined(my.entry)
+#            copy my.entry to my.result
+#        else
+#            abort "Preset $(_config.name) absent from registry."
+#        endif
+#    endfor
+endfunction
+
 .endtemplate
 .template 1
 .
