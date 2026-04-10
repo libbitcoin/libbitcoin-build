@@ -339,8 +339,12 @@ jobs:
 .           endif
 .
           - image: $(_entry.image)
+.           if (my.job.name = "presets")
+            preset: "$(my.entry_job.preset)"
+.           else
             config: "$(_entry.config)"
             link: "$(_entry.link)"
+.           endif
             cc: "$(compiler(my.entry_job, _entry, "c"))"
             cxx: "$(compiler(my.entry_job, _entry, "cxx"))"
             flags: "$(flags(my.entry_job, _entry))"
@@ -400,22 +404,32 @@ jobs:
       - name: Environmental Computation
         shell: bash
         run: |
-          if [[ ${{ matrix.link }} == 'dynamic' ]]; then
+.       if (my.job.name = "presets")
+          if [[ "${{ matrix.preset }}" == *shared* ]]; then
               echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
           fi
+.       else
+          if [[ "${{ matrix.link }}" == "dynamic" ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
+          fi
+.       endif
 
       - name: Execute installation
         shell: bash
         run: >
 .       require(my.job, "job", "script")
           ./$(my.job.script)
-          --prefix=${{ env.SRC_PATH }}/prefix
-          --build-src-dir=${{ env.SRC_PATH }}
+          --build-use-local-src
+          --build-src-dir="${{ env.SRC_PATH }}"
+.       if (my.job.name = "presets")
+          --build-preset="${{ matrix.preset }}"
+.       else
+          --prefix="${{ env.SRC_PATH }}/prefix"
           --build-obj-dir="obj"
           --build-obj-dir-relative
-          --build-use-local-src
-          --build-config=${{ matrix.config }}
-          --build-link=${{ matrix.link }}
+          --build-config="${{ matrix.config }}"
+          --build-link="${{ matrix.link }}"
+.       endif
 .       for _buildset.build as _build
           ${{ matrix.$(_build.name) }}
 .       endfor

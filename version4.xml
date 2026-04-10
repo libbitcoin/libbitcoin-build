@@ -1443,6 +1443,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <template name="ci.yml.gsl" path="yml" outpath=".github/workflows">
       <job type="shell" name="gnu" script="builds/gnu/install-gnu.sh" />
       <job type="shell" name="cmake" script="builds/cmake/install-cmake.sh" />
+      <job type="shell" name="presets" script="builds/cmake/install-presets.sh" />
       <job type="msvc" name="msvc" script="builds\msvc\build-msvc.cmd" />
     </template>
   </templates>
