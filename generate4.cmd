@@ -54,7 +54,8 @@ if not exist "!CD!\copy_properties.cmd" (
   exit /b 1
 )
 
-"!CD!\copy_properties.cmd"
+call :msg "Execute copy_properties.cmd..."
+call "!CD!\copy_properties.cmd"
 if %ERRORLEVEL% neq 0 (
   call :msg_error "Failure calling 'copy_properties.cmd'."
   exit /b 1
@@ -65,7 +66,8 @@ if not exist "!CD!\generate_artifacts.cmd" (
   exit /b 1
 )
 
-"!CD!\generate_artifacts.cmd"
+call :msg "Execute generate_artifacts.cmd..."
+call "!CD!\generate_artifacts.cmd"
 if %ERRORLEVEL% neq 0 (
   call :msg_error "Failure calling 'generate_artifacts.cmd'."
   exit /b 1
@@ -81,7 +83,8 @@ if not exist "!CD!\version4.xml" (
   exit /b 1
 )
 
-"!CD!\generate.cmd" "!CD!\version4.xml" %*
+call :msg "Execute generate.cmd..."
+call "!CD!\generate.cmd" "!CD!\version4.xml" %*
 if %ERRORLEVEL% neq 0 (
   call :msg_error "Failure calling 'generate.cmd'."
   exit /b 1
@@ -92,7 +95,8 @@ if not exist "!CD!\copy_projects.cmd" (
   exit /b 1
 )
 
-call copy_projects.cmd %*
+call :msg "Execute copy_projects.cmd..."
+call "!CD!\copy_projects.cmd" %*
 if %ERRORLEVEL% neq 0 (
   call :msg_error "Failure calling 'copy_projects.cmd'."
   exit /b 1

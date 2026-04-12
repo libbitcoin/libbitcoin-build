@@ -36,7 +36,7 @@ set "NAMES[3]=copy_projects"
 set "NAMES.length=3"
 
 for /L %%i in (1,1,%NAMES.length%) do (
-    echo gsl -q -script:"process\!NAMES[%%i]!.cmd.gsl" "!CONFIG!"
+    call :msg "gsl -q -script:'process\!NAMES[%%i]!.cmd.gsl' '!CONFIG!'"
     gsl -q -script:"process\!NAMES[%%i]!.cmd.gsl" "!CONFIG!"
     if %ERRORLEVEL% neq 0 (
         echo FAILURE: evaluating "process\!NAMES[%%i]!.cmd.gsl".
