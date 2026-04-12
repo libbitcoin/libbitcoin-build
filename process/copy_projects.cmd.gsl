@@ -21,54 +21,57 @@
 .   initialize_path()
 
 :: Assign arguments
-set "source_dir=$(path(configuration->templates.resultpath))"
-set "dest_dir=..\\.."
+set "SOURCE_DIR=$(path(configuration->templates.resultpath))"
+set "DEST_DIR=..\\.."
 
 :: Check if source directory exists
-if not exist "%source_dir%\" (
-    echo Error: Source directory '%source_dir%' does not exist.
+if not exist "%SOURCE_DIR%\" (
+    call :msg_error "Error: Source directory '%SOURCE_DIR%' does not exist."
     exit /b 1
 )
 
 :: Check if destination directory exists
-if not exist "%dest_dir%\" (
-    echo Error: Destination directory '%dest_dir%' does not exist.
+if not exist "%DEST_DIR%\" (
+    call :msg_error "Error: Destination directory '%DEST_DIR%' does not exist."
     exit /b 1
 )
 
 :: If no substring arguments are provided, copy all subdriectories
-set copied=0
+set COPIED=0
 if "%~1"=="" (
-    echo No substrings specified. Copying all 'libbitcoin' subdirectories from '%source_dir%' to '%dest_dir'...
+    call :msg_warn "No substrings specified. Copying all 'libbitcoin' subdirectories from '%SOURCE_DIR%' to '%DEST_DIR%'..."
 
-    for /d %%i in ("%source_dir%\\libbitcoin*") do (
-        echo Copying '%%~nxi' to '%dest_dir%'...
-        xcopy "%%i" "%dest_dir%\\%%~nxi\\" /E /I /Y
-        set /a copied+=1
+    for /d %%i in ("%SOURCE_DIR%\\libbitcoin*") do (
+        call :msg "Copying '%%~nxi' to '%DEST_DIR%'..."
+        xcopy "%%i" "%DEST_DIR%\\%%~nxi\\" /E /I /Y
+        set /a COPIED+=1
     )
 ) else (
     :: Copy subdirectories whose names contain any of the provided substrings
-    for /d %%i in ("%source_dir%\\*") do (
+    for /d %%i in ("%SOURCE_DIR%\\*") do (
         for %%j in (%*) do (
             echo.%%~nxi | find /i "%%j" >nul
-            if !errorlevel! equ 0 (
-                echo Copying '%%~nxi' to '%dest_dir%'...
-                xcopy "%%i" "%dest_dir%\\%%~nxi\" /E /I /Y
-                set /a copied+=1
+            if %ERRORLEVEL% equ 0 (
+                call :msg "Copying '%%~nxi' to '%DEST_DIR%'..."
+                xcopy "%%i" "%DEST_DIR%\\%%~nxi\" /E /I /Y
+                set /a COPIED+=1
             )
         )
     )
-    if !copied! equ 0 (
-        echo Warning: No subdriectories found in '%source_dir%' matching any provided substrings.
+    if !COPIED! equ 0 (
+        call :msg_warn "Warning: No subdriectories found in '%SOURCE_DIR%' matching any provided substrings."
     ) else (
-        echo Copied !copied! repositories.
+        call :msg_success "Copied !copied! repositories."
     )
 )
 
 popd
 
-echo Copy operation completed.
-endlocal
+call :msg_success "Copy operation completed."
+exit /b 0
+
+.   define_display_functions()
+.
 .endmacro generate_copy_script
 .endtemplate
 .template 0

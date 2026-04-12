@@ -21,35 +21,37 @@
 .   initialize_path()
 
 :: Cleanup output directory
-set "output_path=$(path(configuration->templates.resultpath))"
-if exist "%output_path%" (
-    rmdir /s /q "%output_path%"
-    if %errorlevel% neq 0 (
-        echo Failure to remove path '%output_path%'
-        exit /b %errorlevel%
+set "OUTPUT_PATH=$(path(configuration->templates.resultpath))"
+if exist "%OUTPUT_PATH%" (
+    rmdir /s /q "%OUTPUT_PATH%"
+    if %ERRORLEVEL% neq 0 (
+        call :msg_error "Failure to remove path '%OUTPUT_PATH%'"
+        exit /b %ERRORLEVEL%
     ) else (
-        echo Removed path '%output_path%'
+        call :msg_error "Removed path '%OUTPUT_PATH%'"
     )
 )
 
 .   define index = 0
 .   for configuration->templates.template as _template
 .       index = index + 1
-set "templates[$(index)]=..\\templates\\$(path(_template.path))\\$(_template.name)"
+set "TEMPLATES[$(index)]=..\\templates\\$(path(_template.path))\\$(_template.name)"
 .   endfor
-set "templates.length=$(count(configuration->templates.template))"
-set "configuration=..\\$(path(configuration->templates.source))"
+set "TEMPLATES.length=$(count(configuration->templates.template))"
+set "CONFIGURATION=..\\$(path(configuration->templates.source))"
 
-for /L %%i in (1,1,%templates.length%) do (
-    echo gsl -q -script:"!templates[%%i]!" "%configuration%"
-    gsl -q -script:"!templates[%%i]!" "%configuration%"
-    if %errorlevel% neq 0 (
-        echo Failure: "!templates[%%i]!" produced error.
-        exit /b %errorlevel%
+for /L %%i in (1,1,%TEMPLATES.length%) do (
+    echo gsl -q -script:"!TEMPLATES[%%i]!" "%CONFIGURATION%"
+    gsl -q -script:"!TEMPLATES[%%i]!" "%CONFIGURATION%"
+    if %ERRORLEVEL% neq 0 (
+        call :msg_error "Failure: '!TEMPLATES[%%i]!' produced error."
+        exit /b %ERRORLEVEL%
     )
 )
 
 exit /b 0
+
+.   define_display_functions()
 .
 .endmacro # generate_artifacts
 .endtemplate
