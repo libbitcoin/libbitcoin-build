@@ -17,18 +17,20 @@
 .   output(out_file)
 .   initialize_echo_local()
 .   copyleft("libbitcoin-build")
-
 .   initialize_path()
+
+set "GSL_EXE=gsl"
 
 :: Cleanup output directory
 set "OUTPUT_PATH=$(path(configuration->templates.resultpath))"
 if exist "%OUTPUT_PATH%" (
+    call :msg_warn "Removing output path '%OUTPUT_PATH%'."
     rmdir /s /q "%OUTPUT_PATH%"
     if %ERRORLEVEL% neq 0 (
-        call :msg_error "Failure to remove path '%OUTPUT_PATH%'"
+        call :msg_error "Failure to remove output path '%OUTPUT_PATH%'"
         exit /b %ERRORLEVEL%
     ) else (
-        call :msg_error "Removed path '%OUTPUT_PATH%'"
+        call :msg_success "Removed path '%OUTPUT_PATH%'"
     )
 )
 
@@ -41,15 +43,17 @@ set "TEMPLATES.length=$(count(configuration->templates.template))"
 set "CONFIGURATION=..\\$(path(configuration->templates.source))"
 
 for /L %%i in (1,1,%TEMPLATES.length%) do (
-    echo gsl -q -script:"!TEMPLATES[%%i]!" "%CONFIGURATION%"
-    gsl -q -script:"!TEMPLATES[%%i]!" "%CONFIGURATION%"
+    call :msg "!GSL_EXE! -script:'!TEMPLATES[%%i]!' '%CONFIGURATION%'"
+    !GSL_EXE! -script:"!TEMPLATES[%%i]!" "%CONFIGURATION%"
     if %ERRORLEVEL% neq 0 (
         call :msg_error "Failure: '!TEMPLATES[%%i]!' produced error."
         exit /b %ERRORLEVEL%
     )
 )
 
+call :msg_success "Artifact generation completed successfully."
 exit /b 0
+
 
 .   define_display_functions()
 .

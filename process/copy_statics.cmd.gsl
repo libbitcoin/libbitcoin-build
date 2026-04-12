@@ -17,7 +17,6 @@
 .   output(out_file)
 .   initialize_echo_local()
 .   copyleft("libbitcoin-build")
-
 .   initialize_path()
 
 set "RESULT_DIR=$(path(configuration->templates.resultpath))"
@@ -78,7 +77,9 @@ for /L %%i in (1,1,%LENGTH%) do (
 )
 
 popd
+call :msg_success "Copy operation completed successfully."
 exit /b 0
+
 
 .
 .   define_display_functions()

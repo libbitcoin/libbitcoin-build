@@ -1,6 +1,5 @@
 @echo off
 setlocal EnableDelayedExpansion
-
 REM ###########################################################################
 REM  Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
 REM
@@ -15,6 +14,8 @@ REM ###########################################################################
 
 REM Do everything relative to this file location.
 pushd %~dp0
+
+set "GSL_EXE=gsl"
 
 if "%~1"=="" (
     call :msg "Usage: %~nx0 configuration [targets...]"
@@ -36,8 +37,8 @@ set "NAMES[3]=copy_projects"
 set "NAMES.length=3"
 
 for /L %%i in (1,1,%NAMES.length%) do (
-    call :msg "gsl -q -script:'process\!NAMES[%%i]!.cmd.gsl' '!CONFIG!'"
-    gsl -q -script:"process\!NAMES[%%i]!.cmd.gsl" "!CONFIG!"
+    call :msg "!GSL_EXE! -q -script:'process\!NAMES[%%i]!.cmd.gsl' '!CONFIG!'"
+    !GSL_EXE! -q -script:"process\!NAMES[%%i]!.cmd.gsl" "!CONFIG!"
     if %ERRORLEVEL% neq 0 (
         echo FAILURE: evaluating "process\!NAMES[%%i]!.cmd.gsl".
         exit /b %ERRORLEVEL%
