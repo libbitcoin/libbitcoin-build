@@ -1,4 +1,6 @@
 @echo off
+setlocal EnableDelayedExpansion
+setlocal EnableExtensions
 REM ###########################################################################
 REM  Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
 REM
@@ -12,29 +14,132 @@ REM  Extract gsl.exe from package using NuGet's File > Export
 REM ###########################################################################
 
 REM Do everything relative to this file location.
+set "PATH_INITIAL=!CD!"
 pushd %~dp0
+set "PATH_FILE=!CD!"
+set "GSL_EXE=gsl"
 
 REM Clean directories for generated build artifacts.
 rmdir /s /q "output" 2>NUL
 
-REM Generate property copiers and artifact generators.
-gsl -q -script:gsl.copy_properties.cmd generate4.xml
-gsl -q -script:gsl.generate_artifacts.cmd generate4.xml
+call :msg "Current directory: !CD!"
+if not exist "!CD!\generate4.xml" (
+    call :msg_error "Error: 'generate4.xml' not found in '!CD!'."
+    exit /b 1
+) else (
+    call :msg_success "File 'generate4.xml' appears in '!CD!'."
+)
 
-REM Generate bindings from generated binding generators.
-REM The path to swig.exe must be in our path.
-REM for generate.repository by name as _repo
-REM     call ..\\$(_repo.name)\\bindings.bat
-REM endfor
+call :msg_heading "Begin Execution context"
+call :msg "PATH_INITIAL     : !PATH_INITIAL!"
+call :msg "PATH_FILE        : !PATH_FILE!"
+call :msg "GSL_EXE          : !GSL_EXE!"
+call :msg "GITHUB_PATH      : !GITHUB_PATH!"
+call :msg_heading "End Execution context"
 
-REM Execute property copiers and artifact generators.
-call copy_properties.cmd
-call generate_artifacts.cmd
-call generate.cmd version4.xml %*
+!GSL_EXE! -q -script:"!CD!\gsl.copy_properties.cmd" "!CD!\generate4.xml"
+if %ERRORLEVEL% neq 0 (
+  call :msg_error "GSL execution failure."
+  exit /b 1
+)
+
+!GSL_EXE! -q -script:"!CD!\gsl.generate_artifacts.cmd" "!CD!\generate4.xml"
+if %ERRORLEVEL% neq 0 (
+  call :msg_error "GSL execution failure."
+  exit /b 1
+)
+
+if not exist "!CD!\copy_properties.cmd" (
+  call :msg_error "Error: 'copy_properties.cmd' not found in '!CD!'."
+  exit /b 1
+)
+
+"!CD!\copy_properties.cmd"
+if %ERRORLEVEL% neq 0 (
+  call :msg_error "Failure calling 'copy_properties.cmd'."
+  exit /b 1
+)
+
+if not exist "!CD!\generate_artifacts.cmd" (
+  call :msg_error "Error: 'generate_artifacts.cmd' not found in '!CD!'."
+  exit /b 1
+)
+
+"!CD!\generate_artifacts.cmd"
+if %ERRORLEVEL% neq 0 (
+  call :msg_error "Failure calling 'generate_artifacts.cmd'."
+  exit /b 1
+)
+
+if not exist "!CD!\generate.cmd" (
+  call :msg_error "Error: 'generate.cmd' not found in '!CD!'."
+  exit /b 1
+)
+
+if not exist "!CD!\version4.xml" (
+  call :msg_error "Error: 'version4.xml' not found in '!CD!'."
+  exit /b 1
+)
+
+"!CD!\generate.cmd" "!CD!\version4.xml" %*
+if %ERRORLEVEL% neq 0 (
+  call :msg_error "Failure calling 'generate.cmd'."
+  exit /b 1
+)
+
+if not exist "!CD!\copy_projects.cmd" (
+  call :msg_error "Error: 'copy_projects.cmd' not found in '!CD!'."
+  exit /b 1
+)
+
 call copy_projects.cmd %*
+if %ERRORLEVEL% neq 0 (
+  call :msg_error "Failure calling 'copy_projects.cmd'."
+  exit /b 1
+)
 
 REM Restore directory.
 popd
 
 REM Delay for manual confirmation.
-call pause
+if not defined CI (
+    pause
+)
+
+exit /b 0
+
+:msg_heading
+    call :msg "***************************************************************************"
+    call :msg "%~1"
+    call :msg "***************************************************************************"
+    exit /b %ERRORLEVEL%
+
+:msg
+    if "%~1" == "" (
+        echo.
+    ) else (
+        echo %~1
+    )
+    exit /b %ERRORLEVEL%
+
+:msg_empty
+    echo.
+    exit /b %ERRORLEVEL%
+
+:msg_verbose
+    if "!DISPLAY_VERBOSE!" == "yes" (
+        echo [96m%~1[0m
+    )
+    exit /b %ERRORLEVEL%
+
+:msg_success
+    echo [92m%~1[0m
+    exit /b %ERRORLEVEL%
+
+:msg_warn
+    echo [93m%~1[0m
+    exit /b %ERRORLEVEL%
+
+:msg_error
+    echo [91m%~1[0m
+    exit /b %ERRORLEVEL%
