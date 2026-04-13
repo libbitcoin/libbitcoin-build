@@ -112,11 +112,10 @@
 
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
     </library>
 
     <test name="libbitcoin-system-test"
-      option="test" type="with" default="yes"
+      option="tests" type="with" default="yes"
       uuid="51a424a9-2c12-4211-8d40-e49d1534c541">
 
       <sources path="test" recursive="true" />
@@ -142,10 +141,8 @@
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
         <flag id="fstack-protector-all" />
-
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
       <!-- <trigger test="t2" /> -->
     </test>
 
@@ -173,13 +170,109 @@
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
         <flag id="fstack-protector-all" />
-
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
     </binary>
 
-    <ci />
+    <ci>
+      <coverage>
+        <exclude path="src/wallet/address/qrencode/*" />
+      </coverage>
+
+      <entry image="macos-latest" config="release" link="dynamic">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake">
+          <flag value="-DNDEBUG" />
+          <option value="--verbose" />
+        </job>
+      </entry>
+
+      <entry image="macos-latest" config="release" link="static">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake">
+          <option value="--verbose" />
+        </job>
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="dynamic">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="static">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="dynamic">
+        <compiler lang="c" name="gcc" version="12" />
+        <compiler lang="cxx" name="g++" version="12" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="static">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu" coverage="lcov">
+          <flag value="--coverage" />
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+      </entry>
+
+      <entry image="windows-latest">
+        <job name="msvc"
+          platform="x64"
+          configuration="StaticRelease"
+          version="vs2022"
+          tests="*" />
+        <job name="msvc"
+          platform="x64"
+          configuration="StaticDebug"
+          version="vs2022"
+          tests="*" />
+      </entry>
+    </ci>
   </repository>
 
   <repository name="libbitcoin-network" 
@@ -223,14 +316,12 @@
         <flag id="Wno-deprecated-copy" />
         <flag id="Wno-mismatched-tags" />
         <flag id="fstack-protector-all" />
-
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
     </library>
 
-    <test name="libbitcoin-network-tests"
-      option="test" type="with" default="yes"
+    <test name="libbitcoin-network-test"
+      option="tests" type="with" default="yes"
       uuid="d28fc18a-8b81-4247-92ee-6967feefeeff">
 
       <headers path="test" private="true" recursive="true" root="true">
@@ -264,11 +355,105 @@
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
         <flag id="fstack-protector-all" />
-
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
     </test>
 
+    <ci>
+      <entry image="macos-latest" config="release" link="dynamic">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake">
+          <flag value="-DNDEBUG" />
+          <option value="--verbose" />
+        </job>
+      </entry>
+
+      <entry image="macos-latest" config="release" link="static">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake">
+          <option value="--verbose" />
+        </job>
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="dynamic">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="static">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="dynamic">
+        <compiler lang="c" name="gcc" version="12" />
+        <compiler lang="cxx" name="g++" version="12" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="static">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu" coverage="lcov">
+          <flag value="--coverage" />
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+      </entry>
+
+      <entry image="windows-latest">
+        <job name="msvc"
+          platform="x64"
+          configuration="StaticRelease"
+          version="vs2022"
+          tests="*" />
+        <job name="msvc"
+          platform="x64"
+          configuration="StaticDebug"
+          version="vs2022"
+          tests="*" />
+      </entry>
+    </ci>
   </repository>
 
   <repository name="libbitcoin-database"
@@ -299,14 +484,12 @@
         <flag id="Wno-mismatched-tags" />
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="fstack-protector-all" />
-
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
     </library>
 
-    <test name="libbitcoin-database-tests"
-      option="test" type="with" default="yes"
+    <test name="libbitcoin-database-test"
+      option="tests" type="with" default="yes"
       uuid="5c4da53a-8c06-4da6-a2a8-3c30f338ed70">
 
       <sources path="test" recursive="true" />
@@ -332,10 +515,8 @@
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
         <flag id="fstack-protector-all" />
-
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
     </test>
 
     <binary name="libbitcoin-database-tools" output="initchain"
@@ -361,12 +542,105 @@
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
         <flag id="fstack-protector-all" />
-
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
     </binary>
 
+    <ci>
+      <entry image="macos-latest" config="release" link="dynamic">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake">
+          <flag value="-DNDEBUG" />
+          <option value="--verbose" />
+        </job>
+      </entry>
+
+      <entry image="macos-latest" config="release" link="static">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake">
+          <option value="--verbose" />
+        </job>
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="dynamic">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="static">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="dynamic">
+        <compiler lang="c" name="gcc" version="12" />
+        <compiler lang="cxx" name="g++" version="12" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="static">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu" coverage="lcov">
+          <flag value="--coverage" />
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+      </entry>
+
+      <entry image="windows-latest">
+        <job name="msvc"
+          platform="x64"
+          configuration="StaticRelease"
+          version="vs2022"
+          tests="*" />
+        <job name="msvc"
+          platform="x64"
+          configuration="StaticDebug"
+          version="vs2022"
+          tests="*" />
+      </entry>
+    </ci>
   </repository>
 
   <repository name="libbitcoin-node"
@@ -398,14 +672,12 @@
         <flag id="Wno-mismatched-tags" />
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="fstack-protector-all" />
-
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
     </library>
 
-    <test name="libbitcoin-node-tests"
-      option="test" type="with" default="yes"
+    <test name="libbitcoin-node-test"
+      option="tests" type="with" default="yes"
       uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8">
 
       <sources path="test" recursive="true" />
@@ -434,9 +706,103 @@
 
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
     </test>
 
+    <ci>
+      <entry image="macos-latest" config="release" link="dynamic">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake">
+          <flag value="-DNDEBUG" />
+          <option value="--verbose" />
+        </job>
+      </entry>
+
+      <entry image="macos-latest" config="release" link="static">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake">
+          <option value="--verbose" />
+        </job>
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="dynamic">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="static">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="dynamic">
+        <compiler lang="c" name="gcc" version="12" />
+        <compiler lang="cxx" name="g++" version="12" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="static">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu" coverage="lcov">
+          <flag value="--coverage" />
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+      </entry>
+
+      <entry image="windows-latest">
+        <job name="msvc"
+          platform="x64"
+          configuration="StaticRelease"
+          version="vs2022"
+          tests="*" />
+        <job name="msvc"
+          platform="x64"
+          configuration="StaticDebug"
+          version="vs2022"
+          tests="*" />
+      </entry>
+    </ci>
   </repository>
 
   <repository name="libbitcoin-server"
@@ -467,14 +833,12 @@
         <flag id="Wno-mismatched-tags" />
         <!-- <flag id="fvisibility=hidden" /> -->>
         <flag id="fstack-protector-all" />
-
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
    </library>
 
-    <test name="libbitcoin-server-tests"
-      option="test" type="with" default="yes"
+    <test name="libbitcoin-server-test"
+      option="tests" type="with" default="yes"
       uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea">
 
       <sources path="test" recursive="true" />
@@ -500,10 +864,8 @@
         <flag id="Wno-long-long" />
         <flag id="fno-var-tracking-assignments" />
         <flag id="fstack-protector-all" />
-
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
     </test>
 
     <binary name="bitcoin-server" output="bs"
@@ -533,9 +895,103 @@
 
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-
     </binary>
 
+    <ci>
+      <entry image="macos-latest" config="release" link="dynamic">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake">
+          <flag value="-DNDEBUG" />
+          <option value="--verbose" />
+        </job>
+      </entry>
+
+      <entry image="macos-latest" config="release" link="static">
+        <compiler lang="c" name="clang"  />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake">
+          <option value="--verbose" />
+        </job>
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="dynamic">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="static">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="release" link="dynamic">
+        <compiler lang="c" name="gcc" version="12" />
+        <compiler lang="cxx" name="g++" version="12" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu">
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+      </entry>
+
+      <entry image="ubuntu-24.04" config="debug" link="static">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <build name="boost" />
+        <build name="secp256k1" />
+
+        <job name="gnu" coverage="lcov">
+          <flag value="--coverage" />
+          <option value="--enable-isystem" />
+        </job>
+        <job name="cmake" />
+      </entry>
+
+      <entry image="windows-latest">
+        <job name="msvc"
+          platform="x64"
+          configuration="StaticRelease"
+          version="vs2022"
+          tests="*" />
+        <job name="msvc"
+          platform="x64"
+          configuration="StaticDebug"
+          version="vs2022"
+          tests="*" />
+      </entry>
+    </ci>
   </repository>
 
   <canonical>
@@ -656,59 +1112,339 @@
  </canonical>
 
   <registrar id="dependency">
-    <element name="libbitcoin-system">
+    <dependency name="libbitcoin-system">
+      <github owner="libbitcoin" tag="master" />
+      <build method="gnu" filepath="." parallel="true">
+        <option value="--without-tests" ignore="true" />
+        <option value="--without-examples" ignore="true" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-examples:BOOL=OFF" ignore="true" />
+      </build>
+      <build method="preset" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-examples:BOOL=OFF" ignore="true" />
+      </build>
+      <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"
         package="libbitcoin-system"
         target="bitcoin::system" />
-    </element>
-    <element name="libbitcoin-database">
+    </dependency>
+    <dependency name="libbitcoin-database">
+      <github owner="libbitcoin" tag="master" />
+      <build method="gnu" filepath="." parallel="true">
+        <option value="--without-tests" ignore="true" />
+        <option value="--without-tools" ignore="true" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-tools:BOOL=OFF" ignore="true" />
+      </build>
+      <build method="preset" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-tools:BOOL=OFF" ignore="true" />
+      </build>
+      <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"
         package="libbitcoin-database"
         target="bitcoin::database" />
-    </element>
-    <element name="libbitcoin-network">
+    </dependency>
+    <dependency name="libbitcoin-network">
+      <github owner="libbitcoin" tag="master" />
+      <build method="gnu" filepath="." parallel="true">
+        <option value="--without-tests" ignore="true" />
+        <!-- <option value="--with-ssl" /> -->
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-ssl:BOOL=ON" />
+      </build>
+      <build method="preset" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-ssl:BOOL=ON" />
+      </build>
+      <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"
         package="libbitcoin-network"
         target="bitcoin::network" />
-    </element>
-    <element name="libbitcoin-node">
+    </dependency>
+    <dependency name="libbitcoin-node">
+      <github owner="libbitcoin" tag="master" />
+      <build method="gnu" filepath="." parallel="true">
+        <option value="--without-tests" ignore="true" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+      </build>
+      <build method="preset" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+      </build>
+      <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"
         package="libbitcoin-node"
         target="bitcoin::node" />
-    </element>
-    <element name="libbitcoin-server">
+    </dependency>
+    <dependency name="libbitcoin-server">
+      <github owner="libbitcoin" tag="master" />
+      <build method="gnu" filepath="." parallel="true">
+        <option value="--without-tests" ignore="true" />
+        <option value="--without-console" ignore="true" />
+        <option value="${with_boost}" />
+        <option value="${with_pkgconfigdir}" />
+      </build>
+      <build method="cmake" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-console:BOOL=OFF" ignore="true" />
+      </build>
+      <build method="preset" filepath="builds/cmake" parallel="true">
+        <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-console:BOOL=OFF" ignore="true" />
+      </build>
+      <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"
         package="libbitcoin-server"
         target="bitcoin::server" />
-    </element>
-    <element name="boost">
-      <cmake namespace="Boost"
-        package="Boost" />
-    </element>
-    <element name="secp256k1">
-      <cmake namespace="libsecp256k1"
-        package="libsecp256k1"
+    </dependency>
+    <dependency name="boost" textname="Boost" conditional="true">
+      <prefix root="true" with="true" />
+      <archive version="1.86.0">
+        <url pattern="https://archives.boost.io/release/version/source/">
+          <substitute data="version" symbol="version" type="no" />
+        </url>
+        <filename pattern="boost_version" compression="bzip2" filetype=".tar.bz2">
+          <substitute data="version" symbol="version" type="c" />
+        </filename>
+      </archive>
+      <github owner="boostorg" tag="boost-1.86.0" />
+      <nuget />
+      <build method="nuget" />
+      <build method="boost_build" version="1.86.0" parallel="true">
+        <flag value="-Wno-enum-constexpr-conversion" />
+        <option value="--with-iostreams" />
+        <option value="--with-locale" />
+        <option value="--with-program_options" />
+        <option value="--with-regex" />
+        <option value="--with-thread" />
+        <option value="--with-url" />
+        <option value="--with-test" />
+      </build>
+      <cmake namespace="Boost" package="Boost" />
+    </dependency>
+    <dependency name="secp256k1" textname="libsecp256k1" conditional="true">
+      <github owner="bitcoin-core" tag="v0.7.0" />
+      <nuget />
+      <build method="nuget" />
+      <build method="gnu" filepath="." parallel="true">
+        <flag value="-w" />
+        <option value="--disable-tests" />
+        <option value="--enable-experimental" />
+        <option value="--enable-module-recovery" />
+        <option value="--enable-module-schnorrsig" />
+      </build>
+      <build method="cmake" filepath="." parallel="true">
+        <flag value="-w" />
+        <option value="-DSECP256K1_BUILD_TESTS=OFF" />
+        <option value="-DSECP256K1_EXPERIMENTAL=ON" />
+        <option value="-DSECP256K1_ENABLE_MODULE_RECOVERY=ON" />
+        <option value="-DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON" />
+      </build>
+      <cmake namespace="libsecp256k1" package="libsecp256k1"
         target="libsecp256k1::secp256k1" />
-    </element>
-    <element name="pthread">
-      <cmake namespace="Threads"
-       package="Threads"
-       target="Threads::Threads">
+    </dependency>
+    <dependency name="pthread">
+      <cmake namespace="Threads" package="Threads" target="Threads::Threads">
         <set variable="THREAD_PREFER_PTHREAD_FLAG" value="TRUE" />
       </cmake>
-    </element>
+    </dependency>
+  </registrar>
+
+  <registrar id="presets">
+    <configuration name="nix-base" description="Factored base settings for non-windows *nix based platforms." hidden="true" inherits="">
+      <property name="installDir" value="${sourceParentDir}/../../../prefix/${presetName}" />
+      <property name="binaryDir" value="${sourceParentDir}/../obj/${presetName}" />
+      <property name="condition" type="object">
+        <property name="type" value="inList" />
+        <property name="string" value="${hostSystemName}" />
+        <property name="list" type="list">
+          <property value="Darwin" />
+          <property value="Linux" />
+        </property>
+      </property>
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
+        <property name="CMAKE_INSTALL_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
+        <property name="CMAKE_LIBRARY_PATH" value="${sourceParentDir}/../../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}" type="PATH" />
+      </property>
+    </configuration>
+<configuration name="gnu-debug" description="Factored debug settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_BUILD_TYPE" value="Debug" />
+        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -Og -g --coverage" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Og -g --coverage" />
+      </property>
+    </configuration>
+    <configuration name="gnu-release" description="Factored release settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_BUILD_TYPE" value="Release" />
+        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -O3" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -O3" />
+      </property>
+    </configuration>
+    <configuration name="static" description="Factored static linking settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="BUILD_SHARED_LIBS" value="OFF" type="BOOL" />
+      </property>
+    </configuration>
+    <configuration name="shared" description="Factored shared/dynamic linking settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="BUILD_SHARED_LIBS" value="ON" type="BOOL" />
+      </property>
+      </configuration>
+    <!--
+    <configuration name="gnu-optimized-size" description="Factored size optimization settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -Os" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Os" />
+      </property>
+    </configuration>-->
+    <configuration name="nix-gnu-debug-static" description="Debug build with static linking." hidden="false" display="*nix/GNU/Debug/Static">
+      <property name="inherits" type="list">
+        <property value="static" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-debug-shared" description="Debug build with shared linking." hidden="false" display="*nix/GNU/Debug/Shared">
+      <property name="inherits" type="list">
+        <property value="shared" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-static" description="Release build with static linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Static">
+      <property name="inherits" type="list">
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="nix-gnu-release-shared" description="Release build with shared linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Shared">
+      <property name="inherits" type="list">
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>
+    <!--
+    <configuration name="nix-gnu-release-static-size" description="Release build with static linkin
+g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
+    <!--
+    <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
+    <!--
+    <configuration name="nix-gnu-release-static-size" description="Release build with static linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size/WithConsensus">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
+    <!--
+    <configuration name="nix-gnu-release-static-size" description="Release build with static linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size/WithoutConsensus">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
+    <!--
+    <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size/WithConsensus">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
+    <!--
+    <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size/WithoutConsensus">
+      <property name="inherits" type="list">
+        <property value="gnu-optimized-size" />
+        <property value="shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
+      </property>
+    </configuration>-->
   </registrar>
 
   <templates source="version4.xml" resultpath="../output/version4">
     <!-- resultpath provided relative to expected evaluation - libbitcoin-build/process -->
-    <template name="CMakeLists.txt.gsl"
-      path="cmake"
-      outpath="builds/cmake">
+    <template name="CMakeLists.txt.gsl" path="cmake" outpath="builds/cmake">
       <cmake rootpath="../.." />
       <!--<file source="cmake/InTargetProperty.cmake" destination="builds/cmake/modules" />-->
     </template>
-    <template name="config.cmake.in.gsl"
-      path="cmake"
-      outpath="builds/cmake" />
+    <template name="CMakePresets.json.gsl" path="cmake" outpath="builds/cmake">
+      <!-- <cmake rootpath="../.." /> -->
+    </template>
+    <template name="config.cmake.in.gsl" path="cmake" outpath="builds/cmake" />
+    <template name="install-gnu.sh.gsl" path="shell" outpath="builds/gnu">
+      <build method="gnu" />
+      <build method="boost_build" />
+      <column help="28" const="32" parse="28" />
+      <source type="archive" />
+      <source type="github" />
+    </template>
+    <template name="install-cmake.sh.gsl" path="shell" outpath="builds/cmake">
+      <build method="cmake" />
+      <build method="boost_build" />
+      <column help="28" const="32" parse="28" />
+      <source type="archive" />
+      <source type="github" />
+    </template>
+    <template name="install-presets.sh.gsl" path="shell" outpath="builds/cmake">
+      <build method="preset" />
+      <build method="cmake" />
+      <build method="boost_build" />
+      <column help="28" const="32" parse="28" />
+      <source type="archive" />
+      <source type="github" />
+    </template>
+    <template name="build-msvc.cmd.gsl" path="shell" outpath="builds/msvc" label="true">
+      <column help="28" const="32" parse="28" />
+      <build  method="msbuild" />
+      <build method="nuget" />
+      <source type="github" />
+      <source type="nuget" />
+    </template>
+    <template name="ci.yml.gsl" path="yml" outpath=".github/workflows">
+      <job type="shell" name="gnu" script="builds/gnu/install-gnu.sh" />
+      <job type="shell" name="cmake" script="builds/cmake/install-cmake.sh" />
+      <job type="shell" name="presets" script="builds/cmake/install-presets.sh" />
+      <job type="msvc" name="msvc" script="builds\msvc\build-msvc.cmd" />
+    </template>
   </templates>
 </configuration>

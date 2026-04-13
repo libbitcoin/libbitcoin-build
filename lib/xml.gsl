@@ -1,0 +1,271 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin xml utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+function global.is_defined_value(node, attribute, value)
+    define my.node = is_defined_value.node
+    define my.value = is_defined_value.value
+    if (!defined(my.node))
+        abort "Missing context node for attribute '$(my.attribute)'."
+    endif
+    return defined(my.node.$(my.attribute)) &\
+        (my.node.$(my.attribute) = my.value)
+endfunction
+
+function global.is_defined_negative(node, attribute)
+    define my.node = is_defined_negative.node
+    if (!defined(my.node))
+        abort "Missing context node for attribute '$(my.attribute)'."
+    endif
+    return defined(my.node.$(my.attribute)) &\
+        ((my.node.$(my.attribute) = "false") | (my.node.$(my.attribute) = "no"))
+endfunction
+
+function global.is_defined_positive(node, attribute)
+    define my.node = is_defined_positive.node
+    if (!defined(my.node))
+        abort "Missing context node for attribute '$(my.attribute)'."
+    endif
+    return defined(my.node.$(my.attribute)) &\
+        ((my.node.$(my.attribute) = "true") | (my.node.$(my.attribute) = "yes"))
+endfunction
+
+function global.merge_children_select(destination, source, name, identifier)
+    define my.destination = merge_children_select.destination
+    define my.source = merge_children_select.source
+    define my.name = merge_children_select.name
+    define my.identifier = merge_children_select.identifier
+
+    for my.source.$(my.name) as _child
+        if (count(my.destination->$(my.name), $(my.name).$(identifier) = _child.$(identifier)) = 0)
+            copy _child to my.destination
+        endif
+    endfor
+endfunction
+
+function global.canonicalize(result, host, canonical, name, identifier)
+    define my.result = canonicalize.result
+    define my.host = canonicalize.host
+    define my.canonical = canonicalize.canonical
+    define my.name = canonicalize.name
+    define my.identifier = canonicalize.identifier
+
+    for my.host.$(my.name) as _element
+        if (!defined(_element.$(my.identifier)))
+            copy _element to my.result
+        elsif (count(my.result.$(my.name), defined(this.$(my.identifier)) & (this.$(my.identifier) = _element.$(my.identifier)), this) = 0)
+            if (count(my.canonical.$(my.name), .$(my.identifier) = _element.$(my.identifier)) > 0)
+                copy my.canonical->$(my.name)(.$(my.identifier) = _element.$(my.identifier)) to my.result
+            else
+                copy _element to my.result
+            endif
+        endif
+    endfor
+endfunction
+
+function global.merge_components(dependencies, element)
+    define my.dependencies = merge_components.dependencies
+    define my.element = merge_components.element
+
+    if (count(my.dependencies.dependency, dependency.name = my.element.name) > 0)
+        define my.destination = my.dependencies->dependency(dependency.name = my.element.name)
+
+        merge_children_select(my.destination, my.element, "component", "name")
+    else
+        copy my.element to my.dependencies
+    endif
+endfunction
+
+function global.count_matches_name(container, childname, namevalue)
+    define my.container = count_matches_name.container
+    define my.child = count_matches_name.childname
+    define my.namevalue = count_matches_name.namevalue
+    define my.n = 0
+
+    for my.container.$(my.childname) as child
+        if (child.name = my.namevalue)
+            my.n = my.n + 1
+        endif
+    endfor
+    return my.n
+endfunction
+
+###############################################################################
+# Specific pattern xml functions
+###############################################################################
+function global.registry(registrar, query, name)
+    define my.registrar = registry.registrar
+    define my.query = registry.query
+    define my.name = registry.name
+
+    if !defined(my.query.name)
+        abort "Malformed query: $(my.query)"
+    endif
+
+    # using function to manually count as count function is returning
+    # child count of matching element
+    if !(count_matches_name(my.registrar, my.name, my.query.name) = 1)
+       abort "Registrar lacks single entry for '$(my.query.name)'."
+    endif
+
+    return my.registrar->$(my.name)($(my.name).name = my.query.name)
+endfunction
+
+### ASSUMES configuration root object in xml
+function global.package_name(query, host)
+    define my.query = package_name.query
+    define my.host = package_name.host
+    define my.registry = registry(my.host->registrar(id = "dependency"), my.query, "dependency")
+
+    if !defined(my.registry)
+        abort "Missing registry for '$(my.query)'."
+    endif
+
+    if !defined(my.registry->cmake) | !defined(my.registry->cmake.package)
+        abort "Missing registry details for '$(my.query)'."
+    endif
+
+    return my.registry->cmake.package
+endfunction
+
+function global.find_option_declaration(name, target, repository)
+    define my.name = find_option_declaration.name
+    define my.target = find_option_declaration.target
+    define my.repository = find_option_declaration.repository
+
+    if (count(my.target.option, .name = my.name) > 0)
+        define my.target_option = my.target->option(option.name = my.name)
+
+        if defined(my.target_option)
+            return my.target_option
+        endif
+    endif
+
+    for my.target.dependency as _depend
+        if (count(my.repository.library, library.name = _depend.name) > 0)
+            if defined(my.repository->library(library.name = _depend.name)->option(option.name = my.name))
+                return my.repository->library(name = _depend.name)->option(name = my.name)
+            endif
+        else
+            for configuration.repository as _repo
+                if (count(_repo.library, library.name = _depend.name) > 0)
+                    if defined(_repo->library(name = _depend.name)->option(name = my.name))
+                        return _repo->library(name = _depend.naem)->option(name = my.name)
+                    endif
+                endif
+            endfor
+        endif
+    endfor
+
+    abort "Missing option matching name '$(my.name)'."
+endfunction
+
+function global.get_option(reference, target, repository)
+    define my.reference = get_option.reference
+    define my.target = get_option.target
+    define my.repository = get_option.repository
+    define my.result = ""
+
+    if (defined(my.reference.option))
+        define my.option = find_option_declaration(my.reference.option, my.target, my.repository)
+
+        if (!defined(my.option))
+            abort "Target '$(my.target.name)' missing option '$(my.reference.option)'."
+        endif
+
+        my.result = "$(my.option.type:lower)-$(my.option.name:lower)"
+    endif
+
+    return my.result
+endfunction
+
+function canonical_dependency_list(result, repository, configuration)
+    define my.result = canonical_dependency_list.result
+    define my.repository = canonical_dependency_list.repository
+    define my.configuration = canonical_dependency_list.configuration
+
+    for my.repository.library as _target
+        # for simplicity, assuming only libraries traversed recursively
+        for _target.dependency as _dep
+            if (count_matches_name(my.configuration, "repository", _dep.name) > 0)
+                define my.dep_rep = my.configuration->repository(name = _dep.name)
+                canonical_dependency_list(my.result, my.dep_rep, my.configuration)
+            endif
+        endfor
+
+        canonicalize(my.result, _target, my.configuration->registrar(id = "dependency"), "dependency", "name")
+    endfor
+    for my.repository.test as _target
+        canonicalize(my.result, _target, my.configuration->registrar(id = "dependency"), "dependency", "name")
+    endfor
+    for my.repository.binary as _target
+        canonicalize(my.result, _target, my.configuration->registrar(id = "dependency"), "dependency", "name")
+    endfor
+endfunction
+
+function calculate_presets(result, configuration, repository)
+    define my.result = calculate_presets.result
+    define my.configuration = calculate_presets.configuration
+    define my.repository = calculate_presets.repository
+
+    # targets
+    for my.repository.library as _library
+        new target as _target
+            _target.value = "$(_library.name)"
+            copy _target to my.result
+        endnew
+    endfor
+    for my.repository.test as _test
+        new target as _target
+            _target.value = "$(_test.name)"
+            copy _target to my.result
+        endnew
+    endfor
+    for my.repository.binary as _binary
+        new target as _target
+            _target.value = "$(_binary.name)"
+            copy _target to my.result
+        endnew
+    endfor
+
+    # configurations
+    define my.registrar = my.configuration->registrar(id = "presets")?
+
+    # shortcut - currently all presets are same, use registry
+    for my.registrar.configuration as _config
+        copy _config to my.result
+    endfor
+
+#    if !defined(my.repository->presets)
+#        return
+#    endif
+#
+#    for my.repository->presets.configuration as _config
+#        define my.entry = registry(my.registrar, _config, "configuration")?
+#
+#        if defined(my.entry)
+#            copy my.entry to my.result
+#        else
+#            abort "Preset $(_config.name) absent from registry."
+#        endif
+#    endfor
+endfunction
+
+.endtemplate
+.template 1
+.
+.##############################################################################
+.# Macros
+.##############################################################################
+.
+.endtemplate
+

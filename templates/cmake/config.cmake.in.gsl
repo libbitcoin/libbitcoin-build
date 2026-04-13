@@ -13,7 +13,8 @@
 
 gsl from "../library/math.gsl"
 gsl from "../library/string.gsl"
-gsl from "../lib/cmake.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/cmake-output.gsl"
 gsl from "../lib/debug.gsl"
 gsl from "../lib/filesystem.gsl"
 gsl from "../lib/output.gsl"
@@ -88,7 +89,7 @@ include( "${CMAKE_CURRENT_LIST_DIR}/$(my.target.name)-targets.cmake" )
 set( $(get_option(_dependency, my.target, my.repository)) @$(get_option(_dependency, my.target, my.repository))@ )
 .       endif
 .
-.       emit_find_dependency(_dependency, my.target, my.repository, "find_dependency")
+.       emit_find_dependency(_dependency, my.target, my.repository, configuration, "find_dependency")
 .   endfor
 
 check_required_components(@PROJECT_NAME@)

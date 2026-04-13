@@ -24,6 +24,7 @@
 # trim_left(text)
 # trim_right(text)
 # trim_both(text)
+# pad(text, length, symbol)
 #------------------------------------------------------------------------------
 
 # Return the remainder of the text after discarding the base_length.
@@ -112,6 +113,14 @@ endfunction
 # Remove whitespace from both sides of the text.
 function global.trim_both(text)
     return trim_left(string.trim(my.text))
+endfunction
+
+function global.pad(text, length, symbol)
+    define my.result = my.text
+    while string.length(my.result) < my.length
+        my.result = "$(my.result)$(my.symbol)"
+    endwhile
+    return my.result
 endfunction
 
 ###############################################################################

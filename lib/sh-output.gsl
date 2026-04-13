@@ -1,0 +1,163 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin shell utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+
+function global.shebang(interpreter)
+    write_line("#!/bin/$(my.interpreter)")
+endfunction
+
+.endtemplate
+.template 1
+.
+.##############################################################################
+.# Macros
+.##############################################################################
+.
+.macro global.copyleft(name)
+###############################################################################
+#  Copyright (c) 2014-2026 $(my.name) developers (see COPYING).
+#
+#         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+#
+###############################################################################
+.endmacro
+.
+.macro global.heading1(text)
+
+# $(my.text)
+#==============================================================================
+.endmacro
+.
+.macro global.heading2(text)
+
+# $(my.text)
+#------------------------------------------------------------------------------
+.endmacro
+.
+.macro global.heading3(text)
+# $(my.text)
+.endmacro
+.
+.macro global.define_display_functions()
+
+COLOR_CYAN='\\e[0;96m'
+COLOR_GREEN='\\e[0;92m'
+COLOR_RED='\\e[0;91m'
+COLOR_YELLOW='\\e[0;93m'
+COLOR_RESET='\\e[0m'
+
+msg_heading()
+{
+    printf "\\n********************** %b **********************\\n" "$@"
+}
+
+msg_verbose()
+{
+    if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
+        printf "${COLOR_CYAN}%b${COLOR_RESET}\\n" "$@"
+    fi
+}
+
+msg()
+{
+    printf "%b\\n" "$@"
+}
+
+msg_success()
+{
+    printf "${COLOR_GREEN}%b${COLOR_RESET}\\n" "$@"
+}
+
+msg_warn()
+{
+    printf "${COLOR_YELLOW}%b${COLOR_RESET}\\n" "$@"
+}
+
+msg_error()
+{
+    >&2 printf "${COLOR_RED}%b${COLOR_RESET}\\n" "$@"
+}
+.endmacro
+.
+.macro global.define_directory_functions()
+
+create_directory()
+{
+    local DIRECTORY="$1"
+    local MODE="$2"
+
+    if [[ -d "${DIRECTORY}" ]]; then
+        if [[ ${MODE} == "-f" ]]; then
+            msg_warn "Reinitializing '${DIRECTORY}'..."
+            rm -rf "${DIRECTORY}"
+            mkdir -p "${DIRECTORY}"
+        else
+            msg_warn "Reusing existing '${DIRECTORY}'..."
+        fi
+    else
+        msg "Initializing '${DIRECTORY}'..."
+        mkdir -p "${DIRECTORY}"
+    fi
+}
+
+create_directory_force()
+{
+    create_directory "$@" -f
+}
+
+pop_directory()
+{
+    msg_verbose "*** move  pre: '\$(pwd)'"
+    popd >/dev/null
+    msg_verbose "*** move post: '\$(pwd)'"
+}
+
+push_directory()
+{
+    msg_verbose "*** move  pre: '\$(pwd)'"
+    local DIRECTORY="$1"
+    pushd "${DIRECTORY}" >/dev/null
+    msg_verbose "*** move post: '\$(pwd)'"
+}
+
+remove_directory_force()
+{
+    msg_verbose "*** removing: '$@'"
+    rm -rf "$@"
+}
+.endmacro
+.
+.macro global.initialize_environment()
+
+OPTS_ENABLE="set -eo pipefail"
+OPTS_DISABLE="set +e"
+
+eval "${OPTS_ENABLE}"
+trap 'echo "FATAL ERROR: Command failed at line ${LINENO}: ${BASH_COMMAND}" >&2' ERR
+.endmacro
+.
+.macro global.define_error_functions()
+
+enable_exit_on_error()
+{
+    eval "${OPTS_ENABLE}"
+}
+
+disable_exit_on_error()
+{
+    eval "${OPTS_DISABLE}"
+}
+.endmacro
+.
+.endtemplate
+

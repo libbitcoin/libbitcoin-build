@@ -19,10 +19,15 @@
 .   copyleft("libbitcoin-build")
 
 # Exit this script on the first build error.
-set -e
+set -euo pipefail
+trap 'msg_error "FATAL ERROR: Command failed at line $LINENO: $BASH_COMMAND" >&2' ERR
+
+GSL="gsl -q"
 
 # Do everything relative to this file location.
 cd `dirname "$0"`
+
+.   define_display_functions()
 
 # Cleanup output directory
 rm -rf "$(configuration->templates.resultpath)"
@@ -36,13 +41,31 @@ declare -a generator=( \\
 # Generate build artifacts.
 for generate in "\${generator[@]}"
 do
-    echo "gsl -q -script:\$generate ../$(configuration->templates.source)"
-    gsl -q -script:\$generate ../$(configuration->templates.source)
+    msg_warn "${GSL} -script:\$generate ../$(configuration->templates.source)"
+    ${GSL} -script:\$generate ../$(configuration->templates.source)
 done
 
 .if (count(configuration->templates.template, ends_with(count.name, ".sh.gsl")) > 0)
 # Make generated scripts executable.
-eval chmod -R +x "$(configuration->templates.resultpath)/*/*.sh"
+modcount=0
+failcount=0
+
+while IFS= read -r -d '' file; do
+    if chmod +x "${file}"; then
+        msg "${COLOR_GREEN}✓${COLOR_RESET} ${file}"
+        ((modcount += 1))
+    else
+        msg "${COLOR_RED}✗${COLOR_RESET} Failed: ${file}"
+        ((failcount += 1))
+    fi
+done < <(find ../output/version4 -name "*.sh" -type f -print0)
+
+if [[ ${failcount} -eq 0 ]]; then
+    msg_success "Made ${modcount} files executable."
+else
+    msg_error "Failed modifying ${failcount} files."
+    exit 1
+fi
 .endif
 .endmacro generate_artifacts
 .endtemplate
@@ -56,7 +79,7 @@ eval chmod -R +x "$(configuration->templates.resultpath)/*/*.sh"
 
 # Note: expected context root libbitcoin-build directory
 gsl from "lib/output.gsl"
-gsl from "lib/sh.gsl"
+gsl from "lib/sh-output.gsl"
 gsl from "library/string.gsl"
 
 generate_artifacts()

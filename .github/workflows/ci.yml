@@ -18,26 +18,29 @@ jobs:
           - os: ubuntu-latest
             script: generate4.sh
             branch: master
+            shell: bash
 
           - os: macos-latest
             script: generate4.sh
             branch: master
+            shell: bash
 
           - os: windows-latest
             script: generate4.cmd
             branch: master
+            shell: cmd
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repository [build]
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
           path: 'libbitcoin-build'
           repository: ${{ github.repository }}
 
-      - name: Checkout repository
+      - name: Checkout repository [system]
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
@@ -45,23 +48,7 @@ jobs:
           repository: '${{ github.repository_owner }}/libbitcoin-system'
           ref: ${{ matrix.branch }}
 
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-          path: 'libbitcoin-protocol'
-          repository: '${{ github.repository_owner }}/libbitcoin-protocol'
-          ref: ${{ matrix.branch }}
-
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-          path: 'libbitcoin-client'
-          repository: '${{ github.repository_owner }}/libbitcoin-client'
-          ref: ${{ matrix.branch }}
-
-      - name: Checkout repository
+      - name: Checkout repository [explorer]
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
@@ -69,7 +56,7 @@ jobs:
           repository: '${{ github.repository_owner }}/libbitcoin-explorer'
           ref: ${{ matrix.branch }}
 
-      - name: Checkout repository
+      - name: Checkout repository [network]
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
@@ -77,15 +64,7 @@ jobs:
           repository: '${{ github.repository_owner }}/libbitcoin-network'
           ref: ${{ matrix.branch }}
 
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-          path: 'libbitcoin-consensus'
-          repository: '${{ github.repository_owner }}/libbitcoin-consensus'
-          ref: ${{ matrix.branch }}
-
-      - name: Checkout repository
+      - name: Checkout repository [database]
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
@@ -93,15 +72,7 @@ jobs:
           repository: '${{ github.repository_owner }}/libbitcoin-database'
           ref: ${{ matrix.branch }}
 
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-          path: 'libbitcoin-blockchain'
-          repository: '${{ github.repository_owner }}/libbitcoin-blockchain'
-          ref: ${{ matrix.branch }}
-
-      - name: Checkout repository
+      - name: Checkout repository [node]
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
@@ -109,7 +80,7 @@ jobs:
           repository: '${{ github.repository_owner }}/libbitcoin-node'
           ref: ${{ matrix.branch }}
 
-      - name: Checkout repository
+      - name: Checkout repository [server]
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
@@ -117,7 +88,7 @@ jobs:
           repository: '${{ github.repository_owner }}/libbitcoin-server'
           ref: ${{ matrix.branch }}
 
-      - name: Checkout repository
+      - name: Checkout repository [zeromq/gsl]
         if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
         uses: actions/checkout@v6
         with:
@@ -125,30 +96,30 @@ jobs:
           path: 'gsl'
           repository: 'zeromq/gsl'
 
-      - name: Prepare toolchain [macos]
+      - name: Prepare platform toolchain [macos]
         if: ${{ startsWith(matrix.os, 'macos') }}
         run: |
           brew install pcre
 
-      - name: Prepare toolchain [ubuntu]
+      - name: Prepare platform toolchain [ubuntu]
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           sudo apt-get update
           sudo apt-get install libpcre3-dev
 
-      - name: Prepare toolchain [windows]
+      - name: Prepare platform toolchain [windows]
         if: ${{ startsWith(matrix.os, 'windows') }}
         uses: microsoft/setup-msbuild@v3
 
-      - name: Build gsl [macos]
+      - name: Aquire gsl [macos]
         if: ${{ startsWith(matrix.os, 'macos') }}
         run: |
           pushd "gsl/src"
           CPPFLAGS="-I/opt/homebrew/include ${CPPFLAGS}" make --silent
           sudo make install
           popd
-          
-      - name: Build gsl [ubuntu]
+
+      - name: Aquire gsl [ubuntu]
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           pushd "gsl/src"
@@ -156,21 +127,28 @@ jobs:
           sudo make install
           popd
 
-      - name: Retrieve gsl binary [windows]
+      - name: Aquire gsl [windows]
         if: ${{ startsWith(matrix.os, 'windows') }}
         shell: powershell
         run: |
-          Invoke-WebRequest -Uri "https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe" -OutFile "${{ github.workspace }}\libbitcoin-build\gsl.exe"
+          echo "${{ github.workspace }}\libbitcoin-build\bin\winx64" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
 
-      - name: Execute generation [macos, ubuntu]
-        if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
-        run: |
-          pushd libbitcoin-build
+      - name: Execute generation [bash]
+        if: ${{ startsWith(matrix.shell, 'bash') }}
+        shell: bash
+        working-directory: ${{ github.workspace }}/libbitcoin-build
+        run: >
           ./${{ matrix.script }}
-          popd
 
-      - name: Execute generation [windows]
-        if: ${{ startsWith(matrix.os, 'windows') }}
+      - name: Execute generation [cmd]
+        if: ${{ startsWith(matrix.shell, 'cmd') }}
         shell: cmd
-        run: .\libbitcoin-build\${{ matrix.script }}
+        working-directory: ${{ github.workspace }}\libbitcoin-build
+        run: .\\${{ matrix.script }}
+
+      - name: Execute generation [powershell]
+        if: ${{ startsWith(matrix.shell, 'powershell') }}
+        shell: pwsh
+        working-directory: ${{ github.workspace }}\libbitcoin-build
+        run: .\\${{ matrix.script }}
 

@@ -1,0 +1,331 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL responsible for installation structure of libbitcoin projects.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_install_sh(configuration, id)
+    define my.configuration = generate_install_sh.configuration
+    define my.id = generate_install_sh.id
+    define my.filename = left(my.id, string.length(my.id) - 4)
+    require(my.configuration->templates, "templates", "resultpath")
+
+    if !(ends_with(my.id, ".gsl"))
+        abort "Provided id '$(my.id)' does not end with '.gsl'."
+    endif
+
+    define my.template = my.configuration->templates->template(.name = my.id)
+
+    require(my.template, "template", "outpath")
+    define my.project_path_suffix = my.template.outpath
+
+    for my.configuration.repository by .name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+        create_directory(my.output_path)
+
+        define my.out_file = path_append(my.output_path, my.filename)
+        notify(my.out_file)
+        output(my.out_file)
+
+        emit_install_sh(my.template, my.configuration, _repository)
+
+        close
+     endfor _repository
+endfunction
+
+###############################################################################
+# Library-able?
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+function emit_install_sh(meta, configuration, repository)
+    define my.meta = emit_install_sh.meta
+    define my.configuration = emit_install_sh.configuration
+    define my.repository = emit_install_sh.repository
+
+    new installable as _install
+        canonical_dependency_list(_install, my.repository, my.configuration)
+        verify_toolchains_supported(_install, my.meta, my.configuration, my.repository)
+        build_hints(_install, my.meta, my.configuration, my.repository)
+
+        initialize_pre_copyleft()
+
+        copyleft(my.repository.name)
+
+        emit_documentation_comment(my.meta, my.configuration, my.repository, _install)
+
+        initialize_post_copyleft()
+
+        define_constants(my.meta, my.configuration, my.repository, _install)
+
+        if is_defined_positive(my.meta, "label")
+            execute_main_logic()
+        endif
+
+        define_main(my.meta, my.configuration, my.repository, _install)
+
+        new keys as _keys
+            for _install.dependency as _depend
+                if (count(_keys.method, method.name = _depend.hint_build) = 0)
+                    new _keys.method as _method
+                        _method.name = _depend.hint_build
+                    endnew
+                endif
+
+                if (count(_keys.source, source.name = _depend.hint_source) = 0)
+                    new _keys.source as _source
+                        _source.name = _depend.hint_source
+                    endnew
+                endif
+            endfor
+
+            for _keys.source as _source
+                if (_source.name = "archive")
+                    define_source_archive()
+                elsif (_source.name = "github")
+                    define_source_github()
+                elsif (_source.name = "nuget")
+                    define_source_nuget()
+                else
+                    abort "Unrecognized source '$(_source.name)'."
+                endif
+            endfor
+
+            if (count(_keys.method, count.name = "cmake" | count.name = "preset" | count.name = "gnu") > 0)
+                define_helpers_make()
+            endif
+
+            for _keys.method as _method
+                if (_method.name = "cmake")
+                    define_build_cmake()
+                elsif (_method.name = "preset")
+                    define_build_preset()
+                elsif (_method.name = "gnu")
+                    define_build_gnu()
+                elsif (_method.name = "msbuild")
+                    define_build_msbuild()
+                elsif (_method.name = "nuget")
+                    define_build_nuget()
+               elsif (_method.name = "boost_build")
+                    define_build_boost()
+                else
+                    abort "Unrecognized build method '$(_method.name)'."
+                endif
+            endfor
+        endnew
+
+        define_display_build_variables(my.meta, my.configuration, my.repository, _install)
+
+        define_display_toolchain_variables(my.meta, my.configuration, my.repository, _install)
+
+        define_display_constants(my.meta, my.configuration, my.repository, _install)
+
+        define_display_help(my.meta, my.configuration, my.repository, _install)
+
+        define_utility_functions()
+
+        define_directory_functions()
+
+        define_display_functions()
+
+        if !is_defined_positive(my.meta, "label")
+            execute_main_logic()
+        endif
+    endnew
+endfunction
+
+function textname(dependency)
+    define my.dependency = textname.dependency
+    return defined(my.dependency.textname) ?? my.dependency.textname ? my.dependency.name
+endfunction
+
+function substitute(datasource, value, instructions)
+    define my.datasource = substitute.datasource
+    define my.result = substitute.value
+    define my.instructions = substitute.instructions
+
+    for my.instructions.substitute as _sub
+        define my.data = ""
+        if (_sub.data = "version")
+            my.data = my.datasource->archive.version
+        else
+            abort "Unrecognized datasource '$(_sub.data)'."
+        endif
+
+        my.result = string.replace(my.result, "$(_sub.symbol)|$(my.data)")
+        my.result = "$(my.result:$(_sub.type))"
+    endfor
+
+    return my.result
+endfunction
+
+function urlbase(dependency, source_type)
+    define my.dependency = urlbase.dependency
+    define my.type = urlbase.source_type
+
+    define my.url = my.dependency->$(my.type)->url
+    return substitute(my.dependency, my.url.pattern, my.url)
+endfunction
+
+function filename(dependency, source_type)
+    define my.dependency = filename.dependency
+    define my.type = filename.source_type
+
+    define my.filename = my.dependency->$(my.type)->filename
+    define my.expanded_filename = difference(substitute(my.dependency, "v$(my.filename.pattern)", my.filename), 1)
+
+    return "$(my.expanded_filename)$(my.filename.filetype)"
+endfunction
+
+function verify_toolchains_supported(dependencies, meta, configuration, repository)
+    define my.dependencies = verify_toolchains_supported.dependencies
+    define my.meta = verify_toolchains_supported.meta
+    define my.configuration = verify_toolchains_supported.configuration
+    define my.repository = verify_toolchains_supported.repository
+
+    define my.cmake = defined(my.meta->build(build.method = "cmake"))
+    define my.gnu = defined(my.meta->build(build.method = "gnu"))
+    define my.msbuild = defined(my.meta->build(build.method = "msbuild"))
+    define my.preset = defined(my.meta->build(build.method = "preset"))
+
+    # if (my.cmake | my.preset) & (my.gnu)
+    #     abort "Configurations mixing 'cmake'/'preset' and 'gnu' are not supported."
+    # endif
+
+    if (my.cmake)
+        my.dependencies.toolchain = "cmake"
+        my.dependencies.hint_options = "cmake"
+    elsif (my.gnu)
+        my.dependencies.toolchain = "gnu"
+        my.dependencies.hint_options = "gnu"
+    elsif (my.msbuild)
+        my.dependencies.toolchain = "msbuild"
+        my.dependencies.hint_options = "msbuild"
+    elsif (my.preset)
+        my.dependencies.toolchain = "preset"
+        my.dependencies.hint_options = "cmake"
+    else
+        abort "Unexpected - missing primary toolchain."
+    endif
+
+endfunction
+
+function build_hints(dependencies, meta, configuration, repository)
+    define my.dependencies = build_hints.dependencies
+    define my.meta = build_hints.meta
+    define my.configuration = build_hints.configuration
+    define my.repository = build_hints.repository
+
+    # hint source type
+    for my.dependencies.dependency as _depend
+        define my.handled_source = 0
+        for my.meta.source as _source
+            if (my.handled_source > 0)
+                next
+            endif
+
+            if defined(_depend->$(_source.type))
+                if !((_source.type = "archive") | (_source.type = "github"))
+                    abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
+                endif
+
+                _depend.hint_source = _source.type
+                my.handled_source = 1
+            endif
+        endfor
+
+        if (my.handled_source = 0)
+            abort "No source recognized for dependency '$(_depend.name)'."
+        endif
+
+        define my.handled_build = 0
+
+        for my.meta.build as _build
+            if (my.handled_build > 0)
+                next
+            endif
+
+            if defined(_depend->build(build.method = _build.method))
+                define my.active = _depend->build(build.method = _build.method)
+
+                _depend.hint_build = _build.method
+                my.handled_build = 1
+            endif
+        endfor
+
+        if (my.handled_build = 0)
+           abort "No build method recognized for dependency '$(_depend.name)'."
+        endif
+    endfor
+endfunction
+
+function write_column_line(begin, end, align, pad, indent, prefix, suffix)
+    define my.begin = write_column_line.begin
+    define my.end = write_column_line.end
+    define my.align = write_column_line.align
+    define my.pad = write_column_line.pad ? " "
+    define my.indent = write_column_line.indent ? ""
+    define my.prefix = write_column_line.prefix ? ""
+    define my.suffix = write_column_line.suffix ? ""
+
+    return "$(my.indent)$(my.prefix)$(pad(my.begin, my.align, my.pad))$(my.end)$(my.suffix)"
+endfunction
+
+function indent_column(begin, end, column, indent, pad)
+    define my.begin = indent_column.begin
+    define my.end = indent_column.end
+    define my.column = indent_column.column
+    define my.indent = indent_column.indent ? ""
+    define my.pad = indent_column.pad ? " "
+
+    return write_column_line(my.begin, my.end, my.column, my.pad, my.indent, "", "")
+endfunction
+
+function fix_column(begin, end, column, prefix, suffix, pad)
+    define my.begin = fix_column.begin
+    define my.end = fix_column.end
+    define my.column = fix_column.column
+    define my.prefix = fix_column.prefix ? ""
+    define my.suffix = fix_column.suffix ? ""
+    define my.pad = fix_column.pad ? " "
+
+    return write_column_line(my.begin, my.end, my.column, my.pad, "", my.prefix, my.suffix)
+endfunction
+
+function is_applicable(option, dependency, repository)
+    define my.option = is_applicable.option
+    define my.dependency = is_applicable.dependency
+    define my.repository = is_applicable.repository
+
+    define my.ignorable = (my.dependency.name = my.repository.name) &\
+        (defined(my.option.ignore) & (my.option.ignore = "true"))
+
+    return !(my.ignorable)
+endfunction
+
+.endtemplate

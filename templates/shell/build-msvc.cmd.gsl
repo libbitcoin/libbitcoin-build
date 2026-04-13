@@ -1,0 +1,538 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin install-msbuild.cmd.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../lib/cmd-output.gsl"
+gsl from "../templates/shell/install-base.gsl"
+
+###############################################################################
+# Functions
+###############################################################################
+function column_variables(variable, align, prefix, suffix, pad)
+    define my.variable = column_variables.variable
+    define my.align = column_variables.align
+    define my.prefix = column_variables.prefix ? ""
+    define my.suffix = column_variables.suffix ? ""
+    define my.pad = column_variables.pad ? " "
+
+    return fix_column(my.variable, ": !$(my.variable)!", my.align, my.prefix, my.suffix, my.pad)
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro error_trampoline(indent)
+.   define my.indent = error_trampoline.indent
+$(my.indent)if %ERRORLEVEL% neq 0 (
+    $(my.indent)exit /b %ERRORLEVEL%
+$(my.indent))
+.endmacro # error_trampoline
+.
+.macro initialize_pre_copyleft()
+.   initialize_echo_local()
+.
+.endmacro # initialize_pre_copyleft
+.
+.macro initialize_post_copyleft()
+.endmacro # initialize_post_copyleft
+.
+.macro emit_documentation_comment(meta, configuration, repository, dependencies)
+.   define my.meta = emit_documentation_comment.meta
+.   define my.configuration = emit_documentation_comment.configuration
+.   define my.repository = emit_documentation_comment.repository
+.   define my.dependencies = emit_documentation_comment.dependencies
+
+.   emit_documentation(my.meta, my.configuration, my.repository, my.dependencies, "REM ", "")
+REM 
+.
+.endmacro # emit_documentation_comment
+.
+.macro define_constants(meta, configuration, repository, dependencies)
+.   define my.meta = define_constants.meta
+.   define my.configuration = define_constants.configuration
+.   define my.repository = define_constants.repository
+.   define my.dependencies = define_constants.dependencies
+.
+
+if "!MSBUILD_EXE!" == "" (
+    set "MSBUILD_EXE=msbuild"
+)
+
+if "!NUGET_EXE!" == "" (
+    set "NUGET_EXE=nuget"
+)
+.   for my.dependencies.dependency as _depend
+.       if (count(my.configuration.repository, count.name = _depend.name) = 0)
+.           next
+.       endif
+.
+.       if !defined(_depend->$(_depend.hint_source))
+.           abort "Expected hint_source value '$(_depend.hint_source)' not found for dependency '$(_depend.name)'."
+.       endif
+.
+.       if (_depend.hint_source = "github")
+
+if "!$(_depend.name:c)_OWNER!" == "" (
+    set "$(_depend.name:c)_OWNER=$(_depend->$(_depend.hint_source).owner)"
+)
+if "!$(_depend.name:c)_TAG!" == "" (
+    set "$(_depend.name:c)_TAG=$(_depend->$(_depend.hint_source).tag)"
+)
+.       else
+.           abort "'$(_depend.name)': Declared source type '$(_depend.hint_source)' not supported."
+.       endif
+.   endfor
+.
+.endmacro # define_constants
+.
+.macro define_main(meta, configuration, repository, dependencies)
+.   define my.meta = define_main.meta
+.   define my.configuration = define_main.configuration
+.   define my.repository = define_main.repository
+.   define my.dependencies = define_main.dependencies
+
+:main
+    call :parse_input %*
+
+    if "!DISPLAY_VERBOSE!" == "yes" (
+        call :msg_heading "Pre-sanitized state"
+        call :display_build_variables
+        call :display_toolchain_variables
+        call :display_constants
+    )
+
+    if "!SHOW_HELP!" == "yes" (
+        call :help
+        exit /b 0
+    )
+
+    if "!BUILD_SRC_DIR!" == "" (
+        set "BUILD_SRC_DIR=!CD!"
+        call :msg_warn "No source directory specified, using '!BUILD_SRC_DIR!'."
+    ) else (
+        call :push_directory "!BUILD_SRC_DIR!"
+.   error_trampoline("        ")
+        set "BUILD_SRC_DIR=!CD!"
+        call :msg_verbose "Resolving potential relative path '!BUILD_SRC_DIR!'."
+        call :pop_directory
+.   error_trampoline("        ")
+    )
+
+    if "!NUGET_PKG_PATH!" == "" (
+        set "NUGET_PKG_PATH=!BUILD_SRC_DIR!\\.nuget\\packages"
+    )
+
+    if not exist "!NUGET_PKG_PATH!" (
+        call :msg_warn "NUGET_PKG_PATH does not exist, creating..."
+        call :create_directory_force "!NUGET_PKG_PATH!"
+        call :msg_success "NUGET_PKG_PATH: '%NUGET_PKG_PATH%' created successfully."
+.   error_trampoline("        ")
+    ) else (
+        call :msg_warn "NUGET_PKG_PATH exists, reusing..."
+    )
+
+    if "!BUILD_CONFIG!" == "" (
+        call :msg_error "Build configuration required."
+        call :help
+        exit /b 1
+    )
+
+    if "!BUILD_VERSION!" == "" (
+        set "BUILD_VERSION=vs2022"
+        call :msg_warn "Build msvc version not provided, defaulting to '!BUILD_VERSION!'."
+    )
+
+    if "!BUILD_PLATFORM!" == "" (
+        set "BUILD_PLATFORM=x64"
+        call :msg_warn "Build platform not provided, defaulting to '!BUILD_PLATFORM!'."
+    )
+
+    if "!MSBUILD_VERBOSE!" == "" (
+        if "!DISPLAY_VERBOSE!" == "yes" (
+            set "MSBUILD_VERBOSE=diagnostic"
+        ) else (
+            set "MSBUILD_VERBOSE=minimal"
+        )
+    )
+
+    call :msg_heading "Configuration"
+    call :display_build_variables
+
+    call :msg_heading "Toolchain Configuration Parameters"
+    call :display_toolchain_variables
+
+    if "!DISPLAY_VERBOSE!" == "yes" (
+        call :msg_heading "State"
+        call :display_constants
+    )
+
+    call :push_directory "!BUILD_SRC_DIR!"
+.   error_trampoline("    ")
+.
+.   for my.dependencies.dependency as _depend
+.       if (count(my.configuration.repository, count.name = _depend.name) = 0)
+.           next
+.       endif
+.
+.       if !defined(_depend.hint_source)
+.           abort "Expected hint_source for dependency '$(_depend.name)' not found."
+.       endif
+.
+.       if is_defined_positive(_depend, "conditional")
+.           abort "Unexpected 'conditional' property defined positive."
+.       endif
+.
+.       define my.vname = "$(_depend.name:c)"
+.       define my.active_source = _depend->$(_depend.hint_source)
+.
+.       if (_depend.hint_source = "github")
+
+    call :source_github "!$(my.vname)_OWNER!" "$(_depend.name)" "!$(my.vname)_TAG!"
+.           error_trampoline("    ")
+.       else
+.           abort "'$(_depend.name)': Declared source type '$(_source.type)' not supported."
+.       endif
+.
+.       if !defined(_depend.hint_build)
+.           abort "Expected hint_build for dependency '$(_depend.name)' not found."
+.       endif
+.
+.       if !defined(_depend->build(build.method = _depend.hint_build))
+.           abort "Expected hint_build value '$(_depend.hint_build)' not found for depeendency '$(_depend.name)'."
+.       endif
+.
+.       define my.active_build = _depend->build(build.method = _depend.hint_build)
+.
+.       if (my.active_build.method = "msbuild")
+.           define my.lib_only = last() ?? "no" ? "yes"
+.           define my.dep_repo = my.configuration->repository(.name = _depend.name)
+.           if !last()
+.               for my.dep_repo.library as _library
+    call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)" "$(_library.name)"
+.                   error_trampoline("    ")
+.               endfor
+.           else
+    call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)"
+.               error_trampoline("    ")
+.           endif
+.       else
+.           abort "Unrecognized build method '$(_build.method)'."
+.       endif
+.   endfor
+
+    call :pop_directory
+.   error_trampoline("    ")
+
+    call :msg_success "Build process completed successfully."
+    if not defined CI (
+        pause
+    )
+
+    exit /b 0
+
+:parse_input
+    if "%~1" == "" (
+        goto :end_parse_input
+    ) else if "%~1" == "--build-src-dir" (
+        set "BUILD_SRC_DIR=%~2"
+        shift
+    ) else if "%~1" == "--build-config" (
+        set "BUILD_CONFIG=%~2"
+        shift
+    ) else if "%~1" == "--build-platform" (
+        set "BUILD_PLATFORM=%~2"
+        shift
+    ) else if "%~1" == "--build-version" (
+        set "BUILD_VERSION=%~2"
+        shift
+    ) else if "%~1" == "--build-full-repositories" (
+        set "BUILD_FULL_REPOSITORIES=yes"
+    ) else if "%~1" == "--build-use-local-src" (
+        set "BUILD_USE_LOCAL_SRC=yes"
+    ) else if "%~1" == "--verbose" (
+        set "DISPLAY_VERBOSE=yes"
+    ) else if "%~1" == "-v" (
+        set "DISPLAY_VERBOSE=yes"
+    ) else if "%~1" == "--help" (
+        set "SHOW_HELP=yes"
+    ) else if "%~1" == "-h" (
+        set "SHOW_HELP=yes"
+    )
+
+    shift
+    goto :parse_input
+
+:end_parse_input
+    exit /b 0
+
+.endmacro # define_main
+.
+.macro define_display_build_variables(meta, configuration, repository, dependencies)
+.   define my.meta = define_display_build_variables.meta
+.   define my.configuration = define_display_build_variables.configuration
+.   define my.repository = define_display_build_variables.repository
+.   define my.dependencies = define_display_build_variables.dependencies
+
+:display_build_variables
+.   emit_build_variables(my.meta, my.configuration, my.repository, my.dependencies, "    call :msg \"", "\"")
+    exit /b %ERRORLEVEL%
+
+.endmacro # define_display_build_values
+.
+.macro emit_build_variables(meta, configuration, repository, dependencies, prefix, suffix)
+.   define my.meta = emit_build_variables.meta
+.   define my.configuration = emit_build_variables.configuration
+.   define my.repository = emit_build_variables.repository
+.   define my.dependencies = emit_build_variables.dependencies
+.   define my.prefix = emit_build_variables.prefix
+.   define my.suffix = emit_build_variables.suffix
+.
+.   if !defined(my.meta->column)
+.       abort "The provided template lacks 'column' data."
+.   endif
+.
+.   require(my.meta->column, "column", "const")
+.   define my.column = my.meta->column.const
+.
+$(column_variables("BUILD_CONFIG", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_PLATFORM", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_VERSION", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_SRC_DIR", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_FULL_REPOSITORIES", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_USE_LOCAL_SRC", my.column, my.prefix, my.suffix))
+$(column_variables("DISPLAY_VERBOSE", my.column, my.prefix, my.suffix))
+$(column_variables("SHOW_HELP", my.column, my.prefix, my.suffix))
+.
+.endmacro # emit_build_variables
+.
+.macro define_display_toolchain_variables(meta, configuration, repository, dependencies)
+.   define my.meta = define_display_toolchain_variables.meta
+.   define my.configuration = define_display_toolchain_variables.configuration
+.   define my.repository = define_display_toolchain_variables.repository
+.   define my.dependencies = define_display_toolchain_variables.dependencies
+.
+
+:display_toolchain_variables
+.   emit_toolchain_variables(my.meta, my.configuration, my.repository, my.dependencies, "    call :msg \"", "\"")
+    exit /b %ERRORLEVEL%
+.
+.endmacro # define_display_toolchain_variables
+.
+.macro emit_toolchain_variables(meta, configuration, repository, dependencies, prefix, suffix)
+.   define my.meta = emit_toolchain_variables.meta
+.   define my.configuration = emit_toolchain_variables.configuration
+.   define my.repository = emit_toolchain_variables.repository
+.   define my.dependencies = emit_toolchain_variables.dependencies
+.   define my.prefix = emit_toolchain_variables.prefix
+.   define my.suffix = emit_toolchain_variables.suffix
+.
+.   if !defined(my.meta->column)
+.       abort "The provided template lacks 'column' data."
+.   endif
+.
+.   require(my.meta->column, "column", "const")
+.   define my.column = my.meta->column.const
+.
+$(column_variables("MSBUILD_EXE", my.column, my.prefix, my.suffix))
+$(column_variables("NUGET_PKG_PATH", my.column, my.prefix, my.suffix))
+.
+.endmacro # emit_toolchain_variables
+.
+.macro define_display_constants(meta, configuration, repository, dependencies)
+.   define my.meta = define_display_constants.meta
+.   define my.configuration = define_display_constants.configuration
+.   define my.repository = define_display_constants.repository
+.   define my.dependencies = define_display_constants.dependencies
+
+:display_constants
+.   emit_constants(my.meta, my.configuration, my.repository, my.dependencies, "    call :msg \"", "\"")
+    exit /b %ERRORLEVEL%
+.
+.endmacro # define_display_constants
+.
+.macro emit_constants(meta, configuration, repository, dependencies, prefix, suffix)
+.   define my.meta = emit_constants.meta
+.   define my.configuration = emit_constants.configuration
+.   define my.repository = emit_constants.repository
+.   define my.dependencies = emit_constants.dependencies
+.   define my.prefix = emit_constants.prefix
+.   define my.suffix = emit_constants.suffix
+.
+.   if !defined(my.meta->column)
+.       abort "The provided template lacks 'column' data."
+.   endif
+.
+.   require(my.meta->column, "column", "const")
+.   define my.column = my.meta->column.const
+.
+.   for my.dependencies.dependency as _depend
+.       # if not a repository, expected discovered by nuget, skip
+.       if (count(my.configuration.repository, this.name = _depend.name, this) = 0)
+.           next
+.       endif
+.
+.       if !defined(_depend->$(_depend.hint_source))
+.           abort "Expected hint_source value '$(_depend.hint_source)' not found for dependency '$(_depend.name)'."
+.       endif
+.
+.       if (_depend.hint_source = "github")
+$(column_variables("$(_depend.name:c)_OWNER", my.column, my.prefix, my.suffix))
+$(column_variables("$(_depend.name:c)_TAG", my.column, my.prefix, my.suffix))
+.       else
+.           abort "'$(_depend.name)': Declared source type '$(_depend.hint_source)' not supported."
+.       endif
+.   endfor
+.endmacro # emit_constants
+.
+.macro emit_documentation(meta, configuration, repository, dependencies, prefix, suffix)
+.   define my.meta = emit_documentation.meta
+.   define my.configuration = emit_documentation.configuration
+.   define my.repository = emit_documentation.repository
+.   define my.dependencies = emit_documentation.dependencies
+.
+.   if !defined(my.meta->column)
+.       abort "The provided template lacks 'column' data."
+.   endif
+.
+.   require(my.meta->column, "column", "help")
+.   define my.column = my.meta->column.help
+.
+$(my.prefix)Script managing the build of $(my.repository.name).$(my.suffix)
+$(my.prefix)$(my.suffix)
+$(my.prefix)Script options:$(my.suffix)
+$(fix_column("--build-config config", "Build configuration.", my.column, my.prefix, my.suffix))
+$(fix_column("--build-platform platform", "Build platform.", my.column, my.prefix, my.suffix))
+$(fix_column("--build-version version", "Build MSVC version.", my.column, my.prefix, my.suffix))
+$(fix_column("--build-src-dir path", "Location of sources.", my.column, my.prefix, my.suffix))
+$(fix_column("--build-full-repositories", "Sync full github repositories.", my.column, my.prefix, my.suffix))
+$(fix_column("--build-use-local-src", "Use existing sources in build-src-dir path.", my.column, my.prefix, my.suffix))
+$(fix_column("--verbose", "Display verbose script output.", my.column, my.prefix, my.suffix))
+$(fix_column("--help, -h", "Display usage, overriding script execution.", my.column, my.prefix, my.suffix))
+.endmacro # emit_documentation
+.
+.macro define_display_help(meta, configuration, repository, dependencies)
+.   define my.meta = define_display_help.meta
+.   define my.configuration = define_display_help.configuration
+.   define my.repository = define_display_help.repository
+.   define my.dependencies = define_display_help.dependencies
+
+:help
+.   emit_documentation(my.meta, my.configuration, my.repository, my.dependencies, "    call :msg \"", "\"")
+.
+    exit /b %ERRORLEVEL%
+.endmacro # define_display_help
+.
+.macro define_utility_functions()
+.endmacro # define_utility_functions
+.
+.macro define_source_github()
+
+:source_github
+    set "OWNER=%~1"
+    set "REPOSITORY=%~2"
+    set "TAG=%~3"
+    set "CLONE_OPTIONS=--depth 1 --single-branch"
+
+    if "!BUILD_FULL_REPOSITORIES!" == "yes" (
+        set "CLONE_OPTIONS="
+    )
+
+    call :msg_heading "Preparing to aquire %OWNER%/%REPOSITORY%/%TAG%"
+    call :push_directory "!BUILD_SRC_DIR!"
+.   error_trampoline("    ")
+
+    if exist "%REPOSITORY%" (
+        if "!BUILD_USE_LOCAL_SRC!" == "yes" (
+            call :msg_warn "Reusing existing '%REPOSITORY%'..."
+            call :pop_directory
+            exit /b %ERRORLEVEL%
+        )
+
+        call :msg_warn "Encountered existing '%REPOSITORY%' directory, removing..."
+        call :remove_directory_force "%REPOSITORY%"
+.   error_trampoline("        ")
+    )
+
+    call :msg "Cloning %OWNER%/%REPOSITORY%/%TAG%..."
+    call git clone !CLONE_OPTIONS! --branch %TAG% "https://github.com/%OWNER%/%REPOSITORY%"
+    if %ERRORLEVEL% neq 0 (
+        call :msg_error "Clone of '%OWNER%/%REPOSITORY%/%TAG%' failed."
+        call :pop_directory
+        exit /b 1
+    )
+
+    call :pop_directory
+    exit /b %ERRORLEVEL%
+.endmacro # define_source_github
+.
+.macro define_build_nuget()
+.endmacro # define_build_nuget
+.
+.macro define_build_msbuild()
+
+:build_msbuild
+    set "PROJECT=%~1"
+    set "RELATIVE_PATH=%~2"
+    set "TARGET=%~3"
+
+    if "%TARGET%" == "" (
+        set "TARGET_ARG="
+    ) else (
+        set "TARGET_ARG=/target:%TARGET%:Rebuild"
+    )
+
+    call :push_directory "!BUILD_SRC_DIR!\\%PROJECT%\\%RELATIVE_PATH%\\!BUILD_VERSION!"
+.   error_trampoline("    ")
+
+    call :nuget_restore "%PROJECT%"
+.   error_trampoline("    ")
+
+    !MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! /p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false
+
+    if %ERRORLEVEL% neq 0 (
+        call :msg_error "!MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! /p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false"
+        call :pop_directory
+        exit /b 1
+    )
+
+    call :msg_success "'%PROJECT%' built successfully."
+    call :pop_directory
+    exit /b %ERRORLEVEL%
+
+:nuget_restore
+    call :msg_verbose "nuget restore %~1.sln to !NUGET_PKG_PATH!"
+    !NUGET_EXE! restore "%~1.sln" -OutputDirectory !NUGET_PKG_PATH!
+    if %ERRORLEVEL% neq 0 (
+        call :msg_error "nuget restore failed."
+        exit /b 1
+    )
+
+    call :msg_success "nuget restoration for %~1 complete."
+    exit /b %ERRORLEVEL%
+.
+.endmacro # define_build_msbui%d
+.
+.macro execute_main_logic()
+.endmacro # execute_main_logic
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_install_sh(configuration, "$(script)")
+
+.endtemplate

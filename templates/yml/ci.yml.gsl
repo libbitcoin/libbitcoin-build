@@ -1,0 +1,466 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin <bitcoin library>-config.cmake.in.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/sh-output.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_ci_yml(configuration)
+    define my.configuration = generate_ci_yml.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.filename = "ci.yml"
+    define my.template = my.configuration->templates->template(.name = "ci.yml.gsl")
+
+    if (!defined(my.template))
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    define my.project_path_suffix = my.template.outpath
+
+    for my.configuration.repository by .name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+
+        if defined(_repository->ci)
+            create_directory(my.output_path)
+
+            define my.out_file = path_append(my.output_path, my.filename)
+            notify(my.out_file)
+            output(my.out_file)
+
+            emit_ci_yml(my.template, my.configuration, _repository)
+
+            close
+        endif
+     endfor _repository
+endfunction
+
+###############################################################################
+# Library-able?
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+function compiler_name(compiler)
+    define my.compiler = compiler_name.compiler
+    require(my.compiler, "compiler", "name")
+    define my.specifier = defined(my.compiler.version) ?? "-$(my.compiler.version)" ? ""
+    return "$(my.compiler.name)$(my.specifier)"
+endfunction
+
+function compiler(job, entry, language)
+    define my.job = compiler.job
+    define my.entry = compiler.entry
+    define my.language = compiler.language
+
+    if defined(my.job->compiler(compiler.lang = my.language))
+        return compiler_name(my.job->compiler(compiler.lang = my.language))
+    elsif defined(my.entry->compiler(compiler.lang = my.language))
+        return compiler_name(my.entry->compiler(compiler.lang = my.language))
+    endif
+
+    return ""
+endfunction
+
+function collect_flags(container)
+    define my.container = collect_flags.container
+
+    my.result = ""
+    for my.container.flag as _flag
+        if (string.length(my.result) > 0)
+            my.result = join(my.result, _flag.value, " ")
+        else
+            my.result = _flag.value
+        endif
+    endfor
+
+    return my.result
+endfunction
+
+function flags(job, entry)
+    define my.job = flags.job
+    define my.entry = flags.entry
+
+    my.j_flags = collect_flags(my.job)
+    my.e_flags = collect_flags(my.entry)
+
+    return join(my.e_flags, my.j_flags, " ")
+endfunction
+
+function exclusions(repository)
+    define my.repository = exclusions.repository
+
+    if !defined(my.repository->ci)
+        return ""
+    elsif !defined(my.repository->ci->coverage)
+        return ""
+    endif
+
+    define my.result = ""
+
+    for my.repository->ci->coverage.exclude as _exclude
+        my.result += "$(!first() ?? " " ? "")\"${{ github.workspace }}/$(_exclude.path)\""
+    endfor
+
+    return my.result
+endfunction
+
+function accumulate_options(entry, job)
+    define my.entry = accumulate_options.entry
+    define my.job = accumulate_options.job
+
+    define my.options = ""
+
+    for my.entry.option as _option
+        if (string.length(my.options) > 0)
+            my.options = join(my.options, _option.value, " ")
+        else
+            my.options = _option.value
+        endif
+    endfor
+    for my.job.option as _option
+        if (string.length(my.options) > 0)
+            my.options = join(my.options, _option.value, " ")
+        else
+            my.options = _option.value
+        endif
+    endfor
+
+    return my.options
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_ci_yml(meta, configuration, repository)
+.   define my.meta = emit_ci_yml.meta
+.   define my.configuration = emit_ci_yml.configuration
+.   define my.repository = emit_ci_yml.repository
+.
+.   copyleft(my.repository.name)
+
+name: Continuous Integration
+
+on: [ pull_request, push, workflow_dispatch ]
+
+jobs:
+.   for my.meta.job as _job
+.       if (_job.type = "shell")
+.           define_ci_job_shell(_job, my.meta, my.configuration, my.repository)
+.       elsif (_job.type = "msvc")
+.           define_ci_job_msvc(_job, my.meta, my.configuration, my.repository)
+.       endif
+.   endfor
+.
+.endmacro # emit_CMakeLists
+.
+.macro step_initialize_sdk()
+.
+
+      - name: Initialize SDK
+        shell: powershell
+        run: |
+          try {
+            Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=323507" -OutFile "sdksetup.exe"
+
+            $FeatureList = "OptionId.WindowsDesktopSoftwareDevelopmentKit OptionId.NetFxSoftwareDevelopmentKit"
+            $Args = "/q /norestart /features $FeatureList"
+            $setup = Start-Process -PassThru -FilePath "sdksetup.exe" -ArgumentList $Args
+
+            $setup.WaitForExit()
+            if ($setup.ExitCode -ne 0) {
+              Write-Host "Test execution failure: " $setup.ExitCode -ForegroundColor Red;
+              exit $setup.ExitCode;
+            }
+          }
+          catch {
+            $ERR = $_;
+            Write-Host "Initialization failure: " $ERR -ForegroundColor Red;
+            exit $ERR;
+          }
+.
+.endmacro # step_initialize_sdk
+.
+.macro define_ci_job_msvc(job, meta, configuration, repository)
+.   define my.job = define_ci_job_msvc.job
+.   define my.meta = define_ci_job_msvc.meta
+.   define my.configuration = define_ci_job_msvc.configuration
+.   define my.repository = define_ci_job_msvc.repository
+.
+.   require(my.job, "job", "name")
+
+  $(my.job.name):
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+.   for my.repository->ci.entry as _entry \
+      where (count(_entry.job, count.name = my.job.name) > 0)
+.
+.       for _entry.job as _entry_job where (_entry_job.name = my.job.name)
+.           if !first()
+
+.           endif
+.
+.           require(_entry_job, "job", "configuration")
+.           require(_entry_job, "job", "platform")
+.           require(_entry_job, "job", "version")
+.           define my.tests = defined(_entry_job.tests) ?? _entry_job.tests ? "*"
+.
+          - image: $(_entry.image)
+            configuration: "$(_entry_job.configuration)"
+            platform: "$(_entry_job.platform)"
+            version: "$(_entry_job.version)"
+            tests: "$(my.tests)"
+.       endfor
+.   endfor
+.   if (count(my.repository.test) = 0)
+.       abort "Expected repository '$(my.repository.name)' to contain a <test> element."
+.   endif
+.   define my.testname = my.repository->test.name
+
+    runs-on: ${{ matrix.image }}
+
+    steps:
+      - name: Set msbuild path
+        uses: microsoft/setup-msbuild@v3
+        with:
+          msbuild-architecture: x64
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Execute build
+        shell: cmd
+        run: >
+          .\\$(my.job.script)
+          --build-src-dir "%RUNNER_WORKSPACE%"
+          --build-config ${{ matrix.configuration }}
+          --build-platform ${{ matrix.platform }}
+          --build-version ${{ matrix.version }}
+          --build-use-local-src
+
+      - name: Execute tests
+        shell: powershell
+        run: |
+          Write-Host "Locating test executables..." -ForegroundColor Yellow;
+          $BC_TEST_EXES = @(Get-ChildItem -Path "$env:${{ github.workspace }}\\bin" -recurse | Where-Object { $_.Name -eq "$(my.testname).exe" });
+          If ($BC_TEST_EXES.Count -ne 1) {
+            Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
+            exit 1;
+          }
+          Write-Host "Found single test executable: " $BC_TEST_EXES.FullName -ForegroundColor Green;
+          $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
+          Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
+          try {
+            Invoke-Expression "$BC_TEST_SINGLETON --log_level=warning --run_test=${{ matrix.tests }} $env:BOOST_UNIT_TEST_OPTIONS"
+          }
+          catch {
+            $ERR = $_;
+            Write-Host "Test execution failure: " $ERR -ForegroundColor Red;
+            exit $ERR;
+          }
+          Write-Host "Test execution complete." -ForegroundColor Green;
+.
+.endmacro # define_ci_job_msvc
+.
+.macro define_ci_job_shell(job, meta, configuration, repository)
+.   define my.job = define_ci_job_shell.job
+.   define my.meta = define_ci_job_shell.meta
+.   define my.configuration = define_ci_job_shell.configuration
+.   define my.repository = define_ci_job_shell.repository
+.
+.   require(my.job, "job", "name")
+.
+.   new buildset as _buildset
+.       for my.repository->ci.entry as _entry \
+          where (count(_entry.job, count.name = my.job.name) > 0)
+.           for _entry.build as _build
+.               if (count(_buildset.build, count.name = _build.name) > 0)
+.                   next
+.               endif
+.
+.               copy _build to _buildset
+.           endfor
+.
+.           for _entry.job as _entry_job where (_entry_job.name = my.job.name)
+.               for _entry_job.build as _entry_build
+.                   if (count(_buildset.build, count.name = _entry_build.name) > 0)
+.                       next
+.                   endif
+.
+.                   copy _entry_build to _buildset
+.               endfor
+.           endfor
+.       endfor
+.
+
+  $(my.job.name):
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+.       for my.repository->ci.entry as _entry \
+          where (count(_entry.job, count.name = my.job.name) > 0)
+.
+.           define my.entry_job = _entry->job(this.name = my.job.name, this)
+.           if !first()
+
+.           endif
+.
+          - image: $(_entry.image)
+.           if (my.job.name = "presets")
+            preset: "$(my.entry_job.preset)"
+.           else
+            config: "$(_entry.config)"
+            link: "$(_entry.link)"
+.           endif
+            cc: "$(compiler(my.entry_job, _entry, "c"))"
+            cxx: "$(compiler(my.entry_job, _entry, "cxx"))"
+            flags: "$(flags(my.entry_job, _entry))"
+            coverage: "$(defined(my.entry_job.coverage) ?? my.entry_job.coverage ? "")"
+.
+.           for _buildset.build as _build
+.               define my.value = ""
+.               if ((count(_entry.build, count.name = _build.name) > 0) |\
+                    (count(my.entry_job.build, count.name = _build.name) > 0))
+.
+.                   my.value = "--build-$(_build.name)"
+.               endif
+            $(_build.name): "$(my.value)"
+.           endfor
+.
+            options: "$(accumulate_options(_entry, my.entry_job))"
+.
+.       endfor
+
+    runs-on: ${{ matrix.image }}
+
+    env:
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Sources directory path assignment
+        shell: bash
+        run: |
+          cd ..
+          echo SRC_PATH="\$(pwd)" >> $GITHUB_ENV
+
+      - name: Prepare toolchain [linux]
+        if: ${{ startsWith(matrix.image, 'ubuntu') }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
+          if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
+              sudo apt-get install lcov
+          fi
+
+      - name: Prepare toolchain [macos]
+        if: ${{ startsWith(matrix.image, 'macos') }}
+        shell: bash
+        run: |
+          brew install autoconf automake libtool ${{ matrix.package || '' }}
+          if [[ -n "${{ matrix.llvm }}" ]]; then
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:${PATH}" >> $GITHUB_ENV
+          fi
+
+      - name: Environmental Computation
+        shell: bash
+        run: |
+.       if (my.job.name = "presets")
+          if [[ "${{ matrix.preset }}" == *shared* ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
+          fi
+.       else
+          if [[ "${{ matrix.link }}" == "dynamic" ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
+          fi
+.       endif
+
+      - name: Execute installation
+        shell: bash
+        run: >
+.       require(my.job, "job", "script")
+          ./$(my.job.script)
+          --build-use-local-src
+          --build-src-dir="${{ env.SRC_PATH }}"
+.       if (my.job.name = "presets")
+          --build-preset="${{ matrix.preset }}"
+.       else
+          --prefix="${{ env.SRC_PATH }}/prefix"
+          --build-obj-dir="obj"
+          --build-obj-dir-relative
+          --build-config="${{ matrix.config }}"
+          --build-link="${{ matrix.link }}"
+.       endif
+.       for _buildset.build as _build
+          ${{ matrix.$(_build.name) }}
+.       endfor
+          ${{ matrix.options }}
+.   endnew
+.
+
+      - name: Coverage calculation
+        if: ${{ matrix.coverage == 'lcov' }}
+        shell: bash
+        run: |
+          lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ env.SRC_PATH }}/prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" $(exclusions(my.repository)) --output-file coverage.info
+
+      - name: Coveralls.io upload
+        if: ${{ matrix.coverage == 'lcov' }}
+        uses: coverallsapp/github-action@v2.3.6
+        with:
+          format: lcov
+          files: "./coverage.info"
+          github-token: ${{ secrets.github_token }}
+.
+.
+.endmacro # 
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_ci_yml(configuration)
+
+.endtemplate

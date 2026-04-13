@@ -1,0 +1,138 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin windows shell utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+function global.path(input)
+    return string.replace(path.input, "/|\\")
+endfunction
+
+.endtemplate
+.template 1
+.
+.##############################################################################
+.# Macros
+.##############################################################################
+.
+.macro global.copyleft(name)
+REM ###########################################################################
+REM #  Copyright (c) 2014-2026 $(my.name) developers (see COPYING).
+REM #
+REM #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+REM #
+REM ###########################################################################
+.endmacro
+.
+.macro global.initialize_echo_local()
+@echo off
+setlocal EnableDelayedExpansion
+setlocal EnableExtensions
+.endmacro
+.
+.macro global.initialize_path()
+
+:: Do everything relative to this file location.
+push /d "%~dp0"
+.endmacro
+.
+.macro global.define_directory_functions()
+
+:create_directory
+    set "CD_DIRECTORY=%~1"
+    set "CD_MODE=%~2"
+
+    if exist "!CD_DIRECTORY!" (
+        if "!CD_MODE!" == "-f" (
+            call :msg_warn "Reinitializing '%CD_DIRECTORY%'..."
+            rmdir /S /Q "!CD_DIRECTORY!"
+            if %ERRORLEVEL% neq 0 (
+                exit /b %ERRORLEVEL%
+            )
+
+            mkdir "!CD_DIRECTORY!"
+        ) else (
+            call :msg_warn "Reusing existing '!CD_DIRECTORY!'..."
+        )
+    ) else (
+        call :msg "Initializing '!CD_DIRECTORY!'..."
+    )
+    exit /b %ERRORLEVEL%
+
+:create_directory_force
+    call :create_directory "%~1" -f
+    exit /b %ERRORLEVEL%
+
+:pop_directory
+    call :msg_verbose "*** move  pre: '!CD!'"
+    popd
+    if %ERRORLEVEL% neq 0 (
+        exit /b %ERRORLEVEL%
+    )
+    call :msg_verbose "*** move post: '!CD!'"
+    exit /b %ERRORLEVEL%
+
+:push_directory
+    call :msg_verbose "*** move  pre: '!CD!'"
+    pushd %1
+    if %ERRORLEVEL% neq 0 (
+        exit /b %ERRORLEVEL%
+    )
+    call :msg_verbose "*** move post: '!CD!'"
+    exit /b %ERRORLEVEL%
+
+:remove_directory_force
+    call :msg_verbose "*** removing: '%~1'"
+    rmdir /S /Q "%~1"
+    exit /b %ERRORLEVEL%
+.
+.endmacro
+.
+.macro global.define_display_functions()
+
+:msg_heading
+    call :msg "***************************************************************************"
+    call :msg "%~1"
+    call :msg "***************************************************************************"
+    exit /b %ERRORLEVEL%
+
+:msg
+    if "%~1" == "" (
+        echo.
+    ) else (
+        echo %~1
+    )
+    exit /b %ERRORLEVEL%
+
+:msg_empty
+    echo.
+    exit /b %ERRORLEVEL%
+
+:msg_verbose
+    if "!DISPLAY_VERBOSE!" == "yes" (
+        echo [96m%~1[0m
+    )
+    exit /b %ERRORLEVEL%
+
+:msg_success
+    echo [92m%~1[0m
+    exit /b %ERRORLEVEL%
+
+:msg_warn
+    echo [93m%~1[0m
+    exit /b %ERRORLEVEL%
+
+:msg_error
+    echo [91m%~1[0m
+    exit /b %ERRORLEVEL%
+.
+.endmacro
+.
+.endtemplate

@@ -1,6 +1,5 @@
 @echo off
 setlocal EnableDelayedExpansion
-
 REM ###########################################################################
 REM  Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
 REM
@@ -16,54 +15,98 @@ REM ###########################################################################
 REM Do everything relative to this file location.
 pushd %~dp0
 
+set "GSL_EXE=gsl -q"
+
 if "%~1"=="" (
-    echo Usage: %~nx0 configuration [targets...]
-    echo.
-    echo   configuration        required xml file
-    echo   targets              all targets to be copied
+    call :msg "Usage: %~nx0 configuration [targets...]"
+    call :msg ""
+    call :msg "  configuration        required xml file"
+    call :msg "  targets              all targets to be copied"
     exit /b 1
 )
 
-set "configuration=%~1"
+set "CONFIG=%~1"
 shift
 
-set "targets="
+set "TARGETS="
 call :populate_targets %*
 
-set "names[1]=generate_artifacts"
-set "names[2]=copy_statics"
-set "names[3]=copy_projects"
-set "names.length=3"
+set "NAMES[1]=generate_artifacts"
+set "NAMES[2]=copy_statics"
+set "NAMES[3]=copy_projects"
+set "NAMES.length=3"
 
-for /L %%i in (1,1,%names.length%) do (
-    echo gsl -q -script:"process\!names[%%i]!.cmd.gsl" "!configuration!"
-    gsl -q -script:"process\!names[%%i]!.cmd.gsl" "!configuration!"
-    if %errorlevel% neq 0 (
-        echo FAILURE: evaluating "process\!names[%%i]!.cmd.gsl".
-        exit /b %errorlevel%
+for /L %%i in (1,1,%NAMES.length%) do (
+    call :msg "!GSL_EXE! -q -script:'process\!NAMES[%%i]!.cmd.gsl' '!CONFIG!'"
+    !GSL_EXE! -q -script:"process\!NAMES[%%i]!.cmd.gsl" "!CONFIG!"
+    if %ERRORLEVEL% neq 0 (
+        echo FAILURE: evaluating "process\!NAMES[%%i]!.cmd.gsl".
+        exit /b %ERRORLEVEL%
     )
 )
 
 REM Execute process scripts (explicit enumeration).
 pushd process
-for /L %%i in (1,1,%names.length%) do (
-    call !names[%%i]!.cmd !targets!
-    if %errorlevel% neq 0 (
-        exit /b %errorlevel%
+for /L %%i in (1,1,%NAMES.length%) do (
+    call !NAMES[%%i]!.cmd !targets!
+    if %ERRORLEVEL% neq 0 (
+        exit /b %ERRORLEVEL%
     )
 )
 popd
 
-echo "Generation for configuration %CONFIGURATION% complete."
-::pause
+echo "Generation for configuration %CONFIG% complete."
+REM Commented out until calling script is obsolete
+REM if not defined CI (
+REM     pause
+REM )
+
 exit /b 0
+
+
 
 :populate_targets
     shift
-    :begin
+:begin
     if "%1"=="" goto done
-    set "targets=%targets% %~1"
+    set "TARGETS=!TARGETS! %~1"
     shift
     goto begin
-    :done
+:done
     exit /b 0
+
+:msg_heading
+    call :msg "***************************************************************************"
+    call :msg "%~1"
+    call :msg "***************************************************************************"
+    exit /b %ERRORLEVEL%
+
+:msg
+    if "%~1" == "" (
+        echo.
+    ) else (
+        echo %~1
+    )
+    exit /b %ERRORLEVEL%
+
+:msg_empty
+    echo.
+    exit /b %ERRORLEVEL%
+
+:msg_verbose
+    if "!DISPLAY_VERBOSE!" == "yes" (
+        echo [96m%~1[0m
+    )
+    exit /b %ERRORLEVEL%
+
+:msg_success
+    echo [92m%~1[0m
+    exit /b %ERRORLEVEL%
+
+:msg_warn
+    echo [93m%~1[0m
+    exit /b %ERRORLEVEL%
+
+:msg_error
+    echo [91m%~1[0m
+    exit /b %ERRORLEVEL%

@@ -17,13 +17,12 @@
 .   output(out_file)
 .   initialize_echo_local()
 .   copyleft("libbitcoin-build")
-
 .   initialize_path()
 
-set "result_dir=$(path(configuration->templates.resultpath))"
+set "RESULT_DIR=$(path(configuration->templates.resultpath))"
 
-if not exist "%result_dir%" (
-    echo Error: result directory '%result_dir%' does not exist.
+if not exist "%RESULT_DIR%" (
+    call :msg_error "Error: result directory '%RESULT_DIR%' does not exist."
     exit /b 1
 )
 
@@ -33,52 +32,57 @@ if not exist "%result_dir%" (
 .       for configuration->templates.template as _template
 .           for _template.file as _file
 .               index = index + 1
-set "source[$(index)]=$(path_suffix)$(path(_file.source))"
-set "destination[$(index)]=%result_dir%\\$(_repository.name)\\$(path(_file.destination))"
+set "SOURCE[$(index)]=$(path_suffix)$(path(_file.SOURCE))"
+set "DESTINATION[$(index)]=%RESULT_DIR%\\$(_repository.name)\\$(path(_file.DESTINATION))"
 .           endfor
 .       endfor
 .   endfor
-set "length=$(index)"
+set "LENGTH=$(index)"
 
-for /L %%i in (1,1,%length%) do (
-    if "!destination[%%i]!"=="" (
-        echo Error: No destination directory specified.
+for /L %%i in (1,1,%LENGTH%) do (
+    if "!DESTINATION[%%i]!"=="" (
+        call :msg_error "Error: No DESTINATION directory specified."
         exit /b 1
     )
 
-    if "!source[%%i]!"=="" (
-        echo Error: No source specified.
+    if "!SOURCE[%%i]!"=="" (
+        call :msg_error "Error: No SOURCE specified."
         exit /b 1
     )
 
-    :: Check if source exists
-    if not exist !source[%%i]! (
-        echo Error: Source file not found '"!source[%%i]!"'.
+    :: Check if SOURCE exists
+    if not exist !SOURCE[%%i]! (
+        call :msg_error "Error: SOURCE file not found '!SOURCE[%%i]!'."
         exit /b 1
     )
 
-    :: Create destination if it does not exist
-    if not exist "!destination[%%i]!" (
-        echo Creating directory '!destination[%%i]!'.
-        mkdir "!destination[%%i]!" 2>nul
-        if errorlevel 1 (
-            echo Error: Failed to create directory '!destination[%%i]!'.
+    :: Create DESTINATION if it does not exist
+    if not exist "!DESTINATION[%%i]!" (
+        call :msg "Creating directory '!DESTINATION[%%i]!'."
+        mkdir "!DESTINATION[%%i]!" 2>nul
+        if %ERRORLEVEL% neq 0 (
+            call :msg_error "Error: Failed to create directory '!DESTINATION[%%i]!'."
             exit /b 1
         )
     )
 
    :: Perform the copy
-    echo Copying "!source[%%i]!" to "!destination[%%i]!"
-    copy /Y "!source[%%i]!" "!destination[%%i]!" >nul
+    call :msg "Copying '!SOURCE[%%i]!' to '!DESTINATION[%%i]!'"
+    copy /Y "!SOURCE[%%i]!" "!DESTINATION[%%i]!" >nul
 
     if errorlevel 1 (
-        echo Error: copy of '!source[%%i]!' failed.
+        call :msg_error "Error: copy of '!SOURCE[%%i]!' failed."
         exit /b 1
     )
 )
 
 popd
+call :msg_success "Copy operation completed successfully."
+exit /b 0
+
+
 .
+.   define_display_functions()
 .endmacro # generate_copy_script
 .
 .endtemplate
@@ -92,7 +96,7 @@ popd
 
 # Note: expected context root libbitcoin-build directory
 gsl from "lib/output.gsl"
-gsl from "lib/cmd.gsl"
+gsl from "lib/cmd-output.gsl"
 gsl from "library/string.gsl"
 
 generate_copy_script()
