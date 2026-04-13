@@ -56,9 +56,10 @@ for /L %%i in (1,1,%NAMES.length%) do (
 popd
 
 echo "Generation for configuration %CONFIG% complete."
-if not defined CI (
-    pause
-)
+REM Commented out until calling script is obsolete
+REM if not defined CI (
+REM     pause
+REM )
 
 exit /b 0
 
