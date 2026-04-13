@@ -22,6 +22,8 @@
 set -euo pipefail
 trap 'msg_error "FATAL ERROR: Command failed at line $LINENO: $BASH_COMMAND" >&2' ERR
 
+GSL="gsl -q"
+
 # Do everything relative to this file location.
 cd `dirname "$0"`
 
@@ -39,8 +41,8 @@ declare -a generator=( \\
 # Generate build artifacts.
 for generate in "\${generator[@]}"
 do
-    msg_warn "gsl -q -script:\$generate ../$(configuration->templates.source)"
-    gsl -q -script:\$generate ../$(configuration->templates.source)
+    msg_warn "${GSL} -script:\$generate ../$(configuration->templates.source)"
+    ${GSL} -script:\$generate ../$(configuration->templates.source)
 done
 
 .if (count(configuration->templates.template, ends_with(count.name, ".sh.gsl")) > 0)

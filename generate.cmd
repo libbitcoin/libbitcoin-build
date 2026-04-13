@@ -15,7 +15,7 @@ REM ###########################################################################
 REM Do everything relative to this file location.
 pushd %~dp0
 
-set "GSL_EXE=gsl"
+set "GSL_EXE=gsl -q"
 
 if "%~1"=="" (
     call :msg "Usage: %~nx0 configuration [targets...]"

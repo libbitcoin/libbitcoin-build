@@ -17,7 +17,7 @@ REM Do everything relative to this file location.
 set "PATH_INITIAL=!CD!"
 pushd %~dp0
 set "PATH_FILE=!CD!"
-set "GSL_EXE=gsl"
+set "GSL_EXE=gsl -q"
 
 REM Clean directories for generated build artifacts.
 rmdir /s /q "output" 2>NUL
@@ -104,6 +104,7 @@ if %ERRORLEVEL% neq 0 (
 
 REM Restore directory.
 popd
+call :msg_success "Script execution completed successfully."
 
 REM Delay for manual confirmation.
 if not defined CI (
