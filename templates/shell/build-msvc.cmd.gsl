@@ -234,6 +234,12 @@ if "!$(_depend.name:c)_TAG!" == "" (
 
     call :pop_directory
 .   error_trampoline("    ")
+
+    call :msg_success "Build process completed successfully."
+    if not defined CI (
+        pause
+    )
+
     exit /b 0
 
 :parse_input

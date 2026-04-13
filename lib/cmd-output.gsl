@@ -40,7 +40,7 @@ setlocal EnableExtensions
 .macro global.initialize_path()
 
 :: Do everything relative to this file location.
-cd /d "%~dp0"
+push /d "%~dp0"
 .endmacro
 .
 .macro global.define_directory_functions()

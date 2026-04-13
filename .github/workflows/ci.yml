@@ -131,9 +131,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'windows') }}
         shell: powershell
         run: |
-          Invoke-WebRequest -Uri "https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe" -OutFile "${{ github.workspace }}\libbitcoin-build\gsl.exe"
-
-          echo "${{ github.workspace }}\libbitcoin-build" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+          echo "${{ github.workspace }}\libbitcoin-build\bin\winx64" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
 
       - name: Execute generation [bash]
         if: ${{ startsWith(matrix.shell, 'bash') }}
