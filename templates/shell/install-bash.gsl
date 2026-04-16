@@ -59,16 +59,6 @@ main "$@"
 .   define_display_configure_options()
 
 .   define_error_functions()
-
-strip_optimization()
-{
-    echo "$1" | sed -E '
-        s/-O([0-3]|s|fast|g|z|size|speed)?b?/ /g
-        s/-g([0-3]|gdb|dwarf[0-9]*)?\b?/ /g
-        s/[[:space:]]+/ /g
-        s/^ | $//g
-    '
-}
 .endmacro # define_utility_functions
 .
 .macro define_constants(meta, configuration, repository, install)
@@ -278,6 +268,7 @@ $(column_variables("BUILD_CONFIG", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_LINK", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_FULL_REPOSITORIES", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_USE_LOCAL_SRC", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_SKIP_TESTS", my.column, my.prefix, my.suffix))
 $(column_variables("PARALLEL", my.column, my.prefix, my.suffix))
 $(column_variables("PREFIX", my.column, my.prefix, my.suffix))
 $(column_variables("DISPLAY_VERBOSE", my.column, my.prefix, my.suffix))
@@ -871,6 +862,7 @@ $(indent_column("(--build-link=*)", "BUILD_LINK=\"${OPTION#*=}\";;", my.column, 
 $(indent_column("(--build-full-repositories)", "BUILD_FULL_REPOSITORIES=\"yes\";;", my.column, my.o_indent))
 $(indent_column("(--build-use-local-src)", "BUILD_USE_LOCAL_SRC=\"yes\";;", my.column, my.o_indent))
 $(indent_column("(--build-parallel=*)", "PARALLEL=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(--build-skip-tests)", "BUILD_SKIP_TESTS=\"yes\";;", my.column, my.o_indent))
 .   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
 $(indent_column("(--prefix=*)", "PREFIX=\"${OPTION#*=}\";;", my.column, my.o_indent))
 .   endif
@@ -1159,8 +1151,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             msg_verbose "Exporting CFLAGS '${CFLAGS}'"
         else
             msg_verbose "CFLAGS initially '${CFLAGS}'"
-            SANITIZED_CFLAGS=\$(strip_optimization "$CFLAGS")
-            export CFLAGS="${SANITIZED_CFLAGS} ${BUILD_FLAGS}"
+            export CFLAGS="${CFLAGS} ${BUILD_FLAGS}"
             msg_verbose "CFLAGS modified to '${CFLAGS}'"
         fi
 
@@ -1169,8 +1160,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             msg_verbose "Exporting CXXFLAGS '${CXXFLAGS}'"
         else
             msg_verbose "CXXFLAGS initially '${CXXFLAGS}'"
-            SANITIZED_CXXFLAGS=\$(strip_optimization "$CXXFLAGS")
-            export CXXFLAGS="${SANITIZED_CXXFLAGS} ${BUILD_FLAGS}"
+            export CXXFLAGS="${CXXFLAGS} ${BUILD_FLAGS}"
             msg_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
         fi
     fi
@@ -1353,7 +1343,9 @@ $(my.indent)export CPPFLAGS="${CPPFLAGS} ${$(my.vname)_FLAGS[@]}"
 .           require(my.active_build, "build", "filepath")
 $(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
 .           if last()
-$(my.indent)test_make "$(_depend.name)" "check" "${PARALLEL}"
+$(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
+    $(my.indent)test_make "$(_depend.name)" "check" "${PARALLEL}"
+$(my.indent)fi
 .           endif
 $(my.indent)install_make "$(_depend.name)"
 .
@@ -1361,7 +1353,9 @@ $(my.indent)install_make "$(_depend.name)"
 .           require(my.active_build, "build", "filepath")
 $(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
 .           if last()
-$(my.indent)test_make "$(_depend.name)" "test" "${PARALLEL}"
+$(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
+    $(my.indent)test_make "$(_depend.name)" "test" "${PARALLEL}"
+$(my.indent)fi
 .           endif
 $(my.indent)install_make "$(_depend.name)"
 .
@@ -1369,7 +1363,9 @@ $(my.indent)install_make "$(_depend.name)"
 .           require(my.active_build, "build", "filepath")
 $(my.indent)build_preset "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
 .           if last()
-$(my.indent)test_make "$(_depend.name)" "test" "${PARALLEL}"
+$(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
+    $(my.indent)test_make "$(_depend.name)" "test" "${PARALLEL}"
+$(my.indent)fi
 .           endif
 $(my.indent)install_make "$(_depend.name)"
 .
