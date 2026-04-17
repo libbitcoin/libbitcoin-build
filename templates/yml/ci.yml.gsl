@@ -124,7 +124,7 @@ function exclusions(repository)
     define my.result = ""
 
     for my.repository->ci->coverage.exclude as _exclude
-        my.result += "$(!first() ?? " " ? "")\"${{ github.workspace }}/$(_exclude.path)\""
+        my.result += "$(!first() ?? " " ? "")\"${{ github.workspace }}/$(my.repository.name)/$(_exclude.path)\""
     endfor
 
     return my.result
@@ -172,46 +172,24 @@ name: Continuous Integration
 on: [ pull_request, push, workflow_dispatch ]
 
 jobs:
-.   for my.meta.job as _job
-.       if (_job.type = "shell")
-.           define_ci_job_shell(_job, my.meta, my.configuration, my.repository)
-.       elsif (_job.type = "msvc")
-.           define_ci_job_msvc(_job, my.meta, my.configuration, my.repository)
-.       endif
-.   endfor
+.   new list as _list
+.       canonical_dependency_list(_list, my.repository, my.configuration)
+.
+.       for my.meta.job as _job
+.           if (_job.type = "shell")
+.               define_ci_job_shell(_job, my.meta, _list, my.configuration, my.repository)
+.           elsif (_job.type = "msvc")
+.               define_ci_job_msvc(_job, my.meta, _list, my.configuration, my.repository)
+.           endif
+.       endfor
+.   endnew
 .
 .endmacro # emit_CMakeLists
 .
-.macro step_initialize_sdk()
-.
-
-      - name: Initialize SDK
-        shell: powershell
-        run: |
-          try {
-            Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=323507" -OutFile "sdksetup.exe"
-
-            $FeatureList = "OptionId.WindowsDesktopSoftwareDevelopmentKit OptionId.NetFxSoftwareDevelopmentKit"
-            $Args = "/q /norestart /features $FeatureList"
-            $setup = Start-Process -PassThru -FilePath "sdksetup.exe" -ArgumentList $Args
-
-            $setup.WaitForExit()
-            if ($setup.ExitCode -ne 0) {
-              Write-Host "Test execution failure: " $setup.ExitCode -ForegroundColor Red;
-              exit $setup.ExitCode;
-            }
-          }
-          catch {
-            $ERR = $_;
-            Write-Host "Initialization failure: " $ERR -ForegroundColor Red;
-            exit $ERR;
-          }
-.
-.endmacro # step_initialize_sdk
-.
-.macro define_ci_job_msvc(job, meta, configuration, repository)
+.macro define_ci_job_msvc(job, meta, dependencies, configuration, repository)
 .   define my.job = define_ci_job_msvc.job
 .   define my.meta = define_ci_job_msvc.meta
+.   define my.dependencies = define_ci_job_msvc.dependencies
 .   define my.configuration = define_ci_job_msvc.configuration
 .   define my.repository = define_ci_job_msvc.repository
 .
@@ -251,19 +229,42 @@ jobs:
     runs-on: ${{ matrix.image }}
 
     steps:
+      - name: Get branch name
+        id: get-branch
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set msbuild path
         uses: microsoft/setup-msbuild@v3
         with:
           msbuild-architecture: x64
+.
+.   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
 
-      - name: Checkout repository
+      - name: Checkout repository [$(_depend.name)]
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: '$(_depend.name)'
+.       if !(_depend.name = my.repository.name)
+          ref: ${{ steps.get-branch.outputs.branch_name }}
+          repository: ${{ github.repository_owner }}/$(_depend.name)
+.       else
+          repository: ${{ github.repository }}
+.       endif
+.   endfor
 
       - name: Execute build
         shell: cmd
+        working-directory: '$(my.repository.name)'
         run: >
           .\\$(my.job.script)
-          --build-src-dir "%RUNNER_WORKSPACE%"
+          --build-src-dir "${{ github.workspace }}"
           --build-config ${{ matrix.configuration }}
           --build-platform ${{ matrix.platform }}
           --build-version ${{ matrix.version }}
@@ -271,9 +272,10 @@ jobs:
 
       - name: Execute tests
         shell: powershell
+        working-directory: '$(my.repository.name)'
         run: |
           Write-Host "Locating test executables..." -ForegroundColor Yellow;
-          $BC_TEST_EXES = @(Get-ChildItem -Path "$env:${{ github.workspace }}\\bin" -recurse | Where-Object { $_.Name -eq "$(my.testname).exe" });
+          $BC_TEST_EXES = @(Get-ChildItem -Path "bin" -recurse | Where-Object { $_.Name -eq "$(my.testname).exe" });
           If ($BC_TEST_EXES.Count -ne 1) {
             Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
             exit 1;
@@ -293,9 +295,10 @@ jobs:
 .
 .endmacro # define_ci_job_msvc
 .
-.macro define_ci_job_shell(job, meta, configuration, repository)
+.macro define_ci_job_shell(job, meta, dependencies, configuration, repository)
 .   define my.job = define_ci_job_shell.job
 .   define my.meta = define_ci_job_shell.meta
+.   define my.dependencies = define_ci_job_shell.dependencies
 .   define my.configuration = define_ci_job_shell.configuration
 .   define my.repository = define_ci_job_shell.repository
 .
@@ -373,14 +376,29 @@ jobs:
       CXXFLAGS: '${{ matrix.flags }}'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Sources directory path assignment
-        shell: bash
+      - name: Get branch name
+        id: get-branch
         run: |
-          cd ..
-          echo SRC_PATH="\$(pwd)" >> $GITHUB_ENV
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+.
+.   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
+
+      - name: Checkout repository [$(_depend.name)]
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: '$(_depend.name)'
+.       if !(_depend.name = my.repository.name)
+          ref: ${{ steps.get-branch.outputs.branch_name }}
+          repository: ${{ github.repository_owner }}/$(_depend.name)
+.       else
+          repository: ${{ github.repository }}
+.       endif
+.   endfor
 
       - name: Prepare toolchain [linux]
         if: ${{ startsWith(matrix.image, 'ubuntu') }}
@@ -406,25 +424,26 @@ jobs:
         run: |
 .       if (my.job.name = "presets")
           if [[ "${{ matrix.preset }}" == *shared* ]]; then
-              echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
+              echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
 .       else
           if [[ "${{ matrix.link }}" == "dynamic" ]]; then
-              echo "LDFLAGS=-Wl,-rpath,${{ env.SRC_PATH }}/prefix/lib" >> $GITHUB_ENV
+              echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
 .       endif
 
       - name: Execute installation
         shell: bash
+        working-directory: '$(my.repository.name)'
         run: >
 .       require(my.job, "job", "script")
           ./$(my.job.script)
           --build-use-local-src
-          --build-src-dir="${{ env.SRC_PATH }}"
+          --build-src-dir="${{ github.workspace }}"
 .       if (my.job.name = "presets")
           --build-preset="${{ matrix.preset }}"
 .       else
-          --prefix="${{ env.SRC_PATH }}/prefix"
+          --prefix="${{ github.workspace }}/prefix"
           --build-obj-dir="obj"
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
@@ -435,22 +454,42 @@ jobs:
 .       endfor
           ${{ matrix.options }}
 .   endnew
-.
 
       - name: Coverage calculation
         if: ${{ matrix.coverage == 'lcov' }}
         shell: bash
+        working-directory: '$(my.repository.name)'
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "${{ env.SRC_PATH }}/prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" $(exclusions(my.repository)) --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/$(my.repository.name)/examples/*" "${{ github.workspace }}/$(my.repository.name)/test/*" $(exclusions(my.repository)) --output-file coverage.info
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
         uses: coverallsapp/github-action@v2.3.6
         with:
           format: lcov
-          files: "./coverage.info"
+          files: "$(my.repository.name)/coverage.info"
           github-token: ${{ secrets.github_token }}
+
+      - name: Test artifact collection
+        if: failure()
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+.   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
+          if [[ -e "$(_depend.name)/obj/test.log" ]]; then
+            cp "$(_depend.name)/obj/test.log" $(_depend.name)-test.log"
+          fi
+.   endfor
+
+      - name: Test artifact upload
+        if: failure()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: testlogs
+          path: ${{ github.workspace }}/*test.log
+          retention-days: 1
+          if-no-files-found: warn
 .
 .
 .endmacro # 
