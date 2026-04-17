@@ -19,7 +19,7 @@
       <option name="avx2" type="enable" default="no" comment="Use Intel AVX2 intrinsics." />
       <option name="avx512" type="enable" default="no" comment="Use Intel AVX512 intrinsics." />
       <option name="sse41" type="enable" default="no" comment="Use SSE4.1 hardware instructions." />
-      <option name="shani" type="enable" default="no" comment="Use Intel SHA Extensions." />
+      <option name="shani" type="enable" default="no" comment="Use Intel/ARM SHA Extensions." />
 
       <!-- Dependencies -->
       <dependency name="boost" version="1.86.0">
@@ -146,7 +146,7 @@
       <!-- <trigger test="t2" /> -->
     </test>
 
-    <binary name="examples"
+    <binary name="libbitcoin-system-examples"
       option="examples" type="with" default="yes"
       install="false"
       uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e">
@@ -872,7 +872,7 @@
        </compiler>
     </test>
 
-    <binary name="bitcoin-server" output="bs"
+    <binary name="bitcoin-server" msvcproj="bs" output="bs"
       option="console" type="with" default="yes"
       install="true"
       uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe">
