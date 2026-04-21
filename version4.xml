@@ -1455,6 +1455,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       canonical="BUILD_PRESET"
       comment="Specifies preset configuration to build."
       datatype="string"
+      placeholder="preset"
       sanitize="true" >
       <symbol long="--build-preset" />
     </option>
@@ -1464,6 +1465,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       canonical="BUILD_CONFIG"
       comment="Specifies the build configuration."
       datatype="enumeration"
+      placeholder="mode"
       sanitize="true" >
       <symbol long="--build-config" />
       <value symbol="debug" />
@@ -1474,6 +1476,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       canonical="BUILD_LINK"
       comment="Specifies the link mode."
       datatype="enumeration"
+      placeholder="mode"
       sanitize="true" >
       <symbol long="--build-link" />
       <value symbol="dynamic" />
@@ -1486,9 +1489,10 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       canonical="BUILD_OBJ_DIR"
       comment="Location for intermediate objects."
       datatype="path"
+      placeholder="path"
       sanitize="true" >
       <symbol long="--build-obj-dir" />
-      <default bash="$(pwd)/obj" />
+      <default bash="obj" />
     </option>
     <option id="build-obj-dir-relative"
       canonical="BUILD_OBJ_DIR_RELATIVE"
@@ -1529,6 +1533,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       canonical="PARALLEL"
       comment="Number of jobs to run simultaneously."
       datatype="integer"
+      placeholder="int"
       sanitize="true" >
       <symbol long="--build-parallel" />
       <hint text="Default: supported platforms use nproc/sysctl" />
@@ -1539,6 +1544,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       canonical="PREFIX"
       comment="Installation destination."
       datatype="path"
+      placeholder="path"
       sanitize="true" >
       <symbol long="--prefix" />
       <default bash="/usr/local" />
@@ -1549,6 +1555,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       canonical="BUILD_SRC_DIR"
       comment="Location for sources."
       datatype="path"
+      placeholder="path"
       sanitize="true" >
       <symbol long="--build-src-dir" />
       <default msvc="!CD!" bash="$(pwd)" />

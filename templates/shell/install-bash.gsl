@@ -84,11 +84,32 @@ function option_flag_default(option, meta)
     return is_defined_positive(my.option, "default") ?? my.positive ? my.negative
 endfunction
 
-function option_symbol(property, symbol, option)
+function registered_option(id, configuration)
+    define my.id = registered_option.id
+    define my.configuration = registered_option.configuration
+    define my.registry = my.configuration->registrar(id = "build-options")
+    return my.registry->option(id = my.id)
+endfunction
+
+function registered_option_default(id, configuration)
+    define my.id = registered_option_default.id
+    define my.configuration = registered_option_default.configuration
+    define my.option = registered_option(my.id, my.configuration)
+    return my.option->default.bash
+endfunction
+
+function registered_option_symbol(id, configuration)
+    define my.id = registered_option_symbol.id
+    define my.configuration = registered_option_symbol.configuration
+    define my.option = registered_option(my.id, my.configuration)
+    return my.option->symbol.long
+endfunction
+
+function option_symbol(property, symbol, option, wildcarded)
     define my.property = option_symbol.property
     define my.symbol = option_symbol.symbol
     define my.option = option_symbol.option
-    define my.value_extractor = ""
+    define my.wildcarded = option_symbol.wildcarded?
 
     if !defined(my.symbol.$(my.property))
         abort "Symbol lacks property '$(my.property)'."
@@ -98,7 +119,80 @@ function option_symbol(property, symbol, option)
         my.value_extractor = "=*"
     endif
 
-    return "$(my.symbol.$(my.property))$(my.value_extractor)"
+    define my.result = "$(my.symbol.$(my.property))"
+    if defined(my.wildcarded) & (my.wildcarded = "true")
+        define my.value_extractor = ""
+
+        if !(my.option.datatype = "boolean")
+            my.value_extractor = "=*"
+        endif
+
+        my.result = "$(my.result)$(my.value_extractor)"
+    endif
+
+    return my.result
+endfunction
+
+
+function documentation_option_symbol(symbol, option)
+    define my.symbol = documentation_option_symbol.symbol
+    define my.option = documentation_option_symbol.option
+    define my.matches = ""
+    define my.value = ""
+
+    if defined(my.option.placeholder)
+        my.value = "=<$(my.option.placeholder)>"
+    endif
+
+    define my.long = defined(my.symbol.long) ?? \
+        "$(option_symbol("long", my.symbol, my.option))$(my.value)" ? ""
+    define my.short = defined(my.symbol.short) ?? \
+        "$(option_symbol("short", my.symbol, my.option))$(my.value)" ? ""
+
+    if defined(_symbol.long) & defined(_symbol.short)
+        my.matches = "$(my.long), $(my.short)"
+    elsif defined(_symbol.long)
+        my.matches = my.long
+    elsif defined(_symbol.short)
+        my.matches = my.short
+    else
+        abort "Option '$(my.option.id)' symbol lacks long and short."
+    endif
+
+    return my.matches
+endfunction
+
+function documentation_default(option)
+    define my.option = documentation_default.option
+
+    if !defined(my.option->default)
+        abort "Expected 'default' defined for option '$(my.option.id)'."
+    endif
+
+    if !defined(my.option->default.bash)
+        abort "Expected 'default.bash' defined for option '$(my.option.id)'."
+    endif
+
+    return "Default: $(my.option->default.bash)"
+endfunction
+
+function documentation_values(option)
+    define my.option = documentation_values.option
+    define my.values = ""
+
+    for my.option.value as _value
+        if first()
+            my.values = "{ $(_value.symbol)"
+        else
+            my.values = "$(my.values), $(_value.symbol)"
+        endif
+
+        if last()
+            my.values = "$(my.values) }"
+        endif
+    endfor
+
+    return "Values: $(my.values)"
 endfunction
 
 function parse_option_symbol(symbol, option)
@@ -107,9 +201,9 @@ function parse_option_symbol(symbol, option)
     define my.matches = ""
 
     define my.long = defined(my.symbol.long) ?? \
-        option_symbol("long", my.symbol, my.option) ? ""
+        option_symbol("long", my.symbol, my.option, "true") ? ""
     define my.short = defined(my.symbol.short) ?? \
-        option_symbol("short", my.symbol, my.option) ? ""
+        option_symbol("short", my.symbol, my.option, "true") ? ""
 
     if defined(_symbol.long) & defined(_symbol.short)
         my.matches = "$(my.long)|$(my.short)"
@@ -123,7 +217,6 @@ function parse_option_symbol(symbol, option)
 
     return my.matches
 endfunction
-
 
 function parse_option_assign(option)
     define my.option = parse_option_assign.option
@@ -505,45 +598,28 @@ $(fix_column("", option_flag_default(_option, my.meta), my.column, my.prefix, my
 $(fix_column("--build-$(_depend.name)", "Build $(textname(_depend)) libraries", my.column, my.prefix, my.suffix))
 .   endfor
 .
-.   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
-$(fix_column("--build-preset=<preset>", "Preset configuration to build.", my.column, my.prefix, my.suffix))
-.   endif
+.   new build_options as _build_options
+.       canonicalize(_build_options, my.meta, my.configuration->registrar(id = "build-options"), "option", "id")
 .
-.#  consumed by installer (generic)
-$(fix_column("--build-src-dir=<path>", "Location of sources.", my.column, my.prefix, my.suffix))
+.       for _build_options.option as _option where !is_defined_positive(_option, "undocumented")
+.           for _option.symbol as _symbol
 .
-.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
-$(fix_column("--build-obj-dir=<path>", "Location of intermedia objects.", my.column, my.prefix, my.suffix))
-$(fix_column("--build-obj-dir-relative", "Use build-obj-dir as relative to project sources.", my.column, my.prefix, my.suffix))
+$(fix_column("$(documentation_option_symbol(_symbol, _option))", _option.comment, my.column, my.prefix, my.suffix))
 .
-$(fix_column("--build-config=<mode>", "Specifies the build configuration.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Valid values: { debug, release }", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Toolchain default behavior will occur if no value specified.", my.column, my.prefix, my.suffix))
+.               if (_option.datatype = "enumeration")
+$(fix_column("", "  $(documentation_values(_option))", my.column, my.prefix, my.suffix))
+.               endif
 .
-$(fix_column("--build-link=<mode>", "Specifies link mode.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Valid values: { dynamic, static }", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Toolchain default behavior will occur if no value specified.", my.column, my.prefix, my.suffix))
-.   endif
+.               if (defined(_option->default))
+$(fix_column("", "  $(documentation_default(_option))", my.column, my.prefix, my.suffix))
+.               endif
 .
-$(fix_column("--build-full-repositories", "Sync full github repositories.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Default clones depth 1, single branch", my.column, my.prefix, my.suffix))
-.
-$(fix_column("--build-post-install-clean", "Clean dependencies post install.", my.column, my.prefix, my.suffix))
-$(fix_column("--build-skip-tests", "Skip test execution.", my.column, my.prefix, my.suffix))
-
-$(fix_column("--build-parallel=<int>", "Number of jobs to run simultaneously.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Default: discovery", my.column, my.prefix, my.suffix))
-.
-$(fix_column("--build-use-local-src", "Use existing sources in build-src-dir path.", my.column, my.prefix, my.suffix))
-.
-.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
-$(fix_column("--prefix=<path>", "Library install location.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Default: /usr/local", my.column, my.prefix, my.suffix))
-.   endif
-.
-$(fix_column("--verbose", "Display verbose script output.", my.column, my.prefix, my.suffix))
-.
-$(fix_column("--help, -h", "Display usage, overriding script execution.", my.column, my.prefix, my.suffix))
+.               if defined(_option->hint) & defined(_option->hint.text)
+$(fix_column("", "  $(_option->hint.text)", my.column, my.prefix, my.suffix))
+.               endif
+.           endfor
+.       endfor
+.   endnew
 .
 $(my.prefix)$(my.suffix)
 $(my.prefix)All unrecognized options provided shall be passed as configuration$(my.suffix)
@@ -1046,11 +1122,11 @@ $(my.indent)CONFIGURE_OPTIONS=("$@")
 .       for _build_options.option as _option where is_defined_positive(_option, "sanitize")
 .           for _option.symbol as _symbol
 .               if defined(_symbol.long)
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("long", _symbol, _option))/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("long", _symbol, _option, "true"))/}")
 .               endif
 .
 .               if defined(_symbol.short)
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("short", _symbol, _option))/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("short", _symbol, _option, "true"))/}")
 .               endif
 .           endfor
 .       endfor
@@ -1075,7 +1151,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 
     # --build-preset
     if [[ -z "${BUILD_PRESET}" ]]; then
-        msg_error "No build-preset specified."
+        msg_error "No $(registered_option_symbol("build-preset", my.configuration)) specified."
         help
         exit 1
     fi
@@ -1117,22 +1193,19 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 
     # --build-src-dir
     if [[ -z "${BUILD_SRC_DIR}" ]]; then
-        BUILD_SRC_DIR="\$(pwd)"
+        BUILD_SRC_DIR="$(registered_option_default("build-src-dir", my.configuration))"
         msg_verbose "No build-src-dir specified, using default '${BUILD_SRC_DIR}'."
     fi
 
-    if [[ -d "${BUILD_SRC_DIR}" ]]; then
-        push_directory "${BUILD_SRC_DIR}"
-        BUILD_SRC_DIR="\$(pwd)"
-        pop_directory
-        msg_verbose "Determined absolute path for build-src-dir '${BUILD_SRC_DIR}'."
-    else
+    if ! [[ -d "${BUILD_SRC_DIR}" ]]; then
         create_directory "${BUILD_SRC_DIR}"
-        push_directory "${BUILD_SRC_DIR}"
-        BUILD_SRC_DIR="\$(pwd)"
-        pop_directory
-        msg_verbose "Created build-src-dir '${BUILD_SRC_DIR}'."
+        msg_verbose "Created $(registered_option_symbol("build-src-dir", my.configuration)) '${BUILD_SRC_DIR}'."
     fi
+
+    push_directory "${BUILD_SRC_DIR}"
+    BUILD_SRC_DIR="\$(pwd)"
+    pop_directory
+    msg_verbose "Determined absolute path for $(registered_option_symbol("build-src-dir", my.configuration)) '${BUILD_SRC_DIR}'."
 .
 .   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
 .   # Embedded knowledge of CMakePresets: CMAKE_PREFIX_PATH, CMAKE_INSTALL_REFIX_PATH
@@ -1146,47 +1219,44 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
     # --build-obj-dir
     if [[ -z "${BUILD_OBJ_DIR}" ]]; then
         if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-            BUILD_OBJ_DIR="obj"
-            msg_verbose "No build-obj-dir specified, using relative default '${BUILD_OBJ_DIR}'."
+            BUILD_OBJ_DIR="$(registered_option_default("build-obj-dir", my.configuration))"
+            msg_verbose "No $(registered_option_symbol("build-obj-dir", my.configuration)) specified, using relative default '${BUILD_OBJ_DIR}'."
         else
-            BUILD_OBJ_DIR="\$(pwd)/obj"
-            msg_verbose "No build-obj-dir specified, using default '${BUILD_OBJ_DIR}'."
+            BUILD_OBJ_DIR="\$(pwd)/$(registered_option_default("build-obj-dir", my.configuration))"
+            msg_verbose "No $(registered_option_symbol("build-obj-dir", my.configuration)) specified, using default '${BUILD_OBJ_DIR}'."
         fi
     fi
 
     if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        msg_verbose "Deferring relative path action for build-obj-dir '${BUILD_OBJ_DIR}'."
+        msg_verbose "Deferring relative path action for $(registered_option_symbol("build-obj-dir", my.configuration)) '${BUILD_OBJ_DIR}'."
     else
-        if [[ -d "${BUILD_OBJ_DIR}" ]]; then
-            push_directory "${BUILD_OBJ_DIR}"
-            BUILD_OBJ_DIR="\$(pwd)"
-            pop_directory
-            msg_verbose "Determined absolute path for build-obj-dir '${BUILD_OBJ_DIR}'."
-       else
+        if ! [[ -d "${BUILD_OBJ_DIR}" ]]; then
             create_directory "${BUILD_OBJ_DIR}"
-            push_directory "${BUILD_OBJ_DIR}"
-            BUILD_OBJ_DIR="\$(pwd)"
-            pop_directory
-            msg_verbose "Created build-obj-dir '${BUILD_OBJ_DIR}'."
+            msg_verbose "Created $(registered_option_symbol("build-obj-dir", my.configuration)) '${BUILD_OBJ_DIR}'."
         fi
+
+        push_directory "${BUILD_OBJ_DIR}"
+        BUILD_OBJ_DIR="\$(pwd)"
+        pop_directory
+        msg_verbose "Determined absolute path for $(registered_option_symbol("build-obj-dir", my.configuration)) '${BUILD_OBJ_DIR}'."
     fi
 
     # --build-config
     if [[ -z "${BUILD_CONFIG}" ]]; then
-        msg_verbose "No build-config specified."
+        msg_verbose "No $(registered_option_symbol("build-config", my.configuration)) specified."
     elif [[ "${BUILD_CONFIG}" != "debug" ]] && [[ "${BUILD_CONFIG}" != "release" ]]; then
-        msg_error "Provided build-config '${BUILD_CONFIG}' not a valid value."
+        msg_error "Provided $(registered_option_symbol("build-config", my.configuration)) '${BUILD_CONFIG}' not a valid value."
         help
         exit 1
     else
-        msg_verbose "Using provided build-config '${BUILD_CONFIG}'"
+        msg_verbose "Using provided $(registered_option_symbol("build-config", my.configuration)) '${BUILD_CONFIG}'"
     fi
 
     # --build-link
     if [[ -z "${BUILD_LINK}" ]]; then
-        msg_verbose "No build-link specified."
+        msg_verbose "No $(registered_option_symbol("build-link", my.configuration)) specified."
     elif [[ "${BUILD_LINK}" != "dynamic" ]] && [[ "${BUILD_LINK}" != "static" ]]; then
-        msg_error "Provided build-link '${BUILD_LINK}' not a valid value."
+        msg_error "Provided $(registered_option_symbol("build-link", my.configuration)) '${BUILD_LINK}' not a valid value."
         help
         exit 1
     fi
@@ -1195,7 +1265,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
     if [[ -z "${PREFIX}" ]]; then
         # Always set a prefix (required for OSX and lib detection).
         PREFIX="/usr/local"
-        msg_verbose "No prefix specified, defaulting to '${PREFIX}'."
+        msg_verbose "No $(registered_option_symbol("prefix", my.configuration)) specified, defaulting to '${PREFIX}'."
     else
         # Incorporate the custom libdir into each object, for link time resolution
         if [[ -z "${LD_RUN_PATH}" ]]; then
@@ -1262,7 +1332,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             PARALLEL=\$(sysctl -n hw.ncpu)
         else
             msg_error "Unsupported system: '${OS}'"
-            msg_error "  Unable to determine value for '--parallel='"
+            msg_error "  Unable to determine value for $(registered_option_symbol("build-parallel", my.configuration))"
             msg_error "  Please specify explicitly to continue."
             msg_error ""
             help
