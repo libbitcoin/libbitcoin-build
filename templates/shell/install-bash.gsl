@@ -32,6 +32,58 @@ function column_variables(variable, align, prefix, suffix, pad)
     return fix_column(my.variable, ": ${$(my.variable)}", my.align, my.prefix, my.suffix, my.pad)
 endfunction
 
+function option_flag(option, meta)
+    define my.option = option_flag.option
+    define my.meta = option_flag.meta
+    define my.result = ""
+
+    # Cutting corners here - assumption of boolean configuration (currently true)
+    if (count(my.meta.build, count.method = "cmake") > 0)
+        my.result = "-D$(my.option.type)-$(my.option.name)=<ON/OFF>"
+    elsif (count(my.meta.build, count.method = "gnu") > 0)
+        if (my.option.type = "enable")
+            my.result = "--<enable/disable>-$(my.option.name)"
+        elsif (my.option.type = "with")
+            my.result = "--<with/without>-$(my.option.name)"
+        else
+            abort "Unable to generate option due to option type '$(my.option.type)'."
+        endif
+    else
+        abort "Unable to generate option due to build method expectation."
+    endif
+
+    return my.result
+endfunction
+
+function option_flag_default(option, meta)
+    define my.option = option_flag_default.option
+    define my.meta = option_flag_default.meta
+    define my.result = ""
+
+    define my.positive = ""
+    define my.negative = ""
+
+    # Cutting corners here - assumption of boolean configuration (currently true)
+    if (count(my.meta.build, count.method = "cmake") > 0)
+        my.positive = "ON"
+        my.negative = "OFF"
+    elsif (count(my.meta.build, count.method = "gnu") > 0)
+        if (my.option.type = "enable")
+            my.positive = "--enable-$(my.option.name)"
+            my.negative = "--disable-$(my.option.name)"
+        elsif (my.option.type = "with")
+            my.positive = "--with-$(my.option.name)"
+            my.negative = "--without-$(my.option.name)"
+        else
+            abort "Unable to generate option due to option type '$(my.option.type)'."
+        endif
+    else
+        abort "Unable to generate option due to build method expectation."
+    endif
+
+    return is_defined_positive(my.option, "default") ?? my.positive ? my.negative
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -348,6 +400,39 @@ $(my.prefix)$(my.suffix)
 $(my.prefix)Script options:$(my.suffix)
 .#  translated by installer
 .#  consumed by installer (specific)
+.
+.   for my.install.dependency as _depend
+.       if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
+.           next
+.       endif
+.
+.       define my.deprepo = my.configuration->repository(.name = _depend.name)
+.
+.       for my.deprepo.library as _library
+.           for _library.option as _option
+$(fix_column(option_flag(_option, my.meta), _option.comment, my.column, my.prefix, my.suffix))
+$(fix_column("", "  Default: $(option_flag_default(_option, my.meta))", my.column, my.prefix, my.suffix))
+.           endfor
+.       endfor
+.
+.       if !(_depend.name = my.repository.name)
+.           next
+.       endif
+.
+.       for my.deprepo.binary as _binary
+.           for _binary.option as _option
+$(fix_column(option_flag(_option, my.meta), _option.comment, my.column, my.prefix, my.suffix))
+$(fix_column("", option_flag_default(_option, my.meta), my.column, my.prefix, my.suffix))
+.           endfor
+.       endfor
+.
+.       for my.deprepo.test as _test
+.           for _test.option as _option
+$(fix_column(option_flag(_option, my.meta), _option.comment, my.column, my.prefix, my.suffix))
+$(fix_column("", option_flag_default(_option, my.meta), my.column, my.prefix, my.suffix))
+.           endfor
+.       endfor
+.   endfor
 .
 .   for my.install.dependency as _depend
 .       if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
