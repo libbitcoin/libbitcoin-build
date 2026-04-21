@@ -1219,7 +1219,10 @@
         package="libbitcoin-server"
         target="bitcoin::server" />
     </dependency>
-    <dependency name="boost" textname="Boost" conditional="true">
+    <dependency name="boost"
+      textname="Boost"
+      conditional="true"
+      comment="Build Boost libraries.">
       <prefix root="true" with="true" />
       <archive version="1.86.0">
         <url pattern="https://archives.boost.io/release/version/source/">
@@ -1244,7 +1247,10 @@
       </build>
       <cmake namespace="Boost" package="Boost" />
     </dependency>
-    <dependency name="secp256k1" textname="libsecp256k1" conditional="true">
+    <dependency name="secp256k1"
+      textname="libsecp256k1"
+      conditional="true"
+      comment="Build libsecp256k1 libraries.">
       <github owner="bitcoin-core" tag="v0.7.0" />
       <nuget />
       <build method="nuget" />
@@ -1406,6 +1412,200 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     </configuration>-->
   </registrar>
 
+  <registrar id="build-options">
+
+    <!-- msbuild/msvc build script unique settings -->
+    <option id="build-msvc-config"
+      canonical="BUILD_CONFIG"
+      comment="Build configuration."
+      datatype="string" >
+      <symbol long="--build-config" />
+    </option>
+    <option id="build-msvc-platform"
+      canonical="BUILD_PLATFORM"
+      comment="Build platform."
+      datatype="string" >
+      <symbol long="--build-platform" />
+    </option>
+    <option id="build-msvc-version"
+      canonical="BUILD_VERSION"
+      comment="Build MSVC version."
+      datatype="string" >
+      <symbol long="--build-version" />
+    </option>
+    <option id="build-msvc-mode"
+      canonical="BUILD_MODE"
+      comment="Determines action on target."
+      datatype="string" >
+      <symbol long="--build-mode" />
+      <hint text="Default: Rebuild" />
+    </option>
+    <option id="build-msvc-symbols"
+      canonical="BUILD_SYMBOLS"
+      comment="Determines treatment of symbols."
+      datatype="enumeration" >
+      <symbol long="--build-symbols" />
+      <value symbol="default" />
+      <value symbol="disabled" />
+      <value symbol="public-only" />
+    </option>
+
+    <!-- preset -->
+    <option id="build-preset"
+      canonical="BUILD_PRESET"
+      comment="Specifies preset configuration to build."
+      datatype="string"
+      sanitize="true" >
+      <symbol long="--build-preset" />
+    </option>
+
+    <!-- config/link (conflicts with preset) -->
+    <option id="build-config"
+      canonical="BUILD_CONFIG"
+      comment="Specifies the build configuration."
+      datatype="enumeration"
+      sanitize="true" >
+      <symbol long="--build-config" />
+      <value symbol="debug" />
+      <value symbol="release" />
+      <hint text="Toolchain default behavior will occur if no value specified." />
+    </option>
+    <option id="build-link"
+      canonical="BUILD_LINK"
+      comment="Specifies the link mode."
+      datatype="enumeration"
+      sanitize="true" >
+      <symbol long="--build-link" />
+      <value symbol="dynamic" />
+      <value symbol="static" />
+      <hint text="Toolchain default behavior will occur if no value specified." />
+    </option>
+
+    <!-- object directory controlling settings (conflicts with preset) -->
+    <option id="build-obj-dir"
+      canonical="BUILD_OBJ_DIR"
+      comment="Location for intermediate objects."
+      datatype="path"
+      sanitize="true" >
+      <symbol long="--build-obj-dir" />
+      <default bash="$(pwd)/obj" />
+    </option>
+    <option id="build-obj-dir-relative"
+      canonical="BUILD_OBJ_DIR_RELATIVE"
+      comment="Interpret build-obj-dir as relative to project sources."
+      datatype="boolean"
+      sanitize="true" >
+      <symbol long="--build-obj-dir-relative" />
+    </option>
+
+    <!-- github sync control -->
+    <option id="build-full-repositories"
+      canonical="BUILD_FULL_REPOSITORIES"
+      comment="Sync full github repositories."
+      datatype="boolean"
+      sanitize="true" >
+      <symbol long="--build-full-repositories" />
+      <hint text="Default: git clone --depth 1 --single-branch" />
+    </option>
+
+    <!-- post build action modifiers -->
+    <option id="build-post-install-clean"
+      canonical="BUILD_POST_INSTALL_CLEAN"
+      comment="Clean dependencies after installation (saves space)."
+      datatype="boolean"
+      sanitize="true" >
+      <symbol long="--build-post-install-clean" />
+    </option>
+    <option id="build-skip-tests"
+      canonical="BUILD_SKIP_TESTS"
+      comment="Skip test compilation and execution."
+      datatype="boolean"
+      sanitize="true" >
+      <symbol long="--build-skip-tests" />
+    </option>
+
+    <!-- parallelism -->
+    <option id="build-parallel"
+      canonical="PARALLEL"
+      comment="Number of jobs to run simultaneously."
+      datatype="integer"
+      sanitize="true" >
+      <symbol long="--build-parallel" />
+      <hint text="Default: supported platforms use nproc/sysctl" />
+    </option>
+
+    <!-- installation path control (conflicts with preset) -->
+    <option id="prefix"
+      canonical="PREFIX"
+      comment="Installation destination."
+      datatype="path"
+      sanitize="true" >
+      <symbol long="--prefix" />
+      <default bash="/usr/local" />
+    </option>
+
+    <!-- Universal settings -->
+    <option id="build-src-dir"
+      canonical="BUILD_SRC_DIR"
+      comment="Location for sources."
+      datatype="path"
+      sanitize="true" >
+      <symbol long="--build-src-dir" />
+      <default msvc="!CD!" bash="$(pwd)" />
+    </option>
+    <option id="build-use-local-src"
+      canonical="BUILD_USE_LOCAL_SRC"
+      comment="Use existing sources in build-src-dir path."
+      datatype="boolean"
+      sanitize="true" >
+      <symbol long="--build-use-local-src" />
+    </option>
+    <option id="verbose"
+      canonical="DISPLAY_VERBOSE"
+      comment="Display verbose script output."
+      datatype="boolean"
+      sanitize="true" >
+      <symbol long="--verbose" />
+    </option>
+    <option id="help"
+      canonical="DISPLAY_HELP"
+      comment="Display usage, overriding script execution."
+      datatype="boolean"
+      sanitize="true" >
+      <symbol long="--help" short="-h" />
+    </option>
+
+    <!-- cmake toolchain variables -->
+    <option id="cmake_prefix_path"
+      canonical="CMAKE_PREFIX_PATH"
+      datatype="path"
+      sanitize="false"
+      undocumented="true">
+      <symbol long="-DCMAKE_PREFIX_PATH" />
+    </option>
+    <option id="cmake_install_prefix"
+      canonical="CMAKE_INSTALL_PREFIX"
+      datatype="path"
+      sanitize="false"
+      undocumented="true">
+      <symbol long="-DCMAKE_INSTALL_PREFIX" />
+    </option>
+    <option id="cmake_include_path"
+      canonical="CMAKE_INCLUDE_PATH"
+      datatype="path"
+      sanitize="false"
+      undocumented="true">
+      <symbol long="-DCMAKE_INCLUDE_PATH" />
+    </option>
+    <option id="cmake_library_path"
+      canonical="CMAKE_LIBRARY_PATH"
+      datatype="path"
+      sanitize="false"
+      undocumented="true">
+      <symbol long="-DCMAKE_LIBRARY_PATH" />
+    </option>
+  </registrar>
+
   <templates source="version4.xml" resultpath="../output/version4">
     <!-- resultpath provided relative to expected evaluation - libbitcoin-build/process -->
     <template name="CMakeLists.txt.gsl" path="cmake" outpath="builds/cmake">
@@ -1422,6 +1622,19 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <column help="28" const="32" parse="28" />
       <source type="archive" />
       <source type="github" />
+      <option id="build-src-dir" />
+      <option id="build-obj-dir" />
+      <option id="build-obj-dir-relative" />
+      <option id="build-config" />
+      <option id="build-link" />
+      <option id="build-full-repositories" />
+      <option id="build-post-install-clean" />
+      <option id="build-skip-tests" />
+      <option id="build-parallel" />
+      <option id="build-use-local-src" />
+      <option id="prefix" />
+      <option id="verbose" />
+      <option id="help" />
     </template>
     <template name="install-cmake.sh.gsl" path="shell" outpath="builds/cmake">
       <build method="cmake" />
@@ -1429,6 +1642,23 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <column help="28" const="32" parse="28" />
       <source type="archive" />
       <source type="github" />
+      <option id="build-src-dir" />
+      <option id="build-obj-dir" />
+      <option id="build-obj-dir-relative" />
+      <option id="build-config" />
+      <option id="build-link" />
+      <option id="build-full-repositories" />
+      <option id="build-post-install-clean" />
+      <option id="build-skip-tests" />
+      <option id="build-parallel" />
+      <option id="build-use-local-src" />
+      <option id="prefix" />
+      <option id="verbose" />
+      <option id="help" />
+      <option id="cmake_prefix_path" />
+      <option id="cmake_install_prefix" />
+      <option id="cmake_include_path" />
+      <option id="cmake_library_path" />
     </template>
     <template name="install-presets.sh.gsl" path="shell" outpath="builds/cmake">
       <build method="preset" />
@@ -1437,6 +1667,19 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <column help="28" const="32" parse="28" />
       <source type="archive" />
       <source type="github" />
+      <option id="build-preset" />
+      <option id="build-src-dir" />
+      <option id="build-full-repositories" />
+      <option id="build-post-install-clean" />
+      <option id="build-skip-tests" />
+      <option id="build-parallel" />
+      <option id="build-use-local-src" />
+      <option id="verbose" />
+      <option id="help" />
+      <option id="cmake_prefix_path" />
+      <option id="cmake_install_prefix" />
+      <option id="cmake_include_path" />
+      <option id="cmake_library_path" />
     </template>
     <template name="build-msvc.cmd.gsl" path="shell" outpath="builds/msvc" label="true">
       <column help="28" const="32" parse="28" />
@@ -1444,6 +1687,17 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <build method="nuget" />
       <source type="github" />
       <source type="nuget" />
+      <option id="build-msvc-config" />
+      <option id="build-msvc-platform" />
+      <option id="build-msvc-version" />
+      <option id="build-msvc-mode" />
+      <option id="build-msvc-symbols" />
+      <option id="build-src-dir" />
+      <option id="build-full-repositories" />
+      <option id="build-skip-tests" />
+      <option id="build-use-local-src" />
+      <option id="verbose" />
+      <option id="help" />
     </template>
     <template name="ci.yml.gsl" path="yml" outpath=".github/workflows">
       <job type="shell" name="gnu" script="builds/gnu/install-gnu.sh" />

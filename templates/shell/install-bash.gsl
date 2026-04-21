@@ -84,6 +84,62 @@ function option_flag_default(option, meta)
     return is_defined_positive(my.option, "default") ?? my.positive ? my.negative
 endfunction
 
+function option_symbol(property, symbol, option)
+    define my.property = option_symbol.property
+    define my.symbol = option_symbol.symbol
+    define my.option = option_symbol.option
+    define my.value_extractor = ""
+
+    if !defined(my.symbol.$(my.property))
+        abort "Symbol lacks property '$(my.property)'."
+    endif
+
+    if !(my.option.datatype = "boolean")
+        my.value_extractor = "=*"
+    endif
+
+    return "$(my.symbol.$(my.property))$(my.value_extractor)"
+endfunction
+
+function parse_option_symbol(symbol, option)
+    define my.symbol = parse_option_symbol.symbol
+    define my.option = parse_option_symbol.option
+    define my.matches = ""
+
+    define my.long = defined(my.symbol.long) ?? \
+        option_symbol("long", my.symbol, my.option) ? ""
+    define my.short = defined(my.symbol.short) ?? \
+        option_symbol("short", my.symbol, my.option) ? ""
+
+    if defined(_symbol.long) & defined(_symbol.short)
+        my.matches = "$(my.long)|$(my.short)"
+    elsif defined(_symbol.long)
+        my.matches = my.long
+    elsif defined(_symbol.short)
+        my.matches = my.short
+    else
+        abort "Option '$(my.option.id)' symbol lacks long and short."
+    endif
+
+    return my.matches
+endfunction
+
+
+function parse_option_assign(option)
+    define my.option = parse_option_assign.option
+    define my.value = "\"yes\""
+
+    if !(my.option.datatype = "boolean")
+        my.value = "\"${OPTION#*=}\""
+    endif
+
+    if !defined(my.option.canonical)
+        abort "Option '$(my.option.id)' lacks canonical property."
+    endif
+
+    return "$(my.option.canonical)=$(my.value);;"
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -972,43 +1028,34 @@ $(my.c_indent)case ${OPTION} in
 $(indent_column("(--build-$(_depend.name))", "BUILD_$(_depend.name)=\"yes\";;", my.column, my.o_indent))
 .   endfor
 .
-.   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
-$(indent_column("(--build-preset=*)", "BUILD_PRESET=\"${OPTION#*=}\";;", my.column, my.o_indent))
-.   endif
-.
-$(indent_column("(--build-src-dir=*)", "BUILD_SRC_DIR=\"${OPTION#*=}\";;", my.column, my.o_indent))
-.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
-$(indent_column("(--build-obj-dir=*)", "BUILD_OBJ_DIR=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(--build-obj-dir-relative)", "BUILD_OBJ_DIR_RELATIVE=\"yes\";;", my.column, my.o_indent))
-$(indent_column("(--build-config=*)", "BUILD_CONFIG=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(--build-link=*)", "BUILD_LINK=\"${OPTION#*=}\";;", my.column, my.o_indent))
-.   endif
-$(indent_column("(--build-full-repositories)", "BUILD_FULL_REPOSITORIES=\"yes\";;", my.column, my.o_indent))
-$(indent_column("(--build-use-local-src)", "BUILD_USE_LOCAL_SRC=\"yes\";;", my.column, my.o_indent))
-$(indent_column("(--build-parallel=*)", "PARALLEL=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(--build-post-install-clean)", "BUILD_POST_INSTALL_CLEAN=\"yes\";;", my.column, my.o_indent))
-$(indent_column("(--build-skip-tests)", "BUILD_SKIP_TESTS=\"yes\";;", my.column, my.o_indent))
-.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
-$(indent_column("(--prefix=*)", "PREFIX=\"${OPTION#*=}\";;", my.column, my.o_indent))
-.   endif
-$(indent_column("(--verbose)", "DISPLAY_VERBOSE=\"yes\";;", my.column, my.o_indent))
-$(indent_column("(--help|-h)", "DISPLAY_HELP=\"yes\";;", my.column, my.o_indent))
-.
-.   if (my.install.hint_options = "cmake")
-$(indent_column("(-DCMAKE_PREFIX_PATH=*)", "CMAKE_PREFIX_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(-DCMAKE_INSTALL_PREFIX=*)", "CMAKE_INSTALL_PREFIX=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(-DCMAKE_INCLUDE_PATH=*)", "CMAKE_INCLUDE_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(-DCMAKE_LIBRARY_PATH=*)", "CMAKE_LIBRARY_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
-.   endif
+.   new options as _build_options
+.       canonicalize(_build_options, my.meta, my.configuration->registrar(id = "build-options"), "option", "id")
+.       for _build_options.option as _option
+.           for _option.symbol as _symbol
+.               define my.matches = parse_option_symbol(_symbol, _option)
+.               define my.assign = parse_option_assign(_option)
+$(indent_column("($(my.matches))", "$(my.assign)", my.column, my.o_indent))
+.           endfor
+.       endfor
 .
 $(my.c_indent)esac
 $(my.indent)done
 
 $(my.indent)CONFIGURE_OPTIONS_ORIGINAL=("$@")
 $(my.indent)CONFIGURE_OPTIONS=("$@")
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
+.       for _build_options.option as _option where is_defined_positive(_option, "sanitize")
+.           for _option.symbol as _symbol
+.               if defined(_symbol.long)
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("long", _symbol, _option))/}")
+.               endif
+.
+.               if defined(_symbol.short)
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("short", _symbol, _option))/}")
+.               endif
+.           endfor
+.       endfor
+.   endnew
+.
 $(my.indent)msg_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
 $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 .
