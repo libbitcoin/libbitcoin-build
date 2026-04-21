@@ -267,6 +267,7 @@ $(column_variables("BUILD_OBJ_DIR_RELATIVE", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_CONFIG", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_LINK", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_FULL_REPOSITORIES", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_POST_INSTALL_CLEAN", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_USE_LOCAL_SRC", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_SKIP_TESTS", my.column, my.prefix, my.suffix))
 $(column_variables("PARALLEL", my.column, my.prefix, my.suffix))
@@ -386,6 +387,9 @@ $(fix_column("", "  Toolchain default behavior will occur if no value specified.
 $(fix_column("--build-full-repositories", "Sync full github repositories.", my.column, my.prefix, my.suffix))
 $(fix_column("", "  Default clones depth 1, single branch", my.column, my.prefix, my.suffix))
 .
+$(fix_column("--build-post-install-clean", "Clean dependencies post install.", my.column, my.prefix, my.suffix))
+$(fix_column("--build-skip-tests", "Skip test execution.", my.column, my.prefix, my.suffix))
+
 $(fix_column("--build-parallel=<int>", "Number of jobs to run simultaneously.", my.column, my.prefix, my.suffix))
 $(fix_column("", "  Default: discovery", my.column, my.prefix, my.suffix))
 .
@@ -609,6 +613,38 @@ test_make()
     pop_directory # BUILD_SRC_DIR/PROJECT
 
     msg_success "'${PROJECT}' test complete."
+}
+
+clean_make()
+{
+    local PROJECT="$1"
+    shift 1
+
+    msg "Preparing to clean ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    disable_exit_on_error
+
+    make clean
+
+    local RESULT=$?
+
+    if [[ ${RESULT} -ne 0 ]]; then
+        msg_error "Encountered error, please see test.log contents above."
+        exit ${RESULT}
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' clean complete."
 }
 .endmacro # define_helpers_make
 .
@@ -865,6 +901,7 @@ $(indent_column("(--build-link=*)", "BUILD_LINK=\"${OPTION#*=}\";;", my.column, 
 $(indent_column("(--build-full-repositories)", "BUILD_FULL_REPOSITORIES=\"yes\";;", my.column, my.o_indent))
 $(indent_column("(--build-use-local-src)", "BUILD_USE_LOCAL_SRC=\"yes\";;", my.column, my.o_indent))
 $(indent_column("(--build-parallel=*)", "PARALLEL=\"${OPTION#*=}\";;", my.column, my.o_indent))
+$(indent_column("(--build-post-install-clean)", "BUILD_POST_INSTALL_CLEAN=\"yes\";;", my.column, my.o_indent))
 $(indent_column("(--build-skip-tests)", "BUILD_SKIP_TESTS=\"yes\";;", my.column, my.o_indent))
 .   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
 $(indent_column("(--prefix=*)", "PREFIX=\"${OPTION#*=}\";;", my.column, my.o_indent))
@@ -1351,6 +1388,9 @@ $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
 $(my.indent)fi
 .           endif
 $(my.indent)install_make "$(_depend.name)"
+$(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
+    $(my.indent)clean_make "$(_depend.name)"
+$(my.indent)fi
 .
 .       elsif (my.active_build.method = "cmake")
 .           require(my.active_build, "build", "filepath")
@@ -1361,6 +1401,9 @@ $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
 $(my.indent)fi
 .           endif
 $(my.indent)install_make "$(_depend.name)"
+$(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
+    $(my.indent)clean_make "$(_depend.name)"
+$(my.indent)fi
 .
 .       elsif (my.active_build.method = "preset")
 .           require(my.active_build, "build", "filepath")
@@ -1371,6 +1414,9 @@ $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
 $(my.indent)fi
 .           endif
 $(my.indent)install_make "$(_depend.name)"
+$(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
+    $(my.indent)clean_make "$(_depend.name)"
+$(my.indent)fi
 .
 .       elsif (my.active_build.method = "boost_build")
 $(my.indent)build_boost "$(_depend.name)" "${$(my.vname)_OPTIONS[@]}"

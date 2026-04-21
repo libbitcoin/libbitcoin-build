@@ -444,6 +444,7 @@ jobs:
           --build-preset="${{ matrix.preset }}"
 .       else
           --prefix="${{ github.workspace }}/prefix"
+          --build-post-install-clean
           --build-obj-dir="obj"
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
