@@ -1629,6 +1629,8 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     </template>
     <template name="config.cmake.in.gsl" path="cmake" outpath="builds/cmake" />
     <template name="install-gnu.sh.gsl" path="shell" outpath="builds/gnu">
+      <error logpath="test-suite.log" />
+      <error logpath="test.log" />
       <build method="gnu" />
       <build method="boost_build" />
       <column help="28" const="32" parse="28" />
@@ -1649,6 +1651,8 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="help" />
     </template>
     <template name="install-cmake.sh.gsl" path="shell" outpath="builds/cmake">
+      <error logpath="Testing/Temporary/LastTest.log" />
+      <error logpath="test.log" />
       <build method="cmake" />
       <build method="boost_build" />
       <column help="28" const="32" parse="28" />
@@ -1673,6 +1677,8 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="cmake_library_path" />
     </template>
     <template name="install-presets.sh.gsl" path="shell" outpath="builds/cmake">
+      <error logpath="Testing/Temporary/LastTest.log" />
+      <error logpath="test.log" />
       <build method="preset" />
       <build method="cmake" />
       <build method="boost_build" />

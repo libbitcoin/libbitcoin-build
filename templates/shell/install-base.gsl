@@ -117,7 +117,7 @@ function emit_install_sh(meta, configuration, repository)
             endfor
 
             if (count(_keys.method, count.name = "cmake" | count.name = "preset" | count.name = "gnu") > 0)
-                define_helpers_make()
+                define_helpers_make(my.meta, my.repository, my.configuration)
             endif
 
             for _keys.method as _method

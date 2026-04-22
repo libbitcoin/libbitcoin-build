@@ -701,7 +701,10 @@ display_configure_options()
     fi
 .endmacro # define_build_initialize_path
 .
-.macro define_helpers_make()
+.macro define_helpers_make(meta, repository, configuration)
+.   define my.meta = define_helpers_make.meta
+.   define my.repository = define_helpers_make.repository
+.   define my.configuration = define_helpers_make.configuration
 
 install_make()
 {
@@ -756,13 +759,15 @@ test_make()
     fi
 
     local RESULT=$?
+.
+.   for my.meta.error as _error where defined(_error.logpath)
 
-    # Test runners emit to the test.log file.
-    if [[ -e "test.log" ]]; then
-        msg_warn "test.log - begin"
-        cat "test.log"
-        msg_warn "test.log - end"
+    if [[ -e "$(_error.logpath)" ]]; then
+        msg_warn "begin error log: $(_error.logpath)"
+        cat "$(_error.logpath)"
+        msg_warn "  end error log: $(_error.logpath)"
     fi
+.   endfor
 
     if [[ ${RESULT} -ne 0 ]]; then
         msg_error "Encountered error, please see test.log contents above."
