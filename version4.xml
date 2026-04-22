@@ -1718,6 +1718,9 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="help" />
     </template>
     <template name="ci.yml.gsl" path="yml" outpath=".github/workflows">
+      <error name="LastTest" logpath="Testing/Temporary/LastTest.log" />
+      <error name="test-suite" logpath="test-suite.log" />
+      <error name="test" logpath="test.log" />
       <job type="shell" name="gnu" script="builds/gnu/install-gnu.sh" />
       <job type="shell" name="cmake" script="builds/cmake/install-cmake.sh" />
       <job type="shell" name="presets" script="builds/cmake/install-presets.sh" />

@@ -478,9 +478,11 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
 .   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
-          if [[ -e "$(_depend.name)/obj/test.log" ]]; then
-            cp "$(_depend.name)/obj/test.log" $(_depend.name)-test.log"
+.       for my.meta.error as _error where defined(_error.logpath) & defined(_error.name)
+          if [[ -e "$(_depend.name)/obj/$(_error.logpath)" ]]; then
+            cp "$(_depend.name)/obj/$(_error.logpath)" $(_depend.name)-$(_error.name).errors"
           fi
+.       endfor
 .   endfor
 
       - name: Test artifact upload
@@ -488,7 +490,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.1
         with:
           name: testlogs
-          path: ${{ github.workspace }}/*test.log
+          path: ${{ github.workspace }}/*.errors
           retention-days: 1
           if-no-files-found: warn
 .
