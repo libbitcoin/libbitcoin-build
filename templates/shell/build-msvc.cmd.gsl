@@ -27,6 +27,13 @@ function column_variables(variable, align, prefix, suffix, pad)
     return fix_column(my.variable, ": !$(my.variable)!", my.align, my.prefix, my.suffix, my.pad)
 endfunction
 
+function documentation_placeholder(option)
+    define my.option = documentation_placeholder.option
+
+    return defined(my.option.placeholder) ?? \
+        " $(my.option.placeholder)" ? ""
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -113,7 +120,7 @@ if "!$(_depend.name:c)_TAG!" == "" (
         call :display_constants
     )
 
-    if "!SHOW_HELP!" == "yes" (
+    if "!DISPLAY_HELP!" == "yes" (
         call :help
         exit /b 0
     )
@@ -271,38 +278,19 @@ if "!$(_depend.name:c)_TAG!" == "" (
 :parse_input
     if "%~1" == "" (
         goto :end_parse_input
-    ) else if "%~1" == "--build-src-dir" (
-        set "BUILD_SRC_DIR=%~2"
-        shift
-    ) else if "%~1" == "--build-config" (
-        set "BUILD_CONFIG=%~2"
-        shift
-    ) else if "%~1" == "--build-platform" (
-        set "BUILD_PLATFORM=%~2"
-        shift
-    ) else if "%~1" == "--build-version" (
-        set "BUILD_VERSION=%~2"
-        shift
-    ) else if "%!1" == "--build-mode" (
-        set "BUILD_MODE=%~2"
-        shift
-    ) else if "%!1" == "--build-symbols" (
-        set "BUILD_SYMBOLS=%~2"
-        shift
-    ) else if "%~1" == "--build-full-repositories" (
-        set "BUILD_FULL_REPOSITORIES=yes"
-    ) else if "%~1" == "--build-use-local-src" (
-        set "BUILD_USE_LOCAL_SRC=yes"
-    ) else if "%~1" == "--build-skip-tests" (
-        set "BUILD_SKIP_TESTS=yes"
-    ) else if "%~1" == "--verbose" (
-        set "DISPLAY_VERBOSE=yes"
-    ) else if "%~1" == "-v" (
-        set "DISPLAY_VERBOSE=yes"
-    ) else if "%~1" == "--help" (
-        set "SHOW_HELP=yes"
-    ) else if "%~1" == "-h" (
-        set "SHOW_HELP=yes"
+.   new build_options as _build_options
+.       canonicalize(_build_options, my.meta, my.configuration->registrar(id = "build-options"), "option", "id")
+.       for _build_options.option as _option
+.           for _option.symbol as _symbol
+.               if defined(_symbol.long)
+.                   parse_option_symbol("long", _symbol, _option)
+.               endif
+.               if defined(_symbol.short)
+.                   parse_option_symbol("short", _symbol, _option)
+.               endif
+.           endfor
+.       endfor
+.   endnew
     ) else (
         if "!UNHANDLED_ARGS!" == "" (
             set "UNHANDLED_ARGS=%1"
@@ -318,6 +306,20 @@ if "!$(_depend.name:c)_TAG!" == "" (
     exit /b 0
 
 .endmacro # define_main
+.
+.macro parse_option_symbol(property, symbol, option)
+.   define my.property = parse_option_symbol.property
+.   define my.symbol = parse_option_symbol.symbol
+.   define my.option = parse_option_symbol.option
+.
+    ) else if "%~1" == "$(my.symbol.$(my.property))" (
+.               if !(my.option.datatype = "boolean")
+        set "$(my.option.canonical)=%~2"
+        shift
+.               else
+        set "$(my.option.canonical)=yes"
+.               endif
+.endmacro # parse_option_symbol
 .
 .macro define_display_build_variables(meta, configuration, repository, dependencies)
 .   define my.meta = define_display_build_variables.meta
@@ -355,7 +357,7 @@ $(column_variables("BUILD_USE_LOCAL_SRC", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_MODE", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_SYMBOLS", my.column, my.prefix, my.suffix))
 $(column_variables("DISPLAY_VERBOSE", my.column, my.prefix, my.suffix))
-$(column_variables("SHOW_HELP", my.column, my.prefix, my.suffix))
+$(column_variables("DISPLAY_HELP", my.column, my.prefix, my.suffix))
 .
 .endmacro # emit_build_variables
 .
@@ -454,18 +456,29 @@ $(column_variables("$(_depend.name:c)_TAG", my.column, my.prefix, my.suffix))
 $(my.prefix)Script managing the build of $(my.repository.name).$(my.suffix)
 $(my.prefix)$(my.suffix)
 $(my.prefix)Script options:$(my.suffix)
-$(fix_column("--build-config config", "Build configuration.", my.column, my.prefix, my.suffix))
-$(fix_column("--build-platform platform", "Build platform.", my.column, my.prefix, my.suffix))
-$(fix_column("--build-version version", "Build MSVC version.", my.column, my.prefix, my.suffix))
-$(fix_column("--build-src-dir path", "Location of sources.", my.column, my.prefix, my.suffix))
-$(fix_column("--build-full-repositories", "Sync full github repositories.", my.column, my.prefix, my.suffix))
-$(fix_column("--build-use-local-src", "Use existing sources in build-src-dir path.", my.column, my.prefix, my.suffix))
-$(fix_column("--build-mode mode", "Determines action on target.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Default: Rebuild", my.column, my.prefix, my.suffix))
-$(fix_column("--build-symbols mode", "Determines treatment of symbols.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Values: default, disabled, public-only", my.column, my.prefix, my.suffix))
-$(fix_column("--verbose", "Display verbose script output.", my.column, my.prefix, my.suffix))
-$(fix_column("--help, -h", "Display usage, overriding script execution.", my.column, my.prefix, my.suffix))
+.
+.   new build_options as _build_options
+.       canonicalize(_build_options, my.meta, my.configuration->registrar(id = "build-options"), "option", "id")
+.
+.       for _build_options.option as _option where !is_defined_positive(_option, "undocumented")
+.           for _option.symbol as _symbol
+.
+$(fix_column("$(documentation_option_symbol(_symbol, _option))", _option.comment, my.column, my.prefix, my.suffix))
+.
+.               if (_option.datatype = "enumeration")
+$(fix_column("", "  $(documentation_values(_option))", my.column, my.prefix, my.suffix))
+.               endif
+.
+.               if (defined(_option->default))
+$(fix_column("", "  $(documentation_default(_option, "msvc"))", my.column, my.prefix, my.suffix))
+.               endif
+.
+.               if defined(_option->hint) & defined(_option->hint.text)
+$(fix_column("", "  $(_option->hint.text)", my.column, my.prefix, my.suffix))
+.               endif
+.           endfor
+.       endfor
+.   endnew
 .endmacro # emit_documentation
 .
 .macro define_display_help(meta, configuration, repository, dependencies)

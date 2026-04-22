@@ -1418,32 +1418,37 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <option id="build-msvc-config"
       canonical="BUILD_CONFIG"
       comment="Build configuration."
-      datatype="string" >
+      datatype="string"
+      placeholder="config" >
       <symbol long="--build-config" />
     </option>
     <option id="build-msvc-platform"
       canonical="BUILD_PLATFORM"
       comment="Build platform."
-      datatype="string" >
+      datatype="string"
+      placeholder="platform" >
       <symbol long="--build-platform" />
     </option>
     <option id="build-msvc-version"
       canonical="BUILD_VERSION"
       comment="Build MSVC version."
-      datatype="string" >
+      datatype="string"
+      placeholder="version" >
       <symbol long="--build-version" />
     </option>
     <option id="build-msvc-mode"
       canonical="BUILD_MODE"
       comment="Determines action on target."
-      datatype="string" >
+      datatype="string"
+      placeholder="mode" >
       <symbol long="--build-mode" />
       <hint text="Default: Rebuild" />
     </option>
     <option id="build-msvc-symbols"
       canonical="BUILD_SYMBOLS"
       comment="Determines treatment of symbols."
-      datatype="enumeration" >
+      datatype="enumeration"
+      placeholder="mode" >
       <symbol long="--build-symbols" />
       <value symbol="default" />
       <value symbol="disabled" />
@@ -1562,7 +1567,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     </option>
     <option id="build-use-local-src"
       canonical="BUILD_USE_LOCAL_SRC"
-      comment="Use existing sources in build-src-dir path."
+      comment="Use existing sources in relevant paths."
       datatype="boolean"
       sanitize="true" >
       <symbol long="--build-use-local-src" />

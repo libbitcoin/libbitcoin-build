@@ -133,66 +133,11 @@ function option_symbol(property, symbol, option, wildcarded)
     return my.result
 endfunction
 
+function documentation_placeholder(option)
+    define my.option = documentation_placeholder.option
 
-function documentation_option_symbol(symbol, option)
-    define my.symbol = documentation_option_symbol.symbol
-    define my.option = documentation_option_symbol.option
-    define my.matches = ""
-    define my.value = ""
-
-    if defined(my.option.placeholder)
-        my.value = "=<$(my.option.placeholder)>"
-    endif
-
-    define my.long = defined(my.symbol.long) ?? \
-        "$(option_symbol("long", my.symbol, my.option))$(my.value)" ? ""
-    define my.short = defined(my.symbol.short) ?? \
-        "$(option_symbol("short", my.symbol, my.option))$(my.value)" ? ""
-
-    if defined(_symbol.long) & defined(_symbol.short)
-        my.matches = "$(my.long), $(my.short)"
-    elsif defined(_symbol.long)
-        my.matches = my.long
-    elsif defined(_symbol.short)
-        my.matches = my.short
-    else
-        abort "Option '$(my.option.id)' symbol lacks long and short."
-    endif
-
-    return my.matches
-endfunction
-
-function documentation_default(option)
-    define my.option = documentation_default.option
-
-    if !defined(my.option->default)
-        abort "Expected 'default' defined for option '$(my.option.id)'."
-    endif
-
-    if !defined(my.option->default.bash)
-        abort "Expected 'default.bash' defined for option '$(my.option.id)'."
-    endif
-
-    return "Default: $(my.option->default.bash)"
-endfunction
-
-function documentation_values(option)
-    define my.option = documentation_values.option
-    define my.values = ""
-
-    for my.option.value as _value
-        if first()
-            my.values = "{ $(_value.symbol)"
-        else
-            my.values = "$(my.values), $(_value.symbol)"
-        endif
-
-        if last()
-            my.values = "$(my.values) }"
-        endif
-    endfor
-
-    return "Values: $(my.values)"
+    return defined(my.option.placeholder) ?? \
+        "=<$(my.option.placeholder)>" ? ""
 endfunction
 
 function parse_option_symbol(symbol, option)
@@ -611,7 +556,7 @@ $(fix_column("", "  $(documentation_values(_option))", my.column, my.prefix, my.
 .               endif
 .
 .               if (defined(_option->default))
-$(fix_column("", "  $(documentation_default(_option))", my.column, my.prefix, my.suffix))
+$(fix_column("", "  $(documentation_default(_option, "bash"))", my.column, my.prefix, my.suffix))
 .               endif
 .
 .               if defined(_option->hint) & defined(_option->hint.text)
@@ -1119,6 +1064,21 @@ $(my.indent)done
 
 $(my.indent)CONFIGURE_OPTIONS_ORIGINAL=("$@")
 $(my.indent)CONFIGURE_OPTIONS=("$@")
+.       for my.install.dependency as _depend
+.           if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
+.               next
+.           endif
+.
+.           # This condition can be turned to 'next' if dependencies are allowed to be
+.           # present without an installation routine in the installer.
+.           # (This may be necessary for tracy due to installation toolchain restrictions)
+.           if !defined(_depend->build(build.method = _depend.hint_build))
+.               abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
+.           endif
+.
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-$(_depend.name)/}")
+.       endfor
+.
 .       for _build_options.option as _option where is_defined_positive(_option, "sanitize")
 .           for _option.symbol as _symbol
 .               if defined(_symbol.long)
@@ -1508,13 +1468,13 @@ main()
         display_build_variables
     fi
 
-.   define_sanitize_input(my.meta, my.configuration, my.repository, my.install)
-
     # handle help
     if [[ "${DISPLAY_HELP}" == "yes" ]]; then
         help
         return 0
     fi
+
+.   define_sanitize_input(my.meta, my.configuration, my.repository, my.install)
 
     msg_heading "Configuration"
     display_build_variables
