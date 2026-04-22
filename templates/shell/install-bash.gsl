@@ -32,6 +32,152 @@ function column_variables(variable, align, prefix, suffix, pad)
     return fix_column(my.variable, ": ${$(my.variable)}", my.align, my.prefix, my.suffix, my.pad)
 endfunction
 
+function option_flag(option, meta)
+    define my.option = option_flag.option
+    define my.meta = option_flag.meta
+    define my.result = ""
+
+    # Cutting corners here - assumption of boolean configuration (currently true)
+    if (count(my.meta.build, count.method = "cmake") > 0)
+        my.result = "-D$(my.option.type)-$(my.option.name)=<ON/OFF>"
+    elsif (count(my.meta.build, count.method = "gnu") > 0)
+        if (my.option.type = "enable")
+            my.result = "--<enable/disable>-$(my.option.name)"
+        elsif (my.option.type = "with")
+            my.result = "--<with/without>-$(my.option.name)"
+        else
+            abort "Unable to generate option due to option type '$(my.option.type)'."
+        endif
+    else
+        abort "Unable to generate option due to build method expectation."
+    endif
+
+    return my.result
+endfunction
+
+function option_flag_default(option, meta)
+    define my.option = option_flag_default.option
+    define my.meta = option_flag_default.meta
+    define my.result = ""
+
+    define my.positive = ""
+    define my.negative = ""
+
+    # Cutting corners here - assumption of boolean configuration (currently true)
+    if (count(my.meta.build, count.method = "cmake") > 0)
+        my.positive = "ON"
+        my.negative = "OFF"
+    elsif (count(my.meta.build, count.method = "gnu") > 0)
+        if (my.option.type = "enable")
+            my.positive = "--enable-$(my.option.name)"
+            my.negative = "--disable-$(my.option.name)"
+        elsif (my.option.type = "with")
+            my.positive = "--with-$(my.option.name)"
+            my.negative = "--without-$(my.option.name)"
+        else
+            abort "Unable to generate option due to option type '$(my.option.type)'."
+        endif
+    else
+        abort "Unable to generate option due to build method expectation."
+    endif
+
+    return is_defined_positive(my.option, "default") ?? my.positive ? my.negative
+endfunction
+
+function registered_option(id, configuration)
+    define my.id = registered_option.id
+    define my.configuration = registered_option.configuration
+    define my.registry = my.configuration->registrar(id = "build-options")
+    return my.registry->option(id = my.id)
+endfunction
+
+function registered_option_default(id, configuration)
+    define my.id = registered_option_default.id
+    define my.configuration = registered_option_default.configuration
+    define my.option = registered_option(my.id, my.configuration)
+    return my.option->default.bash
+endfunction
+
+function registered_option_symbol(id, configuration)
+    define my.id = registered_option_symbol.id
+    define my.configuration = registered_option_symbol.configuration
+    define my.option = registered_option(my.id, my.configuration)
+    return my.option->symbol.long
+endfunction
+
+function option_symbol(property, symbol, option, wildcarded)
+    define my.property = option_symbol.property
+    define my.symbol = option_symbol.symbol
+    define my.option = option_symbol.option
+    define my.wildcarded = option_symbol.wildcarded?
+
+    if !defined(my.symbol.$(my.property))
+        abort "Symbol lacks property '$(my.property)'."
+    endif
+
+    if !(my.option.datatype = "boolean")
+        my.value_extractor = "=*"
+    endif
+
+    define my.result = "$(my.symbol.$(my.property))"
+    if defined(my.wildcarded) & (my.wildcarded = "true")
+        define my.value_extractor = ""
+
+        if !(my.option.datatype = "boolean")
+            my.value_extractor = "=*"
+        endif
+
+        my.result = "$(my.result)$(my.value_extractor)"
+    endif
+
+    return my.result
+endfunction
+
+function documentation_placeholder(option)
+    define my.option = documentation_placeholder.option
+
+    return defined(my.option.placeholder) ?? \
+        "=<$(my.option.placeholder)>" ? ""
+endfunction
+
+function parse_option_symbol(symbol, option)
+    define my.symbol = parse_option_symbol.symbol
+    define my.option = parse_option_symbol.option
+    define my.matches = ""
+
+    define my.long = defined(my.symbol.long) ?? \
+        option_symbol("long", my.symbol, my.option, "true") ? ""
+    define my.short = defined(my.symbol.short) ?? \
+        option_symbol("short", my.symbol, my.option, "true") ? ""
+
+    if defined(_symbol.long) & defined(_symbol.short)
+        my.matches = "$(my.long)|$(my.short)"
+    elsif defined(_symbol.long)
+        my.matches = my.long
+    elsif defined(_symbol.short)
+        my.matches = my.short
+    else
+        abort "Option '$(my.option.id)' symbol lacks long and short."
+    endif
+
+    return my.matches
+endfunction
+
+function parse_option_assign(option)
+    define my.option = parse_option_assign.option
+    define my.value = "\"yes\""
+
+    if !(my.option.datatype = "boolean")
+        my.value = "\"${OPTION#*=}\""
+    endif
+
+    if !defined(my.option.canonical)
+        abort "Option '$(my.option.id)' lacks canonical property."
+    endif
+
+    return "$(my.option.canonical)=$(my.value);;"
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -267,6 +413,7 @@ $(column_variables("BUILD_OBJ_DIR_RELATIVE", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_CONFIG", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_LINK", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_FULL_REPOSITORIES", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_POST_INSTALL_CLEAN", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_USE_LOCAL_SRC", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_SKIP_TESTS", my.column, my.prefix, my.suffix))
 $(column_variables("PARALLEL", my.column, my.prefix, my.suffix))
@@ -349,6 +496,39 @@ $(my.prefix)Script options:$(my.suffix)
 .#  consumed by installer (specific)
 .
 .   for my.install.dependency as _depend
+.       if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
+.           next
+.       endif
+.
+.       define my.deprepo = my.configuration->repository(.name = _depend.name)
+.
+.       for my.deprepo.library as _library
+.           for _library.option as _option
+$(fix_column(option_flag(_option, my.meta), _option.comment, my.column, my.prefix, my.suffix))
+$(fix_column("", "  Default: $(option_flag_default(_option, my.meta))", my.column, my.prefix, my.suffix))
+.           endfor
+.       endfor
+.
+.       if !(_depend.name = my.repository.name)
+.           next
+.       endif
+.
+.       for my.deprepo.binary as _binary
+.           for _binary.option as _option
+$(fix_column(option_flag(_option, my.meta), _option.comment, my.column, my.prefix, my.suffix))
+$(fix_column("", option_flag_default(_option, my.meta), my.column, my.prefix, my.suffix))
+.           endfor
+.       endfor
+.
+.       for my.deprepo.test as _test
+.           for _test.option as _option
+$(fix_column(option_flag(_option, my.meta), _option.comment, my.column, my.prefix, my.suffix))
+$(fix_column("", option_flag_default(_option, my.meta), my.column, my.prefix, my.suffix))
+.           endfor
+.       endfor
+.   endfor
+.
+.   for my.install.dependency as _depend
 .       if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
 .           next
 .       endif
@@ -363,42 +543,28 @@ $(my.prefix)Script options:$(my.suffix)
 $(fix_column("--build-$(_depend.name)", "Build $(textname(_depend)) libraries", my.column, my.prefix, my.suffix))
 .   endfor
 .
-.   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
-$(fix_column("--build-preset=<preset>", "Preset configuration to build.", my.column, my.prefix, my.suffix))
-.   endif
+.   new build_options as _build_options
+.       canonicalize(_build_options, my.meta, my.configuration->registrar(id = "build-options"), "option", "id")
 .
-.#  consumed by installer (generic)
-$(fix_column("--build-src-dir=<path>", "Location of sources.", my.column, my.prefix, my.suffix))
+.       for _build_options.option as _option where !is_defined_positive(_option, "undocumented")
+.           for _option.symbol as _symbol
 .
-.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
-$(fix_column("--build-obj-dir=<path>", "Location of intermedia objects.", my.column, my.prefix, my.suffix))
-$(fix_column("--build-obj-dir-relative", "Use build-obj-dir as relative to project sources.", my.column, my.prefix, my.suffix))
+$(fix_column("$(documentation_option_symbol(_symbol, _option))", _option.comment, my.column, my.prefix, my.suffix))
 .
-$(fix_column("--build-config=<mode>", "Specifies the build configuration.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Valid values: { debug, release }", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Toolchain default behavior will occur if no value specified.", my.column, my.prefix, my.suffix))
+.               if (_option.datatype = "enumeration")
+$(fix_column("", "  $(documentation_values(_option))", my.column, my.prefix, my.suffix))
+.               endif
 .
-$(fix_column("--build-link=<mode>", "Specifies link mode.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Valid values: { dynamic, static }", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Toolchain default behavior will occur if no value specified.", my.column, my.prefix, my.suffix))
-.   endif
+.               if (defined(_option->default))
+$(fix_column("", "  $(documentation_default(_option, "bash"))", my.column, my.prefix, my.suffix))
+.               endif
 .
-$(fix_column("--build-full-repositories", "Sync full github repositories.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Default clones depth 1, single branch", my.column, my.prefix, my.suffix))
-.
-$(fix_column("--build-parallel=<int>", "Number of jobs to run simultaneously.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Default: discovery", my.column, my.prefix, my.suffix))
-.
-$(fix_column("--build-use-local-src", "Use existing sources in build-src-dir path.", my.column, my.prefix, my.suffix))
-.
-.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
-$(fix_column("--prefix=<path>", "Library install location.", my.column, my.prefix, my.suffix))
-$(fix_column("", "  Default: /usr/local", my.column, my.prefix, my.suffix))
-.   endif
-.
-$(fix_column("--verbose", "Display verbose script output.", my.column, my.prefix, my.suffix))
-.
-$(fix_column("--help, -h", "Display usage, overriding script execution.", my.column, my.prefix, my.suffix))
+.               if defined(_option->hint) & defined(_option->hint.text)
+$(fix_column("", "  $(_option->hint.text)", my.column, my.prefix, my.suffix))
+.               endif
+.           endfor
+.       endfor
+.   endnew
 .
 $(my.prefix)$(my.suffix)
 $(my.prefix)All unrecognized options provided shall be passed as configuration$(my.suffix)
@@ -535,7 +701,10 @@ display_configure_options()
     fi
 .endmacro # define_build_initialize_path
 .
-.macro define_helpers_make()
+.macro define_helpers_make(meta, repository, configuration)
+.   define my.meta = define_helpers_make.meta
+.   define my.repository = define_helpers_make.repository
+.   define my.configuration = define_helpers_make.configuration
 
 install_make()
 {
@@ -590,13 +759,15 @@ test_make()
     fi
 
     local RESULT=$?
+.
+.   for my.meta.error as _error where defined(_error.logpath)
 
-    # Test runners emit to the test.log file.
-    if [[ -e "test.log" ]]; then
-        msg_warn "test.log - begin"
-        cat "test.log"
-        msg_warn "test.log - end"
+    if [[ -e "$(_error.logpath)" ]]; then
+        msg_warn "begin error log: $(_error.logpath)"
+        cat "$(_error.logpath)"
+        msg_warn "  end error log: $(_error.logpath)"
     fi
+.   endfor
 
     if [[ ${RESULT} -ne 0 ]]; then
         msg_error "Encountered error, please see test.log contents above."
@@ -609,6 +780,38 @@ test_make()
     pop_directory # BUILD_SRC_DIR/PROJECT
 
     msg_success "'${PROJECT}' test complete."
+}
+
+clean_make()
+{
+    local PROJECT="$1"
+    shift 1
+
+    msg "Preparing to clean ${PROJECT}"
+
+    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+
+    if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
+        push_directory "${BUILD_OBJ_DIR}"
+    else
+        push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    disable_exit_on_error
+
+    make clean
+
+    local RESULT=$?
+
+    if [[ ${RESULT} -ne 0 ]]; then
+        msg_error "Encountered error, please see test.log contents above."
+        exit ${RESULT}
+    fi
+
+    pop_directory # BUILD_OBJ_DIR
+    pop_directory # BUILD_SRC_DIR/PROJECT
+
+    msg_success "'${PROJECT}' clean complete."
 }
 .endmacro # define_helpers_make
 .
@@ -851,42 +1054,49 @@ $(my.c_indent)case ${OPTION} in
 $(indent_column("(--build-$(_depend.name))", "BUILD_$(_depend.name)=\"yes\";;", my.column, my.o_indent))
 .   endfor
 .
-.   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
-$(indent_column("(--build-preset=*)", "BUILD_PRESET=\"${OPTION#*=}\";;", my.column, my.o_indent))
-.   endif
-.
-$(indent_column("(--build-src-dir=*)", "BUILD_SRC_DIR=\"${OPTION#*=}\";;", my.column, my.o_indent))
-.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
-$(indent_column("(--build-obj-dir=*)", "BUILD_OBJ_DIR=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(--build-obj-dir-relative)", "BUILD_OBJ_DIR_RELATIVE=\"yes\";;", my.column, my.o_indent))
-$(indent_column("(--build-config=*)", "BUILD_CONFIG=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(--build-link=*)", "BUILD_LINK=\"${OPTION#*=}\";;", my.column, my.o_indent))
-.   endif
-$(indent_column("(--build-full-repositories)", "BUILD_FULL_REPOSITORIES=\"yes\";;", my.column, my.o_indent))
-$(indent_column("(--build-use-local-src)", "BUILD_USE_LOCAL_SRC=\"yes\";;", my.column, my.o_indent))
-$(indent_column("(--build-parallel=*)", "PARALLEL=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(--build-skip-tests)", "BUILD_SKIP_TESTS=\"yes\";;", my.column, my.o_indent))
-.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
-$(indent_column("(--prefix=*)", "PREFIX=\"${OPTION#*=}\";;", my.column, my.o_indent))
-.   endif
-$(indent_column("(--verbose)", "DISPLAY_VERBOSE=\"yes\";;", my.column, my.o_indent))
-$(indent_column("(--help|-h)", "DISPLAY_HELP=\"yes\";;", my.column, my.o_indent))
-.
-.   if (my.install.hint_options = "cmake")
-$(indent_column("(-DCMAKE_PREFIX_PATH=*)", "CMAKE_PREFIX_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(-DCMAKE_INSTALL_PREFIX=*)", "CMAKE_INSTALL_PREFIX=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(-DCMAKE_INCLUDE_PATH=*)", "CMAKE_INCLUDE_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
-$(indent_column("(-DCMAKE_LIBRARY_PATH=*)", "CMAKE_LIBRARY_PATH=\"${OPTION#*=}\";;", my.column, my.o_indent))
-.   endif
+.   new options as _build_options
+.       canonicalize(_build_options, my.meta, my.configuration->registrar(id = "build-options"), "option", "id")
+.       for _build_options.option as _option
+.           for _option.symbol as _symbol
+.               define my.matches = parse_option_symbol(_symbol, _option)
+.               define my.assign = parse_option_assign(_option)
+$(indent_column("($(my.matches))", "$(my.assign)", my.column, my.o_indent))
+.           endfor
+.       endfor
 .
 $(my.c_indent)esac
 $(my.indent)done
 
 $(my.indent)CONFIGURE_OPTIONS_ORIGINAL=("$@")
 $(my.indent)CONFIGURE_OPTIONS=("$@")
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-*/}")
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--verbose/}")
+.       for my.install.dependency as _depend
+.           if (count_matches_name(my.configuration, "repository", _depend.name) > 0)
+.               next
+.           endif
+.
+.           # This condition can be turned to 'next' if dependencies are allowed to be
+.           # present without an installation routine in the installer.
+.           # (This may be necessary for tracy due to installation toolchain restrictions)
+.           if !defined(_depend->build(build.method = _depend.hint_build))
+.               abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
+.           endif
+.
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-$(_depend.name)/}")
+.       endfor
+.
+.       for _build_options.option as _option where is_defined_positive(_option, "sanitize")
+.           for _option.symbol as _symbol
+.               if defined(_symbol.long)
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("long", _symbol, _option, "true"))/}")
+.               endif
+.
+.               if defined(_symbol.short)
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("short", _symbol, _option, "true"))/}")
+.               endif
+.           endfor
+.       endfor
+.   endnew
+.
 $(my.indent)msg_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
 $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 .
@@ -906,7 +1116,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 
     # --build-preset
     if [[ -z "${BUILD_PRESET}" ]]; then
-        msg_error "No build-preset specified."
+        msg_error "No $(registered_option_symbol("build-preset", my.configuration)) specified."
         help
         exit 1
     fi
@@ -948,22 +1158,19 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 
     # --build-src-dir
     if [[ -z "${BUILD_SRC_DIR}" ]]; then
-        BUILD_SRC_DIR="\$(pwd)"
+        BUILD_SRC_DIR="$(registered_option_default("build-src-dir", my.configuration))"
         msg_verbose "No build-src-dir specified, using default '${BUILD_SRC_DIR}'."
     fi
 
-    if [[ -d "${BUILD_SRC_DIR}" ]]; then
-        push_directory "${BUILD_SRC_DIR}"
-        BUILD_SRC_DIR="\$(pwd)"
-        pop_directory
-        msg_verbose "Determined absolute path for build-src-dir '${BUILD_SRC_DIR}'."
-    else
+    if ! [[ -d "${BUILD_SRC_DIR}" ]]; then
         create_directory "${BUILD_SRC_DIR}"
-        push_directory "${BUILD_SRC_DIR}"
-        BUILD_SRC_DIR="\$(pwd)"
-        pop_directory
-        msg_verbose "Created build-src-dir '${BUILD_SRC_DIR}'."
+        msg_verbose "Created $(registered_option_symbol("build-src-dir", my.configuration)) '${BUILD_SRC_DIR}'."
     fi
+
+    push_directory "${BUILD_SRC_DIR}"
+    BUILD_SRC_DIR="\$(pwd)"
+    pop_directory
+    msg_verbose "Determined absolute path for $(registered_option_symbol("build-src-dir", my.configuration)) '${BUILD_SRC_DIR}'."
 .
 .   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
 .   # Embedded knowledge of CMakePresets: CMAKE_PREFIX_PATH, CMAKE_INSTALL_REFIX_PATH
@@ -977,47 +1184,44 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
     # --build-obj-dir
     if [[ -z "${BUILD_OBJ_DIR}" ]]; then
         if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-            BUILD_OBJ_DIR="obj"
-            msg_verbose "No build-obj-dir specified, using relative default '${BUILD_OBJ_DIR}'."
+            BUILD_OBJ_DIR="$(registered_option_default("build-obj-dir", my.configuration))"
+            msg_verbose "No $(registered_option_symbol("build-obj-dir", my.configuration)) specified, using relative default '${BUILD_OBJ_DIR}'."
         else
-            BUILD_OBJ_DIR="\$(pwd)/obj"
-            msg_verbose "No build-obj-dir specified, using default '${BUILD_OBJ_DIR}'."
+            BUILD_OBJ_DIR="\$(pwd)/$(registered_option_default("build-obj-dir", my.configuration))"
+            msg_verbose "No $(registered_option_symbol("build-obj-dir", my.configuration)) specified, using default '${BUILD_OBJ_DIR}'."
         fi
     fi
 
     if [[ "${BUILD_OBJ_DIR_RELATIVE}" == "yes" ]]; then
-        msg_verbose "Deferring relative path action for build-obj-dir '${BUILD_OBJ_DIR}'."
+        msg_verbose "Deferring relative path action for $(registered_option_symbol("build-obj-dir", my.configuration)) '${BUILD_OBJ_DIR}'."
     else
-        if [[ -d "${BUILD_OBJ_DIR}" ]]; then
-            push_directory "${BUILD_OBJ_DIR}"
-            BUILD_OBJ_DIR="\$(pwd)"
-            pop_directory
-            msg_verbose "Determined absolute path for build-obj-dir '${BUILD_OBJ_DIR}'."
-       else
+        if ! [[ -d "${BUILD_OBJ_DIR}" ]]; then
             create_directory "${BUILD_OBJ_DIR}"
-            push_directory "${BUILD_OBJ_DIR}"
-            BUILD_OBJ_DIR="\$(pwd)"
-            pop_directory
-            msg_verbose "Created build-obj-dir '${BUILD_OBJ_DIR}'."
+            msg_verbose "Created $(registered_option_symbol("build-obj-dir", my.configuration)) '${BUILD_OBJ_DIR}'."
         fi
+
+        push_directory "${BUILD_OBJ_DIR}"
+        BUILD_OBJ_DIR="\$(pwd)"
+        pop_directory
+        msg_verbose "Determined absolute path for $(registered_option_symbol("build-obj-dir", my.configuration)) '${BUILD_OBJ_DIR}'."
     fi
 
     # --build-config
     if [[ -z "${BUILD_CONFIG}" ]]; then
-        msg_verbose "No build-config specified."
+        msg_verbose "No $(registered_option_symbol("build-config", my.configuration)) specified."
     elif [[ "${BUILD_CONFIG}" != "debug" ]] && [[ "${BUILD_CONFIG}" != "release" ]]; then
-        msg_error "Provided build-config '${BUILD_CONFIG}' not a valid value."
+        msg_error "Provided $(registered_option_symbol("build-config", my.configuration)) '${BUILD_CONFIG}' not a valid value."
         help
         exit 1
     else
-        msg_verbose "Using provided build-config '${BUILD_CONFIG}'"
+        msg_verbose "Using provided $(registered_option_symbol("build-config", my.configuration)) '${BUILD_CONFIG}'"
     fi
 
     # --build-link
     if [[ -z "${BUILD_LINK}" ]]; then
-        msg_verbose "No build-link specified."
+        msg_verbose "No $(registered_option_symbol("build-link", my.configuration)) specified."
     elif [[ "${BUILD_LINK}" != "dynamic" ]] && [[ "${BUILD_LINK}" != "static" ]]; then
-        msg_error "Provided build-link '${BUILD_LINK}' not a valid value."
+        msg_error "Provided $(registered_option_symbol("build-link", my.configuration)) '${BUILD_LINK}' not a valid value."
         help
         exit 1
     fi
@@ -1026,7 +1230,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
     if [[ -z "${PREFIX}" ]]; then
         # Always set a prefix (required for OSX and lib detection).
         PREFIX="/usr/local"
-        msg_verbose "No prefix specified, defaulting to '${PREFIX}'."
+        msg_verbose "No $(registered_option_symbol("prefix", my.configuration)) specified, defaulting to '${PREFIX}'."
     else
         # Incorporate the custom libdir into each object, for link time resolution
         if [[ -z "${LD_RUN_PATH}" ]]; then
@@ -1093,7 +1297,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             PARALLEL=\$(sysctl -n hw.ncpu)
         else
             msg_error "Unsupported system: '${OS}'"
-            msg_error "  Unable to determine value for '--parallel='"
+            msg_error "  Unable to determine value for $(registered_option_symbol("build-parallel", my.configuration))"
             msg_error "  Please specify explicitly to continue."
             msg_error ""
             help
@@ -1269,13 +1473,13 @@ main()
         display_build_variables
     fi
 
-.   define_sanitize_input(my.meta, my.configuration, my.repository, my.install)
-
     # handle help
     if [[ "${DISPLAY_HELP}" == "yes" ]]; then
         help
         return 0
     fi
+
+.   define_sanitize_input(my.meta, my.configuration, my.repository, my.install)
 
     msg_heading "Configuration"
     display_build_variables
@@ -1351,6 +1555,9 @@ $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
 $(my.indent)fi
 .           endif
 $(my.indent)install_make "$(_depend.name)"
+$(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
+    $(my.indent)clean_make "$(_depend.name)"
+$(my.indent)fi
 .
 .       elsif (my.active_build.method = "cmake")
 .           require(my.active_build, "build", "filepath")
@@ -1361,6 +1568,9 @@ $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
 $(my.indent)fi
 .           endif
 $(my.indent)install_make "$(_depend.name)"
+$(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
+    $(my.indent)clean_make "$(_depend.name)"
+$(my.indent)fi
 .
 .       elsif (my.active_build.method = "preset")
 .           require(my.active_build, "build", "filepath")
@@ -1371,6 +1581,9 @@ $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
 $(my.indent)fi
 .           endif
 $(my.indent)install_make "$(_depend.name)"
+$(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
+    $(my.indent)clean_make "$(_depend.name)"
+$(my.indent)fi
 .
 .       elsif (my.active_build.method = "boost_build")
 $(my.indent)build_boost "$(_depend.name)" "${$(my.vname)_OPTIONS[@]}"

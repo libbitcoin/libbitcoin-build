@@ -117,7 +117,7 @@ function emit_install_sh(meta, configuration, repository)
             endfor
 
             if (count(_keys.method, count.name = "cmake" | count.name = "preset" | count.name = "gnu") > 0)
-                define_helpers_make()
+                define_helpers_make(my.meta, my.repository, my.configuration)
             endif
 
             for _keys.method as _method
@@ -326,6 +326,76 @@ function is_applicable(option, dependency, repository)
         (defined(my.option.ignore) & (my.option.ignore = "true"))
 
     return !(my.ignorable)
+endfunction
+
+function option_symbol(property, symbol, option)
+    define my.property = option_symbol.property
+    define my.symbol = option_symbol.symbol
+    define my.option = option_symbol.option
+
+    if !defined(my.symbol.$(my.property))
+        abort "Symbol lacks property '$(my.property)'."
+    endif
+
+    return "$(my.symbol.$(my.property))"
+endfunction
+
+function documentation_option_symbol(symbol, option)
+    define my.symbol = documentation_option_symbol.symbol
+    define my.option = documentation_option_symbol.option
+    define my.matches = ""
+    define my.value = documentation_placeholder(my.option)
+
+    define my.long = defined(my.symbol.long) ?? \
+        "$(option_symbol("long", my.symbol, my.option))$(my.value)" ? ""
+    define my.short = defined(my.symbol.short) ?? \
+        "$(option_symbol("short", my.symbol, my.option))$(my.value)" ? ""
+
+    if defined(_symbol.long) & defined(_symbol.short)
+        my.matches = "$(my.long), $(my.short)"
+    elsif defined(_symbol.long)
+        my.matches = my.long
+    elsif defined(_symbol.short)
+        my.matches = my.short
+    else
+        abort "Option '$(my.option.id)' symbol lacks long and short."
+    endif
+
+    return my.matches
+endfunction
+
+function documentation_default(option, type)
+    define my.option = documentation_default.option
+    define my.type = documentation_default.type
+
+    if !defined(my.option->default)
+        abort "Expected 'default' defined for option '$(my.option.id)'."
+    endif
+
+    if !defined(my.option->default.$(my.type))
+        abort "Expected 'default.$(my.type)' defined for option '$(my.option.id)'."
+    endif
+
+    return "Default: $(my.option->default.$(my.type))"
+endfunction
+
+function documentation_values(option)
+    define my.option = documentation_values.option
+    define my.values = ""
+
+    for my.option.value as _value
+        if first()
+            my.values = "{ $(_value.symbol)"
+        else
+            my.values = "$(my.values), $(_value.symbol)"
+        endif
+
+        if last()
+            my.values = "$(my.values) }"
+        endif
+    endfor
+
+    return "Values: $(my.values)"
 endfunction
 
 .endtemplate
