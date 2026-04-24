@@ -16,10 +16,27 @@
       <headers path="include" recursive="true" root="true" />
 
       <!-- Exposed knobs -->
-      <option name="avx2" type="enable" default="no" comment="Use Intel AVX2 intrinsics." />
-      <option name="avx512" type="enable" default="no" comment="Use Intel AVX512 intrinsics." />
-      <option name="sse41" type="enable" default="no" comment="Use SSE4.1 hardware instructions." />
-      <option name="shani" type="enable" default="no" comment="Use Intel/ARM SHA Extensions." />
+      <option name="avx2"
+        type="enable"
+        default="no"
+        comment="Use Intel AVX2 intrinsics." />
+
+      <option name="avx512"
+        type="enable"
+        default="no"
+        comment="Use Intel AVX512 intrinsics." />
+      <!-- msvc="/p:ClCompile_AdditionalOptions=\&quot;/arch:AVX512\&quot;" /> -->
+
+      <option name="sse41"
+        type="enable"
+        default="no"
+        comment="Use SSE4.1 hardware instructions." />
+
+      <option name="shani"
+        type="enable"
+        default="no"
+        comment="Use Intel/ARM SHA Extensions."
+        msvc="/p:Option-sha=true" />
 
       <!-- Dependencies -->
       <dependency name="boost" version="1.86.0">
