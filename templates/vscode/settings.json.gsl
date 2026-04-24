@@ -1,8 +1,8 @@
 .template 0
 ###############################################################################
-# Copyright (c) 2014-2025 libbitcoin developers (see COPYING).
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
 #
-# GSL generate libbitcoin <bitcoin library>-config.cmake.in.
+# GSL generate libbitcoin .vscode/settings.json.
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
@@ -14,7 +14,6 @@
 gsl from "../library/math.gsl"
 gsl from "../library/string.gsl"
 gsl from "../lib/xml.gsl"
-gsl from "../lib/cmake-output.gsl"
 gsl from "../lib/debug.gsl"
 gsl from "../lib/filesystem.gsl"
 gsl from "../lib/output.gsl"
@@ -22,13 +21,14 @@ gsl from "../lib/output.gsl"
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_config_cmake_in(configuration)
-    define my.configuration = generate_config_cmake_in.configuration
+function generate_vscode_settings(configuration)
+    define my.configuration = generate_vscode_settings.configuration
     require(my.configuration->templates, "templates", "resultpath")
 
-    define my.template = my.configuration->templates->template(.name = "config.cmake.in.gsl")
+    define my.filename = "settings.json"
+    define my.template = my.configuration->templates->template(.name = "$(my.filename).gsl")
 
-    if (!defined(my.template))
+    if !defined(my.template)
         abort "Generator configuration missing."
     endif
 
@@ -45,56 +45,36 @@ function generate_config_cmake_in(configuration)
 
         create_directory(my.output_path)
 
-        for _repository.library as _target
-            define my.filename = "$(_target.name)-config.cmake.in"
-            define my.out_file = path_append(my.output_path, my.filename)
-            notify(my.out_file)
-            output(my.out_file)
+        define my.short_name = string.substr(_repository.name, 11, \
+            string.length(_repository.name))
 
-            emit_config_cmake_in(_target, _repository)
-        endfor
+        define my.out_file = path_append(my.output_path, my.filename)
+        notify(my.out_file)
+        output(my.out_file)
+
+        emit_vscode_settings()
 
         close
-     endfor _repository
-endfunction
+    endfor
 
-###############################################################################
-# Library-able?
-###############################################################################
+endfunction
 
 ###############################################################################
 # Functions
 ###############################################################################
 
 ###############################################################################
-# Macros
+# Generation
 ###############################################################################
 .endtemplate
 .template 1
 .
-.macro emit_config_cmake_in(target, repository)
-.   define my.target = emit_config_cmake_in.target
-.   define my.repository = emit_config_cmake_in.repository
-.
-.   copyleft(my.repository.name)
-@PACKAGE_INIT@
-
-include( CMakeFindDependencyMacro )
-
-include( "${CMAKE_CURRENT_LIST_DIR}/$(my.target.name)-targets.cmake" )
-.
-.   for my.target.dependency as _dependency
-.       if defined(_dependency.option)
-
-set( $(get_option(_dependency, my.target, my.repository)) @$(get_option(_dependency, my.target, my.repository))@ )
-.       endif
-.
-.       emit_find_dependency(_dependency, my.target, my.repository, configuration, "find_dependency")
-.   endfor
-
-check_required_components(@PROJECT_NAME@)
-.
-.endmacro # emit_CMakeLists
+.macro emit_vscode_settings()
+{
+    "cmake.sourceDirectory": "${workspaceFolder}/builds/cmake",
+    "cmake.useCMakePresets": "always"
+}
+.endmacro # emit_vscode_settings
 .
 .endtemplate
 .template 0
@@ -102,6 +82,6 @@ check_required_components(@PROJECT_NAME@)
 # Execution
 ###############################################################################
 
-generate_config_cmake_in(configuration)
+generate_vscode_settings(configuration)
 
 .endtemplate
