@@ -188,6 +188,36 @@ if "!$(_depend.name:c)_TAG!" == "" (
         exit /b 1
     )
 
+.   for my.dependencies.dependency as _depend
+.       if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
+.           next
+.       endif
+.
+.       # This condition can be turned to 'next' if dependencies are allowed to be present
+.       # without an installation routine in the installer.
+.       # (This may be necessary for tracy due to installation toolchain restrictions)
+.       if !defined(_depend->build(build.method = _depend.hint_build))
+.           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
+.       endif
+.
+.       # Loop over options to synthesize consumable options and subsequent values
+.       define my.dep_repo = my.configuration->repository(.name = _depend.name)
+.       for my.dep_repo.library as _library
+    set "REMAPPED_PARAMS=!REMAPPED_PARAMS! !$(_library.name)_PARAMS!"
+.       endfor
+.
+.       if (my.dep_repo.name = my.repository.name)
+.           next
+.       endif
+.
+.       for my.dep_repo.binary as _binary
+    set "REMAPPED_PARAMS=!REMAPPED_PARAMS! !$(_binary.name)_PARAMS!"
+.       endfor
+.       for my.dep_repo.test as _test
+    set "REMAPPED_PARAMS=!REMAPPED_PARAMS! !$(_test.name)_PARAMS!"
+.       endfor
+.   endfor
+
     call :msg_heading "Configuration"
     call :display_build_variables
 
@@ -241,22 +271,22 @@ if "!$(_depend.name:c)_TAG!" == "" (
 .           for my.dep_repo.library as _library
 .               define my.name = defined(_library.msvcproj) ?? \
                     _library.msvcproj ? _library.name
-    call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)" "$(my.name)"
+    call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)" "$(my.name)" "!REMAPPED_PARAMS!"
 .               error_trampoline("    ")
 .           endfor
 .           if last()
 .               for my.dep_repo.binary as _binary
 .               define my.name = defined(_binary.msvcproj) ?? \
                     _binary.msvcproj ? _binary.name
-    call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)" "$(my.name)"
+    call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)" "$(my.name)" "!REMAPPED_PARAMS!"
 .                   error_trampoline("    ")
 .               endfor
     if not "!BUILD_SKIP_TESTS!" == "yes" (
 .               for my.dep_repo.test as _test
 .               define my.name = defined(_test.msvcproj) ?? \
                     _test.msvcproj ? _test.name
-        call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)" "$(my.name)"
-.                   error_trampoline("    ")
+        call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)" "$(my.name)" "!REMAPPED_PARAMS!"
+.                   error_trampoline("        ")
 .               endfor
     )
 .           endif
@@ -278,6 +308,42 @@ if "!$(_depend.name:c)_TAG!" == "" (
 :parse_input
     if "%~1" == "" (
         goto :end_parse_input
+.   for my.dependencies.dependency as _depend
+.       if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
+.           next
+.       endif
+.
+.       # This condition can be turned to 'next' if dependencies are allowed to be present
+.       # without an installation routine in the installer.
+.       # (This may be necessary for tracy due to installation toolchain restrictions)
+.       if !defined(_depend->build(build.method = _depend.hint_build))
+.           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
+.       endif
+.
+.       # Loop over options to synthesize consumable options and subsequent values
+.       define my.dep_repo = my.configuration->repository(.name = _depend.name)
+.       for my.dep_repo.library as _library
+.           for _library.option as _option where defined(_option.msvc)
+.               parse_target_option(_library, _option)
+.           endfor
+.       endfor
+.
+.       if (my.dep_repo.name = my.repository.name)
+.           next
+.       endif
+.
+.       for my.dep_repo.binary as _binary
+.           for _binary.option as _option where defined(_option.msvc)
+.               parse_target_option(_library, _option)
+.           endfor
+.       endfor
+.       for my.dep_repo.test as _test
+.           for _test.option as _option where defined(_option.msvc)
+.               parse_target_option(_test, _option)
+.           endfor
+.       endfor
+.   endfor
+.
 .   new build_options as _build_options
 .       canonicalize(_build_options, my.meta, my.configuration->registrar(id = "build-options"), "option", "id")
 .       for _build_options.option as _option
@@ -293,7 +359,7 @@ if "!$(_depend.name:c)_TAG!" == "" (
 .   endnew
     ) else (
         if "!UNHANDLED_ARGS!" == "" (
-            set "UNHANDLED_ARGS=%1"
+            set "UNHANDLED_ARGS=%~1"
         ) else (
             set "UNHANDLED_ARGS=!UNHANDLED_ARGS! %1"
         )
@@ -306,6 +372,18 @@ if "!$(_depend.name:c)_TAG!" == "" (
     exit /b 0
 
 .endmacro # define_main
+.
+.macro parse_target_option(target, option)
+.   define my.target = parse_target_option.target
+.   define my.option = parse_target_option.option
+.
+    ) else if "%~1" == "--$(my.option.type)-$(my.option.name)" (
+        if "!$(my.target.name)_PARAMS!" == "" (
+            set "$(my.target.name)_PARAMS=$(my.option.msvc)"
+        ) else (
+            set "$(my.target.name)_PARAMS=!$(my.target.name)_PARAMS! $(my.option.msvc)"
+        )
+.endmacro # parse_target_option
 .
 .macro parse_option_symbol(property, symbol, option)
 .   define my.property = parse_option_symbol.property
@@ -347,6 +425,45 @@ if "!$(_depend.name:c)_TAG!" == "" (
 .
 .   require(my.meta->column, "column", "const")
 .   define my.column = my.meta->column.const
+.
+.   for my.dependencies.dependency as _depend
+.       if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
+.           next
+.       endif
+.
+.       # This condition can be turned to 'next' if dependencies are allowed to be present
+.       # without an installation routine in the installer.
+.       # (This may be necessary for tracy due to installation toolchain restrictions)
+.       if !defined(_depend->build(build.method = _depend.hint_build))
+.           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
+.       endif
+.
+.       # Loop over options to synthesize consumable options and subsequent values
+.       define my.dep_repo = my.configuration->repository(.name = _depend.name)
+.       for my.dep_repo.library as _library
+.           for _library.option as _option where defined(_option.msvc)
+$(column_variables("$(_library.name)_PARAMS", my.column, my.prefix, my.suffix))
+.           endfor
+.       endfor
+.
+.       if (my.dep_repo.name = my.repository.name)
+.           next
+.       endif
+.
+.       for my.dep_repo.binary as _binary
+.           for _binary.option as _option where defined(_option.msvc)
+$(column_variables("$(_binary.name)_PARAMS", my.column, my.prefix, my.suffix))
+.           endfor
+.       endfor
+.       for my.dep_repo.test as _test
+.           for _test.option as _option where defined(_option.msvc)
+$(column_variables("$(_test.name)_PARAMS", my.column, my.prefix, my.suffix))
+.           endfor
+.       endfor
+.   endfor
+.
+$(column_variables("REMAPPED_PARAMS", my.column, my.prefix, my.suffix))
+$(column_variables("UNHANDLED_ARGS", my.column, my.prefix, my.suffix))
 .
 $(column_variables("BUILD_CONFIG", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_PLATFORM", my.column, my.prefix, my.suffix))
@@ -457,6 +574,20 @@ $(my.prefix)Script managing the build of $(my.repository.name).$(my.suffix)
 $(my.prefix)$(my.suffix)
 $(my.prefix)Script options:$(my.suffix)
 .
+.   for my.dependencies.dependency as _depend
+.       if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
+.           next
+.       endif
+.
+.       define my.deprepo = my.configuration->repository(.name = _depend.name)
+.
+.       for my.deprepo.library as _library
+.           for _library.option as _option where defined(_option.msvc)
+$(fix_column("--$(_option.type)-$(_option.name)", _option.comment, my.column, my.prefix, my.suffix))
+.           endfor
+.       endfor
+.   endfor
+.
 .   new build_options as _build_options
 .       canonicalize(_build_options, my.meta, my.configuration->registrar(id = "build-options"), "option", "id")
 .
@@ -545,6 +676,24 @@ $(fix_column("", "  $(_option->hint.text)", my.column, my.prefix, my.suffix))
     set "PROJECT=%~1"
     set "RELATIVE_PATH=%~2"
     set "TARGET=%~3"
+    shift
+    shift
+    shift
+
+    set "ADDITIONAL_PARAMS="
+:build_msbuild_parse_remaining
+    if "%~1" == "" (
+        goto :end_build_msbuild_parse_remaining
+    ) else (
+        if "!ADDITIONAL_PARAMS!" == "" (
+            set "ADDITIONAL_PARAMS=%~1"
+        ) else (
+            set "ADDITIONAL_PARAMS=!ADDITIONAL_PARAMS! %~1"
+        )
+    )
+    shift
+    goto :build_msbuild_parse_remaining
+:end_build_msbuild_parse_remaining
 
     if not "%TARGET%" == "" (
         if not "!BUILD_MODE!" == "" (
@@ -571,10 +720,10 @@ $(fix_column("", "  $(_option->hint.text)", my.column, my.prefix, my.suffix))
     call :nuget_restore "%PROJECT%"
 .   error_trampoline("    ")
 
-    !MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS!
+    !MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS! !ADDITIONAL_PARAMS!
 
     if %ERRORLEVEL% neq 0 (
-        call :msg_error "!MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS!"
+        call :msg_error "!MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS! !ADDITIONAL_PARAMS!"
         call :pop_directory
         exit /b 1
     )
