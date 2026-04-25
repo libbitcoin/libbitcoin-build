@@ -1317,7 +1317,7 @@
       <property name="cacheVariables" type="object">
         <property name="CMAKE_BUILD_TYPE" value="Debug" />
         <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -Og -g --coverage -fprofile-update=atomic" />
-        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Og -g --coverage -fprofile-update=atomi -fprofile-update=atomic" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Og -g --coverage -fprofile-update=atomic" />
       </property>
     </configuration>
     <configuration name="gnu-release" description="Factored release settings." hidden="true">
@@ -1743,5 +1743,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <job type="shell" name="presets" script="builds/cmake/install-presets.sh" />
       <job type="msvc" name="msvc" script="builds\msvc\build-msvc.cmd" />
     </template>
+    <template name="code-workspace.gsl" path="vscode" outpath="builds/vscode" />
+    <template name="settings.json.gsl" path="vscode" outpath=".vscode" />
   </templates>
 </configuration>
