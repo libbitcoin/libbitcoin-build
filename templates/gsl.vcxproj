@@ -153,7 +153,7 @@ endfunction
 function get_nuget_package_target(package)
     define my.package = get_nuget_package_target.package
     define my.target = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)/build/native/$(my.package.name).targets"
-    if (starts_with(my.package.name, "boost"))
+    if (starts_with(my.package.name, "boost") | starts_with(my.package.name, "libbitcoin-boost"))
         new version as _version
             split_version(_version, my.package.version)
             if ((conv.number(_version.major) >= 1) & (conv.number(_version.minor) >= 67))

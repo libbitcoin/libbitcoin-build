@@ -810,50 +810,68 @@
       <!--<package compiler="vc141" name="boost" version="1.76.0.0" />-->
       <package compiler="vc142" name="boost" version="1.76.0.0" />-->
       <package compiler="vc143" name="boost" version="1.86.0" />
+      <package compiler="vc145" name="libbitcoin-boost" version="1.91.0" />
     </resource>
     <resource canonical="boost_iostreams">
       <package compiler="vc141" name="boost_iostreams-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_iostreams-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_iostreams-vc143" version="1.86.0" />
+      <package compiler="vc145" name="libbitcoin-boost_iostreams-vc145" version="1.91.0" />
     </resource>
     <resource canonical="boost_locale">
       <package compiler="vc141" name="boost_locale-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_locale-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_locale-vc143" version="1.86.0" />
+      <package compiler="vc145" name="libbitcoin-boost_locale-vc145" version="1.91.0" />
     </resource>
     <resource canonical="boost_program_options">
       <package compiler="vc141" name="boost_program_options-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_program_options-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_program_options-vc143" version="1.86.0" />
+      <package compiler="vc145" name="libbitcoin-boost_program_options-vc145" version="1.91.0" />
     </resource>
     <resource canonical="boost_thread">
       <package compiler="vc141" name="boost_thread-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_thread-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_thread-vc143" version="1.86.0" />
+      <package compiler="vc145" name="libbitcoin-boost_thread-vc145" version="1.91.0" />
     </resource>
     <resource canonical="boost_unit_test_framework">
       <package compiler="vc141" name="boost_unit_test_framework-vc141" version="1.76.0.0" />
       <package compiler="vc142" name="boost_unit_test_framework-vc142" version="1.76.0.0" />
       <package compiler="vc143" name="boost_unit_test_framework-vc143" version="1.86.0" />
+      <package compiler="vc145" name="libbitcoin-boost_unit_test_framework-vc145" version="1.91.0" />
       </resource>
     <resource canonical="boost_url">
       <package compiler="vc141" name="boost_url-vc141" version="1.86.0" />
       <package compiler="vc142" name="boost_url-vc142" version="1.86.0" />
       <package compiler="vc143" name="boost_url-vc143" version="1.86.0" />
+      <package compiler="vc145" name="libbitcoin-boost_url-vc145" version="1.91.0" />
     </resource>
     <resource canonical="secp256k1">
       <!-- The vc120 secp256k1 nuget package is no longer supported -->
       <package compiler="vc141" name="secp256k1_vc141" version="0.1.0.20" />
       <package compiler="vc142" name="secp256k1_vc142" version="0.1.0.20" />
       <package compiler="vc143" name="secp256k1_vc143" version="0.6.1" />
+      <package compiler="vc145" name="secp256k1_vc145" version="0.6.1" />
     </resource>
   </nuget>
 
   <vs path="version4">
     <version value="vs2022" />
+    <version value="vs2026" />
   </vs>
 
   <msvc>
+    <toolset name="vs2026">
+      <solution format="12.00" year="15">
+        <version min="10.0.40219.1" value="15.0.27004.2010" />
+      </solution>
+      <msbuild toolset="v145">
+        <version bin="4.0" lib="15.0" />
+      </msbuild>
+      <nuget version="vc145" />
+    </toolset>
     <toolset name="vs2022">
       <solution format="12.00" year="15">
         <version min="10.0.40219.1" value="15.0.27004.2010" />
