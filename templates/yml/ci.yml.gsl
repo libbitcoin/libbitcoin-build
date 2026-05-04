@@ -87,6 +87,21 @@ function compiler(job, entry, language)
     return ""
 endfunction
 
+function package(job, entry)
+    define my.job = package.job
+    define my.entry = package.entry
+
+    if defined(my.job.package) & defined(my.entry.package)
+        return "$(my.job.package) $(my.entry.package)"
+    elsif defined(my.job.package)
+        return my.job.package
+    elsif defined(my.entry.package)
+        return my.entry.package
+    endif
+
+    return ""
+endfunction
+
 function collect_flags(container)
     define my.container = collect_flags.container
 
@@ -154,6 +169,22 @@ function accumulate_options(entry, job)
     return my.options
 endfunction
 
+function count_matrix_entries(identifier, ci)
+    define my.identifier = count_matrix_entries.identifier
+    define my.ci = count_matrix_entries.ci
+    define my.result = 0
+
+    for my.ci.entry as _entry \
+      where (count(_entry.job, count.name = my.identifier) > 0)
+
+        for _entry.job as _entry_job where (_entry_job.name = my.identifier)
+            my.result += 1
+        endfor
+    endfor
+
+    return my.result
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -194,6 +225,10 @@ jobs:
 .   define my.repository = define_ci_job_msvc.repository
 .
 .   require(my.job, "job", "name")
+.
+.   if (count_matrix_entries(my.job.name, my.repository->ci) = 0)
+.       return
+.   endif
 
   $(my.job.name):
     strategy:
@@ -304,6 +339,10 @@ jobs:
 .
 .   require(my.job, "job", "name")
 .
+.   if (count_matrix_entries(my.job.name, my.repository->ci) = 0)
+.       return
+.   endif
+.
 .   new buildset as _buildset
 .       for my.repository->ci.entry as _entry \
           where (count(_entry.job, count.name = my.job.name) > 0)
@@ -352,6 +391,12 @@ jobs:
             cxx: "$(compiler(my.entry_job, _entry, "cxx"))"
             flags: "$(flags(my.entry_job, _entry))"
             coverage: "$(defined(my.entry_job.coverage) ?? my.entry_job.coverage ? "")"
+.
+.           define my.package = package(my.entry_job, _entry)
+.           if !(my.package = "")
+            package: "$(my.package)"
+.           endif
+.
 .
 .           for _buildset.build as _build
 .               define my.value = ""
