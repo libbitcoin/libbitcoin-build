@@ -1,0 +1,221 @@
+<?xml version = "1.0" ?>
+<ci>
+  <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
+    <job name="msvc" configuration="StaticRelease" />
+    <job name="msvc" configuration="StaticDebug" />
+  </entry>
+
+  <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
+    <job name="msvc" configuration="StaticRelease" />
+    <job name="msvc" configuration="StaticDebug" />
+  </entry>
+
+  <!-- clang -->
+  <entry image="macos-latest">
+    <compiler lang="c" name="clang" />
+    <compiler lang="cxx" name="clang++" />
+    <build name="boost" />
+    <build name="secp256k1" />
+    <option name="gnu" value="--enable-isystem" />
+
+    <job name="gnu" config="debug" link="dynamic" />
+    <job name="gnu" config="debug" link="static" />
+    <job name="gnu" config="release" link="dynamic" />
+    <job name="gnu" config="release" link="static" />
+    <job name="cmake" config="debug" link="dynamic" />
+    <job name="cmake" config="debug" link="static" />
+    <job name="cmake" config="release" link="dynamic" />
+    <job name="cmake" config="release" link="static" />
+  </entry>
+
+  <!-- clang -->
+  <entry image="ubuntu-24.04">
+    <build name="boost" />
+    <build name="secp256k1" />
+
+    <compiler lang="c" name="clang" version="19" />
+    <compiler lang="cxx" name="clang++" version="19" />
+
+    <package name="clang-19" />
+    <package name="clang++-19" />
+
+    <option name="gnu" value="--enable-isystem" />
+
+    <job name="gnu" config="debug" link="dynamic" />
+    <job name="gnu" config="debug" link="static" coverage="lcov">
+      <flag value="--coverage" />
+      <flag value="-fprofile-update=atomic" />
+    </job>
+    <job name="gnu" config="release" link="dynamic" />
+    <job name="gnu" config="release" link="static" />
+    <job name="cmake" config="debug" link="dynamic" />
+    <job name="cmake" config="debug" link="static" />
+    <job name="cmake" config="release" link="dynamic" />
+    <job name="cmake" config="release" link="static" />
+    <job name="presets" preset="nix-gnu-debug-shared" />
+    <job name="presets" preset="nix-gnu-debug-static" />
+    <job name="presets" preset="nix-gnu-release-shared" />
+    <job name="presets" preset="nix-gnu-release-static" />
+  </entry>
+
+  <entry image="ubuntu-24.04">
+    <build name="boost" />
+    <build name="secp256k1" />
+
+    <compiler lang="c" name="clang" version="18" />
+    <compiler lang="cxx" name="clang++" version="18" />
+
+    <option name="gnu" value="--enable-isystem" />
+
+    <job name="gnu" config="debug" link="dynamic" />
+    <job name="gnu" config="debug" link="static" coverage="lcov">
+      <flag value="--coverage" />
+      <flag value="-fprofile-update=atomic" />
+    </job>
+    <job name="gnu" config="release" link="dynamic" />
+    <job name="gnu" config="release" link="static" />
+    <job name="cmake" config="debug" link="dynamic" />
+    <job name="cmake" config="debug" link="static" />
+    <job name="cmake" config="release" link="dynamic" />
+    <job name="cmake" config="release" link="static" />
+    <job name="presets" preset="nix-gnu-debug-shared" />
+    <job name="presets" preset="nix-gnu-debug-static" />
+    <job name="presets" preset="nix-gnu-release-shared" />
+    <job name="presets" preset="nix-gnu-release-static" />
+  </entry>
+
+  <!-- gnu compiler -->
+  <entry image="ubuntu-24.04">
+    <build name="boost" />
+    <build name="secp256k1" />
+
+    <compiler lang="c" name="gcc" version="12" />
+    <compiler lang="cxx" name="g++" version="12" />
+
+    <option name="gnu" value="--enable-isystem" />
+
+    <job name="gnu" config="debug" link="dynamic" />
+    <job name="gnu" config="debug" link="static" coverage="lcov">
+      <flag value="--coverage" />
+      <flag value="-fprofile-update=atomic" />
+    </job>
+    <job name="gnu" config="release" link="dynamic" />
+    <job name="gnu" config="release" link="static" />
+    <job name="cmake" config="debug" link="dynamic" />
+    <job name="cmake" config="debug" link="static" />
+    <job name="cmake" config="release" link="dynamic" />
+    <job name="cmake" config="release" link="static" />
+    <job name="presets" preset="nix-gnu-debug-shared" />
+    <job name="presets" preset="nix-gnu-debug-static" />
+    <job name="presets" preset="nix-gnu-release-shared" />
+    <job name="presets" preset="nix-gnu-release-static" />
+  </entry>
+
+  <entry image="ubuntu-24.04">
+    <build name="boost" />
+    <build name="secp256k1" />
+
+    <compiler lang="c" name="gcc" version="13" />
+    <compiler lang="cxx" name="g++" version="13" />
+
+    <option name="gnu" value="--enable-isystem" />
+
+    <job name="gnu" config="debug" link="dynamic" />
+    <job name="gnu" config="debug" link="static" coverage="lcov">
+      <flag value="--coverage" />
+      <flag value="-fprofile-update=atomic" />
+    </job>
+    <job name="gnu" config="release" link="dynamic" />
+    <job name="gnu" config="release" link="static" />
+    <job name="cmake" config="debug" link="dynamic" />
+    <job name="cmake" config="debug" link="static" />
+    <job name="cmake" config="release" link="dynamic" />
+    <job name="cmake" config="release" link="static" />
+    <job name="presets" preset="nix-gnu-debug-shared" />
+    <job name="presets" preset="nix-gnu-debug-static" />
+    <job name="presets" preset="nix-gnu-release-shared" />
+    <job name="presets" preset="nix-gnu-release-static" />
+  </entry>
+
+  <entry image="ubuntu-24.04">
+    <build name="boost" />
+    <build name="secp256k1" />
+
+    <compiler lang="c" name="gcc" version="14" />
+    <compiler lang="cxx" name="g++" version="14" />
+
+    <option name="gnu" value="--enable-isystem" />
+
+    <job name="gnu" config="debug" link="dynamic" />
+    <job name="gnu" config="debug" link="static" coverage="lcov">
+      <flag value="--coverage" />
+      <flag value="-fprofile-update=atomic" />
+    </job>
+    <job name="gnu" config="release" link="dynamic" />
+    <job name="gnu" config="release" link="static" />
+    <job name="cmake" config="debug" link="dynamic" />
+    <job name="cmake" config="debug" link="static" />
+    <job name="cmake" config="release" link="dynamic" />
+    <job name="cmake" config="release" link="static" />
+    <job name="presets" preset="nix-gnu-debug-shared" />
+    <job name="presets" preset="nix-gnu-debug-static" />
+    <job name="presets" preset="nix-gnu-release-shared" />
+    <job name="presets" preset="nix-gnu-release-static" />
+  </entry>
+
+  <entry image="ubuntu-24.04">
+    <build name="boost" />
+    <build name="secp256k1" />
+
+    <compiler lang="c" name="gcc" version="15" />
+    <compiler lang="cxx" name="g++" version="15" />
+    <package name="g++-15" ppa="ubuntu-toolchain-r/test" />
+    <package name="gcc-15" ppa="ubuntu-toolchain-r/test" />
+
+    <option name="gnu" value="--enable-isystem" />
+
+    <job name="gnu" config="debug" link="dynamic" />
+    <job name="gnu" config="debug" link="static" coverage="lcov">
+      <flag value="--coverage" />
+      <flag value="-fprofile-update=atomic" />
+    </job>
+    <job name="gnu" config="release" link="dynamic" />
+    <job name="gnu" config="release" link="static" />
+    <job name="cmake" config="debug" link="dynamic" />
+    <job name="cmake" config="debug" link="static" />
+    <job name="cmake" config="release" link="dynamic" />
+    <job name="cmake" config="release" link="static" />
+    <job name="presets" preset="nix-gnu-debug-shared" />
+    <job name="presets" preset="nix-gnu-debug-static" />
+    <job name="presets" preset="nix-gnu-release-shared" />
+    <job name="presets" preset="nix-gnu-release-static" />
+  </entry>
+
+  <entry image="ubuntu-24.04">
+    <build name="boost" />
+    <build name="secp256k1" />
+
+    <compiler lang="c" name="gcc" version="16" />
+    <compiler lang="cxx" name="g++" version="16" />
+    <package name="g++-16" ppa="ubuntu-toolchain-r/test" />
+    <package name="gcc-16" ppa="ubuntu-toolchain-r/test" />
+
+    <option name="gnu" value="--enable-isystem" />
+
+    <job name="gnu" config="debug" link="dynamic" />
+    <job name="gnu" config="debug" link="static" coverage="lcov">
+      <flag value="--coverage" />
+      <flag value="-fprofile-update=atomic" />
+    </job>
+    <job name="gnu" config="release" link="dynamic" />
+    <job name="gnu" config="release" link="static" />
+    <job name="cmake" config="debug" link="dynamic" />
+    <job name="cmake" config="debug" link="static" />
+    <job name="cmake" config="release" link="dynamic" />
+    <job name="cmake" config="release" link="static" />
+    <job name="presets" preset="nix-gnu-debug-shared" />
+    <job name="presets" preset="nix-gnu-debug-static" />
+    <job name="presets" preset="nix-gnu-release-shared" />
+    <job name="presets" preset="nix-gnu-release-static" />
+   </entry>
+</ci>

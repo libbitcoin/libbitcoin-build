@@ -66,6 +66,54 @@ endfunction
 ###############################################################################
 # Functions
 ###############################################################################
+function property_priority(name, alpha, beta, default)
+    define my.name = property_priority.name
+    define my.alpha = property_priority.alpha
+    define my.beta = property_priority.beta
+
+    if defined(my.alpha.$(my.name))
+        return my.alpha.$(my.name)
+    elsif defined(my.beta.$(my.name))
+        return my.beta.$(my.name)
+    endif
+
+    if defined(property_priority.default)
+        return property_priority.default
+    endif
+endfunction
+
+function property_concat(name, alpha, beta, seperator)
+    define my.name = property_concat.name
+    define my.alpha = property_concat.alpha
+    define my.beta = property_concat.beta
+    define my.seperator = property_concat.seperator ? ""
+
+    if defined(my.alpha.$(my.name)) & defined(my.beta.$(my.name))
+        return "$(my.alpha.$(my.name))$(my.seperator)$(my.beta.$(my.name))"
+    elsif defined(my.alpha.$(my.name))
+        return my.alpha.$(my.name)
+    elsif defined(my.beta.$(my.name))
+        return my.beta.$(my.name)
+    endif
+endfunction
+
+function element_property_concat(element_name, property_name, container, seed, seperator)
+    define my.element_name = element_property_concat.element_name
+    define my.property_name = element_property_concat.property_name
+    define my.container = element_property_concat.container
+    define my.result = my.seed ? ""
+    define my.seperator = element_property_concat.seperator ? ""
+
+    for my.container.$(my.element_name) as _element
+        if (my.result = "")
+            my.result = _element.$(my.property_name)
+        else
+            my.result = "$(my.result) $(_element.$(my.property_name))"
+        endif
+    endfor
+    return my.result
+endfunction
+
 function compiler_name(compiler)
     define my.compiler = compiler_name.compiler
     require(my.compiler, "compiler", "name")
@@ -82,21 +130,6 @@ function compiler(job, entry, language)
         return compiler_name(my.job->compiler(compiler.lang = my.language))
     elsif defined(my.entry->compiler(compiler.lang = my.language))
         return compiler_name(my.entry->compiler(compiler.lang = my.language))
-    endif
-
-    return ""
-endfunction
-
-function package(job, entry)
-    define my.job = package.job
-    define my.entry = package.entry
-
-    if defined(my.job.package) & defined(my.entry.package)
-        return "$(my.job.package) $(my.entry.package)"
-    elsif defined(my.job.package)
-        return my.job.package
-    elsif defined(my.entry.package)
-        return my.entry.package
     endif
 
     return ""
@@ -151,7 +184,8 @@ function accumulate_options(entry, job)
 
     define my.options = ""
 
-    for my.entry.option as _option
+    for my.entry.option as _option where \
+      !defined(_option.name) | (_option.name = my.job.name)
         if (string.length(my.options) > 0)
             my.options = join(my.options, _option.value, " ")
         else
@@ -177,12 +211,49 @@ function count_matrix_entries(identifier, ci)
     for my.ci.entry as _entry \
       where (count(_entry.job, count.name = my.identifier) > 0)
 
-        for _entry.job as _entry_job where (_entry_job.name = my.identifier)
+        for _entry.job as _job where (_job.name = my.identifier)
             my.result += 1
         endfor
     endfor
 
     return my.result
+endfunction
+
+function populate_archives(archives, ci)
+    define my.archives = populate_archives.archives
+    define my.ci = populate_archives.ci
+
+    for my.ci.entry as _entry
+        for _entry.package as _package where defined(_package.ppa)
+            if (count(my.archives.ppa, count.identifier = _package.ppa) > 0)
+                define my.ppa = my.archives->ppa(this.identifier = _package.ppa, this)
+                if (count(my.ppa.package, count.name = _package.name) = 0)
+                    copy _package to my.ppa
+                endif
+            else
+                new my.archives.ppa as _ppa
+                    _ppa.identifier = _package.ppa
+                    copy _package to _ppa
+                endnew
+            endif
+        endfor
+
+        for _entry.job as _job
+            for _job.package as _package where defined(_package.ppa)
+                if (count(my.archives.ppa, .identifier = _package.ppa) > 0)
+                    define my.ppa = my.archives.ppa(.identifier = _package.ppa)
+                    if (count(my.ppa.package, count.name = _package.name) = 0)
+                        copy _package to my.ppa
+                    endif
+                else
+                    new my.archives.ppa as _ppa
+                        _ppa.identifier = _package.ppa
+                        copy _package to _ppa
+                    endnew
+                endif
+            endfor
+        endfor
+    endfor
 endfunction
 
 ###############################################################################
@@ -238,22 +309,20 @@ jobs:
         include:
 .   for my.repository->ci.entry as _entry \
       where (count(_entry.job, count.name = my.job.name) > 0)
+.       define my.insert_separator = !first()
+.       for _entry.job as _job where (_job.name = my.job.name)
 .
-.       for _entry.job as _entry_job where (_entry_job.name = my.job.name)
-.           if !first()
+.           if my.insert_separator
 
+.           else
+.               my.insert_separator = !my.insert_separator
 .           endif
 .
-.           require(_entry_job, "job", "configuration")
-.           require(_entry_job, "job", "platform")
-.           require(_entry_job, "job", "version")
-.           define my.tests = defined(_entry_job.tests) ?? _entry_job.tests ? "*"
-.
-          - image: $(_entry.image)
-            configuration: "$(_entry_job.configuration)"
-            platform: "$(_entry_job.platform)"
-            version: "$(_entry_job.version)"
-            tests: "$(my.tests)"
+          - image: $(property_priority("image", _job, _entry))
+            configuration: "$(property_priority("configuration", _job, _entry))"
+            platform: "$(property_priority("platform", _job, _entry))"
+            version: "$(property_priority("version", _job, _entry))"
+            tests: "$(property_priority("tests", _job, _entry, "*"))"
 .       endfor
 .   endfor
 .   if (count(my.repository.test) = 0)
@@ -372,44 +441,49 @@ jobs:
 
       matrix:
         include:
+.
 .       for my.repository->ci.entry as _entry \
           where (count(_entry.job, count.name = my.job.name) > 0)
 .
-.           define my.entry_job = _entry->job(this.name = my.job.name, this)
-.           if !first()
+.           define my.insert_separator = !first()
+.           for _entry.job as _job where (_job.name = my.job.name)
+.
+.               if my.insert_separator
 
-.           endif
+.               else
+.                   my.insert_separator = !my.insert_separator
+.               endif
+          - image: $(property_priority("image", _job, _entry))
+.               if (_job.name = "presets")
+            preset: "$(property_priority("preset", _job, _entry))"
+.               else
+            config: "$(property_priority("config", _job, _entry))"
+            link: "$(property_priority("link", _job, _entry))"
+.               endif
+            cc: "$(compiler(_job, _entry, "c"))"
+            cxx: "$(compiler(_job, _entry, "cxx"))"
+            flags: "$(flags(_job, _entry))"
+            coverage: "$(defined(_job.coverage) ?? _job.coverage ? "")"
 .
-          - image: $(_entry.image)
-.           if (my.job.name = "presets")
-            preset: "$(my.entry_job.preset)"
-.           else
-            config: "$(_entry.config)"
-            link: "$(_entry.link)"
-.           endif
-            cc: "$(compiler(my.entry_job, _entry, "c"))"
-            cxx: "$(compiler(my.entry_job, _entry, "cxx"))"
-            flags: "$(flags(my.entry_job, _entry))"
-            coverage: "$(defined(my.entry_job.coverage) ?? my.entry_job.coverage ? "")"
-.
-.           define my.package = package(my.entry_job, _entry)
-.           if !(my.package = "")
+.               define my.package = element_property_concat("package", "name", _entry)
+.               if !(my.package = "")
             package: "$(my.package)"
-.           endif
+.               endif
 .
 .
-.           for _buildset.build as _build
-.               define my.value = ""
-.               if ((count(_entry.build, count.name = _build.name) > 0) |\
-                    (count(my.entry_job.build, count.name = _build.name) > 0))
+.               for _buildset.build as _build
+.                   define my.value = ""
+.                   if ((count(_entry.build, count.name = _build.name) > 0) |\
+                        (count(_job.build, count.name = _build.name) > 0))
 .
 .                   my.value = "--build-$(_build.name)"
-.               endif
+.                   endif
             $(_build.name): "$(my.value)"
+.               endfor
+.
+            options: "$(accumulate_options(_entry, _job))"
+.
 .           endfor
-.
-            options: "$(accumulate_options(_entry, my.entry_job))"
-.
 .       endfor
 
     runs-on: ${{ matrix.image }}
@@ -450,6 +524,7 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
+.   emit_conditional_add_ppa("          ", my.repository)
           sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
           if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
               sudo apt-get install lcov
@@ -541,6 +616,26 @@ jobs:
 .
 .
 .endmacro # 
+.
+.macro emit_conditional_add_ppa(indent, repository)
+.   define my.indent = emit_conditional_add_ppa.indent
+.   define my.repository = emit_conditional_add_ppa.repository
+.
+.   new archives as _archives
+.       populate_archives(_archives, my.repository->ci)
+.       for _archives.ppa as _ppa
+.           for _ppa.package as _package
+.               define my.prefix = first() ?? "if " ? "   "
+.               define my.suffix = last() ?? "; then" ? " ||"
+.
+$(my.indent)$(my.prefix)[[ "${{ matrix.package }}" == *"$(_package.name)"* ]]$(my.suffix)
+.           endfor
+  $(my.indent)sudo add-apt-repository ppa:$(_ppa.identifier) -y
+  $(my.indent)sudo apt-get update
+$(my.indent)fi
+.       endfor
+.   endnew
+.endmacro # emit_conditional_add_ppa
 .
 .endtemplate
 .template 0
