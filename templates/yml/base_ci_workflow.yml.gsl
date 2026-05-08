@@ -1,0 +1,662 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL common ci generation.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/sh-output.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_ci_yml(configuration, id)
+    define my.configuration = generate_ci_yml.configuration
+    define my.id = generate_ci_yml.id
+    define my.filename = left(my.id, string.length(my.id) - 4)
+    require(my.configuration->templates, "templates", "resultpath")
+
+    if !(ends_with(my.id, ".gsl"))
+        abort "Provided id '$(my.id)' does not end with '.gsl'."
+    endif
+
+    define my.template = my.configuration->templates->template(.name = my.id)
+
+    if (!defined(my.template))
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+    define my.project_path_suffix = my.template.outpath
+
+    for my.configuration.repository by .name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+
+        if defined(_repository->ci)
+            create_directory(my.output_path)
+
+            define my.out_file = path_append(my.output_path, my.filename)
+            notify(my.out_file)
+            output(my.out_file)
+
+            emit_ci_yml(my.template, my.configuration, _repository)
+
+            close
+        endif
+     endfor _repository
+endfunction
+
+###############################################################################
+# Library-able?
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+function property_priority(name, alpha, beta, default)
+    define my.name = property_priority.name
+    define my.alpha = property_priority.alpha
+    define my.beta = property_priority.beta
+
+    if defined(my.alpha.$(my.name))
+        return my.alpha.$(my.name)
+    elsif defined(my.beta.$(my.name))
+        return my.beta.$(my.name)
+    endif
+
+    if defined(property_priority.default)
+        return property_priority.default
+    endif
+endfunction
+
+function property_concat(name, alpha, beta, seperator)
+    define my.name = property_concat.name
+    define my.alpha = property_concat.alpha
+    define my.beta = property_concat.beta
+    define my.seperator = property_concat.seperator ? " "
+
+    if defined(my.alpha.$(my.name)) & defined(my.beta.$(my.name))
+        return "$(my.alpha.$(my.name))$(my.seperator)$(my.beta.$(my.name))"
+    elsif defined(my.alpha.$(my.name))
+        return my.alpha.$(my.name)
+    elsif defined(my.beta.$(my.name))
+        return my.beta.$(my.name)
+    endif
+endfunction
+
+function element_property_concat(element_name, property_name, container, seed, seperator)
+    define my.element_name = element_property_concat.element_name
+    define my.property_name = element_property_concat.property_name
+    define my.container = element_property_concat.container
+    define my.result = my.seed ? ""
+    define my.seperator = element_property_concat.seperator ? " "
+
+    for my.container.$(my.element_name) as _element
+        if (my.result = "")
+            my.result = _element.$(my.property_name)
+        else
+            my.result = "$(my.result)$(my.seperator)$(_element.$(my.property_name))"
+        endif
+    endfor
+    return my.result
+endfunction
+
+function compiler_name(compiler)
+    define my.compiler = compiler_name.compiler
+    require(my.compiler, "compiler", "name")
+    define my.specifier = defined(my.compiler.version) ?? "-$(my.compiler.version)" ? ""
+    return "$(my.compiler.name)$(my.specifier)"
+endfunction
+
+function compiler(job, entry, language)
+    define my.job = compiler.job
+    define my.entry = compiler.entry
+    define my.language = compiler.language
+
+    if defined(my.job->compiler(compiler.lang = my.language))
+        return compiler_name(my.job->compiler(compiler.lang = my.language))
+    elsif defined(my.entry->compiler(compiler.lang = my.language))
+        return compiler_name(my.entry->compiler(compiler.lang = my.language))
+    endif
+
+    return ""
+endfunction
+
+function collect_flags(container)
+    define my.container = collect_flags.container
+
+    my.result = ""
+    for my.container.flag as _flag
+        if (string.length(my.result) > 0)
+            my.result = join(my.result, _flag.value, " ")
+        else
+            my.result = _flag.value
+        endif
+    endfor
+
+    return my.result
+endfunction
+
+function flags(job, entry)
+    define my.job = flags.job
+    define my.entry = flags.entry
+
+    my.j_flags = collect_flags(my.job)
+    my.e_flags = collect_flags(my.entry)
+
+    return join(my.e_flags, my.j_flags, " ")
+endfunction
+
+function exclusions(repository)
+    define my.repository = exclusions.repository
+
+    if !defined(my.repository->ci)
+        return ""
+    elsif !defined(my.repository->ci->coverage)
+        return ""
+    endif
+
+    define my.result = ""
+
+    for my.repository->ci->coverage.exclude as _exclude
+        my.result += "$(!first() ?? " " ? "")\"${{ github.workspace }}/$(my.repository.name)/$(_exclude.path)\""
+    endfor
+
+    return my.result
+endfunction
+
+function accumulate_options(entry, job)
+    define my.entry = accumulate_options.entry
+    define my.job = accumulate_options.job
+
+    define my.options = ""
+
+    for my.entry.option as _option where \
+      !defined(_option.name) | (_option.name = my.job.name)
+        if (string.length(my.options) > 0)
+            my.options = join(my.options, _option.value, " ")
+        else
+            my.options = _option.value
+        endif
+    endfor
+    for my.job.option as _option
+        if (string.length(my.options) > 0)
+            my.options = join(my.options, _option.value, " ")
+        else
+            my.options = _option.value
+        endif
+    endfor
+
+    return my.options
+endfunction
+
+function count_matrix_entries(identifier, ci, meta)
+    define my.identifier = count_matrix_entries.identifier
+    define my.ci = count_matrix_entries.ci
+    define my.meta = count_matrix_entries.meta
+    define my.result = 0
+
+    for my.ci.entry as _entry \
+      where (count(_entry.job, count.name = my.identifier) > 0)
+
+        for _entry.job as _job where (_job.name = my.identifier)
+            if defined(my.meta->workflow.restricted) & \
+              !is_defined_positive(_job, "$(my.meta->workflow.restricted)")
+                next
+            endif
+
+            my.result += 1
+        endfor
+    endfor
+
+    return my.result
+endfunction
+
+function populate_archives(archives, ci)
+    define my.archives = populate_archives.archives
+    define my.ci = populate_archives.ci
+
+    for my.ci.entry as _entry
+        for _entry.package as _package where defined(_package.ppa)
+            if (count(my.archives.ppa, count.identifier = _package.ppa) > 0)
+                define my.ppa = my.archives->ppa(this.identifier = _package.ppa, this)
+                if (count(my.ppa.package, count.name = _package.name) = 0)
+                    copy _package to my.ppa
+                endif
+            else
+                new my.archives.ppa as _ppa
+                    _ppa.identifier = _package.ppa
+                    copy _package to _ppa
+                endnew
+            endif
+        endfor
+
+        for _entry.job as _job
+            for _job.package as _package where defined(_package.ppa)
+                if (count(my.archives.ppa, .identifier = _package.ppa) > 0)
+                    define my.ppa = my.archives.ppa(.identifier = _package.ppa)
+                    if (count(my.ppa.package, count.name = _package.name) = 0)
+                        copy _package to my.ppa
+                    endif
+                else
+                    new my.archives.ppa as _ppa
+                        _ppa.identifier = _package.ppa
+                        copy _package to _ppa
+                    endnew
+                endif
+            endfor
+        endfor
+    endfor
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_ci_yml(meta, configuration, repository)
+.   define my.meta = emit_ci_yml.meta
+.   define my.configuration = emit_ci_yml.configuration
+.   define my.repository = emit_ci_yml.repository
+.
+.   copyleft(my.repository.name)
+
+name: $(my.meta->workflow.name)
+
+on: [ $(element_property_concat("trigger", "value", my.meta->workflow, "", ", ")) ]
+
+jobs:
+.   new list as _list
+.       canonical_dependency_list(_list, my.repository, my.configuration)
+.
+.       for my.meta->workflow.job as _job
+.           if (_job.type = "shell")
+.               define_ci_job_shell(_job, my.meta, _list, my.configuration, my.repository)
+.           elsif (_job.type = "msvc")
+.               define_ci_job_msvc(_job, my.meta, _list, my.configuration, my.repository)
+.           endif
+.       endfor
+.   endnew
+.
+.endmacro # emit_CMakeLists
+.
+.macro define_ci_job_msvc(job, meta, dependencies, configuration, repository)
+.   define my.job = define_ci_job_msvc.job
+.   define my.meta = define_ci_job_msvc.meta
+.   define my.dependencies = define_ci_job_msvc.dependencies
+.   define my.configuration = define_ci_job_msvc.configuration
+.   define my.repository = define_ci_job_msvc.repository
+.
+.   require(my.job, "job", "name")
+.
+.   if (count_matrix_entries(my.job.name, my.repository->ci, my.meta) = 0)
+.       echo("Skipping msvc")
+.       return
+.   endif
+
+  $(my.job.name):
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+.   define my.first_emitted_entry = 1
+.   for my.repository->ci.entry as _entry \
+      where (count(_entry.job, count.name = my.job.name) > 0)
+.       for _entry.job as _job where (_job.name = my.job.name)
+.           if defined(my.meta->workflow.restricted) & \
+              !is_defined_positive(_job, "$(my.meta->workflow.restricted)")
+.               next
+.           endif
+.
+.           if !my.first_emitted_entry
+
+.           else
+.               my.first_emitted_entry = 0
+.           endif
+.
+          - image: $(property_priority("image", _job, _entry))
+            configuration: "$(property_priority("configuration", _job, _entry))"
+            platform: "$(property_priority("platform", _job, _entry))"
+            version: "$(property_priority("version", _job, _entry))"
+            tests: "$(property_priority("tests", _job, _entry, "*"))"
+.       endfor
+.   endfor
+.   if (count(my.repository.test) = 0)
+.       abort "Expected repository '$(my.repository.name)' to contain a <test> element."
+.   endif
+.   define my.testname = my.repository->test.name
+
+    runs-on: ${{ matrix.image }}
+
+    steps:
+      - name: Get branch name
+        id: get-branch
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set msbuild path
+        uses: microsoft/setup-msbuild@v3
+        with:
+          msbuild-architecture: x64
+.
+.   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
+
+      - name: Checkout repository [$(_depend.name)]
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: '$(_depend.name)'
+.       if !(_depend.name = my.repository.name)
+          ref: ${{ steps.get-branch.outputs.branch_name }}
+          repository: ${{ github.repository_owner }}/$(_depend.name)
+.       else
+          repository: ${{ github.repository }}
+.       endif
+.   endfor
+
+      - name: Execute build
+        shell: cmd
+        working-directory: '$(my.repository.name)'
+        run: >
+          .\\$(my.job.script)
+          --build-src-dir "${{ github.workspace }}"
+          --build-config ${{ matrix.configuration }}
+          --build-platform ${{ matrix.platform }}
+          --build-version ${{ matrix.version }}
+          --build-use-local-src
+
+      - name: Execute tests
+        shell: powershell
+        working-directory: '$(my.repository.name)'
+        run: |
+          Write-Host "Locating test executables..." -ForegroundColor Yellow;
+          $BC_TEST_EXES = @(Get-ChildItem -Path "bin" -recurse | Where-Object { $_.Name -eq "$(my.testname).exe" });
+          If ($BC_TEST_EXES.Count -ne 1) {
+            Write-Host "Failure, invalid count of test executables." -ForegroundColor Red;
+            exit 1;
+          }
+          Write-Host "Found single test executable: " $BC_TEST_EXES.FullName -ForegroundColor Green;
+          $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
+          Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
+          try {
+            Invoke-Expression "$BC_TEST_SINGLETON --log_level=warning --run_test=${{ matrix.tests }} $env:BOOST_UNIT_TEST_OPTIONS"
+          }
+          catch {
+            $ERR = $_;
+            Write-Host "Test execution failure: " $ERR -ForegroundColor Red;
+            exit $ERR;
+          }
+          Write-Host "Test execution complete." -ForegroundColor Green;
+.
+.endmacro # define_ci_job_msvc
+.
+.macro define_ci_job_shell(job, meta, dependencies, configuration, repository)
+.   define my.job = define_ci_job_shell.job
+.   define my.meta = define_ci_job_shell.meta
+.   define my.dependencies = define_ci_job_shell.dependencies
+.   define my.configuration = define_ci_job_shell.configuration
+.   define my.repository = define_ci_job_shell.repository
+.
+.   require(my.job, "job", "name")
+.
+.   if (count_matrix_entries(my.job.name, my.repository->ci, my.meta) = 0)
+.       echo("Skipping shell")
+.       return
+.   endif
+.
+.   new buildset as _buildset
+.       for my.repository->ci.entry as _entry \
+          where (count(_entry.job, count.name = my.job.name) > 0)
+.           for _entry.build as _build
+.               if (count(_buildset.build, count.name = _build.name) > 0)
+.                   next
+.               endif
+.
+.               copy _build to _buildset
+.           endfor
+.
+.           for _entry.job as _entry_job where (_entry_job.name = my.job.name)
+.               for _entry_job.build as _entry_build
+.                   if (count(_buildset.build, count.name = _entry_build.name) > 0)
+.                       next
+.                   endif
+.
+.                   copy _entry_build to _buildset
+.               endfor
+.           endfor
+.       endfor
+.
+
+  $(my.job.name):
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+.
+.       my.first_emitted_entry = 1
+.       for my.repository->ci.entry as _entry \
+          where (count(_entry.job, count.name = my.job.name) > 0)
+.
+.           for _entry.job as _job where (_job.name = my.job.name)
+.               if defined(my.meta->workflow.restricted) & \
+                  !is_defined_positive(_job, "$(my.meta->workflow.restricted)")
+.                   next
+.               endif
+.
+.           if !my.first_emitted_entry
+
+.           else
+.               my.first_emitted_entry = 0
+.           endif
+.
+          - image: $(property_priority("image", _job, _entry))
+.               if (_job.name = "presets")
+            preset: "$(property_priority("preset", _job, _entry))"
+.               else
+            config: "$(property_priority("config", _job, _entry))"
+            link: "$(property_priority("link", _job, _entry))"
+.               endif
+            cc: "$(compiler(_job, _entry, "c"))"
+            cxx: "$(compiler(_job, _entry, "cxx"))"
+            flags: "$(flags(_job, _entry))"
+            coverage: "$(defined(_job.coverage) ?? _job.coverage ? "")"
+.
+.               define my.package = element_property_concat("package", "name", _entry)
+.               if !(my.package = "")
+            package: "$(my.package)"
+.               endif
+.
+.
+.               for _buildset.build as _build
+.                   define my.value = ""
+.                   if ((count(_entry.build, count.name = _build.name) > 0) |\
+                        (count(_job.build, count.name = _build.name) > 0))
+.
+.                   my.value = "--build-$(_build.name)"
+.                   endif
+            $(_build.name): "$(my.value)"
+.               endfor
+.
+            options: "$(accumulate_options(_entry, _job))"
+.
+.           endfor
+.       endfor
+
+    runs-on: ${{ matrix.image }}
+
+    env:
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+      CFLAGS: '${{ matrix.flags }}'
+      CXXFLAGS: '${{ matrix.flags }}'
+
+    steps:
+      - name: Get branch name
+        id: get-branch
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+.
+.   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
+
+      - name: Checkout repository [$(_depend.name)]
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: '$(_depend.name)'
+.       if !(_depend.name = my.repository.name)
+          ref: ${{ steps.get-branch.outputs.branch_name }}
+          repository: ${{ github.repository_owner }}/$(_depend.name)
+.       else
+          repository: ${{ github.repository }}
+.       endif
+.   endfor
+
+      - name: Prepare toolchain [linux]
+        if: ${{ startsWith(matrix.image, 'ubuntu') }}
+        shell: bash
+        run: |
+          sudo apt-get update
+.   emit_conditional_add_ppa("          ", my.repository)
+          sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
+          if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
+              sudo apt-get install lcov
+          fi
+
+      - name: Prepare toolchain [macos]
+        if: ${{ startsWith(matrix.image, 'macos') }}
+        shell: bash
+        run: |
+          brew install autoconf automake libtool ${{ matrix.package || '' }}
+          if [[ -n "${{ matrix.llvm }}" ]]; then
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:${PATH}" >> $GITHUB_ENV
+          fi
+
+      - name: Environmental Computation
+        shell: bash
+        run: |
+.       if (my.job.name = "presets")
+          if [[ "${{ matrix.preset }}" == *shared* ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
+          fi
+.       else
+          if [[ "${{ matrix.link }}" == "dynamic" ]]; then
+              echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
+          fi
+.       endif
+
+      - name: Execute installation
+        shell: bash
+        working-directory: '$(my.repository.name)'
+        run: >
+.       require(my.job, "job", "script")
+          ./$(my.job.script)
+          --build-use-local-src
+          --build-src-dir="${{ github.workspace }}"
+.       if (my.job.name = "presets")
+          --build-preset="${{ matrix.preset }}"
+.       else
+          --prefix="${{ github.workspace }}/prefix"
+          --build-post-install-clean
+          --build-obj-dir="obj"
+          --build-obj-dir-relative
+          --build-config="${{ matrix.config }}"
+          --build-link="${{ matrix.link }}"
+.       endif
+.       for _buildset.build as _build
+          ${{ matrix.$(_build.name) }}
+.       endfor
+          ${{ matrix.options }}
+.   endnew
+
+      - name: Coverage calculation
+        if: ${{ matrix.coverage == 'lcov' }}
+        shell: bash
+        working-directory: '$(my.repository.name)'
+        run: |
+          lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/$(my.repository.name)/examples/*" "${{ github.workspace }}/$(my.repository.name)/test/*" $(exclusions(my.repository)) --output-file coverage.info
+
+      - name: Coveralls.io upload
+        if: ${{ matrix.coverage == 'lcov' }}
+        uses: coverallsapp/github-action@v2.3.6
+        with:
+          format: lcov
+          files: "$(my.repository.name)/coverage.info"
+          github-token: ${{ secrets.github_token }}
+
+      - name: Test artifact collection
+        if: failure()
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+.   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
+.       for my.meta->workflow.error as _error where defined(_error.logpath) & defined(_error.name)
+          if [[ -e "$(_depend.name)/obj/$(_error.logpath)" ]]; then
+            cp "$(_depend.name)/obj/$(_error.logpath)" $(_depend.name)-$(_error.name).errors
+          fi
+.       endfor
+.   endfor
+
+      - name: Test artifact upload
+        if: failure()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: testlogs
+          path: ${{ github.workspace }}/*.errors
+          retention-days: 1
+          if-no-files-found: warn
+.
+.
+.endmacro # 
+.
+.macro emit_conditional_add_ppa(indent, repository)
+.   define my.indent = emit_conditional_add_ppa.indent
+.   define my.repository = emit_conditional_add_ppa.repository
+.
+.   new archives as _archives
+.       populate_archives(_archives, my.repository->ci)
+.       for _archives.ppa as _ppa
+.           for _ppa.package as _package
+.               define my.prefix = first() ?? "if " ? "   "
+.               define my.suffix = last() ?? "; then" ? " ||"
+.
+$(my.indent)$(my.prefix)[[ "${{ matrix.package }}" == *"$(_package.name)"* ]]$(my.suffix)
+.           endfor
+  $(my.indent)sudo add-apt-repository ppa:$(_ppa.identifier) -y
+  $(my.indent)sudo apt-get update
+$(my.indent)fi
+.       endfor
+.   endnew
+.endmacro # emit_conditional_add_ppa
+.
+.endtemplate
+
