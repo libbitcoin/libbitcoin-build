@@ -192,12 +192,18 @@
     </binary>
 
     <ci>
+      <coverage>
+        <exclude path="src/wallet/address/qrencode/*" />
+      </coverage>
+
       <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
-        <job name="msvc" configuration="StaticDebug" />
+        <job name="msvc" configuration="StaticRelease" />
+        <job name="msvc" configuration="StaticDebug" gate="true" />
       </entry>
 
       <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
-        <job name="msvc" configuration="StaticRelease" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticDebug" />
       </entry>
 
       <!-- clang -->
@@ -208,9 +214,15 @@
         <build name="secp256k1" />
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-       </entry>
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="cmake" config="debug" link="dynamic" gate="true" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
@@ -225,8 +237,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="debug" link="dynamic" />
-        <job name="cmake" config="release" link="static" />
+        <job name="gnu" config="debug" link="dynamic" gate="true" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -238,8 +260,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" gate="true" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <!-- gnu compiler -->
@@ -252,7 +284,17 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="release" link="dynamic" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" gate="true" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -265,10 +307,21 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="debug" link="static" coverage="lcov">
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" coverage="lcov" gate="true">
           <flag value="--coverage" />
           <flag value="-fprofile-update=atomic" />
         </job>
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -280,7 +333,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="debug" link="static" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" gate="true" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -294,7 +358,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="static" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -308,8 +383,19 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="debug" link="dynamic" />
-       </entry>
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" gate="true" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
     </ci>
   </repository>
 
@@ -403,11 +489,13 @@
 
     <ci>
       <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
-        <job name="msvc" configuration="StaticDebug" />
+        <job name="msvc" configuration="StaticRelease" />
+        <job name="msvc" configuration="StaticDebug" gate="true" />
       </entry>
 
       <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
-        <job name="msvc" configuration="StaticRelease" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticDebug" />
       </entry>
 
       <!-- clang -->
@@ -418,9 +506,15 @@
         <build name="secp256k1" />
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-       </entry>
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="cmake" config="debug" link="dynamic" gate="true" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
@@ -435,8 +529,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="debug" link="dynamic" />
-        <job name="cmake" config="release" link="static" />
+        <job name="gnu" config="debug" link="dynamic" gate="true" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -448,8 +552,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" gate="true" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <!-- gnu compiler -->
@@ -462,7 +576,17 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="release" link="dynamic" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" gate="true" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -475,10 +599,21 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="debug" link="static" coverage="lcov">
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" coverage="lcov" gate="true">
           <flag value="--coverage" />
           <flag value="-fprofile-update=atomic" />
         </job>
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -490,7 +625,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="debug" link="static" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" gate="true" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -504,7 +650,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="static" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -518,8 +675,19 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="debug" link="dynamic" />
-       </entry>
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" gate="true" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
     </ci>
   </repository>
 
@@ -615,11 +783,13 @@
 
     <ci>
       <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
-        <job name="msvc" configuration="StaticDebug" />
+        <job name="msvc" configuration="StaticRelease" />
+        <job name="msvc" configuration="StaticDebug" gate="true" />
       </entry>
 
       <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
-        <job name="msvc" configuration="StaticRelease" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticDebug" />
       </entry>
 
       <!-- clang -->
@@ -630,9 +800,15 @@
         <build name="secp256k1" />
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-       </entry>
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="cmake" config="debug" link="dynamic" gate="true" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
@@ -647,8 +823,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="debug" link="dynamic" />
-        <job name="cmake" config="release" link="static" />
+        <job name="gnu" config="debug" link="dynamic" gate="true" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -660,8 +846,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" gate="true" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <!-- gnu compiler -->
@@ -674,7 +870,17 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="release" link="dynamic" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" gate="true" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -687,10 +893,21 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="debug" link="static" coverage="lcov">
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" coverage="lcov" gate="true">
           <flag value="--coverage" />
           <flag value="-fprofile-update=atomic" />
         </job>
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -702,7 +919,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="debug" link="static" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" gate="true" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -716,7 +944,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="static" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -730,8 +969,19 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="debug" link="dynamic" />
-       </entry>
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" gate="true" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
     </ci>
   </repository>
 
@@ -802,11 +1052,13 @@
 
     <ci>
       <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
-        <job name="msvc" configuration="StaticDebug" />
+        <job name="msvc" configuration="StaticRelease" />
+        <job name="msvc" configuration="StaticDebug" gate="true" />
       </entry>
 
       <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
-        <job name="msvc" configuration="StaticRelease" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticDebug" />
       </entry>
 
       <!-- clang -->
@@ -817,9 +1069,15 @@
         <build name="secp256k1" />
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-       </entry>
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="cmake" config="debug" link="dynamic" gate="true" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
@@ -834,8 +1092,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="debug" link="dynamic" />
-        <job name="cmake" config="release" link="static" />
+        <job name="gnu" config="debug" link="dynamic" gate="true" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -847,8 +1115,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" gate="true" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <!-- gnu compiler -->
@@ -861,7 +1139,17 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="release" link="dynamic" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" gate="true" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -874,10 +1162,21 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="debug" link="static" coverage="lcov">
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" coverage="lcov" gate="true">
           <flag value="--coverage" />
           <flag value="-fprofile-update=atomic" />
         </job>
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -889,7 +1188,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="debug" link="static" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" gate="true" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -903,7 +1213,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="static" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -917,8 +1238,19 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="debug" link="dynamic" />
-       </entry>
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" gate="true" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
     </ci>
   </repository>
 
@@ -1016,11 +1348,13 @@
 
     <ci>
       <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
-        <job name="msvc" configuration="StaticDebug" />
+        <job name="msvc" configuration="StaticRelease" />
+        <job name="msvc" configuration="StaticDebug" gate="true" />
       </entry>
 
       <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
-        <job name="msvc" configuration="StaticRelease" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticDebug" />
       </entry>
 
       <!-- clang -->
@@ -1031,9 +1365,15 @@
         <build name="secp256k1" />
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-       </entry>
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="cmake" config="debug" link="dynamic" gate="true" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
@@ -1048,8 +1388,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="debug" link="dynamic" />
-        <job name="cmake" config="release" link="static" />
+        <job name="gnu" config="debug" link="dynamic" gate="true" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -1061,8 +1411,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" gate="true" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <!-- gnu compiler -->
@@ -1075,7 +1435,17 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="release" link="dynamic" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" gate="true" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -1088,10 +1458,21 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="debug" link="static" coverage="lcov">
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" coverage="lcov" gate="true">
           <flag value="--coverage" />
           <flag value="-fprofile-update=atomic" />
         </job>
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -1103,7 +1484,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="debug" link="static" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" gate="true" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -1117,7 +1509,18 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="gnu" config="release" link="static" />
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -1131,8 +1534,19 @@
 
         <option name="gnu" value="--enable-isystem" />
 
-        <job name="cmake" config="debug" link="dynamic" />
-       </entry>
+        <job name="gnu" config="debug" link="dynamic" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" gate="true" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
+        <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
     </ci>
   </repository>
 
@@ -1884,14 +2298,36 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
 
     <!-- workflows -->
     <template name="ci.yml.gsl" path="yml" outpath=".github/workflows">
-      <error name="LastTest" logpath="Testing/Temporary/LastTest.log" />
-      <error name="test-suite" logpath="test-suite.log" />
-      <error name="test" logpath="test.log" />
-      <job type="shell" name="gnu" script="builds/gnu/install-gnu.sh" />
-      <job type="shell" name="cmake" script="builds/cmake/install-cmake.sh" />
-      <job type="shell" name="presets" script="builds/cmake/install-presets.sh" />
-      <job type="msvc" name="msvc" script="builds\msvc\build-msvc.cmd" />
-      </template>
+      <workflow name="Continuous Integration" restricted="gate">
+        <job type="shell" name="gnu" script="builds/gnu/install-gnu.sh" />
+        <job type="shell" name="cmake" script="builds/cmake/install-cmake.sh" />
+        <job type="shell" name="presets" script="builds/cmake/install-presets.sh" />
+        <job type="msvc" name="msvc" script="builds\msvc\build-msvc.cmd" />
+
+        <trigger value="pull_request" />
+        <trigger value="push" />
+        <trigger value="workflow_dispatch" />
+
+        <error name="LastTest" logpath="Testing/Temporary/LastTest.log" />
+        <error name="test-suite" logpath="test-suite.log" />
+        <error name="test" logpath="test.log" />
+      </workflow>
+    </template>
+
+    <template name="ci-expanded.yml.gsl" path="yml" outpath=".github/workflows">
+      <workflow name="Expanded Continuous Integration">
+        <job type="shell" name="gnu" script="builds/gnu/install-gnu.sh" />
+        <job type="shell" name="cmake" script="builds/cmake/install-cmake.sh" />
+        <job type="shell" name="presets" script="builds/cmake/install-presets.sh" />
+        <job type="msvc" name="msvc" script="builds\msvc\build-msvc.cmd" />
+
+        <trigger value="workflow_dispatch" />
+
+        <error name="LastTest" logpath="Testing/Temporary/LastTest.log" />
+        <error name="test-suite" logpath="test-suite.log" />
+        <error name="test" logpath="test.log" />
+      </workflow>
+    </template>
 
     <!-- vscode -->
     <template name="code-workspace.gsl" path="vscode" outpath="builds/vscode" />
