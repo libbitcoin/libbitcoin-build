@@ -2188,7 +2188,9 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
   </registrar>
 
   <!-- resultpath provided relative to expected evaluation - libbitcoin-build/process -->
-  <templates source="version4.xml" resultpath="../output/version4">
+  <templates source="version4.xml"
+    resultpath="../output/version4"
+    src_root_path="../..">
 
     <!-- cmake -->
     <template name="CMakeLists.txt.gsl" path="cmake" outpath="builds/cmake">
@@ -2334,6 +2336,13 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <template name="settings.json.gsl" path="vscode" outpath=".vscode" />
 
     <!-- src -->
-    <!-- <template name="include.hpp.gsl" path="src" outpath="include/bitcoin" /> -->
+    <template name="include.hpp.gsl"
+     path="src"
+     outpath="include/bitcoin"
+     filterpath="bitcoin/">
+
+      <match suffix=".hpp" />
+      <match suffix=".h" />
+    </template>
   </templates>
 </configuration>

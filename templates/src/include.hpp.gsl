@@ -1,0 +1,350 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate bitcoin.hpp.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/cpp-output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_include_hpp(configuration)
+    define my.configuration = generate_include_hpp.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.resource_name = "include.hpp"
+    define my.template = my.configuration->templates->template(.name = "$(my.resource_name).gsl")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    define my.project_path_suffix = my.template.outpath
+
+    for my.configuration.repository as _repository
+        require(_repository, "repository", "name")
+
+        # ASSUMPTION: currently assumes 1 path per repository with relative path provided
+        # by template.  generalization for multiple libraries needs path pulled from library.
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+        create_directory(my.output_path)
+
+        if !(starts_with(_repository.name, "libbitcoin-"))
+            abort "Repository name does not start with 'libbitocoin-': '$(_repository.name)'"
+        endif
+
+        for _repository.library as _library where starts_with(_library.name, "libbitcoin-")
+            define my.short_name = short_name(_library)
+            define my.filename = "$(my.short_name).hpp"
+            define my.out_file = path_append(my.output_path, my.filename)
+            notify(my.out_file)
+            output(my.out_file)
+
+            new excludes as _excludes
+                new _excludes.file as _file
+                    _file.path = my.template.filterpath
+                    _file.name = my.filename
+                endnew
+
+                emit_include_hpp(my.short_name, _library, _repository, my.template,\
+                    my.configuration, _excludes)
+            endnew
+            close
+        endfor
+    endfor
+
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+function discover_files(files, meta, path)
+    define my.files = discover_files.files
+    define my.meta = discover_files.meta
+    define my.path = discover_files.path
+
+    # meta presumed structure:
+    # <meta>
+    #   <match ?suffix=suffix? ?exclude="yes/true"? />
+    # </meta>
+    #
+
+    define my.directory = directory.open(my.path)?
+
+    if !defined(my.directory)
+        abort "Directory open failure: $(error_text)"
+    endif
+
+    my.files.path = my.directory.path
+    my.files.name = my.directory.name
+    my.files.query = my.path
+
+    for my.directory.directory as _subdirectory
+        new my.files.directory as _directory
+            discover_files(_directory, my.meta, "$(_subdirectory.path)$(_subdirectory.name)")
+        endnew
+    endfor
+
+    for my.directory.file as _file by _file.name \
+        where is_targeted_file(_file, my.meta)
+
+        new my.files.file as _active_file
+            _active_file.name = _file.name
+            _active_file.path = _file.path
+            _active_file.size = _file.size
+            _active_file.time = _file.time
+            _active_file.date = _file.date
+        endnew
+    endfor
+endfunction
+
+function is_targeted_file(file, meta)
+    define my.file = is_targeted_file.file
+    define my.meta = is_targeted_file.meta
+
+    define my.filterless = (count(my.meta.match) = 0)
+
+    if my.filterless
+        return 1
+    endif
+
+    for my.meta.match as _filter where defined(_filter.suffix)
+        if ends_with(my.file.name, _filter.suffix)
+            return 1
+        endif
+    endfor
+
+    return 0
+endfunction
+
+function short_name(host)
+    define my.host = short_name.host
+
+    if !defined(my.host.name)
+        abort "Missing 'name' property."
+    endif
+
+    if !starts_with(my.host.name, "libbitcoin-")
+        abort "Library '$(my.host.name)' does not start with 'libbitcoin-'."
+    endif
+
+    return string.substr(my.host.name, 11, string.length(my.host.name))
+endfunction
+
+function find_matching_path(headers, directory, prefix)
+    define my.headers = find_matching_path.headers
+    define my.directory = find_matching_path.directory
+    define my.prefix = find_matching_path.prefix
+    define my.include = "include/"
+
+    define my.compare_headers_path = right(my.headers.path, string.length(my.headers.path) - string.length(my.include))
+    define my.compare_dir_path = ""
+
+    if (string.length(my.prefix) <= string.length(my.directory.path) - 2)
+        my.compare_dir_path = string.substr(my.directory.path, string.length(my.prefix), string.length(my.directory.path) - 2)
+    endif
+
+    if (my.compare_headers_path = my.compare_dir_path)
+        return my.headers
+    endif
+
+    for my.headers.headers as _subheaders
+        define my.result = find_matching_path(_subheaders, my.directory, my.prefix)?
+        if defined(my.result)
+            return my.result
+        endif
+    endfor
+endfunction
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_include_hpp(name, library, repository, meta, configuration, excludes)
+.   define my.name = emit_include_hpp.name
+.   define my.library = emit_include_hpp.library
+.   define my.repository = emit_include_hpp.repository
+.   define my.meta = emit_include_hpp.meta
+.   define my.configuration = emit_include_hpp.configuration
+.   define my.excludes = emit_include_hpp.excludes
+.
+.
+.   copyleft(my.library.name)
+.
+.   emit_define_begin(my.name)
+.
+.   # emit blank between begin and any include
+
+.   emit_include_dependencies(my.library, my.repository, my.meta, my.configuration)
+.
+.   new directory as _files
+.       for my.library.headers as _headers where is_defined_positive(_headers, "root")
+.           define my.path = "$(my.configuration->templates.src_root_path)/$(my.repository.name)/$(_headers.path)"
+.           discover_files(_files, my.meta, my.path)
+.       endfor
+.
+.       emit_include_headers(_files, _files.path, my.library, my.repository, my.meta, my.configuration, my.excludes)
+.
+.   endnew
+.
+.   emit_define_end(my.name)
+.
+.endmacro # emit_vscode_settings
+.
+.macro emit_include_files(files, library)
+.   define my.files = emit_include_files.files
+.   define my.library = emit_include_files.library
+.
+.   for my.files.group as _group
+.       if defined(_group.option)
+.           define my.option = my.library.option(.name = _group.option)
+.           if !defined(my.option.type)
+.               abort "Option '$(my.option.name)' lacks 'type'."
+.           endif
+.
+#if $(my.option.type:upper)_$(my.option.name:upper)
+.       endif
+.
+.       emit_include_files(_group, my.library)
+.
+.       if defined(_group.option)
+#endif
+.       endif
+.   endfor
+.
+.   for my.files.file as _file
+.       if defined(_file.option)
+.           define my.option = my.library.option(.name = _file.option)
+.           if !defined(my.option.type)
+.               abort "Option '$(my.option.name)' lacks 'type'."
+.           endif
+.
+#if $(my.option.type:upper)_$(my.option.name:upper)
+.       endif
+.
+#include<$(_file.name)>
+.
+.       if defined(_file.option)
+#endif
+.       endif
+.   endfor
+.
+.endmacro # emit_include_files
+.
+.macro emit_include_headers(files, prefix, library, repository, meta, configuration, excludes)
+.   define my.files = emit_include_headers.files
+.   define my.prefix = emit_include_headers.prefix
+.   define my.library = emit_include_headers.library
+.   define my.repository = emit_include_headers.repository
+.   define my.meta = emit_include_headers.meta
+.   define my.configuration = emit_include_headers.configuration
+.   define my.excludes = emit_include_headers.excludes
+.
+.   define my.path = right(my.files.path, string.length(my.files.path) - string.length(my.prefix))
+.   define my.match = find_matching_path(my.library->headers, my.files, my.prefix)?
+.
+.   if defined(my.match)
+.       if defined(my.match.option)
+.           define my.option = my.library->option(.name = my.match.option)
+.           if !defined(my.option.type)
+.               abort "Option '$(my.option.name)' lacks 'type'."
+.           endif
+#if $(my.option.type:upper)_$(my.option.name:upper)
+.       endif
+.   endif
+.
+.   for my.files.file as _file
+.       if (count(my.excludes.file, (count.path = my.path) & (count.name = _file.name)) = 0)
+#include <$(my.path)$(_file.name)>
+.       endif
+.   endfor
+.
+.   for my.files.directory as _directory
+.       emit_include_headers(_directory, my.prefix, my.library, my.repository, my.meta, my.configuration, my.excludes)
+.   endfor
+.
+.   if defined(my.match)
+.       if defined(my.match.option)
+#endif
+.       endif
+.   endif
+.
+.endmacro # emit_include_headers
+.
+.macro emit_include_dependencies(library, repository, meta, configuration)
+.   define my.library = emit_include_dependencies.library
+.
+.   for my.library.dependency as _depend where starts_with(_depend.name, "libbitcoin-")
+.       define my.short_name = short_name(_depend)
+.
+.       if defined(_depend.option)
+.           define my.option = my.library.option(.name = _depend.option)
+.
+.           if !defined(my.option.type)
+.               abort "Option '$(my.option.name)' lacks 'type'."
+.           endif
+.
+#if $(my.option.type:upper)_$(my.option.name:upper)
+.       endif
+#include <bitcoin/$(my.short_name).hpp>
+.       if defined(_depend.option)
+#endif
+.       endif
+.   endfor
+.
+.endmacro # emit_include_dependencies
+.
+.macro emit_include()
+.endmacro # 
+.
+.macro emit_define_begin(name)
+.   define my.name = emit_define_begin.name
+.
+#ifndef LIBBITCOIN_$(my.name:c,upper)_HPP
+#define LIBBITCOIN_$(my.name:c,upper)_HPP
+
+/**
+ * API Users: Include only this header. Direct use of other headers is fragile
+ * and unsupported as header organization is subject to change.
+ *
+ * Maintainers: Do not include this header internal to this library.
+ */
+.endmacro # emit_define_begin
+.
+.macro emit_define_end(name)
+.   define my.name = emit_define_end.name
+
+#endif
+.endmacro # emit_define_end
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_include_hpp(configuration)
+
+.endtemplate
