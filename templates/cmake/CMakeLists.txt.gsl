@@ -37,7 +37,6 @@ function generate_CMakeLists(configuration)
     require(my.template->cmake, "cmake", "rootpath")
 
     define my.project_path_suffix = my.template.outpath
-    define my.root_path = my.template->cmake.rootpath
 
     for my.configuration.repository by .name as _repository
         require(_repository, "repository", "name")
@@ -52,7 +51,7 @@ function generate_CMakeLists(configuration)
         notify(my.out_file)
         output(my.out_file)
 
-        emit_CMakeLists(_repository, my.root_path)
+        emit_CMakeLists(_repository, my.configuration, my.template)
 
         close
      endfor _repository
@@ -478,15 +477,68 @@ endfunction
 .endtemplate
 .template 1
 .
-.macro emit_CMakeLists(repository, root_path)
+.macro emit_CMakeLists(repository, configuration, meta)
 .   define my.repository = emit_CMakeLists.repository
-.   define my.root_path = emit_CMakeLists.root_path
+.   define my.configuration = emit_CMakeLists.configuration
+.   define my.meta = emit_CMakeLists.meta
+.
+.   define my.github = my.configuration->registrar(.id = "dependency")\
+        ->dependency(.name = my.repository.name)->github
 .
 .   copyleft(my.repository.name)
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
 
+find_package(Git QUIET)
+
+set( GIT_COMMIT_HASH "unknown" )
+set( GIT_COMMIT_HEIGHT 0 )
+set( GIT_DIRTY 0 )
+set( GIT_ORIGIN_URL "https://github.com/$(my.github.owner)/$(my.repository.name)" )
+
+if ( GIT_EXECUTABLE )
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET )
+
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-list --count HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HEIGHT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET )
+
+    if ( NOT GIT_COMMIT_HEIGHT )
+        set( GIT_COMMIT_HEIGHT 0 )
+    endif()
+
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} remote get-url origin
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_ORIGIN_URL
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET )
+
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} status --porcelain
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_STATUS
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET )
+
+    if ( GIT_STATUS )
+        set( GIT_DIRTY 1 )
+    endif()
+endif()
+
+set( LIBBITCOIN_VERSION_MAJOR $(my.repository->version.major) )
+set( LIBBITCOIN_VERSION_MINOR $(my.repository->version.minor) )
+set( LIBBITCOIN_VERSION_PATCH ${GIT_COMMIT_HEIGHT} )
+
 project( $(my.repository.name)
-  VERSION $(my.repository->version.major).$(my.repository->version.minor).0
+  VERSION ${LIBBITCOIN_VERSION_MAJOR}.${LIBBITCOIN_VERSION_MINOR}.${LIBBITCOIN_VERSION_PATCH}
   DESCRIPTION "$(my.repository.description)"
   LANGUAGES $(language_list(my.repository)) )
 
@@ -512,52 +564,56 @@ endif()
 
 .   heading("Linker options.")
 .   render_link_option_checks(my.repository)
+
+.   heading("Configurable file(s).")
+.   render_configurable_files(my.repository, my.meta)
 .
+
 .   for my.repository.library as _library
 
 .       heading("$(target_name(_library)) library")
-.       emit_target(_library, my.repository, my.root_path)
+.       emit_target(_library, my.repository, my.meta)
 .
 .   endfor
 .
 .   for my.repository.test as _test
 
 .       heading("$(target_name(_test)) tests")
-.       emit_target(_test, my.repository, my.root_path)
+.       emit_target(_test, my.repository, my.meta)
 .   endfor
 .
 .   for my.repository.binary as _binary
 
 .       heading("$(target_name(_binary)) executable")
-.       emit_target(_binary, my.repository, my.root_path)
+.       emit_target(_binary, my.repository, my.meta)
 .   endfor
 .
 .   heading("Installation routine.")
-.   emit_installation(my.repository, my.root_path)
+.   emit_installation(my.repository, my.meta)
 .
 .endmacro # emit_CMakeLists
 .
-.macro emit_installation(repository, root_path)
+.macro emit_installation(repository, meta)
 .   define my.repository = emit_installation.repository
-.   define my.root_path = emit_installation.root_path
+.   define my.meta = emit_installation.meta
 .
 include( GNUInstallDirs )
 include( CMakePackageConfigHelpers )
 
 .   for my.repository.library as _target
-.       emit_install_target(_target, my.repository, my.root_path)
+.       emit_install_target(_target, my.repository, my.meta)
 .   endfor
 .
 .   for my.repository.binary as _target where is_defined_positive(_target, "install")
-.       emit_install_target(_target, my.repository, my.root_path)
+.       emit_install_target(_target, my.repository, my.meta)
 .   endfor
 .
 .endmacro # emit_installation
 .
-.macro emit_install_target(target, repository, root_path)
+.macro emit_install_target(target, repository, meta)
 .   define my.target = emit_install_target.target
 .   define my.repository = emit_install_target.repository
-.   define my.root_path = emit_install_target.root_path
+.   define my.meta = emit_install_target.meta
 .
 .   define my.indent = defined(my.target.option) ?? "  " ? ""
 .
@@ -608,6 +664,37 @@ endif()
 .   endif
 .
 .endmacro # emit_install_target
+.
+.macro render_configurable_files(repository, meta)
+.   define my.repository = render_configurable_files.repository
+.   define my.meta = render_configurable_files.meta
+.
+.   for my.repository.library as _library
+.       for _library.configurable as _configurable
+.           emit_configure_file(_configurable, my.meta)
+.       endfor
+.   endfor
+.   for my.repository.test as _test
+.       for _test.configurable as _configurable
+.           emit_configure_file(_configurable, my.meta)
+.       endfor
+.   endfor
+.   for my.repository.binary as _binary
+.       for _binary.configurable as _configurable
+.           emit_configure_file(_configurable, my.meta)
+.       endfor
+.   endfor
+.endmacro # render_configurable_files
+.
+.macro emit_configure_file(configurable, meta)
+.   define my.config = emit_configure_file.configurable
+.   define my.meta = emit_configure_file.meta
+
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/$(my.meta->cmake.rootpath)/$(my.config.path)/$(my.config.input)
+  ${CMAKE_CURRENT_BINARY_DIR}/$(my.config.path)/$(my.config.output)
+  @ONLY )
+.endmacro # emit_configure_files
 .
 .macro emit_list_dependency(dependency, target, repository, indent)
 .   define my.dependency = emit_list_dependency.dependency
@@ -702,10 +789,10 @@ $(my.indent))
 .
 .endmacro # emit_add_test
 .
-.macro emit_target(target, repository, root_path)
+.macro emit_target(target, repository, meta)
 .   define my.target = emit_target.target
 .   define my.repository = emit_target.repository
-.   define my.root_path = emit_target.root_path
+.   define my.meta = emit_target.meta
 .   define my.indent = defined(my.target.option) ?? "  " ? ""
 .
 .   if (defined(my.target.option))
@@ -734,9 +821,9 @@ $(my.indent)add_executable( $(target_name(my.target)) )
 .   emit_target_compile_assignment("target_link_options", "link", \
         my.target, my.repository, my.indent)
 .
-.   emit_target_files(my.target, my.repository, my.root_path, my.indent)
+.   emit_target_files(my.target, my.repository, my.meta, my.indent)
 .
-.   emit_target_include_directories(my.target, my.repository, my.root_path, my.indent)
+.   emit_target_include_directories(my.target, my.repository, my.meta, my.indent)
 .
 .   emit_target_link_libraries(my.target, my.repository, my.indent)
 .
@@ -766,10 +853,10 @@ endif()
 .   endif
 .endmacro # emit_target
 .
-.macro emit_target_include_directories(target, repository, root_path, indent)
+.macro emit_target_include_directories(target, repository, meta, indent)
 .   define my.target = emit_target_include_directories.target
 .   define my.repository = emit_target_include_directories.repository
-.   define my.root_path = emit_target_include_directories.root_path
+.   define my.meta = emit_target_include_directories.meta
 .   define my.indent = emit_target_include_directories.indent
 .   define my.indent_item = "    $(my.indent)"
 .
@@ -780,20 +867,20 @@ endif()
 $(my.indent)target_include_directories( $(target_name(my.target))
   $(my.indent)$((name(my.target) = "library")?? "PUBLIC" ? "PRIVATE")
 .   for my.target.headers as _headers where is_defined_positive(_headers, "root")
-.       emit_target_path(_headers, my.target, my.repository, my.indent_item, my.root_path)
+.       emit_target_path(_headers, my.target, my.repository, my.indent_item, my.meta)
 .       for _headers.headers as _optional where is_defined_positive(_optional, "root")
-.           emit_target_path(_optional, my.target, my.repository, my.indent_item, my.root_path)
+.           emit_target_path(_optional, my.target, my.repository, my.indent_item, my.meta)
 .       endfor
 .   endfor
 $(my.indent))
 .endmacro # emit_target_include_directories
 .
-.macro emit_target_path(pathholder, target, repository, indent, root_path)
+.macro emit_target_path(pathholder, target, repository, indent, meta)
 .   define my.pathholder = emit_target_path.pathholder
 .   define my.target = emit_target_path.target
 .   define my.repository = emit_target_path.repository
 .   define my.indent = emit_target_path.indent
-.   define my.root_path = emit_target_path.root_path
+.   define my.meta = emit_target_path.meta
 .
 .   define my.prefix = ""
 .   define my.suffix = ""
@@ -808,7 +895,7 @@ $(my.indent))
 .   if !is_empty(my.prefix)
 $(my.indent)$(my.prefix)
 .   endif
-$(my.indent_content)$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)/$(my.pathholder.path)>
+$(my.indent_content)$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/$(my.meta->cmake.rootpath)/$(my.pathholder.path)>
 .   if (target_installable(my.target))
 $(my.indent_content)$<INSTALL_INTERFACE:$(my.pathholder.path)>
 .   endif
@@ -1023,10 +1110,10 @@ $(my.indent)if ( !HAS_FLAG_$(flag_name(my.flag):upper) )
 $(my.indent)endif()
 .endmacro # emit_check_compiler_flag
 .
-.macro emit_target_files(target, repository, root_path, indent)
+.macro emit_target_files(target, repository, meta, indent)
 .   define my.target = emit_target_files.target
 .   define my.repository = emit_target_files.repository
-.   define my.root_path = emit_target_files.root_path
+.   define my.meta = emit_target_files.meta
 .   define my.indent = emit_target_files.indent
 .   define my.indent_headers = "      $(my.indent)"
 .   define my.indent_sources = "    $(my.indent)"
@@ -1042,31 +1129,35 @@ $(my.indent)endif()
 .   endif
 .
 .   if (has_headers)
-.       emit_files_declaration(my.target->headers, my.target, my.repository, my.root_path, my.indent)
+.       emit_files_declaration(my.target->headers, my.target, my.repository, my.meta, my.indent)
 .       for my.target->headers.headers as _optional
-.           emit_files_declaration(_optional, my.target, my.repository, my.root_path, my.indent)
+.           emit_files_declaration(_optional, my.target, my.repository, my.meta, my.indent)
 .       endfor
 .   endif
 .
 .   if (has_sources)
-.       emit_files_declaration(my.target->sources, my.target, my.repository, my.root_path, my.indent)
+.       emit_files_declaration(my.target->sources, my.target, my.repository, my.meta, my.indent)
 .       for my.target->sources.sources as _optional
-.           emit_files_declaration(_optional, my.target, my.repository, my.root_path, my.indent)
+.           emit_files_declaration(_optional, my.target, my.repository, my.meta, my.indent)
 .       endfor
 .   endif
 
 $(my.indent)target_sources( $(my.target.name) 
 .   if has_headers
-.       if is_defined_positive(my.target->headers, "private")
-  $(my.indent)PRIVATE
+.       define my.mode = is_defined_positive(my.target->headers, "private") ??\
+            "PRIVATE" ? "PUBLIC"
+.
+  $(my.indent)$(my.mode:upper)
     $(my.indent)FILE_SET HEADERS
-.       else
-  $(my.indent)PUBLIC
-    $(my.indent)FILE_SET HEADERS
-.       endif
-    $(my.indent)BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)/$(my.target->headers.path)"
+    $(my.indent)BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/$(my.meta->cmake.rootpath)/$(my.target->headers.path)"
     $(my.indent)FILES
 .       emit_target_sources_entry(my.target->headers, my.target, my.repository, my.indent_headers)
+.       if (count(my.target.configurable, count.type = "headers") > 0)
+    $(my.indent)FILE_SET HEADERS
+    $(my.indent)BASE_DIRS "${CMAKE_CURRENT_BINARY_DIR}/$(my.target->headers.path)"
+    $(my.indent)FILES
+.       emit_target_configured_files("headers", my.target, my.repository, my.meta, "      $(my.indent)")
+.       endif
 .
 .#       for my.target->headers.headers as _optional
 .#           emit_target_sources_entry(_optional, my.target, my.repository, my.indent_headers)
@@ -1083,11 +1174,23 @@ $(my.indent)target_sources( $(my.target.name)
 $(my.indent))
 .endmacro # emit_target_files
 .
-.macro emit_files_declaration(item, target, repository, root_path, indent)
+.macro emit_target_configured_files(type, target, repository, meta, indent)
+.   define my.type = emit_target_configured_files.type
+.   define my.target = emit_target_configured_files.target
+.   define my.repository = emit_target_configured_files.repository
+.   define my.meta = emit_target_configured_files.meta
+.   define my.indent = emit_target_configured_files.indent
+.
+.   for my.target.configurable as _config where _config.type = my.type
+$(my.indent)"${CMAKE_CURRENT_BINARY_DIR}/$(_config.path)/$(_config.output)"
+.   endfor
+.endmacro # emit_target_configured_files
+.
+.macro emit_files_declaration(item, target, repository, meta, indent)
 .   define my.item = emit_files_declaration.item
 .   define my.target = emit_files_declaration.target
 .   define my.repository = emit_files_declaration.repository
-.   define my.root_path = emit_files_declaration.root_path
+.   define my.meta = emit_files_declaration.meta
 .   define my.indent = emit_files_declaration.indent
 .
 .   new languages as _languages
@@ -1101,7 +1204,7 @@ $(my.indent))
 $(my.indent)file( GLOB_RECURSE $(my.target.name:c)_$(name(my.item):upper)$(my.suffix) CONFIGURE_DEPENDS
 .   for _languages.language as _lang
 .       for _lang.$(name(my.item)) as _entry where defined(_entry.suffix)
-  $(my.indent)"${CMAKE_CURRENT_SOURCE_DIR}/$(my.root_path)/$(my.item.path)/*.$(_entry.suffix)"
+  $(my.indent)"${CMAKE_CURRENT_SOURCE_DIR}/$(my.meta->cmake.rootpath)/$(my.item.path)/*.$(_entry.suffix)"
 .       endfor
 .   endfor
 $(my.indent))
