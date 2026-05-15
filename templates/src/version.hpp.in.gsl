@@ -1,0 +1,144 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate version.hpp.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/cpp-output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_version_hpp_in(configuration)
+    define my.configuration = generate_version_hpp_in.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    define my.project_path_suffix = my.template.outpath
+
+    for my.configuration.repository as _repository
+        require(_repository, "repository", "name")
+        define my.short_name = short_name(_repository)
+
+        # ASSUMPTION: currently assumes 1 path per repository with relative path provided
+        # by template.  generalization for multiple libraries needs path pulled from library.
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, \
+                    path_append(my.project_path_suffix, my.short_name))))
+
+        create_directory(my.output_path)
+
+        if !(starts_with(_repository.name, "libbitcoin-"))
+            abort "Repository name does not start with 'libbitocoin-': '$(_repository.name)'"
+        endif
+
+        for _repository.library as _library where starts_with(_library.name, "libbitcoin-")
+            define my.filename = "version.hpp.in"
+            define my.out_file = path_append(my.output_path, my.filename)
+
+            notify(my.out_file)
+            output(my.out_file)
+
+            emit_version_hpp_in(my.short_name, _library, _repository, my.template,\
+                my.configuration)
+
+            close
+        endfor
+    endfor
+
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+function short_name(host)
+    define my.host = short_name.host
+
+    if !defined(my.host.name)
+        abort "Missing 'name' property."
+    endif
+
+    if !starts_with(my.host.name, "libbitcoin-")
+        abort "Library '$(my.host.name)' does not start with 'libbitcoin-'."
+    endif
+
+    return string.substr(my.host.name, 11, string.length(my.host.name))
+endfunction
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_version_hpp_in(name, library, repository, meta, configuration)
+.   define my.name = emit_version_hpp_in.name
+.   define my.library = emit_version_hpp_in.library
+.   define my.repository = emit_version_hpp_in.repository
+.   define my.meta = emit_version_hpp_in.meta
+.   define my.configuration = emit_version_hpp_in.configuration
+.
+.   define my.reposymbol = "$(my.repository.name:c,upper)"
+.   if !defined(my.repository->version)
+.       abort "Repository lacks 'version' element."
+.   endif
+.
+.   define my.version = my.repository->version
+.
+.   if !defined(my.version.major) | !defined(my.version.minor)
+.       abort "Repository 'version' lacks 'major' or 'minor'."
+.   endif
+.
+.   copyleft(my.library.name)
+.
+#ifndef $(my.reposymbol)_VERSION_HPP
+#define $(my.reposymbol)_VERSION_HPP
+
+/**
+ * The semantic version of this repository as: [major].[minor].[patch]
+ * For interpretation of the versioning scheme see: http://semver.org
+ */
+
+#define $(my.reposymbol)_VERSION        "@LIBBITCOIN_VERSION_MAJOR@.@LIBBITCOIN_VERSION_MINOR@.@LIBBITCOIN_VERSION_PATCH@"
+#define $(my.reposymbol)_MAJOR_VERSION  @LIBBITCOIN_VERSION_MAJOR@
+#define $(my.reposymbol)_MINOR_VERSION  @LIBBITCOIN_VERSION_MINOR@
+#define $(my.reposymbol)_PATCH_VERSION  @LIBBITCOIN_VERSION_PATCH@
+#define $(my.reposymbol)_COMMIT_HASH    @GIT_COMMIT_HASH@
+#define $(my.reposymbol)_REPOSITORY_URL @GIT_REPOSITORY_URL@
+#define $(my.reposymbol)_IS_DIRTY       @GIT_DIRY@
+
+#endif
+.
+.endmacro # emit_version_hpp_in
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_version_hpp_in(configuration)
+
+.endtemplate

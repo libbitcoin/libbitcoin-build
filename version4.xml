@@ -2,9 +2,10 @@
 <configuration language="en-us">
 
   <repository name="libbitcoin-system"
-    version="4.0.0"
     email="eric@voskuil.org"
     description="Bitcoin Cross-Platform C++ Development Toolkit">
+
+    <version major="4" minor="0" />
 
     <language id="c" />
     <language id="c++" />
@@ -415,9 +416,10 @@
   </repository>
 
   <repository name="libbitcoin-network" 
-    version="4.0.0"
     email="eric@voskuil.org"
     description="Bitcoin P2P Network Library">
+
+    <version major="4" minor="0" />
 
     <language id="c" />
     <language id="c++" />
@@ -707,11 +709,12 @@
   </repository>
 
   <repository name="libbitcoin-database"
-    version="4.0.0"
     email="eric@voskuil.org"
     description="Bitcoin High Performance Blockchain Database">
 
-    <language id="c" />
+    <version major="4" minor="0" />
+
+     <language id="c" />
     <language id="c++" />
 
     <library name="libbitcoin-database"
@@ -1001,11 +1004,12 @@
   </repository>
 
   <repository name="libbitcoin-node"
-    version="4.0.0"
     email="eric@voskuil.org"
     description="Bitcoin Full Node">
 
-    <language id="c" />
+    <version major="4" minor="0" />
+
+     <language id="c" />
     <language id="c++" />
 
     <library name="libbitcoin-node"
@@ -1270,11 +1274,12 @@
   </repository>
 
   <repository name="libbitcoin-server"
-    version="4.0.0"
     email="eric@voskuil.org"
     description="Bitcoin Full Node and Query Server">
 
-    <language id="c" />
+    <version major="4" minor="0" />
+
+     <language id="c" />
     <language id="c++" />
 
     <library name="libbitcoin-server"
@@ -2376,14 +2381,20 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
 
     <!-- src -->
     <template name="include.hpp.gsl"
-     path="src"
-     outpath="include/bitcoin"
-     filterpath="bitcoin/">
+      path="src"
+      outpath="include/bitcoin"
+      filterpath="bitcoin/">
 
       <match suffix=".hpp" />
       <match suffix=".h" />
+      <match suffix=".hpp.in" strip=".in" />
     </template>
 
+    <template name="version.hpp.in.gsl"
+      path="src"
+      outpath="include/bitcoin" />
+
+    <!-- git -->
     <template name="gitignore.gsl"
       path="git"
       outpath="">

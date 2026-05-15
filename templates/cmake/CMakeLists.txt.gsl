@@ -486,7 +486,7 @@ endfunction
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
 
 project( $(my.repository.name)
-  VERSION $(my.repository.version)
+  VERSION $(my.repository->version.major).$(my.repository->version.minor).0
   DESCRIPTION "$(my.repository.description)"
   LANGUAGES $(language_list(my.repository)) )
 

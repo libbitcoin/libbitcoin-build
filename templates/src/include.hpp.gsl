@@ -75,6 +75,19 @@ function generate_include_hpp(configuration)
 
 endfunction
 
+function calculated_name(file, meta)
+    define my.file = calculated_name.file
+    define my.meta = calculated_name.meta
+
+    for my.meta.match as _match where ends_with(my.file.name, _match.suffix)
+        if defined(_match.strip)
+            return string.substr(my.file.name, 0, string.length(my.file.name) - string.length(_match.strip) - 1)
+        endif
+    endfor
+
+    return my.file.name
+endfunction
+
 ###############################################################################
 # Functions
 ###############################################################################
@@ -108,12 +121,18 @@ function discover_files(files, meta, path)
     for my.directory.file as _file by _file.name \
         where is_targeted_file(_file, my.meta)
 
+        define my.modified_name = calculated_name(_file, my.meta)
+
+        #if !(my.modified_name = _file.name)
+            # check for redundancy, if so skip
+            if !(count(my.files.file, (count.name = my.modified_name)) = 0)
+                next
+            endif
+        #endif
+
         new my.files.file as _active_file
-            _active_file.name = _file.name
+            _active_file.name = my.modified_name
             _active_file.path = _file.path
-            _active_file.size = _file.size
-            _active_file.time = _file.time
-            _active_file.date = _file.date
         endnew
     endfor
 endfunction
