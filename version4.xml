@@ -2344,5 +2344,76 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <match suffix=".hpp" />
       <match suffix=".h" />
     </template>
+
+    <template name="gitignore.gsl"
+      path="git"
+      outpath="">
+
+      <!-- c/c++ -->
+      <ignore name="*.o" comment="c/c++ compiled objects" />
+
+      <!-- python -->
+      <ignore name="*.pyc" comment="python bytecode" />
+
+      <!-- gnu -->
+      <ignore comment="gnu">
+        <ignore name=".deps" comment="automake dependency tracking" />
+        <ignore name="Makefile" comment="generated Makefile" />
+        <ignore name="Makefile.in" comment="generated Makefile.in" />
+
+        <ignore name=".libs" comment="libtool temporary libraries and object files" />
+        <ignore name="*.la" comment="libtool archives" />
+        <ignore name="*.lo" comment="libtool objects" />
+
+        <ignore name="/aclocal.m4" comment="Macros gathered by aclocal" />
+        <ignore name="/autom4te.cache" comment="autoconf cache directory" />
+        <ignore name="/build-aux" comment="Helper scripts directory" />
+        <ignore name="/config.*" comment="Generated config.* files" />
+        <ignore name="/configure" comment="Generated configure script" />
+        <ignore name="/libtool" comment="The libtool script" />
+        <ignore name=".dirstamp" comment="automake timestamp tracking" />
+      </ignore>
+
+      <!-- pkg-config -->
+      <ignore name="*.pc" comment="pkg-config pc file from .pc.in" />
+
+      <!-- msbuild/msvc -->
+      <ignore comment="msbuild/msvc">
+        <ignore name="/.vs" comment="VS2015+ solution cache" />
+        <ignore name="*.db" comment="SQLite database" />
+        <ignore name="*.db-shm" comment="SQLite shared memory file" />
+        <ignore name="*.db-wal" comment="SQLite write-ahead log" />
+        <ignore name="*.vsidx" comment="Visual Studio index files" />
+        <ignore name="*.lock" comment="Lock files" />
+      </ignore>
+
+      <!-- common temporary/swap files -->
+      <ignore name="*~" comment="backup files" />
+      <ignore name=".*.swp" comment="vim swap files" />
+
+      <ignore comment="common build directories">
+        <ignore name="bin" />
+        <ignore name="build" />
+        <ignore name="obj" />
+      </ignore>
+
+      <!-- IDE specific -->
+      <ignore name="/*.kdev4" comment="KDevelop IDE" />
+      <ignore name="/.cproject" comment="Eclipse/CDT" />
+      <ignore name="/.project" comment="Eclipse/CDT" />
+      <ignore name="/.settings" comment="Eclipse/CDT" />
+      <ignore name="/nbproject" comment="NetBeans" />
+
+      <!-- specific tooling -->
+      <ignore name=".gitnexus" comment="GitNexus tool." />
+
+      <!-- AI specific -->
+      <ignore name="AI agent tooling">
+        <ignore name=".claude" comment="Claude code configuration." />
+        <ignore name="AGENTS.md" comment="cross-tool standard for context." />
+        <ignore name="CLAUDE.md" comment="Project-specific instructions." />
+      </ignore>
+    </template>
+
   </templates>
 </configuration>

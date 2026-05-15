@@ -1,0 +1,125 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin .gitignore
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/sh-output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_gitignore(configuration)
+    define my.configuration = generate_gitignore.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.resource_name = ".gitignore"
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    define my.project_path_suffix = my.template.outpath
+
+    for my.configuration.repository as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+        create_directory(my.output_path)
+
+        define my.short_name = string.substr(_repository.name, 11, \
+            string.length(_repository.name))
+
+        define my.filename = "$(my.resource_name)"
+        define my.out_file = path_append(my.output_path, my.filename)
+        notify(my.out_file)
+        output(my.out_file)
+
+        emit_gitignore(_repository, my.configuration, my.template)
+
+        close
+    endfor
+
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+function has_repository_name(configuration, name)
+    define my.configuration = has_repository_name.configuration
+    define my.name = has_repository_name.name
+
+    return (count_matches_name(my.configuration, "repository", my.name) > 0)
+endfunction
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_gitignore(repository, configuration, meta)
+.   define my.repository = emit_gitignore.repository
+.   define my.configuration = emit_gitignore.configuration
+.   define my.meta = emit_gitignore.meta
+.
+.   copyleft(my.repository.name)
+.
+.   for my.meta.ignore as _ignore
+.       emit_ignore(_ignore, 0)
+.   endfor
+.
+.   for my.repository.ignore as _ignore
+.       emit_ignore(_ignore, 0)
+.   endfor
+.
+.endmacro # emit_gitignore
+.
+.macro emit_ignore(ignore, skip_comment)
+.   define my.ignore = emit_ignore.ignore
+.   define my.skip_comment = emit_ignore.skip_comment
+.
+.   if !my.skip_comment
+.       if defined(my.ignore.comment)
+
+# $(my.ignore.comment)
+.       endif
+.   endif
+.
+.   if defined(my.ignore.name)
+$(my.ignore.name)
+.   endif
+.
+.   for my.ignore.ignore as _ignore
+.       emit_ignore(_ignore, !my.skip_comment)
+.   endfor
+.endmacro # emit_ignore
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_gitignore(configuration)
+
+.endtemplate
