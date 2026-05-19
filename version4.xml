@@ -11,7 +11,7 @@
     <language id="c++" />
 
     <library name="libbitcoin-system"
-      uuid="9f60708-ff48-4c22-952d-43470866f684">
+      uuid="39f60708-ff48-4c22-952d-43470866f684">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
@@ -471,7 +471,7 @@
         <flag id="Wno-uninitialized" />
         <!--<flag id="Wno-maybe-uninitialized" />-->
        </compiler>
-    </library>
+     </library>
 
     <test name="libbitcoin-network-test"
       option="tests" type="with" default="yes"
@@ -1024,7 +1024,7 @@
 
     <version major="4" minor="0" />
 
-     <language id="c" />
+    <language id="c" />
     <language id="c++" />
 
     <library name="libbitcoin-node"
@@ -1299,7 +1299,7 @@
 
     <version major="4" minor="0" />
 
-     <language id="c" />
+    <language id="c" />
     <language id="c++" />
 
     <library name="libbitcoin-server"
@@ -1329,7 +1329,7 @@
         <flag id="fstack-protector-all" />
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-   </library>
+    </library>
 
     <test name="libbitcoin-server-test"
       option="tests" type="with" default="yes"
@@ -2488,6 +2488,43 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
         <ignore name="AGENTS.md" comment="cross-tool standard for context." />
         <ignore name="CLAUDE.md" comment="Project-specific instructions." />
       </ignore>
+    </template>
+
+    <!-- msbuild/msvc -->
+    <template name="sln.gsl"
+      path="msbuild"
+      outpath="builds/msvc">
+
+      <visual_studio name="2022" format="12.00" year="15" outpath="vs2022">
+        <version value="15.0.27004.2010" min="10.0.40219.1" />
+        <type name="c++" uuid="8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942" />
+        </visual_studio>
+
+      <visual_studio name="2026" format="12.00" year="15" outpath="vs2026">
+        <version value="15.0.27004.2010" min="10.0.40219.1" />
+        <type name="c++" uuid="8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942" />
+      </visual_studio>
+
+      <matrix>
+        <axis name="configuration">
+          <entry value="StaticDebug">
+            <library value="DebugLIB" />
+            <binary value="DebugSEXE" />
+            <test value="DebugSEXE" />
+          </entry>
+          <entry value="StaticRelease">
+            <library value="ReleaseLIB" />
+            <binary value="ReleaseSEXE" />
+            <test value="ReleaseSEXE" />
+          </entry>
+        </axis>
+        <axis name="platform">
+          <entry value="Win32" />
+          <entry value="x64" />
+          <entry value="ARM" />
+          <entry value="ARM64" />
+        </axis>
+      </matrix>
     </template>
 
   </templates>
