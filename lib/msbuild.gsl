@@ -1,0 +1,55 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin msbuild utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+
+###############################################################################
+# Specific pattern xml functions
+###############################################################################
+function target_name(target)
+    define my.target = target_name.target
+
+    if defined(my.target.msvcproj)
+        return my.target.msvcproj
+    endif
+
+    return my.target.name
+endfunction
+
+function project_relative_path(target, meta, visual_studio)
+    define my.target = project_relative_path.target
+    define my.meta = project_relative_path.meta
+    define my.vs = project_relative_path.visual_studio
+
+    define my.relevant = target_name(my.target)
+    define my.path = path_append(my.relevant, "$(my.relevant).vcxproj")
+
+    if defined(my.vs.relative_path)
+        my.path = path_append(my.vs.relative_path, my.path)
+    endif
+
+    if defined(my.meta.relative_path)
+        my.path = path_append(my.meta.relative_path, my.path)
+    endif
+
+    return my.path
+endfunction
+
+.endtemplate
+.template 1
+.
+.##############################################################################
+.# Macros
+.##############################################################################
+.
+.endtemplate
+

@@ -1,0 +1,172 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin packages.config
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/xml-output.gsl"
+gsl from "../lib/msbuild.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_packages_config(configuration)
+    define my.configuration = generate_packages_config.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    for my.template.visual_studio as _vs by _vs.name
+        for my.configuration.repository as _repository
+            for _repository.library as _target
+                generate_target_packages_config(_target, _repository, \
+                    my.configuration, _vs, my.template)
+            endfor
+            for _repository.binary as _target
+                generate_target_packages_config(_target, _repository, \
+                    my.configuration, _vs, my.template)
+            endfor
+            for _repository.test as _target
+                generate_target_packages_config(_target, _repository, \
+                    my.configuration, _vs, my.template)
+            endfor
+        endfor
+    endfor
+endfunction
+
+function generate_target_packages_config(target, repository, configuration, visual_studio, meta)
+    define my.target = generate_target_packages_config.target
+    define my.repository = generate_target_packages_config.repository
+    define my.configuration = generate_target_packages_config.configuration
+    define my.visual_studio = generate_target_packages_config.visual_studio
+    define my.meta = generate_target_packages_config.meta
+
+    define my.filename = "packages.config"
+
+    define my.output_path = path_append(my.configuration->templates.resultpath, \
+        path_append(my.repository.name, \
+            path_append(my.meta.outpath, \
+                path_append(my.visual_studio.outpath, \
+                    target_name(my.target)))))
+
+    create_directory(my.output_path)
+
+    define my.out_file = path_append(my.output_path, my.filename)
+
+    notify(my.out_file)
+    output(my.out_file)
+
+    emit_packages_config(my.target, my.repository, my.configuration, \
+        my.meta, my.visual_studio)
+
+    close
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_packages_config(target, repository, configuration, meta, visual_studio)
+.   define my.target = emit_packages_config.target
+.   define my.repository = emit_packages_config.repository
+.   define my.configuration = emit_packages_config.configuration
+.   define my.meta = emit_packages_config.meta
+.   define my.vs = emit_packages_config.visual_studio
+.
+<?xml version="1.0" encoding="utf-8"?>
+.
+.   copyleft(my.repository.name)
+.
+<packages>
+.   emit_packages(my.target, my.repository, my.configuration, my.meta, my.vs, "  ")
+</packages>
+.
+.endmacro # emit_packagees_config
+.
+.macro emit_packages(target, repository, configuration, meta, visual_studio, indent)
+.   define my.target = emit_packages.target
+.   define my.repository = emit_packages.repository
+.   define my.configuration = emit_packages.configuration
+.   define my.meta = emit_packages.meta
+.   define my.vs = emit_packages.visual_studio
+.   define my.indent = emit_packages.indent
+.
+.   new dependencies as _dependencies
+.       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
+.       for _dependencies.dependency as _depend where defined(_depend->nuget)
+.           # address non-component resources
+.           for _depend->nuget.resource as _resource where \
+                !defined(_resource.component)
+.
+.               define my.found = 0
+.
+.               for _resource.package as _package where \
+                    (_package.compiler = my.vs.compiler)
+.
+.                   my.found = 1
+$(my.indent)<package id="$(_package.name)" version="$(_package.version)" targetFramework="Native" />
+.               endfor
+.
+.               if !my.found
+.                   echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.vs.compiler)'.")
+.               endif
+.           endfor
+.
+.           # address component resources
+.           for _depend.component as _component
+.               for _depend->nuget.resource as _resource where \
+                    defined(_resource.component) & (_resource.component = _component.name)
+.
+.                   define my.found = 0
+.
+.                   for _resource.package as _package where \
+                        (_package.compiler = my.vs.compiler)
+.
+.                       my.found = 1
+$(my.indent)<package id="$(_package.name)" version="$(_package.version)" targetFramework="Native" />
+.                   endfor
+.
+.                   if !my.found
+.                       echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.vs.compiler)'.")
+.                   endif
+.               endfor
+.           endfor
+.       endfor
+.   endnew
+.
+.endmacro # emit_packages
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_packages_config(configuration)
+
+.endtemplate

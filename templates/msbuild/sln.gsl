@@ -18,6 +18,7 @@ gsl from "../lib/xml.gsl"
 gsl from "../lib/debug.gsl"
 gsl from "../lib/filesystem.gsl"
 gsl from "../lib/output.gsl"
+gsl from "../lib/msbuild.gsl"
 
 ###############################################################################
 # Generation
@@ -61,34 +62,6 @@ endfunction
 ###############################################################################
 # Functions
 ###############################################################################
-function target_name(target)
-    define my.target = target_name.target
-
-    if defined(my.target.msvcproj)
-        return my.target.msvcproj
-    endif
-
-    return my.target.name
-endfunction
-
-function project_relative_path(target, meta, visual_studio)
-    define my.target = project_relative_path.target
-    define my.meta = project_relative_path.meta
-    define my.vs = project_relative_path.visual_studio
-
-    define my.relevant = target_name(my.target)
-    define my.path = path_append(my.relevant, "$(my.relevant).vcxproj")
-
-    if defined(my.vs.relative_path)
-        my.path = path_append(my.vs.relative_path, my.path)
-    endif
-
-    if defined(my.meta.relative_path)
-        my.path = path_append(my.meta.relative_path, my.path)
-    endif
-
-    return my.path
-endfunction
 
 ###############################################################################
 # Generation
