@@ -25,16 +25,16 @@ function target_name(target)
     return my.target.name
 endfunction
 
-function project_relative_path(target, meta, visual_studio)
+function project_relative_path(target, meta, tooling)
     define my.target = project_relative_path.target
     define my.meta = project_relative_path.meta
-    define my.vs = project_relative_path.visual_studio
+    define my.tooling = project_relative_path.tooling
 
     define my.relevant = target_name(my.target)
     define my.path = path_append(my.relevant, "$(my.relevant).vcxproj")
 
-    if defined(my.vs.relative_path)
-        my.path = path_append(my.vs.relative_path, my.path)
+    if defined(my.tooling.relative_path)
+        my.path = path_append(my.tooling.relative_path, my.path)
     endif
 
     if defined(my.meta.relative_path)

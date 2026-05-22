@@ -36,13 +36,11 @@ function generate_sln(configuration)
 
     require(my.template, "template", "outpath")
 
-    for my.template.visual_studio as _vs by _vs.name
+    for my.template.tools as _tools by _tools.set
         for my.configuration.repository as _repository
-            require(_repository, "repository", "name")
-
             define my.output_path = path_append(my.configuration->templates.resultpath, \
                 path_append(_repository.name, \
-                    path_append(my.template.outpath, _vs.outpath)))
+                    path_append(my.template.outpath, _tools.outpath)))
 
             define my.filename = "$(_repository.name).sln"
 
@@ -53,7 +51,10 @@ function generate_sln(configuration)
             notify(my.out_file)
             output(my.out_file)
 
-            emit_sln(_repository, my.configuration, my.template, _vs)
+            define my.toolchain = my.configuration->toolchain(this.name = _tools.chain, this)
+            copy _tools to my.toolchain
+
+            emit_sln(_repository, my.configuration, my.toolchain, my.template)
             close
         endfor
     endfor
@@ -69,64 +70,41 @@ endfunction
 .endtemplate
 .template 1
 .
-.macro emit_sln(repository, configuration, meta, visual_studio)
+.macro emit_sln(repository, configuration, toolchain, meta)
 .   define my.repository = emit_sln.repository
 .   define my.configuration = emit_sln.configuration
+.   define my.toolchain = emit_sln.toolchain
 .   define my.meta = emit_sln.meta
-.   define my.vs = emit_sln.visual_studio
 .
-.   emit_version(my.vs)
-.   emit_projects(my.vs, my.repository, my.configuration, my.meta)
+Microsoft Visual Studio Solution File, Format Version $(my.toolchain->sln.format)
+# Visual Studio $(my.toolchain->sln.year)
+VisualStudioVersion = $(my.toolchain->sln->version.value)
+MinimumVisualStudioVersion = $(my.toolchain->sln->version.min)
+.
+.   for my.repository. as _target where is_target_element(_target) & defined(_target.uuid)
+.       emit_project(_target, my.repository, my.configuration, my.toolchain, my.meta)
+.   endfor
 .
 Global
 .
-.   emit_solution_matrix(my.meta, "\t")
-.   emit_project_matrix(my.meta, my.repository, "\t")
-.   emit_solution_properties(my.meta, "\t")
+.   emit_solution_matrix(my.toolchain, "\t")
+.   emit_project_matrix(my.repository, my.configuration, my.toolchain, my.meta, "\t")
+.   emit_solution_properties("\t")
 .
 EndGlobal
 .
 .
 .endmacro # emit_sln
 .
-.macro emit_version(visual_studio, repository, configuration, meta)
-.   define my.vs = emit_version.visual_studio
-.
-
-Microsoft Visual Studio Solution File, Format Version $(my.vs.format)
-# Visual Studio $(my.vs.year)
-VisualStudioVersion = $(my.vs->version.value)
-MinimumVisualStudioVersion = $(my.vs->version.min)
-.
-.endmacro # emit_version
-.
-.macro emit_projects(visual_studio, repository, configuration, meta)
-.   define my.visual_studio = emit_projects.visual_studio
-.   define my.repository = emit_projects.repository
-.   define my.configuration = emit_projects.configuration
-.   define my.meta = emit_projects.meta
-.
-.   for my.repository.library as _target where defined(_target.uuid)
-.       emit_project(_target, my.visual_studio, my.repository, my.configuration, my.meta)
-.   endfor
-.   for my.repository.binary as _target where defined(_target.uuid)
-.       emit_project(_target, my.visual_studio, my.repository, my.configuration, my.meta)
-.   endfor
-.   for my.repository.test as _target where defined(_target.uuid)
-.       emit_project(_target, my.visual_studio, my.repository, my.configuration, my.meta)
-.   endfor
-.
-.endmacro # emit_projects
-.
-.macro emit_project(target, visual_studio, repository, configuration, meta)
+.macro emit_project(target, repository, configuration, toolchain, meta)
 .   define my.target = emit_project.target
-.   define my.visual_studio = emit_project.visual_studio
 .   define my.repository = emit_project.repository
 .   define my.configuration = emit_project.configuration
+.   define my.toolchain = emit_project.toolchain
 .   define my.meta = emit_project.meta
 .
-.   define my.project_type = my.visual_studio->type(.name = "c++").uuid
-.   define my.path = project_relative_path(my.target, my.meta, my.visual_studio)
+.   define my.project_type = my.toolchain->sln->type(.name = "c++").uuid
+.   define my.path = project_relative_path(my.target, my.meta, my.toolchain->tools)
 .   define my.sub = substitute_separator(my.path, "/", "\\")
 .
 Project("{$(my.project_type)}") = "$(target_name(my.target))", "$(my.sub)", "{$(my.target.uuid:upper)}"
@@ -134,54 +112,48 @@ EndProject
 .
 .endmacro # emit_project
 .
-.macro emit_solution_matrix(meta, indent)
-.   define my.meta = emit_solution_matrix.meta
+.macro emit_solution_matrix(toolchain, indent)
+.   define my.toolchain = emit_solution_matrix.toolchain
 .   define my.indent = emit_solution_matrix.indent
 .
 $(my.indent)GlobalSection(SolutionConfigurationPlatforms) = preSolution
-.   for my.meta->matrix->axis(.name = "configuration").entry as _config
-.       for my.meta->matrix->axis(.name = "platform").entry as _platform
+.   for my.toolchain->sln->axis(.name = "configuration").entry as _config
+.       for my.toolchain->sln->axis(.name = "platform").entry as _platform
 \t$(my.indent)$(_config.value)|$(_platform.value) = $(_config.value)|$(_platform.value)
 .       endfor
 .   endfor
 $(my.indent)EndGlobalSection
 .endmacro # emit_solution_matrix
 .
-.macro emit_project_matrix(meta, repository, indent)
-.   define my.meta = emit_project_matrix.meta
+.macro emit_project_matrix(repository, configuration, toolchain, meta, indent)
 .   define my.repository = emit_project_matrix.repository
+.   define my.configuration = emit_project_matrix.configuration
+.   define my.toolchain = emit_project_matrix.toolchain
+.   define my.meta = emit_project_matrix.meta
 .   define my.indent = emit_project_matrix.indent
 .
 $(my.indent)GlobalSection(ProjectConfigurationPlatforms) = postSolution
-.   for my.repository.library as _target where defined(_target.uuid)
-.       emit_target_matrix(_target, my.meta, "\t$(my.indent)")
+.   for my.repository. as _target where is_target_element(_target) & defined(_target.uuid)
+.       emit_target_matrix(_target, my.toolchain, "\t$(my.indent)")
 .   endfor
-.   for my.repository.binary as _target where defined(_target.uuid)
-.       emit_target_matrix(_target, my.meta, "\t$(my.indent)")
-.   endfor
-.   for my.repository.test as _target where defined(_target.uuid)
-.       emit_target_matrix(_target, my.meta, "\t$(my.indent)")
-.   endfor
-.
 $(my.indent)EndGlobalSection
 .endmacro # emit_presolution_matrix
 .
-.macro emit_target_matrix(target, meta, indent)
+.macro emit_target_matrix(target, toolchain, indent)
 .   define my.target = emit_target_matrix.target
-.   define my.meta = emit_target_matrix.meta
+.   define my.toolchain = emit_target_matrix.toolchain
 .   define my.indent = emit_target_matrix.indent
 .
-.   for my.meta->matrix->axis(.name = "configuration").entry as _config
+.   for my.toolchain->sln->axis(.name = "configuration").entry as _config
 .       define my.target_config = _config->$(name(my.target)).value
-.       for my.meta->matrix->axis(.name = "platform").entry as _platform
+.       for my.toolchain->sln->axis(.name = "platform").entry as _platform
 $(my.indent){$(my.target.uuid:upper)}.$(_config.value)|$(_platform.value).ActiveCfg = $(my.target_config)|$(_platform.value)
 $(my.indent){$(my.target.uuid:upper)}.$(_config.value)|$(_platform.value).Build.0 = $(my.target_config)|$(_platform.value)
 .       endfor
 .   endfor
 .endmacro # emit_target_matrix
 .
-.macro emit_solution_properties(meta, indent)
-.   define my.meta = emit_solution_properties.meta
+.macro emit_solution_properties(indent)
 .   define my.indent = emit_solution_properties.indent
 .
 $(my.indent)GlobalSection(SolutionProperties) = preSolution

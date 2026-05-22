@@ -49,7 +49,6 @@ function global.merge_child(destination, element, identifier)
     endif
 endfunction
 
-
 function global.merge_children_select(destination, source, name, identifier)
     define my.destination = merge_children_select.destination
     define my.source = merge_children_select.source
@@ -302,6 +301,13 @@ function calculate_presets(result, configuration, repository)
 #            abort "Preset $(_config.name) absent from registry."
 #        endif
 #    endfor
+endfunction
+
+function global.is_target_element(element)
+    define my.element = is_target_element.element
+    return (name(my.element) = "library") \
+        | (name(my.element) = "test") \
+        | (name(my.element) = "binary")
 endfunction
 
 .endtemplate
