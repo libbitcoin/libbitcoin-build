@@ -18,7 +18,7 @@ gsl from "../library/string.gsl"
 #------------------------------------------------------------------------------
 # Path manipulation tools.
 #------------------------------------------------------------------------------
-function path_append(basepath, baserelativepath)
+function global.path_append(basepath, baserelativepath)
     if is_empty(my.basepath)
         return my.baserelativepath
     endif
@@ -30,7 +30,7 @@ function path_append(basepath, baserelativepath)
     return "$(my.basepath)$(my.baserelativepath)"
 endfunction
 
-function substitute_separator(path, prev, next)
+function global.substitute_separator(path, prev, next)
     define my.path = substitute_separator.path
     define my.prev = substitute_separator.prev
     define my.next = substitute_separator.next
@@ -41,7 +41,7 @@ endfunction
 #------------------------------------------------------------------------------
 # I/O utilities.
 #------------------------------------------------------------------------------
-function create_directory(path)
+function global.create_directory(path)
     define my.result = directory.create(my.path)
     if (my.result = 0)
         return

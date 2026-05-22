@@ -15,7 +15,7 @@
 ###############################################################################
 # Specific pattern xml functions
 ###############################################################################
-function target_name(target)
+function global.target_name(target)
     define my.target = target_name.target
 
     if defined(my.target.msvcproj)
@@ -25,7 +25,7 @@ function target_name(target)
     return my.target.name
 endfunction
 
-function project_relative_path(target, meta, tooling)
+function global.project_relative_path(target, meta, tooling)
     define my.target = project_relative_path.target
     define my.meta = project_relative_path.meta
     define my.tooling = project_relative_path.tooling

@@ -231,7 +231,7 @@ function global.target_dependency_list(result, target, repository, configuration
     endfor
 endfunction
 
-function canonical_dependency_list(result, repository, configuration)
+function global.canonical_dependency_list(result, repository, configuration)
     define my.result = canonical_dependency_list.result
     define my.repository = canonical_dependency_list.repository
     define my.configuration = canonical_dependency_list.configuration
@@ -255,7 +255,7 @@ function canonical_dependency_list(result, repository, configuration)
     endfor
 endfunction
 
-function calculate_presets(result, configuration, repository)
+function global.calculate_presets(result, configuration, repository)
     define my.result = calculate_presets.result
     define my.configuration = calculate_presets.configuration
     define my.repository = calculate_presets.repository
