@@ -235,6 +235,8 @@ endfunction
   </ItemGroup>
 .   # ResourceCompile
   <ItemGroup>
+.           emit_items("ResourceCompile", _files, _substitutions, \
+                my.meta->resource, my.indent)
   </ItemGroup>
 .
 .       endnew
@@ -293,9 +295,6 @@ $(my.indent)</Filter>
 .           my.filter_path = path_append(my.applicable_sub.filter, my.sanitized_path)
 .       endif
 .       if ends_with(my.filter_path, "/")
-.           echo(my.applicable_sub.string())
-.           echo(my.filename)
-.           echo(my.filter_path)
 .           my.filter_path = string.substr(my.filter_path, 0, string.length(my.filter_path) - 2)
 .       endif
 .

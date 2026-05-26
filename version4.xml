@@ -20,7 +20,7 @@
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
 
       <!-- Exposed knobs -->
@@ -159,10 +159,12 @@
 
       <sources path="test" recursive="true">
         <msbuild filter="src" />
-      </sources>
+        </sources>
+      <!--
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
+      -->
 
       <dependency name="boost" version="1.86.0" private="true">
         <component name="unit_test_framework" />
@@ -197,7 +199,7 @@
         <msbuild filter="src" />
       </sources>
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
 
       <dependency name="libbitcoin-system" private="true" />
@@ -451,9 +453,11 @@
       <headers path="include" recursive="true" root="true">
         <headers path="include/bitcoin/network/ssl" recursive="true" root="true" option="ssl" />
       </headers>
+      <!--
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
+      -->
 
       <!-- Exposed knobs -->
       <option name="ssl" type="with" default="yes" comment="Use embedded ssl library." />
@@ -493,9 +497,11 @@
       <sources path="test" recursive="true">
         <msbuild filter="src" />
       </sources>
+      <!--
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
+      -->
 
       <dependency name="boost" version="1.86.0" private="true">
         <component name="unit_test_framework" />
@@ -751,9 +757,11 @@
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
+      <!--
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
+      -->
 
       <dependency name="libbitcoin-system" version="4.0.0" />
 
@@ -779,9 +787,11 @@
       <sources path="test" recursive="true">
         <msbuild filter="src" />
       </sources>
+      <!--
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
+      -->
 
       <dependency name="boost" version="1.86.0" private="true">
         <component name="unit_test_framework" />
@@ -814,9 +824,11 @@
       <sources path="tools/initchain">
         <msbuild filter="src" />
       </sources>
+      <!--
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
+      -->
 
       <dependency name="libbitcoin-database" private="true" />
 
@@ -1062,7 +1074,7 @@
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
 
       <dependency name="libbitcoin-database" version="4.0.0" />
@@ -1090,9 +1102,11 @@
       <sources path="test" recursive="true">
         <msbuild filter="src" />
       </sources>
+      <!--
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
+      -->
 
       <dependency name="boost" version="1.86.0" private="true">
         <component name="unit_test_framework" />
@@ -1343,7 +1357,7 @@
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
 
       <dependency name="libbitcoin-node" version="4.0.0" />
@@ -1370,9 +1384,11 @@
       <sources path="test" recursive="true">
         <msbuild filter="src" />
       </sources>
+      <!--
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
+      -->
 
       <dependency name="boost" version="1.86.0" private="true">
         <component name="unit_test_framework" />
@@ -1407,7 +1423,7 @@
         <msbuild filter="src" />
       </sources>
       <resources path="builds/msvc" recursive="false" root="true">
-        <msbuild filter="resources" />
+        <msbuild filter="resource" />
       </resources>
 
       <dependency name="libbitcoin-server" private="true" />
@@ -2519,9 +2535,9 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       outpath="include/bitcoin"
       filterpath="bitcoin/">
 
-      <match suffix=".hpp" />
-      <match suffix=".h" />
-      <match suffix=".hpp.in" strip=".in" />
+      <match suffix="\.hpp" />
+      <match suffix="\.h" />
+      <match suffix="\.hpp\.in" strip="\.in" />
     </template>
 
     <template name="version.hpp.in.gsl"
@@ -2625,31 +2641,33 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <tools chain="msbuild" set="2026" outpath="vs2026" />
 
       <discovery>
-        <match suffix=".ipp" />
-        <match suffix=".hpp" />
-        <match suffix=".h" />
-        <match suffix=".hpp.in" />
-        <match suffix=".cpp" />
-        <match suffix=".c" />
-        <match suffix=".rc" />
+        <match suffix="\.ipp" />
+        <match suffix="\.hpp" />
+        <match suffix="\.h" />
+        <match suffix="\.hpp\.in" />
+        <match suffix="\.cpp" />
+        <match suffix="\.c" />
+        <match suffix="\.rc" />
        </discovery>
 
       <headers>
-        <match suffix=".hpp" />
-        <match suffix=".h" />
+        <match suffix="\.hpp" />
+        <match suffix="\.h" />
       </headers>
 
       <sources>
-        <match suffix=".cpp" />
-        <match suffix=".c" />
+        <match suffix="\.cpp" />
+        <match suffix="\.c" />
       </sources>
 
       <other>
-        <match suffix=".ipp" />
-        <match suffix=".hpp.in" />
-        <match suffix=".rc" />
+        <match suffix="\.ipp" />
+        <match suffix="\.hpp\.in" />
       </other>
 
+      <resource>
+        <match suffix="\.rc" />
+      </resource>
     </template>
 
   </templates>
