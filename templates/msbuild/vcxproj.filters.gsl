@@ -1,0 +1,320 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin vcxproj.filters
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/xml-output.gsl"
+gsl from "../lib/msbuild.gsl"
+gsl from "../lib/uuid.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_vcxproj_filters(configuration)
+    define my.configuration = generate_vcxproj_filters.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    for my.template.tools as _tools by _tools.set
+        for my.configuration.repository as _repository
+            for _repository. as _target where is_target_element(_target)
+                generate_target_vcxproj_filters(_target, _repository, \
+                    my.configuration, _tools, my.template)
+            endfor
+        endfor
+    endfor
+endfunction
+
+function generate_target_vcxproj_filters(target, repository, configuration, tooling, meta)
+    define my.target = generate_target_vcxproj_filters.target
+    define my.repository = generate_target_vcxproj_filters.repository
+    define my.configuration = generate_target_vcxproj_filters.configuration
+    define my.tooling = generate_target_vcxproj_filters.tooling
+    define my.meta = generate_target_vcxproj_filters.meta
+
+    define my.filename = "$(target_name(my.target)).vcxproj.filters"
+
+    define my.output_path = path_append(my.configuration->templates.resultpath, \
+        path_append(my.repository.name, \
+            path_append(my.meta.outpath, \
+                path_append(my.tooling.outpath, \
+                    target_name(my.target)))))
+
+    create_directory(my.output_path)
+
+    define my.out_file = path_append(my.output_path, my.filename)
+
+    notify(my.out_file)
+    output(my.out_file)
+
+    emit_vcxproj_filters(my.target, my.repository, my.configuration, \
+        my.tooling, my.meta)
+
+    close
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+function repository_path(repository, configuration)
+    define my.repository = repository_path.repository
+    define my.configuration = repository_path.configuration
+
+    define my.path = path_append(my.configuration->templates.src_root_path, \
+        my.repository.name)
+
+    define my.directory = directory.open(my.path)
+
+    return my.directory.path
+endfunction
+
+function matches_substitution(substitutions, path)
+    define my.substitutions = matches_substitution.substitutions
+    define my.path = matches_substitution.path
+
+    for my.substitutions.substitution as _sub
+        if starts_with(my.path, _sub.absolute_path)
+            return _sub
+        endif
+    endfor
+endfunction
+
+function populate_uuid(files, seed)
+    define my.files = populate_uuid.files
+    my.files.uuid = populate_uuid.seed
+    define my.seed = uuid_inc(my.files.uuid)
+
+    for my.files.directory as _directory
+        my.seed = populate_uuid(_directory, my.seed)
+    endfor
+
+    return my.seed
+endfunction
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_vcxproj_filters(target, repository, configuration, tooling, meta)
+.   define my.target = emit_vcxproj_filters.target
+.   define my.repository = emit_vcxproj_filters.repository
+.   define my.configuration = emit_vcxproj_filters.configuration
+.   define my.tooling = emit_vcxproj_filters.tooling
+.   define my.meta = emit_vcxproj_filters.meta
+.
+.   define my.seed = 0
+.   define my.toolchain = my.configuration->toolchain(this.name = my.tooling.chain, this)
+.   define my.version = (name(my.target) = "library") ?? \
+        my.toolchain->msbuild->version(this.type = "lib", this).value ? \
+        my.toolchain->msbuild->version(this.type = "bin", this).value
+.
+<?xml version="1.0" encoding="utf-8"?>
+.
+.   copyleft(my.repository.name)
+.
+<Project DefaultTargets="Build" ToolsVersion="$(my.version)" xmlns="$(my.toolchain->msbuild.schema)">
+.
+.   new substitutions as _substitutions
+.       define my.repository_root = repository_path(my.repository, my.configuration)
+.       define my.intended_prefix = my.meta->path.prefix
+.       define my.indent = "    "
+.
+.       new directory as _files
+.           for my.target.headers as _headers where is_defined_positive(_headers, "root")
+.               define my.path = path_append(my.repository_root, _headers.path)
+.               define my.recurse = is_defined_positive(_headers, "recursive")
+.
+.               new _files.directory as _directory
+.                   discover_files(_directory, my.meta->discovery, my.path, my.recurse)
+.               endnew
+.
+.               new _substitutions.substitution as _sub
+.                   _sub.absolute_path = my.path
+.                   _sub.relative_path_prefix = path_append(my.intended_prefix, \
+                        _headers.path)
+.                   if defined(_headers->msbuild) & defined(_headers->msbuild.filter)
+.                       _sub.filter = _headers->msbuild.filter
+.                   else
+.                       _sub.filter = _headers.path
+.                   endif
+.               endnew
+.           endfor
+.
+.           for my.target.sources as _sources
+.               define my.path = path_append(my.repository_root, _sources.path)
+.               define my.recurse = is_defined_positive(_sources, "recursive")
+.
+.               new _files.directory as _directory
+.                   discover_files(_directory, my.meta->discovery, my.path, my.recurse)
+.               endnew
+.
+.               new _substitutions.substitution as _sub
+.                   _sub.absolute_path = my.path
+.                   _sub.relative_path_prefix = path_append(my.intended_prefix, \
+                        _sources.path)
+.                   if defined(_sources->msbuild) & defined(_sources->msbuild.filter)
+.                       _sub.filter = _sources->msbuild.filter
+.                   else
+.                       _sub.filter = _sources.path
+.                   endif
+.               endnew
+.           endfor
+.
+.           for my.target.resources as _resources
+.               define my.path = path_append(my.repository_root, _resources.path)
+.               define my.recurse = is_defined_positive(_resources, "recursive")
+.
+.               new _files.directory as _directory
+.                   discover_files(_directory, my.meta->discovery, my.path, my.recurse)
+.               endnew
+.
+.               new _substitutions.substitution as _sub
+.                   _sub.absolute_path = my.path
+.                   _sub.relative_path_prefix = path_append(my.intended_prefix, \
+                        _resources.path)
+.                   if defined(_resources->msbuild) & defined(_resources->msbuild.filter)
+.                       _sub.filter = _resources->msbuild.filter
+.                   else
+.                       _sub.filter = _resources.path
+.                   endif
+.               endnew
+.           endfor
+.
+.           my.seed = populate_uuid(_files, my.seed)
+.
+.           # substitution of last resort
+.           new _substitutions.substitution as _sub
+.               _sub.absolute_path = my.repository_root
+.               _sub.relative_path_prefix = my.intended_prefix
+.           endnew
+.   # Filters
+  <ItemGroup>
+.           emit_filters(_files, _substitutions, my.target, my.indent)
+  </ItemGroup>
+.   # ClCompile
+
+  <ItemGroup>
+.           emit_items("ClCompile", _files, _substitutions, my.meta->sources, my.indent)
+  </ItemGroup>
+.   # ClInclude
+  <ItemGroup>
+.           emit_items("ClInclude", _files, _substitutions, my.meta->headers, my.indent)
+  </ItemGroup>
+.   # None
+  <ItemGroup>
+.           emit_items("None", _files, _substitutions, my.meta->other, my.indent)
+    <None Include="packages.config" />
+  </ItemGroup>
+.   # Natvis
+  <ItemGroup>
+    <Natvis Include="..\\..\\debug.natvis" />
+  </ItemGroup>
+.   # ResourceCompile
+  <ItemGroup>
+  </ItemGroup>
+.
+.       endnew
+.   endnew
+.
+</Project>
+.
+.endmacro # emit_vcxproj_filters
+.
+.macro emit_filters(files, substitutions, target, indent)
+.   define my.files = emit_filters.files
+.   define my.substitutions = emit_filters.substitutions
+.   define my.target = emit_filters.target
+.   define my.indent = emit_filters.indent
+.
+.   if defined(my.files.path)
+.       define my.path = "$(my.files.name)"
+.       define my.applicable_sub = matches_substitution(my.substitutions, my.path)
+.       define my.sanitized_path = \
+          (string.length(my.applicable_sub.absolute_path) < string.length(my.path)) ??\
+            string.substr(my.path, \
+              string.length(my.applicable_sub.absolute_path), string.length(my.path) - 1) ?\
+              ""
+.       define my.filter_path = my.sanitized_path
+.       if defined(my.applicable_sub.filter)
+.           my.filter_path = path_append(my.applicable_sub.filter, my.sanitized_path)
+.       endif
+.       if ends_with(my.filter_path, "/")
+.           my.filter_path = string.substr(my.filter_path, 0, string.length(my.filter_path) - 2)
+.       endif
+$(my.indent)<Filter Include="$(path(my.filter_path))">
+  $(my.indent)<UniqueIdentifier>{$(to_uuid(my.target.uuid, my.files.uuid):upper)}</UniqueIdentifier>
+$(my.indent)</Filter>
+.   endif
+.
+.   for my.files.directory as _directory
+.       emit_filters(_directory, my.substitutions, my.target, my.indent)
+.   endfor
+.
+.endmacro # emit_filters
+.
+.macro emit_items(item_name, files, substitutions, filters, indent)
+.   define my.item_name = emit_items.item_name
+.   define my.files = emit_items.files
+.   define my.substitutions = emit_items.substitutions
+.   define my.filters = emit_items.filters
+.   define my.indent = emit_items.indent
+.
+.   for my.files.file as _file where matches_filters(my.filters, _file.name)
+.       define my.applicable_sub = matches_substitution(my.substitutions, _file.path)
+.       define my.sanitized_path = string.substr(_file.path, string.length(my.applicable_sub.absolute_path), string.length(_file.path) - 1)
+.       define my.filename = path_append(my.applicable_sub.relative_path_prefix, \
+            path_append(my.sanitized_path, _file.name))
+.       define my.filter_path = my.sanitized_path
+.       if defined(my.applicable_sub.filter)
+.           my.filter_path = path_append(my.applicable_sub.filter, my.sanitized_path)
+.       endif
+.       if ends_with(my.filter_path, "/")
+.           echo(my.applicable_sub.string())
+.           echo(my.filename)
+.           echo(my.filter_path)
+.           my.filter_path = string.substr(my.filter_path, 0, string.length(my.filter_path) - 2)
+.       endif
+.
+$(my.indent)<$(my.item_name) Include="$(path(my.filename))">
+  $(my.indent)<Filter>$(path(my.filter_path))</Filter>
+$(my.indent)</$(my.item_name)>
+.   endfor
+.
+.   for my.files.directory as _directory
+.       emit_items(my.item_name, _directory, my.substitutions, my.filters, my.indent)
+.   endfor
+.endmacro # emit_item_group
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_vcxproj_filters(configuration)
+
+.endtemplate
