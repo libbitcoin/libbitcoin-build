@@ -40,7 +40,9 @@
 
       <!-- Dependencies -->
       <dependency name="boost" version="1.86.0">
+        <component name="container" />
         <component name="iostreams" />
+        <component name="json" />
         <component name="locale" />
         <component name="program_options" />
         <component name="thread" />
@@ -1799,7 +1801,9 @@
       <build method="nuget" />
       <build method="boost_build" version="1.86.0" parallel="true">
         <flag value="-Wno-enum-constexpr-conversion" />
+        <option value="--with-container" />
         <option value="--with-iostreams" />
+        <option value="--with-json" />
         <option value="--with-locale" />
         <option value="--with-program_options" />
         <option value="--with-regex" />
