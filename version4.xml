@@ -1899,32 +1899,32 @@
       <github owner="boostorg" tag="boost-1.86.0" />
       <nuget>
         <resource canonical="boost">
-          <package compiler="vc143" name="boost" version="1.86.0" />
-          <package compiler="vc145" name="libbitcoin-boost" version="1.91.0" />
+          <package compiler="v143" name="boost" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost" version="1.91.0" />
         </resource>
         <resource canonical="boost_iostreams" component="iostreams">
-          <package compiler="vc143" name="boost_iostreams-vc143" version="1.86.0" />
-          <package compiler="vc145" name="libbitcoin-boost_iostreams-vc145" version="1.91.0" />
+          <package compiler="v143" name="boost_iostreams-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_iostreams-vc145" version="1.91.0" />
         </resource>
         <resource canonical="boost_locale" component="locale">
-          <package compiler="vc143" name="boost_locale-vc143" version="1.86.0" />
-          <package compiler="vc145" name="libbitcoin-boost_locale-vc145" version="1.91.0" />
+          <package compiler="v143" name="boost_locale-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_locale-vc145" version="1.91.0" />
         </resource>
         <resource canonical="boost_program_options" component="program_options">
-          <package compiler="vc143" name="boost_program_options-vc143" version="1.86.0" />
-          <package compiler="vc145" name="libbitcoin-boost_program_options-vc145" version="1.91.0" />
+          <package compiler="v143" name="boost_program_options-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_program_options-vc145" version="1.91.0" />
         </resource>
         <resource canonical="boost_thread" component="thread">
-          <package compiler="vc143" name="boost_thread-vc143" version="1.86.0" />
-          <package compiler="vc145" name="libbitcoin-boost_thread-vc145" version="1.91.0" />
+          <package compiler="v143" name="boost_thread-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_thread-vc145" version="1.91.0" />
         </resource>
         <resource canonical="boost_unit_test_framework" component="unit_test_framework">
-          <package compiler="vc143" name="boost_unit_test_framework-vc143" version="1.86.0" />
-          <package compiler="vc145" name="libbitcoin-boost_unit_test_framework-vc145" version="1.91.0" />
+          <package compiler="v143" name="boost_unit_test_framework-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_unit_test_framework-vc145" version="1.91.0" />
         </resource>
         <resource canonical="boost_url" component="url">
-          <package compiler="vc143" name="boost_url-vc143" version="1.86.0" />
-          <package compiler="vc145" name="libbitcoin-boost_url-vc145" version="1.91.0" />
+          <package compiler="v143" name="boost_url-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_url-vc145" version="1.91.0" />
         </resource>
       </nuget>
       <build method="nuget" />
@@ -1970,8 +1970,8 @@
       <github owner="bitcoin-core" tag="v0.7.0" />
       <nuget>
         <resource canonical="secp256k1">
-          <package compiler="vc143" name="secp256k1_vc143" version="0.6.1" />
-          <package compiler="vc145" name="secp256k1_vc145" version="0.6.1" />
+          <package compiler="v143" name="secp256k1_vc143" version="0.6.1" />
+          <package compiler="v145" name="secp256k1_vc145" version="0.6.1" />
         </resource>
       </nuget>
       <build method="nuget" />
@@ -2347,10 +2347,10 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
   </registrar>
 
   <toolchain name="msbuild">
-    <toolset name="2022" compiler="vc143" />
-    <toolset name="2026" compiler="vc145" />
+    <toolset name="2022" setname="v143" compiler="v143" />
+    <toolset name="2026" setname="v143" compiler="v145" />
 
-    <sln format="12.00" year="15">
+    <msvc format="12.00" year="15">
       <version value="15.0.27004.2010" min="10.0.40219.1" />
       <type name="c++" uuid="8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942" />
 
@@ -2372,7 +2372,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
         <entry value="ARM" />
         <entry value="ARM64" />
       </axis>
-    </sln>
+    </msvc>
 
     <msbuild schema="http://schemas.microsoft.com/developer/msbuild/2003">
       <version type="lib" value="15.0" />
@@ -2537,7 +2537,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
 
       <match suffix="\.hpp" />
       <match suffix="\.h" />
-      <match suffix="\.hpp\.in" strip="\.in" />
+      <match suffix="\.hpp\.in" strip=".in" />
     </template>
 
     <template name="version.hpp.in.gsl"
@@ -2633,6 +2633,44 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     </template>
 
     <template name="vcxproj.filters.gsl"
+      path="msbuild"
+      outpath="builds/msvc">
+
+      <path prefix="../../../.." />
+      <tools chain="msbuild" set="2022" outpath="vs2022" />
+      <tools chain="msbuild" set="2026" outpath="vs2026" />
+
+      <discovery>
+        <match suffix="\.ipp" />
+        <match suffix="\.hpp" />
+        <match suffix="\.h" />
+        <match suffix="\.hpp\.in" />
+        <match suffix="\.cpp" />
+        <match suffix="\.c" />
+        <match suffix="\.rc" />
+       </discovery>
+
+      <headers>
+        <match suffix="\.hpp" />
+        <match suffix="\.h" />
+      </headers>
+
+      <sources>
+        <match suffix="\.cpp" />
+        <match suffix="\.c" />
+      </sources>
+
+      <other>
+        <match suffix="\.ipp" />
+        <match suffix="\.hpp\.in" />
+      </other>
+
+      <resource>
+        <match suffix="\.rc" />
+      </resource>
+    </template>
+
+    <template name="vcxproj.gsl"
       path="msbuild"
       outpath="builds/msvc">
 

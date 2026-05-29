@@ -76,10 +76,10 @@ endfunction
 .   define my.toolchain = emit_sln.toolchain
 .   define my.meta = emit_sln.meta
 .
-Microsoft Visual Studio Solution File, Format Version $(my.toolchain->sln.format)
-# Visual Studio $(my.toolchain->sln.year)
-VisualStudioVersion = $(my.toolchain->sln->version.value)
-MinimumVisualStudioVersion = $(my.toolchain->sln->version.min)
+Microsoft Visual Studio Solution File, Format Version $(my.toolchain->msvc.format)
+# Visual Studio $(my.toolchain->msvc.year)
+VisualStudioVersion = $(my.toolchain->msvc->version.value)
+MinimumVisualStudioVersion = $(my.toolchain->msvc->version.min)
 .
 .   for my.repository. as _target where is_target_element(_target) & defined(_target.uuid)
 .       emit_project(_target, my.repository, my.configuration, my.toolchain, my.meta)
@@ -103,7 +103,7 @@ EndGlobal
 .   define my.toolchain = emit_project.toolchain
 .   define my.meta = emit_project.meta
 .
-.   define my.project_type = my.toolchain->sln->type(.name = "c++").uuid
+.   define my.project_type = my.toolchain->msvc->type(.name = "c++").uuid
 .   define my.path = project_relative_path(my.target, my.meta, my.toolchain->tools)
 .   define my.sub = substitute_separator(my.path, "/", "\\")
 .
@@ -117,8 +117,8 @@ EndProject
 .   define my.indent = emit_solution_matrix.indent
 .
 $(my.indent)GlobalSection(SolutionConfigurationPlatforms) = preSolution
-.   for my.toolchain->sln->axis(.name = "configuration").entry as _config
-.       for my.toolchain->sln->axis(.name = "platform").entry as _platform
+.   for my.toolchain->msvc->axis(.name = "configuration").entry as _config
+.       for my.toolchain->msvc->axis(.name = "platform").entry as _platform
 \t$(my.indent)$(_config.value)|$(_platform.value) = $(_config.value)|$(_platform.value)
 .       endfor
 .   endfor
@@ -144,9 +144,9 @@ $(my.indent)EndGlobalSection
 .   define my.toolchain = emit_target_matrix.toolchain
 .   define my.indent = emit_target_matrix.indent
 .
-.   for my.toolchain->sln->axis(.name = "configuration").entry as _config
+.   for my.toolchain->msvc->axis(.name = "configuration").entry as _config
 .       define my.target_config = _config->$(name(my.target)).value
-.       for my.toolchain->sln->axis(.name = "platform").entry as _platform
+.       for my.toolchain->msvc->axis(.name = "platform").entry as _platform
 $(my.indent){$(my.target.uuid:upper)}.$(_config.value)|$(_platform.value).ActiveCfg = $(my.target_config)|$(_platform.value)
 $(my.indent){$(my.target.uuid:upper)}.$(_config.value)|$(_platform.value).Build.0 = $(my.target_config)|$(_platform.value)
 .       endfor

@@ -2,7 +2,7 @@
 ###############################################################################
 # Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
 #
-# GSL generate libbitcoin vcxproj.filters
+# GSL generate libbitcoin vcxproj
 #
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
@@ -20,13 +20,12 @@ gsl from "../lib/filesystem.gsl"
 gsl from "../lib/output.gsl"
 gsl from "../lib/xml-output.gsl"
 gsl from "../lib/msbuild.gsl"
-gsl from "../lib/uuid.gsl"
 
 ###############################################################################
 # Generation
 ###############################################################################
-function generate_vcxproj_filters(configuration)
-    define my.configuration = generate_vcxproj_filters.configuration
+function generate_vcxproj(configuration)
+    define my.configuration = generate_vcxproj.configuration
     require(my.configuration->templates, "templates", "resultpath")
 
     define my.template = my.configuration->templates->template(.name = "$(script)")
@@ -40,21 +39,21 @@ function generate_vcxproj_filters(configuration)
     for my.template.tools as _tools by _tools.set
         for my.configuration.repository as _repository
             for _repository. as _target where is_target_element(_target)
-                generate_target_vcxproj_filters(_target, _repository, \
+                generate_target_vcxproj(_target, _repository, \
                     my.configuration, _tools, my.template)
             endfor
         endfor
     endfor
 endfunction
 
-function generate_target_vcxproj_filters(target, repository, configuration, tooling, meta)
-    define my.target = generate_target_vcxproj_filters.target
-    define my.repository = generate_target_vcxproj_filters.repository
-    define my.configuration = generate_target_vcxproj_filters.configuration
-    define my.tooling = generate_target_vcxproj_filters.tooling
-    define my.meta = generate_target_vcxproj_filters.meta
+function generate_target_vcxproj(target, repository, configuration, tooling, meta)
+    define my.target = generate_target_vcxproj.target
+    define my.repository = generate_target_vcxproj.repository
+    define my.configuration = generate_target_vcxproj.configuration
+    define my.tooling = generate_target_vcxproj.tooling
+    define my.meta = generate_target_vcxproj.meta
 
-    define my.filename = "$(target_name(my.target)).vcxproj.filters"
+    define my.filename = "$(target_name(my.target)).vcxproj"
 
     define my.output_path = path_append(my.configuration->templates.resultpath, \
         path_append(my.repository.name, \
@@ -69,7 +68,7 @@ function generate_target_vcxproj_filters(target, repository, configuration, tool
     notify(my.out_file)
     output(my.out_file)
 
-    emit_vcxproj_filters(my.target, my.repository, my.configuration, \
+    emit_vcxproj(my.target, my.repository, my.configuration, \
         my.tooling, my.meta)
 
     close
@@ -89,34 +88,22 @@ function matches_substitution(substitutions, path)
     endfor
 endfunction
 
-function populate_uuid(files, seed)
-    define my.files = populate_uuid.files
-    my.files.uuid = populate_uuid.seed
-    define my.seed = uuid_inc(my.files.uuid)
-
-    for my.files.directory as _directory
-        my.seed = populate_uuid(_directory, my.seed)
-    endfor
-
-    return my.seed
-endfunction
-
 ###############################################################################
 # Generation
 ###############################################################################
 .endtemplate
 .template 1
 .
-.macro emit_vcxproj_filters(target, repository, configuration, tooling, meta)
-.   define my.target = emit_vcxproj_filters.target
-.   define my.repository = emit_vcxproj_filters.repository
-.   define my.configuration = emit_vcxproj_filters.configuration
-.   define my.tooling = emit_vcxproj_filters.tooling
-.   define my.meta = emit_vcxproj_filters.meta
+.macro emit_vcxproj(target, repository, configuration, tooling, meta)
+.   define my.target = emit_vcxproj.target
+.   define my.repository = emit_vcxproj.repository
+.   define my.configuration = emit_vcxproj.configuration
+.   define my.tooling = emit_vcxproj.tooling
+.   define my.meta = emit_vcxproj.meta
 .
-.   define my.indent = "    "
-.   define my.seed = 0
+.   define my.item_indent = "    "
 .   define my.toolchain = my.configuration->toolchain(this.name = my.tooling.chain, this)
+.   define my.toolset = my.toolchain->toolset(this.name = my.tooling.set, this)
 .   define my.version = (name(my.target) = "library") ?? \
         my.toolchain->msbuild->version(this.type = "lib", this).value ? \
         my.toolchain->msbuild->version(this.type = "bin", this).value
@@ -126,6 +113,26 @@ endfunction
 .   copyleft(my.repository.name)
 .
 <Project DefaultTargets="Build" ToolsVersion="$(my.version)" xmlns="$(my.toolchain->msbuild.schema)">
+  <PropertyGroup Label="Globals">
+.
+.   if !(name(my.target) = "library")
+    <ConfigurationType>Application</ConfigurationType>
+.   endif
+.
+    <PlatformToolset>$(my.toolset.compiler)</PlatformToolset>
+    <ProjectGuid>{$(my.target.uuid:upper)}</ProjectGuid>
+    <ProjectName>$(target_name(my.target))</ProjectName>
+  </PropertyGroup>
+.
+.   emit_project_configuration(my.target, my.repository, my.configuration, my.toolchain, my.toolset, my.meta, "  ")
+.
+  <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.Default.props" />
+  <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="\$(ProjectDir)..\\..\\properties\\\$(Configuration).props" />
+    <Import Project="\$(ProjectDir)..\\..\\properties\\Output.props" />
+    <Import Project="\$(ProjectDir)\$(ProjectName).props" />
+  </ImportGroup>
 .
 .   new substitutions as _substitutions
 .       new directory as _files
@@ -136,34 +143,30 @@ endfunction
 .           populate_files(_substitutions, _files, my.meta->discovery, \
                 my.target, my.absolute_root, my.intended_prefix)
 .
-.           my.seed = populate_uuid(_files, my.seed)
-.
-.   # Filters
-  <ItemGroup>
-.           emit_filters(_files, _substitutions, my.target, my.indent)
-  </ItemGroup>
 .   # ClCompile
 
   <ItemGroup>
-.           emit_items("ClCompile", _files, _substitutions, my.meta->sources, my.indent)
+.           new conflicts as _conflicts
+.               emit_items("ClCompile", _files, _substitutions, \
+                    my.meta->sources, my.item_indent, _conflicts)
+.           endnew
   </ItemGroup>
 .   # ClInclude
   <ItemGroup>
-.           emit_items("ClInclude", _files, _substitutions, my.meta->headers, my.indent)
+.           emit_items("ClInclude", _files, _substitutions, my.meta->headers, my.item_indent)
   </ItemGroup>
 .   # None
   <ItemGroup>
-.           emit_items("None", _files, _substitutions, my.meta->other, my.indent)
+.           emit_items("None", _files, _substitutions, my.meta->other, my.item_indent)
     <None Include="packages.config" />
+  </ItemGroup>
+.   # ResourceCompile
+  <ItemGroup>
+.           emit_items("ResourceCompile", _files, _substitutions, my.meta->resource, my.item_indent)
   </ItemGroup>
 .   # Natvis
   <ItemGroup>
     <Natvis Include="..\\..\\debug.natvis" />
-  </ItemGroup>
-.   # ResourceCompile
-  <ItemGroup>
-.           emit_items("ResourceCompile", _files, _substitutions, \
-                my.meta->resource, my.indent)
   </ItemGroup>
 .
 .       endnew
@@ -171,48 +174,46 @@ endfunction
 .
 </Project>
 .
-.endmacro # emit_vcxproj_filters
+.endmacro # emit_vcxproj
 .
-.macro emit_filters(files, substitutions, target, indent)
-.   define my.files = emit_filters.files
-.   define my.substitutions = emit_filters.substitutions
-.   define my.target = emit_filters.target
-.   define my.indent = emit_filters.indent
+.macro emit_project_configuration(target, repository, configuration, \
+    toolchain, toolset, meta, indent)
 .
-.   if defined(my.files.path)
-.       define my.path = "$(my.files.name)"
-.       define my.applicable_sub = matches_substitution(my.substitutions, my.path)
-.       define my.sanitized_path = \
-          (string.length(my.applicable_sub.absolute_path) < string.length(my.path)) ??\
-            string.substr(my.path, \
-              string.length(my.applicable_sub.absolute_path), string.length(my.path) - 1) ?\
-              ""
-.       define my.filter_path = my.sanitized_path
-.       if defined(my.applicable_sub.filter)
-.           my.filter_path = path_append(my.applicable_sub.filter, my.sanitized_path)
-.       endif
-.       if ends_with(my.filter_path, "/")
-.           my.filter_path = string.substr(my.filter_path, 0, string.length(my.filter_path) - 2)
-.       endif
-$(my.indent)<Filter Include="$(path(my.filter_path))">
-  $(my.indent)<UniqueIdentifier>{$(to_uuid(my.target.uuid, my.files.uuid):upper)}</UniqueIdentifier>
-$(my.indent)</Filter>
-.   endif
+.   define my.target = emit_project_configuration.target
+.   define my.repository = emit_project_configuration.repository
+.   define my.configuration = emit_project_configuration.configuration
+.   define my.toolchain = emit_project_configuration.toolchain
+.   define my.toolset = emit_project_configuration.toolset
+.   define my.meta = emit_project_configuration.meta
+.   define my.indent = emit_project_configuration.indent
 .
-.   for my.files.directory as _directory
-.       emit_filters(_directory, my.substitutions, my.target, my.indent)
+$(my.indent)<ItemGroup Label="ProjectConfigurations">
+.
+.   for my.toolchain->msvc->axis(.name = "configuration").entry as _config
+.       define my.target_config = _config->$(name(my.target)).value
+.       for my.toolchain->msvc->axis(.name = "platform").entry as _platform
+.
+  $(my.indent)<ProjectConfiguration Include="$(my.target_config)|$(_platform.value)">
+    $(my.indent)<Configuration>$(my.target_config)</Configuration>
+    $(my.indent)<Platform>$(_platform.value)</Platform>
+  $(my.indent)</ProjectConfiguration>
+.       endfor
 .   endfor
 .
-.endmacro # emit_filters
+$(my.indent)</ItemGroup>
 .
-.macro emit_items(item_name, files, substitutions, filters, indent)
+.endmacro # emit_project_configuration
+.
+.macro emit_items(item_name, files, substitutions, filters, indent, conflicts)
 .   define my.item_name = emit_items.item_name
 .   define my.files = emit_items.files
 .   define my.substitutions = emit_items.substitutions
 .   define my.filters = emit_items.filters
 .   define my.indent = emit_items.indent
+.   define my.conflicts = emit_items.conflicts?
 .
 .   for my.files.file as _file where matches_filters(my.filters, _file.name)
+.       define my.conflicted = 0
 .       define my.applicable_sub = matches_substitution(my.substitutions, _file.path)
 .       define my.sanitized_path = string.substr(_file.path, string.length(my.applicable_sub.absolute_path), string.length(_file.path) - 1)
 .       define my.filename = path_append(my.applicable_sub.relative_path_prefix, \
@@ -225,15 +226,35 @@ $(my.indent)</Filter>
 .           my.filter_path = string.substr(my.filter_path, 0, string.length(my.filter_path) - 2)
 .       endif
 .
+.       define my.splitpoint = string.locate_last(_file.name, ".")
+.       define my.filename_base = string.substr(_file.name, 0, my.splitpoint - 1)
+.
+.       if defined(my.conflicts)
+.           if (count(my.conflicts.conflict, count.name = my.filename_base) > 0)
+.               my.conflicted = 1
+.           else
+.               new my.conflicts.conflict as _conflict
+.                   _conflict.name = my.filename_base
+.               endnew
+.           endif
+.       endif
+.
+.       if my.conflicted
+.           define my.path_to_prefix = string.replace(my.sanitized_path, "/|_")
+.           define my.disambiguated = "$(my.applicable_sub.unprefixed_path)$(my.path_to_prefix)$(my.filename_base).obj"
 $(my.indent)<$(my.item_name) Include="$(path(my.filename))">
-  $(my.indent)<Filter>$(path(my.filter_path))</Filter>
+  $(my.indent)<ObjectFileName>\$(IntDir)$(my.disambiguated)</ObjectFileName>
 $(my.indent)</$(my.item_name)>
+.       else
+$(my.indent)<$(my.item_name) Include="$(path(my.filename))" />
+.       endif
 .   endfor
 .
 .   for my.files.directory as _directory
-.       emit_items(my.item_name, _directory, my.substitutions, my.filters, my.indent)
+.       emit_items(my.item_name, _directory, my.substitutions, my.filters, \
+            my.indent, my.conflicts)
 .   endfor
-.endmacro # emit_item_group
+.endmacro # emit_items
 .
 .endtemplate
 .template 0
@@ -241,6 +262,6 @@ $(my.indent)</$(my.item_name)>
 # Execution
 ###############################################################################
 
-generate_vcxproj_filters(configuration)
+generate_vcxproj(configuration)
 
 .endtemplate
