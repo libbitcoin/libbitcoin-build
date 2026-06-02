@@ -88,6 +88,15 @@ function matches_substitution(substitutions, path)
     endfor
 endfunction
 
+function nuget_target(package)
+    define my.package = nuget_target.package
+    define my.prefix = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)"
+    define my.relative_path = defined(my.package.targets) ?? my.package.targets ? "build"
+    define my.targets_file = "$(my.package.name).targets"
+
+    return "$(my.prefix)/$(my.relative_path)/$(my.targets_file)"
+endfunction
+
 ###############################################################################
 # Generation
 ###############################################################################
@@ -125,6 +134,10 @@ endfunction
   </PropertyGroup>
 .
 .   emit_project_configuration(my.target, my.repository, my.configuration, my.toolchain, my.toolset, my.meta, "  ")
+.
+.   if (name(my.target) = "library")
+.       emit_propertygroup_configuration("  ")
+.   endif
 .
   <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.Default.props" />
   <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.props" />
@@ -164,13 +177,22 @@ endfunction
   <ItemGroup>
 .           emit_items("ResourceCompile", _files, _substitutions, my.meta->resource, my.item_indent)
   </ItemGroup>
+.           emit_import_projects(my.target, my.repository, my.configuration, \
+                my.toolchain, my.toolset, my.meta, "  ")
+.
+.       endnew
+.   endnew
+.   emit_ensure_nuget_imports(my.target, my.repository, my.configuration, \
+        my.toolchain, my.toolset, my.meta, "  ")
+.
+.   if !(name(my.target) = "library")
+.       emit_project_references(my.target, my.repository, my.configuration, "  ")
+.   endif
+.
 .   # Natvis
   <ItemGroup>
     <Natvis Include="..\\..\\debug.natvis" />
   </ItemGroup>
-.
-.       endnew
-.   endnew
 .
 </Project>
 .
@@ -255,6 +277,169 @@ $(my.indent)<$(my.item_name) Include="$(path(my.filename))" />
             my.indent, my.conflicts)
 .   endfor
 .endmacro # emit_items
+.
+.macro emit_import_projects(target, repository, configuration, toolchain, toolset, meta, indent)
+.   define my.target = emit_import_projects.target
+.   define my.repository = emit_import_projects.repository
+.   define my.configuration = emit_import_projects.configuration
+.   define my.toolchain = emit_import_projects.toolchain
+.   define my.toolset = emit_import_projects.toolset
+.   define my.meta = emit_import_projects.meta
+.   define my.indent = emit_import_projects.indent
+.
+$(my.indent)<Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.targets" />
+$(my.indent)<ImportGroup Label="ExtensionTargets" />
+$(my.indent)<ImportGroup Label="ExtensionSettings">
+.
+.   new dependencies as _dependencies
+.       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
+.       for _dependencies.dependency as _depend where defined(_depend->nuget)
+.           for _depend->nuget.resource as _resource where \
+                !defined(_resource.component)
+.
+.               define my.found = 0
+.
+.               for _resource.package as _package where \
+                    (_package.compiler = my.toolset.compiler)
+.
+.                   my.found = 1
+.
+.                   define my.nutarget = path(nuget_target(_package))
+  $(my.indent)<Import Project="$(my.nutarget)" Condition="Exists('$(my.nutarget)')" />
+.
+.               endfor
+.
+.               if !my.found
+.                   echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+.               endif
+.           endfor
+.
+.           # address component resources
+.           for _depend.component as _component
+.               for _depend->nuget.resource as _resource where \
+                    defined(_resource.component) & (_resource.component = _component.name)
+.
+.                   define my.found = 0
+.
+.                   for _resource.package as _package where \
+                        (_package.compiler = my.toolset.compiler)
+.
+.                       my.found = 1
+.
+.                       define my.nutarget = path(nuget_target(_package))
+  $(my.indent)<Import Project="$(my.nutarget)" Condition="Exists('$(my.nutarget)')" />
+.
+.                   endfor
+.
+.                   if !my.found
+.                       echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+.                   endif
+.               endfor
+.           endfor
+.       endfor
+.   endnew
+.
+$(my.indent)</ImportGroup>
+.endmacro # emit_import_projects
+.
+.macro emit_ensure_nuget_imports(target, repository, configuration, toolchain, toolset, meta, indent)
+.   define my.target = emit_ensure_nuget_imports.target
+.   define my.repository = emit_ensure_nuget_imports.repository
+.   define my.configuration = emit_ensure_nuget_imports.configuration
+.   define my.toolchain = emit_ensure_nuget_imports.toolchain
+.   define my.toolset = emit_ensure_nuget_imports.toolset
+.   define my.meta = emit_ensure_nuget_imports.meta
+.   define my.indent = emit_ensure_nuget_imports.indent
+.
+$(my.indent)<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+  $(my.indent)<PropertyGroup>
+    $(my.indent)<ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The Missing file is {0}.</ErrorText>
+  $(my.indent)</PropertyGroup>
+.
+.   new dependencies as _dependencies
+.       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
+.       for _dependencies.dependency as _depend where defined(_depend->nuget)
+.           for _depend->nuget.resource as _resource where \
+                !defined(_resource.component)
+.
+.               define my.found = 0
+.
+.               for _resource.package as _package where \
+                    (_package.compiler = my.toolset.compiler)
+.
+.                   my.found = 1
+.
+.                   define my.nutarget = path(nuget_target(_package))
+  $(my.indent)<Error Condition="!Exists('$(my.nutarget)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.nutarget)'))" />
+.
+.               endfor
+.
+.               if !my.found
+.                   echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+.               endif
+.           endfor
+.
+.           # address component resources
+.           for _depend.component as _component
+.               for _depend->nuget.resource as _resource where \
+                    defined(_resource.component) & (_resource.component = _component.name)
+.
+.                   define my.found = 0
+.
+.                   for _resource.package as _package where \
+                        (_package.compiler = my.toolset.compiler)
+.
+.                       my.found = 1
+.
+.                       define my.nutarget = path(nuget_target(_package))
+  $(my.indent)<Error Condition="!Exists('$(my.nutarget)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.nutarget)'))" />
+.
+.                   endfor
+.
+.                   if !my.found
+.                       echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+.                   endif
+.               endfor
+.           endfor
+.       endfor
+.   endnew
+.
+$(my.indent)</Target>
+.
+.endmacro # emit_ensure_nuget_imports
+.
+.macro emit_propertygroup_configuration(indent)
+.   define my.indent = emit_propertygroup_configuration.indent
+.
+$(my.indent)<PropertyGroup Label="Configuration">
+  $(my.indent)<ConfigurationType Condition="\$(Configuration.IndexOf('DLL')) == -1">StaticLibrary</ConfigurationType>
+  $(my.indent)<ConfigurationType Condition="\$(Configuration.IndexOf('DLL')) != -1">DynamicLibrary</ConfigurationType>
+$(my.indent)</PropertyGroup>
+.endmacro # emit_propertygroup_configuration
+.
+.macro emit_project_references(target, repository, configuration, indent)
+.   define my.target = emit_project_references.target
+.   define my.repository = emit_project_references.repository
+.   define my.configuration = emit_project_references.configuration
+.   define my.indent = emit_project_references.indent
+.
+$(my.indent)<ItemGroup>
+.
+.   for my.target.dependency as _depend where \
+        (count(my.repository.library, (count.name = _depend.name) & defined(count.uuid)) > 0)
+.
+.       define my.library = my.repository->library(\
+            (this.name = _depend.name) & defined(this.uuid), this)
+.
+  $(my.indent)<ProjectReference Include="..\\$(my.library.name)\\$(my.library.name).vcxproj">
+    $(my.indent)<Project>{$(my.library.uuid:upper)}</Project>
+  $(my.indent)</ProjectReference>
+.
+.   endfor
+.
+$(my.indent)</ItemGroup>
+.
+.endmacro # emit_project_references
 .
 .endtemplate
 .template 0
