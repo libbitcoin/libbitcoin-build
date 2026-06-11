@@ -400,7 +400,7 @@ $(column_variables("CMAKE_LIBRARY_PATH", my.column, my.prefix, my.suffix))
 .           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
 .       endif
 .
-$(column_variables("BUILD_$(_depend.name)", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_$(option_name(_depend))", my.column, my.prefix, my.suffix))
 .   endfor
 .
 .   if (count(my.install.dependency, this.hint_build = "preset", this) > 0)
@@ -1194,7 +1194,7 @@ $(my.c_indent)case ${OPTION} in
 .           abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
 .       endif
 .
-$(indent_column("(--build-$(_depend.name))", "BUILD_$(_depend.name)=\"yes\";;", my.column, my.o_indent))
+$(indent_column("(--build-$(option_name(_depend)))", "BUILD_$(option_name(_depend))=\"yes\";;", my.column, my.o_indent))
 .   endfor
 .
 .   new options as _build_options
@@ -1224,7 +1224,7 @@ $(my.indent)CONFIGURE_OPTIONS=("$@")
 .               abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
 .           endif
 .
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-$(_depend.name)/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-$(option_name(_depend))/}")
 .       endfor
 .
 .       for _build_options.option as _option where is_defined_positive(_option, "sanitize")
@@ -1576,7 +1576,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 .
 .           if (my.hint_root | my.hint_with)
 
-    if [[ -n "${BUILD_$(_depend.name:c)}" ]]; then
+    if [[ -n "${BUILD_$(option_name(_depend))}" ]]; then
 .               if (my.hint_root)
         export $(_depend.name:upper)_ROOT="${PREFIX}"
 .               endif
@@ -1640,13 +1640,14 @@ main()
 .
 .   for my.install.dependency as _depend
 .       define my.found_source = 0
+.       define my.oname = option_name(_depend)
 .       define my.vname = "$(_depend.name:c)"
 .       define my.priority_source = ""
 .       define my.indent = my.step
 .
 
 .       if (is_defined_positive(_depend, "conditional"))
-$(my.indent)if [[ ${BUILD_$(my.vname)} == "yes" ]]; then
+$(my.indent)if [[ ${BUILD_$(my.oname)} == "yes" ]]; then
 .           my.indent = "$(my.step)$(my.indent)"
 .       endif
 .
