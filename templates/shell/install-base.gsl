@@ -116,10 +116,6 @@ function emit_install_sh(meta, configuration, repository)
                 endif
             endfor
 
-            if (count(_keys.method, count.name = "cmake" | count.name = "preset" | count.name = "gnu") > 0)
-                define_helpers_make(my.meta, my.repository, my.configuration)
-            endif
-
             for _keys.method as _method
                 if (_method.name = "cmake")
                     define_build_cmake()
@@ -137,6 +133,18 @@ function emit_install_sh(meta, configuration, repository)
                     abort "Unrecognized build method '$(_method.name)'."
                 endif
             endfor
+
+            if (count(_keys.method, count.name = "cmake" | count.name = "preset") > 0)
+                define_clean_cmake(my.meta, my.configuration, my.repository)
+                define_install_cmake(my.meta, my.configuration, my.repository)
+                define_test_cmake(my.meta, my.configuration, my.repository)
+            endif
+
+            if (count(_keys.method, count.name = "gnu") > 0)
+                define_clean_gnu(my.meta, my.configuration, my.repository)
+                define_install_gnu(my.meta, my.configuration, my.repository)
+                define_test_gnu(my.meta, my.configuration, my.repository)
+            endif
         endnew
 
         define_display_build_variables(my.meta, my.configuration, my.repository, _install)
@@ -162,6 +170,11 @@ endfunction
 function textname(dependency)
     define my.dependency = textname.dependency
     return defined(my.dependency.textname) ?? my.dependency.textname ? my.dependency.name
+endfunction
+
+function option_name(dependency)
+    define my.dependency = option_name.dependency
+    return defined(my.dependency.optionname) ?? my.dependency.optionname ? my.dependency.name
 endfunction
 
 function substitute(datasource, value, instructions)
