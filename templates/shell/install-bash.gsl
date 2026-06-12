@@ -37,10 +37,11 @@ function option_flag(option, meta)
     define my.meta = option_flag.meta
     define my.result = ""
 
-    # Cutting corners here - assumption of boolean configuration (currently true)
-    if (count(my.meta.build, count.method = "cmake") > 0)
+    define my.canonical = my.meta->build(is_defined_positive(build, "canonical"))
+
+    if (my.canonical.method = "cmake")
         my.result = "-D$(my.option.type)-$(my.option.name)=<ON/OFF>"
-    elsif (count(my.meta.build, count.method = "gnu") > 0)
+    elsif (my.canonical.method = "gnu")
         if (my.option.type = "enable")
             my.result = "--<enable/disable>-$(my.option.name)"
         elsif (my.option.type = "with")
@@ -60,14 +61,16 @@ function option_flag_default(option, meta)
     define my.meta = option_flag_default.meta
     define my.result = ""
 
+    define my.canonical = my.meta->build(is_defined_positive(build, "canonical"))
+
     define my.positive = ""
     define my.negative = ""
 
     # Cutting corners here - assumption of boolean configuration (currently true)
-    if (count(my.meta.build, count.method = "cmake") > 0)
+    if (my.canonical.method = "cmake")
         my.positive = "ON"
         my.negative = "OFF"
-    elsif (count(my.meta.build, count.method = "gnu") > 0)
+    elsif (my.canonical.method = "gnu")
         if (my.option.type = "enable")
             my.positive = "--enable-$(my.option.name)"
             my.negative = "--disable-$(my.option.name)"
@@ -365,7 +368,7 @@ $(column_variables("LDLIBS", my.column, my.prefix, my.suffix))
 $(column_variables("$(_depend.name:upper)_ROOT", my.column, my.prefix, my.suffix))
 .       endif
 .   endfor
-.   if (my.install.hint_options = "cmake")
+.   if defined(my.meta->build(build.method = "cmake"))
 $(column_variables("CMAKE_PREFIX_PATH", my.column, my.prefix, my.suffix))
 $(column_variables("CMAKE_INSTALL_PREFIX", my.column, my.prefix, my.suffix))
 $(column_variables("CMAKE_INCLUDE_PATH", my.column, my.prefix, my.suffix))
@@ -419,6 +422,17 @@ $(column_variables("BUILD_SKIP_TESTS", my.column, my.prefix, my.suffix))
 $(column_variables("PARALLEL", my.column, my.prefix, my.suffix))
 $(column_variables("PREFIX", my.column, my.prefix, my.suffix))
 $(column_variables("DISPLAY_VERBOSE", my.column, my.prefix, my.suffix))
+.
+.   define my.canonical = my.meta->build(is_defined_positive(build, "canonical"))
+.
+.   if (count(my.meta->build, this.method = "cmake", this) > 0)
+$(fix_column("CONFIGURE_OPTIONS_CMAKE", ": ${CONFIGURE_OPTIONS_CMAKE[*]}", my.column, my.prefix, my.suffix))
+.   endif
+.
+.   if (count(my.meta->build, this.method = "gnu", this) > 0)
+$(fix_column("CONFIGURE_OPTIONS_GNU", ": ${CONFIGURE_OPTIONS_GNU[*]}", my.column, my.prefix, my.suffix))
+.   endif
+.
 $(fix_column("CONFIGURE_OPTIONS", ": ${CONFIGURE_OPTIONS[*]}", my.column, my.prefix, my.suffix))
 if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
 $(fix_column("CONFIGURE_OPTIONS_ORIGINAL", ": ${CONFIGURE_OPTIONS_ORIGINAL[*]}", my.column, my.prefix, my.suffix))
@@ -1240,6 +1254,24 @@ $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("short", 
 .       endfor
 .   endnew
 .
+.   define my.canonical = my.meta->build(is_defined_positive(build, "canonical"))
+.
+.   if (count(my.meta.build, build.method = "cmake") > 0)
+.       if (my.canonical.method = "cmake")
+$(my.indent)CONFIGURE_OPTIONS_CMAKE=("${CONFIGURE_OPTIONS[@]}")
+.       else
+$(my.indent)CONFIGURE_OPTIONS_CMAKE=()
+.       endif
+.   endif
+.
+.   if (count(my.meta.build, build.method = "gnu") > 0)
+.       if (my.canonical.method = "gnu")
+$(my.indent)CONFIGURE_OPTIONS_GNU=("${CONFIGURE_OPTIONS[@]}")
+.       else
+$(my.indent)CONFIGURE_OPTIONS_GNU=()
+.       endif
+.   endif
+.
 $(my.indent)msg_verbose "*** ARGUMENTS: ${CONFIGURE_OPTIONS_ORIGINAL[*]}"
 $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 .
@@ -1388,33 +1420,36 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${PREFIX}/lib"
         fi
     fi
-.
-.   if (my.install.hint_options = "gnu")
-
-    if [[ -n "${PREFIX}" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--prefix=${PREFIX}" )
-    fi
-.   elsif (my.install.hint_options = "cmake")
+.   if defined(my.meta->build(build.method = "cmake"))
 
     if [[ -n "${PREFIX}" ]] && [[ -n "${CMAKE_INSTALL_PREFIX}" ]]; then
         msg_error "Both PREFIX and CMAKE_INSTALL_PREFIX have been defined differently."
         help
         exit 1
-    elif [[ -n "${PREFIX}" ]]; then
+    fi
+
+    if [[ -n "${PREFIX}" ]]; then
         CMAKE_INSTALL_PREFIX="${PREFIX}"
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DCMAKE_INSTALL_PREFIX=*/}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DCMAKE_INSTALL_PREFIX=*/}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX}" )
     fi
 
     if [[ -n "${PREFIX}" ]] && [[ -n "${CMAKE_PREFIX_PATH}" ]] &&
        [[ "${PREFIX}" != "${CMAKE_PREFIX_PATH}" ]]; then
         CMAKE_PREFIX_PATH="${PREFIX}:${CMAKE_PREFIX_PATH}"
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DCMAKE_PREFIX_PATH=*/}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DCMAKE_PREFIX_PATH=*/}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" )
     elif [[ -n "${PREFIX}" ]]; then
         CMAKE_INSTALL_PREFIX="${PREFIX}"
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DCMAKE_PREFIX_PATH=*/}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_PREFIX_PATH=${PREFIX}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DCMAKE_PREFIX_PATH=*/}" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_PREFIX_PATH=${PREFIX}" )
+    fi
+.   endif
+.
+.   if defined(my.meta->build(build.method = "gnu"))
+
+    if [[ -n "${PREFIX}" ]]; then
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--prefix=${PREFIX}" )
     fi
 .   endif
 
@@ -1514,46 +1549,49 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             msg_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
         fi
     fi
-
-.   if (my.install.hint_options = "gnu")
+.
+.   if defined(my.meta->build(build.method = "gnu"))
+ 
     # Specify or remove --enable-ndebug for gnu toolchain on release
     if [[ "${BUILD_CONFIG}" == "debug" ]]; then
-        CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--enable-ndebug/}")
+        CONFIGURE_OPTIONS_GNU=("${CONFIGURE_OPTIONS_GNU[@]/--enable-ndebug/}")
     elif [[ "${BUILD_CONFIG}" == "release" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--enable-ndebug" )
+        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-ndebug" )
     fi
-.   elsif (my.install.hint_options = "cmake")
+.   endif
+.
+.   if defined(my.meta->build(build.method = "cmake"))
+
     # Specify cmake build
     if [[ "${BUILD_CONFIG}" == "debug" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Debug" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_BUILD_TYPE=Debug" )
     elif [[ "${BUILD_CONFIG}" == "release" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DCMAKE_BUILD_TYPE=Release" )
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DCMAKE_BUILD_TYPE=Release" )
     fi
-.   else
-.       abort "Unexpected hint_options: '$(my.install.hint_options)'"
 .   endif
 
     # translate BUILD_LINK to appropriate arguments
     if [[ -n "${BUILD_LINK}" ]]; then
-.   if (my.install.hint_options = "gnu")
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--disable-shared=*}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--enable-shared=*}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--disable-static=*}" )
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/--enable-static=*}" )
+.   if defined(my.meta->build(build.method = "gnu"))
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]/--disable-shared=*}" )
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]/--enable-shared=*}" )
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]/--disable-static=*}" )
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]/--enable-static=*}" )
 
         if [[ "${BUILD_LINK}" == "dynamic" ]]; then
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--enable-shared" "--disable-static" )
+            CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-shared" "--disable-static" )
         else
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "--disable-shared" "--enable-static" )
+            CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--disable-shared" "--enable-static" )
         fi
+.   endif
 .
-.   elsif (my.install.hint_options = "cmake")
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/-DBUILD_SHARED_LIBS=*}" )
+.   if defined(my.meta->build(build.method = "cmake"))
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]/-DBUILD_SHARED_LIBS=*}" )
 
         if [[ "${BUILD_LINK}" == "dynamic" ]]; then
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DBUILD_SHARED_LIBS=ON" )
+            CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DBUILD_SHARED_LIBS=ON" )
         else
-            CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]}" "-DBUILD_SHARED_LIBS=OFF" )
+            CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-DBUILD_SHARED_LIBS=OFF" )
         fi
 .   endif
     fi
@@ -1588,16 +1626,28 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
 .       endif
 .   endfor
 
+.   if defined(my.meta->build(build.method = "cmake"))
+.       remap_array_variable("CONFIGURE_OPTIONS_CMAKE")
+.   endif
+.   if defined(my.meta->build(build.method = "gnu"))
+.       remap_array_variable("CONFIGURE_OPTIONS_GNU")
+.   endif
+.
+.endmacro # define_sanitize_input
+.
+.macro remap_array_variable(name)
+.   define my.name = remap_array_variable.name
+.
+
     REMAP=()
-    for argument in "${CONFIGURE_OPTIONS[@]}"; do
+    for argument in "${$(my.name)[@]}"; do
         if [[ -n "${argument}" ]]; then
             REMAP+=( "${argument}" )
         fi
     done
-    CONFIGURE_OPTIONS=( "${REMAP[@]}" )
+    $(my.name)=( "${REMAP[@]}" )
     unset REMAP
-.
-.endmacro # define_sanitize_input
+.endmacro # remp_array_variable
 .
 .macro define_main(meta, configuration, repository, install)
 .   define my.meta = define_main.meta
@@ -1692,7 +1742,7 @@ $(my.indent)export CPPFLAGS="${CPPFLAGS} ${$(my.vname)_FLAGS[@]}"
 .
 .       if (my.active_build.method = "gnu")
 .           require(my.active_build, "build", "filepath")
-$(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
+$(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_GNU[@]}"
 .           if last()
 $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
     $(my.indent)test_gnu "$(_depend.name)" "${PARALLEL}"
@@ -1705,7 +1755,7 @@ $(my.indent)fi
 .
 .       elsif (my.active_build.method = "cmake")
 .           require(my.active_build, "build", "filepath")
-$(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
+$(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
 .           if last()
 $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
     $(my.indent)test_cmake "$(_depend.name)" "${PARALLEL}"
@@ -1718,7 +1768,7 @@ $(my.indent)fi
 .
 .       elsif (my.active_build.method = "preset")
 .           require(my.active_build, "build", "filepath")
-$(my.indent)build_preset "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS[@]}"
+$(my.indent)build_preset "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
 .           if last()
 $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
     $(my.indent)test_cmake "$(_depend.name)" "test" "${PARALLEL}"

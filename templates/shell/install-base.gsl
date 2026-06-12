@@ -221,28 +221,13 @@ function verify_toolchains_supported(dependencies, meta, configuration, reposito
     define my.configuration = verify_toolchains_supported.configuration
     define my.repository = verify_toolchains_supported.repository
 
-    define my.cmake = defined(my.meta->build(build.method = "cmake"))
-    define my.gnu = defined(my.meta->build(build.method = "gnu"))
-    define my.msbuild = defined(my.meta->build(build.method = "msbuild"))
-    define my.preset = defined(my.meta->build(build.method = "preset"))
+    define my.canonical = my.meta->build(is_defined_positive(build, "canonical")).method
 
-    # if (my.cmake | my.preset) & (my.gnu)
-    #     abort "Configurations mixing 'cmake'/'preset' and 'gnu' are not supported."
-    # endif
+    if !((my.canonical = "cmake") | \
+        (my.canonical = "gnu") | \
+        (my.canonical = "msbuild") | \
+        (my.canonical = "preset"))
 
-    if (my.cmake)
-        my.dependencies.toolchain = "cmake"
-        my.dependencies.hint_options = "cmake"
-    elsif (my.gnu)
-        my.dependencies.toolchain = "gnu"
-        my.dependencies.hint_options = "gnu"
-    elsif (my.msbuild)
-        my.dependencies.toolchain = "msbuild"
-        my.dependencies.hint_options = "msbuild"
-    elsif (my.preset)
-        my.dependencies.toolchain = "preset"
-        my.dependencies.hint_options = "cmake"
-    else
         abort "Unexpected - missing primary toolchain."
     endif
 
