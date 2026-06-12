@@ -38,6 +38,18 @@
         comment="Use Intel/ARM SHA Extensions."
         msvc="/p:Option-sha=true" />
 
+      <!--
+      <option name="ultrafast"
+        type="with"
+        default="no"
+        comment="Use shrec/UltraFastSecp256k1." />
+
+      <option name="secp256k1"
+        type="with"
+        default="yes"
+        comment="Use bitcoin-core/secp256k1." />
+      -->
+
       <!-- Dependencies -->
       <dependency name="boost" version="1.86.0">
         <component name="container" />
@@ -49,7 +61,8 @@
         <component name="url" />
       </dependency>
 
-      <dependency name="secp256k1" version="0.7.0" />
+      <dependency name="secp256k1" version="0.7.0" /> <!-- option="secp256k1" />
+      <dependency name="UltrafastSecp256k1" option="ultrafast" /> -->
 
       <compiler standard="20">
         <flag option="avx2"
@@ -1813,6 +1826,27 @@
       </build>
       <cmake namespace="Boost" package="Boost" />
     </dependency>
+    <dependency name="UltrafastSecp256k1"
+      textname="UltrafastSecp256k1"
+      conditional="true"
+      comment="Build Ultra high-performance secp256k1 ECC engine."
+      optionname="ultrafast">
+      <github owner="pmienk" tag="main" />
+      <nuget />
+      <build method="nuget" />
+      <build method="cmake" filepath="." parallel="true">
+        <option value="-DSECP256K1_BUILD_TESTS=OFF" />
+        <option value="-DSECP256K1_BUILD_BENCH=OFF" />
+        <option value="-DSECP256K1_BUILD_EXAMPLES=OFF" />
+        <option value="-DSECP256K1_BUILD_JAVA=OFF" />
+        <option value="-DUFSECP_BUILD_SHARED=OFF" />
+        <option value="-DSECP256K1_BUILD_CABI=ON" />
+        <option value="-DSECP256K1_BUILD_CPU=ON" />
+        <option value="-DSECP256K1_USE_ULTRAFAST=ON" />
+      </build>
+      <cmake namespace="secp256k1" package="secp256k1-fast"
+        target="secp256k1-fast" />
+    </dependency>
     <dependency name="secp256k1"
       textname="libsecp256k1"
       conditional="true"
@@ -2211,9 +2245,10 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <template name="install-gnu.sh.gsl" path="shell" outpath="builds/gnu">
       <error logpath="test-suite.log" />
       <error logpath="test.log" />
-      <build method="gnu" />
+      <build method="gnu" canonical="true" />
+      <build method="cmake" />
       <build method="boost_build" />
-      <column help="28" const="32" parse="28" />
+      <column help="28" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
       <option id="build-src-dir" />
@@ -2234,9 +2269,9 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <template name="install-cmake.sh.gsl" path="shell" outpath="builds/cmake">
       <error logpath="Testing/Temporary/LastTest.log" />
       <error logpath="test.log" />
-      <build method="cmake" />
+      <build method="cmake" canonical="true" />
       <build method="boost_build" />
-      <column help="28" const="32" parse="28" />
+      <column help="28" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
       <option id="build-src-dir" />
@@ -2262,9 +2297,9 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <error logpath="Testing/Temporary/LastTest.log" />
       <error logpath="test.log" />
       <build method="preset" />
-      <build method="cmake" />
+      <build method="cmake" canonical="true" />
       <build method="boost_build" />
-      <column help="28" const="32" parse="28" />
+      <column help="28" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
       <option id="build-preset" />
@@ -2283,8 +2318,8 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="cmake_library_path" />
     </template>
     <template name="build-msvc.cmd.gsl" path="shell" outpath="builds/msvc" label="true">
-      <column help="28" const="32" parse="28" />
-      <build  method="msbuild" />
+      <column help="28" const="32" parse="32" />
+      <build method="msbuild" canonical="true" />
       <build method="nuget" />
       <source type="github" />
       <source type="nuget" />
