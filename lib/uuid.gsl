@@ -1,0 +1,78 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin uuid utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+function global.uuid_initialize()
+    return 0
+endfunction
+
+function global.uuid_inc(uuid)
+    return uuid_inc.uuid + 1
+endfunction
+
+function global.to_hex(value)
+    define my.hex_value = math.mod(to_hex.value, 16)
+
+    if (my.hex_value >= 0 & my.hex_value <= 9)
+        return conv.string(my.hex_value)
+    elsif (my.hex_value = 10)
+        return "a"
+    elsif (my.hex_value = 11)
+        return "b"
+    elsif (my.hex_value = 12)
+        return "c"
+    elsif (my.hex_value = 13)
+        return "d"
+    elsif (my.hex_value = 14)
+        return "e"
+    elsif (my.hex_value = 15)
+        return "f"
+    else
+        abort("Value '$(my.hex_value)' outside hex range.")
+    endif
+endfunction
+
+function to_uuid(seed, value)
+    define my.seed = to_uuid.seed
+    define my.value = to_uuid.value
+    define my.wip = "0"
+
+    while (my.value > 0)
+        my.wip += to_hex(my.value)
+        my.value = math.floor(my.value / 16)
+    endwhile
+
+    # NOTE should vary this?
+    define my.uuid = left(my.seed, 19)
+    my.uuid += "0000-"
+    define my.iter = 0
+
+    # NOTE supports at most 0x0fffffffffff
+    while ((my.iter + string.length(my.wip)) < 12)
+        my.uuid += 0
+        my.iter += 1
+    endwhile
+
+    my.uuid += my.wip
+
+    return my.uuid
+endfunction
+
+.endtemplate
+.template 1
+.
+.##############################################################################
+.# Macros
+.##############################################################################
+.
+.endtemplate
+

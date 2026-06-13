@@ -2,18 +2,26 @@
 <configuration language="en-us">
 
   <repository name="libbitcoin-system"
-    version="4.0.0"
     email="eric@voskuil.org"
     description="Bitcoin Cross-Platform C++ Development Toolkit">
+
+    <version major="4" minor="0" />
 
     <language id="c" />
     <language id="c++" />
 
-    <library name="libbitcoin-system"
-      uuid="9f60708-ff48-4c22-952d-43470866f684">
+    <library name="libbitcoin-system" uuid="39f60708-ff48-4c22-952d-43470866f684">
+
+      <!-- <configurable input="version.hpp.in"
+        output="version.hpp"
+        path="include/bitcoin/system"
+        type="headers" /> -->
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
 
       <!-- Exposed knobs -->
       <option name="avx2"
@@ -38,6 +46,16 @@
         comment="Use Intel/ARM SHA Extensions."
         msvc="/p:Option-sha=true" />
 
+      <option name="ultrafast"
+        type="with"
+        default="no"
+        comment="Use shrec/UltraFastSecp256k1." />
+
+      <option name="secp256k1"
+        type="with"
+        default="yes"
+        comment="Use bitcoin-core/secp256k1." />
+
       <!-- Dependencies -->
       <dependency name="boost" version="1.86.0">
         <component name="container" />
@@ -49,7 +67,8 @@
         <component name="url" />
       </dependency>
 
-      <dependency name="secp256k1" version="0.7.0" />
+      <dependency name="secp256k1" version="0.7.0" option="secp256k1" />
+      <dependency name="UltrafastSecp256k1" version="4.1.1.4" option="ultrafast" />
 
       <compiler standard="20">
         <flag option="avx2"
@@ -133,11 +152,17 @@
        </compiler>
     </library>
 
-    <test name="libbitcoin-system-test"
-      option="tests" type="with" default="yes"
-      uuid="51a424a9-2c12-4211-8d40-e49d1534c541">
+    <test name="libbitcoin-system-test" uuid="51a424a9-2c12-4211-8d40-e49d1534c541"
+      option="tests" type="with" default="yes">
 
-      <sources path="test" recursive="true" />
+      <sources path="test" recursive="true">
+        <msbuild filter="src" />
+        </sources>
+      <!--
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
+      -->
 
       <dependency name="boost" version="1.86.0" private="true">
         <component name="unit_test_framework" />
@@ -165,12 +190,15 @@
       <!-- <trigger test="t2" /> -->
     </test>
 
-    <binary name="libbitcoin-system-examples"
-      option="examples" type="with" default="yes"
-      install="false"
-      uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e">
+    <binary name="libbitcoin-system-examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e"
+      option="examples" type="with" default="yes" install="false">
 
-      <sources path="examples" />
+      <sources path="examples" recursive="true">
+        <msbuild filter="src" />
+      </sources>
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
 
       <dependency name="libbitcoin-system" private="true" />
 
@@ -402,15 +430,20 @@
   </repository>
 
   <repository name="libbitcoin-network" 
-    version="4.0.0"
     email="eric@voskuil.org"
     description="Bitcoin P2P Network Library">
+
+    <version major="4" minor="0" />
 
     <language id="c" />
     <language id="c++" />
 
-    <library name="libbitcoin-network"
-      uuid="564eb540-d6b6-425c-b8db-b0bee8970c18">
+    <library name="libbitcoin-network" uuid="564eb540-d6b6-425c-b8db-b0bee8970c18">
+
+      <!-- <configurable input="version.hpp.in"
+        output="version.hpp"
+        path="include/bitcoin/network"
+        type="headers" /> -->
 
       <sources path="src" recursive="true">
         <sources path="src/ssl" recursive="true" option="ssl" />
@@ -418,6 +451,11 @@
       <headers path="include" recursive="true" root="true">
         <headers path="include/bitcoin/network/ssl" recursive="true" root="true" option="ssl" />
       </headers>
+      <!--
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
+      -->
 
       <!-- Exposed knobs -->
       <option name="ssl" type="with" default="yes" comment="Use embedded ssl library." />
@@ -446,16 +484,23 @@
         <flag id="Wno-uninitialized" />
         <!--<flag id="Wno-maybe-uninitialized" />-->
        </compiler>
-    </library>
+     </library>
 
-    <test name="libbitcoin-network-test"
-      option="tests" type="with" default="yes"
-      uuid="d28fc18a-8b81-4247-92ee-6967feefeeff">
+    <test name="libbitcoin-network-test" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff"
+      option="tests" type="with" default="yes">
 
       <headers path="test" private="true" recursive="true" root="true">
+        <msbuild filter="src" />
         <headers path="test/ssl/wolfssl" private="true" recursive="true" root="true" option="ssl" />
       </headers>
-      <sources path="test" recursive="true" />
+      <sources path="test" recursive="true">
+        <msbuild filter="src" />
+      </sources>
+      <!--
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
+      -->
 
       <dependency name="boost" version="1.86.0" private="true">
         <component name="unit_test_framework" />
@@ -694,18 +739,28 @@
   </repository>
 
   <repository name="libbitcoin-database"
-    version="4.0.0"
     email="eric@voskuil.org"
     description="Bitcoin High Performance Blockchain Database">
+
+    <version major="4" minor="0" />
 
     <language id="c" />
     <language id="c++" />
 
-    <library name="libbitcoin-database"
-      uuid="62d7fbee-4d52-424a-8938-59756e13d9f5">
+    <library name="libbitcoin-database" uuid="62d7fbee-4d52-424a-8938-59756e13d9f5">
+
+      <!-- <configurable input="version.hpp.in"
+        output="version.hpp"
+        path="include/bitcoin/database"
+        type="headers" /> -->
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
+      <!--
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
+      -->
 
       <dependency name="libbitcoin-system" version="4.0.0" />
 
@@ -725,11 +780,17 @@
        </compiler>
     </library>
 
-    <test name="libbitcoin-database-test"
-      option="tests" type="with" default="yes"
-      uuid="5c4da53a-8c06-4da6-a2a8-3c30f338ed70">
+    <test name="libbitcoin-database-test" uuid="5c4da53a-8c06-4da6-a2a8-3c30f338ed70"
+      option="tests" type="with" default="yes">
 
-      <sources path="test" recursive="true" />
+      <sources path="test" recursive="true">
+        <msbuild filter="src" />
+      </sources>
+      <!--
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
+      -->
 
       <dependency name="boost" version="1.86.0" private="true">
         <component name="unit_test_framework" />
@@ -756,11 +817,17 @@
        </compiler>
     </test>
 
-    <binary name="libbitcoin-database-tools" output="initchain"
-      option="tools" type="with" default="yes"
-      install="false"
-      uuid="005f2a86-f937-4ab5-b041-0f21b67eec66">
-      <sources path="tools/initchain" />
+    <binary name="libbitcoin-database-tools" uuid="005f2a86-f937-4ab5-b041-0f21b67eec66"
+      option="tools" type="with" default="yes" install="false" output="initchain">
+
+      <sources path="tools/initchain">
+        <msbuild filter="src" />
+      </sources>
+      <!--
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
+      -->
 
       <dependency name="libbitcoin-database" private="true" />
 
@@ -988,18 +1055,26 @@
   </repository>
 
   <repository name="libbitcoin-node"
-    version="4.0.0"
     email="eric@voskuil.org"
     description="Bitcoin Full Node">
+
+    <version major="4" minor="0" />
 
     <language id="c" />
     <language id="c++" />
 
-    <library name="libbitcoin-node"
-      uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158">
+    <library name="libbitcoin-node" uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158">
+
+      <!-- <configurable input="version.hpp.in"
+        output="version.hpp"
+        path="include/bitcoin/node"
+        type="headers" /> -->
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
 
       <dependency name="libbitcoin-database" version="4.0.0" />
       <dependency name="libbitcoin-network" version="4.0.0" />
@@ -1020,11 +1095,17 @@
        </compiler>
     </library>
 
-    <test name="libbitcoin-node-test"
-      option="tests" type="with" default="yes"
-      uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8">
+    <test name="libbitcoin-node-test" uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8"
+      option="tests" type="with" default="yes">
 
-      <sources path="test" recursive="true" />
+      <sources path="test" recursive="true">
+        <msbuild filter="src" />
+      </sources>
+      <!--
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
+      -->
 
       <dependency name="boost" version="1.86.0" private="true">
         <component name="unit_test_framework" />
@@ -1257,18 +1338,26 @@
   </repository>
 
   <repository name="libbitcoin-server"
-    version="4.0.0"
     email="eric@voskuil.org"
     description="Bitcoin Full Node and Query Server">
+
+    <version major="4" minor="0" />
 
     <language id="c" />
     <language id="c++" />
 
-    <library name="libbitcoin-server"
-      uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0">
+    <library name="libbitcoin-server" uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0">
+
+      <!-- <configurable input="version.hpp.in"
+        output="version.hpp"
+        path="include/bitcoin/server"
+        type="headers" /> -->
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
 
       <dependency name="libbitcoin-node" version="4.0.0" />
 
@@ -1286,13 +1375,19 @@
         <flag id="fstack-protector-all" />
         <!-- link id="no_fixup_chains" /> -->
        </compiler>
-   </library>
+    </library>
 
-    <test name="libbitcoin-server-test"
-      option="tests" type="with" default="yes"
-      uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea">
+    <test name="libbitcoin-server-test" uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea"
+      option="tests" type="with" default="yes">
 
-      <sources path="test" recursive="true" />
+      <sources path="test" recursive="true">
+        <msbuild filter="src" />
+      </sources>
+      <!--
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
+      -->
 
       <dependency name="boost" version="1.86.0" private="true">
         <component name="unit_test_framework" />
@@ -1319,12 +1414,19 @@
        </compiler>
     </test>
 
-    <binary name="bitcoin-server" msvcproj="bs" output="bs"
-      option="console" type="with" default="yes"
-      install="true"
-      uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe">
+    <binary name="bitcoin-server" uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe"
+      option="console" type="with" default="yes" install="true"
+      msvcproj="bs" output="bs">
 
-      <sources path="console" />
+      <headers path="console" recursive="true" root="true">
+        <msbuild filter="src" />
+      </headers>
+      <sources path="console" recursive="true" root="true">
+        <msbuild filter="src" />
+      </sources>
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
 
       <dependency name="libbitcoin-server" private="true" />
 
@@ -1678,7 +1780,7 @@
           <symbol value="-no_fixup_chains" />
         </link>
      </compiler>
- </canonical>
+  </canonical>
 
   <registrar id="dependency">
     <dependency name="libbitcoin-system">
@@ -1797,7 +1899,44 @@
         </filename>
       </archive>
       <github owner="boostorg" tag="boost-1.86.0" />
-      <nuget />
+      <nuget>
+        <resource canonical="boost">
+          <package compiler="v143" name="boost" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost" version="1.91.0" />
+        </resource>
+        <resource canonical="boost_container" component="container">
+          <package compiler="v143" name="boost_container-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_container-vc145" version="1.91.0" />
+        </resource>
+        <resource canonical="boost_iostreams" component="iostreams">
+          <package compiler="v143" name="boost_iostreams-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_iostreams-vc145" version="1.91.0" />
+        </resource>
+        <resource canonical="boost_json" component="json">
+          <package compiler="v143" name="boost_json-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_json-vc145" version="1.91.0" />
+        </resource>
+        <resource canonical="boost_locale" component="locale">
+          <package compiler="v143" name="boost_locale-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_locale-vc145" version="1.91.0" />
+        </resource>
+        <resource canonical="boost_program_options" component="program_options">
+          <package compiler="v143" name="boost_program_options-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_program_options-vc145" version="1.91.0" />
+        </resource>
+        <resource canonical="boost_thread" component="thread">
+          <package compiler="v143" name="boost_thread-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_thread-vc145" version="1.91.0" />
+        </resource>
+        <resource canonical="boost_unit_test_framework" component="unit_test_framework">
+          <package compiler="v143" name="boost_unit_test_framework-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_unit_test_framework-vc145" version="1.91.0" />
+        </resource>
+        <resource canonical="boost_url" component="url">
+          <package compiler="v143" name="boost_url-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_url-vc145" version="1.91.0" />
+        </resource>
+      </nuget>
       <build method="nuget" />
       <build method="boost_build" version="1.86.0" parallel="true">
         <flag value="-Wno-enum-constexpr-conversion" />
@@ -1813,12 +1952,45 @@
       </build>
       <cmake namespace="Boost" package="Boost" />
     </dependency>
+    <dependency name="UltrafastSecp256k1"
+      textname="UltrafastSecp256k1"
+      conditional="true"
+      comment="Build Ultra high-performance secp256k1 ECC engine."
+      optionname="ultrafast">
+      <github owner="pmienk" tag="main" />
+      <nuget>
+        <resource canonical="UltrafastSecp256k1">
+          <package compiler="v145" name="UltrafastSecp256k1-vc145" version="4.1.1.4"
+            targets="build/native" />
+        </resource>
+      </nuget>
+      <build method="nuget" />
+      <build method="cmake" filepath="." parallel="true">
+        <option value="-DSECP256K1_BUILD_TESTS=OFF" />
+        <option value="-DSECP256K1_BUILD_BENCH=OFF" />
+        <option value="-DSECP256K1_BUILD_EXAMPLES=OFF" />
+        <option value="-DSECP256K1_BUILD_JAVA=OFF" />
+        <option value="-DUFSECP_BUILD_SHARED=OFF" />
+        <option value="-DSECP256K1_BUILD_CABI=ON" />
+        <option value="-DSECP256K1_BUILD_CPU=ON" />
+        <option value="-DSECP256K1_USE_ULTRAFAST=ON" />
+      </build>
+      <cmake namespace="secp256k1" package="secp256k1-fast"
+        target="secp256k1-fast" />
+    </dependency>
     <dependency name="secp256k1"
       textname="libsecp256k1"
       conditional="true"
       comment="Build libsecp256k1 libraries.">
       <github owner="bitcoin-core" tag="v0.7.0" />
-      <nuget />
+      <nuget>
+        <resource canonical="secp256k1">
+          <package compiler="v143" name="secp256k1_vc143" version="0.6.1"
+            targets="build/native" />
+          <package compiler="v145" name="secp256k1_vc145" version="0.6.1.2"
+            targets="build/native" />
+        </resource>
+      </nuget>
       <build method="nuget" />
       <build method="gnu" filepath="." parallel="true">
         <flag value="-w" />
@@ -2191,6 +2363,40 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     </option>
   </registrar>
 
+  <toolchain name="msbuild">
+    <toolset name="2022" setname="v143" compiler="v143" />
+    <toolset name="2026" setname="v143" compiler="v145" />
+
+    <msvc format="12.00" year="15">
+      <version value="15.0.27004.2010" min="10.0.40219.1" />
+      <type name="c++" uuid="8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942" />
+
+      <axis name="configuration">
+        <entry value="StaticDebug">
+          <library value="DebugLIB" />
+          <binary value="DebugSEXE" />
+          <test value="DebugSEXE" />
+        </entry>
+        <entry value="StaticRelease">
+          <library value="ReleaseLIB" />
+          <binary value="ReleaseSEXE" />
+          <test value="ReleaseSEXE" />
+        </entry>
+      </axis>
+      <axis name="platform">
+        <entry value="Win32" />
+        <entry value="x64" />
+        <entry value="ARM" />
+        <entry value="ARM64" />
+      </axis>
+    </msvc>
+
+    <msbuild schema="http://schemas.microsoft.com/developer/msbuild/2003">
+      <version type="lib" value="15.0" />
+      <version type="bin" value="4.0" />
+    </msbuild>
+  </toolchain>
+
   <!-- resultpath provided relative to expected evaluation - libbitcoin-build/process -->
   <templates source="version4.xml"
     resultpath="../output/version4"
@@ -2211,9 +2417,10 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <template name="install-gnu.sh.gsl" path="shell" outpath="builds/gnu">
       <error logpath="test-suite.log" />
       <error logpath="test.log" />
-      <build method="gnu" />
+      <build method="gnu" canonical="true" />
+      <build method="cmake" />
       <build method="boost_build" />
-      <column help="28" const="32" parse="28" />
+      <column help="28" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
       <option id="build-src-dir" />
@@ -2234,9 +2441,9 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <template name="install-cmake.sh.gsl" path="shell" outpath="builds/cmake">
       <error logpath="Testing/Temporary/LastTest.log" />
       <error logpath="test.log" />
-      <build method="cmake" />
+      <build method="cmake" canonical="true" />
       <build method="boost_build" />
-      <column help="28" const="32" parse="28" />
+      <column help="28" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
       <option id="build-src-dir" />
@@ -2262,9 +2469,9 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <error logpath="Testing/Temporary/LastTest.log" />
       <error logpath="test.log" />
       <build method="preset" />
-      <build method="cmake" />
+      <build method="cmake" canonical="true" />
       <build method="boost_build" />
-      <column help="28" const="32" parse="28" />
+      <column help="28" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
       <option id="build-preset" />
@@ -2283,8 +2490,8 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="cmake_library_path" />
     </template>
     <template name="build-msvc.cmd.gsl" path="shell" outpath="builds/msvc" label="true">
-      <column help="28" const="32" parse="28" />
-      <build  method="msbuild" />
+      <column help="28" const="32" parse="32" />
+      <build method="msbuild" canonical="true" />
       <build method="nuget" />
       <source type="github" />
       <source type="nuget" />
@@ -2341,14 +2548,23 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
 
     <!-- src -->
     <template name="include.hpp.gsl"
-     path="src"
-     outpath="include/bitcoin"
-     filterpath="bitcoin/">
+      path="src"
+      outpath="include/bitcoin"
+      filterpath="bitcoin/">
 
-      <match suffix=".hpp" />
-      <match suffix=".h" />
+      <match suffix="\.hpp" />
+      <match suffix="\.h" />
+      <match suffix="\.hpp\.in" strip=".in" />
     </template>
 
+    <!-- <template name="version.hpp.in.gsl"
+      path="src"
+      outpath="include/bitcoin" /> -->
+    <template name="version.hpp.gsl"
+      path="src"
+      outpath="include/bitcoin" />
+
+    <!-- git -->
     <template name="gitignore.gsl"
       path="git"
       outpath="">
@@ -2419,5 +2635,99 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       </ignore>
     </template>
 
+    <!-- msbuild/msvc -->
+    <template name="packages.config.gsl"
+      path="msbuild"
+      outpath="builds/msvc">
+
+      <tools chain="msbuild" set="2022" outpath="vs2022" />
+      <tools chain="msbuild" set="2026" outpath="vs2026" />
+    </template>
+
+    <template name="sln.gsl"
+      path="msbuild"
+      outpath="builds/msvc">
+
+      <tools chain="msbuild" set="2022" outpath="vs2022" />
+      <tools chain="msbuild" set="2026" outpath="vs2026" />
+    </template>
+
+    <template name="vcxproj.filters.gsl"
+      path="msbuild"
+      outpath="builds/msvc">
+
+      <path prefix="../../../.." />
+      <tools chain="msbuild" set="2022" outpath="vs2022" />
+      <tools chain="msbuild" set="2026" outpath="vs2026" />
+
+      <discovery>
+        <match suffix="\.ipp" />
+        <match suffix="\.hpp" />
+        <match suffix="\.h" />
+        <match suffix="\.hpp\.in" />
+        <match suffix="\.cpp" />
+        <match suffix="\.c" />
+        <match suffix="\.rc" />
+       </discovery>
+
+      <headers>
+        <match suffix="\.hpp" />
+        <match suffix="\.h" />
+      </headers>
+
+      <sources>
+        <match suffix="\.cpp" />
+        <match suffix="\.c" />
+      </sources>
+
+      <other>
+        <match suffix="\.ipp" />
+        <match suffix="\.hpp\.in" />
+      </other>
+
+      <resource>
+        <match suffix="\.rc" />
+      </resource>
+    </template>
+
+    <template name="vcxproj.gsl"
+      path="msbuild"
+      outpath="builds/msvc">
+
+      <path prefix="../../../.." />
+      <tools chain="msbuild" set="2022" outpath="vs2022" />
+      <tools chain="msbuild" set="2026" outpath="vs2026" />
+
+      <discovery>
+        <match suffix="\.ipp" />
+        <match suffix="\.hpp" />
+        <match suffix="\.h" />
+        <match suffix="\.hpp\.in" />
+        <match suffix="\.cpp" />
+        <match suffix="\.c" />
+        <match suffix="\.rc" />
+       </discovery>
+
+      <headers>
+        <match suffix="\.hpp" />
+        <match suffix="\.h" />
+      </headers>
+
+      <sources>
+        <match suffix="\.cpp" />
+        <match suffix="\.c" />
+      </sources>
+
+      <other>
+        <match suffix="\.ipp" />
+        <match suffix="\.hpp\.in" />
+      </other>
+
+      <resource>
+        <match suffix="\.rc" />
+      </resource>
+    </template>
+
   </templates>
+
 </configuration>

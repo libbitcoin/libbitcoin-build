@@ -1,0 +1,452 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin vcxproj
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/xml-output.gsl"
+gsl from "../lib/msbuild.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_vcxproj(configuration)
+    define my.configuration = generate_vcxproj.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    for my.template.tools as _tools by _tools.set
+        for my.configuration.repository as _repository
+            for _repository. as _target where is_target_element(_target)
+                generate_target_vcxproj(_target, _repository, \
+                    my.configuration, _tools, my.template)
+            endfor
+        endfor
+    endfor
+endfunction
+
+function generate_target_vcxproj(target, repository, configuration, tooling, meta)
+    define my.target = generate_target_vcxproj.target
+    define my.repository = generate_target_vcxproj.repository
+    define my.configuration = generate_target_vcxproj.configuration
+    define my.tooling = generate_target_vcxproj.tooling
+    define my.meta = generate_target_vcxproj.meta
+
+    define my.filename = "$(target_name(my.target)).vcxproj"
+
+    define my.output_path = path_append(my.configuration->templates.resultpath, \
+        path_append(my.repository.name, \
+            path_append(my.meta.outpath, \
+                path_append(my.tooling.outpath, \
+                    target_name(my.target)))))
+
+    create_directory(my.output_path)
+
+    define my.out_file = path_append(my.output_path, my.filename)
+
+    notify(my.out_file)
+    output(my.out_file)
+
+    emit_vcxproj(my.target, my.repository, my.configuration, \
+        my.tooling, my.meta)
+
+    close
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+function matches_substitution(substitutions, path)
+    define my.substitutions = matches_substitution.substitutions
+    define my.path = matches_substitution.path
+
+    for my.substitutions.substitution as _sub
+        if starts_with(my.path, _sub.absolute_path)
+            return _sub
+        endif
+    endfor
+endfunction
+
+function nuget_target(package)
+    define my.package = nuget_target.package
+    define my.prefix = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)"
+    define my.relative_path = defined(my.package.targets) ?? my.package.targets ? "build"
+    define my.targets_file = "$(my.package.name).targets"
+
+    return "$(my.prefix)/$(my.relative_path)/$(my.targets_file)"
+endfunction
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_vcxproj(target, repository, configuration, tooling, meta)
+.   define my.target = emit_vcxproj.target
+.   define my.repository = emit_vcxproj.repository
+.   define my.configuration = emit_vcxproj.configuration
+.   define my.tooling = emit_vcxproj.tooling
+.   define my.meta = emit_vcxproj.meta
+.
+.   define my.item_indent = "    "
+.   define my.toolchain = my.configuration->toolchain(this.name = my.tooling.chain, this)
+.   define my.toolset = my.toolchain->toolset(this.name = my.tooling.set, this)
+.   define my.version = (name(my.target) = "library") ?? \
+        my.toolchain->msbuild->version(this.type = "lib", this).value ? \
+        my.toolchain->msbuild->version(this.type = "bin", this).value
+.
+<?xml version="1.0" encoding="utf-8"?>
+.
+.   copyleft(my.repository.name)
+.
+<Project DefaultTargets="Build" ToolsVersion="$(my.version)" xmlns="$(my.toolchain->msbuild.schema)">
+  <PropertyGroup Label="Globals">
+.
+.   if !(name(my.target) = "library")
+    <ConfigurationType>Application</ConfigurationType>
+.   endif
+.
+    <PlatformToolset>$(my.toolset.compiler)</PlatformToolset>
+    <ProjectGuid>{$(my.target.uuid:upper)}</ProjectGuid>
+    <ProjectName>$(target_name(my.target))</ProjectName>
+  </PropertyGroup>
+.
+.   emit_project_configuration(my.target, my.repository, my.configuration, my.toolchain, my.toolset, my.meta, "  ")
+.
+.   if (name(my.target) = "library")
+.       emit_propertygroup_configuration("  ")
+.   endif
+.
+  <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.Default.props" />
+  <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="\$(ProjectDir)..\\..\\properties\\\$(Configuration).props" />
+    <Import Project="\$(ProjectDir)..\\..\\properties\\Output.props" />
+    <Import Project="\$(ProjectDir)\$(ProjectName).props" />
+  </ImportGroup>
+.
+.   new substitutions as _substitutions
+.       new directory as _files
+.           define my.absolute_root = repository_absolute_path(\
+                my.repository, my.configuration)
+.           define my.intended_prefix = my.meta->path.prefix
+.
+.           populate_files(_substitutions, _files, my.meta->discovery, \
+                my.target, my.absolute_root, my.intended_prefix)
+.
+.   # ClCompile
+
+  <ItemGroup>
+.           new conflicts as _conflicts
+.               emit_items("ClCompile", _files, _substitutions, \
+                    my.meta->sources, my.item_indent, _conflicts)
+.           endnew
+  </ItemGroup>
+.   # ClInclude
+  <ItemGroup>
+.           emit_items("ClInclude", _files, _substitutions, my.meta->headers, my.item_indent)
+  </ItemGroup>
+.   # None
+  <ItemGroup>
+.           emit_items("None", _files, _substitutions, my.meta->other, my.item_indent)
+    <None Include="packages.config" />
+  </ItemGroup>
+.   # ResourceCompile
+  <ItemGroup>
+.           emit_items("ResourceCompile", _files, _substitutions, my.meta->resource, my.item_indent)
+  </ItemGroup>
+.           emit_import_projects(my.target, my.repository, my.configuration, \
+                my.toolchain, my.toolset, my.meta, "  ")
+.
+.       endnew
+.   endnew
+.   emit_ensure_nuget_imports(my.target, my.repository, my.configuration, \
+        my.toolchain, my.toolset, my.meta, "  ")
+.
+.   if !(name(my.target) = "library")
+.       emit_project_references(my.target, my.repository, my.configuration, "  ")
+.   endif
+.
+.   # Natvis
+  <ItemGroup>
+    <Natvis Include="..\\..\\debug.natvis" />
+  </ItemGroup>
+.
+</Project>
+.
+.endmacro # emit_vcxproj
+.
+.macro emit_project_configuration(target, repository, configuration, \
+    toolchain, toolset, meta, indent)
+.
+.   define my.target = emit_project_configuration.target
+.   define my.repository = emit_project_configuration.repository
+.   define my.configuration = emit_project_configuration.configuration
+.   define my.toolchain = emit_project_configuration.toolchain
+.   define my.toolset = emit_project_configuration.toolset
+.   define my.meta = emit_project_configuration.meta
+.   define my.indent = emit_project_configuration.indent
+.
+$(my.indent)<ItemGroup Label="ProjectConfigurations">
+.
+.   for my.toolchain->msvc->axis(.name = "configuration").entry as _config
+.       define my.target_config = _config->$(name(my.target)).value
+.       for my.toolchain->msvc->axis(.name = "platform").entry as _platform
+.
+  $(my.indent)<ProjectConfiguration Include="$(my.target_config)|$(_platform.value)">
+    $(my.indent)<Configuration>$(my.target_config)</Configuration>
+    $(my.indent)<Platform>$(_platform.value)</Platform>
+  $(my.indent)</ProjectConfiguration>
+.       endfor
+.   endfor
+.
+$(my.indent)</ItemGroup>
+.
+.endmacro # emit_project_configuration
+.
+.macro emit_items(item_name, files, substitutions, filters, indent, conflicts)
+.   define my.item_name = emit_items.item_name
+.   define my.files = emit_items.files
+.   define my.substitutions = emit_items.substitutions
+.   define my.filters = emit_items.filters
+.   define my.indent = emit_items.indent
+.   define my.conflicts = emit_items.conflicts?
+.
+.   for my.files.file as _file where matches_filters(my.filters, _file.name)
+.       define my.conflicted = 0
+.       define my.applicable_sub = matches_substitution(my.substitutions, _file.path)
+.       define my.sanitized_path = string.substr(_file.path, string.length(my.applicable_sub.absolute_path), string.length(_file.path) - 1)
+.       define my.filename = path_append(my.applicable_sub.relative_path_prefix, \
+            path_append(my.sanitized_path, _file.name))
+.       define my.filter_path = my.sanitized_path
+.       if defined(my.applicable_sub.filter)
+.           my.filter_path = path_append(my.applicable_sub.filter, my.sanitized_path)
+.       endif
+.       if ends_with(my.filter_path, "/")
+.           my.filter_path = string.substr(my.filter_path, 0, string.length(my.filter_path) - 2)
+.       endif
+.
+.       define my.splitpoint = string.locate_last(_file.name, ".")
+.       define my.filename_base = string.substr(_file.name, 0, my.splitpoint - 1)
+.
+.       if defined(my.conflicts)
+.           if (count(my.conflicts.conflict, count.name = my.filename_base) > 0)
+.               my.conflicted = 1
+.           else
+.               new my.conflicts.conflict as _conflict
+.                   _conflict.name = my.filename_base
+.               endnew
+.           endif
+.       endif
+.
+.       if my.conflicted
+.           define my.path_to_prefix = string.replace(my.sanitized_path, "/|_")
+.           define my.disambiguated = "$(my.applicable_sub.unprefixed_path)$(my.path_to_prefix)$(my.filename_base).obj"
+$(my.indent)<$(my.item_name) Include="$(path(my.filename))">
+  $(my.indent)<ObjectFileName>\$(IntDir)$(my.disambiguated)</ObjectFileName>
+$(my.indent)</$(my.item_name)>
+.       else
+$(my.indent)<$(my.item_name) Include="$(path(my.filename))" />
+.       endif
+.   endfor
+.
+.   for my.files.directory as _directory
+.       emit_items(my.item_name, _directory, my.substitutions, my.filters, \
+            my.indent, my.conflicts)
+.   endfor
+.endmacro # emit_items
+.
+.macro emit_import_projects(target, repository, configuration, toolchain, toolset, meta, indent)
+.   define my.target = emit_import_projects.target
+.   define my.repository = emit_import_projects.repository
+.   define my.configuration = emit_import_projects.configuration
+.   define my.toolchain = emit_import_projects.toolchain
+.   define my.toolset = emit_import_projects.toolset
+.   define my.meta = emit_import_projects.meta
+.   define my.indent = emit_import_projects.indent
+.
+$(my.indent)<Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.targets" />
+$(my.indent)<ImportGroup Label="ExtensionTargets" />
+$(my.indent)<ImportGroup Label="ExtensionSettings">
+.
+.   new dependencies as _dependencies
+.       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
+.       for _dependencies.dependency as _depend where defined(_depend->nuget)
+.           for _depend->nuget.resource as _resource where \
+                !defined(_resource.component)
+.
+.               define my.found = 0
+.
+.               for _resource.package as _package where \
+                    (_package.compiler = my.toolset.compiler)
+.
+.                   my.found = 1
+.
+.                   define my.nutarget = path(nuget_target(_package))
+  $(my.indent)<Import Project="$(my.nutarget)" Condition="Exists('$(my.nutarget)')" />
+.
+.               endfor
+.
+.               if !my.found
+.                   echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+.               endif
+.           endfor
+.
+.           # address component resources
+.           for _depend.component as _component
+.               for _depend->nuget.resource as _resource where \
+                    defined(_resource.component) & (_resource.component = _component.name)
+.
+.                   define my.found = 0
+.
+.                   for _resource.package as _package where \
+                        (_package.compiler = my.toolset.compiler)
+.
+.                       my.found = 1
+.
+.                       define my.nutarget = path(nuget_target(_package))
+  $(my.indent)<Import Project="$(my.nutarget)" Condition="Exists('$(my.nutarget)')" />
+.
+.                   endfor
+.
+.                   if !my.found
+.                       echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+.                   endif
+.               endfor
+.           endfor
+.       endfor
+.   endnew
+.
+$(my.indent)</ImportGroup>
+.endmacro # emit_import_projects
+.
+.macro emit_ensure_nuget_imports(target, repository, configuration, toolchain, toolset, meta, indent)
+.   define my.target = emit_ensure_nuget_imports.target
+.   define my.repository = emit_ensure_nuget_imports.repository
+.   define my.configuration = emit_ensure_nuget_imports.configuration
+.   define my.toolchain = emit_ensure_nuget_imports.toolchain
+.   define my.toolset = emit_ensure_nuget_imports.toolset
+.   define my.meta = emit_ensure_nuget_imports.meta
+.   define my.indent = emit_ensure_nuget_imports.indent
+.
+$(my.indent)<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+  $(my.indent)<PropertyGroup>
+    $(my.indent)<ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The Missing file is {0}.</ErrorText>
+  $(my.indent)</PropertyGroup>
+.
+.   new dependencies as _dependencies
+.       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
+.       for _dependencies.dependency as _depend where defined(_depend->nuget)
+.           for _depend->nuget.resource as _resource where \
+                !defined(_resource.component)
+.
+.               define my.found = 0
+.
+.               for _resource.package as _package where \
+                    (_package.compiler = my.toolset.compiler)
+.
+.                   my.found = 1
+.
+.                   define my.nutarget = path(nuget_target(_package))
+  $(my.indent)<Error Condition="!Exists('$(my.nutarget)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.nutarget)'))" />
+.
+.               endfor
+.
+.               if !my.found
+.                   echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+.               endif
+.           endfor
+.
+.           # address component resources
+.           for _depend.component as _component
+.               for _depend->nuget.resource as _resource where \
+                    defined(_resource.component) & (_resource.component = _component.name)
+.
+.                   define my.found = 0
+.
+.                   for _resource.package as _package where \
+                        (_package.compiler = my.toolset.compiler)
+.
+.                       my.found = 1
+.
+.                       define my.nutarget = path(nuget_target(_package))
+  $(my.indent)<Error Condition="!Exists('$(my.nutarget)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.nutarget)'))" />
+.
+.                   endfor
+.
+.                   if !my.found
+.                       echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+.                   endif
+.               endfor
+.           endfor
+.       endfor
+.   endnew
+.
+$(my.indent)</Target>
+.
+.endmacro # emit_ensure_nuget_imports
+.
+.macro emit_propertygroup_configuration(indent)
+.   define my.indent = emit_propertygroup_configuration.indent
+.
+$(my.indent)<PropertyGroup Label="Configuration">
+  $(my.indent)<ConfigurationType Condition="\$(Configuration.IndexOf('DLL')) == -1">StaticLibrary</ConfigurationType>
+  $(my.indent)<ConfigurationType Condition="\$(Configuration.IndexOf('DLL')) != -1">DynamicLibrary</ConfigurationType>
+$(my.indent)</PropertyGroup>
+.endmacro # emit_propertygroup_configuration
+.
+.macro emit_project_references(target, repository, configuration, indent)
+.   define my.target = emit_project_references.target
+.   define my.repository = emit_project_references.repository
+.   define my.configuration = emit_project_references.configuration
+.   define my.indent = emit_project_references.indent
+.
+$(my.indent)<ItemGroup>
+.
+.   for my.target.dependency as _depend where \
+        (count(my.repository.library, (count.name = _depend.name) & defined(count.uuid)) > 0)
+.
+.       define my.library = my.repository->library(\
+            (this.name = _depend.name) & defined(this.uuid), this)
+.
+  $(my.indent)<ProjectReference Include="..\\$(my.library.name)\\$(my.library.name).vcxproj">
+    $(my.indent)<Project>{$(my.library.uuid:upper)}</Project>
+  $(my.indent)</ProjectReference>
+.
+.   endfor
+.
+$(my.indent)</ItemGroup>
+.
+.endmacro # emit_project_references
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_vcxproj(configuration)
+
+.endtemplate

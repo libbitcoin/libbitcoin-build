@@ -18,26 +18,209 @@ gsl from "../library/string.gsl"
 #------------------------------------------------------------------------------
 # Path manipulation tools.
 #------------------------------------------------------------------------------
-function path_append(basepath, baserelativepath)
-    if (!is_empty(my.basepath))
-        if (!ends_with(my.basepath, "/") & !ends_with(my.basepath, "\\"))
-            return "$(my.basepath)/$(my.baserelativepath)"
-        else
-            return "$(my.basepath)$(my.baserelativepath)"
-        endif
+function global.path_append(base_path, base_relative_path)
+    if is_empty(my.base_path)
+        return my.base_relative_path
     endif
-    return "$(my.baserelativepath)"
+
+    if !ends_with(my.base_path, "/") & !starts_with(my.base_relative_path, "/")
+        return "$(my.base_path)/$(my.base_relative_path)"
+    endif
+
+    return "$(my.base_path)$(my.base_relative_path)"
+endfunction
+
+function global.substitute_separator(path, prev, next)
+    define my.path = substitute_separator.path
+    define my.prev = substitute_separator.prev
+    define my.next = substitute_separator.next
+
+    return string.replace(my.path, '$(my.prev)|$(my.next)')
 endfunction
 
 #------------------------------------------------------------------------------
 # I/O utilities.
 #------------------------------------------------------------------------------
-function create_directory(path)
+function global.create_directory(path)
     define my.result = directory.create(my.path)
     if (my.result = 0)
         return
     endif
     abort "Directory creation failure: $(error_text)"
+endfunction
+
+function global.calculated_name(file, meta)
+    define my.file = calculated_name.file
+    define my.meta = calculated_name.meta
+
+    for my.meta.match as _match where ends_with(my.file.name, _match.suffix)
+        if defined(_match.strip)
+            return string.substr(my.file.name, 0, string.length(my.file.name) - string.length(_match.strip) - 1)
+        endif
+    endfor
+
+    return my.file.name
+endfunction
+
+function global.is_targeted_file(file, meta)
+    define my.file = is_targeted_file.file
+    define my.meta = is_targeted_file.meta
+
+    define my.filterless = (count(my.meta.match) = 0)
+
+    if my.filterless
+        return 1
+    endif
+
+    for my.meta.match as _filter where defined(_filter.suffix)
+        if ends_with(my.file.name, _filter.suffix)
+            return 1
+        endif
+    endfor
+
+    return 0
+endfunction
+
+function global.discover_files(files, meta, path, recurse)
+    define my.files = discover_files.files
+    define my.meta = discover_files.meta
+    define my.path = discover_files.path
+    define my.recurse = discover_files.recurse ? 1
+
+    # meta presumed structure:
+    # <meta>
+    #   <match ?suffix=suffix? ?exclude="yes/true"? />
+    # </meta>
+
+    define my.directory = directory.open(my.path)?
+
+    if !defined(my.directory)
+        abort "Directory open failure: $(error_text)"
+    endif
+
+    my.files.path = my.directory.path
+    my.files.name = my.directory.name
+    my.files.query = my.path
+
+    if my.recurse
+        for my.directory.directory as _subdirectory
+            new my.files.directory as _directory
+                discover_files(_directory, my.meta, "$(_subdirectory.path)$(_subdirectory.name)")
+            endnew
+        endfor
+    endif
+
+    for my.directory.file as _file by _file.name \
+        where is_targeted_file(_file, my.meta)
+
+        define my.modified_name = calculated_name(_file, my.meta)
+
+        #if !(my.modified_name = _file.name)
+            # check for redundancy, if so skip
+            if !(count(my.files.file, (count.name = my.modified_name)) = 0)
+                next
+            endif
+        #endif
+
+        new my.files.file as _active_file
+            _active_file.name = my.modified_name
+            _active_file.path = _file.path
+        endnew
+    endfor
+endfunction
+
+function global.matches_filters(filters, filename)
+    define my.filters = matches_filters.filters
+    define my.filename = matches_filters.filename
+
+    if count(my.filters.match) = 0
+        return 1
+    endif
+
+    for my.filters.match as _match
+        if ends_with(my.filename, _match.suffix)
+            return 1
+        endif
+    endfor
+
+    return 0
+endfunction
+
+function global.populate_files_from_path(path_substitutions, files, filters, files_path, absolute_path_base, intended_prefix_base)
+    define my.path_substitutions = populate_files_from_path.path_substitutions
+    define my.files = populate_files_from_path.files
+    define my.filters = populate_files_from_path.filters
+    define my.files_path = populate_files_from_path.files_path
+    define my.absolute_path_base = populate_files_from_path.absolute_path_base
+    define my.intended_prefix_base = populate_files_from_path.intended_prefix_base
+
+    define my.path = path_append(my.absolute_path_base, my.files_path.path)
+    define my.recurse = is_defined_positive(my.files_path, "recursive")
+
+    new my.files.directory as _directory
+        discover_files(_directory, my.filters, my.path, my.recurse)
+    endnew
+
+    new my.path_substitutions.substitution as _sub
+        _sub.absolute_path = my.path
+        _sub.relative_path_prefix = path_append(my.intended_prefix_base, \
+            my.files_path.path)
+
+        _sub.unprefixed_path = my.files_path.path
+
+        if defined(my.files_path->msbuild) & defined(my.files_path->msbuild.filter)
+            _sub.filter = my.files_path->msbuild.filter
+        else
+            _sub.filter = my.files_path.path
+        endif
+
+        #echo("sub absolute_path        | $(_sub.absolute_path)")
+        #echo("sub relative_path_prefix | $(_sub.relative_path_prefix)")
+        #echo("sub unprefixed_path      | $(_sub.unprefixed_path)")
+        #echo("sub filter               | $(_sub.filter)")
+    endnew
+ endfunction
+
+function global.populate_files(path_substitutions, files, filters, target, absolute_path_base, intended_prefix_base)
+    define my.path_substitutions = populate_files.path_substitutions
+    define my.files = populate_files.files
+    define my.filters = populate_files.filters
+    define my.target = populate_files.target
+    define my.absolute_path_base = populate_files.absolute_path_base
+    define my.intended_prefix_base = populate_files.intended_prefix_base
+
+    for my.target.headers as _file_path where is_defined_positive(_file_path, "root")
+        populate_files_from_path(my.path_substitutions, my.files, my.filters, \
+            _file_path, my.absolute_path_base, my.intended_prefix_base) 
+    endfor
+
+    for my.target.sources as _file_path
+        populate_files_from_path(my.path_substitutions, my.files, my.filters, \
+            _file_path, my.absolute_path_base, my.intended_prefix_base) 
+    endfor
+
+    for my.target.resources as _file_path
+        populate_files_from_path(my.path_substitutions, my.files, my.filters, \
+            _file_path, my.absolute_path_base, my.intended_prefix_base) 
+    endfor
+
+    # substitution of last resort
+    new my.path_substitutions.substitution as _sub
+        _sub.absolute_path = my.absolute_path_base
+        _sub.relative_path_prefix = my.intended_prefix_base
+    endnew
+endfunction
+
+function repository_absolute_path(repository, configuration)
+    define my.repository = repository_absolute_path.repository
+    define my.configuration = repository_absolute_path.configuration
+
+    define my.path = path_append(my.configuration->templates.src_root_path, \
+        my.repository.name)
+
+    define my.directory = directory.open(my.path)
+
+    return my.directory.path
 endfunction
 
 .endtemplate

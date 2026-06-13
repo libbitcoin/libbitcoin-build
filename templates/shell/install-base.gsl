@@ -116,10 +116,6 @@ function emit_install_sh(meta, configuration, repository)
                 endif
             endfor
 
-            if (count(_keys.method, count.name = "cmake" | count.name = "preset" | count.name = "gnu") > 0)
-                define_helpers_make(my.meta, my.repository, my.configuration)
-            endif
-
             for _keys.method as _method
                 if (_method.name = "cmake")
                     define_build_cmake()
@@ -137,6 +133,18 @@ function emit_install_sh(meta, configuration, repository)
                     abort "Unrecognized build method '$(_method.name)'."
                 endif
             endfor
+
+            if (count(_keys.method, count.name = "cmake" | count.name = "preset") > 0)
+                define_clean_cmake(my.meta, my.configuration, my.repository)
+                define_install_cmake(my.meta, my.configuration, my.repository)
+                define_test_cmake(my.meta, my.configuration, my.repository)
+            endif
+
+            if (count(_keys.method, count.name = "gnu") > 0)
+                define_clean_gnu(my.meta, my.configuration, my.repository)
+                define_install_gnu(my.meta, my.configuration, my.repository)
+                define_test_gnu(my.meta, my.configuration, my.repository)
+            endif
         endnew
 
         define_display_build_variables(my.meta, my.configuration, my.repository, _install)
@@ -162,6 +170,11 @@ endfunction
 function textname(dependency)
     define my.dependency = textname.dependency
     return defined(my.dependency.textname) ?? my.dependency.textname ? my.dependency.name
+endfunction
+
+function option_name(dependency)
+    define my.dependency = option_name.dependency
+    return defined(my.dependency.optionname) ?? my.dependency.optionname ? my.dependency.name
 endfunction
 
 function substitute(datasource, value, instructions)
@@ -208,28 +221,13 @@ function verify_toolchains_supported(dependencies, meta, configuration, reposito
     define my.configuration = verify_toolchains_supported.configuration
     define my.repository = verify_toolchains_supported.repository
 
-    define my.cmake = defined(my.meta->build(build.method = "cmake"))
-    define my.gnu = defined(my.meta->build(build.method = "gnu"))
-    define my.msbuild = defined(my.meta->build(build.method = "msbuild"))
-    define my.preset = defined(my.meta->build(build.method = "preset"))
+    define my.canonical = my.meta->build(is_defined_positive(build, "canonical")).method
 
-    # if (my.cmake | my.preset) & (my.gnu)
-    #     abort "Configurations mixing 'cmake'/'preset' and 'gnu' are not supported."
-    # endif
+    if !((my.canonical = "cmake") | \
+        (my.canonical = "gnu") | \
+        (my.canonical = "msbuild") | \
+        (my.canonical = "preset"))
 
-    if (my.cmake)
-        my.dependencies.toolchain = "cmake"
-        my.dependencies.hint_options = "cmake"
-    elsif (my.gnu)
-        my.dependencies.toolchain = "gnu"
-        my.dependencies.hint_options = "gnu"
-    elsif (my.msbuild)
-        my.dependencies.toolchain = "msbuild"
-        my.dependencies.hint_options = "msbuild"
-    elsif (my.preset)
-        my.dependencies.toolchain = "preset"
-        my.dependencies.hint_options = "cmake"
-    else
         abort "Unexpected - missing primary toolchain."
     endif
 

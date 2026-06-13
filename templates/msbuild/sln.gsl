@@ -1,0 +1,174 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin .sln
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/msbuild.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_sln(configuration)
+    define my.configuration = generate_sln.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.resource_name = ".sln"
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    for my.template.tools as _tools by _tools.set
+        for my.configuration.repository as _repository
+            define my.output_path = path_append(my.configuration->templates.resultpath, \
+                path_append(_repository.name, \
+                    path_append(my.template.outpath, _tools.outpath)))
+
+            define my.filename = "$(_repository.name).sln"
+
+            create_directory(my.output_path)
+
+            define my.out_file = path_append(my.output_path, my.filename)
+
+            notify(my.out_file)
+            output(my.out_file)
+
+            define my.toolchain = my.configuration->toolchain(this.name = _tools.chain, this)
+            copy _tools to my.toolchain
+
+            emit_sln(_repository, my.configuration, my.toolchain, my.template)
+            close
+        endfor
+    endfor
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_sln(repository, configuration, toolchain, meta)
+.   define my.repository = emit_sln.repository
+.   define my.configuration = emit_sln.configuration
+.   define my.toolchain = emit_sln.toolchain
+.   define my.meta = emit_sln.meta
+.
+
+Microsoft Visual Studio Solution File, Format Version $(my.toolchain->msvc.format)
+# Visual Studio $(my.toolchain->msvc.year)
+VisualStudioVersion = $(my.toolchain->msvc->version.value)
+MinimumVisualStudioVersion = $(my.toolchain->msvc->version.min)
+.
+.   for my.repository. as _target where is_target_element(_target) & defined(_target.uuid)
+.       emit_project(_target, my.repository, my.configuration, my.toolchain, my.meta)
+.   endfor
+.
+Global
+.
+.   emit_solution_matrix(my.toolchain, "\t")
+.   emit_project_matrix(my.repository, my.configuration, my.toolchain, my.meta, "\t")
+.   emit_solution_properties("\t")
+.
+EndGlobal
+.
+.
+.endmacro # emit_sln
+.
+.macro emit_project(target, repository, configuration, toolchain, meta)
+.   define my.target = emit_project.target
+.   define my.repository = emit_project.repository
+.   define my.configuration = emit_project.configuration
+.   define my.toolchain = emit_project.toolchain
+.   define my.meta = emit_project.meta
+.
+.   define my.project_type = my.toolchain->msvc->type(.name = "c++").uuid
+.   define my.path = project_relative_path(my.target, my.meta, my.toolchain->tools)
+.   define my.sub = substitute_separator(my.path, "/", "\\")
+.
+Project("{$(my.project_type)}") = "$(target_name(my.target))", "$(my.sub)", "{$(my.target.uuid:upper)}"
+EndProject
+.
+.endmacro # emit_project
+.
+.macro emit_solution_matrix(toolchain, indent)
+.   define my.toolchain = emit_solution_matrix.toolchain
+.   define my.indent = emit_solution_matrix.indent
+.
+$(my.indent)GlobalSection(SolutionConfigurationPlatforms) = preSolution
+.   for my.toolchain->msvc->axis(.name = "configuration").entry as _config
+.       for my.toolchain->msvc->axis(.name = "platform").entry as _platform
+\t$(my.indent)$(_config.value)|$(_platform.value) = $(_config.value)|$(_platform.value)
+.       endfor
+.   endfor
+$(my.indent)EndGlobalSection
+.endmacro # emit_solution_matrix
+.
+.macro emit_project_matrix(repository, configuration, toolchain, meta, indent)
+.   define my.repository = emit_project_matrix.repository
+.   define my.configuration = emit_project_matrix.configuration
+.   define my.toolchain = emit_project_matrix.toolchain
+.   define my.meta = emit_project_matrix.meta
+.   define my.indent = emit_project_matrix.indent
+.
+$(my.indent)GlobalSection(ProjectConfigurationPlatforms) = postSolution
+.   for my.repository. as _target where is_target_element(_target) & defined(_target.uuid)
+.       emit_target_matrix(_target, my.toolchain, "\t$(my.indent)")
+.   endfor
+$(my.indent)EndGlobalSection
+.endmacro # emit_presolution_matrix
+.
+.macro emit_target_matrix(target, toolchain, indent)
+.   define my.target = emit_target_matrix.target
+.   define my.toolchain = emit_target_matrix.toolchain
+.   define my.indent = emit_target_matrix.indent
+.
+.   for my.toolchain->msvc->axis(.name = "configuration").entry as _config
+.       define my.target_config = _config->$(name(my.target)).value
+.       for my.toolchain->msvc->axis(.name = "platform").entry as _platform
+$(my.indent){$(my.target.uuid:upper)}.$(_config.value)|$(_platform.value).ActiveCfg = $(my.target_config)|$(_platform.value)
+$(my.indent){$(my.target.uuid:upper)}.$(_config.value)|$(_platform.value).Build.0 = $(my.target_config)|$(_platform.value)
+.       endfor
+.   endfor
+.endmacro # emit_target_matrix
+.
+.macro emit_solution_properties(indent)
+.   define my.indent = emit_solution_properties.indent
+.
+$(my.indent)GlobalSection(SolutionProperties) = preSolution
+\t$(my.indent)HideSolutionNode = FALSE
+$(my.indent)EndGlobalSection
+.
+.endmacro # emit_solution_properties
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_sln(configuration)
+
+.endtemplate

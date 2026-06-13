@@ -39,6 +39,16 @@ function global.is_defined_positive(node, attribute)
         ((my.node.$(my.attribute) = "true") | (my.node.$(my.attribute) = "yes"))
 endfunction
 
+function global.merge_child(destination, element, identifier)
+    define my.destination = merge_child.destination
+    define my.element = merge_child.element
+    define my.identifier = merge_child.identifier
+
+    if (count(my.destination.$(name(my.element)), count.$(my.identifier) = my.element.$(my.identifier)) = 0)
+        copy my.element to my.destination
+    endif
+endfunction
+
 function global.merge_children_select(destination, source, name, identifier)
     define my.destination = merge_children_select.destination
     define my.source = merge_children_select.source
@@ -46,29 +56,39 @@ function global.merge_children_select(destination, source, name, identifier)
     define my.identifier = merge_children_select.identifier
 
     for my.source.$(my.name) as _child
-        if (count(my.destination->$(my.name), $(my.name).$(identifier) = _child.$(identifier)) = 0)
-            copy _child to my.destination
-        endif
+        merge_child(my.destination, _child, my.identifier)
     endfor
 endfunction
 
-function global.canonicalize(result, host, canonical, name, identifier)
+function global.canonicalize_element(result, element, registrar, identifier)
+    define my.result = canonicalize_element.result
+    define my.element = canonicalize_element.element
+    define my.registrar = canonicalize_element.registrar
+    define my.identifier = canonicalize_element.identifier
+
+    if !defined(my.element.$(my.identifier))
+        copy my.element to my.result
+    elsif (count(my.result.$(name(my.element)), defined(this.$(my.identifier)) &\
+        (this.$(my.identifier) = my.element.$(my.identifier)), this) = 0)
+
+        if (count(my.registrar.$(name(my.element)),\
+            this.$(my.identifier) = my.element.$(my.identifier), this) > 0)
+            copy my.registrar->$(name(my.element))(.$(my.identifier) = my.element.$(my.identifier)) to my.result
+        else
+            copy my.element to my.result
+        endif
+    endif
+endfunction
+
+function global.canonicalize(result, host, registrar, name, identifier)
     define my.result = canonicalize.result
     define my.host = canonicalize.host
-    define my.canonical = canonicalize.canonical
+    define my.registrar = canonicalize.registrar
     define my.name = canonicalize.name
     define my.identifier = canonicalize.identifier
 
     for my.host.$(my.name) as _element
-        if (!defined(_element.$(my.identifier)))
-            copy _element to my.result
-        elsif (count(my.result.$(my.name), defined(this.$(my.identifier)) & (this.$(my.identifier) = _element.$(my.identifier)), this) = 0)
-            if (count(my.canonical.$(my.name), .$(my.identifier) = _element.$(my.identifier)) > 0)
-                copy my.canonical->$(my.name)(.$(my.identifier) = _element.$(my.identifier)) to my.result
-            else
-                copy _element to my.result
-            endif
-        endif
+        canonicalize_element(my.result, _element, my.registrar, my.identifier)
     endfor
 endfunction
 
@@ -188,7 +208,30 @@ function global.get_option(reference, target, repository)
     return my.result
 endfunction
 
-function canonical_dependency_list(result, repository, configuration)
+function global.target_dependency_list(result, target, repository, configuration)
+    define my.result = target_dependency_list.result
+    define my.target = target_dependency_list.target
+    define my.repository = target_dependency_list.repository
+    define my.configuration = target_dependency_list.configuration
+
+    define my.registrar = my.configuration->registrar(id = "dependency")
+
+    for my.target.dependency as _dep
+        if (count_matches_name(my.configuration, "repository", _dep.name) > 0)
+            define my.dep_repository = my.configuration->repository(name = _dep.name)
+            define my.dep_target = my.dep_repository->library(name = _dep.name)
+
+            target_dependency_list(my.result, my.dep_target, \
+                my.dep_repository, my.configuration)
+        else
+            canonicalize_element(my.result, _dep, my.registrar, "name")
+        endif
+
+        merge_components(my.result, _dep)
+    endfor
+endfunction
+
+function global.canonical_dependency_list(result, repository, configuration)
     define my.result = canonical_dependency_list.result
     define my.repository = canonical_dependency_list.repository
     define my.configuration = canonical_dependency_list.configuration
@@ -212,7 +255,7 @@ function canonical_dependency_list(result, repository, configuration)
     endfor
 endfunction
 
-function calculate_presets(result, configuration, repository)
+function global.calculate_presets(result, configuration, repository)
     define my.result = calculate_presets.result
     define my.configuration = calculate_presets.configuration
     define my.repository = calculate_presets.repository
@@ -258,6 +301,13 @@ function calculate_presets(result, configuration, repository)
 #            abort "Preset $(_config.name) absent from registry."
 #        endif
 #    endfor
+endfunction
+
+function global.is_target_element(element)
+    define my.element = is_target_element.element
+    return (name(my.element) = "library") \
+        | (name(my.element) = "test") \
+        | (name(my.element) = "binary")
 endfunction
 
 .endtemplate

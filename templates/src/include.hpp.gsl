@@ -78,65 +78,6 @@ endfunction
 ###############################################################################
 # Functions
 ###############################################################################
-function discover_files(files, meta, path)
-    define my.files = discover_files.files
-    define my.meta = discover_files.meta
-    define my.path = discover_files.path
-
-    # meta presumed structure:
-    # <meta>
-    #   <match ?suffix=suffix? ?exclude="yes/true"? />
-    # </meta>
-    #
-
-    define my.directory = directory.open(my.path)?
-
-    if !defined(my.directory)
-        abort "Directory open failure: $(error_text)"
-    endif
-
-    my.files.path = my.directory.path
-    my.files.name = my.directory.name
-    my.files.query = my.path
-
-    for my.directory.directory as _subdirectory
-        new my.files.directory as _directory
-            discover_files(_directory, my.meta, "$(_subdirectory.path)$(_subdirectory.name)")
-        endnew
-    endfor
-
-    for my.directory.file as _file by _file.name \
-        where is_targeted_file(_file, my.meta)
-
-        new my.files.file as _active_file
-            _active_file.name = _file.name
-            _active_file.path = _file.path
-            _active_file.size = _file.size
-            _active_file.time = _file.time
-            _active_file.date = _file.date
-        endnew
-    endfor
-endfunction
-
-function is_targeted_file(file, meta)
-    define my.file = is_targeted_file.file
-    define my.meta = is_targeted_file.meta
-
-    define my.filterless = (count(my.meta.match) = 0)
-
-    if my.filterless
-        return 1
-    endif
-
-    for my.meta.match as _filter where defined(_filter.suffix)
-        if ends_with(my.file.name, _filter.suffix)
-            return 1
-        endif
-    endfor
-
-    return 0
-endfunction
-
 function short_name(host)
     define my.host = short_name.host
 
