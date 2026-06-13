@@ -77,6 +77,73 @@ endfunction
 ###############################################################################
 # Functions
 ###############################################################################
+
+function compute_packages(result, target, repository, configuration, tooling, meta)
+    define my.result = compute_packages.result
+    define my.target = compute_packages.target
+    define my.repository = compute_packages.repository
+    define my.configuration = compute_packages.configuration
+    define my.tooling = compute_packages.tooling
+    define my.meta = compute_packages.meta
+ 
+    define my.toolchain = my.configuration->toolchain(\
+        this.name = my.tooling.chain, this)
+ 
+    define my.toolset = my.toolchain->toolset(\
+        this.name = my.tooling.set, this)
+ 
+    new dependencies as _dependencies
+        target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
+        for _dependencies.dependency as _depend where defined(_depend->nuget)
+            # address non-component resources
+            for _depend->nuget.resource as _resource where \
+                !defined(_resource.component)
+ 
+                define my.found = 0
+ 
+                for _resource.package as _package where \
+                    (_package.compiler = my.toolset.compiler)
+ 
+                    my.found = 1
+
+                    new my.result.package as _result
+                        _result.name = _package.name
+                        _result.version = _package.version
+                    endnew
+                endfor
+
+                if !my.found
+                    echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+                endif
+            endfor
+ 
+            # address component resources
+            for _depend.component as _component
+                for _depend->nuget.resource as _resource where \
+                    defined(_resource.component) & (_resource.component = _component.name)
+
+                    define my.found = 0
+
+                    for _resource.package as _package where \
+                        (_package.compiler = my.toolset.compiler)
+
+                        my.found = 1
+
+                        new my.result.package as _result
+                            _result.name = _package.name
+                            _result.version = _package.version
+                        endnew
+                    endfor
+
+                    if !my.found
+                        echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+                    endif
+                endfor
+            endfor
+        endfor
+    endnew
+endfunction
+
 ###############################################################################
 # Generation
 ###############################################################################
@@ -108,52 +175,12 @@ endfunction
 .   define my.meta = emit_packages.meta
 .   define my.indent = emit_packages.indent
 .
-.   define my.toolchain = my.configuration->toolchain(\
-        this.name = my.tooling.chain, this)
+.   new packages as _packages
+.       compute_packages(_packages, my.target, my.repository, \
+            my.configuration, my.tooling, my.meta)
 .
-.   define my.toolset = my.toolchain->toolset(\
-        this.name = my.tooling.set, this)
-.
-.   new dependencies as _dependencies
-.       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
-.       for _dependencies.dependency as _depend where defined(_depend->nuget)
-.           # address non-component resources
-.           for _depend->nuget.resource as _resource where \
-                !defined(_resource.component)
-.
-.               define my.found = 0
-.
-.               for _resource.package as _package where \
-                    (_package.compiler = my.toolset.compiler)
-.
-.                   my.found = 1
+.       for _packages.package as _package by _package.name
 $(my.indent)<package id="$(_package.name)" version="$(_package.version)" targetFramework="Native" />
-.               endfor
-.
-.               if !my.found
-.                   echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
-.               endif
-.           endfor
-.
-.           # address component resources
-.           for _depend.component as _component
-.               for _depend->nuget.resource as _resource where \
-                    defined(_resource.component) & (_resource.component = _component.name)
-.
-.                   define my.found = 0
-.
-.                   for _resource.package as _package where \
-                        (_package.compiler = my.toolset.compiler)
-.
-.                       my.found = 1
-$(my.indent)<package id="$(_package.name)" version="$(_package.version)" targetFramework="Native" />
-.                   endfor
-.
-.                   if !my.found
-.                       echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
-.                   endif
-.               endfor
-.           endfor
 .       endfor
 .   endnew
 .

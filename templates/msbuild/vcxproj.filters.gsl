@@ -101,6 +101,85 @@ function populate_uuid(files, seed)
     return my.seed
 endfunction
 
+function accumulate_filters(result, files, substitutions, target)
+    define my.result = accumulate_filters.result
+    define my.files = accumulate_filters.files
+    define my.substitutions = accumulate_filters.substitutions
+    define my.target = accumulate_filters.target
+
+    if defined(my.files.path)
+        define my.path = "$(my.files.name)"
+        define my.applicable_sub = matches_substitution(my.substitutions, my.path)
+        define my.sanitized_path = \
+          (string.length(my.applicable_sub.absolute_path) < string.length(my.path)) ??\
+            string.substr(my.path, \
+              string.length(my.applicable_sub.absolute_path), string.length(my.path) - 1) ?\
+              ""
+        define my.filter_path = my.sanitized_path
+        if defined(my.applicable_sub.filter)
+            my.filter_path = path_append(my.applicable_sub.filter, my.sanitized_path)
+        endif
+        if ends_with(my.filter_path, "/")
+            my.filter_path = string.substr(my.filter_path, 0, string.length(my.filter_path) - 2)
+        endif
+
+        if (count(my.result.filter, this.path = my.filter_path, this) = 0)
+            new my.result.filter as _filter
+                _filter.path = my.filter_path
+                _filter.target_uuid = my.target.uuid
+                _filter.files_uuid = my.files.uuid
+            endnew
+        else
+            echo "Collision using filter path '$(my.filter_path)'."
+        endif
+    endif
+ 
+    for my.files.directory as _directory
+        accumulate_filters(my.result, _directory, my.substitutions, my.target)
+    endfor
+endfunction
+
+function accumulate_items(result, files, substitutions, filters)
+    define my.result = accumulate_items.result
+    define my.files = accumulate_items.files
+    define my.substitutions = accumulate_items.substitutions
+    define my.filters = accumulate_items.filters
+
+    for my.files.file as _file where matches_filters(my.filters, _file.name)
+        define my.applicable_sub = matches_substitution(my.substitutions, _file.path)
+        define my.sanitized_path = string.substr(_file.path, string.length(my.applicable_sub.absolute_path), string.length(_file.path) - 1)
+
+        define my.filename = path_append(my.applicable_sub.relative_path_prefix, \
+            path_append(my.sanitized_path, _file.name))
+
+        define my.filter_path = my.sanitized_path
+
+        if defined(my.applicable_sub.filter)
+            my.filter_path = path_append(my.applicable_sub.filter, my.sanitized_path)
+        endif
+
+        if ends_with(my.filter_path, "/")
+            my.filter_path = string.substr(my.filter_path, 0, string.length(my.filter_path) - 2)
+        endif
+
+        define my.name = path(my.filename)
+        define my.filter = path(my.filter_path)
+
+        if (count(my.result.item, this.name = my.name, this) = 0)
+            new my.result.item as _item
+                _item.name = my.name
+                _item.filter = my.filter
+            endnew
+        else
+            echo "Collision using item name '$(my.name)'."
+        endif
+    endfor
+
+    for my.files.directory as _directory
+        accumulate_items(my.result, _directory, my.substitutions, my.filters)
+    endfor
+endfunction
+
 ###############################################################################
 # Generation
 ###############################################################################
@@ -142,30 +221,57 @@ endfunction
   <ItemGroup>
 .           emit_filters(_files, _substitutions, my.target, my.indent)
   </ItemGroup>
+.
 .   # ClCompile
-
+.           new items as _items
+.               accumulate_items(_items, _files, _substitutions, my.meta->sources)
+.
+.               if (count(_items.item) > 0)
   <ItemGroup>
-.           emit_items("ClCompile", _files, _substitutions, my.meta->sources, my.indent)
+.                   emit_items("ClCompile", _items, my.indent)
   </ItemGroup>
+.               endif
+.           endnew
+.
 .   # ClInclude
+.           new items as _items
+.               accumulate_items(_items, _files, _substitutions, my.meta->headers)
+.
+.               if (count(_items.item) > 0)
   <ItemGroup>
-.           emit_items("ClInclude", _files, _substitutions, my.meta->headers, my.indent)
+.                   emit_items("ClInclude", _items, my.indent)
   </ItemGroup>
+.               endif
+.           endnew
+.
 .   # None
+.           new items as _items
+.               accumulate_items(_items, _files, _substitutions, my.meta->other)
+.
+.               new _items.item as _item
+.                   _item.name = "packages.config"
+.               endnew
+.
   <ItemGroup>
-.           emit_items("None", _files, _substitutions, my.meta->other, my.indent)
-    <None Include="packages.config" />
+.               emit_items("None", _items, my.indent)
   </ItemGroup>
-.   # Natvis
+.           endnew
+.
+.           # Natvis
   <ItemGroup>
     <Natvis Include="..\\..\\debug.natvis" />
   </ItemGroup>
-.   # ResourceCompile
-  <ItemGroup>
-.           emit_items("ResourceCompile", _files, _substitutions, \
-                my.meta->resource, my.indent)
-  </ItemGroup>
 .
+.           # ResourceCompile
+.           new items as _items
+.               accumulate_items(_items, _files, _substitutions, my.meta->resource)
+.
+.               if (count(_items.item) > 0)
+  <ItemGroup>
+.                   emit_items("ResourceCompile", _items, my.indent)
+  </ItemGroup>
+.               endif
+.           endnew
 .       endnew
 .   endnew
 .
@@ -179,61 +285,33 @@ endfunction
 .   define my.target = emit_filters.target
 .   define my.indent = emit_filters.indent
 .
-.   if defined(my.files.path)
-.       define my.path = "$(my.files.name)"
-.       define my.applicable_sub = matches_substitution(my.substitutions, my.path)
-.       define my.sanitized_path = \
-          (string.length(my.applicable_sub.absolute_path) < string.length(my.path)) ??\
-            string.substr(my.path, \
-              string.length(my.applicable_sub.absolute_path), string.length(my.path) - 1) ?\
-              ""
-.       define my.filter_path = my.sanitized_path
-.       if defined(my.applicable_sub.filter)
-.           my.filter_path = path_append(my.applicable_sub.filter, my.sanitized_path)
-.       endif
-.       if ends_with(my.filter_path, "/")
-.           my.filter_path = string.substr(my.filter_path, 0, string.length(my.filter_path) - 2)
-.       endif
-$(my.indent)<Filter Include="$(path(my.filter_path))">
-  $(my.indent)<UniqueIdentifier>{$(to_uuid(my.target.uuid, my.files.uuid):upper)}</UniqueIdentifier>
+.   new filters as _filters
+.       accumulate_filters(_filters, my.files, my.substitutions, my.target)
+.
+.       for _filters.filter as _filter by _filter.path
+$(my.indent)<Filter Include="$(path(_filter.path))">
+  $(my.indent)<UniqueIdentifier>{$(to_uuid(_filter.target_uuid, _filter.files_uuid):upper)}</UniqueIdentifier>
 $(my.indent)</Filter>
-.   endif
-.
-.   for my.files.directory as _directory
-.       emit_filters(_directory, my.substitutions, my.target, my.indent)
-.   endfor
-.
+.       endfor
+.   endnew
 .endmacro # emit_filters
 .
-.macro emit_items(item_name, files, substitutions, filters, indent)
+.macro emit_items(item_name, items, indent)
 .   define my.item_name = emit_items.item_name
-.   define my.files = emit_items.files
-.   define my.substitutions = emit_items.substitutions
-.   define my.filters = emit_items.filters
+.   define my.items = emit_items.items
 .   define my.indent = emit_items.indent
 .
-.   for my.files.file as _file where matches_filters(my.filters, _file.name)
-.       define my.applicable_sub = matches_substitution(my.substitutions, _file.path)
-.       define my.sanitized_path = string.substr(_file.path, string.length(my.applicable_sub.absolute_path), string.length(_file.path) - 1)
-.       define my.filename = path_append(my.applicable_sub.relative_path_prefix, \
-            path_append(my.sanitized_path, _file.name))
-.       define my.filter_path = my.sanitized_path
-.       if defined(my.applicable_sub.filter)
-.           my.filter_path = path_append(my.applicable_sub.filter, my.sanitized_path)
-.       endif
-.       if ends_with(my.filter_path, "/")
-.           my.filter_path = string.substr(my.filter_path, 0, string.length(my.filter_path) - 2)
-.       endif
+.   for my.items.item as _item by _item.name
+.       my.lineend = defined(_item.filter) ?? ">" ? " />"
+$(my.indent)<$(my.item_name) Include="$(_item.name)"$(my.lineend)
 .
-$(my.indent)<$(my.item_name) Include="$(path(my.filename))">
-  $(my.indent)<Filter>$(path(my.filter_path))</Filter>
+.       if defined(_item.filter)
+  $(my.indent)<Filter>$(_item.filter)</Filter>
 $(my.indent)</$(my.item_name)>
+.       endif
 .   endfor
 .
-.   for my.files.directory as _directory
-.       emit_items(my.item_name, _directory, my.substitutions, my.filters, my.indent)
-.   endfor
-.endmacro # emit_item_group
+.endmacro # emit_items
 .
 .endtemplate
 .template 0

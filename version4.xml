@@ -195,7 +195,7 @@
     <binary name="libbitcoin-system-examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e"
       option="examples" type="with" default="yes" install="false">
 
-      <sources path="examples">
+      <sources path="examples" recursive="true">
         <msbuild filter="src" />
       </sources>
       <resources path="builds/msvc" recursive="false" root="true">
@@ -492,6 +492,7 @@
       option="tests" type="with" default="yes">
 
       <headers path="test" private="true" recursive="true" root="true">
+        <msbuild filter="src" />
         <headers path="test/ssl/wolfssl" private="true" recursive="true" root="true" option="ssl" />
       </headers>
       <sources path="test" recursive="true">
@@ -1419,7 +1420,10 @@
       option="console" type="with" default="yes" install="true"
       msvcproj="bs" output="bs">
 
-      <sources path="console">
+      <headers path="console" recursive="true" root="true">
+        <msbuild filter="src" />
+      </headers>
+      <sources path="console" recursive="true" root="true">
         <msbuild filter="src" />
       </sources>
       <resources path="builds/msvc" recursive="false" root="true">
@@ -1902,9 +1906,17 @@
           <package compiler="v143" name="boost" version="1.86.0" />
           <package compiler="v145" name="libbitcoin-boost" version="1.91.0" />
         </resource>
+        <resource canonical="boost_container" component="container">
+          <package compiler="v143" name="boost_container-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_container-vc145" version="1.91.0" />
+        </resource>
         <resource canonical="boost_iostreams" component="iostreams">
           <package compiler="v143" name="boost_iostreams-vc143" version="1.86.0" />
           <package compiler="v145" name="libbitcoin-boost_iostreams-vc145" version="1.91.0" />
+        </resource>
+        <resource canonical="boost_json" component="json">
+          <package compiler="v143" name="boost_json-vc143" version="1.86.0" />
+          <package compiler="v145" name="libbitcoin-boost_json-vc145" version="1.91.0" />
         </resource>
         <resource canonical="boost_locale" component="locale">
           <package compiler="v143" name="boost_locale-vc143" version="1.86.0" />
@@ -1972,7 +1984,7 @@
         <resource canonical="secp256k1">
           <package compiler="v143" name="secp256k1_vc143" version="0.6.1"
             targets="build/native" />
-          <package compiler="v145" name="secp256k1_vc145" version="0.6.1"
+          <package compiler="v145" name="secp256k1_vc145" version="0.6.1.2"
             targets="build/native" />
         </resource>
       </nuget>
