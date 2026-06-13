@@ -70,7 +70,7 @@
       </dependency>
 
       <dependency name="secp256k1" version="0.7.0" /> <!-- option="secp256k1" />
-      <dependency name="UltrafastSecp256k1" option="ultrafast" /> -->
+      <dependency name="UltrafastSecp256k1" version="4.1.1.4" option="ultrafast" /> -->
 
       <compiler standard="20">
         <flag option="avx2"
@@ -1960,7 +1960,14 @@
       comment="Build Ultra high-performance secp256k1 ECC engine."
       optionname="ultrafast">
       <github owner="pmienk" tag="main" />
-      <nuget />
+      <nuget>
+        <resource canonical="UltrafastSecp256k1">
+          <package compiler="v143" name="UltrafastSecp256k1-vc143" version="4.1.1.4"
+            targets="build/native" />
+          <package compiler="v145" name="UltrafastSecp256k1-vc145" version="4.1.1.4"
+            targets="build/native" />
+        </resource>
+      </nuget>
       <build method="nuget" />
       <build method="cmake" filepath="." parallel="true">
         <option value="-DSECP256K1_BUILD_TESTS=OFF" />
