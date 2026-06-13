@@ -46,7 +46,6 @@
         comment="Use Intel/ARM SHA Extensions."
         msvc="/p:Option-sha=true" />
 
-      <!--
       <option name="ultrafast"
         type="with"
         default="no"
@@ -56,7 +55,6 @@
         type="with"
         default="yes"
         comment="Use bitcoin-core/secp256k1." />
-      -->
 
       <!-- Dependencies -->
       <dependency name="boost" version="1.86.0">
@@ -69,8 +67,8 @@
         <component name="url" />
       </dependency>
 
-      <dependency name="secp256k1" version="0.7.0" /> <!-- option="secp256k1" />
-      <dependency name="UltrafastSecp256k1" version="4.1.1.4" option="ultrafast" /> -->
+      <dependency name="secp256k1" version="0.7.0" option="secp256k1" />
+      <dependency name="UltrafastSecp256k1" version="4.1.1.4" option="ultrafast" />
 
       <compiler standard="20">
         <flag option="avx2"
