@@ -1401,6 +1401,16 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
         exit 1
     fi
 
+    if [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
+.   if defined(my.meta->build(build.method = "cmake"))
+        CONFIGURE_OPTIONS_CMAKE=( "${CONFIGURE_OPTIONS_CMAKE[@]}" "-Dwith-tests=OFF" )
+.   endif
+.
+.   if defined(my.meta->build(build.method = "gnu"))
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--without-tests" )
+.   endif
+    fi
+
     # --prefix
     if [[ -z "${PREFIX}" ]]; then
         # Always set a prefix (required for OSX and lib detection).
