@@ -311,7 +311,7 @@ $(my.indent)</ItemGroup>
 .   define my.files = emit_items.files
 .   define my.indent = emit_items.indent
 .
-.   for my.files.item as _file
+.   for my.files.item as _file by _file.name
 .       define my.lineend = defined(_file.has_conflict) ?? ">" ? " />"
 $(my.indent)<$(my.item_name) Include="$(path(_file.name))"$(my.lineend)
 .
