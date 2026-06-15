@@ -338,7 +338,9 @@ $(my.indent)<ImportGroup Label="ExtensionSettings">
 .
 .   new dependencies as _dependencies
 .       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
-.       for _dependencies.dependency as _depend where defined(_depend->nuget)
+.       for _dependencies.dependency as _depend by _depend.name \
+            where defined(_depend->nuget)
+.
 .           for _depend->nuget.resource as _resource where \
                 !defined(_resource.component)
 .
@@ -360,7 +362,7 @@ $(my.indent)<ImportGroup Label="ExtensionSettings">
 .           endfor
 .
 .           # address component resources
-.           for _depend.component as _component
+.           for _depend.component as _component by _component.name
 .               for _depend->nuget.resource as _resource where \
                     defined(_resource.component) & (_resource.component = _component.name)
 .
@@ -403,7 +405,9 @@ $(my.indent)<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="Prepare
 .
 .   new dependencies as _dependencies
 .       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
-.       for _dependencies.dependency as _depend where defined(_depend->nuget)
+.       for _dependencies.dependency as _depend by _depend.name \
+            where defined(_depend->nuget)
+.
 .           for _depend->nuget.resource as _resource where \
                 !defined(_resource.component)
 .
@@ -425,7 +429,7 @@ $(my.indent)<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="Prepare
 .           endfor
 .
 .           # address component resources
-.           for _depend.component as _component
+.           for _depend.component as _component by _component.name
 .               for _depend->nuget.resource as _resource where \
                     defined(_resource.component) & (_resource.component = _component.name)
 .
