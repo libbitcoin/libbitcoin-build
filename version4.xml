@@ -49,7 +49,7 @@
       <option name="ultrafast"
         type="with"
         default="no"
-        comment="Use shrec/UltraFastSecp256k1." />
+        comment="Use shrec/UltrafastSecp256k1." />
 
       <option name="secp256k1"
         type="with"
@@ -68,7 +68,7 @@
       </dependency>
 
       <dependency name="secp256k1" version="0.7.0" option="secp256k1" />
-      <dependency name="UltrafastSecp256k1" version="4.1.1.4" option="ultrafast" />
+      <dependency name="UltrafastSecp256k1" version="4.1.1.7" option="ultrafast" />
 
       <compiler standard="20">
         <flag option="avx2"
@@ -1960,7 +1960,9 @@
       <github owner="pmienk" tag="main" />
       <nuget>
         <resource canonical="UltrafastSecp256k1">
-          <package compiler="v145" name="UltrafastSecp256k1-vc145" version="4.1.1.4"
+          <package compiler="v143" name="UltrafastSecp256k1-vc143" version="4.1.1.7"
+            targets="build/native" />
+          <package compiler="v145" name="UltrafastSecp256k1-vc145" version="4.1.1.7"
             targets="build/native" />
         </resource>
       </nuget>
@@ -1973,6 +1975,13 @@
         <option value="-DUFSECP_BUILD_SHARED=OFF" />
         <option value="-DSECP256K1_BUILD_CABI=ON" />
         <option value="-DSECP256K1_BUILD_CPU=ON" />
+        <option value="-DSECP256K1_BUILD_SHIM=ON" />
+        <option value="-DSECP256K1_BUILD_CUDA=OFF" />
+        <option value="-DSECP256K1_BUILD_ROCM=OFF" />
+        <option value="-DSECP256K1_BUILD_OPENCL=OFF" />
+        <option value="-DSECP256K1_BUILD_METAL=OFF" />
+        <option value="-DSECP256K1_INSTALL=ON" />
+        <option value="-DSECP256K1_INSTALL_PKGCONFIG=ON" />
         <option value="-DSECP256K1_USE_ULTRAFAST=ON" />
       </build>
       <cmake namespace="secp256k1" package="secp256k1-fast"
@@ -2372,6 +2381,26 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <type name="c++" uuid="8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942" />
 
       <axis name="configuration">
+        <entry value="DynamicDebug" hidden="true">
+          <library value="DebugDLL" />
+          <binary value="DebugDEXE" />
+          <test value="DebugDEXE" />
+        </entry>
+        <entry value="DynamicRelease" hidden="true">
+          <library value="ReleaseDLL" />
+          <binary value="ReleaseDEXE" />
+          <test value="ReleaseDEXE" />
+        </entry>
+        <entry value="LTCGDebug" hidden="true">
+          <library value="DebugLTCG" />
+          <binary value="DebugLEXE" />
+          <test value="DebugLEXE" />
+        </entry>
+        <entry value="LTCGRelease" hidden="true">
+          <library value="ReleaseLTCG" />
+          <binary value="ReleaseLEXE" />
+          <test value="ReleaseLEXE" />
+        </entry>
         <entry value="StaticDebug">
           <library value="DebugLIB" />
           <binary value="DebugSEXE" />
