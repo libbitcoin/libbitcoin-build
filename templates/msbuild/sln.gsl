@@ -118,8 +118,12 @@ EndProject
 .   define my.indent = emit_solution_matrix.indent
 .
 $(my.indent)GlobalSection(SolutionConfigurationPlatforms) = preSolution
-.   for my.toolchain->msvc->axis(.name = "configuration").entry as _config
-.       for my.toolchain->msvc->axis(.name = "platform").entry as _platform
+.   for my.toolchain->msvc->axis(.name = "platform").entry as _platform \
+        where !defined(_platform.hidden) by _platform.value
+.
+.       for my.toolchain->msvc->axis(.name = "configuration").entry as _config \
+            where !defined(_config.hidden)
+.
 \t$(my.indent)$(_config.value)|$(_platform.value) = $(_config.value)|$(_platform.value)
 .       endfor
 .   endfor
@@ -145,9 +149,13 @@ $(my.indent)EndGlobalSection
 .   define my.toolchain = emit_target_matrix.toolchain
 .   define my.indent = emit_target_matrix.indent
 .
-.   for my.toolchain->msvc->axis(.name = "configuration").entry as _config
-.       define my.target_config = _config->$(name(my.target)).value
-.       for my.toolchain->msvc->axis(.name = "platform").entry as _platform
+.   for my.toolchain->msvc->axis(.name = "platform").entry as _platform \
+        where !defined(_platform.hidden) by _platform.value
+.
+.       for my.toolchain->msvc->axis(.name = "configuration").entry as _config \
+            where !defined(_config.hidden)
+.
+.           define my.target_config = _config->$(name(my.target)).value
 $(my.indent){$(my.target.uuid:upper)}.$(_config.value)|$(_platform.value).ActiveCfg = $(my.target_config)|$(_platform.value)
 $(my.indent){$(my.target.uuid:upper)}.$(_config.value)|$(_platform.value).Build.0 = $(my.target_config)|$(_platform.value)
 .       endfor
