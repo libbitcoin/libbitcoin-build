@@ -186,7 +186,8 @@ function global.populate_files_from_path(path_substitutions, files, filters, fil
     define my.path = path_append(my.absolute_path_base, my.files_path.path)
     define my.recurse = is_defined_positive(my.files_path, "recursive")
 
-    if (count(my.files.directory, this.path = "$(my.path)/", this) > 0)
+    if (count(my.files.directory, this.path = "$(my.path)/", this) > 0) | \
+        (count(my.files.directory, this.path = my.path, this) > 0)
         # echo "Repopulating '$(my.path)'"
         define my.matched_directory = my.files->directory(this.path = "$(my.path)/", this)
         discover_files(my.matched_directory, my.filters, my.path, my.recurse)
@@ -229,20 +230,30 @@ function global.populate_files(path_substitutions, files, filters, target, absol
     define my.absolute_path_base = populate_files.absolute_path_base
     define my.intended_prefix_base = populate_files.intended_prefix_base
 
-    for my.target.headers as _file_path where is_defined_positive(_file_path, "root")
-        populate_files_from_path(my.path_substitutions, my.files, my.filters, \
-            _file_path, my.absolute_path_base, my.intended_prefix_base) 
-    endfor
+    new unique_paths as _paths
+        for my.target.headers as _file_source
+            if (count(_paths., this.path = _file_source.path, this) = 0)
+                copy _file_source to _paths
+            endif
+        endfor
 
-    for my.target.sources as _file_path
-        populate_files_from_path(my.path_substitutions, my.files, my.filters, \
-            _file_path, my.absolute_path_base, my.intended_prefix_base) 
-    endfor
+        for my.target.sources as _file_source
+            if (count(_paths., this.path = _file_source.path, this) = 0)
+                copy _file_source to _paths
+            endif
+        endfor
 
-    for my.target.resources as _file_path
-        populate_files_from_path(my.path_substitutions, my.files, my.filters, \
-            _file_path, my.absolute_path_base, my.intended_prefix_base) 
-    endfor
+        for my.target.resources as _file_source
+            if (count(_paths., this.path = _file_source.path, this) = 0)
+                copy _file_source to _paths
+            endif
+        endfor
+
+        for _paths. as _file_source
+            populate_files_from_path(my.path_substitutions, my.files, my.filters, \
+                _file_source, my.absolute_path_base, my.intended_prefix_base)
+        endfor
+    endnew
 
     # substitution of last resort
     new my.path_substitutions.substitution as _sub
