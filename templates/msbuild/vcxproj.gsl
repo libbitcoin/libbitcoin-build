@@ -97,6 +97,74 @@ function nuget_target(package)
     return "$(my.prefix)/$(my.relative_path)/$(my.targets_file)"
 endfunction
 
+function linearize_sources(result, files, substitutions, filters, disambiguation_type)
+    define my.result = linearize_sources.result
+    define my.files = linearize_sources.files
+    define my.substitutions = linearize_sources.substitutions
+    define my.filters = linearize_sources.filters
+    define my.disambiguation_type = linearize_sources.disambiguation_type?
+
+    for my.files.file as _file where matches_filters(my.filters, _file.name)
+        define my.applicable_sub = matches_substitution(my.substitutions, _file.path)
+
+        define my.sanitized_path = string.substr(_file.path, \
+            string.length(my.applicable_sub.absolute_path), string.length(_file.path) - 1)
+
+        define my.filename = path_append(my.applicable_sub.relative_path_prefix, \
+            path_append(my.sanitized_path, _file.name))
+
+        define my.filter_path = my.sanitized_path
+
+        if defined(my.applicable_sub.filter)
+            my.filter_path = path_append(my.applicable_sub.filter, my.sanitized_path)
+        endif
+
+        if ends_with(my.filter_path, "/")
+            my.filter_path = string.substr(my.filter_path, 0, \
+                string.length(my.filter_path) - 2)
+        endif
+ 
+ 
+        new my.result.item as _item
+            _item.name = my.filename
+            if defined(my.disambiguation_type)
+                define my.splitpoint = string.locate_last(_file.name, ".")
+                _item.collision_name = string.substr(_file.name, 0, my.splitpoint - 1)
+
+                define my.path_to_prefix = string.replace(my.sanitized_path, "/|_")
+                _item.disambiguated = "$(my.applicable_sub.unprefixed_path)$(my.path_to_prefix)$(_item.collision_name).$(my.disambiguation_type)"
+            endif
+        endnew
+    endfor
+
+    for my.files.directory as _directory
+        linearize_sources(my.result, _directory, my.substitutions, my.filters, \
+            my.disambiguation_type)
+    endfor
+endfunction
+
+function annotate_conflicts(items)
+    define my.items = annotate_conflicts.items
+
+    new names as _names
+        for my.items.item as _item by _item.collision_name
+            if (count(_names.item, this.name = _item.collision_name, this) > 0)
+                _names->item(this.name = _item.collision_name, this).deconflict = 1
+            else
+                new _names.item as _identifier
+                    _identifier.name = _item.collision_name
+                endnew
+            endif
+        endfor
+
+        for _names.item as _identifier where defined(_identifier.deconflict)
+            for my.items.item as _item where _item.collision_name = _identifier.name
+                _item.has_conflict = 1
+            endfor
+        endfor
+    endnew
+endfunction
+
 ###############################################################################
 # Generation
 ###############################################################################
@@ -159,23 +227,35 @@ endfunction
 .   # ClCompile
 
   <ItemGroup>
-.           new conflicts as _conflicts
-.               emit_items("ClCompile", _files, _substitutions, \
-                    my.meta->sources, my.item_indent, _conflicts)
+.           new items as _items
+.               linearize_sources(_items, _files, _substitutions, my.meta->sources, "obj")
+.               annotate_conflicts(_items)
+.               emit_items("ClCompile", _items, my.item_indent)
 .           endnew
   </ItemGroup>
 .   # ClInclude
   <ItemGroup>
-.           emit_items("ClInclude", _files, _substitutions, my.meta->headers, my.item_indent)
+.           new items as _items
+.               linearize_sources(_items, _files, _substitutions, my.meta->headers)
+.               emit_items("ClInclude", _items, my.item_indent)
+.           endnew
   </ItemGroup>
 .   # None
   <ItemGroup>
-.           emit_items("None", _files, _substitutions, my.meta->other, my.item_indent)
-    <None Include="packages.config" />
+.           new items as _items
+.               linearize_sources(_items, _files, _substitutions, my.meta->other)
+.               new _items.item as _packagesconfig
+.                   _packagesconfig.name = "packages.config"
+.               endnew
+.               emit_items("None", _items, my.item_indent)
+.           endnew
   </ItemGroup>
 .   # ResourceCompile
   <ItemGroup>
-.           emit_items("ResourceCompile", _files, _substitutions, my.meta->resource, my.item_indent)
+.           new items as _items
+.               linearize_sources(_items, _files, _substitutions, my.meta->resource)
+.               emit_items("ResourceCompile", _items, my.item_indent)
+.           endnew
   </ItemGroup>
 .           emit_import_projects(my.target, my.repository, my.configuration, \
                 my.toolchain, my.toolset, my.meta, "  ")
@@ -211,9 +291,9 @@ endfunction
 .
 $(my.indent)<ItemGroup Label="ProjectConfigurations">
 .
-.   for my.toolchain->msvc->axis(.name = "configuration").entry as _config
-.       define my.target_config = _config->$(name(my.target)).value
-.       for my.toolchain->msvc->axis(.name = "platform").entry as _platform
+.   for my.toolchain->msvc->axis(.name = "platform").entry as _platform by _platform.value
+.       for my.toolchain->msvc->axis(.name = "configuration").entry as _config
+.           define my.target_config = _config->$(name(my.target)).value
 .
   $(my.indent)<ProjectConfiguration Include="$(my.target_config)|$(_platform.value)">
     $(my.indent)<Configuration>$(my.target_config)</Configuration>
@@ -226,56 +306,21 @@ $(my.indent)</ItemGroup>
 .
 .endmacro # emit_project_configuration
 .
-.macro emit_items(item_name, files, substitutions, filters, indent, conflicts)
+.macro emit_items(item_name, files, indent)
 .   define my.item_name = emit_items.item_name
 .   define my.files = emit_items.files
-.   define my.substitutions = emit_items.substitutions
-.   define my.filters = emit_items.filters
 .   define my.indent = emit_items.indent
-.   define my.conflicts = emit_items.conflicts?
 .
-.   for my.files.file as _file where matches_filters(my.filters, _file.name)
-.       define my.conflicted = 0
-.       define my.applicable_sub = matches_substitution(my.substitutions, _file.path)
-.       define my.sanitized_path = string.substr(_file.path, string.length(my.applicable_sub.absolute_path), string.length(_file.path) - 1)
-.       define my.filename = path_append(my.applicable_sub.relative_path_prefix, \
-            path_append(my.sanitized_path, _file.name))
-.       define my.filter_path = my.sanitized_path
-.       if defined(my.applicable_sub.filter)
-.           my.filter_path = path_append(my.applicable_sub.filter, my.sanitized_path)
-.       endif
-.       if ends_with(my.filter_path, "/")
-.           my.filter_path = string.substr(my.filter_path, 0, string.length(my.filter_path) - 2)
-.       endif
+.   for my.files.item as _file by _file.name
+.       define my.lineend = defined(_file.has_conflict) ?? ">" ? " />"
+$(my.indent)<$(my.item_name) Include="$(path(_file.name))"$(my.lineend)
 .
-.       define my.splitpoint = string.locate_last(_file.name, ".")
-.       define my.filename_base = string.substr(_file.name, 0, my.splitpoint - 1)
-.
-.       if defined(my.conflicts)
-.           if (count(my.conflicts.conflict, count.name = my.filename_base) > 0)
-.               my.conflicted = 1
-.           else
-.               new my.conflicts.conflict as _conflict
-.                   _conflict.name = my.filename_base
-.               endnew
-.           endif
-.       endif
-.
-.       if my.conflicted
-.           define my.path_to_prefix = string.replace(my.sanitized_path, "/|_")
-.           define my.disambiguated = "$(my.applicable_sub.unprefixed_path)$(my.path_to_prefix)$(my.filename_base).obj"
-$(my.indent)<$(my.item_name) Include="$(path(my.filename))">
-  $(my.indent)<ObjectFileName>\$(IntDir)$(my.disambiguated)</ObjectFileName>
+.       if defined(_file.has_conflict)
+  $(my.indent)<ObjectFileName>\$(IntDir)$(_file.disambiguated)</ObjectFileName>
 $(my.indent)</$(my.item_name)>
-.       else
-$(my.indent)<$(my.item_name) Include="$(path(my.filename))" />
 .       endif
 .   endfor
 .
-.   for my.files.directory as _directory
-.       emit_items(my.item_name, _directory, my.substitutions, my.filters, \
-            my.indent, my.conflicts)
-.   endfor
 .endmacro # emit_items
 .
 .macro emit_import_projects(target, repository, configuration, toolchain, toolset, meta, indent)
@@ -293,7 +338,9 @@ $(my.indent)<ImportGroup Label="ExtensionSettings">
 .
 .   new dependencies as _dependencies
 .       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
-.       for _dependencies.dependency as _depend where defined(_depend->nuget)
+.       for _dependencies.dependency as _depend by _depend.name \
+            where defined(_depend->nuget)
+.
 .           for _depend->nuget.resource as _resource where \
                 !defined(_resource.component)
 .
@@ -315,7 +362,7 @@ $(my.indent)<ImportGroup Label="ExtensionSettings">
 .           endfor
 .
 .           # address component resources
-.           for _depend.component as _component
+.           for _depend.component as _component by _component.name
 .               for _depend->nuget.resource as _resource where \
                     defined(_resource.component) & (_resource.component = _component.name)
 .
@@ -358,7 +405,9 @@ $(my.indent)<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="Prepare
 .
 .   new dependencies as _dependencies
 .       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
-.       for _dependencies.dependency as _depend where defined(_depend->nuget)
+.       for _dependencies.dependency as _depend by _depend.name \
+            where defined(_depend->nuget)
+.
 .           for _depend->nuget.resource as _resource where \
                 !defined(_resource.component)
 .
@@ -380,7 +429,7 @@ $(my.indent)<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="Prepare
 .           endfor
 .
 .           # address component resources
-.           for _depend.component as _component
+.           for _depend.component as _component by _component.name
 .               for _depend->nuget.resource as _resource where \
                     defined(_resource.component) & (_resource.component = _component.name)
 .

@@ -98,6 +98,34 @@ function global.discover_files(files, meta, path, recurse)
         abort "Directory open failure: $(error_text)"
     endif
 
+    if defined(my.files.path)
+        echo "Rediscovering directory '$(my.files.path)'"
+    endif
+
+    if defined(my.files.path) & !(my.files.path = my.directory.path)
+        abort "Directory path '$(my.files.path)' reused does not match intended assignment path '$(my.directory.path)'"
+    endif
+
+    if defined(my.files.name) & !(my.files.name = my.directory.name)
+        abort "Directory name '$(my.files.name)' reused does not match intended assignment name '$(my.directory.name)'"
+    endif
+
+    if defined(my.files.query) & !(my.files.query = my.path)
+        abort "Directory query '$(my.files.query)' reused does not match intended assignment path '$(my.path)'"
+    endif
+
+    if defined(my.files.path) & !(my.files.path = my.directory.path)
+        abort "Directory path '$(my.files.path)' does not match intended '$(my.directory.path)'"
+    endif
+
+    if defined(my.files.name) & !(my.files.name = my.directory.name)
+        abort "Directory name '$(my.files.name)' does not match intended '$(my.directory.name)'"
+    endif
+
+    if defined(my.files.query) & !(my.files.query = my.path)
+        abort "Directory query '$(my.files.query)' does not match intended '$(my.path)'"
+    endif
+
     my.files.path = my.directory.path
     my.files.name = my.directory.name
     my.files.query = my.path
@@ -118,6 +146,7 @@ function global.discover_files(files, meta, path, recurse)
         #if !(my.modified_name = _file.name)
             # check for redundancy, if so skip
             if !(count(my.files.file, (count.name = my.modified_name)) = 0)
+                echo "Detected collision: $(my.modified_name)  |  $(_file.path)"
                 next
             endif
         #endif
@@ -157,9 +186,20 @@ function global.populate_files_from_path(path_substitutions, files, filters, fil
     define my.path = path_append(my.absolute_path_base, my.files_path.path)
     define my.recurse = is_defined_positive(my.files_path, "recursive")
 
-    new my.files.directory as _directory
-        discover_files(_directory, my.filters, my.path, my.recurse)
-    endnew
+    if (count(my.files.directory, this.path = "$(my.path)/", this) > 0)
+        # echo "Repopulating '$(my.path)'"
+        define my.matched_directory = my.files->directory(this.path = "$(my.path)/", this)
+        discover_files(my.matched_directory, my.filters, my.path, my.recurse)
+    else
+        # echo "Populating '$(my.path)'"
+        # for my.files.directory as _directory
+        #     echo "  Existing: $(_directory.path)"
+        # endfor
+
+        new my.files.directory as _directory
+            discover_files(_directory, my.filters, my.path, my.recurse)
+        endnew
+    endif
 
     new my.path_substitutions.substitution as _sub
         _sub.absolute_path = my.path
