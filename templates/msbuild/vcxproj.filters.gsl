@@ -89,18 +89,6 @@ function matches_substitution(substitutions, path)
     endfor
 endfunction
 
-function populate_uuid(files, seed)
-    define my.files = populate_uuid.files
-    my.files.uuid = populate_uuid.seed
-    define my.seed = uuid_inc(my.files.uuid)
-
-    for my.files.directory as _directory
-        my.seed = populate_uuid(_directory, my.seed)
-    endfor
-
-    return my.seed
-endfunction
-
 function accumulate_filters(result, files, substitutions, target)
     define my.result = accumulate_filters.result
     define my.files = accumulate_filters.files
@@ -127,7 +115,6 @@ function accumulate_filters(result, files, substitutions, target)
             new my.result.filter as _filter
                 _filter.path = my.filter_path
                 _filter.target_uuid = my.target.uuid
-                _filter.files_uuid = my.files.uuid
             endnew
         else
             echo "Collision using filter path '$(my.filter_path)'."
@@ -215,8 +202,6 @@ endfunction
 .           populate_files(_substitutions, _files, my.meta->discovery, \
                 my.target, my.absolute_root, my.intended_prefix)
 .
-.           my.seed = populate_uuid(_files, my.seed)
-.
 .   # Filters
   <ItemGroup>
 .           emit_filters(_files, _substitutions, my.target, my.indent)
@@ -285,13 +270,17 @@ endfunction
 .   define my.target = emit_filters.target
 .   define my.indent = emit_filters.indent
 .
+.   define my.next_uuid = 0
+.
 .   new filters as _filters
 .       accumulate_filters(_filters, my.files, my.substitutions, my.target)
 .
 .       for _filters.filter as _filter by _filter.path
 $(my.indent)<Filter Include="$(path(_filter.path))">
-  $(my.indent)<UniqueIdentifier>{$(to_uuid(_filter.target_uuid, _filter.files_uuid):upper)}</UniqueIdentifier>
+  $(my.indent)<UniqueIdentifier>{$(to_uuid(_filter.target_uuid, my.next_uuid):upper)}</UniqueIdentifier>
 $(my.indent)</Filter>
+.
+.           my.next_uuid = uuid_inc(my.next_uuid)
 .       endfor
 .   endnew
 .endmacro # emit_filters
