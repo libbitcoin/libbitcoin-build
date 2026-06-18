@@ -68,7 +68,7 @@
       </dependency>
 
       <dependency name="secp256k1" version="0.7.0" option="secp256k1" />
-      <dependency name="UltrafastSecp256k1" version="4.1.1.7" option="ultrafast" />
+      <dependency name="UltrafastSecp256k1" version="4.0.0.0" option="ultrafast" />
 
       <compiler standard="20">
         <flag option="avx2"
@@ -1957,12 +1957,12 @@
       conditional="true"
       comment="Build Ultra high-performance secp256k1 ECC engine."
       optionname="ultrafast">
-      <github owner="pmienk" tag="main" />
+      <github owner="shrec" tag="main" />
       <nuget>
         <resource canonical="UltrafastSecp256k1">
           <package compiler="v143" name="UltrafastSecp256k1-vc143" version="4.1.1.7"
             targets="build/native" />
-          <package compiler="v145" name="UltrafastSecp256k1-vc145" version="4.1.1.7"
+          <package compiler="v145" name="UltrafastSecp256k1-vc145" version="4.3.0.3"
             targets="build/native" />
         </resource>
       </nuget>
@@ -1976,16 +1976,16 @@
         <option value="-DSECP256K1_BUILD_CABI=ON" />
         <option value="-DSECP256K1_BUILD_CPU=ON" />
         <option value="-DSECP256K1_BUILD_SHIM=ON" />
-        <option value="-DSECP256K1_BUILD_CUDA=OFF" />
-        <option value="-DSECP256K1_BUILD_ROCM=OFF" />
-        <option value="-DSECP256K1_BUILD_OPENCL=OFF" />
-        <option value="-DSECP256K1_BUILD_METAL=OFF" />
+        <option value="-DSECP256K1_BUILD_CUDA=ON" />
+        <option value="-DSECP256K1_BUILD_ROCM=ON" />
+        <option value="-DSECP256K1_BUILD_OPENCL=ON" />
+        <option value="-DSECP256K1_BUILD_METAL=ON" />
         <option value="-DSECP256K1_INSTALL=ON" />
         <option value="-DSECP256K1_INSTALL_PKGCONFIG=ON" />
         <option value="-DSECP256K1_USE_ULTRAFAST=ON" />
       </build>
       <cmake namespace="secp256k1" package="secp256k1-fast"
-        target="secp256k1-fast" />
+        target="secp256k1::fastsecp256k1" />
     </dependency>
     <dependency name="secp256k1"
       textname="libsecp256k1"

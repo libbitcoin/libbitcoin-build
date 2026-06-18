@@ -165,6 +165,64 @@ function annotate_conflicts(items)
     endnew
 endfunction
 
+function linearize_nuget_packages(packages, toolset, target, repository, configuration)
+    define my.packages = linearize_nuget_packages.packages
+    define my.toolset = linearize_nuget_packages.toolset
+    define my.target = linearize_nuget_packages.target
+    define my.repository = linearize_nuget_packages.repository
+    define my.configuration = linearize_nuget_packages.configuration
+
+    new dependencies as _dependencies
+        target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
+
+        for _dependencies.dependency as _depend where defined(_depend->nuget)
+            define my.found = 0
+
+            for _depend->nuget.resource as _resource where \
+                !defined(_resource.component)
+
+                for _resource.package as _package where \
+                    (_package.compiler = my.toolset.compiler)
+
+                    my.found = 1
+
+                    new my.packages.item as _item
+                        _item.name = path(nuget_target(_package))
+                    endnew
+                endfor
+
+
+                if !my.found
+                    echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+                endif
+            endfor
+
+            # address component resources
+            for _depend.component as _component
+                define my.found = 0
+
+                for _depend->nuget.resource as _resource where \
+                    defined(_resource.component) & (_resource.component = _component.name)
+
+                    for _resource.package as _package where \
+                        (_package.compiler = my.toolset.compiler)
+
+                        my.found = 1
+
+                        new my.packages.item as _item
+                            _item.name = path(nuget_target(_package))
+                        endnew
+                    endfor
+
+                    if !my.found
+                        echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
+                    endif
+                endfor
+            endfor
+        endfor
+    endnew
+endfunction
+
 ###############################################################################
 # Generation
 ###############################################################################
@@ -225,7 +283,6 @@ endfunction
                 my.target, my.absolute_root, my.intended_prefix)
 .
 .   # ClCompile
-
   <ItemGroup>
 .           new items as _items
 .               linearize_sources(_items, _files, _substitutions, my.meta->sources, "obj")
@@ -403,53 +460,11 @@ $(my.indent)<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="Prepare
     $(my.indent)<ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The Missing file is {0}.</ErrorText>
   $(my.indent)</PropertyGroup>
 .
-.   new dependencies as _dependencies
-.       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
-.       for _dependencies.dependency as _depend by _depend.name \
-            where defined(_depend->nuget)
+.   new packages as _packages
+.       linearize_nuget_packages(_packages, my.toolset, my.target, my.repository, my.configuration)
 .
-.           for _depend->nuget.resource as _resource where \
-                !defined(_resource.component)
-.
-.               define my.found = 0
-.
-.               for _resource.package as _package where \
-                    (_package.compiler = my.toolset.compiler)
-.
-.                   my.found = 1
-.
-.                   define my.nutarget = path(nuget_target(_package))
-  $(my.indent)<Error Condition="!Exists('$(my.nutarget)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.nutarget)'))" />
-.
-.               endfor
-.
-.               if !my.found
-.                   echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
-.               endif
-.           endfor
-.
-.           # address component resources
-.           for _depend.component as _component by _component.name
-.               for _depend->nuget.resource as _resource where \
-                    defined(_resource.component) & (_resource.component = _component.name)
-.
-.                   define my.found = 0
-.
-.                   for _resource.package as _package where \
-                        (_package.compiler = my.toolset.compiler)
-.
-.                       my.found = 1
-.
-.                       define my.nutarget = path(nuget_target(_package))
-  $(my.indent)<Error Condition="!Exists('$(my.nutarget)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(my.nutarget)'))" />
-.
-.                   endfor
-.
-.                   if !my.found
-.                       echo("  Warning: resource '$(_resource.canonical)' did not emit a package with compiler '$(my.toolset.compiler)'.")
-.                   endif
-.               endfor
-.           endfor
+.       for _packages.item as _item by "$(_item.name:lower)"
+  $(my.indent)<Error Condition="!Exists('$(_item.name)')" Text="\$([System.String]::Format('\$(ErrorText)', '$(_item.name)'))" />
 .       endfor
 .   endnew
 .
