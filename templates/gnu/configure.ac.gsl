@@ -1,0 +1,703 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin configure.ac
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/gnu-output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_configure_ac(configuration)
+    define my.configuration = generate_configure_ac.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.resource_name = "configure.ac"
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    for my.configuration.repository as _repository
+        define my.output_path = path_append(my.configuration->templates.resultpath, \
+            path_append(_repository.name, my.template.outpath))
+
+        define my.filename = my.resource_name
+
+        create_directory(my.output_path)
+
+        define my.out_file = path_append(my.output_path, my.filename)
+
+        notify(my.out_file)
+        output(my.out_file)
+
+        emit_configure_ac(_repository, my.configuration, my.template)
+        close
+    endfor
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+
+function has_options(repository)
+    define my.repository = has_options.repository
+    define my.count = 0
+
+    for my.repository. as _target where is_target_element(_target)
+        my.count += count(_target.option)
+    endfor
+
+    return (my.count > 0)
+endfunction
+
+function has_compiler_defines(repository)
+    define my.repository = has_compiler_defines.repository
+    define my.count = 0
+
+    for my.repository. as _target where is_target_element(_target)
+        my.count += count(_target->compiler.define)
+    endfor
+
+    return (my.count > 0)
+endfunction
+
+function accumulate_flags(result, repository, configuration, meta)
+    define my.result = accumulate_flags.result
+    define my.repository = accumulate_flags.repository
+    define my.configuration = accumulate_flags.configuration
+    define my.meta = accumulate_flags.meta
+
+    for my.repository. as _target where is_target_element(_target)
+        for _target->compiler.flag as _flag
+            new _flag.target as _flag_target
+                _flag_target.name = _target.name
+                _flag_target.type = name(_target)
+            endnew
+            if !defined(_flag.id)
+                copy _flag to my.result
+            elsif (count(my.result.flag, defined(this.id) & (this.id = _flag.id), this) = 0)
+                define my.canonical = my.configuration->canonical->compiler->flag( \
+                    (this.id = _flag.id), this)?
+
+                if defined(my.canonical)
+                    copy my.canonical to my.result
+                    define my.copied = my.result->flag(\
+                        defined(this.id) & (this.id = _flag.id), this)
+
+                    new my.copied.target as _flag_target
+                        _flag_target.name = _target.name
+                        _flag_target.type = name(_target)
+                    endnew
+                else
+                    copy _flag to my.result
+                endif
+            else
+                define my.match = my.result->flag(defined(this.id) & \
+                    (this.id = _flag.id), this)
+
+                new my.match.target as _flag_target
+                    _flag_target.name = _target.name
+                    _flag_target.type = name(_target)
+                endnew
+            endif
+        endfor
+    endfor
+endfunction
+
+function indent_add(indent, step)
+    define my.indent = indent_add.indent
+    define my.step = indent_add.step
+    return "$(my.indent)$(my.step)"
+endfunction
+
+function indent_remove(indent, step)
+    define my.indent = indent_remove.indent
+    define my.step = indent_remove.step
+    return right(my.indent, string.length(my.indent) - string.length(my.step))
+endfunction
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_configure_ac(repository, configuration, meta)
+.   define my.repository = emit_configure_ac.repository
+.   define my.configuration = emit_configure_ac.configuration
+.   define my.meta = emit_configure_ac.meta
+.
+.   copyleft(my.repository.name)
+
+# Standard declarations.
+#==============================================================================
+# Requires Automake 1.14 or newer.
+
+# Declare the required version of Autoconf.
+AC_PREREQ([$(my.meta->autoconf.version)])
+
+# Process command-line arguments and perform initialization and verification.
+.   define my.version = my.repository->version
+AC_INIT([$(my.repository.name)], [$(my.version.major).$(my.version.minor).0], [$(my.repository.email)])
+
+# Do compilation tests.
+AC_LANG($(my.meta->autoconf.language))
+
+# Specify the temporary directory for build tools.
+AC_CONFIG_AUX_DIR([build-aux])
+
+# Specify the directory of additional local Autoconf macros.
+AC_CONFIG_MACRO_DIR([m4])
+
+# Run macros for operation of generated Makefiles, enable non-recursive make.
+# Unless [foreign] is specified standard GNU files will be required,
+# specifically: AUTHORS, COPYING, INSTALL, NEWS, README and ChangeLog.
+AM_INIT_AUTOMAKE([subdir-objects])
+
+# Enable C and POSIX extensions that may be disabled on certain platforms.
+AC_USE_SYSTEM_EXTENSIONS
+
+# Enable the archiver.
+AM_PROG_AR
+
+# Initialize libtool.
+LT_PREREQ($(my.meta->libtool.version))
+
+# Enable shared libraries if available, and static if they don't conflict.
+LT_INIT
+AC_SUBST([LIBTOOL_DEPS])
+
+# Determine $(my.meta->autoconf.language) compiler to use.
+.   if (my.meta->autoconf.language = "C++")
+AC_PROG_CXX
+.   elsif (my.meta->autoconf.languge = "C")
+AC_PROG_CC
+.   else
+.       abort "Unsupported language '$(my.meta->autoconf.language)'."
+.   endif
+
+# Enable sed for substitution.
+AC_PROG_SED
+
+# Compute the canonical host-system type variable host, including host_os.
+AC_CANONICAL_HOST
+
+# Enable silent rules option.
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
+# Check for pkg-config.
+PKG_PROG_PKG_CONFIG
+AS_IF([test -n "${PKG_CONFIG}"], [],
+    [AC_MSG_ERROR([pkg-config is required but was not found.])])
+
+AS_IF(["x${enable_static}" != "xno"],
+    [AC_SUBST([PKG_CONFIG], ["${PKG_CONFIG} --static"])])
+
+.heading2("Declare environment variables that affect the build.")
+AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
+AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
+AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
+
+repository_root_dir="@abs_top_srcdir@/../.."
+.
+.   if (my.meta->autoconf.language = "C++")
+.       require_stdcxx(my.repository, my.configuration, my.meta)
+.   endif
+.
+.   heading1("Process options.")
+.   define my.encountered_option = 0
+.   for my.meta.option as _option
+.       if (my.encountered_option > 0)
+
+.       endif
+.       emit_option(_option, my.repository->library, my.configuration, my.meta)
+.       my.encountered_option += 1
+.   endfor
+.
+.   for my.repository. as _target where is_target_element(_target) & defined(_target.option)
+.       if (my.encountered_option > 0)
+
+.       endif
+.       emit_option(_target, _target, my.configuration, my.meta)
+.       my.encountered_option += 1
+.   endfor
+.   for my.repository. as _target where is_target_element(_target)
+.       for _target.option as _option
+.           if (my.encountered_option > 0)
+
+.           endif
+.           emit_option(_option, _target, my.configuration, my.meta)
+.           my.encountered_option += 1
+.       endfor
+.   endfor
+.
+.   if has_compiler_defines(my.repository)
+.       heading1("Set preprocessor defines.")
+.       define my.encountered_define = 0
+.       for my.repository. as _target where is_target_element(_target)
+.           for _target->compiler.define as _define
+.               if (my.encountered_define > 0)
+
+.               endif
+.               emit_define(_define, _target, my.repository, my.configuration, my.meta)
+.               my.encountered_define += 1
+.           endfor
+.       endfor
+.   endif
+.
+.   new unique_flags as _flags
+.       accumulate_flags(_flags, my.repository, my.configuration, my.meta)
+.
+.       if (count(_flags.flag) > 0)
+.           define my.encountered_flags = 0
+.
+.           heading1("Set flags.")
+.           for _flags.flag as _flag
+.               if (my.encountered_flags > 0)
+
+.               endif
+.
+.               emit_flag(_flag, my.repository, my.configuration, my.meta)
+.               my.encountered_flags += 1
+.           endfor
+.       endif
+.   endnew
+.
+.   new unique_dependencies as _dependencies
+.       accumulate_repository_dependencies(_dependencies, my.repository)
+.
+.       if (count(_dependencies.dependency) > 0)
+.           heading1("Check dependencies.")
+.           for _dependencies.dependency as _depend
+.               if !first()
+
+.               endif
+.
+.               emit_dependency(_depend, my.repository, my.configuration, my.meta)
+.           endfor
+.       endif
+.   endnew
+.
+
+AC_CONFIG_FILES([
+    Makefile
+    $(my.repository.name).pc
+.   for my.repository.configurable as _configurable
+    @repository_root_dir@/$(_configurable.path)$(_configurable.output)
+.   endfor
+  ])
+
+AC_OUTPUT
+.endmacro # emit_configure_ac
+.
+.macro require_stdcxx(repository, configuration, meta)
+.   define my.repository = require_stdcxx.repository
+.   define my.configuration = require_stdcxx.configuration
+.   define my.meta = require_stdcxx.meta
+.
+.   define my.standard = ""
+.
+.   for my.repository. as _target where is_target_element(_target)
+.       if first()
+.           my.standard = _target->compiler.standard
+.       endif
+.
+.       if !(my.standard = _target->compiler.standard)
+.           abort "Inconsistent compiler standard '$(my.standard)' vs '$(_target->compiler.standard)'."
+.       endif
+.   endfor
+
+.   heading2("Check for baseline language coverage in the compiler for the C++$(my.standard) standard.")
+AX_CXX_COMPILE_STDCXX([$(my.standard)], [noext], [mandatory])
+.endmacro # require_stdcxx
+.
+.macro emit_option(option, target, configuration, meta)
+.   define my.option = emit_option.option
+.   define my.target = emit_option.target
+.   define my.configuration = emit_option.configuration
+.   define my.meta = emit_option.meta
+.
+.   define my.treatment = emit_option.treatment?
+.   require(my.option, "option", "name")
+.   require(my.option, "option", "type")
+.   require(my.option, "option", "comment")
+.
+.   define my.name = defined(my.option.option) ?? my.option.option ? my.option.name
+.   define my.datatype = defined(my.option.data_type) ?? my.option.data_type ? "boolean"
+.   define my.optiontext = "--$(my.option.type)-$(my.name)"
+.   define my.option_var = "$(my.option.type)_$(my.name)"
+.
+.   define my.helpuse = defined(my.option.example) ?? my.option.example ? ""
+.
+.   define my.treatment = (my.option = my.target) ?? \
+        "automake-conditional" ? \
+        (defined(my.option.treatment) ?? my.option.treatment ? "none")
+.
+.   define my.comment_default = defined(my.option.default) ?? \
+        " @<:@default=$(my.option.default)@:>@" ? ""
+.
+.   if !is_defined_positive(my.option, "standard")
+AC_MSG_CHECKING([$(my.optiontext) option])
+.       if (my.option.type = "enable")
+AC_ARG_ENABLE([$(my.name)],
+.       elsif (my.option.type = "with")
+AC_ARG_WITH([$(my.name)],
+.       else
+.           abort "Unsupported option type '$(my.option.type)' in '$(my.option.string())'"
+.       endif
+    AS_HELP_STRING([$(my.optiontext)$(my.helpuse)],
+        [$(my.option.comment)$(my.comment_default)]),
+    [$(my.option_var)=$$(my.option.type)val],
+    [$(my.option_var)=$(my.option.default)])
+AC_MSG_RESULT([$$(my.option_var)])
+.   endif
+.
+.   if (my.treatment = "automake-conditional")
+.       if !(my.datatype = "boolean")
+.           abort "Unexpected 'boolean' datatype with 'automake-conditional'."
+.       endif
+.
+AM_CONDITIONAL([$(my.option_var:upper)], [test "x${$(my.option_var)}" != "xno"])
+.
+.   elsif (my.treatment = "define")
+.       define my.operation = (my.datatype = "boolean") ?? "AS_IF" ? "AS_CASE"
+.       define my.consequence = 
+.       for my.option.on as _on
+.           define my.test = is_defined_positive(_on, "value") ?? \
+                "!=" ? "=="
+.
+.           define my.predicate = (my.datatype = "boolean") ?? \
+                "[test \"x${$(my.option_var)}\" $(my.test) \"xno\"]" ? \
+                "[${$(my.option_var)}], [$(_on.value)]"
+.
+$(my.operation)($(my.predicate), [AC_DEFINE([$(_on.define)])])
+.
+.           for _on.substitute as _sub
+$(my.operation)($(my.predicate), [AC_SUBST([$(_sub.symbol)], [-D$(_sub.value)]))
+.           endfor
+.       endfor
+.
+.   elsif (my.treatment = "substitute")
+.
+AC_SUBST([$(my.name)])
+.
+.   elsif !(my.treatment = "none")
+.       abort "Unrecognized treatment mode '$(my.treatment)'."
+.   endif
+.
+.endmacro # emit_option
+.
+.macro emit_define(define, target, repository, configuration, meta)
+.   define my.define = emit_define.define
+.   define my.target = emit_define.target
+.   define my.repository = emit_define.repository
+.   define my.configuration = emit_define.configuration
+.   define my.meta = emit_define.meta
+.
+.   define my.indent = defined(my.define.option) ?? "        " ? ""
+.
+.   if defined(my.define.option)
+.       define my.option = get_option(my.define, my.target, my.repository, "_")
+.
+AS_IF([test "x${$(my.option)}" != "xno"], [
+.   endif
+.
+.   for my.define.symbol as _symbol
+.
+.       if defined(_symbol.name)
+$(my.indent)AC_DEFINE([$(_symbol.name)], [$(_symbol.value)])
+.       else
+$(my.indent)AC_DEFINE([$(_symbol.value)])
+.       endif
+.
+.       for _symbol.substitute as _substitute
+.           if defined(_substitute.name)
+$(my.indent)AC_SUBST([$(_substitute.name), [-D$(_symbol.value)])
+.           else
+$(my.indent)AC_SUBST([$(_symbol.value)])
+.           endif
+.       endfor
+.   endfor
+.
+.   if defined(my.define.option)
+    ])
+.   endif
+.
+.endmacro # emit_define
+.
+.macro emit_flag(flag, repository, configuration, meta)
+.   define my.flag = emit_flag.flag
+.   define my.repository = emit_flag.repository
+.   define my.configuration = emit_flag.configuration
+.
+.   define my.step = "  "
+.   define my.indent = ""
+.   define my.indent_as_if = ""
+.   define my.indent_as_case = ""
+.   define my.indent_check_compile = ""
+.
+.   if defined(my.flag.option)
+.       define my.target = my.repository->$(my.flag->target.type)(\
+            is_target_element(this) & (this.name = my.flag->target.name), this)
+.
+.       define my.option = get_option(my.flag, my.target, my.repository, "_")
+.
+$(my.indent)AS_IF([test "x${$(my.option)}" != "xno"],
+.       my.indent_as_if = indent_add(my.indent, my.step)
+.       my.indent = indent_add(my.indent_as_if, my.step)
+$(my.indent_as_if)[
+.   endif
+.
+.   if defined(my.flag.compiler)
+$(my.indent)AS_CASE([${CC}], [*$(my.flag.compiler)*],
+.       my.indent_as_case = indent_add(my.indent, my.step)
+$(my.indent_as_case)[
+.       my.indent = indent_add(my.indent_as_case, my.step)
+.   endif
+.
+.   define my.symbol = symbol(my.flag)
+$(my.indent)AX_CHECK_COMPILE_FLAG([$(my.symbol)],
+.   my.indent_check_compile = indent_add(my.indent, my.step)
+.   my.indent = indent_add(my.indent_check_compile, my.step)
+$(my.indent_check_compile)[
+.
+.   for my.flag.context as _context
+.       define my.flagvar = ""
+.       if (_context.language = "c")
+.           my.flagvar = "CFLAGS"
+.       elsif (_context.language = "c++")
+.           my.flagvar = "CXXFLAGS"
+.       else
+.           abort "Unrecognized language '$(_context.language)'."
+.       endif
+.
+.       if defined(my.flag->program)
+$(my.indent)$(my.flagvar)="${$(my.flagvar)} $(my.symbol)";
+.       else
+.           for my.flag.target as _target
+$(my.indent)$(_target.name:lower,c)_$(my.flagvar)="${$(_target.name:lower,c)_$(my.flagvar)} $(my.symbol)";
+.           endfor
+.       endif
+.   endfor
+.
+.   if defined(my.flag->program)
+$(my.indent_check_compile)],[
+$(my.indent)AC_MSG_ERROR([$(my.symbol) not supported.])
+$(my.indent_check_compile)],
+$(my.indent_check_compile)[],
+$(my.indent_check_compile)[
+$(my.indent)AC_LANG_PROGRAM(
+.
+.       define my.indent_program = indent_add(my.indent, my.step)
+.       define my.indent = indent_add(my.indent_program, my.step)
+.
+$(my.indent_program)[[
+.       for my.flag->program.include as _include
+$(my.indent)#include <$(_include.header)>
+.       endfor
+$(my.indent_program)]],
+$(my.indent_program)[[
+.       for my.flag->program.loc as _loc
+$(my.indent)$(_loc)
+.       endfor
+$(my.indent_program)]])
+.       my.indent = indent_remove(my.indent, my.step)
+.       my.indent = indent_remove(my.indent, my.step)
+.   endif
+$(my.indent_check_compile)])
+.   my.indent = indent_remove(my.indent, my.step)
+.   my.indent = indent_remove(my.indent, my.step)
+.
+.   if defined(my.flag.compiler)
+.       my.indent = indent_remove(my.indent, my.step)
+$(my.indent)])
+.       my.indent = indent_remove(my.indent, my.step)
+.   endif
+.
+.   if defined(my.flag.option)
+.       my.indent = indent_remove(my.indent, my.step)
+$(my.indent_as_if)])
+.       my.indent = indent_remove(my.indent, my.step)
+.   endif
+.
+.endmacro # emit_flag
+.
+.macro emit_dependency(dependency, repository, configuration, meta)
+.   define my.dependency = emit_dependency.dependency
+.   define my.repository = emit_dependency.repository
+.   define my.configuration = emit_dependency.configuration
+.   define my.meta = emit_dependency.meta
+.
+.   define my.registrar = my.configuration->registrar(this.id = "dependency", this)
+.   new my.dependency.canonical as _canonical
+.       canonicalize_element(_canonical, my.dependency, my.registrar, "name")
+.   endnew
+.
+.   define my.indent = ""
+.   define my.step = "    "
+.
+.   if defined(my.dependency.option)
+.       echo my.dependency.string()
+.       define my.target = my.repository->$(my.dependency->context.type)(this.name = my.dependency->context.name, this)
+.       define my.optiontext = get_option(my.dependency, my.target, my.repository, "_")
+.
+AS_IF([test "x${$(my.optiontext)}" != "xno"],
+  [
+.       my.indent = indent_add(my.indent, my.step)
+.   endif
+.
+.   if (my.dependency.name = "boost")
+.       emit_dependency_boost(my.dependency, my.repository, \
+            my.configuration, my.meta, my.indent, my.step)
+.   elsif defined(my.dependency->canonical->dependency->pkg)
+.       emit_dependency_pkg_check_modules(my.dependency, \
+            my.repository, my.configuration, my.meta,\
+            my.indent, my.step)
+.   else
+.       abort "Unsupported dependency '$(my.dependency.name)'."
+.   endif
+.
+.   if defined(my.dependency.option)
+  ])
+.   endif
+.
+.endmacro # emit_dependency
+.
+.macro emit_dependency_pkg_check_modules(dependency,\
+    repository, configuration, meta, indent, step)
+.
+.   define my.dependency = emit_dependency_pkg_check_modules.dependency
+.   define my.repository = emit_dependency_pkg_check_modules.repository
+.   define my.configuration = emit_dependency_pkg_check_modules.configuration
+.   define my.meta = emit_dependency_pkg_check_modules.meta
+.   define my.indent = emit_dependency_pkg_check_modules.indent
+.   define my.step = emit_dependency_pkg_check_modules.step
+.
+.   define my.prefix = "$(my.dependency.name:c)"
+.   define my.pkg = my.dependency->canonical->dependency->pkg
+.
+.   define my.pkg_name = defined(my.pkg.name) ?? \
+        my.pkg.name ? my.dependency.name
+.
+.   define my.condition = "$(my.pkg_name) >= $(my.dependency.version)"
+.
+$(my.indent)PKG_CHECK_MODULES(
+  $(my.indent)[$(my.prefix)],
+  $(my.indent)[$(my.condition)],
+  $(my.indent)[],
+  $(my.indent)[
+    $(my.indent)AC_MSG_ERROR([$(my.condition) is required but was not found.]
+  $(my.indent)])
+$(my.indent)AC_SUBST([$(my.prefix)_PKG], ['$(my.condition)'])
+$(my.indent)AC_SUBST([$(my.prefix)_CPPFLAGS], [${$(my.prefix)_CFLAGS}])
+$(my.indent)AC_SUBST([$(my.prefix)_ISYS_CPPFLAGS], [`echo ${$(my.prefix)_CPPFLAGS | ${SED} s/^-I/-isystem/g | ${SED} s/' -I'/' -isystem'/g`])
+$(my.indent)AC_MSG_NOTICE([$(my.prefix)_CPPFLAGS : ${$(my.prefix)_CPPFLAGS}])
+$(my.indent)AC_MSG_NOTICE([$(my.prefix)_ISYS_CPPFLAGS : ${$(my.prefix)_ISYS_CPPFLAGS}])
+$(my.indent)AC_MSG_NOTICE([$(my.prefix)_OTHER_CFLAGS : ${$(my.prefix)_OTHER_CFLAGS}])
+$(my.indent)AC_MSG_NOTICE([$(my.prefix)_INCLUDEDIR : ${$(my.prefix)_INCLUDEDIR}])
+$(my.indent)AC_MSG_NOTICE([$(my.prefix)_LIBS : ${$(my.prefix)_LIBS}])
+$(my.indent)AS_IF([${enable_isystem}],
+  $(my.indent)[AC_SUBST([$(my.prefix)_BUILD_CPPFLAGS], [${$(my.prefix)_ISYS_CPPFLAGS}])],
+  $(my.indent)[AC_SUBST([$(my.prefix)_BUILD_CPPFLAGS], [${$(my.prefix)_CPPFLAGS}])])
+$(my.indent)AC_MSG_NOTICE([$(my.prefix)_BUILD_CPPFLAGS : ${$(my.prefix)_BUILD_CPPFLAGS}])
+.
+.endmacro # emit_dependency_pkg_check_modules
+.
+.macro emit_dependency_boost(dependency, repository, configuration, meta, indent, step)
+.   define my.dependency = emit_dependency_boost.dependency
+.   define my.repository = emit_dependency_boost.repository
+.   define my.configuration = emit_dependency_boost.configuration
+.   define my.meta = emit_dependency_boost.meta
+.   define my.indent = emit_dependency_boost.indent
+.   define my.step = emit_dependency_boost.step
+.
+$(my.indent)AX_BOOST_BASE([$(my.dependency.version)],
+  $(my.indent)[
+    $(my.indent)AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
+    $(my.indent)AC_SUBST([boost_ISYSTEM_CPPFLAGS], [`echo ${boost_CPPFLAGS} | ${SED} s/^-I/-isystem/g | ${SED} s/' -I'/' -isystem'/g`])
+    $(my.indent)AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
+    $(my.indent)AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
+    $(my.indent)AC_MSG_NOTICE([boost_ISYS_CPPFLAGS : ${boost_ISYS_CPPFLAGS}])
+    $(my.indent)AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])
+  $(my.indent)],
+  $(my.indent)[
+    $(my.indent)AC_MSG_ERROR([Boost $(my.dependency.version) or later is required but was not found.])
+  $(my.indent)])
+
+$(my.indent)AS_IF(["x${enable_isystem}" != "xno"],
+  $(my.indent)[ AC_SUBST([boost_BUILD_CPPFLAGS], [${boost_ISYSTEM_CPPFLAGS}]) ],
+  $(my.indent)[ AC_SUBST([boost_BUILD_CPPFLAGS], [${boost_CPPFLAGS}]) ])
+
+$(my.indent)AC_MSG_NOTICE([boost_BUILD_CPPFLAGS : ${boost_BUILD_CPPFLAGS}])
+.
+.   for my.dependency.component as _component
+.       define my.cname = "$(my.dependency.name:c)_$(_component.name:c)"
+.       define my.uname = "$(my.cname:upper)"
+.       define my.indent = ""
+
+.       define my.clause = ""
+.       for _component.context as _context
+.           echo " $(_component.name) : "
+.           echo _context.string()
+.           define my.separator = (my.clause = "") ?? "" ? " | "
+.
+.           define my.target = my.repository->$(_context.type)\
+                (this.name = _context.name, this)
+.
+.           if !defined(my.target.option)
+.               next
+.           endif
+.
+.           my.clause = "$(my.clause)$(my.separator)(test \"x${$(my.target.type)_$(my.target.option)}\" != \"xno\")"
+.       endfor
+.
+.       echo "clause : $(my.clause)"
+.       echo _component.string()
+.       if (string.length(my.clause) > 0)
+.
+$(my.indent)AS_IF([$(my.clause)],
+  $(my.indent)[
+.
+.           my.indent = indent_add(my.indent, my.step)
+.       endif
+.
+$(my.indent)AX_$(my.uname)
+$(my.indent)AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIB])
+$(my.indent)AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
+.
+.       if (string.length(my.clause) > 0)
+.           my.indent = indent_remove(my.indent, my.step)
+  $(my.indent)])
+.       endif
+.   endfor
+.
+.endmacro # emit_dependency_boost
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_configure_ac(configuration)
+
+.endtemplate
