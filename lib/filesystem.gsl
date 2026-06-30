@@ -262,7 +262,7 @@ function global.populate_files(path_substitutions, files, filters, target, absol
     endnew
 endfunction
 
-function repository_absolute_path(repository, configuration)
+function global.repository_absolute_path(repository, configuration)
     define my.repository = repository_absolute_path.repository
     define my.configuration = repository_absolute_path.configuration
 
@@ -272,6 +272,17 @@ function repository_absolute_path(repository, configuration)
     define my.directory = directory.open(my.path)
 
     return my.directory.path
+endfunction
+
+function global.matches_substitution(substitutions, path)
+    define my.substitutions = matches_substitution.substitutions
+    define my.path = matches_substitution.path
+
+    for my.substitutions.substitution as _sub
+        if starts_with(my.path, _sub.absolute_path)
+            return _sub
+        endif
+    endfor
 endfunction
 
 .endtemplate

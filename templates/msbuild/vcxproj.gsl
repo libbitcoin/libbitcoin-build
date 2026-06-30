@@ -77,17 +77,6 @@ endfunction
 ###############################################################################
 # Functions
 ###############################################################################
-function matches_substitution(substitutions, path)
-    define my.substitutions = matches_substitution.substitutions
-    define my.path = matches_substitution.path
-
-    for my.substitutions.substitution as _sub
-        if starts_with(my.path, _sub.absolute_path)
-            return _sub
-        endif
-    endfor
-endfunction
-
 function nuget_target(package)
     define my.package = nuget_target.package
     define my.prefix = "\$(NuGetPackageRoot)$(my.package.name).$(my.package.version)"

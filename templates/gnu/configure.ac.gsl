@@ -209,7 +209,7 @@ PKG_PROG_PKG_CONFIG
 AS_IF([test -n "${PKG_CONFIG}"], [],
     [AC_MSG_ERROR([pkg-config is required but was not found.])])
 
-AS_IF(["x${enable_static}" != "xno"],
+AS_IF([test "x${enable_static}" != "xno"],
     [AC_SUBST([PKG_CONFIG], ["${PKG_CONFIG} --static"])])
 
 .heading2("Declare environment variables that affect the build.")
@@ -398,7 +398,11 @@ $(my.operation)($(my.predicate), [AC_SUBST([$(_sub.symbol)], [-D$(_sub.value)]))
 .
 .   elsif (my.treatment = "substitute")
 .
+.       if !(my.name = my.option_var)
+AC_SUBST([$(my.name)],[${$(my.option_var)}])
+.       else
 AC_SUBST([$(my.name)])
+.       endif
 .
 .   elsif !(my.treatment = "none")
 .       abort "Unrecognized treatment mode '$(my.treatment)'."
@@ -455,6 +459,11 @@ $(my.indent)AC_SUBST([$(_symbol.value)])
 .   define my.indent_as_case = ""
 .   define my.indent_check_compile = ""
 .
+.   define my.count_targets = \
+        count(my.repository.library) + \
+        count(my.repository.test) + \
+        count(my.repository.binary)
+.
 .   if defined(my.flag.option)
 .       define my.target = my.repository->$(my.flag->target.type)(\
             is_target_element(this) & (this.name = my.flag->target.name), this)
@@ -493,11 +502,19 @@ $(my.indent_check_compile)[
 .       if defined(my.flag->program)
 $(my.indent)$(my.flagvar)="${$(my.flagvar)} $(my.symbol)";
 .       else
-.           for my.flag.target as _target
+.           if (count(my.flag.target) = my.count_targets)
+$(my.indent)$(my.flagvar)="${$(my.flagvar)} $(my.symbol)";
+.           else
+.               for my.flag.target as _target
 $(my.indent)$(_target.name:lower,c)_$(my.flagvar)="${$(_target.name:lower,c)_$(my.flagvar)} $(my.symbol)";
-.           endfor
+.               endfor
+.           endif
 .       endif
 .   endfor
+.
+.   if defined(my.flag.substitute)
+$(my.indent)AC_SUBST([$(my.flag.substitute)], ["$(my.symbol)"])
+.   endif
 .
 .   if defined(my.flag->program)
 $(my.indent_check_compile)],[
@@ -556,7 +573,6 @@ $(my.indent_as_if)])
 .   define my.step = "    "
 .
 .   if defined(my.dependency.option)
-.       echo my.dependency.string()
 .       define my.target = my.repository->$(my.dependency->context.type)(this.name = my.dependency->context.name, this)
 .       define my.optiontext = get_option(my.dependency, my.target, my.repository, "_")
 .
@@ -605,17 +621,17 @@ $(my.indent)PKG_CHECK_MODULES(
   $(my.indent)[$(my.condition)],
   $(my.indent)[],
   $(my.indent)[
-    $(my.indent)AC_MSG_ERROR([$(my.condition) is required but was not found.]
+    $(my.indent)AC_MSG_ERROR([$(my.condition) is required but was not found.])
   $(my.indent)])
 $(my.indent)AC_SUBST([$(my.prefix)_PKG], ['$(my.condition)'])
 $(my.indent)AC_SUBST([$(my.prefix)_CPPFLAGS], [${$(my.prefix)_CFLAGS}])
-$(my.indent)AC_SUBST([$(my.prefix)_ISYS_CPPFLAGS], [`echo ${$(my.prefix)_CPPFLAGS | ${SED} s/^-I/-isystem/g | ${SED} s/' -I'/' -isystem'/g`])
+$(my.indent)AC_SUBST([$(my.prefix)_ISYS_CPPFLAGS], [`echo ${$(my.prefix)_CPPFLAGS} | ${SED} s/^-I/-isystem/g | ${SED} s/' -I'/' -isystem'/g`])
 $(my.indent)AC_MSG_NOTICE([$(my.prefix)_CPPFLAGS : ${$(my.prefix)_CPPFLAGS}])
 $(my.indent)AC_MSG_NOTICE([$(my.prefix)_ISYS_CPPFLAGS : ${$(my.prefix)_ISYS_CPPFLAGS}])
 $(my.indent)AC_MSG_NOTICE([$(my.prefix)_OTHER_CFLAGS : ${$(my.prefix)_OTHER_CFLAGS}])
 $(my.indent)AC_MSG_NOTICE([$(my.prefix)_INCLUDEDIR : ${$(my.prefix)_INCLUDEDIR}])
 $(my.indent)AC_MSG_NOTICE([$(my.prefix)_LIBS : ${$(my.prefix)_LIBS}])
-$(my.indent)AS_IF([${enable_isystem}],
+$(my.indent)AS_IF([test "x${enable_isystem}" != "xno"],
   $(my.indent)[AC_SUBST([$(my.prefix)_BUILD_CPPFLAGS], [${$(my.prefix)_ISYS_CPPFLAGS}])],
   $(my.indent)[AC_SUBST([$(my.prefix)_BUILD_CPPFLAGS], [${$(my.prefix)_CPPFLAGS}])])
 $(my.indent)AC_MSG_NOTICE([$(my.prefix)_BUILD_CPPFLAGS : ${$(my.prefix)_BUILD_CPPFLAGS}])
@@ -643,7 +659,7 @@ $(my.indent)AX_BOOST_BASE([$(my.dependency.version)],
     $(my.indent)AC_MSG_ERROR([Boost $(my.dependency.version) or later is required but was not found.])
   $(my.indent)])
 
-$(my.indent)AS_IF(["x${enable_isystem}" != "xno"],
+$(my.indent)AS_IF([test "x${enable_isystem}" != "xno"],
   $(my.indent)[ AC_SUBST([boost_BUILD_CPPFLAGS], [${boost_ISYSTEM_CPPFLAGS}]) ],
   $(my.indent)[ AC_SUBST([boost_BUILD_CPPFLAGS], [${boost_CPPFLAGS}]) ])
 
@@ -656,8 +672,6 @@ $(my.indent)AC_MSG_NOTICE([boost_BUILD_CPPFLAGS : ${boost_BUILD_CPPFLAGS}])
 
 .       define my.clause = ""
 .       for _component.context as _context
-.           echo " $(_component.name) : "
-.           echo _context.string()
 .           define my.separator = (my.clause = "") ?? "" ? " | "
 .
 .           define my.target = my.repository->$(_context.type)\
@@ -670,8 +684,6 @@ $(my.indent)AC_MSG_NOTICE([boost_BUILD_CPPFLAGS : ${boost_BUILD_CPPFLAGS}])
 .           my.clause = "$(my.clause)$(my.separator)(test \"x${$(my.target.type)_$(my.target.option)}\" != \"xno\")"
 .       endfor
 .
-.       echo "clause : $(my.clause)"
-.       echo _component.string()
 .       if (string.length(my.clause) > 0)
 .
 $(my.indent)AS_IF([$(my.clause)],
@@ -681,7 +693,7 @@ $(my.indent)AS_IF([$(my.clause)],
 .       endif
 .
 $(my.indent)AX_$(my.uname)
-$(my.indent)AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIB])
+$(my.indent)AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIB}])
 $(my.indent)AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
 .
 .       if (string.length(my.clause) > 0)

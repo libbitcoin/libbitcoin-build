@@ -735,7 +735,7 @@ display_configure_options()
 
     # directory rationalization
     push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-    push_directory "${RELATIVE_PATH}"
+    push_directory "${RELATIVE_SRC_PATH}"
     local BUILD_PATH="\$(pwd)"
     pop_directory
 
@@ -747,6 +747,11 @@ display_configure_options()
         create_directory_force "${PROJECT}"
         pop_directory
         push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        create_directory_force "${RELATIVE_OBJ_PATH}"
+        push_directory "${RELATIVE_OBJ_PATH}"
     fi
 .endmacro # define_build_initialize_path
 .
@@ -818,8 +823,9 @@ clean_$(my.name)()
 test_cmake()
 {
     local PROJECT="$1"
-    local JOBS="$2"
-    shift 2
+    local RELATIVE_OBJ_PATH="$2"
+    local JOBS="$3"
+    shift 3
 
     msg "Preparing to test ${PROJECT}"
 
@@ -829,6 +835,10 @@ test_cmake()
         push_directory "${BUILD_OBJ_DIR}"
     else
         push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        push_directory "${RELATIVE_OBJ_PATH}"
     fi
 
     disable_exit_on_error
@@ -855,6 +865,9 @@ test_cmake()
 
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        pop_directory
+    fi
 
     msg_success "'${PROJECT}' test complete."
 }
@@ -868,8 +881,9 @@ test_cmake()
 test_gnu()
 {
     local PROJECT="$1"
-    local JOBS="$2"
-    shift 2
+    local RELATIVE_OBJ_PATH="$2"
+    local JOBS="$3"
+    shift 3
 
     msg "Preparing to test ${PROJECT}"
 
@@ -879,6 +893,10 @@ test_gnu()
         push_directory "${BUILD_OBJ_DIR}"
     else
         push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        push_directory "${RELATIVE_OBJ_PATH}"
     fi
 
     disable_exit_on_error
@@ -909,6 +927,9 @@ test_gnu()
 
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        pop_directory
+    fi
 
     msg_success "'${PROJECT}' test complete."
 }
@@ -924,7 +945,8 @@ test_gnu()
 install_$(my.name)()
 {
     local PROJECT="$1"
-    shift
+    local RELATIVE_OBJ_PATH="$2"
+    shift 2
 
     msg "Preparing to install ${PROJECT}"
 
@@ -936,6 +958,10 @@ install_$(my.name)()
         push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
     fi
 
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        push_directory "${RELATIVE_OBJ_PATH}"
+    fi
+
     $(my.command)
 
     if [[ ${OS} == Linux ]] && [[ "${PREFIX}" == "/usr/local" ]]; then
@@ -944,6 +970,9 @@ install_$(my.name)()
 
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        pop_directory
+    fi
 
     msg_success "'${PROJECT}' installation complete."
 }
@@ -974,9 +1003,10 @@ install_$(my.name)()
 build_cmake()
 {
     local PROJECT="$1"
-    local RELATIVE_PATH="$2"
-    local JOBS="$3"
-    shift 3
+    local RELATIVE_SRC_PATH="$2"
+    local RELATIVE_OBJ_PATH="$3"
+    local JOBS="$4"
+    shift 4
 
     local VERBOSITY_CMAKE=""
     local VERBOSITY_MAKE=""
@@ -1003,6 +1033,10 @@ build_cmake()
 
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        pop_directory
+    fi
+
     msg_success "'${PROJECT}' built successfully."
 }
 
@@ -1013,9 +1047,10 @@ build_cmake()
 build_preset()
 {
     local PROJECT="$1"
-    local RELATIVE_PATH="$2"
-    local JOBS="$3"
-    shift 3
+    local RELATIVE_SRC_PATH="$2"
+    local RELATIVE_OBJ_PATH="$3"
+    local JOBS="$4"
+    shift 4
 
     local VERBOSITY_CMAKE=""
     local VERBOSITY_MAKE=""
@@ -1042,6 +1077,10 @@ build_preset()
 
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        pop_directory
+    fi
+
     msg_success "'${PROJECT}' built successfully."
 }
 
@@ -1052,9 +1091,10 @@ build_preset()
 build_gnu()
 {
     local PROJECT="$1"
-    local RELATIVE_PATH="$2"
-    local JOBS="$3"
-    shift 3
+    local RELATIVE_SRC_PATH="$2"
+    local RELATIVE_OBJ_PATH="$3"
+    local JOBS="$4"
+    shift 4
 
     local VERBOSITY_GNU=""
     local VERBOSITY_MAKE=""
@@ -1086,6 +1126,10 @@ build_gnu()
 
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        pop_directory
+    fi
+
     msg_success "'${PROJECT}' built successfully."
 }
 
@@ -1752,39 +1796,42 @@ $(my.indent)export CPPFLAGS="${CPPFLAGS} ${$(my.vname)_FLAGS[@]}"
 .
 .       if (my.active_build.method = "gnu")
 .           require(my.active_build, "build", "filepath")
-$(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_GNU[@]}"
+.           require(my.active_build, "build", "objpath")
+$(my.indent)build_gnu "$(_depend.name)" "$(my.active_build.filepath)" "$(my.active_build.objpath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_GNU[@]}"
 .           if last()
 $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
-    $(my.indent)test_gnu "$(_depend.name)" "${PARALLEL}"
+    $(my.indent)test_gnu "$(_depend.name)" "$(my.active_build.objpath)" "${PARALLEL}"
 $(my.indent)fi
 .           endif
-$(my.indent)install_gnu "$(_depend.name)"
+$(my.indent)install_gnu "$(_depend.name)" "$(my.active_build.objpath)"
 $(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
     $(my.indent)clean_gnu "$(_depend.name)"
 $(my.indent)fi
 .
 .       elsif (my.active_build.method = "cmake")
 .           require(my.active_build, "build", "filepath")
-$(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
+.           require(my.active_build, "build", "objpath")
+$(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "$(my.active_build.objpath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
 .           if last()
 $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
-    $(my.indent)test_cmake "$(_depend.name)" "${PARALLEL}"
+    $(my.indent)test_cmake "$(_depend.name)" "$(my.active_build.objpath)" "${PARALLEL}"
 $(my.indent)fi
 .           endif
-$(my.indent)install_cmake "$(_depend.name)"
+$(my.indent)install_cmake "$(_depend.name)" "$(my.active_build.objpath)"
 $(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
     $(my.indent)clean_cmake "$(_depend.name)"
 $(my.indent)fi
 .
 .       elsif (my.active_build.method = "preset")
 .           require(my.active_build, "build", "filepath")
-$(my.indent)build_preset "$(_depend.name)" "$(my.active_build.filepath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
+.           require(my.active_build, "build", "objpath")
+$(my.indent)build_preset "$(_depend.name)" "$(my.active_build.filepath)" "$(my.active_build.objpath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
 .           if last()
 $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
-    $(my.indent)test_cmake "$(_depend.name)" "test" "${PARALLEL}"
+    $(my.indent)test_cmake "$(_depend.name)" "test" "$(my.active_build.objpath)" "${PARALLEL}"
 $(my.indent)fi
 .           endif
-$(my.indent)install_cmake "$(_depend.name)"
+$(my.indent)install_cmake "$(_depend.name)" "$(my.active_build.objpath)"
 $(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
     $(my.indent)clean_cmake "$(_depend.name)"
 $(my.indent)fi
