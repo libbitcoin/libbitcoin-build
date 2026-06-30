@@ -2659,17 +2659,17 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
         <ignore name="*.la" comment="libtool archives" />
         <ignore name="*.lo" comment="libtool objects" />
 
-        <ignore name="/aclocal.m4" comment="Macros gathered by aclocal" />
-        <ignore name="/autom4te.cache" comment="autoconf cache directory" />
-        <ignore name="/build-aux" comment="Helper scripts directory" />
-        <ignore name="/config.*" comment="Generated config.* files" />
-        <ignore name="/configure" comment="Generated configure script" />
-        <ignore name="/libtool" comment="The libtool script" />
-        <ignore name=".dirstamp" comment="automake timestamp tracking" />
+        <ignore name="builds/gnu/aclocal.m4" comment="Macros gathered by aclocal" />
+        <ignore name="builds/gnu/autom4te.cache" comment="autoconf cache directory" />
+        <ignore name="builds/gnu/build-aux" comment="Helper scripts directory" />
+        <ignore name="builds/gnu/config.*" comment="Generated config.* files" />
+        <ignore name="builds/gnu/configure" comment="Generated configure script" />
+        <ignore name="builds/gnu/libtool" comment="The libtool script" />
+        <ignore name="builds/gnu/.dirstamp" comment="automake timestamp tracking" />
       </ignore>
 
       <!-- pkg-config -->
-      <ignore name="*.pc" comment="pkg-config pc file from .pc.in" />
+      <ignore name="builds/gnu/*.pc" comment="pkg-config pc file from .pc.in" />
 
       <!-- msbuild/msvc -->
       <ignore comment="msbuild/msvc">
@@ -2823,11 +2823,11 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
         unprefixed="true"
         data_type="path" />
 
-      <option type="enable" name="debug"
-        comment="Compile with debug assertions."
+      <option type="enable" name="ndebug"
+        comment="Compile with NDEBUG assertion."
         default="no"
         treatment="define">
-        <on value="no" define="NDEBUG" />
+        <on value="yes" define="NDEBUG" />
       </option>
 
       <option type="enable" name="shared"
