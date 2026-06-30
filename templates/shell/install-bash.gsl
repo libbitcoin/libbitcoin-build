@@ -765,7 +765,8 @@ display_configure_options()
 clean_$(my.name)()
 {
     local PROJECT="$1"
-    shift 1
+    local RELATIVE_OBJ_PATH="$2"
+    shift 2
 
     msg "Preparing to clean ${PROJECT}"
 
@@ -775,6 +776,10 @@ clean_$(my.name)()
         push_directory "${BUILD_OBJ_DIR}"
     else
         push_directory "${BUILD_OBJ_DIR}/${PROJECT}"
+    fi
+
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        push_directory "${RELATIVE_OBJ_PATH}"
     fi
 
     disable_exit_on_error
@@ -790,6 +795,9 @@ clean_$(my.name)()
 
     pop_directory # BUILD_OBJ_DIR
     pop_directory # BUILD_SRC_DIR/PROJECT
+    if [[ "${RELATIVE_OBJ_PATH}" != "." ]]; then
+        pop_directory
+    fi
 
     msg_success "'${PROJECT}' clean complete."
 }
@@ -1022,7 +1030,7 @@ build_cmake()
 
     display_configure_options "$@"
 
-    cmake ${VERBOSITY_CMAKE} -LA "$@" "${BUILD_SRC_DIR}/${PROJECT}/${RELATIVE_PATH}"
+    cmake ${VERBOSITY_CMAKE} -LA "$@" "${BUILD_SRC_DIR}/${PROJECT}/${RELATIVE_SRC_PATH}"
 
     # make
     if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
@@ -1066,7 +1074,7 @@ build_preset()
 
     display_configure_options "$@"
 
-    cmake ${VERBOSITY_CMAKE} -LA --preset="${BUILD_PRESET}" "$@" "${BUILD_SRC_DIR}/${PROJECT}/${RELATIVE_PATH}"
+    cmake ${VERBOSITY_CMAKE} -LA --preset="${BUILD_PRESET}" "$@" "${BUILD_SRC_DIR}/${PROJECT}/${RELATIVE_SRC_PATH}"
 
     # make
     if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
@@ -1805,7 +1813,7 @@ $(my.indent)fi
 .           endif
 $(my.indent)install_gnu "$(_depend.name)" "$(my.active_build.objpath)"
 $(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
-    $(my.indent)clean_gnu "$(_depend.name)"
+    $(my.indent)clean_gnu "$(_depend.name)" "$(my.active_build.objpath)"
 $(my.indent)fi
 .
 .       elsif (my.active_build.method = "cmake")
@@ -1819,7 +1827,7 @@ $(my.indent)fi
 .           endif
 $(my.indent)install_cmake "$(_depend.name)" "$(my.active_build.objpath)"
 $(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
-    $(my.indent)clean_cmake "$(_depend.name)"
+    $(my.indent)clean_cmake "$(_depend.name)" "$(my.active_build.objpath)"
 $(my.indent)fi
 .
 .       elsif (my.active_build.method = "preset")
@@ -1828,12 +1836,12 @@ $(my.indent)fi
 $(my.indent)build_preset "$(_depend.name)" "$(my.active_build.filepath)" "$(my.active_build.objpath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
 .           if last()
 $(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
-    $(my.indent)test_cmake "$(_depend.name)" "test" "$(my.active_build.objpath)" "${PARALLEL}"
+    $(my.indent)test_cmake "$(_depend.name)" "$(my.active_build.objpath)" "${PARALLEL}"
 $(my.indent)fi
 .           endif
 $(my.indent)install_cmake "$(_depend.name)" "$(my.active_build.objpath)"
 $(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
-    $(my.indent)clean_cmake "$(_depend.name)"
+    $(my.indent)clean_cmake "$(_depend.name)" "$(my.active_build.objpath)"
 $(my.indent)fi
 .
 .       elsif (my.active_build.method = "boost_build")
