@@ -514,7 +514,8 @@ $(my.prefix)_$(target_link_suffix(my.target)) = \\
 .       define my.repolib = my.repository->library(this.name = _depend.name, this)?
 .
 .       if defined(my.repolib)
-    ${$(target_var_prefix(my.repolib))_LIBS}$(my.suffix_depend)
+    ${$(target_var_prefix(my.repolib))_LIBS} \\
+    ${$(target_var_prefix(my.repolib))_LIBADD}$(my.suffix_depend)
 .       else
     ${$(_depend.name:c)_LIBS}$(my.suffix_depend)
 .       endif
