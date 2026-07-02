@@ -196,26 +196,7 @@ function render_dependencies(repository)
     define my.repository = render_dependencies.repository
 
     new unique_merged_dependencies as _dependencies
-        for my.repository.library as _library
-            for _library.dependency as _dep
-                merge_components(_dependencies, _dep)
-            endfor
-        endfor
-        for my.repository.test as _test
-            for _test.dependency as _dep
-                merge_components(_dependencies, _dep)
-            endfor
-        endfor
-        for my.repository.binary as _binary
-            for _binary.dependency as _dep
-                merge_components(_dependencies, _dep)
-            endfor
-        endfor
-        for my.repository.library as _library
-            if (count(_dependencies.dependency, name = _library.name) > 0)
-                delete _dependencies->dependency(name = _library.name)
-            endif
-        endfor
+        accumulate_repository_dependencies(_dependencies, my.repository)
 
         emit_shared_static_detection(_dependencies)
 
@@ -307,28 +288,6 @@ function supported_language(element, default)
     return cmake_language(my.default)
 endfunction
 
-function symbol(flag)
-    define my.flag = symbol.flag
-    define my.result = ""
-
-    if (count(my.flag.symbol) > 0)
-        for my.flag.symbol as _symbol
-            if (!first())
-                my.result = "$(my.result) $(_symbol.value)"
-            else
-                my.result = "$(_symbol.value)"
-            endif
-        endfor
-    else
-        if !defined(my.flag.symbol)
-            abort "$(name(my.target)) | Flag requires 'symbol'."
-        endif
-        my.result = "$(my.flag.symbol)"
-    endif
-
-    return my.result
-endfunction
-
 function flag_name(flag)
     define my.flag = flag_name.flag
 
@@ -389,26 +348,10 @@ function render_compiler_option_checks(repository)
     emit_compiler_check_includes(my.repository)
 
     new compiler as _compiler
-        for my.repository.library as _library
-            if !defined(_library->compiler)
-                next
-            endif
+        for my.repository. as _target where is_target_element(_target) &\
+            defined(_target->compiler)
 
-            render_unique_flags(_compiler, _library, my.repository)
-        endfor
-        for my.repository.test as _test
-            if !defined(_test->compiler)
-                next
-            endif
-
-            render_unique_flags(_compiler, _test, my.repository)
-        endfor
-        for my.repository.binary as _binary
-            if !defined(_binary->compiler)
-                next
-            endif
-
-            render_unique_flags(_compiler, _binary, my.repository)
+            render_unique_flags(_compiler, _target, my.repository)
         endfor
     endnew
 endfunction
@@ -564,9 +507,17 @@ endif()
 
 .   heading("Linker options.")
 .   render_link_option_checks(my.repository)
+.
+.   define my.filecount = 0
+.   for my.repository. as _target where is_target_element(_target)
+.       my.filecount += count(_target.configurable)
+.   endfor
+.
+.   if (my.filecount > 0)
 
-.   heading("Configurable file(s).")
-.   render_configurable_files(my.repository, my.meta)
+.       heading("Configurable file(s).")
+.       render_configurable_files(my.repository, my.meta)
+.   endif
 .
 .   for my.repository.library as _library
 
@@ -586,7 +537,7 @@ endif()
 .       heading("$(target_name(_binary)) executable")
 .       emit_target(_binary, my.repository, my.meta)
 .   endfor
-.
+
 .   heading("Installation routine.")
 .   emit_installation(my.repository, my.meta)
 .
@@ -731,8 +682,8 @@ $(my.indent)$(my.prefix)$(qualified_target_name(my.dependency))$(my.suffix)
 .macro emit_options(context)
 .   define my.context = emit_options.context
 .
-.   if (defined(my.context.type))
-option( $(my.context.type:lower)-$(my.context.option:lower) "Build $(my.context.option)." $(option_default(my.context)) )
+.   if (defined(my.context.option))
+option( $(my.context.type:lower)-$(my.context.option:lower) "$(my.context.comment)" $(option_default(my.context)) )
 .   endif
 .
 .   for my.context.option as _option
@@ -746,7 +697,7 @@ option( $(_option.type:lower)-$(_option.name:lower) "$(_option.comment)" $(optio
 .   if (count(my.dependencies.dependency) = 0)
 .       return
 .   endif
-
+.
 if ( BUILD_SHARED_LIBS )
 .   for my.dependencies.dependency as _depend
   set( $(package_name(_depend, configuration))_USE_STATIC_LIBS "OFF" )
@@ -997,7 +948,6 @@ $(my.indent)$(my.symbol)
 .macro emit_compiler_check_includes(repository)
 .   define my.repository = emit_compiler_check_includes.repository
 .
-
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 include(CheckCXXSourceCompiles)
@@ -1006,7 +956,6 @@ include(CheckCXXSourceCompiles)
 .macro emit_link_option_check_includes(repository)
 .   define my.repository = emit_link_option_check_includes.repository
 .
-
 include(CheckLinkerFlag)
 .endmacro # emit_link_option_check_includes
 .

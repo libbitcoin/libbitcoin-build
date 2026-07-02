@@ -93,7 +93,7 @@ function compute_packages(result, target, repository, configuration, tooling, me
         this.name = my.tooling.set, this)
  
     new dependencies as _dependencies
-        target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
+        target_dependency_list(_dependencies, my.target, my.repository, my.configuration, 1)
         for _dependencies.dependency as _depend where defined(_depend->nuget)
             # address non-component resources
             for _depend->nuget.resource as _resource where \

@@ -1,0 +1,642 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin Makefile.am
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/gnu-output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_Makefile_am(configuration)
+    define my.configuration = generate_Makefile_am.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.resource_name = "Makefile.am"
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    for my.configuration.repository as _repository
+        define my.output_path = path_append(my.configuration->templates.resultpath, \
+            path_append(_repository.name, my.template.outpath))
+
+        define my.filename = my.resource_name
+
+        create_directory(my.output_path)
+
+        define my.out_file = path_append(my.output_path, my.filename)
+
+        notify(my.out_file)
+        output(my.out_file)
+
+        emit_Makefile_am(_repository, my.configuration, my.template)
+        close
+    endfor
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+function target_contribution_set(target)
+    define my.target = target_contribution_set.target
+
+    if (name(my.target) = "library")
+        return "lib_LTLIBRARIES"
+    elsif (name(my.target) = "test")
+        return "check_PROGRAMS"
+    elsif (name(my.target) = "binary")
+        if is_defined_positive(my.target, "install")
+            return "bin_PROGRAMS"
+        else
+            return "noinst_PROGRAMS"
+        endif
+    else
+.       abort "Unrecognized target type '$(name(my.target))'."
+    endif
+endfunction
+
+function target_output(target)
+    define my.target = target_output.target
+    define my.target_path_prefix = my.target->sources.path
+
+    if (name(my.target) = "library")
+        return "$(my.target_path_prefix)/$(my.target.name).la"
+    elsif (name(my.target) = "test")
+        return "$(my.target_path_prefix)/$(my.target.name)"
+    elsif (name(my.target) = "binary")
+        define my.bin_name = defined(my.target.output) ?? \
+            my.target.output ? my.target.name
+        return "$(my.target_path_prefix)/$(my.bin_name)"
+    else
+        abort "Unrecognized target type '$(name(my.target))'."
+    endif
+endfunction
+
+function target_var_prefix(target)
+    define my.target = target_var_prefix.target
+    define my.output = target_output(my.target)
+    return "$(my.output:c)"
+endfunction
+
+function target_link_suffix(target)
+    define my.target = target_link_suffix.target
+
+    if (name(my.target) = "library")
+        return "LIBADD"
+    elsif (name(my.target) = "test")
+        return "LDADD"
+    elsif (name(my.target) = "binary")
+        return "LDADD"
+    else
+        abort "Unrecognized target type '$(name(my.target))'."
+    endif
+endfunction
+
+function emit_include_headers(target, repository, configuration, meta)
+    define my.target = emit_include_headers.target
+    define my.repository = emit_include_headers.repository
+    define my.configuration = emit_include_headers.configuration
+    define my.meta = emit_include_headers.meta
+
+    new filedata as _filedata
+        new _filedata.substitutions as _subs
+        new _filedata.files as _files
+
+        define my.absolute_root = repository_absolute_path(\
+            my.repository, my.configuration)
+
+        # populate files
+        for my.target.headers as _file_source
+            populate_files_from_path(_subs, _files, my.meta->headers,\
+                _file_source, my.absolute_root, my.meta->path.prefix)
+        endfor
+
+        # emit_dir_include_headers
+        emit_dir_include_headers(_subs, _files,\
+            my.target, my.repository, my.configuration, my.meta)
+
+        endnew
+        endnew
+    endnew
+endfunction
+
+function emit_target_sources(prefix, target, repository, configuration, meta)
+    define my.prefix = emit_target_sources.prefix
+    define my.target = emit_target_sources.target
+    define my.repository = emit_target_sources.repository
+    define my.configuration = emit_target_sources.configuration
+    define my.meta = emit_target_sources.meta
+
+    new filedata as _filedata
+        new _filedata.substitutions as _subs
+        new _filedata.files as _files
+
+        define my.absolute_root = repository_absolute_path(\
+            my.repository, my.configuration)
+
+        # populate files
+        for my.target.sources as _file_source
+            populate_files_from_path(_subs, _files, my.meta->sources,\
+                _file_source, my.absolute_root, my.meta->path.prefix)
+        endfor
+
+        # emit_dir_target_sources
+        emit_dir_target_sources(_subs, _files, my.prefix,\
+            my.target, my.repository, my.configuration, my.meta)
+
+        endnew
+        endnew
+    endnew
+endfunction
+
+function best_path_match(host, childname, path)
+    define my.host = best_path_match.host
+    define my.childname = best_path_match.childname
+    define my.path = best_path_match.path
+
+    define my.result = my.host
+
+    if defined(my.host.path) & !starts_with(my.path, my.host.path)
+        return
+    endif
+
+    for my.host.$(my.childname) as _child
+        define my.child_result = best_path_match(_child, my.childname, my.path)?
+
+        if defined(my.child_result)
+            if defined(my.result.path)
+                if (string.length(my.child_result.path) > string.length(my.result.path))
+                    my.result = my.child_result
+                endif
+            else
+                my.result = my.child_result
+            endif
+        endif
+    endfor
+
+    return my.result
+endfunction
+
+function linearize_annotate_sources(result, substitutions, files,\
+    target, repository, configuration, meta)
+    define my.result = linearize_annotate_sources.result
+    define my.substitutions = linearize_annotate_sources.substitutions
+    define my.files = linearize_annotate_sources.files
+    define my.target = linearize_annotate_sources.target
+    define my.repository = linearize_annotate_sources.repository
+    define my.configuration = linearize_annotate_sources.configuration
+    define my.meta = linearize_annotate_sources.meta
+
+    if !defined(my.files.path) & (count(my.files.file) > 0)
+        abort "Unexpected - container not a directory but contains files."
+    endif
+
+    if defined(my.files.path)
+        define my.sub = matches_substitution(my.substitutions, my.files.path)
+
+        define my.root_relative_path = string.substr(my.files.path, \
+            string.length(my.sub.absolute_path), \
+            string.length(my.files.path) - 1)
+
+        my.root_relative_path = left(my.root_relative_path, \
+            string.length(my.root_relative_path) - 1)
+
+        define my.relative_path = "$(my.sub.unprefixed_path)$(my.root_relative_path)"
+        define my.matchable_path = "$(my.sub.unprefixed_path)$(my.root_relative_path)"
+        define my.matching_declare = best_path_match(my.target, "sources", \
+            my.matchable_path)
+
+        if defined(my.matching_declare.option)
+            if !defined(my.result->option(this.option = my.matching_declare.option, this))
+                new my.result.option as _option
+                    _option.option = my.matching_declare.option
+                endnew
+            endif
+        endif
+
+        for my.files.file as _file
+            copy _file to my.result
+            define my.copied = my.result->file((this.name = _file.name) &\
+                (this.path = _file.path), this)
+
+            my.copied.path = my.relative_path
+
+            if defined(my.matching_declare.option)
+                my.copied.option = my.matching_declare.option
+            endif
+        endfor
+    endif
+
+    for my.files.directory as _dir
+        linearize_annotate_sources(my.result, my.substitutions, \
+            _dir, my.target, my.repository, my.configuration, my.meta)
+    endfor
+endfunction
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_Makefile_am(repository, configuration, meta)
+.   define my.repository = emit_Makefile_am.repository
+.   define my.configuration = emit_Makefile_am.configuration
+.   define my.meta = emit_Makefile_am.meta
+.
+.   copyleft(my.repository.name)
+.
+.   heading1("Automake settings.")
+.   emit_automake_settings(my.meta)
+.
+.   heading1("Distribute data.")
+.   emit_pkgconfig_data(my.repository, my.configuration, my.meta)
+.
+.   emit_doc_data(my.repository, my.configuration, my.meta)
+.
+.   heading1("Libraries.")
+.   for my.repository.library as _target
+.       if !first()
+
+.       endif
+.
+.       emit_target(_target, my.repository, my.configuration, my.meta, !first())
+.   endfor
+.
+.   heading1("Tests.")
+.   for my.repository.test as _target
+.       if !first()
+
+.       endif
+.
+.       emit_target(_target, my.repository, my.configuration, my.meta, !first())
+.   endfor
+.
+.   if (count(my.repository.binary, !is_defined_positive(this, "install"), this) > 0)
+.       heading1("Binaries.")
+.       for my.repository.binary as _target where !is_defined_positive(_target, "install")
+.           if !first()
+
+.           endif
+.
+.           emit_target(_target, my.repository, my.configuration, my.meta, !first())
+.       endfor
+.   endif
+.
+.   if (count(my.repository.binary, is_defined_positive(this, "install"), this) > 0)
+.       heading1("Installed Binaries.")
+.       for my.repository.binary as _target where is_defined_positive(_target, "install")
+.           if !first()
+
+.           endif
+.
+.           emit_target(_target, my.repository, my.configuration, my.meta, !first())
+.       endfor
+.   endif
+.endmacro # emit_Makefile_am
+.
+.macro emit_automake_settings(meta)
+.   define my.meta = emit_automake_settings.meta
+.
+.   if defined(my.meta->m4) & defined(my.meta->m4.path)
+.       heading2("Look for macros in the '$(my.meta->m4.path)' subdirectory.")
+ACLOCAL_AMFLAGS = -I $(my.meta->m4.path)
+.   endif
+.endmacro # emit_automake_settings
+.
+.macro emit_pkgconfig_data(repository, configuration, meta)
+.   define my.repository = emit_pkgconfig_data.repository
+.   define my.configuration = emit_pkgconfig_data.configuration
+.   define my.meta = emit_pkgconfig_data.meta
+.
+.   if (count(my.repository.library) > 0)
+.       heading2("files => ${pkgconfigdir}")
+pkgconfig_DATA = \\
+.
+.       for my.repository.library as _library
+.           define my.suffix = last() ?? "" ? " \\"
+    $(_library.name).pc$(my.suffix)
+.       endfor
+.   endif
+.endmacro # emit_pkgconfig_data
+.
+.macro emit_doc_data(repository, configuration, meta)
+.   define my.repository = emit_doc_data.repository
+.   define my.configuration = emit_doc_data.configuration
+.   define my.meta = emit_doc_data.meta
+.
+.   if (count(my.meta.doc) > 0)
+
+.       heading2("files => ${docdir}")
+doc_DATA = \\
+.
+.       for my.meta.doc as _doc
+.           define my.suffix = last() ?? "" ? " \\"
+    $(_doc.name)$(my.suffix)
+.       endfor
+.   endif
+.endmacro # emit_doc_data
+.
+.macro emit_target(target, repository, configuration, meta, append)
+.   define my.target = emit_target.target
+.   define my.repository = emit_target.repository
+.   define my.configuration = emit_target.configuration
+.   define my.meta = emit_target.meta
+.   define my.append = emit_target.append
+.
+.   define my.operator = my.append ?? "+=" ? "="
+.
+.   define my.output = target_output(my.target)
+.   define my.var_prefix = target_var_prefix(my.target)
+.
+.   heading2("Target $(name(my.target)) '$(my.output)'")
+.
+.   if defined(my.target.option)
+if $(my.target.type:c,upper)_$(my.target.option:c,upper)
+
+.   endif
+.
+$(target_contribution_set(my.target)) $(my.operator) $(my.output)
+.
+.   if (name(my.target) = "library")
+
+$(my.var_prefix)_LIBS = $(my.output)
+.   endif
+.
+.   emit_target_flags(my.var_prefix, my.target, \
+        my.repository, my.configuration, my.meta)
+.
+.   emit_target_link_libraries(my.var_prefix, my.target, \
+        my.repository, my.configuration, my.meta)
+.
+.   emit_target_sources(my.var_prefix, my.target, my.repository, my.configuration, my.meta)
+.
+.   if (name(my.target) = "library")
+.       if !first()
+
+.       endif
+.       emit_include_headers(my.target, my.repository, my.configuration, my.meta)
+.   endif
+.
+.   if ((name(my.target) = "test") & defined(my.target.runner))
+
+TESTS $(my.operator) $(my.target.runner)
+.   endif
+.
+.   if defined(my.target.option)
+.       if (name(my.target) = "binary")
+
+target_$(my.target.option) = $(my.output)
+
+$(my.target.option): ${target_$(my.target.option)}
+.       endif
+.
+
+endif $(my.target.type:c,upper)_$(my.target.option:c,upper)
+.   endif
+.
+.endmacro # emit_target
+.
+.macro emit_target_flags(prefix, target, repository, configuration, meta)
+.   define my.prefix = emit_target_flags.prefix
+.   define my.target = emit_target_flags.target
+.   define my.repository = emit_target_flags.repository
+.   define my.configuration = emit_target_flags.configuration
+.   define my.meta = emit_target_flags.meta
+.
+.   new flattened_headers as _flattened_headers
+.       for my.target.headers as _headers where is_defined_positive(_headers, "root")
+.           linearize(_flattened_headers, _headers)
+.       endfor
+
+$(my.prefix)_CPPFLAGS = \\
+.
+.       define my.has_depend_entries = (count(my.target.dependency) > 0)
+.
+.       for _flattened_headers.headers as _headers
+.           define my.suffix = (my.has_depend_entries | !last()) ?? " \\" ? ""
+.
+    -I$(my.meta->path.prefix)/$(_headers.path)$(my.suffix)
+.       endfor
+.
+.       for my.target.dependency as _depend
+.           define my.is_last_depend = last()
+.           define my.suffix_depend = (my.is_last_depend &\
+                !(count(_depend.component) > 0)) ?? "" ? " \\"
+.
+.           define my.repolib = my.repository->library(this.name = _depend.name, this)?
+.
+.           if defined(my.repolib)
+    ${$(target_var_prefix(my.repolib))_CPPFLAGS}$(my.suffix_depend)
+.           else
+    ${$(_depend.name:c)_BUILD_CPPFLAGS}$(my.suffix_depend)
+.           endif
+.
+.           for _depend.component as _component
+.               define my.suffix_component = (my.is_last_depend & last()) ??\
+                    "" ? " \\"
+.
+    ${$(_depend.name:c)_$(_component.name:c)_BUILD_CPPFLAGS}$(my.suffix_component)
+.           endfor
+.       endfor
+
+$(my.prefix)_LDFLAGS = \\
+.
+.       for my.target.dependency as _depend
+.           define my.is_last_depend = last()
+.           define my.suffix_depend = (my.is_last_depend &\
+                !(count(_depend.component) > 0)) ?? "" ? " \\"
+.
+.           define my.repolib = my.repository->library(this.name = _depend.name, this)?
+.
+.           if defined(my.repolib)
+    ${$(target_var_prefix(my.repolib))_LDFLAGS}$(my.suffix_depend)
+.           else
+    ${$(_depend.name:c)_LDFLAGS}$(my.suffix_depend)
+.           endif
+.
+.           for _depend.component as _component
+.               define my.suffix_component = (my.is_last_depend & last()) ??\
+                    "" ? " \\"
+.
+    ${$(_depend.name:c)_$(_component.name:c)_LDFLAGS}$(my.suffix_component)
+.           endfor
+.       endfor
+.   endnew
+.endmacro # emit_target_link_libraries
+.
+.macro emit_target_link_libraries(prefix, target, repository, configuration, meta)
+.   define my.prefix = emit_target_link_libraries.prefix
+.   define my.target = emit_target_link_libraries.target
+.   define my.repository = emit_target_link_libraries.repository
+.   define my.configuration = emit_target_link_libraries.configuration
+.   define my.meta = emit_target_link_libraries.meta
+.
+.   if (count(my.target.dependency) > 0)
+
+$(my.prefix)_$(target_link_suffix(my.target)) = \\
+.       for my.target.dependency as _depend
+.       define my.is_last_depend = last()
+.       define my.suffix_depend = (my.is_last_depend & !(count(_depend.component) > 0)) ??\
+            "" ? " \\"
+.
+.       define my.repolib = my.repository->library(this.name = _depend.name, this)?
+.
+.       if defined(my.repolib)
+    ${$(target_var_prefix(my.repolib))_LIBS} \\
+    ${$(target_var_prefix(my.repolib))_LIBADD}$(my.suffix_depend)
+.       else
+    ${$(_depend.name:c)_LIBS}$(my.suffix_depend)
+.       endif
+.
+.           for _depend.component as _component
+.               define my.suffix_component = (my.is_last_depend & last()) ??\
+                    "" ? " \\"
+.
+    ${$(_depend.name:c)_$(_component.name:c)_LIBS}$(my.suffix_component)
+.           endfor
+.       endfor
+.   endif
+.endmacro # emit_target_link_libraries
+.
+.macro emit_dir_target_sources(substitutions, files, prefix,\
+    target, repository, configuration, meta)
+.
+.   define my.substitutions = emit_dir_target_sources.substitutions
+.   define my.files = emit_dir_target_sources.files
+.   define my.prefix = emit_dir_target_sources.prefix
+.   define my.target = emit_dir_target_sources.target
+.   define my.repository = emit_dir_target_sources.repository
+.   define my.configuration = emit_dir_target_sources.configuration
+.   define my.meta = emit_dir_target_sources.meta
+.
+.   new linearized as _linearized
+.       linearize_annotate_sources(_linearized, \
+            my.substitutions, my.files, my.target, my.repository, \
+            my.configuration, my.meta)
+.
+.       if (count(_linearized.file) > 0)
+
+$(my.prefix)_SOURCES = \\
+.
+.           for _linearized.file as _file where !defined(_file.option)
+.               define my.suffix = last() ?? "" ? " \\"
+    $(my.meta->path.prefix)/$(_file.path)/$(_file.name)$(my.suffix)
+.           endfor
+.
+.           for _linearized.option as _option
+.               define my.optionflag = get_option(_option, \
+                    my.target, my.repository, "_")
+.
+
+if $(my.optionflag:upper)
+
+$(my.prefix)_SOURCES += \\
+.               for _linearized.file as _file where defined(_file.option) &\
+                    (_file.option = _option.option)
+.
+.                   define my.suffix = last() ?? "" ? " \\"
+    $(my.meta->path.prefix)/$(_file.path)/$(_file.name)$(my.suffix)
+.               endfor
+
+endif $(my.optionflag:upper)
+.           endfor
+.       endif
+.   endnew
+.endmacro # emit_dir_target_sources
+.
+.macro emit_dir_include_headers(substitutions, files,\
+    target, repository, configuration, meta)
+.
+.   define my.substitutions = emit_dir_include_headers.substitutions
+.   define my.files = emit_dir_include_headers.files
+.   define my.target = emit_dir_include_headers.target
+.   define my.repository = emit_dir_include_headers.repository
+.   define my.configuration = emit_dir_include_headers.configuration
+.   define my.meta = emit_dir_include_headers.meta
+.
+.   define my.optionflag = ""
+.
+.   if defined(my.files.path)
+.       define my.applicable_sub = matches_substitution(my.substitutions, my.files.path)
+.
+.       define my.root_relative_path = string.substr(my.files.path, \
+            string.length(my.applicable_sub.absolute_path), \
+            string.length(my.files.path) - 1)
+.
+.       my.root_relative_path = left(my.root_relative_path, \
+            string.length(my.root_relative_path) - 1)
+.
+.       define my.matchable_path = "$(my.applicable_sub.unprefixed_path)$(my.root_relative_path)"
+.       define my.matching_declare = best_path_match(my.target, "headers", \
+            my.matchable_path)
+.
+.       if defined(my.matching_declare.option) &\
+            (my.matching_declare.path = my.matchable_path)
+.
+.           my.optionflag = get_option(my.matching_declare, my.target, my.repository, "_")
+.
+
+if $(my.optionflag:upper)
+.       endif
+.
+.       if  (count(my.files.file) > 0)
+.
+.           define my.prefix = "include$(my.root_relative_path:c)"
+.           define my.destination_path = "${includedir}$(my.root_relative_path)"
+.           define my.make_relative_path = "$(my.meta->path.prefix)/$(my.applicable_sub.unprefixed_path)$(my.root_relative_path)"
+.
+.# leading blank space
+
+$(my.prefix)dir = \\
+    $(my.destination_path)
+
+$(my.prefix)_HEADERS = \\
+.           for my.files.file as _file
+.               define my.suffix = last() ?? "" ? " \\"
+    $(my.make_relative_path)/$(_file.name)$(my.suffix)
+.           endfor
+.       endif
+.   endif
+.
+.   for my.files.directory as _directory
+.       emit_dir_include_headers(my.substitutions, _directory,\
+            my.target, my.repository, my.configuration, my.meta)
+.   endfor
+.
+.   if !(my.optionflag = "")
+
+endif $(my.optionflag:upper)
+.   endif
+.
+.endmacro # emit_include_headers
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_Makefile_am(configuration)
+
+.endtemplate

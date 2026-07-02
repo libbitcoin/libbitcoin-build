@@ -1,0 +1,254 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin <repository>.pc.in
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/gnu-output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_pc_in(configuration)
+    define my.configuration = generate_pc_in.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    for my.configuration.repository as _repository
+        define my.output_path = path_append(my.configuration->templates.resultpath, \
+            path_append(_repository.name, my.template.outpath))
+
+        create_directory(my.output_path)
+
+        for _repository.library as _library
+            define my.filename = "$(_repository.name).pc.in"
+            define my.out_file = path_append(my.output_path, my.filename)
+
+            notify(my.out_file)
+            output(my.out_file)
+
+            emit_pc_in(_library, _repository, my.configuration, my.template)
+            close
+        endfor
+    endfor
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+function accumulate_flag_components(result, target, dependencies, repository,\
+    configuration, meta)
+
+    define my.result = accumulate_flag_components.result
+    define my.target = accumulate_flag_components.target
+    define my.dependencies = accumulate_flag_components.dependencies
+    define my.repository = accumulate_flag_components.repository
+    define my.configuration = accumulate_flag_components.configuration
+    define my.meta = accumulate_flag_components.meta
+
+    new cumulative_headers as _cumulative
+        linearize(_cumulative, my.target->headers)
+
+        for _cumulative.headers as _headers where is_defined_positive(_headers, "root")
+            copy _headers to my.result
+        endfor
+    endnew
+
+    for my.target->compiler.define as _define
+        copy _define to my.result
+    endfor
+
+    new accumulated_flags as _flags
+        accumulate_target_flags(_flags, my.target, my.repository, my.configuration, my.meta)
+
+        for _flags.flag as _flag where defined(_flag.substitute)
+            copy _flag to my.result
+        endfor
+    endnew
+
+    for my.dependencies.dependency as _depend where !defined(_depend->pkg)
+        copy _depend to my.result
+    endfor
+endfunction
+
+function components_to_cppflags(result, components, iprefix, ireplacement)
+    define my.result = components_to_cppflags.result
+    define my.components = components_to_cppflags.components
+    define my.iprefix = components_to_cppflags.iprefix
+    define my.ireplacement = components_to_cppflags.ireplacement
+
+    for my.components.headers as _headers
+        new my.result.entry as _entry
+            if defined(_headers.option)
+                _entry.value = "@$(_headers.option)_include@"
+            else
+                define my.modified_path = string.replace(_headers.path, \
+                    "$(my.iprefix)|$(my.ireplacement)")
+                _entry.value = "-I$(my.modified_path)"
+            endif
+        endnew
+    endfor
+
+    for my.components.define as _define
+        for _define.symbol as _symbol where defined(_symbol->substitute)
+            new my.result.entry as _entry
+                _entry.value = "@$(_symbol->substitute.name)@"
+            endnew
+        endfor
+    endfor
+
+    for my.components.flag as _flag where defined(_flag.substitute)
+        new my.result.entry as _entry
+            _entry.value = "@$(_flag.substitute)@"
+        endnew
+    endfor
+
+    for my.components.dependency as _depend where !defined(_depend->pkg)
+        new my.result.entry as _entry
+            _entry.value = "@$(_depend.name)_CPPFLAGS@"
+        endnew
+    endfor
+endfunction
+
+function components_to_libs(result, components)
+    define my.result = components_to_libs.result
+    define my.components = components_to_libs.components
+
+    for my.components.dependency as _depend where !defined(_depend->pkg)
+        new my.result.entry as _entry
+            _entry.value = "@$(_depend.name)_LDFLAGS@"
+        endnew
+
+        for _depend.component as _component
+            new my.result.entry as _entry
+                _entry.value = "@$(_depend.name)_$(_component.name)_LIBS@"
+            endnew
+        endfor
+    endfor
+endfunction
+
+function library_name(name)
+    define my.name = library_name.name
+    define my.prefix = "lib"
+
+    if starts_with(my.name, my.prefix)
+        return string.substr(my.name, string.length(my.prefix), \
+            string.length(my.name))
+    endif
+
+    return my.name
+endfunction
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_pc_in(library, repository, configuration, meta)
+.   define my.library = emit_pc_in.library
+.   define my.repository = emit_pc_in.repository
+.   define my.configuration = emit_pc_in.configuration
+.   define my.meta = emit_pc_in.meta
+.
+.   copyleft(my.library.name)
+
+.   heading1("Substitutions")
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+.   heading1("Metadata")
+Name: $(my.library.name)
+Description: $(my.repository.description)
+.
+.   define my.canonical = my.configuration->registrar(this.id = "dependency", this)\
+        ->dependency(this.name = my.repository.name, this)
+.
+URL: https://github.com/$(my.canonical->github.owner)/$(my.canonical.name)
+Version: @PACKAGE_VERSION@
+.
+.   new canonical_dependencies as _dependencies
+.       target_dependency_list(_dependencies,\
+            my.library, my.repository, my.configuration, 0)
+.
+.       if (count(_dependencies.dependency, defined(this->pkg), this) > 0)
+
+.           heading1("Variables")
+Requires: \\
+.           for _dependencies.dependency as _depend where defined(_depend->pkg)
+.               define my.suffix = last() ?? "" ? " \\"
+    @$(_depend.name:c)_PKG@$(my.suffix)
+.           endfor
+.       endif
+.
+.       new flag_components as _components
+.           accumulate_flag_components(_components, my.library, _dependencies, \
+                my.repository, my.configuration, my.meta)
+.
+.           new flattened_cppflags as _cppflags
+.               components_to_cppflags(_cppflags, _components, "include", "${includedir}")
+.
+.               if (count(_cppflags.entry) > 0)
+
+Cflags: \\
+.
+.                   for _cppflags.entry as _entry
+.                       my.suffix = last() ?? "" ? " \\"
+    $(_entry.value)$(my.suffix)
+.                   endfor
+.               endif
+.           endnew
+.
+.           new flattened_libs as _libs
+.               components_to_libs(_libs, _components)
+.
+
+Libs: \\
+    -L${libdir} \\
+    -l$(library_name(my.library.name))$((count(_libs.entry) > 0) ?? " \\" ? "")
+.
+.               if (count(_libs.entry) > 0)
+.
+.                   for _libs.entry as _entry
+.                       my.suffix = last() ?? "" ? " \\"
+    $(_entry.value)$(my.suffix)
+.                   endfor
+.               endif
+.           endnew
+.       endnew
+.   endnew
+.
+.endmacro # emit_pc_in
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_pc_in(configuration)
+
+.endtemplate

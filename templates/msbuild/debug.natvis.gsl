@@ -1,0 +1,122 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin debug.ntvis
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/xml-output.gsl"
+gsl from "../lib/msbuild.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_debug_natvis(configuration)
+    define my.configuration = generate_debug_natvis.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    for my.configuration.repository as _repository
+        for _repository. as _target where is_target_element(_target)
+            generate_target_debug_natvis(_target, _repository, \
+                my.configuration, my.template)
+        endfor
+    endfor
+endfunction
+
+function generate_target_debug_natvis(target, repository, configuration, meta)
+    define my.target = generate_target_debug_natvis.target
+    define my.repository = generate_target_debug_natvis.repository
+    define my.configuration = generate_target_debug_natvis.configuration
+    define my.meta = generate_target_debug_natvis.meta
+
+    define my.filename = "debug.natvis"
+
+    define my.output_path = path_append(my.configuration->templates.resultpath, \
+        path_append(my.repository.name, my.meta.outpath))
+
+    create_directory(my.output_path)
+
+    define my.out_file = path_append(my.output_path, my.filename)
+
+    notify(my.out_file)
+    output(my.out_file)
+
+    emit_debug_natvis(my.target, my.repository, my.configuration, my.meta)
+
+    close
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+function xml_text(text)
+    define my.text = xml_text.text
+    return string.replace(my.text, "<|&lt;,>|&gt;")
+endfunction
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_debug_natvis(target, repository, configuration, meta)
+.   define my.target = emit_debug_natvis.target
+.   define my.repository = emit_debug_natvis.repository
+.   define my.configuration = emit_debug_natvis.configuration
+.   define my.meta = emit_debug_natvis.meta
+.
+<?xml version="1.0" encoding="utf-8"?>
+.
+.   copyleft(my.repository.name)
+.
+<AutoVisualizer xmlns="$(my.meta->schema.xmlns)">
+.
+.   for my.meta.substitution as _substitution
+    <Type Name="$(xml_text(_substitution.type))">
+        <DisplayString>{ $(_substitution.display) }</DisplayString>
+    </Type>
+.   endfor
+.
+.   for my.repository. as _target where is_target_element(_target)
+.       for _target.substitution as _substitution
+    <Type Name="$(xml_text(_substitution.type))">
+        <DisplayString>{ $(_substitution.display) }</DisplayString>
+    </Type>
+.       endfor
+.   endfor
+.
+</AutoVisualizer>
+.
+.endmacro # emit_debug_natvis
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_debug_natvis(configuration)
+
+.endtemplate

@@ -39,24 +39,46 @@ function global.is_defined_positive(node, attribute)
         ((my.node.$(my.attribute) = "true") | (my.node.$(my.attribute) = "yes"))
 endfunction
 
-function global.merge_child(destination, element, identifier)
+function global.linearize(result, host)
+    define my.result = linearize.result
+    define my.host = linearize.host
+
+    copy my.host to my.result
+
+    for my.host.$(name(my.host)) as _child
+        linearize(my.result, _child)
+    endfor
+endfunction
+
+function global.merge_child(destination, element, identifier, context)
     define my.destination = merge_child.destination
     define my.element = merge_child.element
     define my.identifier = merge_child.identifier
+    define my.context = merge_child.context
 
     if (count(my.destination.$(name(my.element)), count.$(my.identifier) = my.element.$(my.identifier)) = 0)
         copy my.element to my.destination
     endif
+
+    define my.match = my.destination->$(name(my.element))(this.$(my.identifier) = my.element.$(my.identifier), this)
+
+    if defined(my.match) & defined(my.context) & defined(my.context.name)
+        new my.match.context as _context
+            _context.name = my.context.name
+            _context.type = name(my.context)
+        endnew
+    endif
 endfunction
 
-function global.merge_children_select(destination, source, name, identifier)
+function global.merge_children_select(destination, source, context, name, identifier)
     define my.destination = merge_children_select.destination
     define my.source = merge_children_select.source
+    define my.context = merge_children_select.context
     define my.name = merge_children_select.name
     define my.identifier = merge_children_select.identifier
 
     for my.source.$(my.name) as _child
-        merge_child(my.destination, _child, my.identifier)
+        merge_child(my.destination, _child, my.identifier, my.context)
     endfor
 endfunction
 
@@ -92,16 +114,38 @@ function global.canonicalize(result, host, registrar, name, identifier)
     endfor
 endfunction
 
-function global.merge_components(dependencies, element)
+function global.merge_components(dependencies, element, context)
     define my.dependencies = merge_components.dependencies
     define my.element = merge_components.element
+    define my.context = merge_components.context
+
+    define my.contextualize_children = 0
 
     if (count(my.dependencies.dependency, dependency.name = my.element.name) > 0)
         define my.destination = my.dependencies->dependency(dependency.name = my.element.name)
 
-        merge_children_select(my.destination, my.element, "component", "name")
+        merge_children_select(my.destination, my.element, my.context, "component", "name")
     else
         copy my.element to my.dependencies
+        my.contextualize_children = 1
+    endif
+
+    define my.match = my.dependencies->dependency(dependency.name = my.element.name)
+
+    if defined(my.match) & defined(my.context) & defined(my.context.name)
+        new my.match.context as _context
+            _context.name = my.context.name
+            _context.type = name(my.context)
+        endnew
+
+        if my.contextualize_children
+            for my.match.component as _component
+                new _component.context as _context
+                    _context.name = my.context.name
+                    _context.type = name(my.context)
+                endnew
+            endfor
+        endif
     endif
 endfunction
 
@@ -189,10 +233,11 @@ function global.find_option_declaration(name, target, repository)
     abort "Missing option matching name '$(my.name)'."
 endfunction
 
-function global.get_option(reference, target, repository)
+function global.get_option(reference, target, repository, separator)
     define my.reference = get_option.reference
     define my.target = get_option.target
     define my.repository = get_option.repository
+    define my.separator = get_option.separator ? "-"
     define my.result = ""
 
     if (defined(my.reference.option))
@@ -202,32 +247,35 @@ function global.get_option(reference, target, repository)
             abort "Target '$(my.target.name)' missing option '$(my.reference.option)'."
         endif
 
-        my.result = "$(my.option.type:lower)-$(my.option.name:lower)"
+        my.result = "$(my.option.type:lower)$(my.separator)$(my.option.name:lower)"
     endif
 
     return my.result
 endfunction
 
-function global.target_dependency_list(result, target, repository, configuration)
+function global.target_dependency_list(result, target, repository, configuration, recurse)
     define my.result = target_dependency_list.result
     define my.target = target_dependency_list.target
     define my.repository = target_dependency_list.repository
     define my.configuration = target_dependency_list.configuration
+    define my.recurse = target_dependency_list.recurse
 
     define my.registrar = my.configuration->registrar(id = "dependency")
 
     for my.target.dependency as _dep
-        if (count_matches_name(my.configuration, "repository", _dep.name) > 0)
+        if ((my.recurse) & \
+            (count_matches_name(my.configuration, "repository", _dep.name) > 0))
+
             define my.dep_repository = my.configuration->repository(name = _dep.name)
             define my.dep_target = my.dep_repository->library(name = _dep.name)
 
             target_dependency_list(my.result, my.dep_target, \
-                my.dep_repository, my.configuration)
+                my.dep_repository, my.configuration, my.recurse)
         else
             canonicalize_element(my.result, _dep, my.registrar, "name")
         endif
 
-        merge_components(my.result, _dep)
+        merge_components(my.result, _dep, my.target)
     endfor
 endfunction
 
@@ -252,6 +300,85 @@ function global.canonical_dependency_list(result, repository, configuration)
     endfor
     for my.repository.binary as _target
         canonicalize(my.result, _target, my.configuration->registrar(id = "dependency"), "dependency", "name")
+    endfor
+endfunction
+
+function global.accumulate_repository_dependencies(result, repository)
+    define my.result = accumulate_repository_dependencies.result
+    define my.repository = accumulate_repository_dependencies.repository
+
+    for my.repository. as _target where is_target_element(_target)
+        for _target.dependency as _dep
+            merge_components(my.result, _dep, _target)
+
+            define my.match = my.result->dependency(this.name = _dep.name, this)
+
+            new my.match.context as _context
+                _context.type = name(_target)
+                _context.name = _target.name
+            endnew
+        endfor
+    endfor
+
+    for my.repository.library as _library
+        if (count(my.result.dependency, this.name = _library.name, this) > 0)
+            delete my.result->dependency(this.name = _library.name, this)
+        endif
+    endfor
+endfunction
+
+function accumulate_target_flags(result, target, repository, configuration, meta)
+    define my.result = accumulate_target_flags.result
+    define my.target = accumulate_target_flags.target
+    define my.repository = accumulate_target_flags.repository
+    define my.configuration = accumulate_target_flags.configuration
+    define my.meta = accumulate_target_flags.meta
+
+    for my.target->compiler.flag as _flag
+        new _flag.target as _flag_target
+            _flag_target.name = my.target.name
+            _flag_target.type = name(my.target)
+        endnew
+
+        if !defined(_flag.id)
+            copy _flag to my.result
+
+        elsif (count(my.result.flag, defined(this.id) & (this.id = _flag.id), this) = 0)
+            define my.canonical = my.configuration->canonical->compiler->flag( \
+                (this.id = _flag.id), this)?
+
+            if defined(my.canonical)
+                copy my.canonical to my.result
+                define my.copied = my.result->flag(\
+                    defined(this.id) & (this.id = _flag.id), this)
+
+                new my.copied.target as _flag_target
+                    _flag_target.name = my.target.name
+                    _flag_target.type = name(my.target)
+                endnew
+            else
+                copy _flag to my.result
+            endif
+        else
+            define my.match = my.result->flag(defined(this.id) & \
+                (this.id = _flag.id), this)
+
+            new my.match.target as _flag_target
+                _flag_target.name = my.target.name
+                _flag_target.type = name(my.target)
+            endnew
+        endif
+    endfor
+endfunction
+
+function accumulate_flags(result, repository, configuration, meta)
+    define my.result = accumulate_flags.result
+    define my.repository = accumulate_flags.repository
+    define my.configuration = accumulate_flags.configuration
+    define my.meta = accumulate_flags.meta
+
+    for my.repository. as _target where is_target_element(_target)
+        accumulate_target_flags(my.result, _target, my.repository, my.configuration, my.meta)
     endfor
 endfunction
 
@@ -308,6 +435,39 @@ function global.is_target_element(element)
     return (name(my.element) = "library") \
         | (name(my.element) = "test") \
         | (name(my.element) = "binary")
+endfunction
+
+function global.symbol_text(symbol)
+    define my.symbol = symbol_text.symbol
+
+    if defined(my.symbol.name)
+        return "$(my.symbol.name)=$(my.symbol.value)"
+    endif
+
+    return my.symbol.value
+endfunction
+
+function global.symbol(flag)
+    define my.flag = symbol.flag
+    define my.result = ""
+
+    if (count(my.flag.symbol) > 0)
+        for my.flag.symbol as _symbol
+            if !first()
+                my.result = "$(my.result) $(symbol_text(_symbol))"
+            else
+                my.result = "$(symbol_text(_symbol))"
+            endif
+        endfor
+    else
+        if !defined(my.flag.symbol)
+            abort "$(name(my.target)) | Flag requires 'symbol'."
+        endif
+
+        my.result = "$(my.flag.symbol)"
+    endif
+
+    return my.result
 endfunction
 
 .endtemplate

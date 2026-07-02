@@ -10,7 +10,8 @@
     <language id="c" />
     <language id="c++" />
 
-    <library name="libbitcoin-system" uuid="39f60708-ff48-4c22-952d-43470866f684">
+    <library name="libbitcoin-system"
+      uuid="39f60708-ff48-4c22-952d-43470866f684">
 
       <!-- <configurable input="version.hpp.in"
         output="version.hpp"
@@ -24,37 +25,31 @@
       </resources>
 
       <!-- Exposed knobs -->
-      <option name="avx2"
-        type="enable"
+      <option name="avx2" type="enable"
         default="no"
         comment="Use Intel AVX2 intrinsics." />
 
-      <option name="avx512"
-        type="enable"
+      <option name="avx512" type="enable"
         default="no"
         comment="Use Intel AVX512 intrinsics." />
       <!-- msvc="/p:ClCompile_AdditionalOptions=\&quot;/arch:AVX512\&quot;" /> -->
 
-      <option name="sse41"
-        type="enable"
+      <option name="sse41" type="enable"
         default="no"
         comment="Use SSE4.1 hardware instructions." />
 
-      <option name="shani"
-        type="enable"
+      <option name="shani" type="enable"
         default="no"
         comment="Use Intel/ARM SHA Extensions."
         msvc="/p:Option-sha=true" />
 
-      <option name="ultrafast"
-        type="with"
+      <option name="ultrafast" type="with"
         default="no"
-        comment="Use shrec/UltrafastSecp256k1." />
+        comment="Use shrec/UltrafastSecp256k1 library." />
 
-      <option name="secp256k1"
-        type="with"
+      <option name="secp256k1" type="with"
         default="yes"
-        comment="Use bitcoin-core/secp256k1." />
+        comment="Use bitcoin-core/secp256k1 library." />
 
       <!-- Dependencies -->
       <dependency name="boost" version="1.86.0">
@@ -73,7 +68,8 @@
       <compiler standard="20">
         <flag option="avx2"
           comment="Conditionally require avx2 intrinsics."
-          type="public">
+          type="public"
+          substitute="avx2">
           <context language="c" />
           <context language="c++" />
           <symbol value="-mavx" />
@@ -88,7 +84,8 @@
 
         <flag option="avx512"
           comment="Conditionally require avx512 intrinsics."
-          type="public">
+          type="public"
+          substitute="avx512">
           <context language="c" />
           <context language="c++" />
           <symbol value="-mavx512f" />
@@ -103,7 +100,8 @@
 
         <flag option="shani"
           comment="Conditionally require sha native intrincis."
-          type="public">
+          type="public"
+          substitute="shani">
           <context language="c" />
           <context language="c++" />
           <symbol value="-msse4" />
@@ -120,7 +118,8 @@
 
         <flag option="sse41"
           comment="Conditionally require sse4.1 intrinsics."
-          type="public">
+          type="public"
+          substitute="sse41">
           <context language="c" />
           <context language="c++" />
           <symbol value="-msse4.1" />
@@ -153,11 +152,14 @@
     </library>
 
     <test name="libbitcoin-system-test" uuid="51a424a9-2c12-4211-8d40-e49d1534c541"
-      option="tests" type="with" default="yes">
+      option="tests" type="with" default="yes"
+      comment="Compile with unit tests."
+      runner="test_runner.sh">
 
       <sources path="test" recursive="true">
         <msbuild filter="src" />
-        </sources>
+      </sources>
+
       <!--
       <resources path="builds/msvc" recursive="false" root="true">
         <msbuild filter="resource" />
@@ -186,12 +188,15 @@
         <flag id="fno-var-tracking-assignments" />
         <flag id="fstack-protector-all" />
         <!-- link id="no_fixup_chains" /> -->
-       </compiler>
+      </compiler>
       <!-- <trigger test="t2" /> -->
     </test>
 
-    <binary name="libbitcoin-system-examples" uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e"
-      option="examples" type="with" default="yes" install="false">
+    <binary name="libbitcoin-system-examples"
+      uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e"
+      install="false"
+      option="examples" type="with" default="yes"
+      comment="Compile with examples.">
 
       <sources path="examples" recursive="true">
         <msbuild filter="src" />
@@ -438,7 +443,8 @@
     <language id="c" />
     <language id="c++" />
 
-    <library name="libbitcoin-network" uuid="564eb540-d6b6-425c-b8db-b0bee8970c18">
+    <library name="libbitcoin-network"
+      uuid="564eb540-d6b6-425c-b8db-b0bee8970c18">
 
       <!-- <configurable input="version.hpp.in"
         output="version.hpp"
@@ -449,7 +455,8 @@
         <sources path="src/ssl" recursive="true" option="ssl" />
       </sources>
       <headers path="include" recursive="true" root="true">
-        <headers path="include/bitcoin/network/ssl" recursive="true" root="true" option="ssl" />
+        <headers path="include/bitcoin/network/ssl"
+          recursive="true" root="true" option="ssl" substitute="ssl_include" />
       </headers>
       <!--
       <resources path="builds/msvc" recursive="false" root="true">
@@ -458,7 +465,9 @@
       -->
 
       <!-- Exposed knobs -->
-      <option name="ssl" type="with" default="yes" comment="Use embedded ssl library." />
+      <option name="ssl" type="with"
+        default="yes"
+        comment="Use embedded ssl library." />
 
       <dependency name="libbitcoin-system" version="4.0.0" />
 
@@ -466,8 +475,12 @@
         <define option="ssl"
           comment="Use embedded ssl libraries."
           type="public">
-          <symbol value="WITH_SSL" />
-          <symbol value="WOLFSSL_USER_SETTINGS" />
+          <symbol value="WITH_SSL">
+            <substitute name="ssl" />
+          </symbol>
+          <symbol value="WOLFSSL_USER_SETTINGS">
+            <substitute name="wolfssl" />
+          </symbol>
         </define>
 
         <flag id="Wall" />
@@ -487,13 +500,16 @@
      </library>
 
     <test name="libbitcoin-network-test" uuid="d28fc18a-8b81-4247-92ee-6967feefeeff"
-      option="tests" type="with" default="yes">
+      option="tests" type="with" default="yes"
+      comment="Compile with unit tests."
+      runner="test_runner.sh">
 
       <headers path="test" private="true" recursive="true" root="true">
         <msbuild filter="src" />
         <headers path="test/ssl/wolfssl" private="true" recursive="true" root="true" option="ssl" />
       </headers>
       <sources path="test" recursive="true">
+        <sources path="test/ssl/wolfssl" private="true" recursive="true" root="true" option="ssl" />
         <msbuild filter="src" />
       </sources>
       <!--
@@ -510,9 +526,11 @@
 
       <compiler standard="20">
         <define option="ssl"
-          symbol="CERT_PREFIX=&quot;${repository_root_dir}/test/ssl/wolfssl/wolfcrypt/test/&quot;"
           comment="WolfSSL test data parameter."
-          type="private" />
+          type="private">
+          <symbol name="CERT_PREFIX"
+            value="&quot;${repository_root_dir}/test/ssl/wolfssl/wolfcrypt/test/&quot;" />
+        </define>
 
         <flag id="Wall" />
         <flag id="Wextra" />
@@ -747,7 +765,8 @@
     <language id="c" />
     <language id="c++" />
 
-    <library name="libbitcoin-database" uuid="62d7fbee-4d52-424a-8938-59756e13d9f5">
+    <library name="libbitcoin-database"
+      uuid="62d7fbee-4d52-424a-8938-59756e13d9f5">
 
       <!-- <configurable input="version.hpp.in"
         output="version.hpp"
@@ -781,7 +800,9 @@
     </library>
 
     <test name="libbitcoin-database-test" uuid="5c4da53a-8c06-4da6-a2a8-3c30f338ed70"
-      option="tests" type="with" default="yes">
+      option="tests" type="with" default="yes"
+      comment="Compile with unit tests."
+      runner="test_runner.sh">
 
       <sources path="test" recursive="true">
         <msbuild filter="src" />
@@ -817,8 +838,12 @@
        </compiler>
     </test>
 
-    <binary name="libbitcoin-database-tools" uuid="005f2a86-f937-4ab5-b041-0f21b67eec66"
-      option="tools" type="with" default="yes" install="false" output="initchain">
+    <binary name="libbitcoin-database-tools"
+      uuid="005f2a86-f937-4ab5-b041-0f21b67eec66"
+      install="false"
+      output="initchain"
+      option="tools" type="with" default="yes"
+      comment="Compile with tools.">
 
       <sources path="tools/initchain">
         <msbuild filter="src" />
@@ -1063,7 +1088,8 @@
     <language id="c" />
     <language id="c++" />
 
-    <library name="libbitcoin-node" uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158">
+    <library name="libbitcoin-node"
+      uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158">
 
       <!-- <configurable input="version.hpp.in"
         output="version.hpp"
@@ -1096,7 +1122,9 @@
     </library>
 
     <test name="libbitcoin-node-test" uuid="4bd50864-d3bc-4f64-aebb-ddeb8a622fa8"
-      option="tests" type="with" default="yes">
+      option="tests" type="with" default="yes"
+      comment="Compile with unit tests."
+      runner="test_runner.sh">
 
       <sources path="test" recursive="true">
         <msbuild filter="src" />
@@ -1346,7 +1374,8 @@
     <language id="c" />
     <language id="c++" />
 
-    <library name="libbitcoin-server" uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0">
+    <library name="libbitcoin-server"
+      uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0">
 
       <!-- <configurable input="version.hpp.in"
         output="version.hpp"
@@ -1378,7 +1407,9 @@
     </library>
 
     <test name="libbitcoin-server-test" uuid="66a0e586-2e3a-448f-bcd0-348afeb0d5ea"
-      option="tests" type="with" default="yes">
+      option="tests" type="with" default="yes"
+      comment="Compile with unit tests."
+      runner="test_runner.sh">
 
       <sources path="test" recursive="true">
         <msbuild filter="src" />
@@ -1414,9 +1445,13 @@
        </compiler>
     </test>
 
-    <binary name="bitcoin-server" uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe"
-      option="console" type="with" default="yes" install="true"
-      msvcproj="bs" output="bs">
+    <binary name="bitcoin-server"
+      uuid="f45b7d90-90bc-41ef-9ad1-9b29256a09fe"
+      install="true"
+      msvcproj="bs"
+      output="bs"
+      option="console" type="with" default="yes"
+      comment="Compile with console application.">
 
       <headers path="console" recursive="true" root="true">
         <msbuild filter="src" />
@@ -1755,22 +1790,26 @@
           comment="Protect stack."
           type="private">
           <symbol value="-fstack-protector" />
+          <context language="c++" />
         </flag>
         <flag id="fstack-protector-all"
           comment="Protect stack comprehensively." 
           type="private">
           <symbol value="-fstack-protector-all" />
+          <context language="c++" />
         </flag>
         <flag id="Wno-maybe-uninitialized"
           comment="Disable warning when a variable might not be initialized on all code paths." 
           type="private"
           compiler="gnu">
           <symbol value="-Wno-maybe-uninitialized" />
+          <context language="c++" />
         </flag>
         <flag id="Wno-uninitialized"
           comment="Suppresses warnings related to the use of uninitialized variables." 
           type="private">
           <symbol value="-Wno-uninitialized" />
+          <context language="c++" />
         </flag>
 
         <!-- macos active between clang 13-16, deprecated 17, removed 18 -->
@@ -1785,17 +1824,17 @@
   <registrar id="dependency">
     <dependency name="libbitcoin-system">
       <github owner="libbitcoin" tag="master" />
-      <build method="gnu" filepath="." parallel="true">
+      <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
         <option value="--without-examples" ignore="true" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build method="cmake" filepath="builds/cmake" parallel="true">
+      <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-examples:BOOL=OFF" ignore="true" />
       </build>
-      <build method="preset" filepath="builds/cmake" parallel="true">
+      <build method="preset" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-examples:BOOL=OFF" ignore="true" />
       </build>
@@ -1803,20 +1842,21 @@
       <cmake namespace="bitcoin"
         package="libbitcoin-system"
         target="bitcoin::system" />
+      <pkg />
     </dependency>
     <dependency name="libbitcoin-database">
       <github owner="libbitcoin" tag="master" />
-      <build method="gnu" filepath="." parallel="true">
+      <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
         <option value="--without-tools" ignore="true" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build method="cmake" filepath="builds/cmake" parallel="true">
+      <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-tools:BOOL=OFF" ignore="true" />
       </build>
-      <build method="preset" filepath="builds/cmake" parallel="true">
+      <build method="preset" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-tools:BOOL=OFF" ignore="true" />
       </build>
@@ -1824,20 +1864,21 @@
       <cmake namespace="bitcoin"
         package="libbitcoin-database"
         target="bitcoin::database" />
+      <pkg />
     </dependency>
     <dependency name="libbitcoin-network">
       <github owner="libbitcoin" tag="master" />
-      <build method="gnu" filepath="." parallel="true">
+      <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
         <!-- <option value="--with-ssl" /> -->
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build method="cmake" filepath="builds/cmake" parallel="true">
+      <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-ssl:BOOL=ON" />
       </build>
-      <build method="preset" filepath="builds/cmake" parallel="true">
+      <build method="preset" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-ssl:BOOL=ON" />
       </build>
@@ -1845,38 +1886,40 @@
       <cmake namespace="bitcoin"
         package="libbitcoin-network"
         target="bitcoin::network" />
+      <pkg />
     </dependency>
     <dependency name="libbitcoin-node">
       <github owner="libbitcoin" tag="master" />
-      <build method="gnu" filepath="." parallel="true">
+      <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build method="cmake" filepath="builds/cmake" parallel="true">
+      <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
       </build>
-      <build method="preset" filepath="builds/cmake" parallel="true">
+      <build method="preset" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
       </build>
       <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"
         package="libbitcoin-node"
         target="bitcoin::node" />
+      <pkg />
     </dependency>
     <dependency name="libbitcoin-server">
       <github owner="libbitcoin" tag="master" />
-      <build method="gnu" filepath="." parallel="true">
+      <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
         <option value="--without-console" ignore="true" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
-      <build method="cmake" filepath="builds/cmake" parallel="true">
+      <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-console:BOOL=OFF" ignore="true" />
       </build>
-      <build method="preset" filepath="builds/cmake" parallel="true">
+      <build method="preset" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
         <option value="-Dwith-console:BOOL=OFF" ignore="true" />
       </build>
@@ -1884,6 +1927,7 @@
       <cmake namespace="bitcoin"
         package="libbitcoin-server"
         target="bitcoin::server" />
+      <pkg />
     </dependency>
     <dependency name="boost"
       textname="Boost"
@@ -1967,7 +2011,7 @@
         </resource>
       </nuget>
       <build method="nuget" />
-      <build method="cmake" filepath="." parallel="true">
+      <build method="cmake" filepath="." objpath="." parallel="true">
         <option value="-DSECP256K1_BUILD_TESTS=OFF" />
         <option value="-DSECP256K1_BUILD_BENCH=OFF" />
         <option value="-DSECP256K1_BUILD_EXAMPLES=OFF" />
@@ -1986,6 +2030,7 @@
       </build>
       <cmake namespace="secp256k1" package="secp256k1-fast"
         target="secp256k1::fastsecp256k1" />
+      <pkg name="secp256k1-fast" />
     </dependency>
     <dependency name="secp256k1"
       textname="libsecp256k1"
@@ -2001,14 +2046,14 @@
         </resource>
       </nuget>
       <build method="nuget" />
-      <build method="gnu" filepath="." parallel="true">
+      <build method="gnu" filepath="." objpath="." parallel="true">
         <flag value="-w" />
         <option value="--disable-tests" />
         <option value="--enable-experimental" />
         <option value="--enable-module-recovery" />
         <option value="--enable-module-schnorrsig" />
       </build>
-      <build method="cmake" filepath="." parallel="true">
+      <build method="cmake" filepath="." objpath="." parallel="true">
         <flag value="-w" />
         <option value="-DSECP256K1_BUILD_TESTS=OFF" />
         <option value="-DSECP256K1_EXPERIMENTAL=ON" />
@@ -2017,6 +2062,7 @@
       </build>
       <cmake namespace="libsecp256k1" package="libsecp256k1"
         target="libsecp256k1::secp256k1" />
+      <pkg name="libsecp256k1" />
     </dependency>
     <dependency name="pthread">
       <cmake namespace="Threads" package="Threads" target="Threads::Threads">
@@ -2614,17 +2660,17 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
         <ignore name="*.la" comment="libtool archives" />
         <ignore name="*.lo" comment="libtool objects" />
 
-        <ignore name="/aclocal.m4" comment="Macros gathered by aclocal" />
-        <ignore name="/autom4te.cache" comment="autoconf cache directory" />
-        <ignore name="/build-aux" comment="Helper scripts directory" />
-        <ignore name="/config.*" comment="Generated config.* files" />
-        <ignore name="/configure" comment="Generated configure script" />
-        <ignore name="/libtool" comment="The libtool script" />
-        <ignore name=".dirstamp" comment="automake timestamp tracking" />
+        <ignore name="builds/gnu/aclocal.m4" comment="Macros gathered by aclocal" />
+        <ignore name="builds/gnu/autom4te.cache" comment="autoconf cache directory" />
+        <ignore name="builds/gnu/build-aux" comment="Helper scripts directory" />
+        <ignore name="builds/gnu/config.*" comment="Generated config.* files" />
+        <ignore name="builds/gnu/configure" comment="Generated configure script" />
+        <ignore name="builds/gnu/libtool" comment="The libtool script" />
+        <ignore name="builds/gnu/.dirstamp" comment="automake timestamp tracking" />
       </ignore>
 
       <!-- pkg-config -->
-      <ignore name="*.pc" comment="pkg-config pc file from .pc.in" />
+      <ignore name="builds/gnu/*.pc" comment="pkg-config pc file from .pc.in" />
 
       <!-- msbuild/msvc -->
       <ignore comment="msbuild/msvc">
@@ -2665,6 +2711,21 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     </template>
 
     <!-- msbuild/msvc -->
+    <template name="debug.natvis.gsl"
+      path="msbuild"
+      outpath="builds/msvc">
+      <schema xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010" />
+
+      <!-- boost::multiprecision::number<boost::multiprecision::cpp_int_backend<*, *, 0, 0, void>> --> 
+      <substitution display="m_backend"
+        type="boost::multiprecision::number&lt;*&gt;" />
+
+      <!-- boost::multiprecision::backends::cpp_int_backend<*,*,0,0,void> -->
+      <substitution display="m_data"
+        type="boost::multiprecision::backends::cpp_int_backend&lt;*,*,0,0,void&gt;" />
+
+    </template>
+
     <template name="packages.config.gsl"
       path="msbuild"
       outpath="builds/msvc">
@@ -2756,6 +2817,81 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
         <match suffix="\.rc" />
       </resource>
     </template>
+
+    <!-- gnu -->
+    <template name="configure.ac.gsl"
+      path="gnu"
+      outpath="builds/gnu">
+
+      <autoconf version="2.65" language="C++" />
+      <libtool version="2.4.2" />
+
+      <option type="enable" name="isystem"
+        default="no"
+        comment="Substitute -isystem for -I in dependencies."
+        treatment="none" />
+
+      <option type="with" name="pkgconfigdir"
+        default="${libdir}/pkgconfig"
+        comment="Path to pkgconfig directory."
+        treatment="substitute"
+        example="=DIR"
+        unprefixed="true"
+        data_type="path" />
+
+      <option type="enable" name="ndebug"
+        comment="Compile with NDEBUG assertion."
+        default="no"
+        treatment="define">
+        <on value="yes" define="NDEBUG" />
+      </option>
+
+      <option type="enable" name="shared"
+        comment="Required for dynamically linking boost test."
+        default="yes"
+        standard="true"
+        treatment="define">
+        <on value="yes" define="BOOST_ALL_DYN_LINK" />
+      </option>
+
+    </template>
+
+    <template name="Makefile.am.gsl"
+      path="gnu"
+      outpath="builds/gnu">
+
+      <path prefix="${srcdir}/../.." />
+
+      <m4 path="m4" />
+
+      <doc name="AUTHORS" />
+      <doc name="COPYING" />
+      <doc name="ChangeLog" />
+      <doc name="INSTALL" />
+      <doc name="NEWS" />
+      <doc name="README" />
+
+      <headers>
+        <match suffix="\.h" />
+        <match suffix="\.hpp" />
+        <match suffix="\.hpp\.in" strip=".in" />
+        <match suffix="\.ipp" />
+      </headers>
+
+      <sources>
+        <match suffix="\.c" />
+        <match suffix="\.cpp" />
+      </sources>
+
+    </template>
+
+    <template name="pc.in.gsl"
+      path="gnu"
+      outpath="builds/gnu" />
+
+    <template name="runner.sh.gsl"
+      path="shell"
+      outpath="builds/gnu" />
 
   </templates>
 
