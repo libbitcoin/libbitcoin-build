@@ -162,7 +162,7 @@ function linearize_nuget_packages(packages, toolset, target, repository, configu
     define my.configuration = linearize_nuget_packages.configuration
 
     new dependencies as _dependencies
-        target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
+        target_dependency_list(_dependencies, my.target, my.repository, my.configuration, 1)
 
         for _dependencies.dependency as _depend where defined(_depend->nuget)
             define my.found = 0
@@ -383,7 +383,7 @@ $(my.indent)<ImportGroup Label="ExtensionTargets" />
 $(my.indent)<ImportGroup Label="ExtensionSettings">
 .
 .   new dependencies as _dependencies
-.       target_dependency_list(_dependencies, my.target, my.repository, my.configuration)
+.       target_dependency_list(_dependencies, my.target, my.repository, my.configuration, 1)
 .       for _dependencies.dependency as _depend by _depend.name \
             where defined(_depend->nuget)
 .

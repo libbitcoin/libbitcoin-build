@@ -80,49 +80,6 @@ function has_compiler_defines(repository)
     return (my.count > 0)
 endfunction
 
-function accumulate_flags(result, repository, configuration, meta)
-    define my.result = accumulate_flags.result
-    define my.repository = accumulate_flags.repository
-    define my.configuration = accumulate_flags.configuration
-    define my.meta = accumulate_flags.meta
-
-    for my.repository. as _target where is_target_element(_target)
-        for _target->compiler.flag as _flag
-            new _flag.target as _flag_target
-                _flag_target.name = _target.name
-                _flag_target.type = name(_target)
-            endnew
-            if !defined(_flag.id)
-                copy _flag to my.result
-            elsif (count(my.result.flag, defined(this.id) & (this.id = _flag.id), this) = 0)
-                define my.canonical = my.configuration->canonical->compiler->flag( \
-                    (this.id = _flag.id), this)?
-
-                if defined(my.canonical)
-                    copy my.canonical to my.result
-                    define my.copied = my.result->flag(\
-                        defined(this.id) & (this.id = _flag.id), this)
-
-                    new my.copied.target as _flag_target
-                        _flag_target.name = _target.name
-                        _flag_target.type = name(_target)
-                    endnew
-                else
-                    copy _flag to my.result
-                endif
-            else
-                define my.match = my.result->flag(defined(this.id) & \
-                    (this.id = _flag.id), this)
-
-                new my.match.target as _flag_target
-                    _flag_target.name = _target.name
-                    _flag_target.type = name(_target)
-                endnew
-            endif
-        endfor
-    endfor
-endfunction
-
 function indent_add(indent, step)
     define my.indent = indent_add.indent
     define my.step = indent_add.step
@@ -133,6 +90,20 @@ function indent_remove(indent, step)
     define my.indent = indent_remove.indent
     define my.step = indent_remove.step
     return right(my.indent, string.length(my.indent) - string.length(my.step))
+endfunction
+
+function emit_conditional_includes(repository, configuration, meta)
+    define my.repository = emit_conditional_includes.repository
+    define my.configuration = emit_conditional_includes.configuration
+    define my.meta = emit_conditional_includes.meta
+
+    for my.repository. as _target where is_target_element(_target)
+        for _target.headers as _headers where is_defined_positive(_headers, "root")
+
+            emit_conditional_includes_recursive(_headers, _target, \
+                my.repository, my.configuration, my.meta)
+        endfor
+    endfor
 endfunction
 
 ###############################################################################
@@ -297,6 +268,7 @@ repository_root_dir="@abs_top_srcdir@/../.."
 .       endif
 .   endnew
 .
+.   emit_conditional_includes(my.repository, my.configuration, my.meta)
 
 AC_CONFIG_FILES([
     Makefile
@@ -336,7 +308,6 @@ AX_CXX_COMPILE_STDCXX([$(my.standard)], [noext], [mandatory])
 .   define my.configuration = emit_option.configuration
 .   define my.meta = emit_option.meta
 .
-.   define my.treatment = emit_option.treatment?
 .   require(my.option, "option", "name")
 .   require(my.option, "option", "type")
 .   require(my.option, "option", "comment")
@@ -348,9 +319,7 @@ AX_CXX_COMPILE_STDCXX([$(my.standard)], [noext], [mandatory])
 .
 .   define my.helpuse = defined(my.option.example) ?? my.option.example ? ""
 .
-.   define my.treatment = (my.option = my.target) ?? \
-        "automake-conditional" ? \
-        (defined(my.option.treatment) ?? my.option.treatment ? "none")
+.   define my.treatment = defined(my.option.treatment) ?? my.option.treatment ? "none"
 .
 .   define my.comment_default = defined(my.option.default) ?? \
         " @<:@default=$(my.option.default)@:>@" ? ""
@@ -369,16 +338,13 @@ AC_ARG_WITH([$(my.name)],
     [$(my.option_var)=$$(my.option.type)val],
     [$(my.option_var)=$(my.option.default)])
 AC_MSG_RESULT([$$(my.option_var)])
+.
+.       if (my.datatype = "boolean")
+AM_CONDITIONAL([$(my.option_var:upper)], [test "x${$(my.option_var)}" != "xno"])
+.       endif
 .   endif
 .
-.   if (my.treatment = "automake-conditional")
-.       if !(my.datatype = "boolean")
-.           abort "Unexpected 'boolean' datatype with 'automake-conditional'."
-.       endif
-.
-AM_CONDITIONAL([$(my.option_var:upper)], [test "x${$(my.option_var)}" != "xno"])
-.
-.   elsif (my.treatment = "define")
+.   if (my.treatment = "define")
 .       define my.operation = (my.datatype = "boolean") ?? "AS_IF" ? "AS_CASE"
 .       define my.consequence = 
 .       for my.option.on as _on
@@ -435,7 +401,7 @@ $(my.indent)AC_DEFINE([$(_symbol.value)])
 .
 .       for _symbol.substitute as _substitute
 .           if defined(_substitute.name)
-$(my.indent)AC_SUBST([$(_substitute.name), [-D$(_symbol.value)])
+$(my.indent)AC_SUBST([$(_substitute.name)], [-D$(_symbol.value)])
 .           else
 $(my.indent)AC_SUBST([$(_symbol.value)])
 .           endif
@@ -703,6 +669,31 @@ $(my.indent)AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
 .   endfor
 .
 .endmacro # emit_dependency_boost
+.
+.macro emit_conditional_includes_recursive(headers, target, \
+    repository, configuration, meta)
+.
+.   define my.headers = emit_conditional_includes_recursive.headers
+.   define my.target = emit_conditional_includes_recursive.target
+.   define my.repository = emit_conditional_includes_recursive.repository
+.   define my.configuration = emit_conditional_includes_recursive.configuration
+.   define my.meta = emit_conditional_includes_recursive.meta
+.
+.   if defined(my.headers.substitute) & defined(my.headers.option) &\
+        is_defined_positive(my.headers, "root")
+.
+.       define my.option_var = get_option(my.headers, my.target, my.repository, "_")
+.       define my.path = string.replace(my.headers.path, "include|-I${includedir}")
+
+AS_IF([test "x${$(my.option_var)}" != "xno"],
+    [ AC_SUBST([$(my.headers.substitute)], [$(my.path)]) ])
+.   endif
+.
+.   for my.headers.headers as _headers
+.       emit_conditional_includes_recursive(_headers, my.target, \
+            my.repository, my.configuration, my.meta)
+.   endfor
+.endmacro # emit_conditional_includes_recursive
 .
 .endtemplate
 .template 0

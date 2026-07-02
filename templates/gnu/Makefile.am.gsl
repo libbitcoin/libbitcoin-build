@@ -57,17 +57,6 @@ endfunction
 ###############################################################################
 # Functions
 ###############################################################################
-function linearize(result, host)
-    define my.result = linearize.result
-    define my.host = linearize.host
-
-    copy my.host to my.result
-
-    for my.host.$(name(my.host)) as _child
-        linearize(my.result, _child)
-    endfor
-endfunction
-
 function target_contribution_set(target)
     define my.target = target_contribution_set.target
 

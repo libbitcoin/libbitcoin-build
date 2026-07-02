@@ -1,0 +1,104 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin <test>_runner.sh
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/sh-output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_runner(configuration)
+    define my.configuration = generate_runner.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    for my.configuration.repository as _repository
+        define my.output_path = path_append(my.configuration->templates.resultpath, \
+            path_append(_repository.name, my.template.outpath))
+
+        create_directory(my.output_path)
+
+        for _repository.test as _target where defined(_target.runner)
+            define my.filename = _target.runner
+            define my.out_file = path_append(my.output_path, my.filename)
+
+            notify(my.out_file)
+            output(my.out_file)
+
+            emit_runner(_target, _repository, my.configuration, my.template)
+
+            close
+        endfor
+    endfor
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_runner(target, repository, configuration, meta)
+.   define my.library= emit_runner.target
+.   define my.repository = emit_runner.repository
+.   define my.configuration = emit_runner.configuration
+.   define my.meta = emit_runner.meta
+.
+.   shebang("sh")
+.
+.   copyleft(my.library.name)
+.
+.   heading1("Define tests and options.")
+BOOST_UNIT_TEST_OPTIONS=\\
+    "--log_level=warning "\\
+    "--show_progress=no "\\
+    "--detect_memory_leak=0 "\\
+    "--report_level=no "\\
+    "--build-info=yes "\\
+    "--run_tests=*"
+.
+.   heading1("Run tests.")
+if [[ ${CI} == true ]]; then
+    \./test/$(my.target.name) ${BOOST_UNIT_TEST_OPTIONS}
+else
+    \./test/$(my.target.name) ${BOOST_UNIT_TEST_OPTIONS} > test.log
+fi
+.
+.endmacro # emit_runner
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_runner(configuration)
+
+.endtemplate

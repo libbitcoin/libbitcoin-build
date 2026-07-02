@@ -455,7 +455,8 @@
         <sources path="src/ssl" recursive="true" option="ssl" />
       </sources>
       <headers path="include" recursive="true" root="true">
-        <headers path="include/bitcoin/network/ssl" recursive="true" root="true" option="ssl" />
+        <headers path="include/bitcoin/network/ssl"
+          recursive="true" root="true" option="ssl" substitute="ssl_include" />
       </headers>
       <!--
       <resources path="builds/msvc" recursive="false" root="true">
@@ -2710,6 +2711,21 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     </template>
 
     <!-- msbuild/msvc -->
+    <template name="debug.natvis.gsl"
+      path="msbuild"
+      outpath="builds/msvc">
+      <schema xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010" />
+
+      <!-- boost::multiprecision::number<boost::multiprecision::cpp_int_backend<*, *, 0, 0, void>> --> 
+      <substitution display="m_backend"
+        type="boost::multiprecision::number&lt;*&gt;" />
+
+      <!-- boost::multiprecision::backends::cpp_int_backend<*,*,0,0,void> -->
+      <substitution display="m_data"
+        type="boost::multiprecision::backends::cpp_int_backend&lt;*,*,0,0,void&gt;" />
+
+    </template>
+
     <template name="packages.config.gsl"
       path="msbuild"
       outpath="builds/msvc">
@@ -2868,6 +2884,14 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       </sources>
 
     </template>
+
+    <template name="pc.in.gsl"
+      path="gnu"
+      outpath="builds/gnu" />
+
+    <template name="runner.sh.gsl"
+      path="shell"
+      outpath="builds/gnu" />
 
   </templates>
 

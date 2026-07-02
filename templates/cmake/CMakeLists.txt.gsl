@@ -683,7 +683,6 @@ $(my.indent)$(my.prefix)$(qualified_target_name(my.dependency))$(my.suffix)
 .   define my.context = emit_options.context
 .
 .   if (defined(my.context.option))
-.       echo my.context.string()
 option( $(my.context.type:lower)-$(my.context.option:lower) "$(my.context.comment)" $(option_default(my.context)) )
 .   endif
 .

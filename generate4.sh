@@ -32,20 +32,15 @@ main()
     # Generate property copiers and artifact generators.
     msg_warn "${GSL} -script:gsl.copy_properties.sh generate4.xml"
     eval ${GSL} -script:gsl.copy_properties.sh generate4.xml
-    msg_warn "${GSL} -script:gsl.generate_artifacts.sh generate4.xml"
-    eval ${GSL} -script:gsl.generate_artifacts.sh generate4.xml
 
     # Make property copiers and artifact generators executable.
     msg_verbose "Modifying properties of shell scripts."
     eval chmod +x copy_properties.sh
-    eval chmod +x generate_artifacts.sh
 
     # Execute property copiers and artifact generators.
 
     msg "Execute copy_properties.sh..."
     eval ./copy_properties.sh
-    msg "Execute generate_artifacts.sh..."
-    eval ./generate_artifacts.sh
     msg "Execute generate.sh..."
     eval ./generate.sh version4.xml
     msg "Execute copy_projects.sh..."

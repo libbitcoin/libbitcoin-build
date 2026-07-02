@@ -39,6 +39,17 @@ function global.is_defined_positive(node, attribute)
         ((my.node.$(my.attribute) = "true") | (my.node.$(my.attribute) = "yes"))
 endfunction
 
+function global.linearize(result, host)
+    define my.result = linearize.result
+    define my.host = linearize.host
+
+    copy my.host to my.result
+
+    for my.host.$(name(my.host)) as _child
+        linearize(my.result, _child)
+    endfor
+endfunction
+
 function global.merge_child(destination, element, identifier, context)
     define my.destination = merge_child.destination
     define my.element = merge_child.element
@@ -242,21 +253,24 @@ function global.get_option(reference, target, repository, separator)
     return my.result
 endfunction
 
-function global.target_dependency_list(result, target, repository, configuration)
+function global.target_dependency_list(result, target, repository, configuration, recurse)
     define my.result = target_dependency_list.result
     define my.target = target_dependency_list.target
     define my.repository = target_dependency_list.repository
     define my.configuration = target_dependency_list.configuration
+    define my.recurse = target_dependency_list.recurse
 
     define my.registrar = my.configuration->registrar(id = "dependency")
 
     for my.target.dependency as _dep
-        if (count_matches_name(my.configuration, "repository", _dep.name) > 0)
+        if ((my.recurse) & \
+            (count_matches_name(my.configuration, "repository", _dep.name) > 0))
+
             define my.dep_repository = my.configuration->repository(name = _dep.name)
             define my.dep_target = my.dep_repository->library(name = _dep.name)
 
             target_dependency_list(my.result, my.dep_target, \
-                my.dep_repository, my.configuration)
+                my.dep_repository, my.configuration, my.recurse)
         else
             canonicalize_element(my.result, _dep, my.registrar, "name")
         endif
@@ -310,6 +324,61 @@ function global.accumulate_repository_dependencies(result, repository)
         if (count(my.result.dependency, this.name = _library.name, this) > 0)
             delete my.result->dependency(this.name = _library.name, this)
         endif
+    endfor
+endfunction
+
+function accumulate_target_flags(result, target, repository, configuration, meta)
+    define my.result = accumulate_target_flags.result
+    define my.target = accumulate_target_flags.target
+    define my.repository = accumulate_target_flags.repository
+    define my.configuration = accumulate_target_flags.configuration
+    define my.meta = accumulate_target_flags.meta
+
+    for my.target->compiler.flag as _flag
+        new _flag.target as _flag_target
+            _flag_target.name = my.target.name
+            _flag_target.type = name(my.target)
+        endnew
+
+        if !defined(_flag.id)
+            copy _flag to my.result
+
+        elsif (count(my.result.flag, defined(this.id) & (this.id = _flag.id), this) = 0)
+            define my.canonical = my.configuration->canonical->compiler->flag( \
+                (this.id = _flag.id), this)?
+
+            if defined(my.canonical)
+                copy my.canonical to my.result
+                define my.copied = my.result->flag(\
+                    defined(this.id) & (this.id = _flag.id), this)
+
+                new my.copied.target as _flag_target
+                    _flag_target.name = my.target.name
+                    _flag_target.type = name(my.target)
+                endnew
+            else
+                copy _flag to my.result
+            endif
+        else
+            define my.match = my.result->flag(defined(this.id) & \
+                (this.id = _flag.id), this)
+
+            new my.match.target as _flag_target
+                _flag_target.name = my.target.name
+                _flag_target.type = name(my.target)
+            endnew
+        endif
+    endfor
+endfunction
+
+function accumulate_flags(result, repository, configuration, meta)
+    define my.result = accumulate_flags.result
+    define my.repository = accumulate_flags.repository
+    define my.configuration = accumulate_flags.configuration
+    define my.meta = accumulate_flags.meta
+
+    for my.repository. as _target where is_target_element(_target)
+        accumulate_target_flags(my.result, _target, my.repository, my.configuration, my.meta)
     endfor
 endfunction
 
