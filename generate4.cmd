@@ -23,13 +23,6 @@ REM Clean directories for generated build artifacts.
 rmdir /s /q "output" 2>NUL
 
 call :msg "Current directory: !CD!"
-if not exist "!CD!\generate4.xml" (
-    call :msg_error "Error: 'generate4.xml' not found in '!CD!'."
-    exit /b 1
-) else (
-    call :msg_success "File 'generate4.xml' appears in '!CD!'."
-)
-
 call :msg_heading "Begin Execution context"
 call :msg "PATH_INITIAL     : !PATH_INITIAL!"
 call :msg "PATH_FILE        : !PATH_FILE!"
