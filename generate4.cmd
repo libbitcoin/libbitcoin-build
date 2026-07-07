@@ -37,42 +37,6 @@ call :msg "GSL_EXE          : !GSL_EXE!"
 call :msg "GITHUB_PATH      : !GITHUB_PATH!"
 call :msg_heading "End Execution context"
 
-!GSL_EXE! -q -script:"!CD!\gsl.copy_properties.cmd" "!CD!\generate4.xml"
-if %ERRORLEVEL% neq 0 (
-  call :msg_error "GSL execution failure."
-  exit /b 1
-)
-
-!GSL_EXE! -q -script:"!CD!\gsl.generate_artifacts.cmd" "!CD!\generate4.xml"
-if %ERRORLEVEL% neq 0 (
-  call :msg_error "GSL execution failure."
-  exit /b 1
-)
-
-if not exist "!CD!\copy_properties.cmd" (
-  call :msg_error "Error: 'copy_properties.cmd' not found in '!CD!'."
-  exit /b 1
-)
-
-call :msg "Execute copy_properties.cmd..."
-call "!CD!\copy_properties.cmd"
-if %ERRORLEVEL% neq 0 (
-  call :msg_error "Failure calling 'copy_properties.cmd'."
-  exit /b 1
-)
-
-if not exist "!CD!\generate_artifacts.cmd" (
-  call :msg_error "Error: 'generate_artifacts.cmd' not found in '!CD!'."
-  exit /b 1
-)
-
-call :msg "Execute generate_artifacts.cmd..."
-call "!CD!\generate_artifacts.cmd"
-if %ERRORLEVEL% neq 0 (
-  call :msg_error "Failure calling 'generate_artifacts.cmd'."
-  exit /b 1
-)
-
 if not exist "!CD!\generate.cmd" (
   call :msg_error "Error: 'generate.cmd' not found in '!CD!'."
   exit /b 1
@@ -87,18 +51,6 @@ call :msg "Execute generate.cmd..."
 call "!CD!\generate.cmd" "!CD!\version4.xml" %*
 if %ERRORLEVEL% neq 0 (
   call :msg_error "Failure calling 'generate.cmd'."
-  exit /b 1
-)
-
-if not exist "!CD!\copy_projects.cmd" (
-  call :msg_error "Error: 'copy_projects.cmd' not found in '!CD!'."
-  exit /b 1
-)
-
-call :msg "Execute copy_projects.cmd..."
-call "!CD!\copy_projects.cmd" %*
-if %ERRORLEVEL% neq 0 (
-  call :msg_error "Failure calling 'copy_projects.cmd'."
   exit /b 1
 )
 

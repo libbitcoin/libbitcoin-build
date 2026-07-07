@@ -2492,12 +2492,11 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <!-- cmake -->
     <template name="CMakeLists.txt.gsl" path="cmake" outpath="builds/cmake">
       <cmake rootpath="../.." />
-      <!-- comment: below is persisted as demonstration of feature, unused currently -->
-      <!--<file source="cmake/InTargetProperty.cmake" destination="builds/cmake/modules" />-->
     </template>
+
     <template name="CMakePresets.json.gsl" path="cmake" outpath="builds/cmake">
-      <!-- <cmake rootpath="../.." /> -->
     </template>
+
     <template name="config.cmake.in.gsl" path="cmake" outpath="builds/cmake" />
 
     <!-- build/install scripts -->
@@ -2744,6 +2743,8 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
 
       <tools chain="msbuild" set="2022" outpath="vs2022" />
       <tools chain="msbuild" set="2026" outpath="vs2026" />
+
+      <file source="props/version4/nuget.config" destination="builds/msvc" />
     </template>
 
     <template name="sln.gsl"
@@ -2752,6 +2753,19 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
 
       <tools chain="msbuild" set="2022" outpath="vs2022" />
       <tools chain="msbuild" set="2026" outpath="vs2026" />
+
+      <file source="props/version4/build/build_base.bat" destination="builds/msvc/build" />
+      <file source="props/version4/import/%repository_dependency%.import.props" destination="builds/msvc/vs2022" />
+      <file source="props/version4/import/%repository_dependency%.import.xml" destination="builds/msvc/vs2022" />
+      <file source="props/version4/import/%repository%.import.props" destination="builds/msvc/vs2022" />
+      <file source="props/version4/import/%repository%.import.xml" destination="builds/msvc/vs2022" />
+      <file source="props/version4/import/%repository_dependency%.import.props" destination="builds/msvc/vs2026" />
+      <file source="props/version4/import/%repository_dependency%.import.xml" destination="builds/msvc/vs2026" />
+      <file source="props/version4/import/%repository%.import.props" destination="builds/msvc/vs2026" />
+      <file source="props/version4/import/%repository%.import.xml" destination="builds/msvc/vs2026" />
+      <file source="props/version4/project/%repository%/%target%/%target%.props" destination="builds/msvc/vs2022/%target%" />
+      <file source="props/version4/project/%repository%/%target%/%target%.props" destination="builds/msvc/vs2026/%target%" />
+
     </template>
 
     <template name="vcxproj.filters.gsl"
@@ -2866,6 +2880,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
         <on value="yes" define="BOOST_ALL_DYN_LINK" />
       </option>
 
+      <file source="m4/*" destination="builds/gnu/m4" />
     </template>
 
     <template name="Makefile.am.gsl"

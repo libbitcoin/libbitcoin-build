@@ -7,6 +7,17 @@
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+# Note expected context root libbitcoin-build directory
+gsl from "lib/output.gsl"
+gsl from "lib/cmd-output.gsl"
+gsl from "process/copy_statics.gsl"
+
+###############################################################################
 # Generation
 ###############################################################################
 .endtemplate
@@ -29,13 +40,15 @@ if not exist "%RESULT_DIR%" (
 .   define path_suffix = "..\\"
 .   define index = 0
 .   for configuration.repository as _repository
-.       for configuration->templates.template as _template
-.           for _template.file as _file
+.       new files as _files
+.           get_files(_files, _repository, configuration)
+.
+.           for _files.file as _file
 .               index = index + 1
-set "SOURCE[$(index)]=$(path_suffix)$(path(_file.SOURCE))"
-set "DESTINATION[$(index)]=%RESULT_DIR%\\$(_repository.name)\\$(path(_file.DESTINATION))"
+set "SOURCE[$(index)]=$(path_suffix)$(path(_file.source))"
+set "DESTINATION[$(index)]=%RESULT_DIR%\\$(_repository.name)\\$(path(_file.destination))"
 .           endfor
-.       endfor
+.       endnew
 .   endfor
 set "LENGTH=$(index)"
 
@@ -90,14 +103,6 @@ exit /b 0
 ###############################################################################
 # Execution
 ###############################################################################
-[global].root = ".."
-[global].trace = 0
-[gsl].ignorecase = 0
-
-# Note: expected context root libbitcoin-build directory
-gsl from "lib/output.gsl"
-gsl from "lib/cmd-output.gsl"
-gsl from "library/string.gsl"
 
 generate_copy_script()
 

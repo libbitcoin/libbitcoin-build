@@ -7,6 +7,17 @@
 # This is a code generator built using the iMatix GSL code generation
 # language. See https://github.com/imatix/gsl for details.
 ###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "lib/output.gsl"
+gsl from "lib/sh-output.gsl"
+gsl from "process/copy_statics.gsl"
+
+###############################################################################
 # Generation
 ###############################################################################
 .endtemplate
@@ -27,24 +38,28 @@ result_dir="$(configuration->templates.resultpath)"
 
 # Check if source directory exists
 if [ ! -d "$result_dir" ]; then
-    echo "Error: result directory '${reuslt_dir}' does not exist."
+    echo "Error: result directory '${result_dir}' does not exist."
     exit 1
 fi
-.
+
 .   for configuration.repository as _repository
-.       for configuration->templates.template as _template
-.           for _template.file as _file
+echo "'$(_repository.name)' file population..."
+.       new files as _files
+.           get_files(_files, _repository, configuration)
+.
+.           for _files.file as _file
+.               if !defined(_files->encountered(this.path = _file.destination, this))
+.                   new _files.encountered as _encountered
+.                       _encountered.path = _file.destination
+.                   endnew
+
 mkdir -p ${result_dir}/$(_repository.name)/$(_file.destination)
-.           endfor
-.       endfor
-.   endfor
-.
-.   for configuration.repository as _repository
-.       for configuration->templates.template as _template
-.           for _template.file as _file
+.               endif
 cp $(path_suffix)$(_file.source) ${result_dir}/$(_repository.name)/$(_file.destination)
 .           endfor
-.       endfor
+.       endnew
+echo "'$(_repository.name)' file population complete."
+
 .   endfor
 .
 .endmacro # generate_copy_script
@@ -53,14 +68,6 @@ cp $(path_suffix)$(_file.source) ${result_dir}/$(_repository.name)/$(_file.desti
 ###############################################################################
 # Execution
 ###############################################################################
-[global].root = ".."
-[global].trace = 0
-[gsl].ignorecase = 0
-
-# Note: expected context root libbitcoin-build directory
-gsl from "lib/output.gsl"
-gsl from "lib/sh-output.gsl"
-gsl from "library/string.gsl"
 
 generate_copy_script()
 

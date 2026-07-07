@@ -279,6 +279,28 @@ function global.target_dependency_list(result, target, repository, configuration
     endfor
 endfunction
 
+function global.populate_cumulative_repository_dependencies(result, repository, configuration)
+    define my.result = populate_cumulative_repository_dependencies.result
+    define my.repository = populate_cumulative_repository_dependencies.repository
+    define my.configuration = populate_cumulative_repository_dependencies.configuration
+
+    for my.repository. as _target where is_target_element(_target)
+        for _target.dependency as _depend where \
+            defined(my.configuration->repository(this.name = _depend.name, this))
+
+            if !defined(my.result->dependency(this.name = _depend.name, this))
+                copy _depend to my.result
+
+                define my.deprepo = my.configuration->repository(\
+                    this.name = _depend.name, this)
+
+                populate_cumulative_repository_dependencies(\
+                    my.result, my.deprepo, my.configuration)
+            endif
+        endfor
+    endfor
+endfunction
+
 function global.canonical_dependency_list(result, repository, configuration)
     define my.result = canonical_dependency_list.result
     define my.repository = canonical_dependency_list.repository
