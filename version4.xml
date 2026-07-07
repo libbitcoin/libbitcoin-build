@@ -2012,21 +2012,33 @@
       </nuget>
       <build method="nuget" />
       <build method="cmake" filepath="." objpath="." parallel="true">
-        <option value="-DSECP256K1_BUILD_TESTS=OFF" />
-        <option value="-DSECP256K1_BUILD_BENCH=OFF" />
-        <option value="-DSECP256K1_BUILD_EXAMPLES=OFF" />
-        <option value="-DSECP256K1_BUILD_JAVA=OFF" />
-        <option value="-DUFSECP_BUILD_SHARED=OFF" />
+
+        <!-- enable necessary features -->
         <option value="-DSECP256K1_BUILD_CABI=ON" />
         <option value="-DSECP256K1_BUILD_CPU=ON" />
         <option value="-DSECP256K1_BUILD_SHIM=ON" />
+        <option value="-DSECP256K1_USE_ULTRAFAST=ON" />
+
+        <!-- hardware support options -->
         <option value="-DSECP256K1_BUILD_CUDA=ON" />
         <option value="-DSECP256K1_BUILD_ROCM=ON" />
         <option value="-DSECP256K1_BUILD_OPENCL=ON" />
         <option value="-DSECP256K1_BUILD_METAL=ON" />
+
+        <!-- disable unnecessary projects -->
+        <option value="-DSECP256K1_BUILD_BENCH=OFF" />
+        <option value="-DSECP256K1_BUILD_EXAMPLES=OFF" />
+        <option value="-DSECP256K1_BUILD_JAVA=OFF" />
+        <option value="-DSECP256K1_BUILD_TESTS=OFF" />
+
+        <!-- disable shared libraries -->
+        <option value="-DSECP256K1_SHIM_BUILD_SHARED=OFF" />
+        <option value="-DUFSECP_BUILD_SHARED=OFF" />
+
+        <!-- installation control (why would i want to not install what i configured?) -->
         <option value="-DSECP256K1_INSTALL=ON" />
+        <option value="-DSECP256K1_SHIM_INSTALL=ON" />
         <option value="-DSECP256K1_INSTALL_PKGCONFIG=ON" />
-        <option value="-DSECP256K1_USE_ULTRAFAST=ON" />
       </build>
       <cmake namespace="secp256k1" package="secp256k1-fast"
         target="secp256k1::fastsecp256k1" />
@@ -2480,12 +2492,11 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <!-- cmake -->
     <template name="CMakeLists.txt.gsl" path="cmake" outpath="builds/cmake">
       <cmake rootpath="../.." />
-      <!-- comment: below is persisted as demonstration of feature, unused currently -->
-      <!--<file source="cmake/InTargetProperty.cmake" destination="builds/cmake/modules" />-->
     </template>
+
     <template name="CMakePresets.json.gsl" path="cmake" outpath="builds/cmake">
-      <!-- <cmake rootpath="../.." /> -->
     </template>
+
     <template name="config.cmake.in.gsl" path="cmake" outpath="builds/cmake" />
 
     <!-- build/install scripts -->
@@ -2732,6 +2743,8 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
 
       <tools chain="msbuild" set="2022" outpath="vs2022" />
       <tools chain="msbuild" set="2026" outpath="vs2026" />
+
+      <file source="props/version4/nuget.config" destination="builds/msvc" />
     </template>
 
     <template name="sln.gsl"
@@ -2740,6 +2753,19 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
 
       <tools chain="msbuild" set="2022" outpath="vs2022" />
       <tools chain="msbuild" set="2026" outpath="vs2026" />
+
+      <file source="props/version4/build/build_base.bat" destination="builds/msvc/build" />
+      <file source="props/version4/import/%repository_dependency%.import.props" destination="builds/msvc/vs2022" />
+      <file source="props/version4/import/%repository_dependency%.import.xml" destination="builds/msvc/vs2022" />
+      <file source="props/version4/import/%repository%.import.props" destination="builds/msvc/vs2022" />
+      <file source="props/version4/import/%repository%.import.xml" destination="builds/msvc/vs2022" />
+      <file source="props/version4/import/%repository_dependency%.import.props" destination="builds/msvc/vs2026" />
+      <file source="props/version4/import/%repository_dependency%.import.xml" destination="builds/msvc/vs2026" />
+      <file source="props/version4/import/%repository%.import.props" destination="builds/msvc/vs2026" />
+      <file source="props/version4/import/%repository%.import.xml" destination="builds/msvc/vs2026" />
+      <file source="props/version4/project/%repository%/%target%/%target%.props" destination="builds/msvc/vs2022/%target%" />
+      <file source="props/version4/project/%repository%/%target%/%target%.props" destination="builds/msvc/vs2026/%target%" />
+
     </template>
 
     <template name="vcxproj.filters.gsl"
@@ -2854,6 +2880,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
         <on value="yes" define="BOOST_ALL_DYN_LINK" />
       </option>
 
+      <file source="m4/*" destination="builds/gnu/m4" />
     </template>
 
     <template name="Makefile.am.gsl"

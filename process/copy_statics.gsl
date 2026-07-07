@@ -1,0 +1,147 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate copy_statics shared library
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+[global].root = ".."
+[global].trace = 0
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+# Note: expected context root libbitcoin-build directory
+gsl from "library/string.gsl"
+gsl from "lib/xml.gsl"
+gsl from "lib/msbuild.gsl"
+
+##############################################################################
+# Functions
+###############################################################################
+function get_base_files(result, configuration)
+    define my.result = get_base_files.result
+    define my.configuration = get_base_files.configuration
+
+    for my.configuration->templates.template as _template
+        for _template.file as _file
+            copy _file to my.result
+        endfor
+    endfor
+endfunction
+
+function get_files(result, repository, configuration)
+    define my.result = get_files.result
+    define my.repository = get_files.repository
+    define my.configuration = get_files.configuration
+
+    get_base_files(my.result, my.configuration)
+    expand_repository(my.result, my.repository, my.configuration)
+    expand_repository_dependency(my.result, my.repository, my.configuration)
+    expand_target(my.result, my.repository, my.configuration)
+endfunction
+
+function token_substitute(expression, token, value)
+    define my.expression = token_substitute.expression
+    define my.token = token_substitute.token
+    define my.value = token_substitute.value
+
+    if is_token(my.token, my.expression)
+        return string.replace(my.expression, "$(my.token)|$(my.value)")
+    endif
+
+    return my.expression
+endfunction
+
+function expand_repository(result, repository, configuration)
+    define my.result = expand_repository.result
+    define my.repository = expand_repository.repository
+    define my.configuration = expand_repository.configuration
+
+    for my.result.file as _file
+        _file.source = token_substitute(_file.source, "%repository%", my.repository.name)
+        _file.destination = token_substitute(_file.destination, "%repository%", \
+            my.repository.name)
+    endfor
+endfunction
+
+function expand_repository_dependency(result, repository, configuration)
+    define my.result = expand_repository_dependency.result
+    define my.repository = expand_repository_dependency.repository
+    define my.configuration = expand_repository_dependency.configuration
+
+    new cumulative_repository_dependencies as _cumulative
+        populate_cumulative_repository_dependencies(_cumulative, _repository, configuration)
+
+        for my.result.file as _file
+            if !(is_token("%repository_dependency%", _file.source) | \
+                is_token("%repository_dependency%", _file.destination))
+
+                copy _file to _cumulative
+                delete _file
+                next
+            endif
+
+            for _cumulative.dependency as _depend
+                copy _file to _cumulative
+                define _mutation = _cumulative->file((this.source = _file.source) & \
+                    (this.destination = _file.destination), this)
+
+                _mutation.source = token_substitute(_file.source, \
+                    "%repository_dependency%", _depend.name)
+
+                _mutation.destintion = token_substitute(_file.destination, \
+                    "%repository_dependency%", _depend.name)
+            endfor
+
+            delete _file
+        endfor
+
+        for _cumulative.file as _file
+            copy _file to my.result
+        endfor
+        delete _cumulative
+    endnew
+endfunction
+
+function expand_target(result, repository, configuration)
+    define my.result = expand_target.result
+    define my.repository = expand_target.repository
+    define my.configuration = expand_target.configuration
+
+    new temporary as _temp
+        for my.result.file as _file
+            if !(is_token("%target%", _file.source) | \
+                is_token("%target%", _file.destination))
+
+                copy _file to _temp
+                delete _file
+                next
+            endif
+
+            for my.repository. as _target where is_target_element(_target)
+                define my.name = target_name(_target)
+
+                copy _file to _temp
+                define _mutation = _temp->file((this.source = _file.source) & \
+                    (this.destination = _file.destination), this)
+
+                _mutation.source = token_substitute(_file.source, \
+                    "%target%", my.name)
+
+                _mutation.destination = token_substitute(_file.destination, \
+                    "%target%", my.name)
+            endfor
+
+            delete _file
+        endfor
+
+        for _temp.file as _file
+            copy _file to my.result
+        endfor
+        delete _temp
+    endnew
+endfunction
+
+.endtemplate

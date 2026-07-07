@@ -29,23 +29,10 @@ main()
     # Clean directories for generated build artifacts.
     remove_directory_force "output"
 
-    # Generate property copiers and artifact generators.
-    msg_warn "${GSL} -script:gsl.copy_properties.sh generate4.xml"
-    eval ${GSL} -script:gsl.copy_properties.sh generate4.xml
-
-    # Make property copiers and artifact generators executable.
-    msg_verbose "Modifying properties of shell scripts."
-    eval chmod +x copy_properties.sh
-
     # Execute property copiers and artifact generators.
 
-    msg "Execute copy_properties.sh..."
-    eval ./copy_properties.sh
     msg "Execute generate.sh..."
     eval ./generate.sh version4.xml
-    msg "Execute copy_projects.sh..."
-    eval ./copy_projects.sh "$@"
-
     pop_directory
     msg_success "Script execution completed successfully."
 }
