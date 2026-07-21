@@ -76,13 +76,13 @@ endfunction
 .   copyleft(my.library.name)
 .
 .   heading1("Define tests and options.")
-BOOST_UNIT_TEST_OPTIONS=\\
-    "--log_level=warning "\\
-    "--show_progress=no "\\
-    "--detect_memory_leak=0 "\\
-    "--report_level=no "\\
-    "--build-info=yes "\\
-    "--run_tests=*"
+BOOST_UNIT_TEST_OPTIONS="\
+--log_level=warning \
+--show_progress=no \
+--detect_memory_leak=0 \
+--report_level=no \
+--build_info=yes \
+--run_test=*"
 .
 .   heading1("Run tests.")
 if [[ ${CI} == true ]]; then
