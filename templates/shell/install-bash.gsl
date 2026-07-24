@@ -1616,9 +1616,9 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
  
     # Specify or remove --enable-ndebug for gnu toolchain on release
     if [[ "${BUILD_CONFIG}" == "debug" ]]; then
-        CONFIGURE_OPTIONS_GNU=("${CONFIGURE_OPTIONS_GNU[@]/--enable-ndebug/}")
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-ndebug=no" )
     elif [[ "${BUILD_CONFIG}" == "release" ]]; then
-        CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-ndebug" )
+        CONFIGURE_OPTIONS_GNU=( "${CONFIGURE_OPTIONS_GNU[@]}" "--enable-ndebug" )
     fi
 .   endif
 .
