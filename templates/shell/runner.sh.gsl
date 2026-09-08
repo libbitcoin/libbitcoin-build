@@ -85,7 +85,7 @@ BOOST_UNIT_TEST_OPTIONS="\
 --run_test=*"
 .
 .   heading1("Run tests.")
-if [[ ${CI} == true ]]; then
+if [ "${CI}" = true ]; then
     \./test/$(my.target.name) ${BOOST_UNIT_TEST_OPTIONS}
 else
     \./test/$(my.target.name) ${BOOST_UNIT_TEST_OPTIONS} > test.log
