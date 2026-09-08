@@ -611,7 +611,6 @@ jobs:
         with:
           format: lcov
           files: "$(my.repository.name)/coverage.info"
-          base-path: "$(my.repository.name)"
           github-token: ${{ secrets.github_token }}
 
       - name: Test artifact collection
