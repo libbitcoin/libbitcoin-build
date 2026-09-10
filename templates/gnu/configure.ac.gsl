@@ -188,7 +188,7 @@ AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
 AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
 AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 
-repository_root_dir="@abs_top_srcdir@/../.."
+repository_root_dir=`cd "${srcdir}/../.." && pwd`
 .
 .   if (my.meta->autoconf.language = "C++")
 .       require_stdcxx(my.repository, my.configuration, my.meta)
@@ -394,7 +394,7 @@ AS_IF([test "x${$(my.option)}" != "xno"], [
 .   for my.define.symbol as _symbol
 .
 .       if defined(_symbol.name)
-$(my.indent)AC_DEFINE([$(_symbol.name)], [$(_symbol.value)])
+$(my.indent)AC_DEFINE_UNQUOTED([$(_symbol.name)], [$(_symbol.value)])
 .       else
 $(my.indent)AC_DEFINE([$(_symbol.value)])
 .       endif
