@@ -8,20 +8,12 @@ Libbitcoin Build uses templates and XML data to generate build artifacts for the
 
 See [MAINTAINED.md](MAINTAINED.md) for a list of artifacts maintained by this project.
 
-* [![libbitcoin](https://github.com/libbitcoin/libbitcoin-system/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-system) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-system/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-system) libbitcoin-system
-* [![libbitcoin-client](https://github.com/libbitcoin/libbitcoin-client/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-client) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-client/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-client) libbitcoin-client
-* [![libbitcoin-database](https://github.com/libbitcoin/libbitcoin-database/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-database) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-database/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-database) libbitcoin-database
-* [![libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-explorer) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-explorer/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-explorer) libbitcoin-explorer
-* [![libbitcoin-network](https://github.com/libbitcoin/libbitcoin-network/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-network) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-network/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-network) libbitcoin-network
-* [![libbitcoin-node](https://github.com/libbitcoin/libbitcoin-node/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-node) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-node/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-node) libbitcoin-node
-* [![libbitcoin-protocol](https://github.com/libbitcoin/libbitcoin-protocol/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-protocol) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-protocol/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-protocol) libbitcoin-protocol
-* [![libbitcoin-server](https://github.com/libbitcoin/libbitcoin-server/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-server) [![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-server/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-server) libbitcoin-server
-
-Notes on Badges
-* `libitcoin-client` coverage does not reflect the effect of `libitcoin-explorer` network tests.
-* `libitcoin-explorer` coverage does not reflect the effect of network tests.
-* `libitcoin-network` coverage does not reflect the effect of network tests.
-* Current converage is inflated by the fact that only files with some level of coverage are counted.
+* [![libbitcoin-system](https://github.com/libbitcoin/libbitcoin-system/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-system) [![Coverage Status](https://img.shields.io/coveralls/github/libbitcoin/libbitcoin-system/master)](https://coveralls.io/r/libbitcoin/libbitcoin-system) libbitcoin-system
+* [![libbitcoin-database](https://github.com/libbitcoin/libbitcoin-database/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-database) [![Coverage Status](https://img.shields.io/coveralls/github/libbitcoin/libbitcoin-database/master)](https://coveralls.io/r/libbitcoin/libbitcoin-database) libbitcoin-database
+* [![libbitcoin-network](https://github.com/libbitcoin/libbitcoin-network/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-network) [![Coverage Status](https://img.shields.io/coveralls/github/libbitcoin/libbitcoin-network/master)](https://coveralls.io/r/libbitcoin/libbitcoin-network) libbitcoin-network
+* [![libbitcoin-node](https://github.com/libbitcoin/libbitcoin-node/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-node) [![Coverage Status](https://img.shields.io/coveralls/github/libbitcoin/libbitcoin-node/master)](https://coveralls.io/r/libbitcoin/libbitcoin-node) libbitcoin-node
+* [![libbitcoin-server](https://github.com/libbitcoin/libbitcoin-server/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-server) [![Coverage Status](https://img.shields.io/coveralls/github/libbitcoin/libbitcoin-server/master)](https://coveralls.io/r/libbitcoin/libbitcoin-server) libbitcoin-server
+* [![libbitcoin-explorer](https://github.com/libbitcoin/libbitcoin-explorer/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-explorer) [![Coverage Status](https://img.shields.io/coveralls/github/libbitcoin/libbitcoin-explorer/master)](https://coveralls.io/r/libbitcoin/libbitcoin-explorer) libbitcoin-explorer
 
 The artifacts generated for each library are as follows. Package names coincide with libbitcoin repository names.
 
@@ -53,10 +45,6 @@ builds/msvc/[edition]/[library].sln
 
 These artifacts are merged into their respective repositories by libbitcoin maintainers. There is no need to build libbitcoin-build if you are not a maintainer in the process of applying a build configuration change.
 
-The build system has a dependency on [ZeroMQ GSL](https://github.com/zeromq/gsl). There are Linux/macOS and Visual Studio builds of GSL. A recent version is recommended, and an executable . There is also a Windows single file executable available for [download](https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe).
-
-![Dependencies](https://raw.githubusercontent.com/libbitcoin/libbitcoin-build/master/img/dependencies.png)
-
 ### Quick Start
 
 This is similar to the [.travis.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.travis.yml) and is useful for local generation. In addition to `generate4.sh` there is a `generate4.cmd` for the native Windows environment.
@@ -79,13 +67,11 @@ cd ../../
 # Clone all libbitcoin repositories.
 git clone https://github.com/libbitcoin/libbitcoin-system.git
 git clone https://github.com/libbitcoin/libbitcoin-build.git
-git clone https://github.com/libbitcoin/libbitcoin-client.git
 git clone https://github.com/libbitcoin/libbitcoin-database.git
-git clone https://github.com/libbitcoin/libbitcoin-explorer.git
 git clone https://github.com/libbitcoin/libbitcoin-network.git
 git clone https://github.com/libbitcoin/libbitcoin-node.git
-git clone https://github.com/libbitcoin/libbitcoin-protocol.git
 git clone https://github.com/libbitcoin/libbitcoin-server.git
+git clone https://github.com/libbitcoin/libbitcoin-explorer.git
 
 # Run the libbitcoin-build generation script.
 # Newly generated build files are copied to the cloned repos.
@@ -102,13 +88,11 @@ cd %work_directory%
 # Clone all libbitcoin repositories.
 git clone https://github.com/libbitcoin/libbitcoin-system.git
 git clone https://github.com/libbitcoin/libbitcoin-build.git
-git clone https://github.com/libbitcoin/libbitcoin-client.git
 git clone https://github.com/libbitcoin/libbitcoin-database.git
-git clone https://github.com/libbitcoin/libbitcoin-explorer.git
 git clone https://github.com/libbitcoin/libbitcoin-network.git
 git clone https://github.com/libbitcoin/libbitcoin-node.git
-git clone https://github.com/libbitcoin/libbitcoin-protocol.git
 git clone https://github.com/libbitcoin/libbitcoin-server.git
+git clone https://github.com/libbitcoin/libbitcoin-explorer.git
 
 # Download the gsl dependency manually from 
 # https://github.com/imatix/gsl/releases/download/NuGet-4.1.0.1/gsl.exe.
