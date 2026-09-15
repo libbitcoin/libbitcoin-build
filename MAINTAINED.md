@@ -162,7 +162,7 @@ The following are files generated via `gsl` and maintained by the `libbitcoin-bu
 * [libbitcoin-server/vs2026/libbitcoin-server.sln](https://github.com/libbitcoin/libbitcoin-server/blob/master/builds/msvc/vs2026/libbitcoin-server.sln)
 * [libbitcoin-system/vs2026/libbitcoin-system.sln](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/msvc/vs2026/libbitcoin-system.sln)
 
-## builds/msvc/vs2026/*/*.props, *.vcxproj, *.vcxproj.filters, packages.config:
+## builds/msvc/vs2026/\*/\*.props, \*.vcxproj, \*.vcxproj.filters, packages.config:
 
 Each repository generates one project directory per build target: the library itself, its unit test runner, and (where applicable) a console application, tools project, or examples project.
 
