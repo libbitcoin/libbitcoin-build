@@ -48,7 +48,7 @@ include/bitcoin/[suffix].hpp
 include/bitcoin/[suffix]/version.hpp
 ```
 
-`[edition]` is currently `vs2022` or `vs2026`. `[library]` is the full repository name (e.g. `libbitcoin-database`); `[suffix]` is the repository name without the `libbitcoin-` prefix (e.g. `database`). See [MAINTAINED.md](MAINTAINED.md) for the exact, per-repository file list.
+`[edition]` is currently `vs2026`. `[library]` is the full repository name (e.g. `libbitcoin-database`); `[suffix]` is the repository name without the `libbitcoin-` prefix (e.g. `database`). See [MAINTAINED.md](MAINTAINED.md) for the exact, per-repository file list.
 
 These artifacts are merged into their respective repositories by libbitcoin maintainers. There is no need to build libbitcoin-build if you are not a maintainer in the process of applying a build configuration change.
 
