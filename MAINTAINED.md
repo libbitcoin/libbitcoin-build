@@ -66,7 +66,7 @@ The following are files generated via `gsl` and maintained by the `libbitcoin-bu
 * [libbitcoin-server/install-presets.sh](https://github.com/libbitcoin/libbitcoin-server/blob/master/builds/cmake/install-presets.sh)
 * [libbitcoin-system/install-presets.sh](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/cmake/install-presets.sh)
 
-## builds/cmake/<repository>-config.cmake.in:
+## builds/cmake/\<repository\>-config.cmake.in:
 * [libbitcoin-database/libbitcoin-database-config.cmake.in](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/cmake/libbitcoin-database-config.cmake.in)
 * [libbitcoin-explorer/libbitcoin-explorer-config.cmake.in](https://github.com/libbitcoin/libbitcoin-explorer/blob/master/builds/cmake/libbitcoin-explorer-config.cmake.in)
 * [libbitcoin-network/libbitcoin-network-config.cmake.in](https://github.com/libbitcoin/libbitcoin-network/blob/master/builds/cmake/libbitcoin-network-config.cmake.in)
@@ -98,7 +98,7 @@ The following are files generated via `gsl` and maintained by the `libbitcoin-bu
 * [libbitcoin-server/install-gnu.sh](https://github.com/libbitcoin/libbitcoin-server/blob/master/builds/gnu/install-gnu.sh)
 * [libbitcoin-system/install-gnu.sh](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/gnu/install-gnu.sh)
 
-## builds/gnu/<repository>.pc.in:
+## builds/gnu/\<repository\>.pc.in:
 * [libbitcoin-database/libbitcoin-database.pc.in](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/gnu/libbitcoin-database.pc.in)
 * [libbitcoin-explorer/libbitcoin-explorer.pc.in](https://github.com/libbitcoin/libbitcoin-explorer/blob/master/builds/gnu/libbitcoin-explorer.pc.in)
 * [libbitcoin-network/libbitcoin-network.pc.in](https://github.com/libbitcoin/libbitcoin-network/blob/master/builds/gnu/libbitcoin-network.pc.in)
@@ -130,7 +130,7 @@ The following are files generated via `gsl` and maintained by the `libbitcoin-bu
 * [libbitcoin-server/debug.natvis](https://github.com/libbitcoin/libbitcoin-server/blob/master/builds/msvc/debug.natvis)
 * [libbitcoin-system/debug.natvis](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/msvc/debug.natvis)
 
-## builds/vscode/<repository suffix>.code-workspace:
+## builds/vscode/\<repository suffix\>.code-workspace:
 * [libbitcoin-database/database.code-workspace](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/vscode/database.code-workspace)
 * [libbitcoin-explorer/explorer.code-workspace](https://github.com/libbitcoin/libbitcoin-explorer/blob/master/builds/vscode/explorer.code-workspace)
 * [libbitcoin-network/network.code-workspace](https://github.com/libbitcoin/libbitcoin-network/blob/master/builds/vscode/network.code-workspace)
@@ -138,7 +138,7 @@ The following are files generated via `gsl` and maintained by the `libbitcoin-bu
 * [libbitcoin-server/server.code-workspace](https://github.com/libbitcoin/libbitcoin-server/blob/master/builds/vscode/server.code-workspace)
 * [libbitcoin-system/system.code-workspace](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/vscode/system.code-workspace)
 
-## include/bitcoin/<repository suffix>.hpp:
+## include/bitcoin/\<repository suffix\>.hpp:
 * [libbitcoin-database/database.hpp](https://github.com/libbitcoin/libbitcoin-database/blob/master/include/bitcoin/database.hpp)
 * [libbitcoin-explorer/explorer.hpp](https://github.com/libbitcoin/libbitcoin-explorer/blob/master/include/bitcoin/explorer.hpp)
 * [libbitcoin-network/network.hpp](https://github.com/libbitcoin/libbitcoin-network/blob/master/include/bitcoin/network.hpp)
@@ -146,7 +146,7 @@ The following are files generated via `gsl` and maintained by the `libbitcoin-bu
 * [libbitcoin-server/server.hpp](https://github.com/libbitcoin/libbitcoin-server/blob/master/include/bitcoin/server.hpp)
 * [libbitcoin-system/system.hpp](https://github.com/libbitcoin/libbitcoin-system/blob/master/include/bitcoin/system.hpp)
 
-## include/bitcoin/<repository suffix>/version.hpp:
+## include/bitcoin/\<repository suffix\>/version.hpp:
 * [libbitcoin-database/version.hpp](https://github.com/libbitcoin/libbitcoin-database/blob/master/include/bitcoin/database/version.hpp)
 * [libbitcoin-explorer/version.hpp](https://github.com/libbitcoin/libbitcoin-explorer/blob/master/include/bitcoin/explorer/version.hpp)
 * [libbitcoin-network/version.hpp](https://github.com/libbitcoin/libbitcoin-network/blob/master/include/bitcoin/network/version.hpp)
@@ -154,7 +154,7 @@ The following are files generated via `gsl` and maintained by the `libbitcoin-bu
 * [libbitcoin-server/version.hpp](https://github.com/libbitcoin/libbitcoin-server/blob/master/include/bitcoin/server/version.hpp)
 * [libbitcoin-system/version.hpp](https://github.com/libbitcoin/libbitcoin-system/blob/master/include/bitcoin/system/version.hpp)
 
-## builds/msvc/vs2026/<repository>.sln:
+## builds/msvc/vs2026/\<repository\>.sln:
 * [libbitcoin-database/vs2026/libbitcoin-database.sln](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/msvc/vs2026/libbitcoin-database.sln)
 * [libbitcoin-explorer/vs2026/libbitcoin-explorer.sln](https://github.com/libbitcoin/libbitcoin-explorer/blob/master/builds/msvc/vs2026/libbitcoin-explorer.sln)
 * [libbitcoin-network/vs2026/libbitcoin-network.sln](https://github.com/libbitcoin/libbitcoin-network/blob/master/builds/msvc/vs2026/libbitcoin-network.sln)
@@ -241,7 +241,7 @@ The following are static files hosted within and distributed by the `libbitcoin-
 ## builds/msvc/nuget.config:
 * [nuget.config](props/version4/nuget.config)
 
-## builds/msvc/vs2026/<repository>.import.props:
+## builds/msvc/vs2026/\<repository\>.import.props:
 * [libbitcoin-database.import.props](props/version4/import/libbitcoin-database.import.props)
 * [libbitcoin-explorer.import.props](props/version4/import/libbitcoin-explorer.import.props)
 * [libbitcoin-network.import.props](props/version4/import/libbitcoin-network.import.props)
@@ -249,7 +249,7 @@ The following are static files hosted within and distributed by the `libbitcoin-
 * [libbitcoin-server.import.props](props/version4/import/libbitcoin-server.import.props)
 * [libbitcoin-system.import.props](props/version4/import/libbitcoin-system.import.props)
 
-## builds/msvc/vs2026/<repository>.import.xml:
+## builds/msvc/vs2026/\<repository\>.import.xml:
 * [libbitcoin-database.import.xml](props/version4/import/libbitcoin-database.import.xml)
 * [libbitcoin-explorer.import.xml](props/version4/import/libbitcoin-explorer.import.xml)
 * [libbitcoin-network.import.xml](props/version4/import/libbitcoin-network.import.xml)
