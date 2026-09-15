@@ -18,36 +18,43 @@ See [MAINTAINED.md](MAINTAINED.md) for a list of artifacts maintained by this pr
 The artifacts generated for each library are as follows. Package names coincide with libbitcoin repository names.
 
 ```
-.appveyor.yml
-.travis.yml
-autogen.sh
-build.cmd
-configure.ac
-install.sh
-[library].pc.in
-[library]_test_runner.sh
-Makefile.am
-include/bitcoin/[library].hpp
-include/bitcoin/[library]/version.hpp
+.github/workflows/ci.yml
+.github/workflows/ci-expanded.yml
+.gitignore
+.vscode/settings.json
+builds/gnu/Makefile.am
+builds/gnu/configure.ac
+builds/gnu/install-gnu.sh
+builds/gnu/[library].pc.in
+builds/gnu/test_runner.sh
 builds/cmake/CMakeLists.txt
-builds/cmake/modules/[module].cmake
+builds/cmake/CMakePresets.json
+builds/cmake/install-cmake.sh
+builds/cmake/install-presets.sh
+builds/cmake/[library]-config.cmake.in
+builds/msvc/build-msvc.cmd
+builds/msvc/debug.natvis
 builds/msvc/nuget.config
 builds/msvc/build/build_base.bat
 builds/msvc/[edition]/[library]/[library].props
 builds/msvc/[edition]/[library]/[library].vcxproj
 builds/msvc/[edition]/[library]/[library].vcxproj.filters
-builds/msvc/[edition]/[library]/[library].xml
 builds/msvc/[edition]/[library]/packages.config
 builds/msvc/[edition]/[library].import.props
 builds/msvc/[edition]/[library].import.xml
 builds/msvc/[edition]/[library].sln
+builds/vscode/[suffix].code-workspace
+include/bitcoin/[suffix].hpp
+include/bitcoin/[suffix]/version.hpp
 ```
+
+`[edition]` is currently `vs2022` or `vs2026`. `[library]` is the full repository name (e.g. `libbitcoin-database`); `[suffix]` is the repository name without the `libbitcoin-` prefix (e.g. `database`). See [MAINTAINED.md](MAINTAINED.md) for the exact, per-repository file list.
 
 These artifacts are merged into their respective repositories by libbitcoin maintainers. There is no need to build libbitcoin-build if you are not a maintainer in the process of applying a build configuration change.
 
 ### Quick Start
 
-This is similar to the [.travis.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.travis.yml) and is useful for local generation. In addition to `generate4.sh` there is a `generate4.cmd` for the native Windows environment.
+This is similar to the [ci.yml](https://github.com/libbitcoin/libbitcoin-build/blob/master/.github/workflows/ci.yml) workflow and is useful for local generation. In addition to `generate4.sh` there is a `generate4.cmd` for the native Windows environment.
 
 #### Linux
 ```
@@ -59,7 +66,7 @@ cd $work_directory
 # Clone, build and install the gsl dependency.
 # gsl requires pcre package (e.g. libpcre3-dev)
 # On Ubuntu: sudo apt-get install libpcre3-dev
-git clone https://github.com/imatix/gsl.git
+git clone https://github.com/zeromq/gsl.git
 cd gsl/src
 make && sudo make install
 cd ../../
