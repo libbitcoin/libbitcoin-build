@@ -232,7 +232,7 @@
         <exclude path="src/words/catalogs/*" />
       </coverage>
 
-      <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
       </entry>
@@ -554,7 +554,7 @@
     </test>
 
     <ci>
-      <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
       </entry>
@@ -877,7 +877,7 @@
     </binary>
 
     <ci>
-      <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
       </entry>
@@ -1163,7 +1163,7 @@
     </test>
 
     <ci>
-      <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
       </entry>
@@ -1487,7 +1487,7 @@
     </binary>
 
     <ci>
-      <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
       </entry>
@@ -1806,7 +1806,7 @@
     </binary>
 
     <ci>
-      <entry image="windows-latest" platform="x64" version="vs2022" tests="*">
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
       </entry>
@@ -2362,10 +2362,12 @@
         <option value="-DSECP256K1_USE_ULTRAFAST=ON" />
 
         <!-- hardware support options -->
+        <!--
         <option value="-DSECP256K1_BUILD_CUDA=ON" />
         <option value="-DSECP256K1_BUILD_ROCM=ON" />
         <option value="-DSECP256K1_BUILD_OPENCL=ON" />
         <option value="-DSECP256K1_BUILD_METAL=ON" />
+          -->
 
         <!-- disable unnecessary projects -->
         <option value="-DSECP256K1_BUILD_BENCH=OFF" />
@@ -3085,7 +3087,6 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       path="msbuild"
       outpath="builds/msvc">
 
-      <tools chain="msbuild" set="2022" outpath="vs2022" />
       <tools chain="msbuild" set="2026" outpath="vs2026" />
 
       <file source="props/version4/nuget.config" destination="builds/msvc" />
@@ -3095,19 +3096,13 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       path="msbuild"
       outpath="builds/msvc">
 
-      <tools chain="msbuild" set="2022" outpath="vs2022" />
       <tools chain="msbuild" set="2026" outpath="vs2026" />
 
       <file source="props/version4/build/build_base.bat" destination="builds/msvc/build" />
-      <file source="props/version4/import/%repository_dependency%.import.props" destination="builds/msvc/vs2022" />
-      <file source="props/version4/import/%repository_dependency%.import.xml" destination="builds/msvc/vs2022" />
-      <file source="props/version4/import/%repository%.import.props" destination="builds/msvc/vs2022" />
-      <file source="props/version4/import/%repository%.import.xml" destination="builds/msvc/vs2022" />
       <file source="props/version4/import/%repository_dependency%.import.props" destination="builds/msvc/vs2026" />
       <file source="props/version4/import/%repository_dependency%.import.xml" destination="builds/msvc/vs2026" />
       <file source="props/version4/import/%repository%.import.props" destination="builds/msvc/vs2026" />
       <file source="props/version4/import/%repository%.import.xml" destination="builds/msvc/vs2026" />
-      <file source="props/version4/project/%repository%/%target%/%target%.props" destination="builds/msvc/vs2022/%target%" />
       <file source="props/version4/project/%repository%/%target%/%target%.props" destination="builds/msvc/vs2026/%target%" />
 
     </template>
@@ -3117,7 +3112,6 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       outpath="builds/msvc">
 
       <path prefix="../../../.." />
-      <tools chain="msbuild" set="2022" outpath="vs2022" />
       <tools chain="msbuild" set="2026" outpath="vs2026" />
 
       <discovery>
@@ -3155,7 +3149,6 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       outpath="builds/msvc">
 
       <path prefix="../../../.." />
-      <tools chain="msbuild" set="2022" outpath="vs2022" />
       <tools chain="msbuild" set="2026" outpath="vs2026" />
 
       <discovery>
