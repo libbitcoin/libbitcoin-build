@@ -277,11 +277,17 @@ endfunction
 .   define my.configuration = emit_ci_yml.configuration
 .   define my.repository = emit_ci_yml.repository
 .
+.   define my.github = my.configuration->registrar(this.id = "dependency", this)->dependency(this.name = my.repository.name, this)->github
+.
 .   copyleft(my.repository.name)
 
 name: $(my.meta->workflow.name)
 
 on: [ $(element_property_concat("trigger", "value", my.meta->workflow, "", ", ")) ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository_owner == '$(my.github.owner)' && (github.event.pull_request.number || github.run_id) || github.ref }}
+  cancel-in-progress: true
 
 jobs:
 .   new list as _list
