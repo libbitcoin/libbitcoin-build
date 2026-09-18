@@ -364,6 +364,19 @@ jobs:
             echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Resolve dependency refs
+        id: refs
+        shell: bash
+        run: |
+          branch="${{ steps.get-branch.outputs.branch }}"
+.   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin") & !(_depend.name = my.repository.name)
+          ref=""
+          if git ls-remote --exit-code --heads "https://github.com/${{ github.repository_owner }}/$(_depend.name)" "$branch" > /dev/null 2>&1; then
+            ref="$branch"
+          fi
+          echo "$(_depend.name)=$ref" >> $GITHUB_OUTPUT
+.   endfor
+
       - name: Set msbuild path
         uses: microsoft/setup-msbuild@v3
         with:
@@ -377,7 +390,7 @@ jobs:
           fetch-depth: 1
           path: '$(_depend.name)'
 .       if !(_depend.name = my.repository.name)
-          ref: ${{ steps.get-branch.outputs.branch }}
+          ref: ${{ steps.refs.outputs.$(_depend.name) }}
           repository: ${{ github.repository_owner }}/$(_depend.name)
 .       else
           repository: ${{ github.repository }}
@@ -530,6 +543,19 @@ jobs:
           else
             echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
+
+      - name: Resolve dependency refs
+        id: refs
+        shell: bash
+        run: |
+          branch="${{ steps.get-branch.outputs.branch }}"
+.   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin") & !(_depend.name = my.repository.name)
+          ref=""
+          if git ls-remote --exit-code --heads "https://github.com/${{ github.repository_owner }}/$(_depend.name)" "$branch" > /dev/null 2>&1; then
+            ref="$branch"
+          fi
+          echo "$(_depend.name)=$ref" >> $GITHUB_OUTPUT
+.   endfor
 .
 .   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
 
@@ -539,7 +565,7 @@ jobs:
           fetch-depth: 1
           path: '$(_depend.name)'
 .       if !(_depend.name = my.repository.name)
-          ref: ${{ steps.get-branch.outputs.branch }}
+          ref: ${{ steps.refs.outputs.$(_depend.name) }}
           repository: ${{ github.repository_owner }}/$(_depend.name)
 .       else
           repository: ${{ github.repository }}
