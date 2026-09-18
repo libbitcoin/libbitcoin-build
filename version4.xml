@@ -3049,6 +3049,13 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <!-- python -->
       <ignore name="*.pyc" comment="python bytecode" />
 
+      <!-- store -->
+      <ignore comment="store">
+        <ignore name="*.bin" comment="ultrafast cache" />
+        <ignore name="*.head" comment="store table heads" />
+        <ignore name="*.data" comment="store table bodies" />
+      </ignore>
+
       <!-- gnu -->
       <ignore comment="gnu">
         <ignore name=".deps" comment="automake dependency tracking" />
