@@ -290,6 +290,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  information:
+    runs-on: ubuntu-latest
+
+    env:
+      CONCURRENCY_GROUP: ${{ github.workflow }}-${{ github.repository_owner == '$(my.github.owner)' && (github.event.pull_request.number || github.run_id) || github.ref }}
+
+    steps:
+        - name: state
+          run: |
+            echo "group    : $CONCURRENCY_GROUP"
+            echo "owner    : ${{ github.repository_owner }}"
+            echo "pr       : ${{ github.event.pull_request }}"
+            echo "pr #     : ${{ github.event.pull_request.number }}"
+            echo "run_id   : ${{ github.run_id }}"
+            echo "ref      : ${{ github.ref }}"
+            echo "base_ref : ${{ github.base_ref }}"
+            echo "head_ref : ${{ github.head_ref }}"
+
 .   new list as _list
 .       canonical_dependency_list(_list, my.repository, my.configuration)
 .
