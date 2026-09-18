@@ -234,7 +234,7 @@ function linearize_annotate_sources(result, substitutions, files,\
             endif
         endif
 
-        for my.files.file as _file
+        for my.files.file as _file by _file.name
             copy _file to my.result
             define my.copied = my.result->file((this.name = _file.name) &\
                 (this.path = _file.path), this)
@@ -247,7 +247,7 @@ function linearize_annotate_sources(result, substitutions, files,\
         endfor
     endif
 
-    for my.files.directory as _dir
+    for my.files.directory as _dir by _dir.name
         linearize_annotate_sources(my.result, my.substitutions, \
             _dir, my.target, my.repository, my.configuration, my.meta)
     endfor
