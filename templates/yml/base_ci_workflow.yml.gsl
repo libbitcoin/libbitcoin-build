@@ -555,6 +555,9 @@ jobs:
 .   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
 
       - name: Checkout repository [$(_depend.name)]
+.       if !(_depend.name = my.repository.name)
+        continue-on-error: true
+.       endif
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
