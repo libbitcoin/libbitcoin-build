@@ -283,7 +283,13 @@ endfunction
 
 name: $(my.meta->workflow.name)
 
-on: [ $(element_property_concat("trigger", "value", my.meta->workflow, "", ", ")) ]
+on:
+.   for my.meta->workflow.trigger as _trigger
+  $(_trigger.value):
+.       if (_trigger.value = "pull_request")
+    types: [opened, synchronize, reopened, closed]
+.       endif
+.   endfor
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.repository_owner == '$(my.github.owner)' && (github.event.pull_request.number || github.run_id) || github.ref }}
@@ -337,6 +343,8 @@ jobs:
 .   endif
 
   $(my.job.name):
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+
     strategy:
       fail-fast: false
 
@@ -491,6 +499,8 @@ jobs:
 .
 
   $(my.job.name):
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+
     strategy:
       fail-fast: false
 
