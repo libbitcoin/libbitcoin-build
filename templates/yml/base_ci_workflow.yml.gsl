@@ -283,7 +283,13 @@ endfunction
 
 name: $(my.meta->workflow.name)
 
-on: [ $(element_property_concat("trigger", "value", my.meta->workflow, "", ", ")) ]
+on:
+.   for my.meta->workflow.trigger as _trigger
+  $(_trigger.value):
+.       if (_trigger.value = "pull_request")
+    types: [opened, synchronize, reopened, closed]
+.       endif
+.   endfor
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.repository_owner == '$(my.github.owner)' && (github.event.pull_request.number || github.run_id) || github.ref }}
@@ -337,6 +343,8 @@ jobs:
 .   endif
 
   $(my.job.name):
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+
     strategy:
       fail-fast: false
 
@@ -390,6 +398,7 @@ jobs:
 .   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
 
       - name: Checkout repository [$(_depend.name)]
+        id: checkout-$(_depend.name)
 .       if !(_depend.name = my.repository.name)
         continue-on-error: true
 .       endif
@@ -402,6 +411,17 @@ jobs:
           repository: ${{ github.repository_owner }}/$(_depend.name)
 .       else
           repository: ${{ github.repository }}
+.       endif
+.
+.       if !(_depend.name = my.repository.name)
+
+      - name: Checkout repository [$(_depend.name)] cleanup on failure
+        continue-on-error: true
+        if: steps.checkout-$(_depend.name).outcome == 'failure'
+        shell: powershell
+        run: |
+          Remove-Item -Path ${{ github.workspace }}\\$(_depend.name) -Recurse -Force -ErrorAction SilentlyContinue
+.
 .       endif
 .   endfor
 
@@ -479,6 +499,8 @@ jobs:
 .
 
   $(my.job.name):
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
+
     strategy:
       fail-fast: false
 
@@ -555,6 +577,7 @@ jobs:
 .   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
 
       - name: Checkout repository [$(_depend.name)]
+        id: checkout-$(_depend.name)
 .       if !(_depend.name = my.repository.name)
         continue-on-error: true
 .       endif
@@ -568,6 +591,18 @@ jobs:
 .       else
           repository: ${{ github.repository }}
 .       endif
+.
+.       if !(_depend.name = my.repository.name)
+
+      - name: Checkout repository [$(_depend.name)] cleanup on failure
+        continue-on-error: true
+        if: steps.checkout-$(_depend.name).outcome == 'failure'
+        shell: bash
+        run: |
+          rm -rf ${{ github.workspace }}/$(_depend.name)
+.
+.       endif
+
 .   endfor
 
       - name: Prepare toolchain [linux]
