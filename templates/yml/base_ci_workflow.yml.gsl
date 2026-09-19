@@ -411,7 +411,6 @@ jobs:
         continue-on-error: true
         if: steps.checkout-$(_depend.name).outcome == 'failure'
         shell: powershell
-        working-directory: '$(my.repository.name)'
         run: |
           Remove-Item -Path ${{ github.workspace }}\\$(_depend.name) -Recurse -Force -ErrorAction SilentlyContinue
 .
@@ -589,7 +588,6 @@ jobs:
         continue-on-error: true
         if: steps.checkout-$(_depend.name).outcome == 'failure'
         shell: powershell
-        working-directory: '$(my.repository.name)'
         run: |
           rm -rf ${{ github.workspace }}/$(_depend.name)
 .
