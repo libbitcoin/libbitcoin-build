@@ -587,7 +587,7 @@ jobs:
       - name: Checkout repository [$(_depend.name)] cleanup on failure
         continue-on-error: true
         if: steps.checkout-$(_depend.name).outcome == 'failure'
-        shell: powershell
+        shell: bash
         run: |
           rm -rf ${{ github.workspace }}/$(_depend.name)
 .
