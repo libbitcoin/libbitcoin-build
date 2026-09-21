@@ -317,8 +317,10 @@ repository_root_dir=`cd "${srcdir}/../.." && pwd`
 AC_CONFIG_FILES([
     Makefile
     $(my.repository.name).pc
-.   for my.repository.configurable as _configurable
-    @repository_root_dir@/$(_configurable.path)$(_configurable.output)
+.   for my.repository. as _target where is_target_element(_target)
+.       for _target.configurable as _configurable
+    $(_configurable.path)/$(_configurable.output):${repository_root_dir}/$(_configurable.path)/$(_configurable.input)
+.       endfor
 .   endfor
   ])
 
