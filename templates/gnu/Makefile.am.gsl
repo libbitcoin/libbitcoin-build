@@ -436,6 +436,7 @@ $(my.prefix)_CPPFLAGS = \\
 .       for _flattened_headers.headers as _headers
 .           define my.suffix = (my.has_depend_entries | !last()) ?? " \\" ? ""
 .
+    -I${top_builddir}/$(_headers.path) \\
     -I$(my.meta->path.prefix)/$(_headers.path)$(my.suffix)
 .       endfor
 .
@@ -600,11 +601,13 @@ endif $(my.optionflag:upper)
 if $(my.optionflag:upper)
 .       endif
 .
-.       if  (count(my.files.file) > 0)
+.       if  ((count(my.files.file) > 0) | \
+            (count(my.target.configurable, this.path = my.matchable_path, this) > 0))
 .
 .           define my.prefix = "include$(my.root_relative_path:c)"
 .           define my.destination_path = "${includedir}$(my.root_relative_path)"
 .           define my.make_relative_path = "$(my.meta->path.prefix)/$(my.applicable_sub.unprefixed_path)$(my.root_relative_path)"
+.           define my.build_relative_path = "$(my.applicable_sub.unprefixed_path)$(my.root_relative_path)"
 .
 .# leading blank space
 
@@ -612,9 +615,17 @@ $(my.prefix)dir = \\
     $(my.destination_path)
 
 $(my.prefix)_HEADERS = \\
+.           define my.endfile_suffix = (count(my.target.configurable, this.path = my.matchable_path, this) > 0) ?? " \\" ? ""
+.
 .           for my.files.file as _file by _file.name
-.               define my.suffix = last() ?? "" ? " \\"
+.               define my.suffix = last() ?? my.endfile_suffix ? " \\"
     $(my.make_relative_path)/$(_file.name)$(my.suffix)
+.           endfor
+.           for my.target.configurable as _configurable \
+              where _configurable.path = my.matchable_path \
+              by _configurable.output
+.               define my.suffix = last() ?? "" ? " \\"
+    $(my.build_relative_path)/$(_configurable.output)$(my.suffix)
 .           endfor
 .       endif
 .   endif
