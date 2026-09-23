@@ -251,6 +251,7 @@ endfunction
 .   emit_project_configuration(my.target, my.repository, my.configuration, my.toolchain, my.toolset, my.meta, "  ")
 .
 .   if (name(my.target) = "library")
+.       emit_propertygroup_prebuild(my.target, my.repository, my.configuration, "  ")
 .       emit_propertygroup_configuration("  ")
 .   endif
 .
@@ -460,6 +461,40 @@ $(my.indent)<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="Prepare
 $(my.indent)</Target>
 .
 .endmacro # emit_ensure_nuget_imports
+.
+.macro emit_propertygroup_prebuild(target, repository, configuration, indent)
+.   define my.target = emit_propertygroup_prebuild.target
+.   define my.repository = emit_propertygroup_prebuild.repository
+.   define my.configuration = emit_propertygroup_prebuild.configuration
+.   define my.indent = emit_propertygroup_prebuild.indent
+.
+$(my.indent)<PropertyGroup Label="Prebuild">
+.   for my.target.configurable as _configurable
+.       if !(_configurable.input = "version.hpp.in")
+.           abort("Unexpected configurable input name: '$(_configurable.input)'.")
+.       endif
+.
+.       if (_configurable.type = "headers")
+  $(my.indent)<GeneratedIncludeDirBase>\$(ProjectDir)..\\..\\..\\..\\non-persistent\\</GeneratedIncludeDirBase>
+  $(my.indent)<GeneratedIncludeDir>\$(GeneratedIncludeDirBase)include\\</GeneratedIncludeDir>
+.       endif
+.   endfor
+$(my.indent)</PropertyGroup>
+$(my.indent)<ItemGroup>
+.   for my.target.configurable as _configurable
+  $(my.indent)<ConfigurableFile Include="$(_configurable.canonical)">
+    $(my.indent)<FileInput>\$(RepoRoot)$(path(_configurable.path))\\$(_configurable.input)</FileInput>
+    $(my.indent)<FileOutput>\$(GeneratedIncludeDirBase)$(path(_configurable.path))\\$(_configurable.output)</FileOutput>
+  $(my.indent)</ConfigurableFile>
+.   endfor
+$(my.indent)</ItemGroup>
+$(my.indent)<ItemGroup>
+  $(my.indent)<None Include="%(ConfigurableFile.FileInput)" />
+  $(my.indent)<ClInclude Include="%(ConfigurableFile.FileOutput)">
+    $(my.indent)<DependentUpon>%(ConfigurableFile.FileInput)</DependentUpon>
+  $(my.indent)</ClInclude>
+$(my.indent)</ItemGroup>
+.endmacro # emit_propertygroup_prebuild
 .
 .macro emit_propertygroup_configuration(indent)
 .   define my.indent = emit_propertygroup_configuration.indent
