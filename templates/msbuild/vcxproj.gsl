@@ -262,6 +262,8 @@ endfunction
     <Import Project="\$(ProjectDir)\$(ProjectName).props" />
   </ImportGroup>
 .
+.   emit_configurable_files(my.target, my.repository, my.configuration, my.meta, "  ")
+.
 .   new substitutions as _substitutions
 .       new directory as _files
 .           define my.absolute_root = repository_absolute_path(\
@@ -460,6 +462,33 @@ $(my.indent)<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="Prepare
 $(my.indent)</Target>
 .
 .endmacro # emit_ensure_nuget_imports
+.
+.macro emit_configurable_files(target, repository, configuration, meta, indent)
+.   define my.target = emit_configurable_files.target
+.   define my.repository = emit_configurable_files.repository
+.   define my.configuration = emit_configurable_files.configuration
+.   define my.meta = emit_configurable_files.meta
+.   define my.indent = emit_configurable_files.indent
+.
+.   if (count(my.target.configurable) > 0)
+.       define my.version = my.repository->version
+.
+$(my.indent)<PropertyGroup Label="Git">
+  $(my.indent)<VersionMajor>$(my.version.major)</VersionMajor>
+  $(my.indent)<VersionMinor>$(my.version.minor)</VersionMinor>
+$(my.indent)</PropertyGroup>
+$(my.indent)<ItemGroup>
+.       for my.target.configurable as _configurable
+  $(my.indent)<ConfigurableFile Include="$(configurable_input(_configurable, my.meta))">
+    $(my.indent)<Generated>$(configurable_output(_configurable, my.meta))</Generated>
+  $(my.indent)</ConfigurableFile>
+.       endfor
+.       for my.target.configurable as _configurable
+  $(my.indent)<$(configurable_item(_configurable)) Include="$(configurable_output(_configurable, my.meta))" />
+.       endfor
+$(my.indent)</ItemGroup>
+.   endif
+.endmacro # emit_configurable_files
 .
 .macro emit_propertygroup_configuration(indent)
 .   define my.indent = emit_propertygroup_configuration.indent

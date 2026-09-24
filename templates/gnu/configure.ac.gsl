@@ -119,9 +119,6 @@ endfunction
 .
 .   define my.version = my.repository->version
 .
-.   define my.github = my.configuration->registrar(.id = "dependency")\
-        ->dependency(.name = my.repository.name)->github
-.
 .   copyleft(my.repository.name)
 
 # Standard declarations.
@@ -143,7 +140,7 @@ m4_define([_git_dirty],
 m4_define([_GIT_DIRTY], m4_ifnblank(_git_dirty, [_git_dirty], [0]))
 
 m4_define([_GIT_ORIGIN_URL],
-    m4_dquote(m4_esyscmd_s([git remote get-url origin 2>/dev/null || echo https://github.com/$(my.github.owner)/$(my.repository.name)])))
+    m4_dquote(m4_esyscmd_s([git ls-remote --get-url 2>/dev/null | grep -e '://' -e '@' || echo unknown])))
 
 m4_define([_LIBBITCOIN_VERSION_MAJOR], [$(my.version.major)])
 m4_define([_LIBBITCOIN_VERSION_MINOR], [$(my.version.minor)])
@@ -317,8 +314,10 @@ repository_root_dir=`cd "${srcdir}/../.." && pwd`
 AC_CONFIG_FILES([
     Makefile
     $(my.repository.name).pc
-.   for my.repository.configurable as _configurable
-    @repository_root_dir@/$(_configurable.path)$(_configurable.output)
+.   for my.repository. as _target where is_target_element(_target)
+.       for _target.configurable as _configurable
+    $(_configurable.path)/$(_configurable.output):${repository_root_dir}/$(_configurable.path)/$(_configurable.input)
+.       endfor
 .   endfor
   ])
 

@@ -18,6 +18,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(RepoRoot)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(RepoRoot)build\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
       <!-- NOMINMAX enables use of std::min/max without conflict. -->
       <!-- WIN32_LEAN_AND_MEAN avoids inclusion of certain headers, winsock.h conflicts with boost and protocol use of winsock2.h. -->

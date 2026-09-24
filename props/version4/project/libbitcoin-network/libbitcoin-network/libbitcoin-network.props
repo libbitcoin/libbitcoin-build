@@ -18,6 +18,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(RepoRoot)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(RepoRoot)build\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 
       <!-- Prevent boost from seeing ssl includes when ssl is deselected  (requires external headers). -->
       <AdditionalIncludeDirectories Condition="'$(Option-ssl)' == 'true'">$(RepoRoot)include\bitcoin\network\ssl\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

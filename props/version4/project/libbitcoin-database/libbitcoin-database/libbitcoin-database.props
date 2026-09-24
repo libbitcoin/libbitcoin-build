@@ -12,6 +12,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(RepoRoot)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(RepoRoot)build\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
       <PreprocessorDefinitions Condition="'$(Linkage-libbitcoin-consensus)' != 'none'">WITH_CONSENSUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'DynamicLibrary'">BCD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
