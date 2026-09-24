@@ -251,7 +251,6 @@ endfunction
 .   emit_project_configuration(my.target, my.repository, my.configuration, my.toolchain, my.toolset, my.meta, "  ")
 .
 .   if (name(my.target) = "library")
-.       emit_propertygroup_prebuild(my.target, my.repository, my.configuration, "  ")
 .       emit_propertygroup_configuration("  ")
 .   endif
 .
@@ -262,6 +261,8 @@ endfunction
     <Import Project="\$(ProjectDir)..\\..\\properties\\Output.props" />
     <Import Project="\$(ProjectDir)\$(ProjectName).props" />
   </ImportGroup>
+.
+.   emit_configurable_files(my.target, my.repository, my.configuration, my.meta, "  ")
 .
 .   new substitutions as _substitutions
 .       new directory as _files
@@ -462,39 +463,35 @@ $(my.indent)</Target>
 .
 .endmacro # emit_ensure_nuget_imports
 .
-.macro emit_propertygroup_prebuild(target, repository, configuration, indent)
-.   define my.target = emit_propertygroup_prebuild.target
-.   define my.repository = emit_propertygroup_prebuild.repository
-.   define my.configuration = emit_propertygroup_prebuild.configuration
-.   define my.indent = emit_propertygroup_prebuild.indent
+.macro emit_configurable_files(target, repository, configuration, meta, indent)
+.   define my.target = emit_configurable_files.target
+.   define my.repository = emit_configurable_files.repository
+.   define my.configuration = emit_configurable_files.configuration
+.   define my.meta = emit_configurable_files.meta
+.   define my.indent = emit_configurable_files.indent
 .
-$(my.indent)<PropertyGroup Label="Prebuild">
-.   for my.target.configurable as _configurable
-.       if !(_configurable.input = "version.hpp.in")
-.           abort("Unexpected configurable input name: '$(_configurable.input)'.")
-.       endif
+.   if (count(my.target.configurable) > 0)
+.       define my.version = my.repository->version
+.       define my.github = my.configuration->registrar(.id = "dependency")\
+            ->dependency(.name = my.repository.name)->github
 .
-.       if (_configurable.type = "headers")
-  $(my.indent)<GeneratedIncludeDirBase>\$(ProjectDir)..\\..\\..\\..\\build\\</GeneratedIncludeDirBase>
-  $(my.indent)<GeneratedIncludeDir>\$(GeneratedIncludeDirBase)include\\</GeneratedIncludeDir>
-.       endif
-.   endfor
+$(my.indent)<PropertyGroup Label="Git">
+  $(my.indent)<VersionMajor>$(my.version.major)</VersionMajor>
+  $(my.indent)<VersionMinor>$(my.version.minor)</VersionMinor>
+  $(my.indent)<GitOriginUrl>https://github.com/$(my.github.owner)/$(my.repository.name)</GitOriginUrl>
 $(my.indent)</PropertyGroup>
 $(my.indent)<ItemGroup>
-.   for my.target.configurable as _configurable
-  $(my.indent)<ConfigurableFile Include="$(_configurable.canonical)">
-    $(my.indent)<FileInput>\$(RepoRoot)$(path(_configurable.path))\\$(_configurable.input)</FileInput>
-    $(my.indent)<FileOutput>\$(GeneratedIncludeDirBase)$(path(_configurable.path))\\$(_configurable.output)</FileOutput>
+.       for my.target.configurable as _configurable
+  $(my.indent)<ConfigurableFile Include="$(configurable_input(_configurable, my.meta))">
+    $(my.indent)<Generated>$(configurable_output(_configurable, my.meta))</Generated>
   $(my.indent)</ConfigurableFile>
-.   endfor
+.       endfor
+.       for my.target.configurable as _configurable
+  $(my.indent)<$(configurable_item(_configurable)) Include="$(configurable_output(_configurable, my.meta))" />
+.       endfor
 $(my.indent)</ItemGroup>
-$(my.indent)<ItemGroup>
-  $(my.indent)<None Include="%(ConfigurableFile.FileInput)" />
-  $(my.indent)<ClInclude Include="%(ConfigurableFile.FileOutput)">
-    $(my.indent)<DependentUpon>%(ConfigurableFile.FileInput)</DependentUpon>
-  $(my.indent)</ClInclude>
-$(my.indent)</ItemGroup>
-.endmacro # emit_propertygroup_prebuild
+.   endif
+.endmacro # emit_configurable_files
 .
 .macro emit_propertygroup_configuration(indent)
 .   define my.indent = emit_propertygroup_configuration.indent

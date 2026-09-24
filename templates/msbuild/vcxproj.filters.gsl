@@ -229,6 +229,17 @@ endfunction
 .               endif
 .           endnew
 .
+.   # Configurable
+.           if (count(my.target.configurable) > 0)
+  <ItemGroup>
+.               for my.target.configurable as _configurable
+    <$(configurable_item(_configurable)) Include="$(configurable_output(_configurable, my.meta))">
+      <Filter>$(path(_configurable.path))</Filter>
+    </$(configurable_item(_configurable))>
+.               endfor
+  </ItemGroup>
+.           endif
+.
 .   # None
 .           new items as _items
 .               accumulate_items(_items, _files, _substitutions, my.meta->other)
