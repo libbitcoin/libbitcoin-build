@@ -28,9 +28,6 @@
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'StaticLibrary'">BCT_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-ssl)' == 'true'">WOLFSSL_USER_SETTINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ResourceCompile>
-      <AdditionalIncludeDirectories>$(RepoRoot)build\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
   </ItemDefinitionGroup>
 
   <Target Name="WolfSSLSuppressions" BeforeTargets="ClCompile">
