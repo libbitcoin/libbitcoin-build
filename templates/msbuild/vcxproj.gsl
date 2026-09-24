@@ -472,13 +472,10 @@ $(my.indent)</Target>
 .
 .   if (count(my.target.configurable) > 0)
 .       define my.version = my.repository->version
-.       define my.github = my.configuration->registrar(.id = "dependency")\
-            ->dependency(.name = my.repository.name)->github
 .
 $(my.indent)<PropertyGroup Label="Git">
   $(my.indent)<VersionMajor>$(my.version.major)</VersionMajor>
   $(my.indent)<VersionMinor>$(my.version.minor)</VersionMinor>
-  $(my.indent)<GitOriginUrl>https://github.com/$(my.github.owner)/$(my.repository.name)</GitOriginUrl>
 $(my.indent)</PropertyGroup>
 $(my.indent)<ItemGroup>
 .       for my.target.configurable as _configurable
