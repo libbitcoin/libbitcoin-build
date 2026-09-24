@@ -121,13 +121,15 @@ endfunction
  * For interpretation of the versioning scheme see: http://semver.org
  */
 
-#define $(my.reposymbol)_VERSION        "@LIBBITCOIN_VERSION_MAJOR@.@LIBBITCOIN_VERSION_MINOR@.@LIBBITCOIN_VERSION_PATCH@"
-#define $(my.reposymbol)_MAJOR_VERSION  @LIBBITCOIN_VERSION_MAJOR@
-#define $(my.reposymbol)_MINOR_VERSION  @LIBBITCOIN_VERSION_MINOR@
-#define $(my.reposymbol)_PATCH_VERSION  @LIBBITCOIN_VERSION_PATCH@
-#define $(my.reposymbol)_COMMIT_HASH    "@GIT_COMMIT_HASH@"
-#define $(my.reposymbol)_REPOSITORY_URL "@GIT_ORIGIN_URL@"
-#define $(my.reposymbol)_IS_DIRTY       @GIT_DIRTY@
+.   define my.width = string.length("$(my.reposymbol)_REPOSITORY_URL") + 1
+.
+#define $(pad("$(my.reposymbol)_VERSION", my.width, " "))"@LIBBITCOIN_VERSION_MAJOR@.@LIBBITCOIN_VERSION_MINOR@.@LIBBITCOIN_VERSION_PATCH@"
+#define $(pad("$(my.reposymbol)_MAJOR_VERSION", my.width, " "))@LIBBITCOIN_VERSION_MAJOR@
+#define $(pad("$(my.reposymbol)_MINOR_VERSION", my.width, " "))@LIBBITCOIN_VERSION_MINOR@
+#define $(pad("$(my.reposymbol)_PATCH_VERSION", my.width, " "))@LIBBITCOIN_VERSION_PATCH@
+#define $(pad("$(my.reposymbol)_COMMIT_HASH", my.width, " "))"@GIT_COMMIT_HASH@"
+#define $(pad("$(my.reposymbol)_REPOSITORY_URL", my.width, " "))"@GIT_ORIGIN_URL@"
+#define $(pad("$(my.reposymbol)_IS_DIRTY", my.width, " "))@GIT_DIRTY@
 
 #endif
 .
