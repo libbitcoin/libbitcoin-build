@@ -441,9 +441,9 @@ if "!$(_depend.name:c)_TAG!" == "" (
 .       # Loop over options to synthesize consumable options and subsequent values
 .       define my.dep_repo = my.configuration->repository(.name = _depend.name)
 .       for my.dep_repo.library as _library
-.           for _library.option as _option where defined(_option.msvc)
+.           if count(_library.option, defined(count.msvc)) > 0
 $(column_variables("$(_library.name)_PARAMS", my.column, my.prefix, my.suffix))
-.           endfor
+.           endif
 .       endfor
 .
 .       if (my.dep_repo.name = my.repository.name)
@@ -451,14 +451,14 @@ $(column_variables("$(_library.name)_PARAMS", my.column, my.prefix, my.suffix))
 .       endif
 .
 .       for my.dep_repo.binary as _binary
-.           for _binary.option as _option where defined(_option.msvc)
+.           if count(_binary.option, defined(count.msvc)) > 0
 $(column_variables("$(_binary.name)_PARAMS", my.column, my.prefix, my.suffix))
-.           endfor
+.           endif
 .       endfor
 .       for my.dep_repo.test as _test
-.           for _test.option as _option where defined(_option.msvc)
+.           if count(_test.option, defined(count.msvc)) > 0
 $(column_variables("$(_test.name)_PARAMS", my.column, my.prefix, my.suffix))
-.           endfor
+.           endif
 .       endfor
 .   endfor
 .
