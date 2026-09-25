@@ -23,16 +23,18 @@
       <!-- Exposed knobs -->
       <option name="avx2" type="enable"
         default="no"
-        comment="Use Intel AVX2 intrinsics." />
+        comment="Use Intel AVX2 intrinsics."
+        msvc="/p:Option-arch=AdvancedVectorExtensions2" />
 
       <option name="avx512" type="enable"
         default="no"
-        comment="Use Intel AVX512 intrinsics." />
-      <!-- msvc="/p:ClCompile_AdditionalOptions=\&quot;/arch:AVX512\&quot;" /> -->
+        comment="Use Intel AVX512 intrinsics."
+        msvc="/p:Option-arch=AdvancedVectorExtensions512" />
 
       <option name="sse41" type="enable"
         default="no"
-        comment="Use SSE4.1 hardware instructions." />
+        comment="Use SSE4.1 hardware instructions."
+        msvc="/p:Option-arch=AdvancedVectorExtensions" />
 
       <option name="shani" type="enable"
         default="no"
