@@ -1,0 +1,161 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL common ci generation.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/sh-output.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_version_tag_yml(configuration)
+    define my.configuration = generate_version_tag_yml.configuration
+    define my.filename = "version-tag.yml"
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.template = my.configuration->templates->template(.name = "$(my.filename).gsl")
+
+    if (!defined(my.template))
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+    define my.project_path_suffix = my.template.outpath
+
+    for my.configuration.repository by .name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+
+        if defined(_repository->ci)
+            create_directory(my.output_path)
+
+            define my.out_file = path_append(my.output_path, my.filename)
+            notify(my.out_file)
+            output(my.out_file)
+
+            emit_version_tag_yml(my.template, my.configuration, _repository)
+
+            close
+        endif
+     endfor _repository
+endfunction
+
+###############################################################################
+# Library-able?
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_version_tag_yml(meta, configuration, repository)
+.   define my.meta = emit_version_tag_yml.meta
+.   define my.configuration = emit_version_tag_yml.configuration
+.   define my.repository = emit_version_tag_yml.repository
+.
+.   define my.github = my.configuration->registrar(this.id = "dependency", this)->dependency(this.name = my.repository.name, this)->github
+.
+.   copyleft(my.repository.name)
+
+name: Create version tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to use for tag generation.'
+        required: false
+        default: 'master'
+        type: string
+      description:
+        description: 'Description to accompany tag.'
+        required: false
+        default: ''
+        type: string
+      suffix:
+        description: 'Suffix applied to version tag.'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  tag-version:
+    runs-on: ubuntu-latest
+
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v6
+          with:
+            fetch-depth: 0
+            ref: ${{ github.event.inputs.branch || 'master' }}
+
+        - name: Configure git identity
+          run: |
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        - name: Compute version
+          id: version
+          run: |
+            MAJOR=\$(grep -oP 'set\\(\\s*LIBBITCOIN_VERSION_MAJOR\\s+\\K[0-9]+' builds/cmake/CMakeLists.txt)
+            MINOR=\$(grep -oP 'set\\(\\s*LIBBITCOIN_VERSION_MINOR\\s+\\K[0-9]+' builds/cmake/CMakeLists.txt)
+            PATCH=\$(git rev-list --count HEAD)
+            TAG="v${MAJOR}.${MINOR}.${PATCH}${{ github.event.inputs.suffix || '' }}"
+            echo "major=$MAJOR" >> $GITHUB_OUTPUT
+            echo "minor=$MINOR" >> $GITHUB_OUTPUT
+            echo "patch=$PATCH" >> $GITHUB_OUTPUT
+            echo "tag=$TAG"     >> $GITHUB_OUTPUT
+            echo "Computed tag: $TAG"
+
+        - name: Create tag
+          run: |
+            if git rev-parse "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+              echo "::error::Tag ${{ steps.version.outputs.tag }} already exists."
+              exit 1
+            fi
+            git tag -a "${{ steps.version.outputs.tag }}" -m "${{ github.event.inputs.description || '' }}"
+            git push origin "${{ steps.version.outputs.tag }}"
+            echo "Created tag '${{ steps.version.outputs.tag }}'."
+
+.endmacro # emit_version_tag_yml
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_version_tag_yml(configuration)
+
+.endtemplate
