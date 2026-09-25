@@ -39,6 +39,11 @@
         comment="Use Intel/ARM SHA Extensions."
         msvc="/p:Option-sha=true" />
 
+      <option name="crypto" type="enable"
+        default="no"
+        comment="Use ARM Crypto Extensions."
+        msvc="/p:Option-sha=true" />
+
       <option name="ultrafast" type="with"
         default="no"
         comment="Use shrec/UltrafastSecp256k1 library." />
@@ -109,6 +114,20 @@
             <loc>__m128i b = _mm_set1_epi32(15);</loc>
             <loc>__m128i k = _mm_set1_epi32(31);</loc>
             <loc>return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);</loc>
+          </program>
+        </flag>
+
+        <flag option="crypto"
+          comment="Conditionally require arm crypto intrinsics."
+          type="public"
+          substitute="crypto">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-march=armv8-a+crypto" />
+          <program>
+            <include header="arm_neon.h" />
+            <loc>uint32x4_t a = vdupq_n_u32(0);</loc>
+            <loc>return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);</loc>
           </program>
         </flag>
 
