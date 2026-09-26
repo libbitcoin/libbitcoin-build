@@ -31,6 +31,11 @@
         comment="Use Intel AVX512 intrinsics."
         msvc="/p:Option-arch=AdvancedVectorExtensions512" />
 
+      <option name="ifma" type="enable"
+        default="no"
+        comment="Use Intel AVX512 IFMA intrinsics."
+        msvc="/p:Option-ifma=true" />
+
       <option name="sse41" type="enable"
         default="no"
         comment="Use SSE4.1 hardware instructions."
@@ -98,6 +103,23 @@
             <include header="immintrin.h" />
             <loc>__m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);</loc>
             <loc>return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1);</loc>
+          </program>
+        </flag>
+
+        <flag option="ifma"
+          comment="Conditionally require avx512 ifma intrinsics."
+          type="public"
+          substitute="ifma">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-mavx512ifma" />
+          <symbol value="-mavx512vl" />
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m512i a = _mm512_set1_epi64(3);</loc>
+            <loc>__m256i b = _mm256_set1_epi64x(5);</loc>
+            <loc>return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);</loc>
           </program>
         </flag>
 
