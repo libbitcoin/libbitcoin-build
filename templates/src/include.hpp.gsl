@@ -216,13 +216,13 @@ endfunction
 .       endif
 .   endif
 .
-.   for my.files.file as _file
+.   for my.files.file as _file by _file.name
 .       if (count(my.excludes.file, (count.path = my.path) & (count.name = _file.name)) = 0)
 #include <$(my.path)$(_file.name)>
 .       endif
 .   endfor
 .
-.   for my.files.directory as _directory
+.   for my.files.directory as _directory by _directory.name
 .       emit_include_headers(_directory, my.prefix, my.library, my.repository, my.meta, my.configuration, my.excludes)
 .   endfor
 .
