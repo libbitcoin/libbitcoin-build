@@ -668,7 +668,10 @@ jobs:
         working-directory: '$(my.repository.name)'
         run: |
           lcov --ignore-errors version,gcov,mismatch,mismatch --directory . --capture --output-file coverage.info
-          lcov --ignore-errors unused --remove coverage.info "${{ github.workspace }}/prefix/*" "${{ github.workspace }}/$(my.repository.name)/examples/*" "${{ github.workspace }}/$(my.repository.name)/test/*" $(exclusions(my.repository)) --output-file coverage.info
+          lcov --ignore-errors unused --extract coverage.info "${{ github.workspace }}/$(my.repository.name)/include/*" "${{ github.workspace }}/$(my.repository.name)/src/*" --output-file coverage.info
+.   if (string.length(exclusions(my.repository)) > 0)
+          lcov --ignore-errors unused --remove coverage.info $(exclusions(my.repository)) --output-file coverage.info
+.   endif
 
       - name: Coveralls.io upload
         if: ${{ matrix.coverage == 'lcov' }}
