@@ -24,22 +24,27 @@
       <option name="avx2" type="enable"
         default="no"
         comment="Use Intel AVX2 intrinsics."
-        msvc="/p:Option-arch=AdvancedVectorExtensions2" />
+        msvc="/p:Option-avx2=true" />
 
       <option name="avx512" type="enable"
         default="no"
         comment="Use Intel AVX512 intrinsics."
-        msvc="/p:Option-arch=AdvancedVectorExtensions512" />
+        msvc="/p:Option-avx512=true" />
 
-      <option name="ifma" type="enable"
+      <option name="avx512ifma" type="enable"
         default="no"
-        comment="Use Intel AVX512 IFMA intrinsics."
-        msvc="/p:Option-ifma=true" />
+        comment="Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
+        msvc="/p:Option-avx512ifma=true" />
+
+      <option name="avxifma" type="enable"
+        default="no"
+        comment="Use Intel AVX IFMA intrinsics (implies AVX2)."
+        msvc="/p:Option-avxifma=true" />
 
       <option name="sse41" type="enable"
         default="no"
         comment="Use SSE4.1 hardware instructions."
-        msvc="/p:Option-arch=AdvancedVectorExtensions" />
+        msvc="/p:Option-sse41=true" />
 
       <option name="shani" type="enable"
         default="no"
@@ -50,6 +55,16 @@
         default="no"
         comment="Use ARM Crypto Extensions."
         msvc="/p:Option-sha=true" />
+
+      <option name="aesni" type="enable"
+        default="no"
+        comment="Use Intel AES-NI and PCLMULQDQ intrinsics."
+        msvc="/p:Option-aesni=true" />
+
+      <option name="vaes" type="enable"
+        default="no"
+        comment="Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
+        msvc="/p:Option-vaes=true" />
 
       <option name="ultrafast" type="with"
         default="no"
@@ -106,10 +121,10 @@
           </program>
         </flag>
 
-        <flag option="ifma"
+        <flag option="avx512ifma"
           comment="Conditionally require avx512 ifma intrinsics."
           type="public"
-          substitute="ifma">
+          substitute="avx512ifma">
           <context language="c" />
           <context language="c++" />
           <symbol value="-mavx512ifma" />
@@ -120,6 +135,22 @@
             <loc>__m512i a = _mm512_set1_epi64(3);</loc>
             <loc>__m256i b = _mm256_set1_epi64x(5);</loc>
             <loc>return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_madd52lo_epu64(a, a, a), 1), 0) + _mm256_extract_epi32(_mm256_madd52hi_epu64(b, b, b), 2);</loc>
+          </program>
+        </flag>
+
+        <flag option="avxifma"
+          comment="Conditionally require avx ifma intrinsics."
+          type="public"
+          substitute="avxifma">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-mavxifma" />
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m256i a = _mm256_set1_epi64x(3);</loc>
+            <loc>__m128i b = _mm_set1_epi64x(5);</loc>
+            <loc>return _mm256_extract_epi32(_mm256_madd52lo_avx_epu64(a, a, a), 2) + _mm_extract_epi32(_mm_madd52hi_avx_epu64(b, b, b), 2);</loc>
           </program>
         </flag>
 
@@ -168,6 +199,44 @@
             <loc>__m128i a = _mm_set1_epi32(0);</loc>
             <loc>__m128i b = _mm_set1_epi32(15);</loc>
             <loc>return _mm_extract_epi32(_mm_add_epi64(a, b), 2);</loc>
+          </program>
+        </flag>
+
+        <flag option="aesni"
+          comment="Conditionally require aes-ni and pclmulqdq intrinsics."
+          type="public"
+          substitute="aesni">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-msse4.1" />
+          <symbol value="-maes" />
+          <symbol value="-mpclmul" />
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m128i a = _mm_set1_epi32(1);</loc>
+            <loc>__m128i b = _mm_set1_epi32(3);</loc>
+            <loc>return _mm_cvtsi128_si32(_mm_clmulepi64_si128(_mm_aesenc_si128(a, b), b, 0x00));</loc>
+          </program>
+        </flag>
+
+        <flag option="vaes"
+          comment="Conditionally require vaes and vpclmulqdq intrinsics."
+          type="public"
+          substitute="vaes">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-mavx2" />
+          <symbol value="-maes" />
+          <symbol value="-mpclmul" />
+          <symbol value="-mvaes" />
+          <symbol value="-mvpclmulqdq" />
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m256i a = _mm256_set1_epi32(1);</loc>
+            <loc>__m256i b = _mm256_set1_epi32(3);</loc>
+            <loc>return _mm256_extract_epi32(_mm256_clmulepi64_epi128(_mm256_aesenc_epi128(a, b), b, 0x00), 1);</loc>
           </program>
         </flag>
 
@@ -2876,7 +2945,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <build method="gnu" canonical="true" />
       <build method="cmake" />
       <build method="boost_build" />
-      <column help="28" const="32" parse="32" />
+      <column help="30" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
       <option id="build-src-dir" />
