@@ -262,20 +262,6 @@ repository_root_dir=`cd "${srcdir}/../.." && pwd`
 .       endfor
 .   endfor
 .
-.   if has_compiler_defines(my.repository)
-.       heading1("Set preprocessor defines.")
-.       define my.encountered_define = 0
-.       for my.repository. as _target where is_target_element(_target)
-.           for _target->compiler.define as _define
-.               if (my.encountered_define > 0)
-
-.               endif
-.               emit_define(_define, _target, my.repository, my.configuration, my.meta)
-.               my.encountered_define += 1
-.           endfor
-.       endfor
-.   endif
-.
 .   new unique_flags as _flags
 .       accumulate_flags(_flags, my.repository, my.configuration, my.meta)
 .
@@ -308,6 +294,20 @@ repository_root_dir=`cd "${srcdir}/../.." && pwd`
 .           endfor
 .       endif
 .   endnew
+.
+.   if has_compiler_defines(my.repository)
+.       heading1("Set preprocessor defines.")
+.       define my.encountered_define = 0
+.       for my.repository. as _target where is_target_element(_target)
+.           for _target->compiler.define as _define
+.               if (my.encountered_define > 0)
+
+.               endif
+.               emit_define(_define, _target, my.repository, my.configuration, my.meta)
+.               my.encountered_define += 1
+.           endfor
+.       endfor
+.   endif
 .
 .   emit_conditional_includes(my.repository, my.configuration, my.meta)
 
@@ -633,8 +633,10 @@ $(my.indent)PKG_CHECK_MODULES(
     $(my.indent)AC_MSG_ERROR([$(my.condition) is required but was not found.])
   $(my.indent)])
 $(my.indent)AC_SUBST([$(my.prefix)_PKG], ['$(my.condition)'])
+$(my.indent)AC_SUBST([$(my.prefix)_VERSION], [`${PKG_CONFIG} --modversion $(my.pkg_name)`])
 $(my.indent)AC_SUBST([$(my.prefix)_CPPFLAGS], [${$(my.prefix)_CFLAGS}])
 $(my.indent)AC_SUBST([$(my.prefix)_ISYS_CPPFLAGS], [`echo ${$(my.prefix)_CPPFLAGS} | ${SED} s/^-I/-isystem/g | ${SED} s/' -I'/' -isystem'/g`])
+$(my.indent)AC_MSG_NOTICE([$(my.prefix)_VERSION : ${$(my.prefix)_VERSION}])
 $(my.indent)AC_MSG_NOTICE([$(my.prefix)_CPPFLAGS : ${$(my.prefix)_CPPFLAGS}])
 $(my.indent)AC_MSG_NOTICE([$(my.prefix)_ISYS_CPPFLAGS : ${$(my.prefix)_ISYS_CPPFLAGS}])
 $(my.indent)AC_MSG_NOTICE([$(my.prefix)_OTHER_CFLAGS : ${$(my.prefix)_OTHER_CFLAGS}])
