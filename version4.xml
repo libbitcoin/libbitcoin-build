@@ -56,6 +56,16 @@
         comment="Use ARM Crypto Extensions."
         msvc="/p:Option-sha=true" />
 
+      <option name="sha512" type="enable"
+        default="no"
+        comment="Use Intel SHA512 Extensions (implies AVX2)."
+        msvc="/p:Option-sha512=true" />
+
+      <option name="sha3" type="enable"
+        default="no"
+        comment="Use ARM SHA3 Extensions for SHA512 (implies Crypto)."
+        msvc="/p:Option-sha512=true" />
+
       <option name="aesni" type="enable"
         default="no"
         comment="Use Intel AES-NI and PCLMULQDQ intrinsics."
@@ -197,6 +207,37 @@
             <include header="arm_neon.h" />
             <loc>uint32x4_t a = vdupq_n_u32(0);</loc>
             <loc>return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);</loc>
+          </program>
+        </flag>
+
+        <flag option="sha512"
+          comment="Conditionally require sha512 native intrinsics."
+          type="public"
+          substitute="sha512">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-mavx2" />
+          <symbol value="-msha512" />
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m256i a = _mm256_set1_epi64x(0);</loc>
+            <loc>__m128i k = _mm_set1_epi64x(15);</loc>
+            <loc>return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);</loc>
+          </program>
+        </flag>
+
+        <flag option="sha3"
+          comment="Conditionally require arm sha512 intrinsics."
+          type="public"
+          substitute="sha3">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-march=armv8.2-a+crypto+sha3" />
+          <program>
+            <include header="arm_neon.h" />
+            <loc>uint64x2_t a = vdupq_n_u64(0);</loc>
+            <loc>return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);</loc>
           </program>
         </flag>
 
