@@ -65,6 +65,10 @@ $(my.indent)$(my.function_name)( $(my.name)$(my.version) REQUIRED$(my.eol)
 $(my.indent))
 .   endif
 .
+.   if (my.function_name = "find_package") & (my.dependency.name <> "boost")
+$(my.indent)set( $(my.dependency.name:c)_VERSION ${$(my.name)_VERSION} )
+.   endif
+.
 .   if defined(my.dependency.option)
 endif()
 .   endif
