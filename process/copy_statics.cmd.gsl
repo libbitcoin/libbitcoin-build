@@ -47,6 +47,9 @@ if not exist "%RESULT_DIR%" (
 .               index = index + 1
 set "SOURCE[$(index)]=$(path_suffix)$(path(_file.source))"
 set "DESTINATION[$(index)]=%RESULT_DIR%\\$(_repository.name)\\$(path(_file.destination))"
+.               if is_optional(_file)
+set "OPTIONAL[$(index)]=true"
+.               endif
 .           endfor
 .       endnew
 .   endfor
@@ -63,29 +66,31 @@ for /L %%i in (1,1,%LENGTH%) do (
         exit /b 1
     )
 
-    :: Check if SOURCE exists
+    :: Check if SOURCE exists (skip if optional)
     if not exist !SOURCE[%%i]! (
-        call :msg_error "Error: SOURCE file not found '!SOURCE[%%i]!'."
-        exit /b 1
-    )
-
-    :: Create DESTINATION if it does not exist
-    if not exist "!DESTINATION[%%i]!" (
-        call :msg "Creating directory '!DESTINATION[%%i]!'."
-        mkdir "!DESTINATION[%%i]!" 2>nul
-        if %ERRORLEVEL% neq 0 (
-            call :msg_error "Error: Failed to create directory '!DESTINATION[%%i]!'."
+        if not "!OPTIONAL[%%i]!"=="true" (
+            call :msg_error "Error: SOURCE file not found '!SOURCE[%%i]!'."
             exit /b 1
         )
-    )
+    ) else (
+        :: Create DESTINATION if it does not exist
+        if not exist "!DESTINATION[%%i]!" (
+            call :msg "Creating directory '!DESTINATION[%%i]!'."
+            mkdir "!DESTINATION[%%i]!" 2>nul
+            if !ERRORLEVEL! neq 0 (
+                call :msg_error "Error: Failed to create directory '!DESTINATION[%%i]!'."
+                exit /b 1
+            )
+        )
 
-   :: Perform the copy
-    call :msg "Copying '!SOURCE[%%i]!' to '!DESTINATION[%%i]!'"
-    copy /Y "!SOURCE[%%i]!" "!DESTINATION[%%i]!" >nul
+        :: Perform the copy
+        call :msg "Copying '!SOURCE[%%i]!' to '!DESTINATION[%%i]!'"
+        copy /Y "!SOURCE[%%i]!" "!DESTINATION[%%i]!" >nul
 
-    if errorlevel 1 (
-        call :msg_error "Error: copy of '!SOURCE[%%i]!' failed."
-        exit /b 1
+        if errorlevel 1 (
+            call :msg_error "Error: copy of '!SOURCE[%%i]!' failed."
+            exit /b 1
+        )
     )
 )
 

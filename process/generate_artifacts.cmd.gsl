@@ -26,9 +26,9 @@ set "OUTPUT_PATH=$(path(configuration->templates.resultpath))"
 if exist "%OUTPUT_PATH%" (
     call :msg_warn "Removing output path '%OUTPUT_PATH%'."
     rmdir /s /q "%OUTPUT_PATH%"
-    if %ERRORLEVEL% neq 0 (
+    if !ERRORLEVEL! neq 0 (
         call :msg_error "Failure to remove output path '%OUTPUT_PATH%'"
-        exit /b %ERRORLEVEL%
+        exit /b 1
     ) else (
         call :msg_success "Removed path '%OUTPUT_PATH%'"
     )
@@ -45,9 +45,9 @@ set "CONFIGURATION=..\\$(path(configuration->templates.source))"
 for /L %%i in (1,1,%TEMPLATES.length%) do (
     call :msg "!GSL_EXE! -script:'!TEMPLATES[%%i]!' '%CONFIGURATION%'"
     !GSL_EXE! -script:"!TEMPLATES[%%i]!" "%CONFIGURATION%"
-    if %ERRORLEVEL% neq 0 (
+    if !ERRORLEVEL! neq 0 (
         call :msg_error "Failure: '!TEMPLATES[%%i]!' produced error."
-        exit /b %ERRORLEVEL%
+        exit /b 1
     )
 )
 

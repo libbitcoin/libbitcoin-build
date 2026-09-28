@@ -56,6 +56,16 @@
         comment="Use ARM Crypto Extensions."
         msvc="/p:Option-sha=true" />
 
+      <option name="sha512" type="enable"
+        default="no"
+        comment="Use Intel SHA512 Extensions (implies AVX2)."
+        msvc="/p:Option-sha512=true" />
+
+      <option name="sha3" type="enable"
+        default="no"
+        comment="Use ARM SHA3 Extensions for SHA512 (implies Crypto)."
+        msvc="/p:Option-sha512=true" />
+
       <option name="aesni" type="enable"
         default="no"
         comment="Use Intel AES-NI and PCLMULQDQ intrinsics."
@@ -125,11 +135,13 @@
           <context language="c++" />
           <symbol value="-mavx512f" />
           <symbol value="-mavx512bw" />
+          <symbol value="-mavx512vl" />
           <program>
             <include header="stdint.h" />
             <include header="immintrin.h" />
             <loc>__m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);</loc>
-            <loc>return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1);</loc>
+            <loc>__m256i b = _mm256_set1_epi32(3);</loc>
+            <loc>return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1) + _mm256_extract_epi32(_mm256_ror_epi32(b, 1), 2);</loc>
           </program>
         </flag>
 
@@ -195,6 +207,37 @@
             <include header="arm_neon.h" />
             <loc>uint32x4_t a = vdupq_n_u32(0);</loc>
             <loc>return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);</loc>
+          </program>
+        </flag>
+
+        <flag option="sha512"
+          comment="Conditionally require sha512 native intrinsics."
+          type="public"
+          substitute="sha512">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-mavx2" />
+          <symbol value="-msha512" />
+          <program>
+            <include header="stdint.h" />
+            <include header="immintrin.h" />
+            <loc>__m256i a = _mm256_set1_epi64x(0);</loc>
+            <loc>__m128i k = _mm_set1_epi64x(15);</loc>
+            <loc>return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);</loc>
+          </program>
+        </flag>
+
+        <flag option="sha3"
+          comment="Conditionally require arm sha512 intrinsics."
+          type="public"
+          substitute="sha3">
+          <context language="c" />
+          <context language="c++" />
+          <symbol value="-march=armv8.2-a+crypto+sha3" />
+          <program>
+            <include header="arm_neon.h" />
+            <loc>uint64x2_t a = vdupq_n_u64(0);</loc>
+            <loc>return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);</loc>
           </program>
         </flag>
 
@@ -2935,7 +2978,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <error logpath="test.log" />
       <build method="cmake" canonical="true" />
       <build method="boost_build" />
-      <column help="28" const="32" parse="32" />
+      <column help="29" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
       <option id="build-src-dir" />
@@ -2963,7 +3006,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <build method="preset" />
       <build method="cmake" canonical="true" />
       <build method="boost_build" />
-      <column help="28" const="32" parse="32" />
+      <column help="29" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
       <option id="build-preset" />
@@ -3202,6 +3245,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <file source="props/version4/import/%repository%.import.props" destination="builds/msvc/vs2026" />
       <file source="props/version4/import/%repository%.import.xml" destination="builds/msvc/vs2026" />
       <file source="props/version4/project/%repository%/%target%/%target%.props" destination="builds/msvc/vs2026/%target%" />
+      <file source="props/version4/project/%repository%/%target%/%target%.xml" destination="builds/msvc/vs2026/%target%" optional="true" />
 
     </template>
 
