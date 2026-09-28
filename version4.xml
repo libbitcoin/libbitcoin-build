@@ -471,29 +471,6 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="12" />
-        <compiler lang="cxx" name="g++" version="12" />
-
-        <option name="gnu" value="--enable-isystem" />
-        <option name="presets" value="--build-skip-tests" />
-
-        <job name="gnu" config="debug" link="dynamic" />
-        <job name="gnu" config="debug" link="static" />
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
-        <job name="cmake" config="release" link="static" />
-        <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
-        <job name="presets" preset="nix-gnu-release-shared" />
-        <job name="presets" preset="nix-gnu-release-static" />
-      </entry>
-
-      <entry image="ubuntu-24.04">
-        <build name="boost" />
-
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
 
@@ -509,12 +486,12 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="dynamic" gate="true" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
         <job name="presets" preset="nix-gnu-release-shared" />
-        <job name="presets" preset="nix-gnu-release-static" />
+        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -786,29 +763,6 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="12" />
-        <compiler lang="cxx" name="g++" version="12" />
-
-        <option name="gnu" value="--enable-isystem" />
-        <option name="presets" value="--build-skip-tests" />
-
-        <job name="gnu" config="debug" link="dynamic" />
-        <job name="gnu" config="debug" link="static" />
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
-        <job name="cmake" config="release" link="static" />
-        <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
-        <job name="presets" preset="nix-gnu-release-shared" />
-        <job name="presets" preset="nix-gnu-release-static" />
-      </entry>
-
-      <entry image="ubuntu-24.04">
-        <build name="boost" />
-
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
 
@@ -824,10 +778,10 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="dynamic" gate="true" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
@@ -1099,29 +1053,6 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="12" />
-        <compiler lang="cxx" name="g++" version="12" />
-
-        <option name="gnu" value="--enable-isystem" />
-        <option name="presets" value="--build-skip-tests" />
-
-        <job name="gnu" config="debug" link="dynamic" />
-        <job name="gnu" config="debug" link="static" />
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
-        <job name="cmake" config="release" link="static" />
-        <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
-        <job name="presets" preset="nix-gnu-release-shared" />
-        <job name="presets" preset="nix-gnu-release-static" />
-      </entry>
-
-      <entry image="ubuntu-24.04">
-        <build name="boost" />
-
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
 
@@ -1137,10 +1068,10 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="dynamic" gate="true" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
@@ -1377,29 +1308,6 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="12" />
-        <compiler lang="cxx" name="g++" version="12" />
-
-        <option name="gnu" value="--enable-isystem" />
-        <option name="presets" value="--build-skip-tests" />
-
-        <job name="gnu" config="debug" link="dynamic" />
-        <job name="gnu" config="debug" link="static" />
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
-        <job name="cmake" config="release" link="static" />
-        <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
-        <job name="presets" preset="nix-gnu-release-shared" />
-        <job name="presets" preset="nix-gnu-release-static" />
-      </entry>
-
-      <entry image="ubuntu-24.04">
-        <build name="boost" />
-
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
 
@@ -1415,10 +1323,10 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="dynamic" gate="true" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
@@ -1693,29 +1601,6 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="12" />
-        <compiler lang="cxx" name="g++" version="12" />
-
-        <option name="gnu" value="--enable-isystem" />
-        <option name="presets" value="--build-skip-tests" />
-
-        <job name="gnu" config="debug" link="dynamic" />
-        <job name="gnu" config="debug" link="static" />
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
-        <job name="cmake" config="release" link="static" />
-        <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
-        <job name="presets" preset="nix-gnu-release-shared" />
-        <job name="presets" preset="nix-gnu-release-static" />
-      </entry>
-
-      <entry image="ubuntu-24.04">
-        <build name="boost" />
-
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
 
@@ -1731,10 +1616,10 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="dynamic" gate="true" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
@@ -2007,29 +1892,6 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="12" />
-        <compiler lang="cxx" name="g++" version="12" />
-
-        <option name="gnu" value="--enable-isystem" />
-        <option name="presets" value="--build-skip-tests" />
-
-        <job name="gnu" config="debug" link="dynamic" />
-        <job name="gnu" config="debug" link="static" />
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
-        <job name="cmake" config="release" link="static" />
-        <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
-        <job name="presets" preset="nix-gnu-release-shared" />
-        <job name="presets" preset="nix-gnu-release-static" />
-      </entry>
-
-      <entry image="ubuntu-24.04">
-        <build name="boost" />
-
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
 
@@ -2045,10 +1907,10 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="dynamic" gate="true" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-debug-static" gate="true" />
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
