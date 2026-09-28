@@ -77,7 +77,7 @@ for /L %%i in (1,1,%LENGTH%) do (
         if not exist "!DESTINATION[%%i]!" (
             call :msg "Creating directory '!DESTINATION[%%i]!'."
             mkdir "!DESTINATION[%%i]!" 2>nul
-            if %ERRORLEVEL% neq 0 (
+            if !ERRORLEVEL! neq 0 (
                 call :msg_error "Error: Failed to create directory '!DESTINATION[%%i]!'."
                 exit /b 1
             )
