@@ -55,7 +55,13 @@ echo "'$(_repository.name)' file population..."
 
 mkdir -p ${result_dir}/$(_repository.name)/$(_file.destination)
 .               endif
+.               if is_optional(_file)
+if [ -f $(path_suffix)$(_file.source) ]; then
+    cp $(path_suffix)$(_file.source) ${result_dir}/$(_repository.name)/$(_file.destination)
+fi
+.               else
 cp $(path_suffix)$(_file.source) ${result_dir}/$(_repository.name)/$(_file.destination)
+.               endif
 .           endfor
 .       endnew
 echo "'$(_repository.name)' file population complete."

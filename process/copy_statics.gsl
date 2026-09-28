@@ -20,6 +20,11 @@ gsl from "lib/msbuild.gsl"
 ##############################################################################
 # Functions
 ###############################################################################
+function is_optional(file)
+    define my.file = is_optional.file
+    return defined(my.file.optional) & (my.file.optional = "true")
+endfunction
+
 function get_base_files(result, configuration)
     define my.result = get_base_files.result
     define my.configuration = get_base_files.configuration
