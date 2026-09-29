@@ -266,6 +266,31 @@ function populate_archives(archives, ci)
     endfor
 endfunction
 
+function populate_unique_path(results, host)
+    define my.results = populate_unique_path.results
+    define my.host = populate_unique_path.host
+
+    if (count(my.results.path, this.value = my.host.path, this) = 0)
+        new my.results.path as _path
+            _path.value = my.host.path
+        endnew
+    endif
+endfunction
+
+function populate_project_paths(results, repository)
+    define my.results = populate_project_paths.results
+    define my.repository = populate_project_paths.repository
+
+    for my.repository. as _target where is_target_element(_target)
+        for _target.sources as _sources
+            populate_unique_path(my.results, _sources)
+        endfor
+        for _target.include as _include
+            populate_unique_path(my.results, _include)
+        endfor
+    endfor
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -288,6 +313,19 @@ on:
   $(_trigger.value):
 .       if (_trigger.value = "pull_request")
     types: [opened, synchronize, reopened, closed]
+.       endif
+.       if ((_trigger.value = "pull_request") | (_trigger.value = "push"))
+    paths:
+      - 'builds/cmake/**'
+      - 'builds/gnu/**'
+      - 'builds/msvc/**'
+.           new project_paths as _paths
+.               populate_project_paths(_paths, my.repository)
+.
+.               for _paths.path as _path by _path.value
+      - '$(_path.value)/**'
+.               endfor
+.           endnew
 .       endif
 .   endfor
 
