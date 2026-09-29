@@ -1,0 +1,112 @@
+###############################################################################
+#  Copyright (c) 2014-2026 libbitcoin-build developers (see COPYING).
+#
+###############################################################################
+
+name: Find Latest Tags
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        repository:
+          - libbitcoin-system
+          - libbitcoin-database
+          - libbitcoin-network
+          - libbitcoin-node
+          - libbitcoin-server
+          - libbitcoin-explorer
+
+    steps:
+      - name: Find latest semantic version tag
+        id: find
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          REPO="${{ github.repository_owner }}/${{ matrix.repository }}"
+          echo "Processing $REPO ..."
+
+          # Fetch all tags (paginated)
+          TAGS=$(gh api --paginate "/repos/${REPO}/tags" --jq '.[].name' 2>/dev/null || true)
+
+          if [ -z "$TAGS" ]; then
+            LATEST="(no tags)"
+            VERSION="-"
+          else
+            # Keep only valid SemVer tags (optional leading 'v')
+            LATEST=$(echo "$TAGS" \
+              | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$' \
+              | sort -V \
+              | tail -n1 || true)
+
+            if [ -z "$LATEST" ]; then
+              LATEST="(no semver tags)"
+              VERSION="-"
+            else
+              VERSION="${LATEST#v}"
+            fi
+          fi
+
+          echo "tag=$LATEST"      >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          # Write clean JSON (no leading whitespace)
+          cat > result.json <<EOF
+          {"repository":"$REPO","tag":"$LATEST","version":"$VERSION"}
+          EOF
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: result-${{ strategy.job-index }}
+          path: result.json
+          retention-days: 1
+
+  summary:
+    needs: discover
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download all results
+        uses: actions/download-artifact@v4
+        with:
+          path: results
+          pattern: result-*
+          # Do NOT use merge-multiple – keep each artifact in its own subdir
+
+      - name: Create summary
+        run: |
+          set -euo pipefail
+
+          echo "| Repository | Latest Tag | Version |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------------|------------|---------|" >> "$GITHUB_STEP_SUMMARY"
+
+          # Collect every result.json from the sub-directories
+          jq -s 'sort_by(.repository)' results/*/result.json > all.json
+
+          jq -r '.[] | "| `\(.repository)` | `\(.tag)` | `\(.version)` |"' all.json \
+            >> "$GITHUB_STEP_SUMMARY"
+
+          echo
+          echo "=== Summary ==="
+          jq -r '.[] | "\(.repository): \(.tag)"' all.json
+
+          cp all.json latest-semantic-version-tags.json
+
+      - name: Upload combined results
+        uses: actions/upload-artifact@v4
+        with:
+          name: latest-semantic-version-tags
+          path: latest-semantic-version-tags.json
