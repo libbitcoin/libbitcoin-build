@@ -610,9 +610,6 @@
           <symbol value="WITH_SSL">
             <substitute name="ssl" />
           </symbol>
-          <symbol value="WOLFSSL_USER_SETTINGS">
-            <substitute name="wolfssl" />
-          </symbol>
         </define>
 
         <flag id="Wall" />
@@ -638,10 +635,8 @@
 
       <headers path="test" private="true" recursive="true" root="true">
         <msbuild filter="src" />
-        <headers path="test/ssl/wolfssl" private="true" recursive="true" root="true" option="ssl" />
       </headers>
       <sources path="test" recursive="true">
-        <sources path="test/ssl/wolfssl" private="true" recursive="true" root="true" option="ssl" />
         <msbuild filter="src" />
       </sources>
       <!--
@@ -654,12 +649,6 @@
       <dependency name="libbitcoin-network" private="true" />
 
       <compiler standard="20">
-        <define option="ssl"
-          comment="WolfSSL test data parameter."
-          type="private">
-          <symbol name="CERT_PREFIX"
-            value="&quot;${repository_root_dir}/test/ssl/vectors/&quot;" />
-        </define>
 
         <flag id="Wall" />
         <flag id="Wextra" />
