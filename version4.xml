@@ -87,11 +87,8 @@
       <!-- Dependencies -->
       <dependency name="boost" version="1.86.0">
         <component name="container" />
-        <component name="iostreams" />
         <component name="json" />
-        <component name="locale" />
         <component name="program_options" />
-        <component name="thread" />
         <component name="url" />
       </dependency>
 
@@ -2261,20 +2258,11 @@
         <resource canonical="boost_container" component="container">
           <package compiler="v145" name="libbitcoin-boost_container-vc145" version="1.91.0" />
         </resource>
-        <resource canonical="boost_iostreams" component="iostreams">
-          <package compiler="v145" name="libbitcoin-boost_iostreams-vc145" version="1.91.0" />
-        </resource>
         <resource canonical="boost_json" component="json">
           <package compiler="v145" name="libbitcoin-boost_json-vc145" version="1.91.0" />
         </resource>
-        <resource canonical="boost_locale" component="locale">
-          <package compiler="v145" name="libbitcoin-boost_locale-vc145" version="1.91.0" />
-        </resource>
         <resource canonical="boost_program_options" component="program_options">
           <package compiler="v145" name="libbitcoin-boost_program_options-vc145" version="1.91.0" />
-        </resource>
-        <resource canonical="boost_thread" component="thread">
-          <package compiler="v145" name="libbitcoin-boost_thread-vc145" version="1.91.0" />
         </resource>
         <resource canonical="boost_unit_test_framework" component="unit_test_framework">
           <package compiler="v145" name="libbitcoin-boost_unit_test_framework-vc145" version="1.91.0" />
@@ -2287,12 +2275,8 @@
       <build method="boost_build" version="1.86.0" parallel="true">
         <flag value="-Wno-enum-constexpr-conversion" />
         <option value="--with-container" />
-        <option value="--with-iostreams" />
         <option value="--with-json" />
-        <option value="--with-locale" />
         <option value="--with-program_options" />
-        <option value="--with-regex" />
-        <option value="--with-thread" />
         <option value="--with-url" />
         <option value="--with-test" />
       </build>
