@@ -80,6 +80,11 @@
         default="no"
         comment="Use bitcoin-core/secp256k1 library." />
 
+      <option name="cuda" type="enable"
+        default="no"
+        comment="Use cuda (gpu) batch signature verification."
+        msvc="/p:Option-cuda=true" />
+
       <!-- Dependencies -->
       <dependency name="boost" version="1.86.0">
         <component name="container" />
@@ -101,6 +106,12 @@
           comment="Version of bitcoin-core/secp256k1 library."
           type="private">
           <symbol name="SECP256K1_VERSION" value="${secp256k1_VERSION}" />
+        </define>
+
+        <define option="cuda"
+          comment="Use cuda (gpu) batch signature verification."
+          type="private">
+          <symbol value="ENABLE_CUDA" />
         </define>
 
         <flag option="avx2"
