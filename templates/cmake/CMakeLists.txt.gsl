@@ -839,23 +839,15 @@ $(my.indent))
 .
 .   define my.prefix = ""
 .   define my.suffix = ""
-.   define my.indent_content = my.indent
 .
 .   if defined(my.pathholder.option)
 .       my.prefix = "$<$<BOOL:${$(get_option(my.pathholder, my.target, my.repository))}>:"
 .       my.suffix = ">"
-.       my.indent_content = "  $(my.indent)"
 .   endif
 .
-.   if !is_empty(my.prefix)
-$(my.indent)$(my.prefix)
-.   endif
-$(my.indent_content)$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/$(my.meta->cmake.rootpath)/$(my.pathholder.path)>
+$(my.indent)$(my.prefix)$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/$(my.meta->cmake.rootpath)/$(my.pathholder.path)>$(my.suffix)
 .   if (target_installable(my.target))
-$(my.indent_content)$<INSTALL_INTERFACE:$(my.pathholder.path)>
-.   endif
-.   if !is_empty(my.prefix)
-$(my.indent)$(my.suffix)
+$(my.indent)$(my.prefix)$<INSTALL_INTERFACE:$(my.pathholder.path)>$(my.suffix)
 .   endif
 .endmacro
 .
