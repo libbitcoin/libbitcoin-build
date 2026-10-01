@@ -45,15 +45,12 @@
 
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
     <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">dynamic</Linkage-secp256k1>
-    <Linkage-ultrafast Condition="'$(Option-ultrafast)' == 'true'">dynamic</Linkage-ultrafast>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
     <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">ltcg</Linkage-secp256k1>
-    <Linkage-ultrafast Condition="'$(Option-ultrafast)' == 'true'">ltcg</Linkage-ultrafast>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
     <Linkage-secp256k1 Condition="'$(Option-secp256k1)' == 'true'">static</Linkage-secp256k1>
-    <Linkage-ultrafast Condition="'$(Option-ultrafast)' == 'true'">static</Linkage-ultrafast>
   </PropertyGroup>
   
   <!-- Options -->
@@ -69,8 +66,6 @@
     <Option-aesni Condition="'$(Option-aesni)' == ''">false</Option-aesni>
     <Option-vaes Condition="'$(Option-vaes)' == ''">false</Option-vaes>
     <Option-secp256k1 Condition="'$(Option-secp256k1)' == ''">false</Option-secp256k1>
-    <Option-ultrafast Condition="'$(Option-ultrafast)' == ''">false</Option-ultrafast>
-    <Option-cuda Condition="'$(Option-cuda)' == ''">false</Option-cuda>
   </PropertyGroup>
 
   <!-- Width options, and options that require a width, raise Option-arch (highest wins). -->
@@ -90,15 +85,12 @@
     <Message Text="Option-aesni      : $(Option-aesni)" Importance="high"/>
     <Message Text="Option-vaes       : $(Option-vaes)" Importance="high"/>
     <Message Text="Option-secp256k1  : $(Option-secp256k1)" Importance="high"/>
-    <Message Text="Option-ultrafast  : $(Option-ultrafast)" Importance="high"/>
-    <Message Text="Option-cuda       : $(Option-cuda)" Importance="high"/>
   </Target>
 
   <!-- Linkage -->
 
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
-    <Message Text="Linkage-ultrafast : $(Linkage-ultrafast)" Importance="high"/>
   </Target>
 
 </Project>
