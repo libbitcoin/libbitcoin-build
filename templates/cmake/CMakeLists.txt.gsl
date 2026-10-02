@@ -347,6 +347,27 @@ function render_compiler_option_checks(repository)
 
     emit_compiler_check_includes(my.repository)
 
+    new compiler as _march
+        for my.repository. as _target where is_target_element(_target) &\
+            defined(_target->compiler)
+
+            for _target->compiler.flag as _flag where defined(_flag.march) &\
+                (count(_march.flag, this.name = _flag.option, this) = 0)
+
+                new _march.flag as _entry
+                    _entry.name = _flag.option
+                    _entry.option = get_option(_flag, _target, my.repository)
+                    _entry.march = _flag.march
+                    _entry.base = _flag.base
+                endnew
+            endfor
+        endfor
+
+        if (count(_march.flag) > 0)
+            emit_march_composition(_march)
+        endif
+    endnew
+
     new compiler as _compiler
         for my.repository. as _target where is_target_element(_target) &\
             defined(_target->compiler)
@@ -907,14 +928,26 @@ $(my.indent))
 $(my.indent)$(my.property)( $(my.target.name)
 .       if (count(_compiler.$(my.element), is_defined_value($(my.element), "type", "public")) > 0)
   $(my.indent)PUBLIC
+.           define my.marched = 0
 .           for _compiler.$(my.element) as _ele where is_defined_value(_ele, "type", "public")
-.               emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
+.               if !defined(_ele.march)
+.                   emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
+.               elsif (my.marched = 0)
+$(my.indent_item)${march}
+.                   my.marched = 1
+.               endif
 .           endfor
 .       endif
 .       if (count(_compiler.$(my.element), is_defined_value($(my.element), "type", "private")) > 0)
   $(my.indent)PRIVATE
+.           define my.marched = 0
 .           for _compiler.$(my.element) as _ele where is_defined_value(_ele, "type", "private")
-.               emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
+.               if !defined(_ele.march)
+.                   emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
+.               elsif (my.marched = 0)
+$(my.indent_item)${march}
+.                   my.marched = 1
+.               endif
 .           endfor
 .       endif
 $(my.indent))
@@ -941,6 +974,24 @@ $(my.indent)$<$<COMPILE_LANGUAGE:$(supported_language(my.element, ""))>:$(my.sym
 $(my.indent)$(my.symbol)
 .   endif
 .endmacro # emit_compiler_element
+.
+.macro emit_march_composition(march)
+.   define my.march = emit_march_composition.march
+
+set( march-base "" )
+set( march-features "" )
+.   for my.march.flag as _flag by _flag.base
+if ( $(_flag.option) )
+  set( march-base "$(_flag.base)" )
+  string( APPEND march-features "$(_flag.march)" )
+endif()
+.   endfor
+
+set( march "" )
+if ( NOT march-features STREQUAL "" )
+  set( march "-march=${march-base}${march-features}" )
+endif()
+.endmacro # emit_march_composition
 .
 .macro emit_compiler_check_includes(repository)
 .   define my.repository = emit_compiler_check_includes.repository

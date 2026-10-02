@@ -119,9 +119,12 @@ function components_to_cppflags(result, components, iprefix, ireplacement)
     endfor
 
     for my.components.flag as _flag where defined(_flag.substitute)
-        new my.result.entry as _entry
-            _entry.value = "@$(_flag.substitute)@"
-        endnew
+        define my.value = "@$(_flag.substitute)@"
+        if (count(my.result.entry, this.value = my.value, this) = 0)
+            new my.result.entry as _entry
+                _entry.value = my.value
+            endnew
+        endif
     endfor
 
     for my.components.dependency as _depend where !defined(_depend->pkg)

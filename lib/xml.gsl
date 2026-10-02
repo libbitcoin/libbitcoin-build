@@ -473,6 +473,10 @@ function global.symbol(flag)
     define my.flag = symbol.flag
     define my.result = ""
 
+    if defined(my.flag.march)
+        return "${march}"
+    endif
+
     if (count(my.flag.symbol) > 0)
         for my.flag.symbol as _symbol
             if !first()
