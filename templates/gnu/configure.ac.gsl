@@ -269,7 +269,7 @@ repository_root_dir=`cd "${srcdir}/../.." && pwd`
 .           define my.encountered_flags = 0
 .
 .           heading1("Set flags.")
-.           for _flags.flag as _flag
+.           for _flags.flag as _flag where !defined(_flag.march)
 .               if (my.encountered_flags > 0)
 
 .               endif
@@ -277,6 +277,14 @@ repository_root_dir=`cd "${srcdir}/../.." && pwd`
 .               emit_flag(_flag, my.repository, my.configuration, my.meta)
 .               my.encountered_flags += 1
 .           endfor
+.
+.           if (count(_flags.flag, defined(this.march), this) > 0)
+.               if (my.encountered_flags > 0)
+
+.               endif
+.
+.               emit_march(_flags, my.repository)
+.           endif
 .       endif
 .   endnew
 .
@@ -566,6 +574,67 @@ $(my.indent_as_if)])
 .   endif
 .
 .endmacro # emit_flag
+.
+.macro emit_march(flags, repository)
+.   define my.flags = emit_march.flags
+.   define my.repository = emit_march.repository
+.
+march_base=""
+march_features=""
+.   for my.flags.flag as _flag where defined(_flag.march) by _flag.base
+.       define my.option = march_option(_flag, my.repository)
+AS_IF([test "x${$(my.option)}" != "xno"],
+  [
+    march_base="$(_flag.base)"
+    march_features="${march_features}$(_flag.march)"
+  ])
+.   endfor
+
+AS_IF([test "x${march_features}" != "x"],
+  [
+    march="-march=${march_base}${march_features}"
+    march_CXXFLAGS="${CXXFLAGS}"
+    CXXFLAGS="${CXXFLAGS} ${march}"
+.   for my.flags.flag as _flag where defined(_flag.march) & defined(_flag->program)
+.       define my.option = march_option(_flag, my.repository)
+
+    AS_IF([test "x${$(my.option)}" != "xno"],
+      [
+        AC_MSG_CHECKING([whether ${march} supports $(_flag.option)])
+        AC_COMPILE_IFELSE(
+          [
+            AC_LANG_PROGRAM(
+              [[
+.       for _flag->program.include as _include
+                #include <$(_include.header)>
+.       endfor
+              ]],
+              [[
+.       for _flag->program.loc as _loc
+                $(_loc)
+.       endfor
+              ]])
+          ],
+          [AC_MSG_RESULT([yes])],
+          [AC_MSG_ERROR([${march} does not support $(_flag.option).])])
+      ])
+.   endfor
+
+    CXXFLAGS="${march_CXXFLAGS}"
+    CFLAGS="${CFLAGS} ${march}"
+    CXXFLAGS="${CXXFLAGS} ${march}"
+    AC_SUBST([march], ["${march}"])
+  ])
+.endmacro # emit_march
+.
+.function march_option(flag, repository)
+.   define my.flag = march_option.flag
+.   define my.repository = march_option.repository
+.   define my.target = my.repository->$(my.flag->target.type)(\
+        is_target_element(this) & (this.name = my.flag->target.name), this)
+.
+.   return get_option(my.flag, my.target, my.repository, "_")
+.endfunction
 .
 .macro emit_dependency(dependency, repository, configuration, meta)
 .   define my.dependency = emit_dependency.dependency
