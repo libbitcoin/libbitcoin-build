@@ -76,13 +76,14 @@
         comment="Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
         msvc="/p:Option-vaes=true" />
 
-      <option name="ultrafast" type="with"
-        default="no"
-        comment="Use shrec/UltrafastSecp256k1 library." />
-
       <option name="secp256k1" type="with"
         default="no"
         comment="Use bitcoin-core/secp256k1 library." />
+
+      <option name="cuda" type="enable"
+        default="no"
+        comment="Use cuda (gpu) batch signature verification."
+        msvc="/p:Option-cuda=true" />
 
       <!-- Dependencies -->
       <dependency name="boost" version="1.86.0">
@@ -93,7 +94,6 @@
       </dependency>
 
       <dependency name="secp256k1" version="0.8.0" option="secp256k1" />
-      <dependency name="UltrafastSecp256k1" version="4.0.0.0" option="ultrafast" />
 
       <compiler standard="20">
         <define option="secp256k1"
@@ -106,6 +106,12 @@
           comment="Version of bitcoin-core/secp256k1 library."
           type="private">
           <symbol name="SECP256K1_VERSION" value="${secp256k1_VERSION}" />
+        </define>
+
+        <define option="cuda"
+          comment="Use cuda (gpu) batch signature verification."
+          type="private">
+          <symbol value="ENABLE_CUDA" />
         </define>
 
         <flag option="avx2"
@@ -2282,54 +2288,6 @@
       </build>
       <cmake namespace="Boost" package="Boost" />
     </dependency>
-    <dependency name="UltrafastSecp256k1"
-      textname="UltrafastSecp256k1"
-      conditional="true"
-      comment="Build Ultra high-performance secp256k1 ECC engine."
-      optionname="ultrafast">
-      <github owner="shrec" tag="main" />
-      <nuget>
-        <resource canonical="UltrafastSecp256k1">
-          <package compiler="v145" name="UltrafastSecp256k1-vc145" version="4.6.0.0"
-            targets="build/native" />
-        </resource>
-      </nuget>
-      <build method="nuget" />
-      <build method="cmake" filepath="." objpath="." parallel="true">
-
-        <!-- enable necessary features -->
-        <option value="-DSECP256K1_BUILD_CABI=ON" />
-        <option value="-DSECP256K1_BUILD_CPU=ON" />
-        <option value="-DSECP256K1_BUILD_SHIM=ON" />
-        <option value="-DSECP256K1_USE_ULTRAFAST=ON" />
-
-        <!-- hardware support options -->
-        <!--
-        <option value="-DSECP256K1_BUILD_CUDA=ON" />
-        <option value="-DSECP256K1_BUILD_ROCM=ON" />
-        <option value="-DSECP256K1_BUILD_OPENCL=ON" />
-        <option value="-DSECP256K1_BUILD_METAL=ON" />
-          -->
-
-        <!-- disable unnecessary projects -->
-        <option value="-DSECP256K1_BUILD_BENCH=OFF" />
-        <option value="-DSECP256K1_BUILD_EXAMPLES=OFF" />
-        <option value="-DSECP256K1_BUILD_JAVA=OFF" />
-        <option value="-DSECP256K1_BUILD_TESTS=OFF" />
-
-        <!-- disable shared libraries -->
-        <option value="-DSECP256K1_SHIM_BUILD_SHARED=OFF" />
-        <option value="-DUFSECP_BUILD_SHARED=OFF" />
-
-        <!-- installation control (why would i want to not install what i configured?) -->
-        <option value="-DSECP256K1_INSTALL=ON" />
-        <option value="-DSECP256K1_SHIM_INSTALL=ON" />
-        <option value="-DSECP256K1_INSTALL_PKGCONFIG=ON" />
-      </build>
-      <cmake namespace="secp256k1" package="secp256k1-fast"
-        target="secp256k1::fastsecp256k1" />
-      <pkg name="secp256k1-fast" />
-    </dependency>
     <dependency name="secp256k1"
       textname="libsecp256k1"
       conditional="true"
@@ -2959,7 +2917,6 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
 
       <!-- store -->
       <ignore comment="store">
-        <ignore name="*.bin" comment="ultrafast cache" />
         <ignore name="*.head" comment="store table heads" />
         <ignore name="*.data" comment="store table bodies" />
       </ignore>
