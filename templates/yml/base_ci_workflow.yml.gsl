@@ -285,8 +285,8 @@ function populate_project_paths(results, repository)
         for _target.sources as _sources
             populate_unique_path(my.results, _sources)
         endfor
-        for _target.include as _include
-            populate_unique_path(my.results, _include)
+        for _target.headers as _headers
+            populate_unique_path(my.results, _headers)
         endfor
     endfor
 endfunction
