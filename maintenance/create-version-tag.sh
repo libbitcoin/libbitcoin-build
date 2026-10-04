@@ -118,9 +118,9 @@ git pull --ff-only origin "$BRANCH" 2>/dev/null || true
 # ------------------------------------------------------------------
 # Step 2: Configure git identity
 # ------------------------------------------------------------------
-echo "=== Configuring git identity ==="
-git config user.name "github-actions[bot]"
-git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+#echo "=== Configuring git identity ==="
+#git config user.name "github-actions[bot]"
+#git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
 # ------------------------------------------------------------------
 # Step 3: Compute version
