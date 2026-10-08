@@ -419,6 +419,9 @@ $(column_variables("BUILD_FULL_REPOSITORIES", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_POST_INSTALL_CLEAN", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_USE_LOCAL_SRC", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_SKIP_TESTS", my.column, my.prefix, my.suffix))
+.   if defined(my.meta->option(option.id = "build-valgrind"))
+$(column_variables("BUILD_VALGRIND", my.column, my.prefix, my.suffix))
+.   endif
 $(column_variables("PARALLEL", my.column, my.prefix, my.suffix))
 $(column_variables("PREFIX", my.column, my.prefix, my.suffix))
 $(column_variables("DISPLAY_VERBOSE", my.column, my.prefix, my.suffix))
@@ -934,6 +937,17 @@ test_gnu()
     if [[ ${RESULT} -ne 0 ]]; then
         msg_error "Encountered error, please see test.log contents above."
         exit ${RESULT}
+    fi
+
+    if [[ -n "${BUILD_VALGRIND}" && "${PROJECT}" == "$(my.repository.name)" ]]; then
+        msg "Testing ${PROJECT} under valgrind: ${BUILD_VALGRIND}"
+        valgrind --quiet --error-exitcode=1 "./test/${PROJECT}-test" --run_test="${BUILD_VALGRIND}"
+
+        RESULT=$?
+        if [[ ${RESULT} -ne 0 ]]; then
+            msg_error "Encountered valgrind error, please see report above."
+            exit ${RESULT}
+        fi
     fi
 
     enable_exit_on_error

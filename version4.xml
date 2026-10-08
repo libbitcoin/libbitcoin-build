@@ -85,6 +85,10 @@
         default="no"
         comment="Use bitcoin-core/secp256k1 library." />
 
+      <option name="valgrind" type="with"
+        default="no"
+        comment="Use valgrind memcheck client requests." />
+
       <option name="cuda" type="enable"
         default="yes"
         comment="Use cuda (gpu) batch signature verification (inert on macOS)."
@@ -111,6 +115,12 @@
           comment="Version of bitcoin-core/secp256k1 library."
           type="private">
           <symbol name="SECP256K1_VERSION" value="${secp256k1_VERSION}" />
+        </define>
+
+        <define option="valgrind"
+          comment="Use valgrind memcheck client requests."
+          type="private">
+          <symbol value="WITH_VALGRIND" />
         </define>
 
         <define option="cuda"
@@ -517,6 +527,21 @@
         <job name="presets" preset="nix-gnu-debug-static" />
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-debug-static" gate="true" />
+      </entry>
+
+      <!-- constant time (valgrind reports secret dependent branches) -->
+      <entry image="ubuntu-24.04">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <package name="valgrind" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--with-valgrind" />
+        <option name="gnu" value="--build-valgrind=secp256k1_ctime_tests" />
+
+        <job name="gnu" config="debug" link="static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -2603,6 +2628,14 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       sanitize="true" >
       <symbol long="--build-skip-tests" />
     </option>
+    <option id="build-valgrind"
+      canonical="BUILD_VALGRIND"
+      comment="Also run the tests matching the filter under valgrind."
+      datatype="string"
+      placeholder="filter"
+      sanitize="true" >
+      <symbol long="--build-valgrind" />
+    </option>
 
     <!-- parallelism -->
     <option id="build-parallel"
@@ -2781,6 +2814,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="build-full-repositories" />
       <option id="build-post-install-clean" />
       <option id="build-skip-tests" />
+      <option id="build-valgrind" />
       <option id="build-parallel" />
       <option id="build-use-local-src" />
       <option id="prefix" />
