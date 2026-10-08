@@ -356,6 +356,8 @@ $(column_variables("CC", my.column, my.prefix, my.suffix))
 $(column_variables("CFLAGS", my.column, my.prefix, my.suffix))
 $(column_variables("CXX", my.column, my.prefix, my.suffix))
 $(column_variables("CXXFLAGS", my.column, my.prefix, my.suffix))
+$(column_variables("LDFLAGS", my.column, my.prefix, my.suffix))
+$(column_variables("LDADD", my.column, my.prefix, my.suffix))
 $(column_variables("LD_RUN_PATH", my.column, my.prefix, my.suffix))
 $(column_variables("LD_LIBRARY_PATH", my.column, my.prefix, my.suffix))
 $(column_variables("PKG_CONFIG_PATH", my.column, my.prefix, my.suffix))
@@ -1579,7 +1581,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             STDLIB="stdc++"
         fi
     else
-        define_message_verbose "STDLIB using defined value '${STDLIB}'"
+        msg_verbose "STDLIB using defined value '${STDLIB}'"
     fi
 
     if [[ -z "${CC}" ]]; then

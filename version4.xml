@@ -3193,6 +3193,17 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
         comment="Substitute -isystem for -I in dependencies."
         treatment="none" />
 
+      <!--
+      <option type="enable" name="force_static"
+        default="no"
+        comment="Use -all-static on binary libtool linking."
+        treatment="substitute">
+        <on value="yes">
+          <substitute symbol="LIBTOOL_ALL_STATIC" value="-all-static" />
+        </on>
+      </option>
+        -->
+
       <option type="with" name="pkgconfigdir"
         default="${libdir}/pkgconfig"
         comment="Path to pkgconfig directory."
