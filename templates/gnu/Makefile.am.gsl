@@ -462,6 +462,9 @@ $(my.prefix)_CPPFLAGS = \\
 .       endfor
 
 $(my.prefix)_LDFLAGS = \\
+.       if (name(my.target) = "binary")
+    ${LIBTOOL_ALL_STATIC} \\
+.       endif
 .
 .       for my.target.dependency as _depend
 .           define my.is_last_depend = last()

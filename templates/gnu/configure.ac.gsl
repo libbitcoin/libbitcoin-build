@@ -415,10 +415,26 @@ $(my.operation)($(my.predicate), [AC_SUBST([$(_sub.symbol)], [-D$(_sub.value)]))
 .
 .   elsif (my.treatment = "substitute")
 .
-.       if !(my.name = my.option_var)
+.       if (count(my.option.on) = 0)
+.           if !(my.name = my.option_var)
 AC_SUBST([$(my.name)],[${$(my.option_var)}])
-.       else
+.           else
 AC_SUBST([$(my.name)])
+.           endif
+.       else
+.           define my.operation = (my.datatype = "boolean") ?? "AS_IF" ? "AS_CASE"
+.           for my.option.on as _on
+.               define my.test = is_defined_positive(_on, "value") ?? \
+                    "!=" ? "=="
+.
+.               define my.predicate = (my.datatype = "boolean") ?? \
+                    "[test \"x${$(my.option_var)}\" $(my.test) \"xno\"]" ? \
+                    "[${$(my.option_var)}], [$(_on.value)]"
+.
+.               for _on.substitute as _sub
+$(my.operation)($(my.predicate), [AC_SUBST([$(_sub.symbol)],[$(_sub.value)])]) 
+.               endfor
+.           endfor
 .       endif
 .
 .   elsif !(my.treatment = "none")
