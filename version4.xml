@@ -2293,7 +2293,8 @@
     <dependency name="boost"
       textname="Boost"
       conditional="true"
-      comment="Build Boost libraries.">
+      comment="Build Boost libraries."
+      stage="external">
       <prefix root="true" with="true" />
       <archive version="1.86.0">
         <url pattern="https://archives.boost.io/release/version/source/">
@@ -2338,7 +2339,8 @@
     <dependency name="secp256k1"
       textname="libsecp256k1"
       conditional="true"
-      comment="Build libsecp256k1 libraries.">
+      comment="Build libsecp256k1 libraries."
+      stage="external">
       <github owner="bitcoin-core" tag="v0.8.0" />
       <nuget>
         <resource canonical="secp256k1">
@@ -2637,6 +2639,21 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <symbol long="--build-valgrind" />
     </option>
 
+    <!-- -->
+    <option id="build-limit"
+      canonical="BUILD_LIMIT"
+      comment="Limitation at which the process will terminate."
+      datatype="enumeration"
+      placeholder="limit"
+      sanitize="true" >
+      <symbol long="--build-limit" />
+      <value symbol="none" />
+      <value symbol="target" />
+      <value symbol="dependencies" />
+      <value symbol="external" />
+      <hint text="Default: none" />
+    </option>
+
     <!-- parallelism -->
     <option id="build-parallel"
       canonical="PARALLEL"
@@ -2809,6 +2826,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="build-src-dir" />
       <option id="build-obj-dir" />
       <option id="build-obj-dir-relative" />
+      <option id="build-limit" />
       <option id="build-config" />
       <option id="build-link" />
       <option id="build-full-repositories" />
@@ -2833,6 +2851,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="build-src-dir" />
       <option id="build-obj-dir" />
       <option id="build-obj-dir-relative" />
+      <option id="build-limit" />
       <option id="build-config" />
       <option id="build-link" />
       <option id="build-full-repositories" />
@@ -2860,6 +2879,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <source type="github" />
       <option id="build-preset" />
       <option id="build-src-dir" />
+      <option id="build-limit" />
       <option id="build-full-repositories" />
       <option id="build-post-install-clean" />
       <option id="build-skip-tests" />
