@@ -1454,6 +1454,21 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
         msg_verbose "Determined absolute path for $(registered_option_symbol("build-obj-dir", my.configuration)) '${BUILD_OBJ_DIR}'."
     fi
 
+    # --build-limit
+    if [[ -z "${BUILD_LIMIT}" ]]; then
+        BUILD_LIMIT="none"
+        msg_verbose "No $(registered_option_symbol("build-limit", my.configuration)) specified."
+    elif [[ "${BUILD_LIMIT}" != "none" ]] &&
+        [[ "${BUILD_LIMIT}" != "target" ]] &&
+        [[ "${BUILD_LIMIT}" != "dependencies" ]] &&
+        [[ "${BUILD_LIMIT}" != "external" ]]; then
+        msg_error "Provided $(registered_option_symbol("build-limit", my.configuration)) '${BUILD_LIMIT}' not a valid value."
+        help
+        exit 1
+    else
+        msg_verbose "Using provided $(registered_option_symbol("build-limit", my.configuration)) '${BUILD_LIMIT}'"
+    fi
+
     # --build-config
     if [[ -z "${BUILD_CONFIG}" ]]; then
         msg_verbose "No $(registered_option_symbol("build-config", my.configuration)) specified."
@@ -1779,6 +1794,19 @@ main()
 .       define my.indent = my.step
 .
 
+.       if last()
+$(my.indent)if [[ ${BUILD_LIMIT} == "target" ]] ||
+$(my.indent)   [[ ${BUILD_LIMIT} == "none" ]]; then
+.       elsif defined(_depend.stage)
+$(my.indent)if [[ ${BUILD_LIMIT} == "$(_depend.stage)" ]] ||
+$(my.indent)   [[ ${BUILD_LIMIT} == "dependencies" ]] ||
+$(my.indent)   [[ ${BUILD_LIMIT} == "none" ]]; then
+.       else
+$(my.indent)if [[ ${BUILD_LIMIT} == "dependencies" ]] ||
+$(my.indent)   [[ ${BUILD_LIMIT} == "none" ]]; then
+.       endif
+.       my.indent = "$(my.step)$(my.indent)"
+.
 .       if (is_defined_positive(_depend, "conditional"))
 $(my.indent)if [[ ${BUILD_$(my.oname)} == "yes" ]]; then
 .           my.indent = "$(my.step)$(my.indent)"
@@ -1877,6 +1905,8 @@ $(my.indent)export CPPFLAGS="${SAVE_CPPFLAGS}"
 .           my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
 $(my.indent)fi
 .       endif
+.       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
+$(my.indent)fi
 .   endfor
 
     msg_success "Completed successfully."
