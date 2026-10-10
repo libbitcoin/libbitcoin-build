@@ -95,12 +95,7 @@
         msvc="/p:Option-cuda=true" />
 
       <!-- Dependencies -->
-      <dependency name="boost" version="1.86.0">
-        <component name="container" />
-        <component name="json" />
-        <component name="program_options" />
-        <component name="url" />
-      </dependency>
+      <dependency name="boost" version="1.86.0" />
 
       <dependency name="secp256k1" version="0.8.0" option="secp256k1" />
 
@@ -361,9 +356,7 @@
       <!--
       -->
 
-      <dependency name="boost" version="1.86.0" private="true">
-        <component name="unit_test_framework" />
-      </dependency>
+      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-system" private="true" />
 
@@ -692,9 +685,7 @@
       <!--
       -->
 
-      <dependency name="boost" version="1.86.0" private="true">
-        <component name="unit_test_framework" />
-      </dependency>
+      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-network" private="true" />
 
@@ -951,9 +942,7 @@
       <!--
       -->
 
-      <dependency name="boost" version="1.86.0" private="true">
-        <component name="unit_test_framework" />
-      </dependency>
+      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-database" private="true" />
 
@@ -1239,9 +1228,7 @@
       <!--
       -->
 
-      <dependency name="boost" version="1.86.0" private="true">
-        <component name="unit_test_framework" />
-      </dependency>
+      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-node" private="true" />
 
@@ -1493,9 +1480,7 @@
       <!--
       -->
 
-      <dependency name="boost" version="1.86.0" private="true">
-        <component name="unit_test_framework" />
-      </dependency>
+      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-server" private="true" />
 
@@ -1787,9 +1772,7 @@
         <msbuild filter="src" />
       </sources>
 
-      <dependency name="boost" version="1.86.0" private="true">
-        <component name="unit_test_framework" />
-      </dependency>
+      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-explorer" private="true" />
 
@@ -2309,32 +2292,13 @@
         <resource canonical="boost">
           <package compiler="v145" name="libbitcoin-boost" version="1.91.0.1" />
         </resource>
-        <resource canonical="boost_container" component="container">
-          <package compiler="v145" name="libbitcoin-boost_container-vc145" version="1.91.0.1" />
-        </resource>
-        <resource canonical="boost_json" component="json">
-          <package compiler="v145" name="libbitcoin-boost_json-vc145" version="1.91.0.1" />
-        </resource>
-        <resource canonical="boost_program_options" component="program_options">
-          <package compiler="v145" name="libbitcoin-boost_program_options-vc145" version="1.91.0.1" />
-        </resource>
-        <resource canonical="boost_unit_test_framework" component="unit_test_framework">
-          <package compiler="v145" name="libbitcoin-boost_unit_test_framework-vc145" version="1.91.0.1" />
-        </resource>
-        <resource canonical="boost_url" component="url">
-          <package compiler="v145" name="libbitcoin-boost_url-vc145" version="1.91.0.1" />
-        </resource>
       </nuget>
       <build method="nuget" />
       <build method="boost_build" version="1.86.0" parallel="true">
         <flag value="-Wno-enum-constexpr-conversion" />
-        <option value="--with-container" />
-        <option value="--with-json" />
-        <option value="--with-program_options" />
-        <option value="--with-url" />
-        <option value="--with-test" />
+        <option value="--with-headers" />
       </build>
-      <cmake namespace="Boost" package="Boost" />
+      <cmake namespace="Boost" package="Boost" target="Boost::headers" />
     </dependency>
     <dependency name="secp256k1"
       textname="libsecp256k1"
