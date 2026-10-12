@@ -314,6 +314,10 @@ on:
 .       if (_trigger.value = "pull_request")
     types: [opened, synchronize, reopened, closed]
 .       endif
+.       if (_trigger.value = "push")
+    tags-ignore:
+      - "**"
+.       endif
 .       if ((_trigger.value = "pull_request") | (_trigger.value = "push"))
     paths:
       - 'builds/cmake/**'
@@ -333,12 +337,18 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.repository_owner == '$(my.github.owner)' && (github.event.pull_request.number || github.run_id) || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   information:
     runs-on: ubuntu-latest
 
     env:
       CONCURRENCY_GROUP: ${{ github.workflow }}-${{ github.repository_owner == '$(my.github.owner)' && (github.event.pull_request.number || github.run_id) || github.ref }}
+
+    permissions:
+      actions: write
 
     steps:
         - name: state
@@ -351,6 +361,15 @@ jobs:
             echo "ref      : ${{ github.ref }}"
             echo "base_ref : ${{ github.base_ref }}"
             echo "head_ref : ${{ github.head_ref }}"
+
+        - name: cancel on pull_request closed
+          if: github.event_name == 'pull_request' && github.event.action == 'closed'
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            gh api --method POST \\
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/cancel"
 
 .   new list as _list
 .       canonical_dependency_list(_list, my.repository, my.configuration)
@@ -429,10 +448,18 @@ jobs:
           fi
 
       - name: Set msbuild path
-        uses: microsoft/setup-msbuild@v3
+.   define my.setup = my.configuration->registrar(this.id = "actions", this)->action(this.id = "setup-msbuild", this)
+.   require(my.setup, "action", "name")
+.   require(my.setup, "action", "intended")
+.   require(my.setup, "action", "sha")
+        uses: $(my.setup.name)@$(my.setup.sha) # $(my.setup.intended)
         with:
           msbuild-architecture: x64
 .
+.   define my.checkout = my.configuration->registrar(this.id = "actions", this)->action(this.id = "checkout", this)
+.   require(my.checkout, "action", "name")
+.   require(my.checkout, "action", "intended")
+.   require(my.checkout, "action", "sha")
 .   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
 
       - name: Checkout repository [$(_depend.name)]
@@ -440,10 +467,11 @@ jobs:
 .       if !(_depend.name = my.repository.name)
         continue-on-error: true
 .       endif
-        uses: actions/checkout@v6
+        uses: $(my.checkout.name)@$(my.checkout.sha) # $(my.checkout.intended)
         with:
           fetch-depth: 1
           path: '$(_depend.name)'
+          persist-credentials: false
 .       if !(_depend.name = my.repository.name)
           ref: ${{ steps.get-branch.outputs.branch }}
           repository: ${{ github.repository_owner }}/$(_depend.name)
@@ -612,6 +640,10 @@ jobs:
             echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 .
+.   define my.checkout = my.configuration->registrar(this.id = "actions", this)->action(this.id = "checkout", this)
+.   require(my.checkout, "action", "name")
+.   require(my.checkout, "action", "intended")
+.   require(my.checkout, "action", "sha")
 .   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
 
       - name: Checkout repository [$(_depend.name)]
@@ -619,7 +651,7 @@ jobs:
 .       if !(_depend.name = my.repository.name)
         continue-on-error: true
 .       endif
-        uses: actions/checkout@v6
+        uses: $(my.checkout.name)@$(my.checkout.sha) # $(my.checkout.intended)
         with:
           fetch-depth: 1
           path: '$(_depend.name)'
@@ -716,7 +748,7 @@ jobs:
         shell: bash
         working-directory: '$(my.repository.name)'
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.github_token }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-linux-x86_64.tar.gz
           curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-checksums.txt
@@ -737,9 +769,13 @@ jobs:
 .       endfor
 .   endfor
 
+.   define my.upload = my.configuration->registrar(this.id = "actions", this)->action(this.id = "upload", this)
+.   require(my.upload, "action", "name")
+.   require(my.upload, "action", "intended")
+.   require(my.upload, "action", "sha")
       - name: Test artifact upload
         if: failure()
-        uses: actions/upload-artifact@v7.0.1
+        uses: $(my.upload.name)@$(my.upload.sha) # $(my.upload.intended)
         with:
           name: testlogs
           path: ${{ github.workspace }}/*.errors

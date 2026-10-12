@@ -78,6 +78,7 @@ endfunction
 .   define my.repository = emit_version_tag_yml.repository
 .
 .   define my.github = my.configuration->registrar(this.id = "dependency", this)->dependency(this.name = my.repository.name, this)->github
+.   define my.actions = my.configuration->registrar(this.id = "actions", this)
 .
 .   copyleft(my.repository.name)
 
@@ -114,8 +115,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-        - name: Checkout
-          uses: actions/checkout@v6
+.   define my.checkout = my.actions->action(this.id = "checkout", this)
+.   require(my.checkout, "action", "name")
+.   require(my.checkout, "action", "intended")
+.   require(my.checkout, "action", "sha")
+       - name: Checkout
+         uses: $(my.checkout.name)@$(my.checkout.sha) # $(my.checkout.intended)
           with:
             fetch-depth: 0
             ref: ${{ github.event.inputs.branch || 'master' }}

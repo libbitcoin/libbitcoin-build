@@ -12,23 +12,25 @@ Arguments:
                       (default: current directory)
 
 Options:
-  -r, --repo PATH           Explicitly set repository path
+  -p, --repo PATH           Explicitly set repository path
                             (overrides positional argument)
   -b, --branch BRANCH       Branch to use for tag generation (default: master)
   -d, --description TEXT    Description / message for the annotated tag (default: empty)
   -s, --suffix SUFFIX       Suffix applied to the version tag (default: empty)
+  -r, --remote REMOTE       Name of the remote to push the tag to.
+                            If omitted, the tag is created locally only (no push).
   -n, --dry-run             Compute and show the tag, but do not create or push it
   -h, --help                Show this help
 
 Examples:
-  # Use current directory
+  # Use current directory (create tag locally only)
   $0
   $0 .
-  $0 --repo .
+  $0 -p .
 
-  # Use another path
-  $0 /path/to/libbitcoin-server
-  $0 -r /path/to/libbitcoin-server -b master -d "Release notes"
+  # Create tag and push to a remote
+  $0 -r origin
+  $0 -p /path/to/libbitcoin-server -b master -d "Release notes" -r origin
 EOF
 }
 
@@ -38,11 +40,12 @@ DESCRIPTION=""
 SUFFIX=""
 DRY_RUN=0
 REPO=""
+REMOTE=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -r|--repo)
+    -p|--repo)
       REPO="${2:-}"
       shift 2
       ;;
@@ -56,6 +59,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -s|--suffix)
       SUFFIX="${2:-}"
+      shift 2
+      ;;
+    -r|--remote)
+      REMOTE="${2:-}"
       shift 2
       ;;
     -n|--dry-run)
@@ -112,18 +119,10 @@ echo "Using repository: $REPO"
 echo "=== Checking out branch: $BRANCH ==="
 git fetch --all --tags 2>/dev/null || true
 git checkout "$BRANCH"
-# Ensure we have full history (equivalent to fetch-depth: 0)
-git pull --ff-only origin "$BRANCH" 2>/dev/null || true
+# Do NOT pull – we want to stay on the staged / checked-out commit
 
 # ------------------------------------------------------------------
-# Step 2: Configure git identity
-# ------------------------------------------------------------------
-#echo "=== Configuring git identity ==="
-#git config user.name "github-actions[bot]"
-#git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-# ------------------------------------------------------------------
-# Step 3: Compute version
+# Step 2: Compute version
 # ------------------------------------------------------------------
 echo "=== Computing version ==="
 
@@ -151,7 +150,7 @@ echo "tag=$TAG"
 echo "Computed tag: $TAG"
 
 # ------------------------------------------------------------------
-# Step 4: Create tag
+# Step 3: Create tag
 # ------------------------------------------------------------------
 echo "=== Creating tag ==="
 
@@ -163,10 +162,19 @@ fi
 if [[ $DRY_RUN -eq 1 ]]; then
   echo "[dry-run] Would create annotated tag: $TAG"
   echo "[dry-run] Message: $DESCRIPTION"
-  echo "[dry-run] Would push: git push origin $TAG"
+  if [[ -n "$REMOTE" ]]; then
+    echo "[dry-run] Would push: git push $REMOTE $TAG"
+  else
+    echo "[dry-run] Would not push (no remote specified)"
+  fi
   exit 0
 fi
 
 git tag -a "$TAG" -m "$DESCRIPTION"
-git push origin "$TAG"
-echo "Created tag '$TAG'."
+
+if [[ -n "$REMOTE" ]]; then
+  git push "$REMOTE" "$TAG"
+  echo "Created tag '$TAG' and pushed to remote '$REMOTE'."
+else
+  echo "Created tag '$TAG' locally (no push)."
+fi
