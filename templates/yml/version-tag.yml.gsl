@@ -119,8 +119,8 @@ jobs:
 .   require(my.checkout, "action", "name")
 .   require(my.checkout, "action", "intended")
 .   require(my.checkout, "action", "sha")
-       - name: Checkout
-         uses: $(my.checkout.name)@$(my.checkout.sha) # $(my.checkout.intended)
+        - name: Checkout
+          uses: $(my.checkout.name)@$(my.checkout.sha) # $(my.checkout.intended)
           with:
             fetch-depth: 0
             ref: ${{ github.event.inputs.branch || 'master' }}
