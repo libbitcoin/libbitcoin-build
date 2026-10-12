@@ -117,9 +117,10 @@ jobs:
     steps:
 .   define my.checkout = my.actions->action(this.id = "checkout", this)
 .   require(my.checkout, "action", "name")
+.   require(my.checkout, "action", "intended")
 .   require(my.checkout, "action", "sha")
        - name: Checkout
-         uses: $(my.checkout.name)@$(my.checkout.sha)
+         uses: $(my.checkout.name)@$(my.checkout.sha) # $(my.checkout.intended)
           with:
             fetch-depth: 0
             ref: ${{ github.event.inputs.branch || 'master' }}

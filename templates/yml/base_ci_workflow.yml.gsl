@@ -450,13 +450,15 @@ jobs:
       - name: Set msbuild path
 .   define my.setup = my.configuration->registrar(this.id = "actions", this)->action(this.id = "setup-msbuild", this)
 .   require(my.setup, "action", "name")
+.   require(my.setup, "action", "intended")
 .   require(my.setup, "action", "sha")
-        uses: $(my.setup.name)@$(my.setup.sha)
+        uses: $(my.setup.name)@$(my.setup.sha) # $(my.setup.intended)
         with:
           msbuild-architecture: x64
 .
 .   define my.checkout = my.configuration->registrar(this.id = "actions", this)->action(this.id = "checkout", this)
 .   require(my.checkout, "action", "name")
+.   require(my.checkout, "action", "intended")
 .   require(my.checkout, "action", "sha")
 .   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
 
@@ -465,7 +467,7 @@ jobs:
 .       if !(_depend.name = my.repository.name)
         continue-on-error: true
 .       endif
-        uses: $(my.checkout.name)@$(my.checkout.sha)
+        uses: $(my.checkout.name)@$(my.checkout.sha) # $(my.checkout.intended)
         with:
           fetch-depth: 1
           path: '$(_depend.name)'
@@ -640,6 +642,7 @@ jobs:
 .
 .   define my.checkout = my.configuration->registrar(this.id = "actions", this)->action(this.id = "checkout", this)
 .   require(my.checkout, "action", "name")
+.   require(my.checkout, "action", "intended")
 .   require(my.checkout, "action", "sha")
 .   for my.dependencies.dependency as _depend where defined(_depend->github) & (_depend->github.owner = "libbitcoin")
 
@@ -648,7 +651,7 @@ jobs:
 .       if !(_depend.name = my.repository.name)
         continue-on-error: true
 .       endif
-        uses: $(my.checkout.name)@$(my.checkout.sha)
+        uses: $(my.checkout.name)@$(my.checkout.sha) # $(my.checkout.intended)
         with:
           fetch-depth: 1
           path: '$(_depend.name)'
@@ -768,10 +771,11 @@ jobs:
 
 .   define my.upload = my.configuration->registrar(this.id = "actions", this)->action(this.id = "upload", this)
 .   require(my.upload, "action", "name")
+.   require(my.upload, "action", "intended")
 .   require(my.upload, "action", "sha")
       - name: Test artifact upload
         if: failure()
-        uses: $(my.upload.name)@$(my.upload.sha)
+        uses: $(my.upload.name)@$(my.upload.sha) # $(my.upload.intended)
         with:
           name: testlogs
           path: ${{ github.workspace }}/*.errors
