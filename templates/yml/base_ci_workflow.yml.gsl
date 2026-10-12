@@ -337,6 +337,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.repository_owner == '$(my.github.owner)' && (github.event.pull_request.number || github.run_id) || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   information:
     runs-on: ubuntu-latest
@@ -460,6 +463,7 @@ jobs:
         with:
           fetch-depth: 1
           path: '$(_depend.name)'
+          persist-credentials: false
 .       if !(_depend.name = my.repository.name)
           ref: ${{ steps.get-branch.outputs.branch }}
           repository: ${{ github.repository_owner }}/$(_depend.name)
@@ -732,7 +736,7 @@ jobs:
         shell: bash
         working-directory: '$(my.repository.name)'
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.github_token }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-linux-x86_64.tar.gz
           curl -sLO https://github.com/coverallsapp/coverage-reporter/releases/latest/download/coveralls-checksums.txt
