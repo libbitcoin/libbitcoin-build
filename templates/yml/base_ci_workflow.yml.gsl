@@ -315,8 +315,10 @@ on:
     types: [opened, synchronize, reopened, closed]
 .       endif
 .       if (_trigger.value = "push")
+    branches:
+      - '**'
     tags-ignore:
-      - "**"
+      - '**'
 .       endif
 .       if ((_trigger.value = "pull_request") | (_trigger.value = "push"))
     paths:
