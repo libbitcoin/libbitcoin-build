@@ -493,6 +493,12 @@ jobs:
 .       endif
 .   endfor
 
+      - name: Force clean nuget package repository
+        shell: cmd
+        working-directory: '$(my.repository.name)'
+        run: |
+          nuget locals all -clear
+
       - name: Execute build
         shell: cmd
         working-directory: '$(my.repository.name)'
