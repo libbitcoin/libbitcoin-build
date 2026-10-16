@@ -447,32 +447,6 @@
       <!-- clang -->
       <entry image="ubuntu-24.04">
         <build name="boost" />
-
-        <compiler lang="c" name="clang" version="19" />
-        <compiler lang="cxx" name="clang++" version="19" />
-
-        <package name="clang-19" />
-        <package name="clang++-19" />
-
-        <option name="gnu" value="--enable-isystem" />
-        <option name="presets" value="--build-skip-tests" />
-
-        <job name="gnu" config="debug" link="dynamic" gate="true" />
-        <job name="gnu" config="debug" link="static" />
-        <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" />
-        <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" />
-        <job name="cmake" config="release" link="static" gate="true" />
-        <job name="presets" preset="nix-gnu-debug-shared" />
-        <job name="presets" preset="nix-gnu-debug-static" />
-        <job name="presets" preset="nix-gnu-release-shared" />
-        <job name="presets" preset="nix-gnu-release-static" />
-      </entry>
-
-      <entry image="ubuntu-24.04">
-        <build name="boost" />
         <build name="secp256k1" />
 
         <compiler lang="c" name="clang" version="18" />
@@ -494,6 +468,32 @@
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
         <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
+
+      <entry image="ubuntu-24.04">
+        <build name="boost" />
+
+        <compiler lang="c" name="clang" version="19" />
+        <compiler lang="cxx" name="clang++" version="19" />
+
+        <package name="clang-19" />
+        <package name="clang++-19" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="presets" value="--build-skip-tests" />
+
+        <job name="gnu" config="debug" link="dynamic" gate="true" />
+        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="dynamic" />
+        <job name="gnu" config="release" link="static" />
+        <job name="cmake" config="debug" link="dynamic" />
+        <job name="cmake" config="debug" link="static" />
+        <job name="cmake" config="release" link="dynamic" />
+        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="presets" preset="nix-gnu-debug-shared" />
+        <job name="presets" preset="nix-gnu-debug-static" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -2156,6 +2156,188 @@
         </link>
      </compiler>
   </canonical>
+
+  <registrar id="build">
+    <axis id="configuration">
+      <entry name="debug" />
+      <entry name="release" />
+    </axis>
+
+    <axis id="linkage">
+      <entry name="dynamic" />
+      <entry name="static" />
+    </axis>
+
+    <axis id="os">
+      <entry name="linux" />
+      <entry name="macos" />
+      <entry name="windows" />
+    </axis>
+
+    <axis id="platform">
+      <entry name="arm64" />
+      <entry name="x64" />
+    </axis>
+
+    <axis group="optimizations">
+      <applicable id="platform" name="arm64" />
+      <entry name="none" />
+      <entry name="sha" />
+      <entry name="sha3" />
+    </axis>
+
+    <axis group="optimizations">
+      <applicable id="platform" name="x64" />
+      <entry name="avx2" />
+      <entry name="avx512" />
+      <entry name="shani" />
+      <entry name="avx512-shani" />
+      <entry name="avxifma" />
+      <entry name="avx512-avxifma" />
+    </axis>
+
+    <axis group="image">
+      <applicable id="os" name="linux" />
+      <applicable id="platform" name="arm64" />
+      <entry name="ubuntu-24.04-arm64" />
+      <entry name="ubuntu-26.04-arm64" />
+    </axis>
+
+    <axis group="image">
+      <applicable id="os" name="linux" />
+      <applicable id="platform" name="x64" />
+      <entry name="ubuntu-24.04" />
+      <entry name="ubuntu-26.04" />
+    </axis>
+
+    <axis group="image">
+      <applicable id="os" name="macos" />
+      <applicable id="platform" name="arm64" />
+      <entry name="macos-26-arm64" />
+    </axis>
+
+    <axis group="image">
+      <applicable id="os" name="macos" />
+      <applicable id="platform" name="x64" />
+      <entry name="macos-26-intel" />
+    </axis>
+
+    <axis group="image">
+      <applicable id="os" name="windows" />
+      <applicable id="platform" name="arm64" />
+      <entry name="windows-11-vs2026-arm" />
+    </axis>
+
+    <axis group="image">
+      <applicable id="os" name="windows" />
+      <applicable id="platform" name="x64" />
+      <entry name="windows-2025-vs2026" />
+    </axis>
+
+    <axis group="toolchain">
+      <applicable id="os" name="windows" />
+      <entry name="msbuild" />
+    </axis>
+
+    <axis group="toolchain">
+      <applicable id="os" name="linux" />
+      <entry name="cmake" />
+      <entry name="gnu" />
+    </axis>
+
+    <axis group="toolchain">
+      <applicable id="os" name="macos" />
+      <entry name="cmake" />
+    </axis>
+
+    <axis group="libc">
+      <applicable id="os" name="linux" />
+      <!-- build tooling restriction -->
+      <applicable id="platform" name="x64" />
+      <entry name="glibc" />
+      <entry name="musl" />
+    </axis>
+
+    <axis group="compiler">
+      <applicable id="toolchain" name="cmake" />
+      <applicable id="toolchain" name="gnu" />
+      <entry name="clang" />
+      <entry name="gcc" />
+    </axis>
+
+    <axis group="compiler">
+      <applicable id="toolchain" name="msbuild" />
+      <entry name="default" />
+    </axis>
+
+    <axis group="compiler-version">
+      <applicable id="compiler" name="clang" />
+      <applicable id="image" name="ubuntu-24.04" />
+      <entry name="default" />
+      <entry name="18" />
+      <entry name="19" />
+    </axis>
+
+    <axis group="compiler-version">
+      <applicable id="compiler" name="clang" />
+      <applicable id="image" name="ubuntu-26.04" />
+      <entry name="default" />
+      <entry name="20" />
+      <entry name="21" />
+      <entry name="22" />
+    </axis>
+
+    <axis group="compiler-version">
+      <applicable id="compiler" name="clang" />
+      <applicable id="image" name="ubuntu-24.04-arm" />
+      <entry name="default" />
+      <entry name="18" />
+      <entry name="19" />
+    </axis>
+
+    <axis group="compiler-version">
+      <applicable id="compiler" name="clang" />
+      <applicable id="image" name="ubuntu-26.04-arm" />
+      <entry name="default" />
+      <entry name="20" />
+      <entry name="21" />
+      <entry name="22" />
+    </axis>
+
+     <axis group="compiler-version">
+      <applicable id="compiler" name="gcc" />
+      <applicable id="image" name="ubuntu-24.04" />
+      <entry name="default" />
+      <entry name="13" />
+      <entry name="14" />
+    </axis>
+
+     <axis group="compiler-version">
+      <applicable id="compiler" name="gcc" />
+      <applicable id="image" name="ubuntu-26.04" />
+      <entry name="default" />
+      <entry name="13" />
+      <entry name="14" />
+      <entry name="15" />
+    </axis>
+
+     <axis group="compiler-version">
+      <applicable id="compiler" name="gcc" />
+      <applicable id="image" name="ubuntu-24.04-arm" />
+      <entry name="default" />
+      <entry name="13" />
+      <entry name="14" />
+    </axis>
+
+     <axis group="compiler-version">
+      <applicable id="compiler" name="gcc" />
+      <applicable id="image" name="ubuntu-26.04-arm" />
+      <entry name="default" />
+      <entry name="13" />
+      <entry name="14" />
+      <entry name="15" />
+    </axis>
+ </registrar>
 
   <registrar id="dependency">
     <dependency name="libbitcoin-system">
