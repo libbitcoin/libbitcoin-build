@@ -1523,9 +1523,20 @@
         <msbuild filter="resource" />
       </resources>
 
+      <!-- Exposed knobs -->
+      <option name="embedded" type="with"
+        default="yes"
+        comment="Compile web pages into the console application." />
+
       <dependency name="libbitcoin-server" private="true" />
 
       <compiler standard="20">
+        <define option="embedded"
+          comment="Compile web pages into the console application."
+          type="private">
+          <symbol value="WITH_EMBEDDED" />
+        </define>
+
         <flag id="Wall" />
         <flag id="Wextra" />
         <!-- <flag id="Wpedantic" /> -->
