@@ -1015,12 +1015,12 @@ include(CheckLinkerFlag)
 .   define my.indent = ""
 .   define my.step = "  "
 
-.   if defined(my.flag.option)
-$(my.indent)if ( $(get_option(my.flag, my.target, my.repository)) )
-.       define my.indent = "$(my.step)$(my.indent)"
-.   endif
 .   if defined(my.flag.compiler)
 $(my.indent)if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "$(compiler_identifier(my.flag))" )
+.       define my.indent = "$(my.step)$(my.indent)"
+.   endif
+.   if defined(my.flag.option)
+$(my.indent)if ( $(get_option(my.flag, my.target, my.repository)) )
 .       define my.indent = "$(my.step)$(my.indent)"
 .   endif
 .   if defined(my.flag->program)
@@ -1028,11 +1028,29 @@ $(my.indent)if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "$(compiler_identifier(my.f
 .   else
 .       emit_check_compiler_flag(my.flag, my.repository, my.indent)
 .   endif
-.   if defined(my.flag.compiler)
+.   if defined(my.flag.option)
+.       if is_defined_positive(my.flag, "environmental") & defined(my.flag->program)
+.       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
+$(my.indent)else()
+.       define my.indent = "$(my.step)$(my.indent)"
+.       define my.language = supported_language(my.flag, "c++")
+$(my.indent)check_$(my.language:lower)_source_compiles( "
+.       for my.flag->program.include as _include
+  $(my.indent)#include <$(_include.header)>
+.       endfor
+    $(my.indent)int main() {
+.       for my.flag->program.loc as _loc
+    $(my.indent)$(_loc)
+.       endfor
+    $(my.indent)}" DETECTED_FLAG_$(flag_name(my.flag):upper) )
+$(my.indent)if ( DETECTED_FLAG_$(flag_name(my.flag):upper) )
+  $(my.indent)message( WARNING "Environmental override enabling option '$(my.flag.option)'." )
+$(my.indent)endif()
+.       endif
 .       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
 $(my.indent)endif()
 .   endif
-.   if defined(my.flag.option)
+.   if defined(my.flag.compiler)
 .       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
 $(my.indent)endif()
 .   endif
