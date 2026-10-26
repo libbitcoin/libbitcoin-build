@@ -621,7 +621,7 @@ $(my.indent)[
 .           emit_program(my.flag->program, my.indent)
 .           my.indent = indent_remove(my.indent, my.step)
 $(my.indent)],
-$(my.indent)[echo "Environmental override enabling option '$(my.flag.option)'"],
+$(my.indent)[AC_MSG_WARN(Environmental override enabling option '$(my.flag.option)'.)],
 $(my.indent)[])
 .           my.indent = indent_remove(my.indent, my.step)
 .
