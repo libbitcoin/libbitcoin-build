@@ -1622,6 +1622,11 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
         msg_verbose "CXX using defined value '${CXX}'"
     fi
 
+    # HARDWARE_OPTIMIZED
+    if [[ "${HARDWARE_OPTIMIZED}" == "yes" ]]; then
+        ARCHTUNE="-march=native -mtune=native"
+    fi
+
     # translate BUILD_CONFIG to ZFLAGS
     if [[ -n "${BUILD_CONFIG}" ]]; then
         msg_verbose "*** Build config specified, calculating flags..."
@@ -1633,20 +1638,20 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
         fi
 
         if [[ -z "${CFLAGS}" ]]; then
-            export CFLAGS="${BUILD_FLAGS}"
+            export CFLAGS="${ARCHTUNE} ${BUILD_FLAGS}"
             msg_verbose "Exporting CFLAGS '${CFLAGS}'"
         else
             msg_verbose "CFLAGS initially '${CFLAGS}'"
-            export CFLAGS="${CFLAGS} ${BUILD_FLAGS}"
+            export CFLAGS="${CFLAGS} ${ARCHTUNE} ${BUILD_FLAGS}"
             msg_verbose "CFLAGS modified to '${CFLAGS}'"
         fi
 
         if [[ -z "${CXXFLAGS}" ]]; then
-            export CXXFLAGS="${BUILD_FLAGS}"
+            export CXXFLAGS="${ARCHTUNE} ${BUILD_FLAGS}"
             msg_verbose "Exporting CXXFLAGS '${CXXFLAGS}'"
         else
             msg_verbose "CXXFLAGS initially '${CXXFLAGS}'"
-            export CXXFLAGS="${CXXFLAGS} ${BUILD_FLAGS}"
+            export CXXFLAGS="${CXXFLAGS} ${ARCHTUNE} ${BUILD_FLAGS}"
             msg_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
         fi
     fi

@@ -79,7 +79,7 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      if [[ -z "$REPO" ]]; then
+      if [[ -z "${REPO}" ]]; then
         REPO="$1"
       else
         echo "Unexpected argument: $1" >&2
@@ -92,33 +92,33 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Default to current directory if nothing was provided
-if [[ -z "$REPO" ]]; then
+if [[ -z "${REPO}" ]]; then
   REPO="."
 fi
 
 # Resolve to absolute path for clearer messages
-REPO="$(cd "$REPO" && pwd)"
+REPO="$(cd "${REPO}" && pwd)"
 
-if [[ ! -d "$REPO" ]]; then
-  echo "Error: directory does not exist: $REPO" >&2
+if [[ ! -d "${REPO}" ]]; then
+  echo "Error: directory does not exist: ${REPO}" >&2
   exit 1
 fi
 
-cd "$REPO"
+cd "${REPO}"
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  echo "Error: not a git repository: $REPO" >&2
+  echo "Error: not a git repository: ${REPO}" >&2
   exit 1
 fi
 
-echo "Using repository: $REPO"
+echo "Using repository: ${REPO}"
 
 # ------------------------------------------------------------------
 # Step 1: Checkout equivalent (switch to the requested branch)
 # ------------------------------------------------------------------
-echo "=== Checking out branch: $BRANCH ==="
-git fetch --all --tags 2>/dev/null || true
-git checkout "$BRANCH"
+echo "=== Checking out branch: ${BRANCH} ==="
+git fetch ${REMOTE} --tags 2>/dev/null || true
+git checkout "${BRANCH}"
 # Do NOT pull – we want to stay on the staged / checked-out commit
 
 # ------------------------------------------------------------------
@@ -127,54 +127,54 @@ git checkout "$BRANCH"
 echo "=== Computing version ==="
 
 CMAKE_FILE="builds/cmake/CMakeLists.txt"
-if [[ ! -f "$CMAKE_FILE" ]]; then
-  echo "Error: $CMAKE_FILE not found." >&2
+if [[ ! -f "${CMAKE_FILE}" ]]; then
+  echo "Error: ${CMAKE_FILE} not found." >&2
   exit 1
 fi
 
-MAJOR=$(grep -oP 'set\(\s*LIBBITCOIN_VERSION_MAJOR\s+\K[0-9]+' "$CMAKE_FILE")
-MINOR=$(grep -oP 'set\(\s*LIBBITCOIN_VERSION_MINOR\s+\K[0-9]+' "$CMAKE_FILE")
+MAJOR=$(grep -oP 'set\(\s*LIBBITCOIN_VERSION_MAJOR\s+\K[0-9]+' "${CMAKE_FILE}")
+MINOR=$(grep -oP 'set\(\s*LIBBITCOIN_VERSION_MINOR\s+\K[0-9]+' "${CMAKE_FILE}")
 PATCH=$(git rev-list --count HEAD)
 
-if [[ -z "$MAJOR" || -z "$MINOR" ]]; then
-  echo "Error: could not extract MAJOR/MINOR from $CMAKE_FILE" >&2
+if [[ -z "${MAJOR}" || -z "${MINOR}" ]]; then
+  echo "Error: could not extract MAJOR/MINOR from ${CMAKE_FILE}" >&2
   exit 1
 fi
 
 TAG="v${MAJOR}.${MINOR}.${PATCH}${SUFFIX}"
 
-echo "major=$MAJOR"
-echo "minor=$MINOR"
-echo "patch=$PATCH"
-echo "tag=$TAG"
-echo "Computed tag: $TAG"
+echo "major=${MAJOR}"
+echo "minor=${MINOR}"
+echo "patch=${PATCH}"
+echo "tag=${TAG}"
+echo "Computed tag: ${TAG}"
 
 # ------------------------------------------------------------------
 # Step 3: Create tag
 # ------------------------------------------------------------------
 echo "=== Creating tag ==="
 
-if git rev-parse "$TAG" >/dev/null 2>&1; then
-  echo "Error: Tag $TAG already exists." >&2
+if git rev-parse "${TAG}" >/dev/null 2>&1; then
+  echo "Error: Tag ${TAG} already exists." >&2
   exit 1
 fi
 
-if [[ $DRY_RUN -eq 1 ]]; then
-  echo "[dry-run] Would create annotated tag: $TAG"
-  echo "[dry-run] Message: $DESCRIPTION"
-  if [[ -n "$REMOTE" ]]; then
-    echo "[dry-run] Would push: git push $REMOTE $TAG"
+if [[ ${DRY_RUN} -eq 1 ]]; then
+  echo "[dry-run] Would create annotated tag: ${TAG}"
+  echo "[dry-run] Message: ${DESCRIPTION}"
+  if [[ -n "${REMOTE}" ]]; then
+    echo "[dry-run] Would push: git push ${REMOTE} ${TAG}"
   else
     echo "[dry-run] Would not push (no remote specified)"
   fi
   exit 0
 fi
 
-git tag -a "$TAG" -m "$DESCRIPTION"
+git tag -a "${TAG}" -m "${DESCRIPTION}"
 
-if [[ -n "$REMOTE" ]]; then
-  git push "$REMOTE" "$TAG"
-  echo "Created tag '$TAG' and pushed to remote '$REMOTE'."
+if [[ -n "${REMOTE}" ]]; then
+  git push "${REMOTE}" "${TAG}"
+  echo "Created tag '${TAG}' and pushed to remote '${REMOTE}'."
 else
-  echo "Created tag '$TAG' locally (no push)."
+  echo "Created tag '${TAG}' locally (no push)."
 fi
