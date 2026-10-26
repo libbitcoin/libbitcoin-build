@@ -481,6 +481,56 @@ $(my.indent)AC_SUBST([$(_symbol.value)])
 .
 .endmacro # emit_define
 .
+.macro emit_program(program, indent)
+.   define my.program = emit_program.program
+.   define my.indent_init = emit_program.indent
+.
+.   define my.step = "  "
+.   define my.indent = my.indent_init
+$(my.indent)AC_LANG_PROGRAM(
+.
+.   define my.indent_program = indent_add(my.indent, my.step)
+.   define my.indent = indent_add(my.indent_program, my.step)
+.
+$(my.indent_program)[[
+.   for my.program.include as _include
+$(my.indent)#include <$(_include.header)>
+.   endfor
+$(my.indent_program)]],
+$(my.indent_program)[[
+.   for my.program.loc as _loc
+$(my.indent)$(_loc)
+.   endfor
+$(my.indent_program)]])
+.   my.indent = indent_remove(my.indent, my.step)
+.   my.indent = indent_remove(my.indent, my.step)
+.endmacro # emit_program
+.
+.macro emit_flag_test(flag, repository, configuration, meta)
+.   define my.flag = emit_flag_test.flag
+.   define my.repository = emit_flag_test.repository
+.   define my.configuration = emit_flag_test.configuration
+.
+.   define my.step = "  "
+.   define my.indent = ""
+.   define my.indent_as_if = ""
+.   define my.indent_as_case = ""
+.   define my.indent_check_compile = ""
+.
+.   if defined(my.flag.option)
+.       define my.target = my.repository->$(my.flag->target.type)(\
+            is_target_element(this) & (this.name = my.flag->target.name), this)
+.
+.       define my.option = get_option(my.flag, my.target, my.repository, "_")
+.
+$(my.indent)AS_IF([test "x$(my.option)}" != "xno"],
+.       my.indent_as_if = indent_add(my.indent, my.step)
+.       my.indent = indent_add(my.indent_as_if, my.step)
+$(my.indent_as_if)[
+.   endif
+.
+.endmacro # emit_flag_test
+.
 .macro emit_flag(flag, repository, configuration, meta)
 .   define my.flag = emit_flag.flag
 .   define my.repository = emit_flag.repository
@@ -497,6 +547,13 @@ $(my.indent)AC_SUBST([$(_symbol.value)])
         count(my.repository.test) + \
         count(my.repository.binary)
 .
+.   if defined(my.flag.compiler)
+$(my.indent)AS_CASE([${CC}], [*$(my.flag.compiler)*],
+.       my.indent_as_case = indent_add(my.indent, my.step)
+$(my.indent_as_case)[
+.       my.indent = indent_add(my.indent_as_case, my.step)
+.   endif
+.
 .   if defined(my.flag.option)
 .       define my.target = my.repository->$(my.flag->target.type)(\
             is_target_element(this) & (this.name = my.flag->target.name), this)
@@ -507,13 +564,6 @@ $(my.indent)AS_IF([test "x${$(my.option)}" != "xno"],
 .       my.indent_as_if = indent_add(my.indent, my.step)
 .       my.indent = indent_add(my.indent_as_if, my.step)
 $(my.indent_as_if)[
-.   endif
-.
-.   if defined(my.flag.compiler)
-$(my.indent)AS_CASE([${CC}], [*$(my.flag.compiler)*],
-.       my.indent_as_case = indent_add(my.indent, my.step)
-$(my.indent_as_case)[
-.       my.indent = indent_add(my.indent_as_case, my.step)
 .   endif
 .
 .   define my.symbol = symbol(my.flag)
@@ -555,40 +605,37 @@ $(my.indent)AC_MSG_ERROR([$(my.symbol) not supported.])
 $(my.indent_check_compile)],
 $(my.indent_check_compile)[],
 $(my.indent_check_compile)[
-$(my.indent)AC_LANG_PROGRAM(
-.
-.       define my.indent_program = indent_add(my.indent, my.step)
-.       define my.indent = indent_add(my.indent_program, my.step)
-.
-$(my.indent_program)[[
-.       for my.flag->program.include as _include
-$(my.indent)#include <$(_include.header)>
-.       endfor
-$(my.indent_program)]],
-$(my.indent_program)[[
-.       for my.flag->program.loc as _loc
-$(my.indent)$(_loc)
-.       endfor
-$(my.indent_program)]])
-.       my.indent = indent_remove(my.indent, my.step)
-.       my.indent = indent_remove(my.indent, my.step)
+.       emit_program(my.flag->program, my.indent)
 .   endif
 $(my.indent_check_compile)])
 .   my.indent = indent_remove(my.indent, my.step)
 .   my.indent = indent_remove(my.indent, my.step)
+.
+.   if defined(my.flag.option)
+.       if is_defined_positive(my.flag, "environmental")
+$(my.indent_as_if)],[
+$(my.indent)AC_COMPILE_IFELSE(
+.           my.indent = indent_add(my.indent, my.step)
+$(my.indent)[
+.           my.indent = indent_add(my.indent, my.step)
+.           emit_program(my.flag->program, my.indent)
+.           my.indent = indent_remove(my.indent, my.step)
+$(my.indent)],
+$(my.indent)[echo "Environmental override enabling option '$(my.flag.option)'"],
+$(my.indent)[])
+.           my.indent = indent_remove(my.indent, my.step)
+.
+.       endif
+.       my.indent = indent_remove(my.indent, my.step)
+$(my.indent_as_if)])
+.       my.indent = indent_remove(my.indent, my.step)
+.   endif
 .
 .   if defined(my.flag.compiler)
 .       my.indent = indent_remove(my.indent, my.step)
 $(my.indent)])
 .       my.indent = indent_remove(my.indent, my.step)
 .   endif
-.
-.   if defined(my.flag.option)
-.       my.indent = indent_remove(my.indent, my.step)
-$(my.indent_as_if)])
-.       my.indent = indent_remove(my.indent, my.step)
-.   endif
-.
 .endmacro # emit_flag
 .
 .macro emit_march(flags, repository)
