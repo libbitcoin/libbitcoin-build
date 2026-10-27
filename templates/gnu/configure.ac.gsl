@@ -269,7 +269,7 @@ repository_root_dir=`cd "${srcdir}/../.." && pwd`
 .           define my.encountered_flags = 0
 .
 .           heading1("Set flags.")
-.           for _flags.flag as _flag where !defined(_flag.march)
+.           for _flags.flag as _flag
 .               if (my.encountered_flags > 0)
 
 .               endif
@@ -277,14 +277,24 @@ repository_root_dir=`cd "${srcdir}/../.." && pwd`
 .               emit_flag(_flag, my.repository, my.configuration, my.meta)
 .               my.encountered_flags += 1
 .           endfor
+.       endif
+.   endnew
 .
-.           if (count(_flags.flag, defined(this.march), this) > 0)
-.               if (my.encountered_flags > 0)
+.   new unique_arch as _u_archs
+.       accumulate_architecture(_u_archs, my.repository, my.configuration, my.meta)
+.
+.       if (count(_u_archs.architecture) > 0)
+.           define my.encountered_architectures = 0
+.
+.           heading1("Check architecture.")
+.           for _u_archs.architecture as _arch
+.               if (my.encountered_architectures > 0)
 
 .               endif
 .
-.               emit_march(_flags, my.repository)
-.           endif
+.               emit_architecture(_arch, my.repository, my.configuration, my.meta)
+.               my.encountered_architectures += 1
+.           endfor
 .       endif
 .   endnew
 .
@@ -506,31 +516,6 @@ $(my.indent_program)]])
 .   my.indent = indent_remove(my.indent, my.step)
 .endmacro # emit_program
 .
-.macro emit_flag_test(flag, repository, configuration, meta)
-.   define my.flag = emit_flag_test.flag
-.   define my.repository = emit_flag_test.repository
-.   define my.configuration = emit_flag_test.configuration
-.
-.   define my.step = "  "
-.   define my.indent = ""
-.   define my.indent_as_if = ""
-.   define my.indent_as_case = ""
-.   define my.indent_check_compile = ""
-.
-.   if defined(my.flag.option)
-.       define my.target = my.repository->$(my.flag->target.type)(\
-            is_target_element(this) & (this.name = my.flag->target.name), this)
-.
-.       define my.option = get_option(my.flag, my.target, my.repository, "_")
-.
-$(my.indent)AS_IF([test "x$(my.option)}" != "xno"],
-.       my.indent_as_if = indent_add(my.indent, my.step)
-.       my.indent = indent_add(my.indent_as_if, my.step)
-$(my.indent_as_if)[
-.   endif
-.
-.endmacro # emit_flag_test
-.
 .macro emit_flag(flag, repository, configuration, meta)
 .   define my.flag = emit_flag.flag
 .   define my.repository = emit_flag.repository
@@ -638,66 +623,51 @@ $(my.indent)])
 .   endif
 .endmacro # emit_flag
 .
-.macro emit_march(flags, repository)
-.   define my.flags = emit_march.flags
-.   define my.repository = emit_march.repository
+.macro emit_architecture(architecture, repository, configuration, meta)
+.   define my.architecture = emit_architecture.architecture
+.   define my.repository = emit_architecture.repository
+.   define my.configuration = emit_architecture.configuration
 .
-march_base=""
-march_features=""
-.   for my.flags.flag as _flag where defined(_flag.march) by _flag.base
-.       define my.option = march_option(_flag, my.repository)
-AS_IF([test "x${$(my.option)}" != "xno"],
-  [
-    march_base="$(_flag.base)"
-    march_features="${march_features}$(_flag.march)"
-  ])
-.   endfor
-
-AS_IF([test "x${march_features}" != "x"],
-  [
-    march="-march=${march_base}${march_features}"
-    march_CXXFLAGS="${CXXFLAGS}"
-    CXXFLAGS="${CXXFLAGS} ${march}"
-.   for my.flags.flag as _flag where defined(_flag.march) & defined(_flag->program)
-.       define my.option = march_option(_flag, my.repository)
-
-    AS_IF([test "x${$(my.option)}" != "xno"],
-      [
-        AC_MSG_CHECKING([whether ${march} supports $(_flag.option)])
-        AC_COMPILE_IFELSE(
-          [
-            AC_LANG_PROGRAM(
-              [[
-.       for _flag->program.include as _include
-                #include <$(_include.header)>
-.       endfor
-              ]],
-              [[
-.       for _flag->program.loc as _loc
-                $(_loc)
-.       endfor
-              ]])
-          ],
-          [AC_MSG_RESULT([yes])],
-          [AC_MSG_ERROR([${march} does not support $(_flag.option).])])
-      ])
-.   endfor
-
-    CXXFLAGS="${march_CXXFLAGS}"
-    CFLAGS="${CFLAGS} ${march}"
-    CXXFLAGS="${CXXFLAGS} ${march}"
-    AC_SUBST([march], ["${march}"])
-  ])
-.endmacro # emit_march
+.   define my.step = "  "
+.   define my.indent = ""
+.   define my.indent_as_if = ""
 .
-.function march_option(flag, repository)
-.   define my.flag = march_option.flag
-.   define my.repository = march_option.repository
-.   define my.target = my.repository->$(my.flag->target.type)(\
-        is_target_element(this) & (this.name = my.flag->target.name), this)
+.   if defined(my.architecture->program)
+$(my.indent)AC_COMPILE_IFELSE(
+.       my.indent = indent_add(my.indent, my.step)
+$(my.indent)[
+.       define my.indent_compileifelse = indent_add(my.indent, my.step)
+.       emit_program(my.architecture->program, my.indent_compileifelse)
+$(my.indent)],
+$(my.indent)[ TEST_COMPILES_$(my.architecture.option:upper)="yes"; ],
+$(my.indent)[ TEST_COMPILES_$(my.architecture.option:upper)="no"; ])
+
+.       my.indent = indent_remove(my.indent, my.step)
+.   endif
 .
-.   return get_option(my.flag, my.target, my.repository, "_")
-.endfunction
+.   if defined(my.architecture.option)
+.       define my.target = my.repository->$(my.architecture->target.type)(\
+            is_target_element(this) & (this.name = my.architecture->target.name), this)
+.
+.       define my.option = get_option(my.architecture, my.target, my.repository, "_")
+.
+$(my.indent)AS_IF([test "x${$(my.option)}" != "xno"],
+.       my.indent_as_if = indent_add(my.indent, my.step)
+.       my.indent = indent_add(my.indent_as_if, my.step)
+$(my.indent_as_if)[
+$(my.indent)AS_IF([test "x${TEST_COMPILES_$(my.architecture.option:upper)}" != "xno"],
+  $(my.indent)[ AC_MSG_WARN(Detected '$(my.architecture.option)'.) ],
+  $(my.indent)[ AC_MSG_ERROR(Expected feature not detected '$(my.architecture.option)') ])
+$(my.indent_as_if)],[
+$(my.indent)AS_IF([test "x${TEST_COMPILES_$(my.architecture.option:upper)}" != "xno"],
+  $(my.indent)[ AC_MSG_WARN(Environment enabling option '$(my.architecture.option)'.) ],
+  $(my.indent)[ AC_MSG_WARN(Unexpected feature not detected '$(my.architecture.option)') ])
+.       my.indent = indent_remove(my.indent, my.step)
+.       my.indent = indent_remove(my.indent, my.step)
+$(my.indent)])
+.   endif
+.
+.endmacro # emit_architecture
 .
 .macro emit_dependency(dependency, repository, configuration, meta)
 .   define my.dependency = emit_dependency.dependency

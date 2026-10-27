@@ -124,6 +124,33 @@
           <symbol value="ENABLE_CUDA" />
         </define>
 
+        <architecture option="aes"
+          comment="Conditionally require arm aes intrinsics.">
+          <program>
+            <include header="arm_neon.h" />
+            <loc>uint8x16_t a = vdupq_n_u8(0);</loc>
+            <loc>return vgetq_lane_u8(vaeseq_u8(a, a), 0);</loc>
+          </program>
+        </architecture>
+
+        <architecture option="sha"
+          comment="Conditionally require arm sha256 intrinsics.">
+          <program>
+            <include header="arm_neon.h" />
+            <loc>uint32x4_t a = vdupq_n_u32(0);</loc>
+            <loc>return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);</loc>
+          </program>
+        </architecture>
+
+        <architecture option="sha3"
+          comment="Conditionally require arm sha512 intrinsics.">
+          <program>
+            <include header="arm_neon.h" />
+            <loc>uint64x2_t a = vdupq_n_u64(0);</loc>
+            <loc>return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);</loc>
+          </program>
+        </architecture>
+
         <flag option="avx2" environmental="true"
           comment="Conditionally require avx2 intrinsics."
           type="public"
@@ -209,36 +236,6 @@
           </program>
         </flag>
 
-        <flag option="sha" environmental="true"
-          comment="Conditionally require arm sha256 intrinsics."
-          type="public"
-          substitute="march"
-          march="+sha2"
-          base="armv8-a">
-          <context language="c" />
-          <context language="c++" />
-          <program>
-            <include header="arm_neon.h" />
-            <loc>uint32x4_t a = vdupq_n_u32(0);</loc>
-            <loc>return vgetq_lane_u32(vsha256hq_u32(a, a, a), 0);</loc>
-          </program>
-        </flag>
-
-        <flag option="aes" environmental="true"
-          comment="Conditionally require arm aes intrinsics."
-          type="public"
-          substitute="march"
-          march="+aes"
-          base="armv8-a">
-          <context language="c" />
-          <context language="c++" />
-          <program>
-            <include header="arm_neon.h" />
-            <loc>uint8x16_t a = vdupq_n_u8(0);</loc>
-            <loc>return vgetq_lane_u8(vaeseq_u8(a, a), 0);</loc>
-          </program>
-        </flag>
-
         <flag option="sha512" environmental="true"
           comment="Conditionally require sha512 native intrinsics."
           type="public"
@@ -253,21 +250,6 @@
             <loc>__m256i a = _mm256_set1_epi64x(0);</loc>
             <loc>__m128i k = _mm_set1_epi64x(15);</loc>
             <loc>return _mm256_extract_epi32(_mm256_sha512msg2_epi64(_mm256_sha512msg1_epi64(_mm256_sha512rnds2_epi64(a, a, k), k), a), 2);</loc>
-          </program>
-        </flag>
-
-        <flag option="sha3" environmental="true"
-          comment="Conditionally require arm sha512 intrinsics."
-          type="public"
-          substitute="march"
-          march="+sha3"
-          base="armv8.2-a">
-          <context language="c" />
-          <context language="c++" />
-          <program>
-            <include header="arm_neon.h" />
-            <loc>uint64x2_t a = vdupq_n_u64(0);</loc>
-            <loc>return vgetq_lane_u64(vsha512hq_u64(a, a, a), 0);</loc>
           </program>
         </flag>
 

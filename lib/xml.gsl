@@ -349,47 +349,59 @@ function global.accumulate_repository_dependencies(result, repository)
     endfor
 endfunction
 
-function accumulate_target_flags(result, target, repository, configuration, meta)
-    define my.result = accumulate_target_flags.result
-    define my.target = accumulate_target_flags.target
-    define my.repository = accumulate_target_flags.repository
-    define my.configuration = accumulate_target_flags.configuration
-    define my.meta = accumulate_target_flags.meta
+function accumulate_target(result, type, target, repository, configuration, meta)
+    define my.result = accumulate_target.result
+    define my.type = accumulate_target.type
+    define my.target = accumulate_target.target
+    define my.repository = accumulate_target.repository
+    define my.configuration = accumulate_target.configuration
+    define my.meta = accumulate_target.meta
 
-    for my.target->compiler.flag as _flag
-        new _flag.target as _flag_target
-            _flag_target.name = my.target.name
-            _flag_target.type = name(my.target)
+    for my.target->compiler.$(my.type) as _element
+        new _element.target as _element_target
+            _element_target.name = my.target.name
+            _element_target.type = name(my.target)
         endnew
 
-        if !defined(_flag.id)
-            copy _flag to my.result
+        if !defined(_element.id)
+            copy _element to my.result
 
-        elsif (count(my.result.flag, defined(this.id) & (this.id = _flag.id), this) = 0)
-            define my.canonical = my.configuration->canonical->compiler->flag( \
-                (this.id = _flag.id), this)?
+        elsif (count(my.result.$(my.type), defined(this.id) & (this.id = _element.id), this) = 0)
+            define my.canonical = my.configuration->canonical->compiler->$(my.type)( \
+                (this.id = _element.id), this)?
 
             if defined(my.canonical)
                 copy my.canonical to my.result
-                define my.copied = my.result->flag(\
-                    defined(this.id) & (this.id = _flag.id), this)
+                define my.copied = my.result->$(my.type)(\
+                    defined(this.id) & (this.id = _element.id), this)
 
-                new my.copied.target as _flag_target
-                    _flag_target.name = my.target.name
-                    _flag_target.type = name(my.target)
+                new my.copied.target as _element_target
+                    _element_target.name = my.target.name
+                    _element_target.type = name(my.target)
                 endnew
             else
-                copy _flag to my.result
+                copy _element to my.result
             endif
         else
-            define my.match = my.result->flag(defined(this.id) & \
-                (this.id = _flag.id), this)
+            define my.match = my.result->$(my.type)(defined(this.id) & \
+                (this.id = _element.id), this)
 
-            new my.match.target as _flag_target
-                _flag_target.name = my.target.name
-                _flag_target.type = name(my.target)
+            new my.match.target as _element_target
+                _element_target.name = my.target.name
+                _element_target.type = name(my.target)
             endnew
         endif
+    endfor
+endfunction
+
+function accumulate_architecture(result, repository, configuration, meta)
+    define my.result = accumulate_architecture.result
+    define my.repository = accumulate_architecture.repository
+    define my.configuration = accumulate_architecture.configuration
+    define my.meta = accumulate_architecture.meta
+
+    for my.repository. as _target where is_target_element(_target)
+        accumulate_target(my.result, "architecture", _target, my.repository, my.configuration, my.meta)
     endfor
 endfunction
 
@@ -400,7 +412,7 @@ function accumulate_flags(result, repository, configuration, meta)
     define my.meta = accumulate_flags.meta
 
     for my.repository. as _target where is_target_element(_target)
-        accumulate_target_flags(my.result, _target, my.repository, my.configuration, my.meta)
+        accumulate_target(my.result, "flag", _target, my.repository, my.configuration, my.meta)
     endfor
 endfunction
 
@@ -472,10 +484,6 @@ endfunction
 function global.symbol(flag)
     define my.flag = symbol.flag
     define my.result = ""
-
-    if defined(my.flag.march)
-        return "${march}"
-    endif
 
     if (count(my.flag.symbol) > 0)
         for my.flag.symbol as _symbol
