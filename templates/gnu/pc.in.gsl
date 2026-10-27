@@ -80,7 +80,7 @@ function accumulate_flag_components(result, target, dependencies, repository,\
     endfor
 
     new accumulated_flags as _flags
-        accumulate_target_flags(_flags, my.target, my.repository, my.configuration, my.meta)
+        accumulate_target(_flags, "flag", my.target, my.repository, my.configuration, my.meta)
 
         for _flags.flag as _flag where defined(_flag.substitute)
             copy _flag to my.result

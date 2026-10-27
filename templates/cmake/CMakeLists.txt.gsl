@@ -342,31 +342,20 @@ function render_unique_link_option(encountered, target, repository)
     endfor
 endfunction
 
+function render_architecture_option_checks(repository)
+    define my.repository = render_architecture_option_checks.repository
+
+    for my.repository. as _target where is_target_element(_target) &\
+        defined(_target->compiler)
+
+        for _target->compiler.architecture as _arch
+            emit_architecture_option_check(_arch, _target, my.repository)
+        endfor
+    endfor
+endfunction
+
 function render_compiler_option_checks(repository)
     define my.repository = render_compiler_option_checks.repository
-
-    emit_compiler_check_includes(my.repository)
-
-    new compiler as _march
-        for my.repository. as _target where is_target_element(_target) &\
-            defined(_target->compiler)
-
-            for _target->compiler.flag as _flag where defined(_flag.march) &\
-                (count(_march.flag, this.name = _flag.option, this) = 0)
-
-                new _march.flag as _entry
-                    _entry.name = _flag.option
-                    _entry.option = get_option(_flag, _target, my.repository)
-                    _entry.march = _flag.march
-                    _entry.base = _flag.base
-                endnew
-            endfor
-        endfor
-
-        if (count(_march.flag) > 0)
-            emit_march_composition(_march)
-        endif
-    endnew
 
     new compiler as _compiler
         for my.repository. as _target where is_target_element(_target) &\
@@ -522,11 +511,16 @@ if ( MSVC )
   set( CMAKE_SHARED_LIBRARY_PREFIX "lib" )
 endif()
 
+.   emit_compiler_check_includes(my.repository)
+
 .   heading("Project options.")
 .   emit_repository_options(my.repository)
 
 .   heading("Dependencies.")
 .   render_dependencies(my.repository)
+
+.   heading("Architecture options.")
+.   render_architecture_option_checks(my.repository)
 
 .   heading("Compiler options.")
 .   render_compiler_option_checks(my.repository)
@@ -928,26 +922,14 @@ $(my.indent))
 $(my.indent)$(my.property)( $(my.target.name)
 .       if (count(_compiler.$(my.element), is_defined_value($(my.element), "type", "public")) > 0)
   $(my.indent)PUBLIC
-.           define my.marched = 0
 .           for _compiler.$(my.element) as _ele where is_defined_value(_ele, "type", "public")
-.               if !defined(_ele.march)
-.                   emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
-.               elsif (my.marched = 0)
-$(my.indent_item)${march}
-.                   my.marched = 1
-.               endif
+.               emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
 .           endfor
 .       endif
 .       if (count(_compiler.$(my.element), is_defined_value($(my.element), "type", "private")) > 0)
   $(my.indent)PRIVATE
-.           define my.marched = 0
 .           for _compiler.$(my.element) as _ele where is_defined_value(_ele, "type", "private")
-.               if !defined(_ele.march)
-.                   emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
-.               elsif (my.marched = 0)
-$(my.indent_item)${march}
-.                   my.marched = 1
-.               endif
+.               emit_compiler_element(_ele, my.target, my.repository, my.indent_item)
 .           endfor
 .       endif
 $(my.indent))
@@ -975,24 +957,6 @@ $(my.indent)$(my.symbol)
 .   endif
 .endmacro # emit_compiler_element
 .
-.macro emit_march_composition(march)
-.   define my.march = emit_march_composition.march
-
-set( march-base "" )
-set( march-features "" )
-.   for my.march.flag as _flag by _flag.base
-if ( $(_flag.option) )
-  set( march-base "$(_flag.base)" )
-  string( APPEND march-features "$(_flag.march)" )
-endif()
-.   endfor
-
-set( march "" )
-if ( NOT march-features STREQUAL "" )
-  set( march "-march=${march-base}${march-features}" )
-endif()
-.endmacro # emit_march_composition
-.
 .macro emit_compiler_check_includes(repository)
 .   define my.repository = emit_compiler_check_includes.repository
 .
@@ -1006,6 +970,28 @@ include(CheckCXXSourceCompiles)
 .
 include(CheckLinkerFlag)
 .endmacro # emit_link_option_check_includes
+.
+.macro emit_architecture_option_check(architecture, target, repository)
+.   define my.architecture = emit_architecture_option_check.architecture
+.   define my.target = emit_architecture_option_check.target
+.   define my.repository = emit_architecture_option_check.repository
+.
+.   emit_check_source_compiles(my.architecture.option, my.architecture, my.repository, "")
+
+if ( $(get_option(my.architecture, my.target, my.repository)) )
+  if ( TEST_COMPILES_$(my.architecture.option:upper) )
+    message( WARNING "Detected '$(my.architecture.option)'" )
+  else()
+    message( FATAL_ERROR "Expected feature not detected '$(my.architecture.option)'" )
+  endif()
+else()
+  if ( TEST_COMPILES_$(my.architecture.option:upper) )
+    message( WARNING "Environment enabling option '$(my.architecture.option)'" )
+  else()
+    message( WARNING "Unexpected feature not detected '$(my.architecture.option)'" )
+  endif()
+endif()
+.endmacro # emit_architecture_option_check
 .
 .macro emit_compiler_flag_check(flag, target, repository)
 .   define my.flag = emit_compiler_flag_check.flag
@@ -1024,7 +1010,7 @@ $(my.indent)if ( $(get_option(my.flag, my.target, my.repository)) )
 .       define my.indent = "$(my.step)$(my.indent)"
 .   endif
 .   if defined(my.flag->program)
-.       emit_check_source_compiles(my.flag, my.repository, my.indent)
+.       emit_check_flag_source_compiles(my.flag, my.repository, my.indent)
 .   else
 .       emit_check_compiler_flag(my.flag, my.repository, my.indent)
 .   endif
@@ -1089,28 +1075,37 @@ $(my.indent)endif()
 .   endif
 .endmacro # emit_link_option_check
 
-.macro emit_check_source_compiles(flag, repository, indent)
-.   define my.flag = emit_check_source_compiles.flag
+.macro emit_check_source_compiles(name, element, repository, indent)
+.   define my.name = emit_check_source_compiles.name
+.   define my.element = emit_check_source_compiles.element
 .   define my.repository = emit_check_source_compiles.repository
 .   define my.indent = emit_check_source_compiles.indent
 .
-.   define my.language = supported_language(my.flag, "c++")
-$(my.indent)set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
-$(my.indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} $(symbol(my.flag))" )
+.   define my.language = supported_language(my.element, "c++")
 $(my.indent)check_$(my.language:lower)_source_compiles( "
-.   for my.flag->program.include as _include
+.   for my.element->program.include as _include
   $(my.indent)#include <$(_include.header)>
 .   endfor
     $(my.indent)int main() {
-.   for my.flag->program.loc as _loc
+.   for my.element->program.loc as _loc
     $(my.indent)$(_loc)
 .   endfor
-    $(my.indent)}" SUPPORTS_FLAG_$(flag_name(my.flag):upper) )
+    $(my.indent)}" TEST_COMPILES_$(my.name:upper) )
+.endmacro # emit_check_source_compiles
+.
+.macro emit_check_flag_source_compiles(flag, repository, indent)
+.   define my.flag = emit_check_flag_source_compiles.flag
+.   define my.repository = emit_check_flag_source_compiles.repository
+.   define my.indent = emit_check_flag_source_compiles.indent
+.
+$(my.indent)set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+$(my.indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} $(symbol(my.flag))" )
+.   emit_check_source_compiles(flag_name(my.flag), my.flag, my.repository, my.indent)
 $(my.indent)set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
-$(my.indent)if ( !SUPPORTS_FLAG_$(flag_name(my.flag):upper) )
+$(my.indent)if ( !TEST_COMPILES_$(flag_name(my.flag):upper) )
   $(my.indent)message( FATAL_ERROR "Compiler does not support '$(symbol(my.flag))'." )
 $(my.indent)endif()
-.endmacro # emit_check_source_compiles
+.endmacro # emit_check_flag_source_compiles
 .
 .macro emit_check_compiler_flag(flag, repository, indent)
 .   define my.flag = emit_check_compiler_flag.flag
