@@ -224,13 +224,6 @@ function render_dependencies(repository)
                 abort "Dependency '$(_depend.name)' compiled but not found on target."
             endif
         endfor
-
-        # detect fixups
-        if (defined(_dependencies->dependency(dependency.name = "boost")) & \
-            defined(_dependencies->dependency(dependency.name = "icu")))
-
-            emit_boost_icu_fixups()
-        endif
      endnew
  endfunction
 
@@ -428,13 +421,6 @@ function has_repository_dependency(repository, dependency)
         (defined(has_bin) & has_bin)
 endfunction
 
-function uses_modules(repository)
-    define my.repository = uses_modules.repository
-
-    return has_repository_dependency(my.repository, "boost") & \
-        has_repository_dependency(my.repository, "icu")
-endfunction
-
 ###############################################################################
 # Macros
 ###############################################################################
@@ -511,9 +497,6 @@ project( $(my.repository.name)
   DESCRIPTION "$(my.repository.description)"
   LANGUAGES $(language_list(my.repository)) )
 
-.   if (uses_modules(my.repository))
-list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
-.   endif
 
 set( repository_root_dir "${CMAKE_CURRENT_SOURCE_DIR}/../.." )
 
@@ -734,16 +717,6 @@ else()
 .   endfor
 endif()
 .endmacro # emit_shared_static_detection
-.
-.macro emit_boost_icu_fixups()
-
-if ( with-icu )
-  include( InTargetProperty )
-  remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icudata )
-  remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icui18n )
-  remove_in_target_property( Boost::locale INTERFACE_LINK_LIBRARIES icuuc )
-endif()
-.endmacro # emit_boost_icu_fixups
 .
 .macro emit_add_test(target, indent)
 .   define my.target = emit_add_test.target
