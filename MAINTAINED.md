@@ -164,7 +164,7 @@ The following are files generated via `gsl` and maintained by the `libbitcoin-bu
 
 ## builds/msvc/vs2026/\*/\*.props, \*.vcxproj, \*.vcxproj.filters, packages.config:
 
-Each repository generates one project directory per build target: the library itself, its unit test runner, and (where applicable) a console application, tools project, or examples project.
+Each repository generates one project directory per build target: the library itself, its unit test runner, and (where applicable) a console application.
 
 * [libbitcoin-database/vs2026/libbitcoin-database/libbitcoin-database.props](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/msvc/vs2026/libbitcoin-database/libbitcoin-database.props)
 * [libbitcoin-database/vs2026/libbitcoin-database/libbitcoin-database.vcxproj](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/msvc/vs2026/libbitcoin-database/libbitcoin-database.vcxproj)
@@ -174,10 +174,6 @@ Each repository generates one project directory per build target: the library it
 * [libbitcoin-database/vs2026/libbitcoin-database-test/libbitcoin-database-test.vcxproj](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/msvc/vs2026/libbitcoin-database-test/libbitcoin-database-test.vcxproj)
 * [libbitcoin-database/vs2026/libbitcoin-database-test/libbitcoin-database-test.vcxproj.filters](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/msvc/vs2026/libbitcoin-database-test/libbitcoin-database-test.vcxproj.filters)
 * [libbitcoin-database/vs2026/libbitcoin-database-test/packages.config](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/msvc/vs2026/libbitcoin-database-test/packages.config)
-* [libbitcoin-database/vs2026/libbitcoin-database-tools/libbitcoin-database-tools.props](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/msvc/vs2026/libbitcoin-database-tools/libbitcoin-database-tools.props)
-* [libbitcoin-database/vs2026/libbitcoin-database-tools/libbitcoin-database-tools.vcxproj](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/msvc/vs2026/libbitcoin-database-tools/libbitcoin-database-tools.vcxproj)
-* [libbitcoin-database/vs2026/libbitcoin-database-tools/libbitcoin-database-tools.vcxproj.filters](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/msvc/vs2026/libbitcoin-database-tools/libbitcoin-database-tools.vcxproj.filters)
-* [libbitcoin-database/vs2026/libbitcoin-database-tools/packages.config](https://github.com/libbitcoin/libbitcoin-database/blob/master/builds/msvc/vs2026/libbitcoin-database-tools/packages.config)
 * [libbitcoin-explorer/vs2026/libbitcoin-explorer/libbitcoin-explorer.props](https://github.com/libbitcoin/libbitcoin-explorer/blob/master/builds/msvc/vs2026/libbitcoin-explorer/libbitcoin-explorer.props)
 * [libbitcoin-explorer/vs2026/libbitcoin-explorer/libbitcoin-explorer.vcxproj](https://github.com/libbitcoin/libbitcoin-explorer/blob/master/builds/msvc/vs2026/libbitcoin-explorer/libbitcoin-explorer.vcxproj)
 * [libbitcoin-explorer/vs2026/libbitcoin-explorer/libbitcoin-explorer.vcxproj.filters](https://github.com/libbitcoin/libbitcoin-explorer/blob/master/builds/msvc/vs2026/libbitcoin-explorer/libbitcoin-explorer.vcxproj.filters)
@@ -226,10 +222,6 @@ Each repository generates one project directory per build target: the library it
 * [libbitcoin-system/vs2026/libbitcoin-system-test/libbitcoin-system-test.vcxproj](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/msvc/vs2026/libbitcoin-system-test/libbitcoin-system-test.vcxproj)
 * [libbitcoin-system/vs2026/libbitcoin-system-test/libbitcoin-system-test.vcxproj.filters](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/msvc/vs2026/libbitcoin-system-test/libbitcoin-system-test.vcxproj.filters)
 * [libbitcoin-system/vs2026/libbitcoin-system-test/packages.config](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/msvc/vs2026/libbitcoin-system-test/packages.config)
-* [libbitcoin-system/vs2026/libbitcoin-system-examples/libbitcoin-system-examples.props](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/msvc/vs2026/libbitcoin-system-examples/libbitcoin-system-examples.props)
-* [libbitcoin-system/vs2026/libbitcoin-system-examples/libbitcoin-system-examples.vcxproj](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/msvc/vs2026/libbitcoin-system-examples/libbitcoin-system-examples.vcxproj)
-* [libbitcoin-system/vs2026/libbitcoin-system-examples/libbitcoin-system-examples.vcxproj.filters](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/msvc/vs2026/libbitcoin-system-examples/libbitcoin-system-examples.vcxproj.filters)
-* [libbitcoin-system/vs2026/libbitcoin-system-examples/packages.config](https://github.com/libbitcoin/libbitcoin-system/blob/master/builds/msvc/vs2026/libbitcoin-system-examples/packages.config)
 
 # Copied Files:
 
