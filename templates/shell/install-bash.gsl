@@ -1312,17 +1312,17 @@ $(my.indent)CONFIGURE_OPTIONS=("$@")
 .               abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
 .           endif
 .
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-$(option_name(_depend))/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-$(option_name(_depend))/}")
 .       endfor
 .
 .       for _build_options.option as _option where is_defined_positive(_option, "sanitize")
 .           for _option.symbol as _symbol
 .               if defined(_symbol.long)
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("long", _symbol, _option, "true"))/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#$(option_symbol("long", _symbol, _option, "true"))/}")
 .               endif
 .
 .               if defined(_symbol.short)
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("short", _symbol, _option, "true"))/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#$(option_symbol("short", _symbol, _option, "true"))/}")
 .               endif
 .           endfor
 .       endfor
