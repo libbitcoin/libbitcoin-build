@@ -362,36 +362,6 @@
       <!-- <trigger test="t2" /> -->
     </test>
 
-    <binary name="libbitcoin-system-examples"
-      uuid="b726df7d-6d1d-48fb-ac02-34eb45f9145e"
-      install="false"
-      option="examples" type="with" default="yes"
-      comment="Compile with examples.">
-
-      <sources path="examples" recursive="true">
-        <msbuild filter="src" />
-      </sources>
-      <dependency name="libbitcoin-system" private="true" />
-
-      <compiler standard="20">
-        <flag id="Wall" />
-        <flag id="Wextra" />
-        <!-- <flag id="Wpedantic" /> -->
-        <flag id="Wno-reorder" />
-        <flag id="Wno-missing-field-initializers" />
-        <flag id="Wno-missing-braces" />
-        <flag id="Wno-comment" />
-        <flag id="Wno-deprecated-copy" />
-        <flag id="Wno-ignored-attributes" />
-        <flag id="Wno-mismatched-tags" />
-        <!-- <flag id="fvisibility=hidden" /> -->>
-        <flag id="Wno-long-long" />
-        <flag id="fno-var-tracking-assignments" />
-        <flag id="fstack-protector-all" />
-        <!-- link id="no_fixup_chains" /> -->
-       </compiler>
-    </binary>
-
     <ci>
       <coverage>
         <exclude path="src/words/catalogs/*" />
@@ -949,40 +919,6 @@
        </compiler>
     </test>
 
-    <binary name="libbitcoin-database-tools"
-      uuid="005f2a86-f937-4ab5-b041-0f21b67eec66"
-      install="false"
-      output="initchain"
-      option="tools" type="with" default="yes"
-      comment="Compile with tools.">
-
-      <sources path="tools/initchain">
-        <msbuild filter="src" />
-      </sources>
-      <!--
-      -->
-
-      <dependency name="libbitcoin-database" private="true" />
-
-      <compiler standard="20">
-        <flag id="Wall" />
-        <flag id="Wextra" />
-        <!-- <flag id="Wpedantic" /> -->
-        <flag id="Wno-reorder" />
-        <flag id="Wno-missing-field-initializers" />
-        <flag id="Wno-missing-braces" />
-        <flag id="Wno-comment" />
-        <flag id="Wno-deprecated-copy" />
-        <flag id="Wno-ignored-attributes" />
-        <flag id="Wno-mismatched-tags" />
-        <!-- <flag id="fvisibility=hidden" /> -->>
-        <flag id="Wno-long-long" />
-        <flag id="fno-var-tracking-assignments" />
-        <flag id="fstack-protector-all" />
-        <!-- link id="no_fixup_chains" /> -->
-       </compiler>
-    </binary>
-
     <ci>
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
@@ -1422,6 +1358,8 @@
 
     <version major="4" minor="0" />
 
+    <completion name="data/bs" />
+
     <language id="c" />
     <language id="c++" />
 
@@ -1723,6 +1661,8 @@
     description="Bitcoin Command Line Tool">
 
     <version major="4" minor="0" />
+
+    <completion name="data/bx" />
 
     <language id="c" />
     <language id="c++" />
@@ -2326,17 +2266,14 @@
       <github owner="libbitcoin" tag="master" />
       <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
-        <option value="--without-examples" ignore="true" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
-        <option value="-Dwith-examples:BOOL=OFF" ignore="true" />
       </build>
       <build method="preset" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
-        <option value="-Dwith-examples:BOOL=OFF" ignore="true" />
       </build>
       <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"
@@ -2348,17 +2285,14 @@
       <github owner="libbitcoin" tag="master" />
       <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
-        <option value="--without-tools" ignore="true" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
-        <option value="-Dwith-tools:BOOL=OFF" ignore="true" />
       </build>
       <build method="preset" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
-        <option value="-Dwith-tools:BOOL=OFF" ignore="true" />
       </build>
       <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"

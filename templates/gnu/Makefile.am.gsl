@@ -274,6 +274,8 @@ endfunction
 .
 .   emit_doc_data(my.repository, my.configuration, my.meta)
 .
+.   emit_completion_data(my.repository, my.configuration, my.meta)
+.
 .   heading1("Libraries.")
 .   for my.repository.library as _target
 .       if !first()
@@ -356,6 +358,24 @@ doc_DATA = \\
 .       endfor
 .   endif
 .endmacro # emit_doc_data
+.
+.macro emit_completion_data(repository, configuration, meta)
+.   define my.repository = emit_completion_data.repository
+.   define my.configuration = emit_completion_data.configuration
+.   define my.meta = emit_completion_data.meta
+.
+.   if (count(my.repository.completion) > 0)
+
+.       heading2("files => ${bashcompletiondir}")
+bashcompletiondir = ${datadir}/bash-completion/completions
+dist_bashcompletion_DATA = \\
+.
+.       for my.repository.completion as _completion
+.           define my.suffix = last() ?? "" ? " \\"
+    $(my.meta->path.prefix)/$(_completion.name)$(my.suffix)
+.       endfor
+.   endif
+.endmacro # emit_completion_data
 .
 .macro emit_target(target, repository, configuration, meta, append)
 .   define my.target = emit_target.target

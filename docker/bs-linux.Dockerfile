@@ -24,8 +24,6 @@ RUN ./developer_setup.sh \
     --build-mode=configure \
     --disable-shared \
     --enable-static \
-    --with-icu \
-    --build-icu \
     --build-boost \
     --build-zmq
 
@@ -41,7 +39,6 @@ RUN ./developer_setup.sh \
     --enable-static \
     --enable-isystem \
     --without-consensus \
-    --with-icu \
     --with-boost=/build/prefix
 
 RUN ./developer_setup.sh \
@@ -54,7 +51,6 @@ RUN ./developer_setup.sh \
     --enable-static \
     --enable-isystem \
     --without-consensus \
-    --with-icu \
     --with-boost=/build/prefix
 
 RUN rm -rf /build/src /build/obj
