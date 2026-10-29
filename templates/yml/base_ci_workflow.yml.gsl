@@ -549,6 +549,17 @@ jobs:
 .       return
 .   endif
 .
+.   define my.cross = 0
+.   for my.repository->ci.entry as _entry
+.       for _entry.job as _job where (_job.name = my.job.name)
+.           if (defined(_job.host) | defined(_entry.host)) & \
+              (!defined(my.meta->workflow.restricted) | \
+              is_defined_positive(_job, "$(my.meta->workflow.restricted)"))
+.               my.cross = 1
+.           endif
+.       endfor
+.   endfor
+.
 .   new buildset as _buildset
 .       for my.repository->ci.entry as _entry \
           where (count(_entry.job, count.name = my.job.name) > 0)
@@ -614,6 +625,9 @@ jobs:
             package: "$(my.package)"
 .               endif
 .
+.               if defined(_job.host) | defined(_entry.host)
+            host: "$(property_priority("host", _job, _entry))"
+.               endif
 .
 .               for _buildset.build as _build
 .                   define my.value = ""
@@ -637,6 +651,9 @@ jobs:
       CXX: '${{ matrix.cxx }}'
       CFLAGS: '${{ matrix.flags }}'
       CXXFLAGS: '${{ matrix.flags }}'
+.   if my.cross
+      QEMU_LD_PREFIX: "${{ matrix.host && format('/usr/{0}', matrix.host) || '' }}"
+.   endif
 
     steps:
       - name: Get branch name
@@ -715,12 +732,48 @@ jobs:
               echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
 .       endif
+.
+.   require(my.job, "job", "script")
+.   if my.cross
+
+      - name: Verify emulation [cross]
+        if: ${{ matrix.host }}
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          echo 'int main() { return 0; }' > emulation.c
+          ${{ matrix.cc }} emulation.c -o emulation
+          file emulation
+          ./emulation
+
+      - name: Install boost headers [cross]
+        if: ${{ matrix.host }}
+        shell: bash
+        working-directory: '$(my.repository.name)'
+        env:
+          CC: 'gcc'
+          CXX: 'g++'
+        run: >
+          ./$(my.job.script)
+          --build-use-local-src
+          --build-src-dir="${{ github.workspace }}"
+          --prefix="${{ github.workspace }}/prefix"
+          --build-obj-dir="obj"
+          --build-obj-dir-relative
+          --build-config="${{ matrix.config }}"
+          --build-link="${{ matrix.link }}"
+          --build-limit=external
+          --build-boost
+.   endif
 
       - name: Execute installation
         shell: bash
         working-directory: '$(my.repository.name)'
+.   if my.cross
+        env:
+          MAKEFLAGS: "${{ matrix.host && 'TESTS=' || '' }}"
+.   endif
         run: >
-.       require(my.job, "job", "script")
           ./$(my.job.script)
           --build-use-local-src
           --build-src-dir="${{ github.workspace }}"
@@ -728,7 +781,11 @@ jobs:
           --build-preset="${{ matrix.preset }}"
 .       else
           --prefix="${{ github.workspace }}/prefix"
+.           if my.cross
+          ${{ !matrix.host && '--build-post-install-clean' || '' }}
+.           else
           --build-post-install-clean
+.           endif
           --build-obj-dir="obj"
           --build-obj-dir-relative
           --build-config="${{ matrix.config }}"
@@ -738,7 +795,27 @@ jobs:
           ${{ matrix.$(_build.name) }}
 .       endfor
           ${{ matrix.options }}
+.       if my.cross
+          ${{ matrix.host && format('--build-limit=target --host={0} --with-boost={1}/prefix', matrix.host, github.workspace) || '' }}
+.       endif
 .   endnew
+.
+.   if my.cross
+.       require(my.repository, "repository", "name")
+.       define my.testname = my.repository->test.name
+
+      - name: Execute tests [cross]
+        if: ${{ matrix.host }}
+        shell: bash
+        working-directory: '$(my.repository.name)/obj/builds/gnu'
+        run: >
+          ./test/$(my.testname)
+          --log_level=test_suite
+          --report_level=short
+          --show_progress=no
+          --detect_memory_leak=0
+          --build_info=yes
+.   endif
 
       - name: Coverage calculation
         if: ${{ matrix.coverage == 'lcov' }}
