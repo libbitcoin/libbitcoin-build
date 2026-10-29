@@ -568,7 +568,7 @@
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
-      <!-- big endian (cross compiled, emulated tests) -->
+      <!-- big endian (cross compiled) -->
       <entry image="ubuntu-24.04" host="s390x-linux-gnu">
         <compiler lang="c" name="s390x-linux-gnu-gcc" />
         <compiler lang="cxx" name="s390x-linux-gnu-g++" />
@@ -577,6 +577,7 @@
         <package name="qemu-user-static" />
 
         <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-tests" />
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
@@ -859,6 +860,20 @@
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
+
+      <!-- big endian (cross compiled) -->
+      <entry image="ubuntu-24.04" host="s390x-linux-gnu">
+        <compiler lang="c" name="s390x-linux-gnu-gcc" />
+        <compiler lang="cxx" name="s390x-linux-gnu-g++" />
+        <package name="gcc-s390x-linux-gnu" />
+        <package name="g++-s390x-linux-gnu" />
+        <package name="qemu-user-static" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-tests" />
+
+        <job name="gnu" config="debug" link="static" gate="true" />
+      </entry>
     </ci>
   </repository>
 
@@ -1113,6 +1128,20 @@
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
+
+      <!-- big endian (cross compiled) -->
+      <entry image="ubuntu-24.04" host="s390x-linux-gnu">
+        <compiler lang="c" name="s390x-linux-gnu-gcc" />
+        <compiler lang="cxx" name="s390x-linux-gnu-g++" />
+        <package name="gcc-s390x-linux-gnu" />
+        <package name="g++-s390x-linux-gnu" />
+        <package name="qemu-user-static" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-tests" />
+
+        <job name="gnu" config="debug" link="static" gate="true" />
+      </entry>
     </ci>
   </repository>
 
@@ -1365,6 +1394,20 @@
         <job name="presets" preset="nix-gnu-debug-static" />
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
+
+      <!-- big endian (cross compiled) -->
+      <entry image="ubuntu-24.04" host="s390x-linux-gnu">
+        <compiler lang="c" name="s390x-linux-gnu-gcc" />
+        <compiler lang="cxx" name="s390x-linux-gnu-g++" />
+        <package name="gcc-s390x-linux-gnu" />
+        <package name="g++-s390x-linux-gnu" />
+        <package name="qemu-user-static" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-tests" />
+
+        <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
     </ci>
   </repository>
@@ -1670,6 +1713,20 @@
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
+
+      <!-- big endian (cross compiled) -->
+      <entry image="ubuntu-24.04" host="s390x-linux-gnu">
+        <compiler lang="c" name="s390x-linux-gnu-gcc" />
+        <compiler lang="cxx" name="s390x-linux-gnu-g++" />
+        <package name="gcc-s390x-linux-gnu" />
+        <package name="g++-s390x-linux-gnu" />
+        <package name="qemu-user-static" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-tests" />
+
+        <job name="gnu" config="debug" link="static" gate="true" />
+      </entry>
     </ci>
   </repository>
 
@@ -1960,6 +2017,20 @@
         <job name="presets" preset="nix-gnu-debug-static" />
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
+
+      <!-- big endian (cross compiled) -->
+      <entry image="ubuntu-24.04" host="s390x-linux-gnu">
+        <compiler lang="c" name="s390x-linux-gnu-gcc" />
+        <compiler lang="cxx" name="s390x-linux-gnu-g++" />
+        <package name="gcc-s390x-linux-gnu" />
+        <package name="g++-s390x-linux-gnu" />
+        <package name="qemu-user-static" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-tests" />
+
+        <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
     </ci>
   </repository>

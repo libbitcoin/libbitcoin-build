@@ -550,12 +550,17 @@ jobs:
 .   endif
 .
 .   define my.cross = 0
+.   define my.cross_tests = 0
 .   for my.repository->ci.entry as _entry
 .       for _entry.job as _job where (_job.name = my.job.name)
 .           if (defined(_job.host) | defined(_entry.host)) & \
               (!defined(my.meta->workflow.restricted) | \
               is_defined_positive(_job, "$(my.meta->workflow.restricted)"))
 .               my.cross = 1
+.               if (count(_entry.option, count.value = "--build-skip-tests") + \
+                    count(_job.option, count.value = "--build-skip-tests")) = 0
+.                   my.cross_tests = 1
+.               endif
 .           endif
 .       endfor
 .   endfor
@@ -769,7 +774,7 @@ jobs:
       - name: Execute installation
         shell: bash
         working-directory: '$(my.repository.name)'
-.   if my.cross
+.   if my.cross_tests
         env:
           MAKEFLAGS: "${{ matrix.host && 'TESTS=' || '' }}"
 .   endif
@@ -781,7 +786,7 @@ jobs:
           --build-preset="${{ matrix.preset }}"
 .       else
           --prefix="${{ github.workspace }}/prefix"
-.           if my.cross
+.           if my.cross_tests
           ${{ !matrix.host && '--build-post-install-clean' || '' }}
 .           else
           --build-post-install-clean
@@ -796,11 +801,11 @@ jobs:
 .       endfor
           ${{ matrix.options }}
 .       if my.cross
-          ${{ matrix.host && format('--build-limit=target --host={0} --with-boost={1}/prefix', matrix.host, github.workspace) || '' }}
+          ${{ matrix.host && format('--host={0} --with-boost={1}/prefix', matrix.host, github.workspace) || '' }}
 .       endif
 .   endnew
 .
-.   if my.cross
+.   if my.cross_tests
 .       require(my.repository, "repository", "name")
 .       define my.testname = my.repository->test.name
 
