@@ -1312,17 +1312,17 @@ $(my.indent)CONFIGURE_OPTIONS=("$@")
 .               abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
 .           endif
 .
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--build-$(option_name(_depend))/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-$(option_name(_depend))/}")
 .       endfor
 .
 .       for _build_options.option as _option where is_defined_positive(_option, "sanitize")
 .           for _option.symbol as _symbol
 .               if defined(_symbol.long)
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("long", _symbol, _option, "true"))/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#$(option_symbol("long", _symbol, _option, "true"))/}")
 .               endif
 .
 .               if defined(_symbol.short)
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/$(option_symbol("short", _symbol, _option, "true"))/}")
+$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#$(option_symbol("short", _symbol, _option, "true"))/}")
 .               endif
 .           endfor
 .       endfor
@@ -1620,6 +1620,14 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
         fi
     else
         msg_verbose "CXX using defined value '${CXX}'"
+    fi
+
+    if [[ -z "${MACOSX_DEPLOYMENT_TARGET}" ]]; then
+        if [[ ${OS} == Darwin ]]; then
+            export MACOSX_DEPLOYMENT_TARGET=\$(sw_vers -productVersion)
+        fi
+    else
+        msg_verbose "MACOSX_DEPLOYMENT_TARGET using defined value '${MACOSX_DEPLOYMENT_TARGET}'"
     fi
 
     # HARDWARE_OPTIMIZED
