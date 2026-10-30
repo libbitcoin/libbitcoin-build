@@ -383,6 +383,16 @@ if "!$(_depend.name:c)_TAG!" == "" (
         ) else (
             set "$(my.target.name)_PARAMS=!$(my.target.name)_PARAMS! $(my.option.msvc)"
         )
+.   if is_defined_positive(my.option, "default")
+.       define my.negated = (my.option.type = "enable") ?? "disable" ? "without"
+.       define my.msvc = string.replace(my.option.msvc, "=true|=false")
+    ) else if "%~1" == "--$(my.negated)-$(my.option.name)" (
+        if "!$(my.target.name)_PARAMS!" == "" (
+            set "$(my.target.name)_PARAMS=$(my.msvc)"
+        ) else (
+            set "$(my.target.name)_PARAMS=!$(my.target.name)_PARAMS! $(my.msvc)"
+        )
+.   endif
 .endmacro # parse_target_option
 .
 .macro parse_option_symbol(property, symbol, option)
@@ -583,7 +593,12 @@ $(my.prefix)Script options:$(my.suffix)
 .
 .       for my.deprepo.library as _library
 .           for _library.option as _option where defined(_option.msvc)
+.               if is_defined_positive(_option, "default")
+.                   define my.negated = (_option.type = "enable") ?? "disable" ? "without"
+$(fix_column("--[$(_option.type)/$(my.negated)]-$(_option.name)", _option.comment, my.column, my.prefix, my.suffix))
+.               else
 $(fix_column("--$(_option.type)-$(_option.name)", _option.comment, my.column, my.prefix, my.suffix))
+.               endif
 .           endfor
 .       endfor
 .   endfor
