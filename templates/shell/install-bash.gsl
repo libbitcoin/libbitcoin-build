@@ -422,6 +422,7 @@ $(column_variables("BUILD_FULL_REPOSITORIES", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_POST_INSTALL_CLEAN", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_USE_LOCAL_SRC", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_SKIP_TESTS", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_SKIP_TEST_RUN", my.column, my.prefix, my.suffix))
 .   if defined(my.meta->option(option.id = "build-valgrind"))
 $(column_variables("BUILD_VALGRIND", my.column, my.prefix, my.suffix))
 .   endif
@@ -918,12 +919,17 @@ test_gnu()
         push_directory "${RELATIVE_OBJ_PATH}"
     fi
 
+    local TEST_RUN=()
+    if [[ "${BUILD_SKIP_TEST_RUN}" == "yes" ]]; then
+        TEST_RUN=( "TESTS=" )
+    fi
+
     disable_exit_on_error
 
     if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
-        make -j${JOBS} check VERBOSE=1
+        make -j${JOBS} check VERBOSE=1 "${TEST_RUN[@]}"
     else
-        make check VERBOSE=1
+        make check VERBOSE=1 "${TEST_RUN[@]}"
     fi
 
     local RESULT=$?
@@ -942,7 +948,7 @@ test_gnu()
         exit ${RESULT}
     fi
 
-    if [[ -n "${BUILD_VALGRIND}" && "${PROJECT}" == "$(my.repository.name)" ]]; then
+    if [[ -n "${BUILD_VALGRIND}" && "${BUILD_SKIP_TEST_RUN}" != "yes" && "${PROJECT}" == "$(my.repository.name)" ]]; then
         msg "Testing ${PROJECT} under valgrind: ${BUILD_VALGRIND}"
         valgrind --quiet --error-exitcode=1 "./test/${PROJECT}-test" --run_test="${BUILD_VALGRIND}"
 
@@ -1886,7 +1892,7 @@ $(my.indent)fi
 .           require(my.active_build, "build", "objpath")
 $(my.indent)build_cmake "$(_depend.name)" "$(my.active_build.filepath)" "$(my.active_build.objpath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
 .           if last()
-$(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
+$(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" || "${BUILD_SKIP_TEST_RUN}" == "yes" ]]; then
     $(my.indent)test_cmake "$(_depend.name)" "$(my.active_build.objpath)" "${PARALLEL}"
 $(my.indent)fi
 .           endif
@@ -1900,7 +1906,7 @@ $(my.indent)fi
 .           require(my.active_build, "build", "objpath")
 $(my.indent)build_preset "$(_depend.name)" "$(my.active_build.filepath)" "$(my.active_build.objpath)" "${PARALLEL}" "${$(my.vname)_OPTIONS[@]}" "${CONFIGURE_OPTIONS_CMAKE[@]}"
 .           if last()
-$(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" ]]; then
+$(my.indent)if ! [[ "${BUILD_SKIP_TESTS}" == "yes" || "${BUILD_SKIP_TEST_RUN}" == "yes" ]]; then
     $(my.indent)test_cmake "$(_depend.name)" "$(my.active_build.objpath)" "${PARALLEL}"
 $(my.indent)fi
 .           endif

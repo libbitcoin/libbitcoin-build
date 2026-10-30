@@ -560,7 +560,9 @@ jobs:
               is_defined_positive(_job, "$(my.meta->workflow.restricted)"))
 .               my.cross = 1
 .               if (count(_entry.option, count.value = "--build-skip-tests") + \
-                    count(_job.option, count.value = "--build-skip-tests")) = 0
+                    count(_job.option, count.value = "--build-skip-tests") + \
+                    count(_entry.option, count.value = "--build-skip-test-run") + \
+                    count(_job.option, count.value = "--build-skip-test-run")) = 0
 .                   my.cross_tests = 1
 .               endif
 .           endif
@@ -749,9 +751,12 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           echo 'int main() { return 0; }' > emulation.c
-          ${{ matrix.cc }} emulation.c -o emulation
+          ${{ matrix.cc }} ${{ matrix.flags }} emulation.c -o emulation
           file emulation
-          ./emulation
+          if [[ "${{ matrix.options }}" != *"--build-skip-tests"* && \
+                "${{ matrix.options }}" != *"--build-skip-test-run"* ]]; then
+            ./emulation
+          fi
 
       - name: Install boost headers [cross]
         if: ${{ matrix.host }}
