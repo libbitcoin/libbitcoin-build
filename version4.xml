@@ -383,6 +383,11 @@
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -698,6 +703,11 @@
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -970,6 +980,11 @@
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -1238,6 +1253,11 @@
       </entry>
 
       <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
@@ -1563,6 +1583,11 @@
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -1869,6 +1894,11 @@
       </entry>
 
       <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
@@ -2735,6 +2765,15 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <value symbol="disabled" />
       <value symbol="public-only" />
     </option>
+    <option id="build-msvc-compiler"
+      canonical="BUILD_COMPILER"
+      comment="Determines the compiler."
+      datatype="enumeration"
+      placeholder="compiler" >
+      <symbol long="--build-compiler" />
+      <value symbol="msvc" />
+      <value symbol="clang" />
+    </option>
 
     <!-- preset -->
     <option id="build-preset"
@@ -3119,6 +3158,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="build-msvc-version" />
       <option id="build-msvc-mode" />
       <option id="build-msvc-symbols" />
+      <option id="build-msvc-compiler" />
       <option id="build-src-dir" />
       <option id="build-full-repositories" />
       <option id="build-skip-tests" />

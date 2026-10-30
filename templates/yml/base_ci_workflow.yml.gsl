@@ -429,6 +429,7 @@ jobs:
             platform: "$(property_priority("platform", _job, _entry))"
             version: "$(property_priority("version", _job, _entry))"
             tests: "$(property_priority("tests", _job, _entry, "*"))"
+            options: "$(accumulate_options(_entry, _job))"
 .       endfor
 .   endfor
 .   if (count(my.repository.test) = 0)
@@ -509,6 +510,7 @@ jobs:
           --build-platform ${{ matrix.platform }}
           --build-version ${{ matrix.version }}
           --build-use-local-src
+          ${{ matrix.options }}
 
       - name: Execute tests
         shell: powershell
