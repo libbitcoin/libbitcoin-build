@@ -457,7 +457,7 @@ jobs:
 .   require(my.setup, "action", "sha")
         uses: $(my.setup.name)@$(my.setup.sha) # $(my.setup.intended)
         with:
-          msbuild-architecture: x64
+          msbuild-architecture: ${{ matrix.platform == 'ARM64' && 'arm64' || 'x64' }}
 .
 .   define my.checkout = my.configuration->registrar(this.id = "actions", this)->action(this.id = "checkout", this)
 .   require(my.checkout, "action", "name")
