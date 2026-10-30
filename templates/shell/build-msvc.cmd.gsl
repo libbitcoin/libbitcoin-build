@@ -188,6 +188,18 @@ if "!$(_depend.name:c)_TAG!" == "" (
         exit /b 1
     )
 
+    if "!BUILD_COMPILER!" == "" (
+        call :msg_verbose "BUILD_COMPILER not defined or empty, defaulting to 'msvc'."
+    ) else if "!BUILD_COMPILER!" == "msvc" (
+        call :msg_verbose "BUILD_COMPILER 'msvc'."
+    ) else if "!BUILD_COMPILER!" == "clang" (
+        call :msg_verbose "BUILD_COMPILER 'clang'."
+    ) else (
+        call :msg_error "BUILD_COMPILER value '!BUILD_COMPILER!' unrecognized."
+        call :help
+        exit /b 1
+    )
+
 .   for my.dependencies.dependency as _depend
 .       if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
 .           next
@@ -483,6 +495,7 @@ $(column_variables("BUILD_FULL_REPOSITORIES", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_USE_LOCAL_SRC", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_MODE", my.column, my.prefix, my.suffix))
 $(column_variables("BUILD_SYMBOLS", my.column, my.prefix, my.suffix))
+$(column_variables("BUILD_COMPILER", my.column, my.prefix, my.suffix))
 $(column_variables("DISPLAY_VERBOSE", my.column, my.prefix, my.suffix))
 $(column_variables("DISPLAY_HELP", my.column, my.prefix, my.suffix))
 .
@@ -764,16 +777,21 @@ $(fix_column("", "  $(_option->hint.text)", my.column, my.prefix, my.suffix))
         set "SYMBOLS_ARG=/p:DebugSymbols=false "
     )
 
+    set "COMPILER_ARG="
+    if "!BUILD_COMPILER!" == "clang" (
+        set "COMPILER_ARG=/p:Option-clang=true "
+    )
+
     call :push_directory "!BUILD_SRC_DIR!\\%PROJECT%\\%RELATIVE_PATH%\\!BUILD_VERSION!"
 .   error_trampoline("    ")
 
     call :nuget_restore "%PROJECT%"
 .   error_trampoline("    ")
 
-    !MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS! !ADDITIONAL_PARAMS!
+    !MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!!COMPILER_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS! !ADDITIONAL_PARAMS!
 
     if %ERRORLEVEL% neq 0 (
-        call :msg_error "!MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS! !ADDITIONAL_PARAMS!"
+        call :msg_error "!MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!!COMPILER_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS! !ADDITIONAL_PARAMS!"
         call :pop_directory
         exit /b 1
     )

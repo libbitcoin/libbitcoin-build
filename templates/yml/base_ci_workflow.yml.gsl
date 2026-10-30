@@ -429,6 +429,7 @@ jobs:
             platform: "$(property_priority("platform", _job, _entry))"
             version: "$(property_priority("version", _job, _entry))"
             tests: "$(property_priority("tests", _job, _entry, "*"))"
+            options: "$(accumulate_options(_entry, _job))"
 .       endfor
 .   endfor
 .   if (count(my.repository.test) = 0)
@@ -456,7 +457,7 @@ jobs:
 .   require(my.setup, "action", "sha")
         uses: $(my.setup.name)@$(my.setup.sha) # $(my.setup.intended)
         with:
-          msbuild-architecture: x64
+          msbuild-architecture: ${{ matrix.platform == 'ARM64' && 'arm64' || 'x64' }}
 .
 .   define my.checkout = my.configuration->registrar(this.id = "actions", this)->action(this.id = "checkout", this)
 .   require(my.checkout, "action", "name")
@@ -509,6 +510,7 @@ jobs:
           --build-platform ${{ matrix.platform }}
           --build-version ${{ matrix.version }}
           --build-use-local-src
+          ${{ matrix.options }}
 
       - name: Execute tests
         shell: powershell
@@ -558,7 +560,9 @@ jobs:
               is_defined_positive(_job, "$(my.meta->workflow.restricted)"))
 .               my.cross = 1
 .               if (count(_entry.option, count.value = "--build-skip-tests") + \
-                    count(_job.option, count.value = "--build-skip-tests")) = 0
+                    count(_job.option, count.value = "--build-skip-tests") + \
+                    count(_entry.option, count.value = "--build-skip-test-run") + \
+                    count(_job.option, count.value = "--build-skip-test-run")) = 0
 .                   my.cross_tests = 1
 .               endif
 .           endif
@@ -747,9 +751,12 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           echo 'int main() { return 0; }' > emulation.c
-          ${{ matrix.cc }} emulation.c -o emulation
+          ${{ matrix.cc }} ${{ matrix.flags }} emulation.c -o emulation
           file emulation
-          ./emulation
+          if [[ "${{ matrix.options }}" != *"--build-skip-tests"* && \
+                "${{ matrix.options }}" != *"--build-skip-test-run"* ]]; then
+            ./emulation
+          fi
 
       - name: Install boost headers [cross]
         if: ${{ matrix.host }}

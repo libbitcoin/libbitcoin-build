@@ -383,6 +383,25 @@
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -577,7 +596,57 @@
         <package name="qemu-user-static" />
 
         <option name="gnu" value="--enable-isystem" />
-        <option name="gnu" value="--build-skip-tests" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="debug" link="static" gate="true" />
+      </entry>
+
+      <!-- macos x86_64 -->
+      <entry image="macos-26-intel">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm64 -->
+      <entry image="ubuntu-24.04-arm">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux x86 -->
+      <entry image="ubuntu-24.04">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+        <package name="gcc-13-multilib" />
+        <package name="g++-13-multilib" />
+        <flag value="-m32" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm32 (cross compiled) -->
+      <entry image="ubuntu-24.04" host="arm-linux-gnueabihf">
+        <compiler lang="c" name="arm-linux-gnueabihf-gcc" />
+        <compiler lang="cxx" name="arm-linux-gnueabihf-g++" />
+        <package name="gcc-arm-linux-gnueabihf" />
+        <package name="g++-arm-linux-gnueabihf" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
@@ -698,6 +767,25 @@
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -874,7 +962,57 @@
         <package name="qemu-user-static" />
 
         <option name="gnu" value="--enable-isystem" />
-        <option name="gnu" value="--build-skip-tests" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="debug" link="static" gate="true" />
+      </entry>
+
+      <!-- macos x86_64 -->
+      <entry image="macos-26-intel">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm64 -->
+      <entry image="ubuntu-24.04-arm">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux x86 -->
+      <entry image="ubuntu-24.04">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+        <package name="gcc-13-multilib" />
+        <package name="g++-13-multilib" />
+        <flag value="-m32" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm32 (cross compiled) -->
+      <entry image="ubuntu-24.04" host="arm-linux-gnueabihf">
+        <compiler lang="c" name="arm-linux-gnueabihf-gcc" />
+        <compiler lang="cxx" name="arm-linux-gnueabihf-g++" />
+        <package name="gcc-arm-linux-gnueabihf" />
+        <package name="g++-arm-linux-gnueabihf" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
@@ -970,6 +1108,25 @@
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -1146,7 +1303,57 @@
         <package name="qemu-user-static" />
 
         <option name="gnu" value="--enable-isystem" />
-        <option name="gnu" value="--build-skip-tests" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="debug" link="static" gate="true" />
+      </entry>
+
+      <!-- macos x86_64 -->
+      <entry image="macos-26-intel">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm64 -->
+      <entry image="ubuntu-24.04-arm">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux x86 -->
+      <entry image="ubuntu-24.04">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+        <package name="gcc-13-multilib" />
+        <package name="g++-13-multilib" />
+        <flag value="-m32" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm32 (cross compiled) -->
+      <entry image="ubuntu-24.04" host="arm-linux-gnueabihf">
+        <compiler lang="c" name="arm-linux-gnueabihf-gcc" />
+        <compiler lang="cxx" name="arm-linux-gnueabihf-g++" />
+        <package name="gcc-arm-linux-gnueabihf" />
+        <package name="g++-arm-linux-gnueabihf" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
@@ -1241,6 +1448,25 @@
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -1417,7 +1643,57 @@
         <package name="qemu-user-static" />
 
         <option name="gnu" value="--enable-isystem" />
-        <option name="gnu" value="--build-skip-tests" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="debug" link="static" gate="true" />
+      </entry>
+
+      <!-- macos x86_64 -->
+      <entry image="macos-26-intel">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm64 -->
+      <entry image="ubuntu-24.04-arm">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux x86 -->
+      <entry image="ubuntu-24.04">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+        <package name="gcc-13-multilib" />
+        <package name="g++-13-multilib" />
+        <flag value="-m32" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm32 (cross compiled) -->
+      <entry image="ubuntu-24.04" host="arm-linux-gnueabihf">
+        <compiler lang="c" name="arm-linux-gnueabihf-gcc" />
+        <compiler lang="cxx" name="arm-linux-gnueabihf-g++" />
+        <package name="gcc-arm-linux-gnueabihf" />
+        <package name="g++-arm-linux-gnueabihf" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
@@ -1563,6 +1839,25 @@
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -1739,7 +2034,57 @@
         <package name="qemu-user-static" />
 
         <option name="gnu" value="--enable-isystem" />
-        <option name="gnu" value="--build-skip-tests" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="debug" link="static" gate="true" />
+      </entry>
+
+      <!-- macos x86_64 -->
+      <entry image="macos-26-intel">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm64 -->
+      <entry image="ubuntu-24.04-arm">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux x86 -->
+      <entry image="ubuntu-24.04">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+        <package name="gcc-13-multilib" />
+        <package name="g++-13-multilib" />
+        <flag value="-m32" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm32 (cross compiled) -->
+      <entry image="ubuntu-24.04" host="arm-linux-gnueabihf">
+        <compiler lang="c" name="arm-linux-gnueabihf-gcc" />
+        <compiler lang="cxx" name="arm-linux-gnueabihf-g++" />
+        <package name="gcc-arm-linux-gnueabihf" />
+        <package name="g++-arm-linux-gnueabihf" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
@@ -1872,6 +2217,25 @@
         <job name="msvc" configuration="StaticRelease" gate="true" />
       </entry>
 
+      <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
+        <option name="msvc" value="--build-compiler clang" />
+        <job name="msvc" configuration="StaticRelease" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -2048,7 +2412,57 @@
         <package name="qemu-user-static" />
 
         <option name="gnu" value="--enable-isystem" />
-        <option name="gnu" value="--build-skip-tests" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="debug" link="static" gate="true" />
+      </entry>
+
+      <!-- macos x86_64 -->
+      <entry image="macos-26-intel">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <build name="boost" />
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm64 -->
+      <entry image="ubuntu-24.04-arm">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux x86 -->
+      <entry image="ubuntu-24.04">
+        <build name="boost" />
+
+        <compiler lang="c" name="gcc" version="13" />
+        <compiler lang="cxx" name="g++" version="13" />
+        <package name="gcc-13-multilib" />
+        <package name="g++-13-multilib" />
+        <flag value="-m32" />
+
+        <option name="gnu" value="--enable-isystem" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- linux arm32 (cross compiled) -->
+      <entry image="ubuntu-24.04" host="arm-linux-gnueabihf">
+        <compiler lang="c" name="arm-linux-gnueabihf-gcc" />
+        <compiler lang="cxx" name="arm-linux-gnueabihf-g++" />
+        <package name="gcc-arm-linux-gnueabihf" />
+        <package name="g++-arm-linux-gnueabihf" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
@@ -2735,6 +3149,15 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <value symbol="disabled" />
       <value symbol="public-only" />
     </option>
+    <option id="build-msvc-compiler"
+      canonical="BUILD_COMPILER"
+      comment="Determines the compiler."
+      datatype="enumeration"
+      placeholder="compiler" >
+      <symbol long="--build-compiler" />
+      <value symbol="msvc" />
+      <value symbol="clang" />
+    </option>
 
     <!-- preset -->
     <option id="build-preset"
@@ -2812,6 +3235,13 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       datatype="boolean"
       sanitize="true" >
       <symbol long="--build-skip-tests" />
+    </option>
+    <option id="build-skip-test-run"
+      canonical="BUILD_SKIP_TEST_RUN"
+      comment="Compile tests without executing them."
+      datatype="boolean"
+      sanitize="true" >
+      <symbol long="--build-skip-test-run" />
     </option>
     <option id="build-valgrind"
       canonical="BUILD_VALGRIND"
@@ -3044,6 +3474,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="build-full-repositories" />
       <option id="build-post-install-clean" />
       <option id="build-skip-tests" />
+      <option id="build-skip-test-run" />
       <option id="build-valgrind" />
       <option id="build-parallel" />
       <option id="build-use-local-src" />
@@ -3070,6 +3501,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="build-full-repositories" />
       <option id="build-post-install-clean" />
       <option id="build-skip-tests" />
+      <option id="build-skip-test-run" />
       <option id="build-parallel" />
       <option id="build-use-local-src" />
       <option id="prefix" />
@@ -3097,6 +3529,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="build-full-repositories" />
       <option id="build-post-install-clean" />
       <option id="build-skip-tests" />
+      <option id="build-skip-test-run" />
       <option id="build-parallel" />
       <option id="build-use-local-src" />
       <option id="hardware-optimized" />
@@ -3119,6 +3552,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="build-msvc-version" />
       <option id="build-msvc-mode" />
       <option id="build-msvc-symbols" />
+      <option id="build-msvc-compiler" />
       <option id="build-src-dir" />
       <option id="build-full-repositories" />
       <option id="build-skip-tests" />
