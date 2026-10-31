@@ -101,7 +101,6 @@
         msvc="/p:Option-cuda=true" />
 
       <!-- Dependencies -->
-      <dependency name="boost" version="1.86.0" />
 
       <dependency name="secp256k1" version="0.8.0" option="secp256k1" />
 
@@ -344,7 +343,6 @@
       <!--
       -->
 
-      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-system" private="true" />
 
@@ -447,7 +445,6 @@
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="debug" link="dynamic" />
@@ -462,7 +459,6 @@
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
         <build name="secp256k1" />
 
         <compiler lang="c" name="clang" version="18" />
@@ -488,7 +484,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="clang" version="19" />
         <compiler lang="cxx" name="clang++" version="19" />
@@ -515,7 +510,6 @@
 
       <!-- gnu compiler -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
@@ -542,7 +536,6 @@
 
       <!-- constant time (valgrind reports secret dependent branches) -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -556,7 +549,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -579,7 +571,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -604,7 +595,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="16" />
         <compiler lang="cxx" name="g++" version="16" />
@@ -646,7 +636,6 @@
       <entry image="macos-26-intel">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="release" link="static" gate="true" />
@@ -654,7 +643,6 @@
 
       <!-- linux arm64 -->
       <entry image="ubuntu-24.04-arm">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -668,7 +656,6 @@
 
       <!-- linux x86 -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -768,7 +755,6 @@
       <!--
       -->
 
-      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-network" private="true" />
 
@@ -832,7 +818,6 @@
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="debug" link="dynamic" />
@@ -847,7 +832,6 @@
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="clang" version="19" />
         <compiler lang="cxx" name="clang++" version="19" />
@@ -873,7 +857,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="clang" version="18" />
         <compiler lang="cxx" name="clang++" version="18" />
@@ -897,7 +880,6 @@
 
       <!-- gnu compiler -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
@@ -923,7 +905,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -946,7 +927,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -971,7 +951,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="16" />
         <compiler lang="cxx" name="g++" version="16" />
@@ -1013,7 +992,6 @@
       <entry image="macos-26-intel">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="release" link="static" gate="true" />
@@ -1021,7 +999,6 @@
 
       <!-- linux arm64 -->
       <entry image="ubuntu-24.04-arm">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -1035,7 +1012,6 @@
 
       <!-- linux x86 -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -1133,7 +1109,6 @@
       <!--
       -->
 
-      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-database" private="true" />
 
@@ -1194,7 +1169,6 @@
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="debug" link="dynamic" />
@@ -1209,7 +1183,6 @@
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="clang" version="19" />
         <compiler lang="cxx" name="clang++" version="19" />
@@ -1235,7 +1208,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="clang" version="18" />
         <compiler lang="cxx" name="clang++" version="18" />
@@ -1259,7 +1231,6 @@
 
       <!-- gnu compiler -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
@@ -1285,7 +1256,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -1308,7 +1278,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -1333,7 +1302,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="16" />
         <compiler lang="cxx" name="g++" version="16" />
@@ -1375,7 +1343,6 @@
       <entry image="macos-26-intel">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="release" link="static" gate="true" />
@@ -1383,7 +1350,6 @@
 
       <!-- linux arm64 -->
       <entry image="ubuntu-24.04-arm">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -1397,7 +1363,6 @@
 
       <!-- linux x86 -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -1493,7 +1458,6 @@
       <!--
       -->
 
-      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-node" private="true" />
 
@@ -1555,7 +1519,6 @@
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="debug" link="dynamic" />
@@ -1570,7 +1533,6 @@
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="clang" version="19" />
         <compiler lang="cxx" name="clang++" version="19" />
@@ -1596,7 +1558,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="clang" version="18" />
         <compiler lang="cxx" name="clang++" version="18" />
@@ -1620,7 +1581,6 @@
 
       <!-- gnu compiler -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
@@ -1646,7 +1606,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -1669,7 +1628,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -1694,7 +1652,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="16" />
         <compiler lang="cxx" name="g++" version="16" />
@@ -1736,7 +1693,6 @@
       <entry image="macos-26-intel">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="release" link="static" gate="true" />
@@ -1744,7 +1700,6 @@
 
       <!-- linux arm64 -->
       <entry image="ubuntu-24.04-arm">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -1758,7 +1713,6 @@
 
       <!-- linux x86 -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -1855,7 +1809,6 @@
       <!--
       -->
 
-      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-server" private="true" />
 
@@ -1968,7 +1921,6 @@
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="debug" link="dynamic" />
@@ -1983,7 +1935,6 @@
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="clang" version="19" />
         <compiler lang="cxx" name="clang++" version="19" />
@@ -2009,7 +1960,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="clang" version="18" />
         <compiler lang="cxx" name="clang++" version="18" />
@@ -2033,7 +1983,6 @@
 
       <!-- gnu compiler -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
@@ -2059,7 +2008,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -2082,7 +2030,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -2107,7 +2054,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="16" />
         <compiler lang="cxx" name="g++" version="16" />
@@ -2149,7 +2095,6 @@
       <entry image="macos-26-intel">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="release" link="static" gate="true" />
@@ -2157,7 +2102,6 @@
 
       <!-- linux arm64 -->
       <entry image="ubuntu-24.04-arm">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -2171,7 +2115,6 @@
 
       <!-- linux x86 -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -2269,7 +2212,6 @@
         <msbuild filter="src" />
       </sources>
 
-      <dependency name="boost" version="1.86.0" private="true" />
 
       <dependency name="libbitcoin-explorer" private="true" />
 
@@ -2368,7 +2310,6 @@
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="debug" link="dynamic" />
@@ -2383,7 +2324,6 @@
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="clang" version="19" />
         <compiler lang="cxx" name="clang++" version="19" />
@@ -2409,7 +2349,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="clang" version="18" />
         <compiler lang="cxx" name="clang++" version="18" />
@@ -2433,7 +2372,6 @@
 
       <!-- gnu compiler -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="13" />
         <compiler lang="cxx" name="g++" version="13" />
@@ -2459,7 +2397,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -2482,7 +2419,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -2507,7 +2443,6 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="16" />
         <compiler lang="cxx" name="g++" version="16" />
@@ -2549,7 +2484,6 @@
       <entry image="macos-26-intel">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <build name="boost" />
         <option name="gnu" value="--enable-isystem" />
 
         <job name="gnu" config="release" link="static" gate="true" />
@@ -2557,7 +2491,6 @@
 
       <!-- linux arm64 -->
       <entry image="ubuntu-24.04-arm">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
@@ -2571,7 +2504,6 @@
 
       <!-- linux x86 -->
       <entry image="ubuntu-24.04">
-        <build name="boost" />
 
         <compiler lang="c" name="gcc" version="15" />
         <compiler lang="cxx" name="g++" version="15" />
@@ -2688,7 +2620,7 @@
           <symbol value="-Wno-mismatched-tags" />
           <context language="c++" />
         </flag>
-         <!-- This varies by dependency build, such as boost. So we do not enforce. -->
+         <!-- This varies by dependency build. So we do not enforce. -->
         <flag id="fvisibility=hidden"
           comment="Hide internal functions from external libs."
           type="private"
@@ -2932,7 +2864,6 @@
       <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
         <option value="--without-console" ignore="true" />
-        <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
@@ -2953,7 +2884,6 @@
       <github owner="libbitcoin" tag="master" />
       <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
-        <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
@@ -2972,7 +2902,6 @@
       <github owner="libbitcoin" tag="master" />
       <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
-        <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
@@ -2991,7 +2920,6 @@
       <github owner="libbitcoin" tag="master" />
       <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
-        <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
@@ -3011,7 +2939,6 @@
       <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
         <option value="--without-console" ignore="true" />
-        <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
@@ -3033,7 +2960,6 @@
       <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
         <option value="--without-console" ignore="true" />
-        <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
@@ -3049,33 +2975,6 @@
         package="libbitcoin-explorer"
         target="bitcoin::explorer" />
       <pkg />
-    </dependency>
-    <dependency name="boost"
-      textname="Boost"
-      conditional="true"
-      comment="Build Boost libraries."
-      stage="external">
-      <prefix root="true" with="true" />
-      <archive version="1.86.0">
-        <url pattern="https://archives.boost.io/release/version/source/">
-          <substitute data="version" symbol="version" type="no" />
-        </url>
-        <filename pattern="boost_version" compression="bzip2" filetype=".tar.bz2">
-          <substitute data="version" symbol="version" type="c" />
-        </filename>
-      </archive>
-      <github owner="boostorg" tag="boost-1.86.0" />
-      <nuget>
-        <resource canonical="boost">
-          <package compiler="v145" name="libbitcoin-boost" version="1.91.0.1" />
-        </resource>
-      </nuget>
-      <build method="nuget" />
-      <build method="boost_build" version="1.86.0" parallel="true">
-        <flag value="-Wno-enum-constexpr-conversion" />
-        <option value="--with-headers" />
-      </build>
-      <cmake namespace="Boost" package="Boost" target="Boost::headers" />
     </dependency>
     <dependency name="secp256k1"
       textname="libsecp256k1"
@@ -3605,7 +3504,6 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <error logpath="test.log" />
       <build method="gnu" canonical="true" />
       <build method="cmake" />
-      <build method="boost_build" />
       <column help="30" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
@@ -3632,7 +3530,6 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <error logpath="Testing/Temporary/LastTest.log" />
       <error logpath="test.log" />
       <build method="cmake" canonical="true" />
-      <build method="boost_build" />
       <column help="29" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
@@ -3663,7 +3560,6 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <error logpath="test.log" />
       <build method="preset" />
       <build method="cmake" canonical="true" />
-      <build method="boost_build" />
       <column help="29" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
@@ -3862,14 +3758,6 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       outpath="builds/msvc">
       <schema xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010" />
 
-      <!-- boost::multiprecision::number<boost::multiprecision::cpp_int_backend<*, *, 0, 0, void>> --> 
-      <substitution display="m_backend"
-        type="boost::multiprecision::number&lt;*&gt;" />
-
-      <!-- boost::multiprecision::backends::cpp_int_backend<*,*,0,0,void> -->
-      <substitution display="m_data"
-        type="boost::multiprecision::backends::cpp_int_backend&lt;*,*,0,0,void&gt;" />
-
     </template>
 
     <template name="packages.config.gsl"
@@ -4038,12 +3926,10 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       </option>
 
       <option type="enable" name="shared"
-        comment="Required for dynamically linking boost test."
+        comment="Build shared libraries."
         default="yes"
         standard="true"
-        treatment="define">
-        <on value="yes" define="BOOST_ALL_DYN_LINK" />
-      </option>
+        treatment="none" />
 
       <!-- <file source="m4/*" destination="builds/gnu/m4" /> -->
     </template>

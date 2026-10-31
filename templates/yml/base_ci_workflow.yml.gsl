@@ -524,9 +524,9 @@ jobs:
           }
           Write-Host "Found single test executable: " $BC_TEST_EXES.FullName -ForegroundColor Green;
           $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
-          Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
+          Write-Host "Executing $BC_TEST_SINGLETON" -ForegroundColor Yellow;
           try {
-            Invoke-Expression "$BC_TEST_SINGLETON --log_level=warning --run_test=${{ matrix.tests }} $env:BOOST_UNIT_TEST_OPTIONS"
+            Invoke-Expression "$BC_TEST_SINGLETON --log_level=warning --run_test=${{ matrix.tests }}"
           }
           catch {
             $ERR = $_;
@@ -757,25 +757,6 @@ jobs:
                 "${{ matrix.options }}" != *"--build-skip-test-run"* ]]; then
             ./emulation
           fi
-
-      - name: Install boost headers [cross]
-        if: ${{ matrix.host }}
-        shell: bash
-        working-directory: '$(my.repository.name)'
-        env:
-          CC: 'gcc'
-          CXX: 'g++'
-        run: >
-          ./$(my.job.script)
-          --build-use-local-src
-          --build-src-dir="${{ github.workspace }}"
-          --prefix="${{ github.workspace }}/prefix"
-          --build-obj-dir="obj"
-          --build-obj-dir-relative
-          --build-config="${{ matrix.config }}"
-          --build-link="${{ matrix.link }}"
-          --build-limit=external
-          --build-boost
 .   endif
 
       - name: Execute installation
@@ -808,7 +789,7 @@ jobs:
 .       endfor
           ${{ matrix.options }}
 .       if my.cross
-          ${{ matrix.host && format('--host={0} --with-boost={1}/prefix', matrix.host, github.workspace) || '' }}
+          ${{ matrix.host && format('--host={0}', matrix.host) || '' }}
 .       endif
 .   endnew
 .
