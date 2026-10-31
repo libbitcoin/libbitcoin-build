@@ -394,12 +394,12 @@
 
       <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <!-- clang -->
@@ -442,7 +442,7 @@
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
-        <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -465,7 +465,7 @@
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
-        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
         <job name="presets" preset="nix-gnu-release-shared" />
@@ -491,7 +491,7 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
+        <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
@@ -528,7 +528,7 @@
         <job name="gnu" config="release" link="dynamic" />
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" gate="true" />
+        <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
@@ -551,7 +551,7 @@
         <job name="gnu" config="debug" link="dynamic" />
         <job name="gnu" config="debug" link="static" />
         <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
@@ -615,8 +615,10 @@
       <entry image="ubuntu-24.04-arm">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <package name="gcc-14" />
+        <package name="g++-14" />
 
         <option name="gnu" value="--enable-isystem" />
 
@@ -627,10 +629,10 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
-        <package name="gcc-13-multilib" />
-        <package name="g++-13-multilib" />
+        <compiler lang="c" name="gcc" version="15" />
+        <compiler lang="cxx" name="g++" version="15" />
+        <package name="gcc-15-multilib" ppa="ubuntu-toolchain-r/test" />
+        <package name="g++-15-multilib" ppa="ubuntu-toolchain-r/test" />
         <flag value="-m32" />
 
         <option name="gnu" value="--enable-isystem" />
@@ -778,12 +780,12 @@
 
       <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <!-- clang -->
@@ -823,7 +825,7 @@
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
-        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
         <job name="presets" preset="nix-gnu-release-shared" />
@@ -849,7 +851,7 @@
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
-        <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -872,7 +874,7 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
+        <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" gate="true" />
@@ -894,7 +896,7 @@
         <job name="gnu" config="release" link="dynamic" />
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" gate="true" />
+        <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
@@ -917,7 +919,7 @@
         <job name="gnu" config="debug" link="dynamic" />
         <job name="gnu" config="debug" link="static" />
         <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
@@ -981,8 +983,10 @@
       <entry image="ubuntu-24.04-arm">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <package name="gcc-14" />
+        <package name="g++-14" />
 
         <option name="gnu" value="--enable-isystem" />
 
@@ -993,10 +997,10 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
-        <package name="gcc-13-multilib" />
-        <package name="g++-13-multilib" />
+        <compiler lang="c" name="gcc" version="15" />
+        <compiler lang="cxx" name="g++" version="15" />
+        <package name="gcc-15-multilib" ppa="ubuntu-toolchain-r/test" />
+        <package name="g++-15-multilib" ppa="ubuntu-toolchain-r/test" />
         <flag value="-m32" />
 
         <option name="gnu" value="--enable-isystem" />
@@ -1119,12 +1123,12 @@
 
       <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <!-- clang -->
@@ -1164,7 +1168,7 @@
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
-        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
         <job name="presets" preset="nix-gnu-release-shared" />
@@ -1190,7 +1194,7 @@
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
-        <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -1213,7 +1217,7 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
+        <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" gate="true" />
@@ -1235,7 +1239,7 @@
         <job name="gnu" config="release" link="dynamic" />
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" gate="true" />
+        <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
@@ -1258,7 +1262,7 @@
         <job name="gnu" config="debug" link="dynamic" />
         <job name="gnu" config="debug" link="static" />
         <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
@@ -1322,8 +1326,10 @@
       <entry image="ubuntu-24.04-arm">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <package name="gcc-14" />
+        <package name="g++-14" />
 
         <option name="gnu" value="--enable-isystem" />
 
@@ -1334,10 +1340,10 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
-        <package name="gcc-13-multilib" />
-        <package name="g++-13-multilib" />
+        <compiler lang="c" name="gcc" version="15" />
+        <compiler lang="cxx" name="g++" version="15" />
+        <package name="gcc-15-multilib" ppa="ubuntu-toolchain-r/test" />
+        <package name="g++-15-multilib" ppa="ubuntu-toolchain-r/test" />
         <flag value="-m32" />
 
         <option name="gnu" value="--enable-isystem" />
@@ -1459,12 +1465,12 @@
 
       <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <!-- clang -->
@@ -1504,7 +1510,7 @@
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
-        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
         <job name="presets" preset="nix-gnu-release-shared" />
@@ -1530,7 +1536,7 @@
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
-        <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -1553,7 +1559,7 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
+        <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" gate="true" />
@@ -1575,7 +1581,7 @@
         <job name="gnu" config="release" link="dynamic" />
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" gate="true" />
+        <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
@@ -1598,7 +1604,7 @@
         <job name="gnu" config="debug" link="dynamic" />
         <job name="gnu" config="debug" link="static" />
         <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
@@ -1662,8 +1668,10 @@
       <entry image="ubuntu-24.04-arm">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <package name="gcc-14" />
+        <package name="g++-14" />
 
         <option name="gnu" value="--enable-isystem" />
 
@@ -1674,10 +1682,10 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
-        <package name="gcc-13-multilib" />
-        <package name="g++-13-multilib" />
+        <compiler lang="c" name="gcc" version="15" />
+        <compiler lang="cxx" name="g++" version="15" />
+        <package name="gcc-15-multilib" ppa="ubuntu-toolchain-r/test" />
+        <package name="g++-15-multilib" ppa="ubuntu-toolchain-r/test" />
         <flag value="-m32" />
 
         <option name="gnu" value="--enable-isystem" />
@@ -1850,12 +1858,12 @@
 
       <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <!-- clang -->
@@ -1895,7 +1903,7 @@
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
-        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
         <job name="presets" preset="nix-gnu-release-shared" />
@@ -1921,7 +1929,7 @@
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
-        <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -1944,7 +1952,7 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
+        <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" gate="true" />
@@ -1966,7 +1974,7 @@
         <job name="gnu" config="release" link="dynamic" />
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" gate="true" />
+        <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
@@ -1989,7 +1997,7 @@
         <job name="gnu" config="debug" link="dynamic" />
         <job name="gnu" config="debug" link="static" />
         <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
@@ -2053,8 +2061,10 @@
       <entry image="ubuntu-24.04-arm">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <package name="gcc-14" />
+        <package name="g++-14" />
 
         <option name="gnu" value="--enable-isystem" />
 
@@ -2065,10 +2075,10 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
-        <package name="gcc-13-multilib" />
-        <package name="g++-13-multilib" />
+        <compiler lang="c" name="gcc" version="15" />
+        <compiler lang="cxx" name="g++" version="15" />
+        <package name="gcc-15-multilib" ppa="ubuntu-toolchain-r/test" />
+        <package name="g++-15-multilib" ppa="ubuntu-toolchain-r/test" />
         <flag value="-m32" />
 
         <option name="gnu" value="--enable-isystem" />
@@ -2228,12 +2238,12 @@
 
       <entry image="windows-latest" platform="Win32" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
-        <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="StaticRelease" />
       </entry>
 
       <!-- clang -->
@@ -2273,7 +2283,7 @@
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
-        <job name="cmake" config="release" link="static" gate="true" />
+        <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
         <job name="presets" preset="nix-gnu-release-shared" />
@@ -2299,7 +2309,7 @@
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" />
-        <job name="presets" preset="nix-gnu-release-shared" gate="true" />
+        <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
       </entry>
 
@@ -2322,7 +2332,7 @@
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
-        <job name="cmake" config="release" link="dynamic" gate="true" />
+        <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
         <job name="presets" preset="nix-gnu-debug-static" gate="true" />
@@ -2344,7 +2354,7 @@
         <job name="gnu" config="release" link="dynamic" />
         <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
-        <job name="cmake" config="debug" link="static" gate="true" />
+        <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
         <job name="cmake" config="release" link="static" />
         <job name="presets" preset="nix-gnu-debug-shared" />
@@ -2367,7 +2377,7 @@
         <job name="gnu" config="debug" link="dynamic" />
         <job name="gnu" config="debug" link="static" />
         <job name="gnu" config="release" link="dynamic" />
-        <job name="gnu" config="release" link="static" gate="true" />
+        <job name="gnu" config="release" link="static" />
         <job name="cmake" config="debug" link="dynamic" />
         <job name="cmake" config="debug" link="static" />
         <job name="cmake" config="release" link="dynamic" />
@@ -2431,8 +2441,10 @@
       <entry image="ubuntu-24.04-arm">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <package name="gcc-14" />
+        <package name="g++-14" />
 
         <option name="gnu" value="--enable-isystem" />
 
@@ -2443,10 +2455,10 @@
       <entry image="ubuntu-24.04">
         <build name="boost" />
 
-        <compiler lang="c" name="gcc" version="13" />
-        <compiler lang="cxx" name="g++" version="13" />
-        <package name="gcc-13-multilib" />
-        <package name="g++-13-multilib" />
+        <compiler lang="c" name="gcc" version="15" />
+        <compiler lang="cxx" name="g++" version="15" />
+        <package name="gcc-15-multilib" ppa="ubuntu-toolchain-r/test" />
+        <package name="g++-15-multilib" ppa="ubuntu-toolchain-r/test" />
         <flag value="-m32" />
 
         <option name="gnu" value="--enable-isystem" />
