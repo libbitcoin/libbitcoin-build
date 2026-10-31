@@ -732,32 +732,12 @@
         path="src"
         type="sources" />
 
-      <sources path="src" recursive="true">
-        <sources path="src/ssl" recursive="true" option="ssl" />
-      </sources>
-      <headers path="include" recursive="true" root="true">
-        <headers path="include/bitcoin/network/ssl"
-          recursive="true" root="true" option="ssl" substitute="ssl_include" />
-      </headers>
-      <!--
-      -->
-
-      <!-- Exposed knobs -->
-      <option name="ssl" type="with"
-        default="yes"
-        comment="Use embedded ssl library." />
+      <sources path="src" recursive="true" />
+      <headers path="include" recursive="true" root="true" />
 
       <dependency name="libbitcoin-system" version="4.0.0" />
 
       <compiler standard="20">
-        <define option="ssl"
-          comment="Use embedded ssl libraries."
-          type="public">
-          <symbol value="WITH_SSL">
-            <substitute name="ssl" />
-          </symbol>
-        </define>
-
         <flag id="Wall" />
         <flag id="Wextra" />
         <!-- <flag id="Wpedantic" /> -->
@@ -2997,11 +2977,9 @@
       </build>
       <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
-        <option value="-Dwith-ssl:BOOL=ON" />
       </build>
       <build method="preset" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
-        <option value="-Dwith-ssl:BOOL=ON" />
       </build>
       <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"
