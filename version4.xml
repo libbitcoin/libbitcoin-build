@@ -11,12 +11,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-system"
-      uuid="39f60708-ff48-4c22-952d-43470866f684">
+      uuid="39f60708-ff48-4c22-952d-43470866f684"
+      symbol="BC">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/system"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
@@ -714,12 +720,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-network"
-      uuid="564eb540-d6b6-425c-b8db-b0bee8970c18">
+      uuid="564eb540-d6b6-425c-b8db-b0bee8970c18"
+      symbol="BCT">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/network"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true">
         <sources path="src/ssl" recursive="true" option="ssl" />
@@ -1095,12 +1107,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-database"
-      uuid="62d7fbee-4d52-424a-8938-59756e13d9f5">
+      uuid="62d7fbee-4d52-424a-8938-59756e13d9f5"
+      symbol="BCD">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/database"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
@@ -1451,12 +1469,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-node"
-      uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158">
+      uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158"
+      symbol="BCN">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/node"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
@@ -1808,12 +1832,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-server"
-      uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0">
+      uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0"
+      symbol="BCS">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/server"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
@@ -2215,12 +2245,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-explorer"
-      uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f">
+      uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f"
+      symbol="BCX">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/explorer"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
@@ -3747,6 +3783,10 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       path="src"
       outpath="include/bitcoin" />
 
+    <template name="version.cpp.in.gsl"
+      path="src"
+      outpath="src" />
+
     <!-- <template name="version.hpp.gsl"
       path="src"
       outpath="include/bitcoin" /> -->
@@ -3799,6 +3839,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <!-- pkg-config -->
       <ignore name="builds/gnu/*.pc" comment="pkg-config pc file from .pc.in" />
       <ignore name="builds/gnu/include" comment="configured headers from in-tree configure" />
+      <ignore name="builds/gnu/src" comment="configured sources from in-tree make" />
 
       <!-- msbuild/msvc -->
       <ignore comment="msbuild/msvc">

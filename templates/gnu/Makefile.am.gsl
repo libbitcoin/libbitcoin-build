@@ -410,6 +410,7 @@ $(my.var_prefix)_LIBS = $(my.output)
         my.repository, my.configuration, my.meta)
 .
 .   emit_target_sources(my.var_prefix, my.target, my.repository, my.configuration, my.meta)
+.   emit_configured_sources(my.var_prefix, my.target, my.meta)
 .
 .   if (name(my.target) = "library")
 .       if !first()
@@ -545,6 +546,37 @@ $(my.prefix)_$(target_link_suffix(my.target)) = \\
 .       endfor
 .   endif
 .endmacro # emit_target_link_libraries
+.
+.macro emit_configured_sources(prefix, target, meta)
+.   define my.prefix = emit_configured_sources.prefix
+.   define my.target = emit_configured_sources.target
+.   define my.meta = emit_configured_sources.meta
+.
+.   for my.target.configurable as _configurable where (_configurable.type = "sources")
+.       define my.output = "$(_configurable.path)/$(_configurable.output)"
+.       define my.input = "$(my.meta->path.prefix)/$(_configurable.path)/$(_configurable.input)"
+
+nodist_$(my.prefix)_SOURCES = \\
+    $(my.output)
+
+$(my.output): FORCE
+	@${MKDIR_P} $(_configurable.path)
+	@commit=`git -C ${srcdir} rev-parse HEAD 2>/dev/null || echo unknown`; \\
+	height=`git -C ${srcdir} rev-list --count HEAD 2>/dev/null || echo 0`; \\
+	url=`git -C ${srcdir} ls-remote --get-url 2>/dev/null | grep -e '://' -e '@' || echo unknown`; \\
+	if git -C ${srcdir} status --porcelain 2>/dev/null | grep -q . ; then dirty=1; else dirty=0; fi; \\
+	sed -e "s|[@]LIBBITCOIN_VERSION_MAJOR[@]|${LIBBITCOIN_VERSION_MAJOR}|g" \\
+	    -e "s|[@]LIBBITCOIN_VERSION_MINOR[@]|${LIBBITCOIN_VERSION_MINOR}|g" \\
+	    -e "s|[@]LIBBITCOIN_VERSION_PATCH[@]|$$height|g" \\
+	    -e "s|[@]GIT_COMMIT_HASH[@]|$$commit|g" \\
+	    -e "s|[@]GIT_ORIGIN_URL[@]|$$url|g" \\
+	    -e "s|[@]GIT_DIRTY[@]|$$dirty|g" \\
+	    $(my.input) > $@.tmp; \\
+	if cmp -s $@.tmp $@; then rm -f $@.tmp; else mv -f $@.tmp $@; fi
+
+FORCE:
+.   endfor
+.endmacro # emit_configured_sources
 .
 .macro emit_dir_target_sources(substitutions, files, prefix,\
     target, repository, configuration, meta)

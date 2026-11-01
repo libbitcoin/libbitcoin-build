@@ -343,7 +343,7 @@ AC_CONFIG_FILES([
     Makefile
     $(my.repository.name).pc
 .   for my.repository. as _target where is_target_element(_target)
-.       for _target.configurable as _configurable
+.       for _target.configurable as _configurable where !(_configurable.type = "sources")
     $(_configurable.path)/$(_configurable.output):${repository_root_dir}/$(_configurable.path)/$(_configurable.input)
 .       endfor
 .   endfor

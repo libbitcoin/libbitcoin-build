@@ -424,7 +424,9 @@ endfunction
 .   copyleft(my.repository.name)
 cmake_minimum_required(VERSION 3.30 FATAL_ERROR)
 
-find_package(Git QUIET)
+if ( NOT CMAKE_SCRIPT_MODE_FILE )
+    find_package(Git QUIET)
+endif()
 
 set( GIT_COMMIT_HASH "unknown" )
 set( GIT_COMMIT_HEIGHT 0 )
@@ -480,6 +482,11 @@ endif()
 set( LIBBITCOIN_VERSION_MAJOR $(my.repository->version.major) )
 set( LIBBITCOIN_VERSION_MINOR $(my.repository->version.minor) )
 set( LIBBITCOIN_VERSION_PATCH ${GIT_COMMIT_HEIGHT} )
+
+if ( CMAKE_SCRIPT_MODE_FILE )
+    configure_file( ${CONFIGURE_INPUT} ${CONFIGURE_OUTPUT} @ONLY )
+    return()
+endif()
 
 project( $(my.repository.name)
   VERSION ${LIBBITCOIN_VERSION_MAJOR}.${LIBBITCOIN_VERSION_MINOR}.${LIBBITCOIN_VERSION_PATCH}
@@ -770,6 +777,8 @@ $(my.indent)add_executable( $(target_name(my.target)) )
 .
 .   emit_target_link_libraries(my.target, my.repository, my.indent)
 .
+.   emit_target_configured_sources(my.target, my.meta, my.indent)
+.
 
 $(my.indent)set_target_properties( $(my.target.name)
   $(my.indent)PROPERTIES
@@ -795,6 +804,29 @@ $(my.indent))
 endif()
 .   endif
 .endmacro # emit_target
+.
+.macro emit_target_configured_sources(target, meta, indent)
+.   define my.target = emit_target_configured_sources.target
+.   define my.meta = emit_target_configured_sources.meta
+.   define my.indent = emit_target_configured_sources.indent
+.
+.   for my.target.configurable as _config where (_config.type = "sources")
+.       define my.output = "${CMAKE_CURRENT_BINARY_DIR}/$(_config.path)/$(_config.output)"
+
+$(my.indent)add_custom_target( $(target_name(my.target))-$(_config.output)
+  $(my.indent)COMMAND ${CMAKE_COMMAND}
+    $(my.indent)-DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+    $(my.indent)-DCONFIGURE_INPUT=${CMAKE_CURRENT_SOURCE_DIR}/$(my.meta->cmake.rootpath)/$(_config.path)/$(_config.input)
+    $(my.indent)-DCONFIGURE_OUTPUT=$(my.output)
+    $(my.indent)-P ${CMAKE_CURRENT_LIST_FILE}
+  $(my.indent)WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  $(my.indent)BYPRODUCTS $(my.output)
+  $(my.indent)VERBATIM )
+
+$(my.indent)add_dependencies( $(target_name(my.target)) $(target_name(my.target))-$(_config.output) )
+$(my.indent)target_sources( $(target_name(my.target)) PRIVATE $(my.output) )
+.   endfor
+.endmacro # emit_target_configured_sources
 .
 .macro emit_target_include_directories(target, repository, meta, indent)
 .   define my.target = emit_target_include_directories.target
