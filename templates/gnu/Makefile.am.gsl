@@ -482,6 +482,12 @@ $(my.prefix)_CPPFLAGS = \\
 .       endfor
 
 $(my.prefix)_LDFLAGS = \\
+.       if !(name(my.target) = "library")
+    ${mingw_program_LDFLAGS} \\
+.           if is_defined_positive(my.target, "wmain")
+    ${mingw_wmain_LDFLAGS} \\
+.           endif
+.       endif
 .
 .       for my.target.dependency as _depend
 .           define my.is_last_depend = last()
