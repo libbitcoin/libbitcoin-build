@@ -362,6 +362,42 @@
       <!-- <trigger test="t2" /> -->
     </test>
 
+    <binary name="bitcoin-selector"
+      uuid="3986e3a3-0642-4435-88b8-7a4b701fba8f"
+      install="true"
+      msvcproj="selector"
+      output="selector"
+      option="console" type="with" default="yes"
+      comment="Compile with console application.">
+
+      <sources path="console" recursive="true" root="true">
+        <msbuild filter="src" />
+      </sources>
+      <resources path="builds/msvc" recursive="false" root="true">
+        <msbuild filter="resource" />
+      </resources>
+
+      <dependency name="libbitcoin-system" private="true" />
+
+      <compiler standard="20">
+        <flag id="Wall" />
+        <flag id="Wextra" />
+        <!-- <flag id="Wpedantic" /> -->
+        <flag id="Wno-reorder" />
+        <flag id="Wno-missing-field-initializers" />
+        <flag id="Wno-missing-braces" />
+        <flag id="Wno-comment" />
+        <flag id="Wno-deprecated-copy" />
+        <flag id="Wno-ignored-attributes" />
+        <flag id="Wno-mismatched-tags" />
+        <!-- <flag id="fvisibility=hidden" /> -->>
+        <flag id="Wno-long-long" />
+        <flag id="fno-var-tracking-assignments" />
+        <flag id="fstack-protector-all" />
+        <!-- link id="no_fixup_chains" /> -->
+       </compiler>
+    </binary>
+
     <ci>
       <coverage>
         <exclude path="src/words/catalogs/*" />
@@ -2800,14 +2836,17 @@
       <github owner="libbitcoin" tag="master" />
       <build method="gnu" filepath="builds/gnu" objpath="builds/gnu" parallel="true">
         <option value="--without-tests" ignore="true" />
+        <option value="--without-console" ignore="true" />
         <option value="${with_boost}" />
         <option value="${with_pkgconfigdir}" />
       </build>
       <build method="cmake" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-console:BOOL=OFF" ignore="true" />
       </build>
       <build method="preset" filepath="builds/cmake" objpath="." parallel="true">
         <option value="-Dwith-tests:BOOL=OFF" ignore="true" />
+        <option value="-Dwith-console:BOOL=OFF" ignore="true" />
       </build>
       <build method="msbuild" filepath="builds\msvc\%proj_version%" />
       <cmake namespace="bitcoin"
