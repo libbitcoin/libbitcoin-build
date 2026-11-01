@@ -484,7 +484,16 @@ $(my.indent)<ItemGroup>
   $(my.indent)</ConfigurableFile>
 .       endfor
 .       for my.target.configurable as _configurable
+.           if (_configurable.type = "sources")
+.               define my.splitpoint = string.locate_last(_configurable.output, ".")
+.               define my.stem = string.substr(_configurable.output, 0, my.splitpoint - 1)
+.               define my.prefix = string.replace(_configurable.path, "/|_")
+  $(my.indent)<$(configurable_item(_configurable)) Include="$(configurable_output(_configurable, my.meta))">
+    $(my.indent)<ObjectFileName>\$(IntDir)build_$(my.prefix)_$(my.stem).obj</ObjectFileName>
+  $(my.indent)</$(configurable_item(_configurable))>
+.           else
   $(my.indent)<$(configurable_item(_configurable)) Include="$(configurable_output(_configurable, my.meta))" />
+.           endif
 .       endfor
 $(my.indent)</ItemGroup>
 .   endif

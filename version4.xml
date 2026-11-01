@@ -11,12 +11,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-system"
-      uuid="39f60708-ff48-4c22-952d-43470866f684">
+      uuid="39f60708-ff48-4c22-952d-43470866f684"
+      symbol="BC">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/system"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
@@ -688,6 +694,19 @@
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
+
+      <!-- windows x86_64 mingw-w64 (cross compiled) -->
+      <entry image="ubuntu-26.04" host="x86_64-w64-mingw32">
+        <compiler lang="c" name="x86_64-w64-mingw32-gcc-posix" />
+        <compiler lang="cxx" name="x86_64-w64-mingw32-g++-posix" />
+        <package name="gcc-mingw-w64-x86-64-posix" />
+        <package name="g++-mingw-w64-x86-64-posix" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
     </ci>
   </repository>
 
@@ -701,12 +720,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-network"
-      uuid="564eb540-d6b6-425c-b8db-b0bee8970c18">
+      uuid="564eb540-d6b6-425c-b8db-b0bee8970c18"
+      symbol="BCT">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/network"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true">
         <sources path="src/ssl" recursive="true" option="ssl" />
@@ -1056,6 +1081,19 @@
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
+
+      <!-- windows x86_64 mingw-w64 (cross compiled) -->
+      <entry image="ubuntu-26.04" host="x86_64-w64-mingw32">
+        <compiler lang="c" name="x86_64-w64-mingw32-gcc-posix" />
+        <compiler lang="cxx" name="x86_64-w64-mingw32-g++-posix" />
+        <package name="gcc-mingw-w64-x86-64-posix" />
+        <package name="g++-mingw-w64-x86-64-posix" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
     </ci>
   </repository>
 
@@ -1069,12 +1107,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-database"
-      uuid="62d7fbee-4d52-424a-8938-59756e13d9f5">
+      uuid="62d7fbee-4d52-424a-8938-59756e13d9f5"
+      symbol="BCD">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/database"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
@@ -1399,6 +1443,19 @@
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
+
+      <!-- windows x86_64 mingw-w64 (cross compiled) -->
+      <entry image="ubuntu-26.04" host="x86_64-w64-mingw32">
+        <compiler lang="c" name="x86_64-w64-mingw32-gcc-posix" />
+        <compiler lang="cxx" name="x86_64-w64-mingw32-g++-posix" />
+        <package name="gcc-mingw-w64-x86-64-posix" />
+        <package name="g++-mingw-w64-x86-64-posix" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
     </ci>
   </repository>
 
@@ -1412,12 +1469,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-node"
-      uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158">
+      uuid="5ffb5f52-0772-4404-bb2f-39be5f82a158"
+      symbol="BCN">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/node"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
@@ -1741,6 +1804,19 @@
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
+
+      <!-- windows x86_64 mingw-w64 (cross compiled) -->
+      <entry image="ubuntu-26.04" host="x86_64-w64-mingw32">
+        <compiler lang="c" name="x86_64-w64-mingw32-gcc-posix" />
+        <compiler lang="cxx" name="x86_64-w64-mingw32-g++-posix" />
+        <package name="gcc-mingw-w64-x86-64-posix" />
+        <package name="g++-mingw-w64-x86-64-posix" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
     </ci>
   </repository>
 
@@ -1756,12 +1832,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-server"
-      uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0">
+      uuid="73ce0ac2-ecb2-4e8d-a136-17840c0371a0"
+      symbol="BCS">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/server"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
@@ -1822,10 +1904,11 @@
       install="true"
       msvcproj="bs"
       output="bs"
+      wmain="true"
       option="console" type="with" default="yes"
       comment="Compile with console application.">
 
-      <headers path="console" recursive="true" root="true">
+      <headers path="console" private="true" recursive="true" root="true">
         <msbuild filter="src" />
       </headers>
       <sources path="console" recursive="true" root="true">
@@ -2134,6 +2217,19 @@
 
         <job name="gnu" config="debug" link="static" gate="true" />
       </entry>
+
+      <!-- windows x86_64 mingw-w64 (cross compiled) -->
+      <entry image="ubuntu-26.04" host="x86_64-w64-mingw32">
+        <compiler lang="c" name="x86_64-w64-mingw32-gcc-posix" />
+        <compiler lang="cxx" name="x86_64-w64-mingw32-g++-posix" />
+        <package name="gcc-mingw-w64-x86-64-posix" />
+        <package name="g++-mingw-w64-x86-64-posix" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
     </ci>
   </repository>
 
@@ -2149,12 +2245,18 @@
     <language id="c++" />
 
     <library name="libbitcoin-explorer"
-      uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f">
+      uuid="4a1d71d5-3dee-47f0-a189-21c301e2808f"
+      symbol="BCX">
 
       <configurable input="version.hpp.in"
         output="version.hpp"
         path="include/bitcoin/explorer"
         type="headers" />
+
+      <configurable input="version.cpp.in"
+        output="version.cpp"
+        path="src"
+        type="sources" />
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
@@ -2216,6 +2318,7 @@
       install="true"
       msvcproj="bx"
       output="bx"
+      wmain="true"
       option="console" type="with" default="yes"
       comment="Compile with console application.">
 
@@ -2513,6 +2616,19 @@
         <option name="gnu" value="--build-skip-test-run" />
 
         <job name="gnu" config="debug" link="static" gate="true" />
+      </entry>
+
+      <!-- windows x86_64 mingw-w64 (cross compiled) -->
+      <entry image="ubuntu-26.04" host="x86_64-w64-mingw32">
+        <compiler lang="c" name="x86_64-w64-mingw32-gcc-posix" />
+        <compiler lang="cxx" name="x86_64-w64-mingw32-g++-posix" />
+        <package name="gcc-mingw-w64-x86-64-posix" />
+        <package name="g++-mingw-w64-x86-64-posix" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+
+        <job name="gnu" config="release" link="static" gate="true" />
       </entry>
     </ci>
   </repository>
@@ -3667,6 +3783,10 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       path="src"
       outpath="include/bitcoin" />
 
+    <template name="version.cpp.in.gsl"
+      path="src"
+      outpath="src" />
+
     <!-- <template name="version.hpp.gsl"
       path="src"
       outpath="include/bitcoin" /> -->
@@ -3719,6 +3839,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <!-- pkg-config -->
       <ignore name="builds/gnu/*.pc" comment="pkg-config pc file from .pc.in" />
       <ignore name="builds/gnu/include" comment="configured headers from in-tree configure" />
+      <ignore name="builds/gnu/src" comment="configured sources from in-tree make" />
 
       <!-- msbuild/msvc -->
       <ignore comment="msbuild/msvc">

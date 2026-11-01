@@ -117,19 +117,55 @@ endfunction
 #define $(my.reposymbol)_VERSION_HPP
 
 /**
- * The semantic version of this repository as: [major].[minor].[patch]
+ * The version of this repository as: [major].[minor]
  * For interpretation of the versioning scheme see: http://semver.org
  */
 
-.   define my.width = string.length("$(my.reposymbol)_REPOSITORY_URL") + 1
+.   define my.width = string.length("$(my.reposymbol)_MAJOR_VERSION") + 1
 .
-#define $(pad("$(my.reposymbol)_VERSION", my.width, " "))"@LIBBITCOIN_VERSION_MAJOR@.@LIBBITCOIN_VERSION_MINOR@.@LIBBITCOIN_VERSION_PATCH@"
+#define $(pad("$(my.reposymbol)_VERSION", my.width, " "))"@LIBBITCOIN_VERSION_MAJOR@.@LIBBITCOIN_VERSION_MINOR@"
 #define $(pad("$(my.reposymbol)_MAJOR_VERSION", my.width, " "))@LIBBITCOIN_VERSION_MAJOR@
 #define $(pad("$(my.reposymbol)_MINOR_VERSION", my.width, " "))@LIBBITCOIN_VERSION_MINOR@
-#define $(pad("$(my.reposymbol)_PATCH_VERSION", my.width, " "))@LIBBITCOIN_VERSION_PATCH@
-#define $(pad("$(my.reposymbol)_COMMIT_HASH", my.width, " "))"@GIT_COMMIT_HASH@"
-#define $(pad("$(my.reposymbol)_REPOSITORY_URL", my.width, " "))"@GIT_ORIGIN_URL@"
-#define $(pad("$(my.reposymbol)_IS_DIRTY", my.width, " "))@GIT_DIRTY@
+
+.   if !defined(my.library.symbol)
+.       abort "Library '$(my.library.name)' lacks 'symbol'."
+.   endif
+.
+#ifndef RC_INVOKED
+
+#include <string_view>
+
+#if defined($(my.library.symbol)_STATIC)
+    #define $(my.reposymbol)_VERSION_API
+#elif defined(_MSC_VER) || defined(__CYGWIN__)
+    #if defined($(my.library.symbol)_DLL)
+        #define $(my.reposymbol)_VERSION_API __declspec(dllexport)
+    #else
+        #define $(my.reposymbol)_VERSION_API __declspec(dllimport)
+    #endif
+#else
+    #define $(my.reposymbol)_VERSION_API __attribute__((visibility("default")))
+#endif
+
+namespace libbitcoin {
+namespace $(my.name) {
+
+/// The version of a build, as [major].[minor].[patch] with its git state.
+struct build_version_t
+{
+    std::string_view semantic;
+    std::string_view commit_hash;
+    std::string_view repository_url;
+    bool dirty;
+};
+
+/// The version of this build.
+$(my.reposymbol)_VERSION_API const build_version_t& build_version() noexcept;
+
+} // namespace $(my.name)
+} // namespace libbitcoin
+
+#endif
 
 #endif
 .
