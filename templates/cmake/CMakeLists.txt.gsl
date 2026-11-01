@@ -359,6 +359,41 @@ function render_compiler_option_checks(repository)
     endnew
 endfunction
 
+function count_option_flags(repository)
+    define my.repository = count_option_flags.repository
+    define my.count = 0
+
+    for my.repository. as _target where is_target_element(_target) &\
+        defined(_target->compiler)
+
+        my.count += count(_target->compiler.flag, defined(count.option))
+    endfor
+
+    return my.count
+endfunction
+
+function render_msvc_option_rejections(repository)
+    define my.repository = render_msvc_option_rejections.repository
+
+    new options as _options
+        for my.repository. as _target where is_target_element(_target) &\
+            defined(_target->compiler)
+
+            for _target->compiler.flag as _flag where defined(_flag.option)
+                define my.name = get_option(_flag, _target, my.repository)
+
+                if (count(_options.option, .name = my.name) = 0)
+                    new _options.option as _option
+                        _option.name = my.name
+                    endnew
+
+                    emit_msvc_option_rejection(my.name)
+                endif
+            endfor
+        endfor
+    endnew
+endfunction
+
 function render_link_option_checks(repository)
     define my.repository = render_link_option_checks.repository
 
@@ -499,6 +534,25 @@ set( repository_root_dir "${CMAKE_CURRENT_SOURCE_DIR}/../.." )
 if ( MSVC )
   set( CMAKE_STATIC_LIBRARY_PREFIX "lib" )
   set( CMAKE_SHARED_LIBRARY_PREFIX "lib" )
+
+  if ( BUILD_SHARED_LIBS )
+    message( FATAL_ERROR "Shared libraries are not supported with the MSVC frontend." )
+  endif()
+
+  add_compile_options(
+    /W4
+    /bigobj
+    /permissive-
+    /Zc:__cplusplus
+    /Zc:preprocessor
+    $<$<CXX_COMPILER_ID:Clang>:-Wno-unused-command-line-argument> )
+
+  add_compile_definitions(
+    UNICODE
+    _UNICODE
+    WIN32_LEAN_AND_MEAN
+    NOMINMAX
+    _WIN32_WINNT=0x0A00 )
 endif()
 
 .   emit_compiler_check_includes(my.repository)
@@ -513,7 +567,13 @@ endif()
 .   render_architecture_option_checks(my.repository)
 
 .   heading("Compiler options.")
+if ( NOT MSVC )
 .   render_compiler_option_checks(my.repository)
+.   if (count_option_flags(my.repository) > 0)
+else()
+.       render_msvc_option_rejections(my.repository)
+.   endif
+endif()
 
 .   heading("Linker options.")
 .   render_link_option_checks(my.repository)
@@ -763,13 +823,24 @@ $(my.indent)add_executable( $(target_name(my.target)) )
 .   emit_target_compile_features(my.target, my.repository, my.indent)
 .
 .   emit_target_compile_assignment("target_compile_options", "flag", \
-        my.target, my.repository, my.indent)
+        my.target, my.repository, "NOT MSVC", my.indent)
 .
 .   emit_target_compile_assignment("target_compile_definitions", "define", \
-        my.target, my.repository, my.indent)
+        my.target, my.repository, "", my.indent)
 .
 .   emit_target_compile_assignment("target_link_options", "link", \
-        my.target, my.repository, my.indent)
+        my.target, my.repository, "NOT MSVC", my.indent)
+.
+.   if (name(my.target) = "library")
+.       require(my.target, "library", "symbol")
+
+$(my.indent)if ( MSVC )
+  $(my.indent)target_compile_definitions( $(target_name(my.target))
+    $(my.indent)PUBLIC
+      $(my.indent)$(my.target.symbol)_STATIC
+  $(my.indent))
+$(my.indent)endif()
+.   endif
 .
 .   emit_target_files(my.target, my.repository, my.meta, my.indent)
 .
@@ -911,12 +982,14 @@ $(my.indent))
 .
 .endmacro # emit_target_compile_features
 .
-.macro emit_target_compile_assignment(property, element, target, repository, indent)
+.macro emit_target_compile_assignment(property, element, target, repository, guard, indent)
 .   define my.property = emit_target_compile_assignment.property
 .   define my.element = emit_target_compile_assignment.element
 .   define my.target = emit_target_compile_assignment.target
 .   define my.repository = emit_target_compile_assignment.repository
-.   define my.indent = emit_target_compile_assignment.indent
+.   define my.guard = emit_target_compile_assignment.guard
+.   define my.outer = emit_target_compile_assignment.indent
+.   define my.indent = is_empty(my.guard) ?? my.outer ? "  $(my.outer)"
 .   define my.indent_item = "    $(my.indent)"
 .
 .   new compiler as _compiler
@@ -924,6 +997,9 @@ $(my.indent))
 .
 .   if (count(_compiler.$(my.element)) > 0)
 
+.       if !is_empty(my.guard)
+$(my.outer)if ( $(my.guard) )
+.       endif
 $(my.indent)$(my.property)( $(my.target.name)
 .       if (count(_compiler.$(my.element), is_defined_value($(my.element), "type", "public")) > 0)
   $(my.indent)PUBLIC
@@ -938,6 +1014,9 @@ $(my.indent)$(my.property)( $(my.target.name)
 .           endfor
 .       endif
 $(my.indent))
+.       if !is_empty(my.guard)
+$(my.outer)endif()
+.       endif
 .   endif
 .   endnew
 .
@@ -998,12 +1077,20 @@ else()
 endif()
 .endmacro # emit_architecture_option_check
 .
+.macro emit_msvc_option_rejection(name)
+.   define my.name = emit_msvc_option_rejection.name
+
+  if ( $(my.name) )
+    message( FATAL_ERROR "Option '$(my.name)' is not supported with the MSVC frontend." )
+  endif()
+.endmacro # emit_msvc_option_rejection
+.
 .macro emit_compiler_flag_check(flag, target, repository)
 .   define my.flag = emit_compiler_flag_check.flag
 .   define my.target = emit_compiler_flag_check.target
 .   define my.repository = emit_compiler_flag_check.repository
 .
-.   define my.indent = ""
+.   define my.indent = "  "
 .   define my.step = "  "
 
 .   if defined(my.flag.compiler)
@@ -1052,9 +1139,10 @@ $(my.indent)endif()
 .   define my.target = emit_link_option_check.target
 .   define my.repository = emit_link_option_check.repository
 .
-.   define my.indent = ""
+.   define my.indent = "  "
 .   define my.step = "  "
-.
+
+if ( NOT MSVC )
 .   if defined(my.linkage.option)
 $(my.indent)if ( $(get_option(my.linkage, my.target, my.repository)) )
 .       define my.indent = "$(my.step)$(my.indent)"
@@ -1065,7 +1153,6 @@ $(my.indent)if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "$(compiler_identifier(my.l
 .   endif
 .
 .   define my.language = supported_language(my.linkage, "c++")
-
 $(my.indent)check_linker_flag( $(my.language:upper) $(symbol(my.linkage)) SUPPORTS_$(my.linkage.id:upper) )
 $(my.indent)if ( !SUPPORTS_$(my.linkage.id:upper) )
   $(my.indent)message( FATAL_ERROR "Linker does not support '$(symbol(my.linkage)))'." )
@@ -1078,6 +1165,7 @@ $(my.indent)endif()
 .       my.indent = right(my.indent, string.length(my.indent) - string.length(my.step))
 $(my.indent)endif()
 .   endif
+endif()
 .endmacro # emit_link_option_check
 
 .macro emit_check_source_compiles(name, element, repository, indent)

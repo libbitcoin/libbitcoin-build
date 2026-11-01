@@ -441,6 +441,12 @@
         <job name="msvc" configuration="StaticRelease" />
       </entry>
 
+      <!-- windows cmake -->
+      <entry image="windows-latest">
+        <job name="presets" preset="win-msvc-release-static" gate="true" />
+        <job name="presets" preset="win-clangcl-release-static" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -814,6 +820,12 @@
         <job name="msvc" configuration="StaticRelease" />
       </entry>
 
+      <!-- windows cmake -->
+      <entry image="windows-latest">
+        <job name="presets" preset="win-msvc-release-static" gate="true" />
+        <job name="presets" preset="win-clangcl-release-static" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -1165,6 +1177,12 @@
         <job name="msvc" configuration="StaticRelease" />
       </entry>
 
+      <!-- windows cmake -->
+      <entry image="windows-latest">
+        <job name="presets" preset="win-msvc-release-static" gate="true" />
+        <job name="presets" preset="win-clangcl-release-static" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -1513,6 +1531,12 @@
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
         <job name="msvc" configuration="StaticRelease" />
+      </entry>
+
+      <!-- windows cmake -->
+      <entry image="windows-latest">
+        <job name="presets" preset="win-msvc-release-static" gate="true" />
+        <job name="presets" preset="win-clangcl-release-static" gate="true" />
       </entry>
 
       <!-- clang -->
@@ -1917,6 +1941,12 @@
         <job name="msvc" configuration="StaticRelease" />
       </entry>
 
+      <!-- windows cmake -->
+      <entry image="windows-latest">
+        <job name="presets" preset="win-msvc-release-static" gate="true" />
+        <job name="presets" preset="win-clangcl-release-static" gate="true" />
+      </entry>
+
       <!-- clang -->
       <entry image="macos-latest">
         <compiler lang="c" name="clang" />
@@ -2304,6 +2334,12 @@
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
         <job name="msvc" configuration="StaticRelease" />
+      </entry>
+
+      <!-- windows cmake -->
+      <entry image="windows-latest">
+        <job name="presets" preset="win-msvc-release-static" gate="true" />
+        <job name="presets" preset="win-clangcl-release-static" gate="true" />
       </entry>
 
       <!-- clang -->
@@ -3091,6 +3127,75 @@
         <property value="shared" />
         <property value="gnu-release" />
         <property value="nix-base" />
+      </property>
+    </configuration>
+    <configuration name="win-base" description="Factored base settings for windows platforms (msvc developer environment)." hidden="true">
+      <property name="generator" value="Ninja" />
+      <property name="installDir" value="${sourceParentDir}/../../../prefix/${presetName}" />
+      <property name="binaryDir" value="${sourceParentDir}/../obj/${presetName}" />
+      <property name="condition" type="object">
+        <property name="type" value="equals" />
+        <property name="lhs" value="${hostSystemName}" />
+        <property name="rhs" value="Windows" />
+      </property>
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
+        <property name="CMAKE_INSTALL_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
+        <property name="CMAKE_MSVC_RUNTIME_LIBRARY" value="MultiThreaded$&lt;$&lt;CONFIG:Debug&gt;:Debug&gt;" />
+      </property>
+    </configuration>
+    <configuration name="msvc" description="Factored msvc compiler settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_C_COMPILER" value="cl" />
+        <property name="CMAKE_CXX_COMPILER" value="cl" />
+      </property>
+    </configuration>
+    <configuration name="clangcl" description="Factored clang-cl compiler settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_C_COMPILER" value="clang-cl" />
+        <property name="CMAKE_CXX_COMPILER" value="clang-cl" />
+      </property>
+    </configuration>
+    <configuration name="win-debug" description="Factored windows debug settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_BUILD_TYPE" value="Debug" />
+      </property>
+    </configuration>
+    <configuration name="win-release" description="Factored windows release settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_BUILD_TYPE" value="Release" />
+      </property>
+    </configuration>
+    <configuration name="win-msvc-debug-static" description="Debug build with msvc and static linking." hidden="false" display="Windows/MSVC/Debug/Static">
+      <property name="inherits" type="list">
+        <property value="static" />
+        <property value="win-debug" />
+        <property value="msvc" />
+        <property value="win-base" />
+      </property>
+    </configuration>
+    <configuration name="win-msvc-release-static" description="Release build with msvc and static linking." hidden="false" display="Windows/MSVC/Release/Static">
+      <property name="inherits" type="list">
+        <property value="static" />
+        <property value="win-release" />
+        <property value="msvc" />
+        <property value="win-base" />
+      </property>
+    </configuration>
+    <configuration name="win-clangcl-debug-static" description="Debug build with clang-cl and static linking." hidden="false" display="Windows/clang-cl/Debug/Static">
+      <property name="inherits" type="list">
+        <property value="static" />
+        <property value="win-debug" />
+        <property value="clangcl" />
+        <property value="win-base" />
+      </property>
+    </configuration>
+    <configuration name="win-clangcl-release-static" description="Release build with clang-cl and static linking." hidden="false" display="Windows/clang-cl/Release/Static">
+      <property name="inherits" type="list">
+        <property value="static" />
+        <property value="win-release" />
+        <property value="clangcl" />
+        <property value="win-base" />
       </property>
     </configuration>
     <!--

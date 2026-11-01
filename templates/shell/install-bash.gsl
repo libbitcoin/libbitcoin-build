@@ -1092,7 +1092,7 @@ build_preset()
 
     if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
         VERBOSITY_CMAKE="-DCMAKE_VERBOSE_MAKEFILE=ON"
-        VERBOSITY_MAKE="VERBOSE=1"
+        VERBOSITY_MAKE="--verbose"
     fi
 
     msg_heading "Preparing to build ${PROJECT}"
@@ -1103,11 +1103,10 @@ build_preset()
 
     cmake ${VERBOSITY_CMAKE} -LA --preset="${BUILD_PRESET}" "$@" "${BUILD_SRC_DIR}/${PROJECT}/${RELATIVE_SRC_PATH}"
 
-    # make
     if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
-        make -j${JOBS} ${VERBOSITY_MAKE}
+        cmake --build . -j${JOBS} ${VERBOSITY_MAKE}
     else
-        make
+        cmake --build . ${VERBOSITY_MAKE}
     fi
 
     pop_directory # BUILD_OBJ_DIR
@@ -1489,6 +1488,8 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             PARALLEL=\$(nproc)
         elif [[ ${OS} == Darwin ]] || [[ ${OS} == OpenBSD ]]; then
             PARALLEL=\$(sysctl -n hw.ncpu)
+        elif [[ ${OS} == MINGW* ]] || [[ ${OS} == MSYS* ]]; then
+            PARALLEL=${NUMBER_OF_PROCESSORS}
         else
             msg_error "Unsupported system: '${OS}'"
             msg_error "  Unable to determine value for $(registered_option_symbol("build-parallel", my.configuration))"
@@ -1550,6 +1551,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
         ARCHTUNE="-march=native -mtune=native"
     fi
 
+.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
     # translate BUILD_CONFIG to ZFLAGS
     if [[ -n "${BUILD_CONFIG}" ]]; then
         msg_verbose "*** Build config specified, calculating flags..."
@@ -1578,6 +1580,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             msg_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
         fi
     fi
+.   endif
 .
 .   if defined(my.meta->build(build.method = "gnu"))
  
