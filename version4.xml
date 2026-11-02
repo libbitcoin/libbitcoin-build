@@ -556,6 +556,19 @@
 
       <entry image="ubuntu-24.04">
 
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <package name="valgrind" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--with-valgrind" />
+        <option name="gnu" value="--build-valgrind=secp256k1_ctime_tests" />
+
+        <job name="gnu" config="debug" link="static" />
+      </entry>
+
+      <entry image="ubuntu-24.04">
+
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
 
