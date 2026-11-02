@@ -1,0 +1,722 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin manual-release.yml.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+
+gsl from "../templates/yml/base_ci_workflow.yml.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_manual_release_yml(configuration)
+    define my.configuration = generate_manual_release_yml.configuration
+    define my.filename = "manual-release.yml"
+    require(my.configuration->templates, "templates", "resultpath")
+
+    define my.template = my.configuration->templates->template(.name = "$(my.filename).gsl")
+
+    if (!defined(my.template))
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+    define my.project_path_suffix = my.template.outpath
+
+    for my.configuration.repository by .name as _repository
+        require(_repository, "repository", "name")
+        define my.output_path = path_append(\
+            my.configuration->templates.resultpath, \
+            path_append(my.path_prefix, \
+                path_append(_repository.name, my.project_path_suffix)))
+
+        if (count_release_jobs(_repository) > 0)
+            create_directory(my.output_path)
+
+            define my.out_file = path_append(my.output_path, my.filename)
+            notify(my.out_file)
+            output(my.out_file)
+
+            emit_manual_release_yml(my.template, my.configuration, _repository)
+
+            close
+        endif
+    endfor _repository
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+function count_release_jobs(repository)
+    define my.repository = count_release_jobs.repository
+    define my.count = 0
+
+    if defined(my.repository->ci)
+        for my.repository->ci.entry as _entry
+            for _entry.job as _job where is_defined_positive(_job, "release")
+                my.count += 1
+            endfor
+        endfor
+    endif
+
+    return my.count
+endfunction
+
+###############################################################################
+# Macros
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_manual_release_yml(meta, configuration, repository)
+.   define my.meta = emit_manual_release_yml.meta
+.   define my.configuration = emit_manual_release_yml.configuration
+.   define my.repository = emit_manual_release_yml.repository
+.
+.   copyleft(my.repository.name)
+
+name: Build to Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-suffix:
+        description: "Suffix applied to release title (server version tag)."
+        required: false
+        type: string
+      tag-database:
+        description: "libbitcoin-database tag used for release generation."
+        required: true
+        type: string
+      tag-network:
+        description: "libbitcoin-network tag used for release generation."
+        required: true
+        type: string
+      tag-node:
+        description: "libbitcoin-node tag used for release generation."
+        required: true
+        type: string
+      tag-server:
+        description: "libbitcoin-server tag used for release generation."
+        required: true
+        type: string
+      tag-system:
+        description: "libbitcoin-system tag used for release generation."
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+
+  validate-tags:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout server
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          path: 'libbitcoin-server'
+          ref: ${{ github.event.inputs.tag-server }}
+          repository: ${{ github.repository }}
+
+      - name: checkout node
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          path: 'libbitcoin-node'
+          ref: ${{ github.event.inputs.tag-node }}
+          repository: ${{ github.repository_owner }}/libbitcoin-node
+
+      - name: checkout network
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          path: 'libbitcoin-network'
+          ref: ${{ github.event.inputs.tag-network }}
+          repository: ${{ github.repository_owner }}/libbitcoin-network
+
+      - name: checkout database
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          path: 'libbitcoin-database'
+          ref: ${{ github.event.inputs.tag-database }}
+          repository: ${{ github.repository_owner }}/libbitcoin-database
+
+      - name: checkout system
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          path: 'libbitcoin-system'
+          ref: ${{ github.event.inputs.tag-system }}
+          repository: ${{ github.repository_owner }}/libbitcoin-system
+
+      - name: Verify tag server
+        shell: bash
+        working-directory: libbitcoin-server
+        run: |
+          if ! git rev-parse --verify "refs/tags/${{ github.event.inputs.tag-server }}" > /dev/null 2>&1; then
+            echo "Tag '${{ github.event.inputs.tag-server }}' does not exist in the repository."
+            exit 1
+          fi
+          echo "Validated tag '${{ github.event.inputs.tag-server }}'."
+
+      - name: Verify tag node
+        shell: bash
+        working-directory: libbitcoin-node
+        run: |
+          if ! git rev-parse --verify "refs/tags/${{ github.event.inputs.tag-node }}" > /dev/null 2>&1; then
+            echo "Tag '${{ github.event.inputs.tag-node }}' does not exist in the repository."
+            exit 1
+          fi
+          echo "Validated tag '${{ github.event.inputs.tag-node }}'."
+
+      - name: Verify tag network
+        shell: bash
+        working-directory: libbitcoin-network
+        run: |
+          if ! git rev-parse --verify "refs/tags/${{ github.event.inputs.tag-network }}" > /dev/null 2>&1; then
+            echo "Tag '${{ github.event.inputs.tag-network }}' does not exist in the repository."
+            exit 1
+          fi
+          echo "Validated tag '${{ github.event.inputs.tag-network }}'."
+
+      - name: Verify tag database
+        shell: bash
+        working-directory: libbitcoin-database
+        run: |
+          if ! git rev-parse --verify "refs/tags/${{ github.event.inputs.tag-database }}" > /dev/null 2>&1; then
+            echo "Tag '${{ github.event.inputs.tag-database }}' does not exist in the repository."
+            exit 1
+          fi
+          echo "Validated tag '${{ github.event.inputs.tag-database }}'."
+
+      - name: Verify tag system
+        shell: bash
+        working-directory: libbitcoin-system
+        run: |
+          if ! git rev-parse --verify "refs/tags/${{ github.event.inputs.tag-system }}" > /dev/null 2>&1; then
+            echo "Tag '${{ github.event.inputs.tag-system }}' does not exist in the repository."
+            exit 1
+          fi
+          echo "Validated tag '${{ github.event.inputs.tag-system }}'."
+
+  build-candidates:
+
+    needs: validate-tags
+
+    outputs:
+      candidate_identifier: ${{ steps.binary.outputs.candidate_identifier }}
+
+    runs-on: ${{ matrix.image }}
+    container: ${{ matrix.container  || null }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+.   define my.first = 1
+.   for my.repository->ci.entry as _entry
+.       for _entry.job as _job where is_defined_positive(_job, "release")
+.           if !my.first
+
+.           endif
+.           my.first = 0
+.           define my.options = accumulate_options(_entry, _job)
+.           define my.cc = compiler(_job, _entry, "c")
+.           define my.cxx = compiler(_job, _entry, "cxx")
+.           define my.flags = flags(_job, _entry)
+.           define my.linkflags = element_property_concat("linkflag", "value", _entry)
+          - basename: "$(_job.basename)"
+.           if defined(_job.project)
+            project: "$(_job.project)"
+.           endif
+.           if defined(_job.program)
+            program: "$(_job.program)"
+.           endif
+            configuration: $(property_priority("configuration", _job, _entry, property_priority("config", _job, _entry)))
+.           if defined(_job.link)
+            link: $(_job.link)
+.           endif
+            toolchain: $((_job.name = "msvc") ?? "msbuild" ? _job.name)
+.           if !(my.options = "")
+.               if (left(my.options, 1) = "\"")
+            options: '$(my.options)'
+.               else
+            options: "$(my.options)"
+.               endif
+.           endif
+.           if !(my.cc = "")
+            cc: "$(my.cc)"
+.           endif
+.           if !(my.cxx = "")
+            cxx: "$(my.cxx)"
+.           endif
+.           if !(my.linkflags = "")
+            linkflags: "$(my.linkflags)"
+.           endif
+.           if defined(_entry.platform)
+            platform: "$(_entry.platform)"
+.           endif
+.           if defined(_entry.toolset)
+            toolset: "$(_entry.toolset)"
+.           endif
+.           if defined(_entry.version)
+            version: "$(_entry.version)"
+.           endif
+            image: $(_entry.image)
+.           if defined(_entry.container)
+            container: $(_entry.container)
+.           endif
+.           if defined(_entry.deployment_target)
+            deployment_target: "$(_entry.deployment_target)"
+.           endif
+.           if !(my.flags = "")
+            flags: "$(my.flags)"
+.           endif
+.       endfor
+.   endfor
+
+    env:
+      CC: '${{ matrix.cc }}'
+      CXX: '${{ matrix.cxx }}'
+
+    steps:
+      # Disabled pending security discussion
+      #- name: Address alpine arm64 JavaScript actions
+      #  if: ${{ endsWith(matrix.image, 'arm') && startsWith(matrix.container, 'alpine') }}
+      #  uses: laverdet/alpine-arm64@7f0f72ee2f71eb2324e5888e8b6e42b1b53e6160 # v1.0.0
+
+      - name: checkout server
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          path: 'libbitcoin-server'
+          ref: ${{ github.event.inputs.tag-server }}
+          repository: ${{ github.repository }}
+
+      - name: checkout node
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          path: 'libbitcoin-node'
+          ref: ${{ github.event.inputs.tag-node }}
+          repository: ${{ github.repository_owner }}/libbitcoin-node
+
+      - name: checkout network
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          path: 'libbitcoin-network'
+          ref: ${{ github.event.inputs.tag-network }}
+          repository: ${{ github.repository_owner }}/libbitcoin-network
+
+      - name: checkout database
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          path: 'libbitcoin-database'
+          ref: ${{ github.event.inputs.tag-database }}
+          repository: ${{ github.repository_owner }}/libbitcoin-database
+
+      - name: checkout system
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          path: 'libbitcoin-system'
+          ref: ${{ github.event.inputs.tag-system }}
+          repository: ${{ github.repository_owner }}/libbitcoin-system
+
+      - name: Build
+        id: binary
+        uses: ./libbitcoin-server/.github/actions/build-binary
+        with:
+          source: ${{ github.workspace }}
+          toolchain: ${{ matrix.toolchain }}
+          basename: ${{ matrix.basename }}
+          project: ${{ matrix.project || 'libbitcoin-server' }}
+          program: ${{ matrix.program || 'bs' }}
+          configuration: ${{ matrix.configuration }}
+          link: ${{ matrix.link }}
+          preset: ${{ matrix.preset }}
+          options: ${{ matrix.options }}
+          flags: ${{ matrix.flags }}
+          linkflags: ${{ matrix.linkflags }}
+          packages: ${{ matrix.packages }}
+          llvm: ${{ matrix.llvm }}
+          deployment_target: ${{ matrix.deployment_target }}
+          platform: ${{ matrix.platform }}
+          toolset: ${{ matrix.toolset }}
+          version: ${{ matrix.version }}
+          container: ${{ matrix.container }}
+
+      - name: Display candidate files
+        working-directory: candidate
+        shell: bash
+        run: |
+          ls -lahR
+
+      - name: Display binary information [bash]
+        if: ${{ matrix.toolchain != 'msbuild' }}
+        continue-on-error: true
+        shell: bash
+        working-directory: candidate
+        run: |
+          ./${{ steps.binary.outputs.candidate_identifier }} --version
+          ./${{ steps.binary.outputs.candidate_identifier }} --hardware
+
+      - name: Display binary information [cmd]
+        if: ${{ matrix.toolchain == 'msbuild' }}
+        continue-on-error: true
+        shell: cmd
+        working-directory: candidate
+        run: |
+          .\\${{ steps.binary.outputs.candidate_identifier }} --version
+          .\\${{ steps.binary.outputs.candidate_identifier }} --hardware
+
+      - name: Display linkage
+        if: ${{ matrix.toolchain != 'msbuild' }}
+        shell: bash
+        run: |
+          echo "Binary linkage information:"
+          find candidate -type f \\
+            \\( -perm -111 -o -name "*.so" -o -name "*.dylib" \\) \\
+            ! -path "*/.git/*" \\
+            ! -name "*.a" \\
+            -print0 | while IFS= read -r -d '' f; do
+              if ! file "$f" | grep -qE "ELF|Mach-O|PE32"; then
+                continue
+              fi
+              echo "========================================"
+              echo "File: $f"
+              file "$f"
+              case "\$(uname -s)" in
+                Linux)
+                  ldd "$f"
+                  if ldd "$f" 2>/dev/null | grep -q .; then
+                    echo "--- Dynamic dependencies (ldd) ---"
+                    ldd "$f" || true
+                  else
+                    echo "--- No dynamic dependencies (likely fully static) ---"
+                    ldd "$f" 2>&1 || true
+                  fi
+                  echo "--- ELF dynamic section (readelf -d) ---"
+                  readelf -d "$f" 2>/dev/null | grep -E 'NEEDED|RPATH|RUNPATH|SONAME' || echo "(none)"
+                  ;;
+                Darwin)
+                  otool -L "$f"
+                  echo "--- Linked libraries (otool -L) ---"
+                  otool -L "$f" || true
+                  ;;
+                *)
+                  echo "Unsupported platform for linkage display: \$(uname -s)"
+                  ;;
+              esac
+            done || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ steps.binary.outputs.candidate_identifier }}
+          path: candidate/*
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload symbols
+        if: ${{ matrix.configuration != 'debug' || matrix.toolchain == 'msbuild' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ matrix.basename }}-symbols
+          path: symbols/*
+          retention-days: 1
+          if-no-files-found: error
+
+  double-build:
+    needs: validate-tags
+    permissions:
+      contents: read
+    uses: ./.github/workflows/double-build.yml
+    with:
+      tag-database: ${{ github.event.inputs.tag-database }}
+      tag-network: ${{ github.event.inputs.tag-network }}
+      tag-node: ${{ github.event.inputs.tag-node }}
+      tag-server: ${{ github.event.inputs.tag-server }}
+      tag-system: ${{ github.event.inputs.tag-system }}
+
+  sign:
+    name: Sign artifacts
+    needs: [ build-candidates, double-build ]
+    environment: release
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Retrieve artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: artifacts
+          pattern: "{bs,selector}-*"
+
+      - name: GPG Keyring Initialization
+        id: gpg-init
+        env:
+          SIGNING_PRIVATE_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
+        run: |
+          echo "Importing GPG signing key..."
+
+          # Import private key
+          echo "$SIGNING_PRIVATE_KEY" | gpg --batch --import --pinentry-mode loopback
+
+          # Extract full fingerprint
+          KEY_FINGERPRINT=\$(gpg --list-secret-keys --with-colons --fingerprint \\
+            | grep '^fpr' | head -n1 | cut -d: -f10)
+
+          if [ -z "$KEY_FINGERPRINT" ]; then
+            echo "Error: No secret key found after import"
+            exit 1
+          fi
+
+          echo "Imported key fingerprint: $KEY_FINGERPRINT"
+
+          # Set ultimate trust
+          echo -e "5\\ny\\n" | gpg --batch --command-fd 0 --edit-key "$KEY_FINGERPRINT" trust >/dev/null 2>&1
+
+          # Configure gpg-agent
+          mkdir -p ~/.gnupg
+          cat > ~/.gnupg/gpg-agent.conf << 'EOF'
+            allow-loopback-pinentry
+            default-cache-ttl 3600
+            max-cache-ttl 7200
+          EOF
+
+          echo "use-agent" > ~/.gnupg/gpg.conf
+
+          # Restart agent
+          gpgconf --kill gpg-agent
+          gpgconf --launch gpg-agent
+
+          # Pre-cache passphrase (after agent is ready)
+          echo "$SIGNING_PASSPHRASE" | \\
+            gpg \\
+              --batch \\
+              --pinentry-mode loopback \\
+              --passphrase-fd 0 \\
+              --sign \\
+              --output /dev/null \\
+              --detach-sign /dev/null \\
+              2>/dev/null || true
+
+          echo "key_fingerprint=$KEY_FINGERPRINT" >> $GITHUB_OUTPUT
+          echo "GPG key imported and passphrase cached successfully."
+
+      - name: execute signature
+        id: gpg-sign
+        working-directory: artifacts
+        shell: bash
+        env:
+          KEY_FINGERPRINT: ${{ steps.gpg-init.outputs.key_fingerprint }}
+        run: |
+          echo "Signing artifacts with key $KEY_FINGERPRINT..."
+
+          shopt -s nullglob
+
+          find . -mindepth 1 -maxdepth 1 -type d ! -name '.*' -print0 | \\
+            while IFS= read -r -d '' dir; do
+              dir_name="${dir#./}"
+              echo "📁 Directory: $dir_name"
+
+              # Sign only regular files that are not already signatures
+              find "$dir" -maxdepth 1 -type f ! -name "*.asc" -print0 | \\
+                while IFS= read -r -d '' file; do
+                  file_name=\$(basename "$file")
+                  echo "   📄 Signing: $file_name"
+
+                  gpg \\
+                    --batch \\
+                    --yes \\
+                    --pinentry-mode loopback \\
+                    --local-user "$KEY_FINGERPRINT" \\
+                    --detach-sign \\
+                    --armor \\
+                    "$file" || {
+                      echo "❌ Failed to sign $file_name"
+                      exit 1
+                    }
+                done
+            done
+          echo "✅ All artifacts signed successfully."
+
+      - name: GPG Keyring Cleanup
+        id: gpg-cleanup
+        if: always()
+        run: |
+          echo "Cleaning up GPG keyring and passphrase cache..."
+
+          # 1. Kill agent first (clears cached passphrase)
+          gpgconf --kill gpg-agent 2>/dev/null || true
+
+          # 2. Delete keys using full fingerprint
+          FINGERPRINTS=\$(gpg --list-secret-keys --with-colons --fingerprint \\
+            | grep '^fpr' | cut -d: -f10 | sort -u)
+
+          if [ -n "$FINGERPRINTS" ]; then
+            for fpr in $FINGERPRINTS; do
+              echo "Deleting key: ${fpr}"
+              gpg --batch --yes --delete-secret-keys "${fpr}" 2>/dev/null || true
+              gpg --batch --yes --delete-keys "${fpr}" 2>/dev/null || true
+            done
+          else
+            echo "No secret keys found to delete."
+          fi
+
+          # 3. Final filesystem cleanup
+          rm -rf ~/.gnupg
+
+          echo "GPG keyring and passphrase cache cleaned up."
+
+      - name: Inventory results
+        working-directory: artifacts
+        shell: bash
+        run: |
+          ls -lahR
+
+      - name: Verify GPG signatures with provided public key
+        working-directory: artifacts
+        env:
+          PUBLIC_KEY: ${{ vars.PUBLIC_KEY }}
+        run: |
+          echo "Importing verification public key..."
+
+          # Import the public key (non-interactively)
+          echo "$PUBLIC_KEY" | gpg --batch --import --pinentry-mode loopback
+
+          # Get the fingerprint of the imported public key
+          PUB_FINGERPRINT=\$(gpg --list-keys --with-colons --fingerprint \\
+            | grep '^fpr' | head -n1 | cut -d: -f10)
+
+          if [ -z "$PUB_FINGERPRINT" ]; then
+            echo "❌ Error: No public key found after import"
+            exit 1
+          fi
+
+          echo "✅ Public key imported (fingerprint: $PUB_FINGERPRINT)"
+          echo "Verifying all signatures..."
+
+          shopt -s nullglob
+
+          find . -mindepth 1 -maxdepth 1 -type d ! -name '.*' -print0 | \\
+            while IFS= read -r -d '' dir; do
+              dir_name="${dir#./}"
+              echo "📁 Checking directory: $dir_name"
+
+              # Find all .asc signature files and verify them
+              find "$dir" -maxdepth 1 -type f -name "*.asc" -print0 | \\
+                while IFS= read -r -d '' sigfile; do
+                  # The original file is the signature filename without .asc
+                  original="${sigfile%.asc}"
+
+                  if [ ! -f "$original" ]; then
+                    echo "   ⚠️  Warning: Original file not found for $sigfile"
+                    continue
+                  fi
+
+                  file_name=\$(basename "$original")
+                  echo "   🔍 Verifying: $file_name"
+
+                  # Verify using the specific public key (strict check)
+                  if gpg --batch --yes --pinentry-mode loopback \\
+                       --no-default-keyring --keyring ~/.gnupg/pubring.kbx \\
+                       --verify "$sigfile" "$original" 2>&1 | grep -q "Good signature"; then
+                    echo "      ✅ Good signature from expected key"
+                  else
+                    echo "      ❌ Verification FAILED for $file_name"
+                    echo "      Full output:"
+                    gpg --batch --yes --verify "$sigfile" "$original"
+                    exit 1
+                  fi
+                done
+            done
+
+          echo "✅ All signatures successfully verified with the provided public key."
+
+      - name: Upload signed artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          if-no-files-found: error
+          name: server-${{ github.event.inputs.tag-server }}-signed-artifacts
+          path: artifacts/*/*
+          retention-days: 1
+
+  publish:
+
+    name: Publish release
+
+    needs: sign
+
+    environment: release
+
+    permissions:
+      contents: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download signed artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: server-${{ github.event.inputs.tag-server }}-signed-artifacts
+          path: signed-release
+
+      - name: Inventory results
+        working-directory: signed-release
+        shell: bash
+        run: |
+          ls -lahR
+
+      - name: Populate release
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "${{ github.event.inputs.tag-server }}${{ github.event.inputs.release-suffix || '' }}"
+          draft: true
+          prerelease: true
+          overwrite_files: false
+          files: |
+            signed-release/*/*
+          body: |
+            **libbitcoin-server [${{ github.event.inputs.tag-server }}](https://github.com/${{ github.repository_owner }}/libbitcoin-server/tree/${{ github.event.inputs.tag-server }})**
+
+            Built from:
+            - ${{ github.repository_owner }}/system [${{ github.event.inputs.tag-system }}](https://github.com/${{ github.repository_owner }}/libbitcoin-system/tree/${{ github.event.inputs.tag-system }})
+            - ${{ github.repository_owner }}/database [${{ github.event.inputs.tag-database }}](https://github.com/${{ github.repository_owner }}/libbitcoin-database/tree/${{ github.event.inputs.tag-database }})
+            - ${{ github.repository_owner }}/network [${{ github.event.inputs.tag-network }}](https://github.com/${{ github.repository_owner }}/libbitcoin-network/tree/${{ github.event.inputs.tag-network }})
+            - ${{ github.repository_owner }}/node [${{ github.event.inputs.tag-node }}](https://github.com/${{ github.repository_owner }}/libbitcoin-node/tree/${{ github.event.inputs.tag-node }})
+            - ${{ github.repository_owner }}/server [${{ github.event.inputs.tag-server }}](https://github.com/${{ github.repository_owner }}/libbitcoin-server/tree/${{ github.event.inputs.tag-server }})
+
+            Signed with:
+            ${{ vars.PUBLIC_KEY }}
+.endmacro # emit_manual_release_yml
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_manual_release_yml(configuration)
+
+.endtemplate

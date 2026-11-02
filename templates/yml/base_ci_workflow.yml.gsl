@@ -216,7 +216,8 @@ function count_matrix_entries(identifier, ci, meta)
     for my.ci.entry as _entry \
       where (count(_entry.job, count.name = my.identifier) > 0)
 
-        for _entry.job as _job where (_job.name = my.identifier)
+        for _entry.job as _job where (_job.name = my.identifier) & \
+          !is_defined_positive(_job, "release")
             if defined(my.meta->workflow.restricted) & \
               !is_defined_positive(_job, "$(my.meta->workflow.restricted)")
                 next
@@ -412,7 +413,8 @@ jobs:
 .   define my.first_emitted_entry = 1
 .   for my.repository->ci.entry as _entry \
       where (count(_entry.job, count.name = my.job.name) > 0)
-.       for _entry.job as _job where (_job.name = my.job.name)
+.       for _entry.job as _job where (_job.name = my.job.name) & \
+          !is_defined_positive(_job, "release")
 .           if defined(my.meta->workflow.restricted) & \
               !is_defined_positive(_job, "$(my.meta->workflow.restricted)")
 .               next
@@ -554,7 +556,8 @@ jobs:
 .   define my.cross = 0
 .   define my.cross_tests = 0
 .   for my.repository->ci.entry as _entry
-.       for _entry.job as _job where (_job.name = my.job.name)
+.       for _entry.job as _job where (_job.name = my.job.name) & \
+          !is_defined_positive(_job, "release")
 .           if (defined(_job.host) | defined(_entry.host)) & \
               (!defined(my.meta->workflow.restricted) | \
               is_defined_positive(_job, "$(my.meta->workflow.restricted)"))
@@ -605,7 +608,8 @@ jobs:
 .       for my.repository->ci.entry as _entry \
           where (count(_entry.job, count.name = my.job.name) > 0)
 .
-.           for _entry.job as _job where (_job.name = my.job.name)
+.           for _entry.job as _job where (_job.name = my.job.name) & \
+              !is_defined_positive(_job, "release")
 .               if defined(my.meta->workflow.restricted) & \
                   !is_defined_positive(_job, "$(my.meta->workflow.restricted)")
 .                   next
