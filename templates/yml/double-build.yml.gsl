@@ -243,16 +243,8 @@ jobs:
       CC: ${{ matrix.target.cc }}
       CXX: ${{ matrix.target.cxx }}
       TZ: ${{ matrix.builder.timezone }}
-      SOURCE: ${{ matrix.builder.root == '.' && github.workspace || format('{0}/{1}', github.workspace, matrix.builder.root) }}
 
     steps:
-      - name: Prepare Alpine arm64 for actions
-        if: ${{ matrix.target.container && runner.arch == 'ARM64' }}
-        shell: sh
-        run: |
-          apk add --no-cache gcompat libstdc++
-          sed -i "s/^ID=alpine$/ID=gcompat/" /etc/os-release
-
       - name: Checkout libbitcoin-server
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -320,7 +312,7 @@ jobs:
         id: binary
         uses: ./.definition/.github/actions/build-binary
         with:
-          source: ${{ matrix.builder.root == '.' && github.workspace || format(runner.os == 'Windows' && '{0}\\{1}' || '{0}/{1}', github.workspace, matrix.builder.root) }}
+          root: ${{ matrix.builder.root }}
           toolchain: ${{ matrix.target.toolchain }}
           basename: ${{ matrix.target.basename }}
           project: ${{ matrix.target.project || 'libbitcoin-server' }}
@@ -411,7 +403,7 @@ jobs:
           {
             echo "image: ${ImageOS} ${ImageVersion}"
             if [[ -n "${CXX}" ]]; then echo "compiler: \$(${CXX} --version | head -1)"; fi
-            echo "source: ${SOURCE}"
+            echo "source: ${BUILD_SOURCE}"
             echo "timezone: ${TZ}"
             echo "umask: \$(umask)"
           } | tee output/toolchain.txt
