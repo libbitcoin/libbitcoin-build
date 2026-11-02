@@ -3965,7 +3965,48 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
 
     <template name="version-tag.yml.gsl" path="yml" outpath=".github/workflows" />
     <template name="double-build.yml.gsl" path="yml" outpath=".github/workflows" />
-    <template name="manual-release.yml.gsl" path="yml" outpath=".github/workflows" />
+    <template name="manual-release.yml.gsl" path="yml" outpath=".github/workflows">
+      <file source="github/version4/%repository%/actions/build-binary/action.yml" destination=".github/actions/build-binary" optional="true" />
+      <file source="github/version4/%repository%/packaging/debian/control.in" destination=".github/packaging/debian" optional="true" />
+      <file source="github/version4/%repository%/packaging/debian/postinst.in" destination=".github/packaging/debian" optional="true" />
+      <file source="github/version4/%repository%/packaging/debian/prerm" destination=".github/packaging/debian" optional="true" />
+      <file source="github/version4/%repository%/packaging/docker/Dockerfile" destination=".github/packaging/docker" optional="true" />
+      <file source="github/version4/%repository%/packaging/docker/bs.cfg" destination=".github/packaging/docker" optional="true" />
+      <file source="github/version4/%repository%/packaging/docker/entrypoint.sh" destination=".github/packaging/docker" optional="true" />
+      <file source="github/version4/%repository%/packaging/fetch.sh" destination=".github/packaging" optional="true" />
+      <file source="github/version4/%repository%/packaging/homebrew/libbitcoin-server.rb.in" destination=".github/packaging/homebrew" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/.gitignore" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/LICENSE" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/Makefile" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/icon.svg" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/instructions.md" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/package.json" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/actions/index.ts" destination=".github/packaging/startos/startos/actions" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/backups.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/dependencies.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/i18n/dictionaries/default.ts" destination=".github/packaging/startos/startos/i18n/dictionaries" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/i18n/dictionaries/translations.ts" destination=".github/packaging/startos/startos/i18n/dictionaries" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/i18n/index.ts" destination=".github/packaging/startos/startos/i18n" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/index.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/init/index.ts" destination=".github/packaging/startos/startos/init" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/interfaces.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/main.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/manifest/i18n.ts" destination=".github/packaging/startos/startos/manifest" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/manifest/index.ts" destination=".github/packaging/startos/startos/manifest" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/sdk.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/utils.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/versions/current.ts" destination=".github/packaging/startos/startos/versions" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/versions/index.ts" destination=".github/packaging/startos/startos/versions" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/tsconfig.json" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/umbrel/bitcoin-server/data/bs/bs.cfg" destination=".github/packaging/umbrel/bitcoin-server/data/bs" optional="true" />
+      <file source="github/version4/%repository%/packaging/umbrel/bitcoin-server/docker-compose.yml.in" destination=".github/packaging/umbrel/bitcoin-server" optional="true" />
+      <file source="github/version4/%repository%/packaging/umbrel/bitcoin-server/umbrel-app.yml.in" destination=".github/packaging/umbrel/bitcoin-server" optional="true" />
+      <file source="github/version4/%repository%/packaging/windows/bs.iss" destination=".github/packaging/windows" optional="true" />
+      <file source="github/version4/%repository%/packaging/winget/Libbitcoin.Server.installer.yaml.in" destination=".github/packaging/winget" optional="true" />
+      <file source="github/version4/%repository%/packaging/winget/Libbitcoin.Server.locale.en-US.yaml.in" destination=".github/packaging/winget" optional="true" />
+      <file source="github/version4/%repository%/packaging/winget/Libbitcoin.Server.yaml.in" destination=".github/packaging/winget" optional="true" />
+      <file source="github/version4/%repository%/workflows/package-release.yml" destination=".github/workflows" optional="true" />
+    </template>
 
     <!-- vscode -->
     <template name="code-workspace.gsl" path="vscode" outpath="builds/vscode" />
