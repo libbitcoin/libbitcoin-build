@@ -2275,7 +2275,7 @@
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha3" />
       </entry>
 
-      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+      <entry image="ubuntu-24.04" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
         <compiler lang="c" name="gcc" />
         <compiler lang="cxx" name="g++" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
@@ -2284,7 +2284,7 @@
         <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64" />
       </entry>
 
-      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+      <entry image="ubuntu-24.04" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
         <compiler lang="c" name="gcc" />
         <compiler lang="cxx" name="g++" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
@@ -2293,7 +2293,7 @@
         <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64-shani" />
       </entry>
 
-      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+      <entry image="ubuntu-24.04" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
         <compiler lang="c" name="gcc" />
         <compiler lang="cxx" name="g++" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
@@ -2302,7 +2302,7 @@
         <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64-avxifma" />
       </entry>
 
-      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+      <entry image="ubuntu-24.04" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
         <compiler lang="c" name="gcc" />
         <compiler lang="cxx" name="g++" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
@@ -2311,28 +2311,31 @@
         <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64-avx512ifma" />
       </entry>
 
-      <!-- <entry image="ubuntu-24.04-arm" container="alpine:3.22.6">
+      <entry image="ubuntu-24.04-arm" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
         <compiler lang="c" name="gcc" />
         <compiler lang="cxx" name="g++" />
+        <flag value="-march=armv8-a -mtune=generic" />
         <linkflag value="--static -static-libstdc++ -static-libgcc" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-musl-arm64" />
-      </entry> -->
+      </entry>
 
-      <!-- <entry image="ubuntu-24.04-arm" container="alpine:3.22.6">
+      <entry image="ubuntu-24.04-arm" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
         <compiler lang="c" name="gcc" />
         <compiler lang="cxx" name="g++" />
+        <flag value="-march=armv8-a+crypto -mtune=generic" />
         <linkflag value="--static -static-libstdc++ -static-libgcc" />
         <option name="cmake" value="-Denable-sha=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-musl-arm64-crypto" />
-      </entry> -->
+      </entry>
 
-      <!-- <entry image="ubuntu-24.04-arm" container="alpine:3.22.6">
+      <entry image="ubuntu-24.04-arm" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
         <compiler lang="c" name="gcc" />
         <compiler lang="cxx" name="g++" />
+        <flag value="-march=armv8.2-a+crypto+sha3 -mtune=generic" />
         <linkflag value="--static -static-libstdc++ -static-libgcc" />
         <option name="cmake" value="-Denable-sha=ON -Denable-sha3=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-musl-arm64-sha3" />
-      </entry> -->
+      </entry>
 
       <entry image="windows-latest" platform="x64" toolset="v145" version="vs2026">
         <option name="msvc" value="--enable-avx2 --enable-sse41" />

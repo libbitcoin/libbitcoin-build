@@ -246,6 +246,13 @@ jobs:
       SOURCE: ${{ matrix.builder.root == '.' && github.workspace || format('{0}/{1}', github.workspace, matrix.builder.root) }}
 
     steps:
+      - name: Prepare Alpine arm64 for actions
+        if: ${{ matrix.target.container && runner.arch == 'ARM64' }}
+        shell: sh
+        run: |
+          apk add --no-cache gcompat libstdc++
+          sed -i "s/^ID=alpine$/ID=gcompat/" /etc/os-release
+
       - name: Checkout libbitcoin-server
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
