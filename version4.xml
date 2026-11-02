@@ -556,6 +556,19 @@
 
       <entry image="ubuntu-24.04">
 
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <package name="valgrind" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--with-valgrind" />
+        <option name="gnu" value="--build-valgrind=secp256k1_ctime_tests" />
+
+        <job name="gnu" config="debug" link="static" />
+      </entry>
+
+      <entry image="ubuntu-24.04">
+
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
 
@@ -2182,6 +2195,201 @@
 
         <job name="gnu" config="release" link="static" gate="true" />
       </entry>
+      <!-- release -->
+
+      <entry image="macos-latest" deployment_target="13.3">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <flag value="-mcpu=apple-m1" />
+        <option name="cmake" value="-Denable-sha3=ON -Denable-sha=ON -Denable-aes=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-arm64" />
+      </entry>
+
+      <entry image="macos-26-intel" deployment_target="13.3">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx2=ON -Denable-sse41=ON -Denable-aesni=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-x64" />
+      </entry>
+
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-avx2=ON -Denable-sse41=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64" />
+      </entry>
+
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-shani" />
+      </entry>
+
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-avxifma=ON -Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avxifma" />
+      </entry>
+
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-avx512ifma=ON -Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avx512ifma" />
+      </entry>
+
+      <entry image="ubuntu-24.04-arm">
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <flag value="-march=armv8-a -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64" />
+      </entry>
+
+      <entry image="ubuntu-24.04-arm">
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <flag value="-march=armv8-a+crypto -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-sha=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-crypto" />
+      </entry>
+
+      <entry image="ubuntu-24.04-arm">
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <flag value="-march=armv8.2-a+crypto+sha3 -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-sha=ON -Denable-sha3=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha3" />
+      </entry>
+
+      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <linkflag value="--static -static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-avx2=ON -Denable-sse41=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64" />
+      </entry>
+
+      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <linkflag value="--static -static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64-shani" />
+      </entry>
+
+      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <linkflag value="--static -static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-avxifma=ON -Denable-shani=ON  -Denable-avx2=ON -Denable-sse41=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64-avxifma" />
+      </entry>
+
+      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <linkflag value="--static -static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-avx512ifma=ON -Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64-avx512ifma" />
+      </entry>
+
+      <!-- <entry image="ubuntu-24.04-arm" container="alpine:3.22.6">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <linkflag value="--static -static-libstdc++ -static-libgcc" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-musl-arm64" />
+      </entry> -->
+
+      <!-- <entry image="ubuntu-24.04-arm" container="alpine:3.22.6">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <linkflag value="--static -static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-sha=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-musl-arm64-crypto" />
+      </entry> -->
+
+      <!-- <entry image="ubuntu-24.04-arm" container="alpine:3.22.6">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+        <linkflag value="--static -static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-sha=ON -Denable-sha3=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-musl-arm64-sha3" />
+      </entry> -->
+
+      <entry image="windows-latest" platform="x64" toolset="v145" version="vs2026">
+        <option name="msvc" value="--enable-avx2 --enable-sse41" />
+        <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-x64" />
+      </entry>
+
+      <entry image="windows-latest" platform="x64" toolset="v145" version="vs2026">
+        <option name="msvc" value="--enable-shani --enable-avx2 --enable-sse41" />
+        <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-x64-shani" />
+      </entry>
+
+      <entry image="windows-latest" platform="x64" toolset="v145" version="vs2026">
+        <option name="msvc" value="--enable-avxifma --enable-shani --enable-avx2 --enable-sse41" />
+        <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-x64-avxifma" />
+      </entry>
+
+      <entry image="windows-latest" platform="x64" toolset="v145" version="vs2026">
+        <option name="msvc" value="--enable-avx512ifma --enable-shani --enable-avx2 --enable-sse41" />
+        <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-x64-avx512ifma" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" toolset="v145" version="vs2026">
+        <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-arm64" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" toolset="v145" version="vs2026">
+        <option name="msvc" value="--enable-sha" />
+        <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-arm64-crypto" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" toolset="v145" version="vs2026">
+        <option name="msvc" value="--enable-sha --enable-sha3" />
+        <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-arm64-sha3" />
+      </entry>
+
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <job name="cmake" config="release" link="static" release="true" basename="selector-linux-x64" project="libbitcoin-system" program="selector" />
+      </entry>
+
+      <entry image="ubuntu-24.04-arm">
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <job name="cmake" config="release" link="static" release="true" basename="selector-linux-arm64" project="libbitcoin-system" program="selector" />
+      </entry>
+
+      <entry image="windows-latest" platform="x64" toolset="v145" version="vs2026">
+        <option name="msvc" value="&quot;/p:Option-arch=StreamingSIMDExtensions2&quot;" />
+        <job name="msvc" configuration="StaticRelease" release="true" basename="selector-windows-x64" project="libbitcoin-system" program="selector" />
+      </entry>
+
+      <entry image="windows-11-vs2026-arm" platform="ARM64" toolset="v145" version="vs2026">
+        <job name="msvc" configuration="StaticRelease" release="true" basename="selector-windows-arm64" project="libbitcoin-system" program="selector" />
+      </entry>
     </ci>
   </repository>
 
@@ -3544,12 +3752,12 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <type name="c++" uuid="8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942" />
 
       <axis name="configuration">
-        <entry value="DynamicDebug" hidden="true">
+        <entry value="DynamicDebug">
           <library value="DebugDLL" />
           <binary value="DebugDEXE" />
           <test value="DebugDEXE" />
         </entry>
-        <entry value="DynamicRelease" hidden="true">
+        <entry value="DynamicRelease">
           <library value="ReleaseDLL" />
           <binary value="ReleaseDEXE" />
           <test value="ReleaseDEXE" />
@@ -3741,6 +3949,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     </template>
 
     <template name="version-tag.yml.gsl" path="yml" outpath=".github/workflows" />
+    <template name="manual-release.yml.gsl" path="yml" outpath=".github/workflows" />
 
     <!-- vscode -->
     <template name="code-workspace.gsl" path="vscode" outpath="builds/vscode" />
