@@ -804,6 +804,8 @@ $(my.indent))
 .   define my.repository = emit_target.repository
 .   define my.meta = emit_target.meta
 .   define my.indent = defined(my.target.option) ?? "  " ? ""
+.   define my.binary = (name(my.target) = "binary")
+.   define my.executable = target_name(my.target)
 .
 .   if (defined(my.target.option))
 if ( $(my.target.type:lower)-$(my.target.option:lower) )
@@ -812,6 +814,9 @@ if ( $(my.target.type:lower)-$(my.target.option:lower) )
 .   if (name(my.target) = "library")
 $(my.indent)add_library( $(target_name(my.target)) )
 $(my.indent)add_library( $(qualified_target_name(my.target)) ALIAS $(target_name(my.target)) )
+.   elsif (my.binary)
+.       my.target.name = "$(my.executable)-objects"
+$(my.indent)add_library( $(target_name(my.target)) STATIC )
 .   else
 $(my.indent)add_executable( $(target_name(my.target)) )
 .   endif
@@ -828,8 +833,10 @@ $(my.indent)add_executable( $(target_name(my.target)) )
 .   emit_target_compile_assignment("target_compile_definitions", "define", \
         my.target, my.repository, "", my.indent)
 .
-.   emit_target_compile_assignment("target_link_options", "link", \
-        my.target, my.repository, "NOT MSVC", my.indent)
+.   if (!my.binary)
+.       emit_target_compile_assignment("target_link_options", "link", \
+            my.target, my.repository, "NOT MSVC", my.indent)
+.   endif
 .
 .   if (name(my.target) = "library")
 .       require(my.target, "library", "symbol")
@@ -850,6 +857,21 @@ $(my.indent)endif()
 .
 .   emit_target_configured_sources(my.target, my.meta, my.indent)
 .
+.   if (my.binary)
+.       my.target.name = my.executable
+.       define my.source = "${CMAKE_CURRENT_BINARY_DIR}/$(target_name(my.target)).cpp"
+
+$(my.indent)file( CONFIGURE OUTPUT "$(my.source)" CONTENT "" )
+$(my.indent)add_executable( $(target_name(my.target)) "$(my.source)" )
+
+$(my.indent)target_link_libraries( $(target_name(my.target))
+  $(my.indent)PRIVATE
+    $(my.indent)$<LINK_LIBRARY:WHOLE_ARCHIVE,$(target_name(my.target))-objects>
+$(my.indent))
+.
+.       emit_target_compile_assignment("target_link_options", "link", \
+            my.target, my.repository, "NOT MSVC", my.indent)
+.   endif
 
 $(my.indent)set_target_properties( $(my.target.name)
   $(my.indent)PROPERTIES
