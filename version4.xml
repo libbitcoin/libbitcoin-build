@@ -2196,6 +2196,8 @@
         <job name="gnu" config="release" link="static" gate="true" />
       </entry>
       <!-- release -->
+      <!-- Minimum platforms: glibc 2.31, macOS 13.3 (floating point std::to_chars), Windows 10. -->
+      <!-- musl is x64 only; arm64 requires Guix (no JavaScript actions in Alpine arm64 containers). -->
 
       <entry image="macos-latest" deployment_target="13.3">
         <compiler lang="c" name="clang" />
