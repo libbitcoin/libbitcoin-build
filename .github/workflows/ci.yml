@@ -138,7 +138,7 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}/libbitcoin-build
         run: >
-          PATH="${PATH} ${{github.workspace }}/prefix" ./${{ matrix.script }}
+          PATH="${PATH} ${{github.workspace }}/prefix/bin" ./${{ matrix.script }}
 
       - name: Execute generation [cmd]
         if: ${{ startsWith(matrix.shell, 'cmd') }}
