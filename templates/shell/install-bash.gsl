@@ -316,8 +316,7 @@ help()
 .
 .       if !((my.active.method = "gnu") | \
             (my.active.method = "cmake") | \
-            (my.active.method = "preset") | \
-            (my.active.method = "boost_build"))
+            (my.active.method = "preset"))
 .
 .           abort "Unrecognized build method '$(my.active.method)'."
 .       endif
@@ -1093,7 +1092,7 @@ build_preset()
 
     if [[ "${DISPLAY_VERBOSE}" == "yes" ]]; then
         VERBOSITY_CMAKE="-DCMAKE_VERBOSE_MAKEFILE=ON"
-        VERBOSITY_MAKE="VERBOSE=1"
+        VERBOSITY_MAKE="--verbose"
     fi
 
     msg_heading "Preparing to build ${PROJECT}"
@@ -1104,11 +1103,10 @@ build_preset()
 
     cmake ${VERBOSITY_CMAKE} -LA --preset="${BUILD_PRESET}" "$@" "${BUILD_SRC_DIR}/${PROJECT}/${RELATIVE_SRC_PATH}"
 
-    # make
     if [[ ${JOBS} -gt ${SEQUENTIAL} ]]; then
-        make -j${JOBS} ${VERBOSITY_MAKE}
+        cmake --build . -j${JOBS} ${VERBOSITY_MAKE}
     else
-        make
+        cmake --build . ${VERBOSITY_MAKE}
     fi
 
     pop_directory # BUILD_OBJ_DIR
@@ -1170,96 +1168,6 @@ build_gnu()
 }
 
 .endmacro # define_build_gnu
-.
-.macro define_build_boost()
-
-build_boost()
-{
-    local PROJECT="$1"
-    shift
-
-    msg_heading "Preparing to build ${PROJECT}"
-
-    push_directory "${BUILD_SRC_DIR}/${PROJECT}"
-
-    local SAVE_IFS="${IFS}"
-    IFS=' '
-
-    # Compute configuration
-    if [[ "${BUILD_LINK}" == "dynamic" ]]; then
-        BOOST_LINK="shared"
-    elif [[ "${BUILD_LINK}" == "static" ]]; then
-        BOOST_LINK="static"
-    else
-        BOOST_LINK="static,shared"
-    fi
-
-    if [[ -n ${CC} ]]; then
-        BOOST_TOOLSET="toolset=${CC}"
-    fi
-
-    if [[ (${OS} == Linux && ${CC} == clang*) || (${OS} == OpenBSD) ]]; then
-        STDLIB_FLAG="-stdlib=lib${STDLIB}"
-        BOOST_CXXFLAGS="cxxflags=${STDLIB_FLAG}"
-        BOOST_LINKFLAGS="linkflags=${STDLIB_FLAG}"
-    fi
-
-    guessed_toolset=`${BUILD_SRC_DIR}/${PROJECT}/tools/build/src/engine/build.sh --guess-toolset`
-    CXXFLAGS="-w" ${BUILD_SRC_DIR}/${PROJECT}/tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
-    cp "${BUILD_SRC_DIR}/${PROJECT}/tools/build/src/engine/b2" .
-
-    if [[ -n "${BOOST_CXXFLAGS}" ]]; then
-        BOOST_CXXFLAGS="${BOOST_CXXFLAGS} ${boost_FLAGS[@]}"
-    else
-        BOOST_CXXFLAGS="cxxflags=${boost_FLAGS[@]}"
-    fi
-
-    # Prebuild status report
-    msg "${PROJECT} configuration."
-    msg "--------------------------------------------------------------------"
-    msg "variant               : release"
-    msg "threading             : multi"
-    msg "toolset               : ${CC}"
-    msg "boost cxxflags        : ${BOOST_CXXFLAGS}"
-    msg "boost linkflags       : ${BOOST_LINKFLAGS}"
-    msg "link                  : ${BOOST_LINK}"
-    msg "-sNO_BZIP2            : 1"
-    msg "-sNO_ZSTD             : 1"
-    msg "-j                    : ${PARALLEL}"
-    msg "-d0                   : [suppress informational messages]"
-    msg "-q                    : [stop at the first error]"
-    msg "--reconfigure         : [ignore cached configuration]"
-    msg "--prefix              : ${PREFIX}"
-    msg "BOOST_OPTIONS         : $*"
-    msg "cxxflags (ignored)    : ${CXXFLAGS}"
-    msg "--------------------------------------------------------------------"
-
-    # Begin build
-    ./bootstrap.sh --with-bjam=./b2 --prefix=${PREFIX}
-
-    ./b2 install \\
-        "cxxstd=20" \\
-        "variant=release" \\
-        "threading=multi" \\
-        "${BOOST_TOOLSET}" \\
-        "${BOOST_CXXFLAGS}" \\
-        "${BOOST_LINKFLAGS}" \\
-        "link=${BOOST_LINK}" \\
-        "warnings=off" \\
-        "-sNO_BZIP2=1" \\
-        "-sNO_ZSTD=1" \\
-        "-j ${PARALLEL}" \\
-        "-d0" \\
-        "-q" \\
-        "--reconfigure" \\
-        "--prefix=${PREFIX}" \\
-        "$@"
-
-    IFS="${SAVE_IFS}"
-
-    pop_directory # BUILD_SRC_DIR
-}
-.endmacro # define_build_boost
 .
 .macro define_parse_options(meta, configuration, repository, install, indent)
 .   my.meta = define_parse_options.meta
@@ -1580,6 +1488,8 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             PARALLEL=\$(nproc)
         elif [[ ${OS} == Darwin ]] || [[ ${OS} == OpenBSD ]]; then
             PARALLEL=\$(sysctl -n hw.ncpu)
+        elif [[ ${OS} == MINGW* ]] || [[ ${OS} == MSYS* ]]; then
+            PARALLEL=${NUMBER_OF_PROCESSORS}
         else
             msg_error "Unsupported system: '${OS}'"
             msg_error "  Unable to determine value for $(registered_option_symbol("build-parallel", my.configuration))"
@@ -1641,6 +1551,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
         ARCHTUNE="-march=native -mtune=native"
     fi
 
+.   if (count(my.install.dependency, this.hint_build = "preset", this) = 0)
     # translate BUILD_CONFIG to ZFLAGS
     if [[ -n "${BUILD_CONFIG}" ]]; then
         msg_verbose "*** Build config specified, calculating flags..."
@@ -1669,6 +1580,7 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
             msg_verbose "CXXFLAGS modified to '${CXXFLAGS}'"
         fi
     fi
+.   endif
 .
 .   if defined(my.meta->build(build.method = "gnu"))
  
@@ -1914,9 +1826,6 @@ $(my.indent)install_cmake "$(_depend.name)" "$(my.active_build.objpath)"
 $(my.indent)if [[ "${BUILD_POST_INSTALL_CLEAN}" == "yes" ]]; then
     $(my.indent)clean_cmake "$(_depend.name)" "$(my.active_build.objpath)"
 $(my.indent)fi
-.
-.       elsif (my.active_build.method = "boost_build")
-$(my.indent)build_boost "$(_depend.name)" "${$(my.vname)_OPTIONS[@]}"
 .
 .       else
 .           abort "Unrecognized build method '$(_build.method)'."

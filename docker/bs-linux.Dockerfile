@@ -24,10 +24,7 @@ RUN ./developer_setup.sh \
     --build-mode=configure \
     --disable-shared \
     --enable-static \
-    --build-boost \
     --build-zmq
-
-ENV BOOST_ROOT="/build/prefix"
 
 RUN ./developer_setup.sh \
     --build-target=libbitcoin \
@@ -38,8 +35,7 @@ RUN ./developer_setup.sh \
     --disable-shared \
     --enable-static \
     --enable-isystem \
-    --without-consensus \
-    --with-boost=/build/prefix
+    --without-consensus
 
 RUN ./developer_setup.sh \
     --build-target=project \
@@ -50,8 +46,7 @@ RUN ./developer_setup.sh \
     --disable-shared \
     --enable-static \
     --enable-isystem \
-    --without-consensus \
-    --with-boost=/build/prefix
+    --without-consensus
 
 RUN rm -rf /build/src /build/obj
 

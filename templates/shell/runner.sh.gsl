@@ -76,7 +76,7 @@ endfunction
 .   copyleft(my.library.name)
 .
 .   heading1("Define tests and options.")
-BOOST_UNIT_TEST_OPTIONS="\
+TEST_OPTIONS="\
 --log_level=warning \
 --show_progress=no \
 --detect_memory_leak=0 \
@@ -86,9 +86,9 @@ BOOST_UNIT_TEST_OPTIONS="\
 .
 .   heading1("Run tests.")
 if [ "${CI}" = true ]; then
-    \./test/$(my.target.name) ${BOOST_UNIT_TEST_OPTIONS}
+    \./test/$(my.target.name) ${TEST_OPTIONS}
 else
-    \./test/$(my.target.name) ${BOOST_UNIT_TEST_OPTIONS} > test.log
+    \./test/$(my.target.name) ${TEST_OPTIONS} > test.log
 fi
 .
 .endmacro # emit_runner

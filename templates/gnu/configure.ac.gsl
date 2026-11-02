@@ -702,10 +702,7 @@ AS_IF([test "x${$(my.optiontext)}" != "xno"],
 .       my.indent = indent_add(my.indent, my.step)
 .   endif
 .
-.   if (my.dependency.name = "boost")
-.       emit_dependency_boost(my.dependency, my.repository, \
-            my.configuration, my.meta, my.indent, my.step)
-.   elsif defined(my.dependency->canonical->dependency->pkg)
+.   if defined(my.dependency->canonical->dependency->pkg)
 .       emit_dependency_pkg_check_modules(my.dependency, \
             my.repository, my.configuration, my.meta,\
             my.indent, my.step)
@@ -760,72 +757,6 @@ $(my.indent)AS_IF([test "x${enable_isystem}" != "xno"],
 $(my.indent)AC_MSG_NOTICE([$(my.prefix)_BUILD_CPPFLAGS : ${$(my.prefix)_BUILD_CPPFLAGS}])
 .
 .endmacro # emit_dependency_pkg_check_modules
-.
-.macro emit_dependency_boost(dependency, repository, configuration, meta, indent, step)
-.   define my.dependency = emit_dependency_boost.dependency
-.   define my.repository = emit_dependency_boost.repository
-.   define my.configuration = emit_dependency_boost.configuration
-.   define my.meta = emit_dependency_boost.meta
-.   define my.indent = emit_dependency_boost.indent
-.   define my.step = emit_dependency_boost.step
-.
-$(my.indent)AX_BOOST_BASE([$(my.dependency.version)],
-  $(my.indent)[
-    $(my.indent)AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
-    $(my.indent)AC_SUBST([boost_ISYSTEM_CPPFLAGS], [`echo ${boost_CPPFLAGS} | ${SED} s/^-I/-isystem/g | ${SED} s/' -I'/' -isystem'/g`])
-    $(my.indent)AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
-    $(my.indent)AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
-    $(my.indent)AC_MSG_NOTICE([boost_ISYS_CPPFLAGS : ${boost_ISYS_CPPFLAGS}])
-    $(my.indent)AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])
-  $(my.indent)],
-  $(my.indent)[
-    $(my.indent)AC_MSG_ERROR([Boost $(my.dependency.version) or later is required but was not found.])
-  $(my.indent)])
-
-$(my.indent)AS_IF([test "x${enable_isystem}" != "xno"],
-  $(my.indent)[ AC_SUBST([boost_BUILD_CPPFLAGS], [${boost_ISYSTEM_CPPFLAGS}]) ],
-  $(my.indent)[ AC_SUBST([boost_BUILD_CPPFLAGS], [${boost_CPPFLAGS}]) ])
-
-$(my.indent)AC_MSG_NOTICE([boost_BUILD_CPPFLAGS : ${boost_BUILD_CPPFLAGS}])
-.
-.   for my.dependency.component as _component
-.       define my.cname = "$(my.dependency.name:c)_$(_component.name:c)"
-.       define my.uname = "$(my.cname:upper)"
-.       define my.indent = ""
-
-.       define my.clause = ""
-.       for _component.context as _context
-.           define my.separator = (my.clause = "") ?? "" ? " | "
-.
-.           define my.target = my.repository->$(_context.type)\
-                (this.name = _context.name, this)
-.
-.           if !defined(my.target.option)
-.               next
-.           endif
-.
-.           my.clause = "$(my.clause)$(my.separator)(test \"x${$(my.target.type)_$(my.target.option)}\" != \"xno\")"
-.       endfor
-.
-.       if (string.length(my.clause) > 0)
-.
-$(my.indent)AS_IF([$(my.clause)],
-  $(my.indent)[
-.
-.           my.indent = indent_add(my.indent, my.step)
-.       endif
-.
-$(my.indent)AX_$(my.uname)
-$(my.indent)AC_SUBST([$(my.cname)_LIBS], [${$(my.uname)_LIB}])
-$(my.indent)AC_MSG_NOTICE([$(my.cname)_LIBS : ${$(my.cname)_LIBS}])
-.
-.       if (string.length(my.clause) > 0)
-.           my.indent = indent_remove(my.indent, my.step)
-  $(my.indent)])
-.       endif
-.   endfor
-.
-.endmacro # emit_dependency_boost
 .
 .macro emit_conditional_includes_recursive(headers, target, \
     repository, configuration, meta)

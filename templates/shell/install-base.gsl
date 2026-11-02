@@ -127,8 +127,6 @@ function emit_install_sh(meta, configuration, repository)
                     define_build_msbuild()
                 elsif (_method.name = "nuget")
                     define_build_nuget()
-               elsif (_method.name = "boost_build")
-                    define_build_boost()
                 else
                     abort "Unrecognized build method '$(_method.name)'."
                 endif
