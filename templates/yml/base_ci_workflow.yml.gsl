@@ -207,6 +207,21 @@ function accumulate_options(entry, job)
     return my.options
 endfunction
 
+function count_release_jobs(repository)
+    define my.repository = count_release_jobs.repository
+    define my.count = 0
+
+    if defined(my.repository->ci)
+        for my.repository->ci.entry as _entry
+            for _entry.job as _job where is_defined_positive(_job, "release")
+                my.count += 1
+            endfor
+        endfor
+    endif
+
+    return my.count
+endfunction
+
 function count_matrix_entries(identifier, ci, meta)
     define my.identifier = count_matrix_entries.identifier
     define my.ci = count_matrix_entries.ci
