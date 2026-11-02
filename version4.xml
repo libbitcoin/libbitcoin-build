@@ -2382,6 +2382,18 @@
         <job name="cmake" config="release" link="static" release="true" basename="selector-linux-arm64" project="libbitcoin-system" program="selector" />
       </entry>
 
+      <entry image="macos-latest" deployment_target="13.3">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <job name="cmake" config="release" link="static" release="true" basename="selector-macos-arm64" project="libbitcoin-system" program="selector" />
+      </entry>
+
+      <entry image="macos-26-intel" deployment_target="13.3">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <job name="cmake" config="release" link="static" release="true" basename="selector-macos-x64" project="libbitcoin-system" program="selector" />
+      </entry>
+
       <entry image="windows-latest" platform="x64" toolset="v145" version="vs2026">
         <option name="msvc" value="&quot;/p:Option-arch=StreamingSIMDExtensions2&quot;" />
         <job name="msvc" configuration="StaticRelease" release="true" basename="selector-windows-x64" project="libbitcoin-system" program="selector" />
