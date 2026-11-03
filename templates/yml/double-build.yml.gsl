@@ -86,15 +86,40 @@ function count_hosted_release_jobs(repository, hosted)
     return my.count
 endfunction
 
-function release_hosts(repository)
-    define my.repository = release_hosts.repository
+function host_toolchain(host)
+    define my.host = host_toolchain.host
+
+    if ends_with(my.host, "-apple-darwin")
+        return "darwin"
+    elsif ends_with(my.host, "-windows-msvc")
+        return "windows"
+    endif
+
+    return my.host
+endfunction
+
+function host_sdk(host)
+    define my.host = host_sdk.host
+
+    if ends_with(my.host, "-apple-darwin")
+        return "apple"
+    elsif ends_with(my.host, "-windows-msvc")
+        return "windows"
+    endif
+
+    return ""
+endfunction
+
+function release_sdks(repository)
+    define my.repository = release_sdks.repository
     define my.result = ""
 
     for my.repository->ci.entry as _entry
         for _entry.job as _job where is_defined_positive(_job, "release") & \
           defined(_job.host)
-            if !is_token(" \"$(_job.host)\"", " $(my.result)")
-                my.result = join(my.result, "\"$(_job.host)\"", ", ")
+            define my.sdk = host_sdk(_job.host)
+            if !is_empty(my.sdk) & !is_token(" $(my.sdk)", " $(my.result)")
+                my.result = join(my.result, my.sdk, " ")
             endif
         endfor
     endfor
@@ -506,11 +531,18 @@ jobs:
             fi
             join -j 2 <(sort -k2 "${A}/SHA256SUMS") <(sort -k2 "${B}/SHA256SUMS") |
               awk '{ print "| " $1 " | " substr($2, 1, 16) " | " substr($3, 1, 16) " |" }' >> "$GITHUB_STEP_SUMMARY"
+.   if count_hosted_release_jobs(my.repository, 0) > 0
             if ! cmp -s <(grep -v '[.]pdb[.]zip$' "${A}/SHA256SUMS") <(grep -v '[.]pdb[.]zip$' "${B}/SHA256SUMS"); then
               DIFFER="${DIFFER} double-${NAME}"
             fi
           done
           echo "PDB files are not compared: link.exe does not write them deterministically." | tee -a "$GITHUB_STEP_SUMMARY"
+.   else
+            if ! cmp -s "${A}/SHA256SUMS" "${B}/SHA256SUMS"; then
+              DIFFER="${DIFFER} double-${NAME}"
+            fi
+          done
+.   endif
           if [[ -n "${MISSING}" ]]; then
             echo "Builds missing:${MISSING}" | tee -a "$GITHUB_STEP_SUMMARY"
             echo "missing=${MISSING}" >> "$GITHUB_OUTPUT"
@@ -567,6 +599,52 @@ jobs:
 .
 .macro emit_guix_jobs(repository)
 .   define my.repository = emit_guix_jobs.repository
+.   define my.sdks = release_sdks(my.repository)
+.   if !is_empty(my.sdks)
+
+  sdk:
+    needs: resolve
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+.       if is_token("apple", my.sdks)
+          - kind: "apple"
+            image: "macos-latest"
+.       endif
+.       if is_token("windows", my.sdks)
+          - kind: "windows"
+            image: "windows-latest"
+.       endif
+
+    runs-on: ${{ matrix.image }}
+
+    steps:
+      - name: Checkout build definition
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          path: ".definition"
+          ref: ${{ needs.resolve.outputs.server }}
+          repository: ${{ github.repository_owner }}/libbitcoin-server
+          sparse-checkout: |
+            .github/guix
+
+      - name: Package SDK
+        shell: bash
+        run: |
+          bash .definition/.github/guix/package-sdk.sh ${{ matrix.kind }} sdk
+
+      - name: Upload SDK
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sdk-${{ matrix.kind }}
+          path: sdk
+          retention-days: 1
+          if-no-files-found: error
+.   endif
 
   toolchain:
     needs: resolve
@@ -576,7 +654,18 @@ jobs:
 
       matrix:
         runner: [ "ubuntu-24.04", "ubuntu-24.04-arm" ]
-        host: [ $(release_hosts(my.repository)) ]
+        toolchain:
+.   define my.toolchains = ""
+.   for my.repository->ci.entry as _entry
+.       for _entry.job as _job where is_defined_positive(_job, "release") & defined(_job.host)
+.           define my.toolchain = host_toolchain(_job.host)
+.           if !is_token(" $(my.toolchain) ", " $(my.toolchains) ")
+.               my.toolchains = join(my.toolchains, my.toolchain, " ")
+          - name: "$(my.toolchain)"
+            host: "$(_job.host)"
+.           endif
+.       endfor
+.   endfor
 
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 360
@@ -598,7 +687,7 @@ jobs:
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: guix-cache
-          key: guix-${{ runner.arch }}-${{ matrix.host }}-${{ hashFiles('.definition/.github/guix/*.scm', '.definition/.github/guix/patches/*') }}
+          key: guix-${{ runner.arch }}-${{ matrix.toolchain.name }}-${{ hashFiles('.definition/.github/guix/*.scm', '.definition/.github/guix/patches/*') }}
           lookup-only: true
 
       - name: Setup Guix
@@ -609,7 +698,7 @@ jobs:
         if: ${{ steps.find.outputs.cache-hit != 'true' }}
         shell: bash
         env:
-          HOST: ${{ matrix.host }}
+          HOST: ${{ matrix.toolchain.host }}
         run: |
           GUIX_DIR="\$(realpath .definition/.github/guix)"
           ENVIRONMENT=\$(guix time-machine --channels="${GUIX_DIR}/channels.scm" -- \\
@@ -643,7 +732,7 @@ jobs:
           key: ${{ steps.find.outputs.cache-primary-key }}
 
   guix:
-    needs: [ resolve, toolchain ]
+    needs: [ $(join("resolve, toolchain", is_empty(my.sdks) ?? "" ? "sdk", ", ")) ]
 
     strategy:
       fail-fast: false
@@ -668,6 +757,13 @@ jobs:
 .           define my.linkflags = element_property_concat("linkflag", "value", _entry)
           - basename: "$(_job.basename)"
             host: "$(_job.host)"
+            toolchain: "$(host_toolchain(_job.host))"
+.           if !is_empty(host_sdk(_job.host))
+            sdk: "$(host_sdk(_job.host))"
+.           endif
+.           if defined(_entry.deployment_target)
+            deployment_target: "$(_entry.deployment_target)"
+.           endif
 .           if defined(_job.project)
             project: "$(_job.project)"
 .           endif
@@ -714,13 +810,31 @@ jobs:
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: guix-cache
-          key: guix-${{ runner.arch }}-${{ matrix.target.host }}-${{ hashFiles('.definition/.github/guix/*.scm', '.definition/.github/guix/patches/*') }}
+          key: guix-${{ runner.arch }}-${{ matrix.target.toolchain }}-${{ hashFiles('.definition/.github/guix/*.scm', '.definition/.github/guix/patches/*') }}
           fail-on-cache-miss: true
 
       - name: Setup Guix
         uses: ./.definition/.github/actions/setup-guix
         with:
           cache: guix-cache
+.   if !is_empty(my.sdks)
+
+      - name: Download SDK
+        if: ${{ matrix.target.sdk }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: sdk-${{ matrix.target.sdk }}
+          path: sdk-archive
+
+      - name: Unpack SDK
+        if: ${{ matrix.target.sdk }}
+        shell: bash
+        run: |
+          mkdir sdk
+          zstd -dc sdk-archive/sdk.tar.zst | tar -x -C sdk
+          echo "SDK=\$(realpath "sdk/\$(ls sdk)")" >> "$GITHUB_ENV"
+          cat sdk-archive/sdk.txt
+.   endif
 
       - name: Build
         shell: bash
@@ -732,14 +846,15 @@ jobs:
           FLAGS: ${{ matrix.target.flags }}
           LINKFLAGS: ${{ matrix.target.linkflags }}
           OPTIONS: ${{ matrix.target.options }}
+          DEPLOYMENT_TARGET: ${{ matrix.target.deployment_target }}
         run: |
           bash .definition/.github/guix/guix-build.sh src build
           mkdir candidate symbols
-          cp "build/${BASENAME}" candidate/
-          cp "build/${BASENAME}.debug" symbols/
+          cp "build/\$(awk 'NR == 1 { print $2 }' build/SHA256SUMS)" candidate/
+          cp "build/\$(awk 'NR == 2 { print $2 }' build/SHA256SUMS)" symbols/
 
       - name: Display binary information
-        if: ${{ (runner.arch == 'X64' && startsWith(matrix.target.host, 'x86_64-')) || (runner.arch == 'ARM64' && startsWith(matrix.target.host, 'aarch64-')) }}
+        if: ${{ (runner.arch == 'X64' && matrix.target.host == 'x86_64-linux-gnu') || (runner.arch == 'ARM64' && matrix.target.host == 'aarch64-linux-gnu') }}
         continue-on-error: true
         shell: bash
         working-directory: candidate
@@ -751,9 +866,11 @@ jobs:
         shell: bash
         working-directory: candidate
         run: |
-          file ${{ matrix.target.basename }}
-          readelf -d ${{ matrix.target.basename }} | grep -E 'NEEDED|RPATH|RUNPATH|SONAME' || echo "(none)"
-          readelf -V --wide ${{ matrix.target.basename }} | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1
+          file *
+          if [[ "${{ matrix.target.host }}" == *-linux-gnu ]]; then
+            readelf -d * | grep -E 'NEEDED|RPATH|RUNPATH|SONAME' || echo "(none)"
+            readelf -V --wide * | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1
+          fi
 
       - name: Record build
         shell: bash
@@ -764,6 +881,7 @@ jobs:
             echo "image: ${ImageOS} ${ImageVersion} ${RUNNER_ARCH}"
             echo "guix: \$(grep -o 'commit "[0-9a-f]*"' .definition/.github/guix/channels.scm)"
             echo "host: ${{ matrix.target.host }}"
+            if [[ -f sdk-archive/sdk.txt ]]; then cat sdk-archive/sdk.txt; fi
           } | tee output/toolchain.txt
           cd output
           FILES=\$(ls | grep -v -x toolchain.txt)
