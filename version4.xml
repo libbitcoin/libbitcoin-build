@@ -130,6 +130,7 @@
         </define>
 
         <architecture option="aes"
+          msvc_define="WITH_SHA"
           comment="Conditionally require arm aes intrinsics.">
           <program>
             <include header="arm_neon.h" />
@@ -139,6 +140,7 @@
         </architecture>
 
         <architecture option="sha"
+          msvc_define="WITH_SHA"
           comment="Conditionally require arm sha256 intrinsics.">
           <program>
             <include header="arm_neon.h" />
@@ -148,6 +150,7 @@
         </architecture>
 
         <architecture option="sha3"
+          msvc_define="WITH_SHA512"
           comment="Conditionally require arm sha512 intrinsics.">
           <program>
             <include header="arm_neon.h" />
@@ -157,6 +160,7 @@
         </architecture>
 
         <flag option="avx2" environmental="true"
+          msvc_arch="AVX2"
           comment="Conditionally require avx2 intrinsics."
           type="public"
           substitute="avx2">
@@ -173,6 +177,7 @@
         </flag>
 
         <flag option="avx512" environmental="true"
+          msvc_arch="AVX512"
           comment="Conditionally require avx512 intrinsics."
           type="public"
           substitute="avx512">
@@ -191,6 +196,7 @@
         </flag>
 
         <flag option="avx512ifma" environmental="true"
+          msvc_define="WITH_AVX512IFMA"
           comment="Conditionally require avx512 ifma intrinsics."
           type="public"
           substitute="avx512ifma">
@@ -208,6 +214,7 @@
         </flag>
 
         <flag option="avxifma" environmental="true"
+          msvc_define="WITH_AVXIFMA"
           comment="Conditionally require avx ifma intrinsics."
           type="public"
           substitute="avxifma">
@@ -224,6 +231,7 @@
         </flag>
 
         <flag option="shani" environmental="true"
+          msvc_define="WITH_SHA"
           comment="Conditionally require sha native intrincis."
           type="public"
           substitute="shani">
@@ -242,6 +250,7 @@
         </flag>
 
         <flag option="sha512" environmental="true"
+          msvc_define="WITH_SHA512"
           comment="Conditionally require sha512 native intrinsics."
           type="public"
           substitute="sha512">
@@ -259,6 +268,7 @@
         </flag>
 
         <flag option="sse41" environmental="true"
+          msvc_arch="AVX"
           comment="Conditionally require sse4.1 intrinsics."
           type="public"
           substitute="sse41">
@@ -275,6 +285,7 @@
         </flag>
 
         <flag option="aesni" environmental="true"
+          msvc_define="WITH_AESNI"
           comment="Conditionally require aes-ni and pclmulqdq intrinsics."
           type="public"
           substitute="aesni">
@@ -293,6 +304,7 @@
         </flag>
 
         <flag option="vaes" environmental="true"
+          msvc_define="WITH_VAES"
           comment="Conditionally require vaes and vpclmulqdq intrinsics."
           type="public"
           substitute="vaes">
