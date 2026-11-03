@@ -963,6 +963,10 @@ $(my.indent)if ( WIN32 )
     $(my.indent)PRIVATE
       $(my.indent)$<TARGET_PROPERTY:$(target_name(my.target))-objects,INCLUDE_DIRECTORIES>
   $(my.indent))
+
+  $(my.indent)if ( MSVC )
+    $(my.indent)target_link_options( $(target_name(my.target)) PRIVATE /MANIFEST:NO )
+  $(my.indent)endif()
 $(my.indent)endif()
 .   endfor
 .endmacro # emit_target_resources
