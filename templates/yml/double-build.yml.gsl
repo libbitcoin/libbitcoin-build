@@ -71,6 +71,37 @@ function release_basenames(repository)
     return my.result
 endfunction
 
+function count_hosted_release_jobs(repository, hosted)
+    define my.repository = count_hosted_release_jobs.repository
+    define my.hosted = count_hosted_release_jobs.hosted
+    define my.count = 0
+
+    for my.repository->ci.entry as _entry
+        for _entry.job as _job where is_defined_positive(_job, "release") & \
+          (defined(_job.host) = my.hosted)
+            my.count += 1
+        endfor
+    endfor
+
+    return my.count
+endfunction
+
+function release_hosts(repository)
+    define my.repository = release_hosts.repository
+    define my.result = ""
+
+    for my.repository->ci.entry as _entry
+        for _entry.job as _job where is_defined_positive(_job, "release") & \
+          defined(_job.host)
+            if !is_token(" \"$(_job.host)\"", " $(my.result)")
+                my.result = join(my.result, "\"$(_job.host)\"", ", ")
+            endif
+        endfor
+    endfor
+
+    return my.result
+endfunction
+
 ###############################################################################
 # Macros
 ###############################################################################
@@ -154,6 +185,7 @@ jobs:
             echo "libbitcoin-${REPO} ${REF} ${SHA}" | tee -a "$GITHUB_STEP_SUMMARY"
             echo "${REPO}=${SHA}" >> "$GITHUB_OUTPUT"
           done
+.   if count_hosted_release_jobs(my.repository, 0) > 0
 
   build:
     needs: resolve
@@ -175,7 +207,7 @@ jobs:
         target:
 .   define my.first = 1
 .   for my.repository->ci.entry as _entry
-.       for _entry.job as _job where is_defined_positive(_job, "release")
+.       for _entry.job as _job where is_defined_positive(_job, "release") & !defined(_job.host)
 .           if !my.first
 
 .           endif
@@ -435,13 +467,19 @@ jobs:
         if: ${{ matrix.builder.name == 'a' && (matrix.target.configuration != 'debug' || matrix.target.toolchain == 'msbuild') }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ${{ matrix.basename }}-symbols
+          name: symbols-${{ matrix.target.basename }}
           path: symbols/*
           retention-days: 1
           if-no-files-found: error
+.   endif
+.   if count_hosted_release_jobs(my.repository, 1) > 0
+.       emit_guix_jobs(my.repository)
+.   endif
+.   define my.native = (count_hosted_release_jobs(my.repository, 0) > 0) ?? "build" ? ""
+.   define my.hosted = (count_hosted_release_jobs(my.repository, 1) > 0) ?? "guix" ? ""
 
   compare:
-    needs: build
+    needs: [ $(join(my.native, my.hosted, ", ")) ]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
 
@@ -513,6 +551,249 @@ jobs:
         shell: bash
         run: exit 1
 .endmacro # emit_double_build_yml
+.
+.macro emit_checkout(repository, root)
+.   define my.repository = emit_checkout.repository
+.   define my.root = emit_checkout.root
+      - name: Checkout $(my.repository)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          path: "$(my.root)/$(my.repository)"
+          ref: ${{ needs.resolve.outputs.$(string.replace(my.repository, "libbitcoin-|")) }}
+          repository: ${{ github.repository_owner }}/$(my.repository)
+
+.endmacro # emit_checkout
+.
+.macro emit_guix_jobs(repository)
+.   define my.repository = emit_guix_jobs.repository
+
+  toolchain:
+    needs: resolve
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        runner: [ "ubuntu-24.04", "ubuntu-24.04-arm" ]
+        host: [ $(release_hosts(my.repository)) ]
+
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout build definition
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          path: ".definition"
+          ref: ${{ needs.resolve.outputs.server }}
+          repository: ${{ github.repository_owner }}/libbitcoin-server
+          sparse-checkout: |
+            .github/actions
+            .github/guix
+
+      - name: Find toolchain
+        id: find
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: guix-cache
+          key: guix-${{ runner.arch }}-${{ matrix.host }}-${{ hashFiles('.definition/.github/guix/*.scm', '.definition/.github/guix/patches/*') }}
+          lookup-only: true
+
+      - name: Setup Guix
+        if: ${{ steps.find.outputs.cache-hit != 'true' }}
+        uses: ./.definition/.github/actions/setup-guix
+
+      - name: Build toolchain
+        if: ${{ steps.find.outputs.cache-hit != 'true' }}
+        shell: bash
+        env:
+          HOST: ${{ matrix.host }}
+        run: |
+          GUIX_DIR="\$(realpath .definition/.github/guix)"
+          ENVIRONMENT=\$(guix time-machine --channels="${GUIX_DIR}/channels.scm" -- \\
+            shell --no-grafts --load-path="${GUIX_DIR}" --manifest="${GUIX_DIR}/manifest.scm" -- \\
+            printenv GUIX_ENVIRONMENT)
+          INFERIOR=\$(find "/var/guix/profiles/per-user/${USER}/inferiors" -type l | head -1)
+          mkdir guix-cache
+          basename "${INFERIOR}" > guix-cache/inferior-key
+          readlink -f "${INFERIOR}" > guix-cache/inferior
+          sudo guix archive --generate-key
+          cp /etc/guix/signing-key.pub guix-cache/
+          guix archive --export -r "\$(cat guix-cache/inferior)" "${ENVIRONMENT}" |
+            zstd -T0 -12 -o guix-cache/store.nar.zst
+          ls -la guix-cache
+
+      - name: Display build logs
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+          sudo find /var/log/guix/drvs -type f -mmin -60 -printf '%T@ %p\\n' |
+            sort -rn | head -5 | while read -r _ LOG; do
+              echo "== ${LOG}"
+              zcat -f "${LOG}" | tail -60
+            done
+
+      - name: Save toolchain
+        if: ${{ steps.find.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: guix-cache
+          key: ${{ steps.find.outputs.cache-primary-key }}
+
+  guix:
+    needs: [ resolve, toolchain ]
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        builder:
+          - name: "a"
+            image: "ubuntu-24.04"
+          - name: "b"
+            image: "ubuntu-24.04-arm"
+
+        target:
+.   define my.first = 1
+.   for my.repository->ci.entry as _entry
+.       for _entry.job as _job where is_defined_positive(_job, "release") & defined(_job.host)
+.           if !my.first
+
+.           endif
+.           my.first = 0
+.           define my.options = accumulate_options(_entry, _job)
+.           define my.flags = flags(_job, _entry)
+.           define my.linkflags = element_property_concat("linkflag", "value", _entry)
+          - basename: "$(_job.basename)"
+            host: "$(_job.host)"
+.           if defined(_job.project)
+            project: "$(_job.project)"
+.           endif
+.           if defined(_job.program)
+            program: "$(_job.program)"
+.           endif
+.           if !(my.options = "")
+.               if (left(my.options, 1) = "\"")
+            options: '$(my.options)'
+.               else
+            options: "$(my.options)"
+.               endif
+.           endif
+.           if !(my.linkflags = "")
+            linkflags: "$(my.linkflags)"
+.           endif
+.           if !(my.flags = "")
+            flags: "$(my.flags)"
+.           endif
+.       endfor
+.   endfor
+
+
+    runs-on: ${{ matrix.builder.image }}
+
+    steps:
+.   emit_checkout("libbitcoin-server", "src")
+.   emit_checkout("libbitcoin-node", "src")
+.   emit_checkout("libbitcoin-network", "src")
+.   emit_checkout("libbitcoin-database", "src")
+.   emit_checkout("libbitcoin-system", "src")
+      - name: Checkout build definition
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          path: ".definition"
+          ref: ${{ needs.resolve.outputs.server }}
+          repository: ${{ github.repository_owner }}/libbitcoin-server
+          sparse-checkout: |
+            .github/actions
+            .github/guix
+
+      - name: Restore toolchain
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: guix-cache
+          key: guix-${{ runner.arch }}-${{ matrix.target.host }}-${{ hashFiles('.definition/.github/guix/*.scm', '.definition/.github/guix/patches/*') }}
+          fail-on-cache-miss: true
+
+      - name: Setup Guix
+        uses: ./.definition/.github/actions/setup-guix
+        with:
+          cache: guix-cache
+
+      - name: Build
+        shell: bash
+        env:
+          HOST: ${{ matrix.target.host }}
+          BASENAME: ${{ matrix.target.basename }}
+          PROJECT: ${{ matrix.target.project }}
+          PROGRAM: ${{ matrix.target.program }}
+          FLAGS: ${{ matrix.target.flags }}
+          LINKFLAGS: ${{ matrix.target.linkflags }}
+          OPTIONS: ${{ matrix.target.options }}
+        run: |
+          bash .definition/.github/guix/guix-build.sh src build
+          mkdir candidate symbols
+          cp "build/${BASENAME}" candidate/
+          cp "build/${BASENAME}.debug" symbols/
+
+      - name: Display binary information
+        if: ${{ (runner.arch == 'X64' && startsWith(matrix.target.host, 'x86_64-')) || (runner.arch == 'ARM64' && startsWith(matrix.target.host, 'aarch64-')) }}
+        continue-on-error: true
+        shell: bash
+        working-directory: candidate
+        run: |
+          ./${{ matrix.target.basename }} --version
+          ./${{ matrix.target.basename }} --hardware
+
+      - name: Display linkage
+        shell: bash
+        working-directory: candidate
+        run: |
+          file ${{ matrix.target.basename }}
+          readelf -d ${{ matrix.target.basename }} | grep -E 'NEEDED|RPATH|RUNPATH|SONAME' || echo "(none)"
+          readelf -V --wide ${{ matrix.target.basename }} | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1
+
+      - name: Record build
+        shell: bash
+        run: |
+          mkdir output
+          cp candidate/* symbols/* output/
+          {
+            echo "image: ${ImageOS} ${ImageVersion} ${RUNNER_ARCH}"
+            echo "guix: \$(grep -o 'commit "[0-9a-f]*"' .definition/.github/guix/channels.scm)"
+            echo "host: ${{ matrix.target.host }}"
+          } | tee output/toolchain.txt
+          cd output
+          FILES=\$(ls | grep -v -x toolchain.txt)
+          sha256sum ${FILES} | tee SHA256SUMS
+
+      - name: Upload build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: double-${{ matrix.target.basename }}-${{ matrix.builder.name }}
+          path: output
+          retention-days: 7
+
+      - name: Upload artifacts
+        if: ${{ matrix.builder.name == 'a' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ matrix.target.basename }}
+          path: candidate/*
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload symbols
+        if: ${{ matrix.builder.name == 'a' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: symbols-${{ matrix.target.basename }}
+          path: symbols/*
+          retention-days: 1
+          if-no-files-found: error
+.endmacro # emit_guix_jobs
 .
 .endtemplate
 .template 0

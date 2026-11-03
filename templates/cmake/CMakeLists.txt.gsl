@@ -520,7 +520,6 @@ endif()
 set( GIT_COMMIT_HASH "unknown" )
 set( GIT_COMMIT_HEIGHT 0 )
 set( GIT_DIRTY 0 )
-set( GIT_ORIGIN_URL "unknown" )
 
 if ( GIT_EXECUTABLE )
     execute_process(
@@ -543,17 +542,6 @@ if ( GIT_EXECUTABLE )
 
     if ( NOT GIT_COMMIT_HEIGHT )
         set( GIT_COMMIT_HEIGHT 0 )
-    endif()
-
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} ls-remote --get-url
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE GIT_ORIGIN_URL
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        ERROR_QUIET )
-
-    if ( NOT GIT_ORIGIN_URL MATCHES "://|@" )
-        set( GIT_ORIGIN_URL "unknown" )
     endif()
 
     execute_process(
@@ -922,6 +910,7 @@ $(my.indent)endif()
 
 $(my.indent)file( CONFIGURE OUTPUT "$(my.source)" CONTENT "" )
 $(my.indent)add_executable( $(target_name(my.target)) "$(my.source)" )
+.       emit_target_resources(my.target, my.meta, my.indent)
 
 $(my.indent)target_link_libraries( $(target_name(my.target))
   $(my.indent)PRIVATE
@@ -956,6 +945,23 @@ $(my.indent))
 endif()
 .   endif
 .endmacro # emit_target
+.
+.macro emit_target_resources(target, meta, indent)
+.   define my.target = emit_target_resources.target
+.   define my.meta = emit_target_resources.meta
+.   define my.indent = emit_target_resources.indent
+.   define my.variable = "$(target_name(my.target):c)_RESOURCES"
+.
+.   for my.target.resources as _resources
+.       define my.glob = is_defined_positive(_resources, "recursive") ?? "GLOB_RECURSE" ? "GLOB"
+
+$(my.indent)if ( WIN32 )
+  $(my.indent)file( $(my.glob) $(my.variable) CONFIGURE_DEPENDS
+    $(my.indent)"${CMAKE_CURRENT_SOURCE_DIR}/$(my.meta->cmake.rootpath)/$(_resources.path)/*.rc" )
+  $(my.indent)target_sources( $(target_name(my.target)) PRIVATE ${$(my.variable)} )
+$(my.indent)endif()
+.   endfor
+.endmacro # emit_target_resources
 .
 .macro emit_target_configured_sources(target, meta, indent)
 .   define my.target = emit_target_configured_sources.target
