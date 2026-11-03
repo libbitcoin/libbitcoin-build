@@ -30,7 +30,7 @@
       <option name="shani" type="enable"
         default="no"
         comment="Use Intel SHA Extensions."
-        msvc="/p:Option-sha=true" />
+        msvc="/p:Option-shani=true" />
 
       <option name="sha512" type="enable"
         default="no"
@@ -72,20 +72,20 @@
         comment="Use SSE4.1 hardware instructions."
         msvc="/p:Option-sse41=true" />
 
-      <option name="sha" type="enable"
+      <option name="sha2" type="enable"
         default="no"
         comment="Use ARM SHA1/SHA256 Extensions."
-        msvc="/p:Option-sha=true" />
+        msvc="/p:Option-sha2=true" />
 
       <option name="sha3" type="enable"
         default="no"
         comment="Use ARM SHA3 Extensions for SHA512."
-        msvc="/p:Option-sha512=true" />
+        msvc="/p:Option-sha3=true" />
 
       <option name="aes" type="enable"
         default="no"
         comment="Use ARM AES and PMULL Extensions."
-        msvc="/p:Option-sha=true" />
+        msvc="/p:Option-aes=true" />
 
       <option name="secp256k1" type="with"
         default="no"
@@ -132,7 +132,7 @@
         <architecture option="aes"
           march="armv8-a"
           extension="aes"
-          msvc_define="WITH_SHA"
+          msvc_define="WITH_AES"
           comment="Conditionally require arm aes intrinsics.">
           <program>
             <include header="arm_neon.h" />
@@ -141,10 +141,10 @@
           </program>
         </architecture>
 
-        <architecture option="sha"
+        <architecture option="sha2"
           march="armv8-a"
           extension="sha2"
-          msvc_define="WITH_SHA"
+          msvc_define="WITH_SHA2"
           comment="Conditionally require arm sha256 intrinsics.">
           <program>
             <include header="arm_neon.h" />
@@ -156,7 +156,7 @@
         <architecture option="sha3"
           march="armv8.2-a"
           extension="sha3"
-          msvc_define="WITH_SHA512"
+          msvc_define="WITH_SHA3"
           comment="Conditionally require arm sha512 intrinsics.">
           <program>
             <include header="arm_neon.h" />
@@ -237,7 +237,7 @@
         </flag>
 
         <flag option="shani" environmental="true"
-          msvc_define="WITH_SHA"
+          msvc_define="WITH_SHANI"
           comment="Conditionally require sha native intrincis."
           type="public"
           substitute="shani">
@@ -2221,7 +2221,7 @@
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
         <flag value="-mtune=apple-m1" />
-        <option name="cmake" value="-Denable-sha3=ON -Denable-sha=ON -Denable-aes=ON" />
+        <option name="cmake" value="-Denable-sha3=ON -Denable-sha2=ON -Denable-aes=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-macos-arm64" />
       </entry>
 
@@ -2282,7 +2282,7 @@
         <compiler lang="cxx" name="g++" version="14" />
         <flag value="-mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-sha=ON -Denable-aes=ON" />
+        <option name="cmake" value="-Denable-sha2=ON -Denable-aes=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-crypto" />
       </entry>
 
@@ -2291,7 +2291,7 @@
         <compiler lang="cxx" name="g++" version="14" />
         <flag value="-mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-sha=ON -Denable-sha3=ON -Denable-aes=ON" />
+        <option name="cmake" value="-Denable-sha2=ON -Denable-sha3=ON -Denable-aes=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha3" />
       </entry>
 
@@ -2356,12 +2356,12 @@
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" toolset="v145" version="vs2026">
-        <option name="msvc" value="--enable-sha" />
+        <option name="msvc" value="--enable-sha2 --enable-aes" />
         <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-arm64-crypto" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" toolset="v145" version="vs2026">
-        <option name="msvc" value="--enable-sha --enable-sha3" />
+        <option name="msvc" value="--enable-sha2 --enable-sha3 --enable-aes" />
         <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-arm64-sha3" />
       </entry>
 
@@ -2954,7 +2954,7 @@
     <axis group="optimizations">
       <applicable id="platform" name="arm64" />
       <entry name="none" />
-      <entry name="sha" />
+      <entry name="sha2" />
       <entry name="sha3" />
     </axis>
 
