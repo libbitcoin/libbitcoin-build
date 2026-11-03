@@ -2234,39 +2234,39 @@
       </entry>
 
       <entry image="ubuntu-24.04">
-        <compiler lang="c" name="clang" version="18" />
-        <compiler lang="cxx" name="clang++" version="18" />
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
         <option name="cmake" value="-Denable-avx2=ON -Denable-sse41=ON" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64" host="x86_64-linux-gnu" />
       </entry>
 
       <entry image="ubuntu-24.04">
-        <compiler lang="c" name="clang" version="18" />
-        <compiler lang="cxx" name="clang++" version="18" />
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
         <option name="cmake" value="-Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-shani" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-shani" host="x86_64-linux-gnu" />
       </entry>
 
       <entry image="ubuntu-24.04">
-        <compiler lang="c" name="clang" version="18" />
-        <compiler lang="cxx" name="clang++" version="18" />
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
         <option name="cmake" value="-Denable-avxifma=ON -Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avxifma" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avxifma" host="x86_64-linux-gnu" />
       </entry>
 
       <entry image="ubuntu-24.04">
-        <compiler lang="c" name="clang" version="18" />
-        <compiler lang="cxx" name="clang++" version="18" />
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
         <option name="cmake" value="-Denable-avx512ifma=ON -Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avx512ifma" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avx512ifma" host="x86_64-linux-gnu" />
       </entry>
 
       <entry image="ubuntu-24.04-arm">
@@ -2274,7 +2274,7 @@
         <compiler lang="cxx" name="g++" version="14" />
         <flag value="-march=armv8-a -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64" host="aarch64-linux-gnu" />
       </entry>
 
       <entry image="ubuntu-24.04-arm">
@@ -2283,7 +2283,7 @@
         <flag value="-mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
         <option name="cmake" value="-Denable-sha2=ON -Denable-aes=ON" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha2" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha2" host="aarch64-linux-gnu" />
       </entry>
 
       <entry image="ubuntu-24.04-arm">
@@ -2292,7 +2292,7 @@
         <flag value="-mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
         <option name="cmake" value="-Denable-sha2=ON -Denable-sha3=ON -Denable-aes=ON" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha3" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha3" host="aarch64-linux-gnu" />
       </entry>
 
       <entry image="ubuntu-24.04" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
@@ -3958,7 +3958,17 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     </template>
 
     <template name="version-tag.yml.gsl" path="yml" outpath=".github/workflows" />
-    <template name="double-build.yml.gsl" path="yml" outpath=".github/workflows" />
+    <template name="double-build.yml.gsl" path="yml" outpath=".github/workflows">
+      <file source="github/version4/%repository%/actions/setup-guix/action.yml" destination=".github/actions/setup-guix" optional="true" />
+      <file source="github/version4/%repository%/guix/build.sh" destination=".github/guix" optional="true" />
+      <file source="github/version4/%repository%/guix/channels.scm" destination=".github/guix" optional="true" />
+      <file source="github/version4/%repository%/guix/guix-build.sh" destination=".github/guix" optional="true" />
+      <file source="github/version4/%repository%/guix/manifest.scm" destination=".github/guix" optional="true" />
+      <file source="github/version4/%repository%/guix/toolchains.scm" destination=".github/guix" optional="true" />
+      <file source="github/version4/%repository%/guix/patches/gcc-remap-guix-store.patch" destination=".github/guix/patches" optional="true" />
+      <file source="github/version4/%repository%/guix/patches/gcc-ssa-generation.patch" destination=".github/guix/patches" optional="true" />
+      <file source="github/version4/%repository%/guix/patches/glibc-guix-prefix.patch" destination=".github/guix/patches" optional="true" />
+    </template>
     <template name="manual-release.yml.gsl" path="yml" outpath=".github/workflows">
       <file source="github/version4/%repository%/actions/build-binary/action.yml" destination=".github/actions/build-binary" optional="true" />
       <file source="github/version4/%repository%/packaging/debian/control.in" destination=".github/packaging/debian" optional="true" />
