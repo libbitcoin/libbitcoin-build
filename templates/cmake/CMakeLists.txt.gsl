@@ -335,6 +335,40 @@ function render_unique_link_option(encountered, target, repository)
     endfor
 endfunction
 
+function count_architecture_extensions(repository)
+    define my.repository = count_architecture_extensions.repository
+    define my.count = 0
+
+    for my.repository. as _target where is_target_element(_target) &\
+        defined(_target->compiler)
+
+        my.count += count(_target->compiler.architecture, defined(count.extension))
+    endfor
+
+    return my.count
+endfunction
+
+function render_architecture_extensions(repository)
+    define my.repository = render_architecture_extensions.repository
+
+    if (count_architecture_extensions(my.repository) > 0)
+        emit_architecture_extensions_begin()
+
+        for my.repository. as _target where is_target_element(_target) &\
+            defined(_target->compiler)
+
+            for _target->compiler.architecture as _arch where \
+                defined(_arch.extension) by _arch.march
+
+                emit_architecture_extension(\
+                    get_option(_arch, _target, my.repository), _arch.march, _arch.extension)
+            endfor
+        endfor
+
+        emit_architecture_extensions_end()
+    endif
+endfunction
+
 function render_architecture_option_checks(repository)
     define my.repository = render_architecture_option_checks.repository
 
@@ -372,26 +406,46 @@ function count_option_flags(repository)
     return my.count
 endfunction
 
-function render_msvc_option_rejections(repository)
-    define my.repository = render_msvc_option_rejections.repository
+function render_msvc_option_arch(repository)
+    define my.repository = render_msvc_option_arch.repository
+    define my.keyword = "if"
 
-    new options as _options
-        for my.repository. as _target where is_target_element(_target) &\
-            defined(_target->compiler)
+    new arches as _arches
+        new _arches.arch as _arch
+            _arch.name = "AVX512"
+        endnew
+        new _arches.arch as _arch
+            _arch.name = "AVX2"
+        endnew
+        new _arches.arch as _arch
+            _arch.name = "AVX"
+        endnew
 
-            for _target->compiler.flag as _flag where defined(_flag.option)
-                define my.name = get_option(_flag, _target, my.repository)
+        for _arches.arch as _arch
+            define my.condition = ""
 
-                if (count(_options.option, .name = my.name) = 0)
-                    new _options.option as _option
-                        _option.name = my.name
-                    endnew
+            for my.repository. as _target where is_target_element(_target) &\
+                defined(_target->compiler)
 
-                    emit_msvc_option_rejection(my.name)
-                endif
+                for _target->compiler.flag as _flag where defined(_flag.option) &\
+                    is_defined_value(_flag, "msvc_arch", _arch.name)
+
+                    define my.name = get_option(_flag, _target, my.repository)
+                    my.condition = is_empty(my.condition) ?? my.name ? \
+                        "$(my.condition) OR $(my.name)"
+                endfor
             endfor
+
+            if !is_empty(my.condition)
+                emit_msvc_option_arch(my.keyword, my.condition, _arch.name)
+                my.keyword = "elseif"
+            endif
         endfor
     endnew
+
+    if (my.keyword = "elseif")
+        emit_msvc_option_arch_end()
+    endif
 endfunction
 
 function render_link_option_checks(repository)
@@ -564,6 +618,7 @@ endif()
 .   render_dependencies(my.repository)
 
 .   heading("Architecture options.")
+.   render_architecture_extensions(my.repository)
 .   render_architecture_option_checks(my.repository)
 
 .   heading("Compiler options.")
@@ -571,7 +626,7 @@ if ( NOT MSVC )
 .   render_compiler_option_checks(my.repository)
 .   if (count_option_flags(my.repository) > 0)
 else()
-.       render_msvc_option_rejections(my.repository)
+.       render_msvc_option_arch(my.repository)
 .   endif
 endif()
 
@@ -830,6 +885,10 @@ $(my.indent)add_executable( $(target_name(my.target)) )
 .   emit_target_compile_assignment("target_compile_options", "flag", \
         my.target, my.repository, "NOT MSVC", my.indent)
 .
+.   emit_target_msvc_options(my.target, my.repository, my.indent)
+.
+.   emit_target_architecture_extensions(my.target, my.indent)
+.
 .   emit_target_compile_assignment("target_compile_definitions", "define", \
         my.target, my.repository, "", my.indent)
 .
@@ -1044,6 +1103,51 @@ $(my.outer)endif()
 .
 .endmacro # emit_target_compile_assignment
 .
+.macro emit_target_msvc_options(target, repository, indent)
+.   define my.target = emit_target_msvc_options.target
+.   define my.repository = emit_target_msvc_options.repository
+.   define my.indent = emit_target_msvc_options.indent
+.
+.   if defined(my.target->compiler)
+.       define my.flags = count(my.target->compiler.flag, defined(count.option))
+.       define my.arches = count(my.target->compiler.flag, defined(count.msvc_arch))
+.       define my.defines = \
+            count(my.target->compiler.flag, defined(count.msvc_define)) + \
+            count(my.target->compiler.architecture, defined(count.msvc_define))
+.
+.       if (my.flags + my.defines > 0)
+
+$(my.indent)if ( MSVC )
+.           if (my.flags > 0)
+  $(my.indent)target_compile_options( $(my.target.name)
+    $(my.indent)PUBLIC
+.               if (my.arches > 0)
+      $(my.indent)$<$<BOOL:${msvc_arch}>:/arch:${msvc_arch}>
+.               endif
+.               for my.target->compiler.flag as _flag where defined(_flag.option)
+      $(my.indent)$<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${$(get_option(_flag, my.target, my.repository))}>:$(symbol(_flag))>>
+.               endfor
+  $(my.indent))
+.           endif
+.           if (my.defines > 0)
+.               if (my.flags > 0)
+
+.               endif
+  $(my.indent)target_compile_definitions( $(my.target.name)
+    $(my.indent)PUBLIC
+.               for my.target->compiler.architecture as _arch where defined(_arch.msvc_define)
+      $(my.indent)$<$<BOOL:${$(get_option(_arch, my.target, my.repository))}>:$(_arch.msvc_define)>
+.               endfor
+.               for my.target->compiler.flag as _flag where defined(_flag.msvc_define)
+      $(my.indent)$<$<BOOL:${$(get_option(_flag, my.target, my.repository))}>:$(_flag.msvc_define)>
+.               endfor
+  $(my.indent))
+.           endif
+$(my.indent)endif()
+.       endif
+.   endif
+.endmacro # emit_target_msvc_options
+.
 .macro emit_compiler_element(element, target, repository, indent)
 .   define my.element = emit_compiler_element.element
 .   define my.target = emit_compiler_element.target
@@ -1099,13 +1203,67 @@ else()
 endif()
 .endmacro # emit_architecture_option_check
 .
-.macro emit_msvc_option_rejection(name)
-.   define my.name = emit_msvc_option_rejection.name
+.macro emit_msvc_option_arch(keyword, condition, arch)
+.   define my.keyword = emit_msvc_option_arch.keyword
+.   define my.condition = emit_msvc_option_arch.condition
+.   define my.arch = emit_msvc_option_arch.arch
+.
+.   if (my.keyword = "if")
 
-  if ( $(my.name) )
-    message( FATAL_ERROR "Option '$(my.name)' is not supported with the MSVC frontend." )
+.   endif
+  $(my.keyword) ( $(my.condition) )
+    set( msvc_arch "$(my.arch)" )
+.endmacro # emit_msvc_option_arch
+.
+.macro emit_msvc_option_arch_end()
   endif()
-.endmacro # emit_msvc_option_rejection
+.endmacro # emit_msvc_option_arch_end
+.
+.macro emit_architecture_extensions_begin()
+set( arm_base "" )
+set( arm_extensions "" )
+if ( NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" )
+.endmacro # emit_architecture_extensions_begin
+.
+.macro emit_architecture_extension(option, march, extension)
+.   define my.option = emit_architecture_extension.option
+.   define my.march = emit_architecture_extension.march
+.   define my.extension = emit_architecture_extension.extension
+  if ( $(my.option) )
+    set( arm_base "$(my.march)" )
+    string( APPEND arm_extensions "+$(my.extension)" )
+  endif()
+.endmacro # emit_architecture_extension
+.
+.macro emit_architecture_extensions_end()
+endif()
+
+set( arm_march "" )
+if ( arm_extensions )
+  if ( "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}" MATCHES "-march=|-mcpu=" )
+    message( FATAL_ERROR "Compiler flags -march or -mcpu conflict with enabled ARM extension options." )
+  endif()
+
+  set( arm_march "-march=${arm_base}${arm_extensions}" )
+  set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${arm_march}" )
+endif()
+
+.endmacro # emit_architecture_extensions_end
+.
+.macro emit_target_architecture_extensions(target, indent)
+.   define my.target = emit_target_architecture_extensions.target
+.   define my.indent = emit_target_architecture_extensions.indent
+.
+.   if defined(my.target->compiler)
+.       if (count(my.target->compiler.architecture, defined(count.extension)) > 0)
+
+$(my.indent)target_compile_options( $(my.target.name)
+  $(my.indent)PUBLIC
+    $(my.indent)$<$<BOOL:${arm_march}>:${arm_march}>
+$(my.indent))
+.       endif
+.   endif
+.endmacro # emit_target_architecture_extensions
 .
 .macro emit_compiler_flag_check(flag, target, repository)
 .   define my.flag = emit_compiler_flag_check.flag

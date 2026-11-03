@@ -30,7 +30,7 @@
       <option name="shani" type="enable"
         default="no"
         comment="Use Intel SHA Extensions."
-        msvc="/p:Option-sha=true" />
+        msvc="/p:Option-shani=true" />
 
       <option name="sha512" type="enable"
         default="no"
@@ -72,20 +72,20 @@
         comment="Use SSE4.1 hardware instructions."
         msvc="/p:Option-sse41=true" />
 
-      <option name="sha" type="enable"
+      <option name="sha2" type="enable"
         default="no"
         comment="Use ARM SHA1/SHA256 Extensions."
-        msvc="/p:Option-sha=true" />
+        msvc="/p:Option-sha2=true" />
 
       <option name="sha3" type="enable"
         default="no"
         comment="Use ARM SHA3 Extensions for SHA512."
-        msvc="/p:Option-sha512=true" />
+        msvc="/p:Option-sha3=true" />
 
       <option name="aes" type="enable"
         default="no"
         comment="Use ARM AES and PMULL Extensions."
-        msvc="/p:Option-sha=true" />
+        msvc="/p:Option-aes=true" />
 
       <option name="secp256k1" type="with"
         default="no"
@@ -130,6 +130,9 @@
         </define>
 
         <architecture option="aes"
+          march="armv8-a"
+          extension="aes"
+          msvc_define="WITH_AES"
           comment="Conditionally require arm aes intrinsics.">
           <program>
             <include header="arm_neon.h" />
@@ -138,7 +141,10 @@
           </program>
         </architecture>
 
-        <architecture option="sha"
+        <architecture option="sha2"
+          march="armv8-a"
+          extension="sha2"
+          msvc_define="WITH_SHA2"
           comment="Conditionally require arm sha256 intrinsics.">
           <program>
             <include header="arm_neon.h" />
@@ -148,6 +154,9 @@
         </architecture>
 
         <architecture option="sha3"
+          march="armv8.2-a"
+          extension="sha3"
+          msvc_define="WITH_SHA3"
           comment="Conditionally require arm sha512 intrinsics.">
           <program>
             <include header="arm_neon.h" />
@@ -157,6 +166,7 @@
         </architecture>
 
         <flag option="avx2" environmental="true"
+          msvc_arch="AVX2"
           comment="Conditionally require avx2 intrinsics."
           type="public"
           substitute="avx2">
@@ -173,6 +183,7 @@
         </flag>
 
         <flag option="avx512" environmental="true"
+          msvc_arch="AVX512"
           comment="Conditionally require avx512 intrinsics."
           type="public"
           substitute="avx512">
@@ -191,6 +202,7 @@
         </flag>
 
         <flag option="avx512ifma" environmental="true"
+          msvc_define="WITH_AVX512IFMA"
           comment="Conditionally require avx512 ifma intrinsics."
           type="public"
           substitute="avx512ifma">
@@ -208,6 +220,7 @@
         </flag>
 
         <flag option="avxifma" environmental="true"
+          msvc_define="WITH_AVXIFMA"
           comment="Conditionally require avx ifma intrinsics."
           type="public"
           substitute="avxifma">
@@ -224,6 +237,7 @@
         </flag>
 
         <flag option="shani" environmental="true"
+          msvc_define="WITH_SHANI"
           comment="Conditionally require sha native intrincis."
           type="public"
           substitute="shani">
@@ -242,6 +256,7 @@
         </flag>
 
         <flag option="sha512" environmental="true"
+          msvc_define="WITH_SHA512"
           comment="Conditionally require sha512 native intrinsics."
           type="public"
           substitute="sha512">
@@ -259,6 +274,7 @@
         </flag>
 
         <flag option="sse41" environmental="true"
+          msvc_arch="AVX"
           comment="Conditionally require sse4.1 intrinsics."
           type="public"
           substitute="sse41">
@@ -275,6 +291,7 @@
         </flag>
 
         <flag option="aesni" environmental="true"
+          msvc_define="WITH_AESNI"
           comment="Conditionally require aes-ni and pclmulqdq intrinsics."
           type="public"
           substitute="aesni">
@@ -293,6 +310,7 @@
         </flag>
 
         <flag option="vaes" environmental="true"
+          msvc_define="WITH_VAES"
           comment="Conditionally require vaes and vpclmulqdq intrinsics."
           type="public"
           substitute="vaes">
@@ -2196,12 +2214,14 @@
         <job name="gnu" config="release" link="static" gate="true" />
       </entry>
       <!-- release -->
+      <!-- Minimum platforms: glibc 2.31, macOS 13.3 (floating point std::to_chars), Windows 10. -->
+      <!-- musl is x64 only; arm64 requires Guix (no JavaScript actions in Alpine arm64 containers). -->
 
       <entry image="macos-latest" deployment_target="13.3">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <flag value="-mcpu=apple-m1" />
-        <option name="cmake" value="-Denable-sha3=ON -Denable-sha=ON -Denable-aes=ON" />
+        <flag value="-mtune=apple-m1" />
+        <option name="cmake" value="-Denable-sha3=ON -Denable-sha2=ON -Denable-aes=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-macos-arm64" />
       </entry>
 
@@ -2260,22 +2280,22 @@
       <entry image="ubuntu-24.04-arm">
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
-        <flag value="-march=armv8-a+crypto -mtune=generic" />
+        <flag value="-mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-sha=ON" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-crypto" />
+        <option name="cmake" value="-Denable-sha2=ON -Denable-aes=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha2" />
       </entry>
 
       <entry image="ubuntu-24.04-arm">
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
-        <flag value="-march=armv8.2-a+crypto+sha3 -mtune=generic" />
+        <flag value="-mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-sha=ON -Denable-sha3=ON" />
+        <option name="cmake" value="-Denable-sha2=ON -Denable-sha3=ON -Denable-aes=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha3" />
       </entry>
 
-      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+      <entry image="ubuntu-24.04" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
         <compiler lang="c" name="gcc" />
         <compiler lang="cxx" name="g++" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
@@ -2284,7 +2304,7 @@
         <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64" />
       </entry>
 
-      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+      <entry image="ubuntu-24.04" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
         <compiler lang="c" name="gcc" />
         <compiler lang="cxx" name="g++" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
@@ -2293,7 +2313,7 @@
         <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64-shani" />
       </entry>
 
-      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+      <entry image="ubuntu-24.04" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
         <compiler lang="c" name="gcc" />
         <compiler lang="cxx" name="g++" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
@@ -2302,7 +2322,7 @@
         <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64-avxifma" />
       </entry>
 
-      <entry image="ubuntu-24.04" container="alpine:3.22.6">
+      <entry image="ubuntu-24.04" container="alpine:3.22.6@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8">
         <compiler lang="c" name="gcc" />
         <compiler lang="cxx" name="g++" />
         <flag value="-march=x86-64-v3 -mtune=generic" />
@@ -2310,29 +2330,6 @@
         <option name="cmake" value="-Denable-avx512ifma=ON -Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-musl-x64-avx512ifma" />
       </entry>
-
-      <!-- <entry image="ubuntu-24.04-arm" container="alpine:3.22.6">
-        <compiler lang="c" name="gcc" />
-        <compiler lang="cxx" name="g++" />
-        <linkflag value="--static -static-libstdc++ -static-libgcc" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-musl-arm64" />
-      </entry> -->
-
-      <!-- <entry image="ubuntu-24.04-arm" container="alpine:3.22.6">
-        <compiler lang="c" name="gcc" />
-        <compiler lang="cxx" name="g++" />
-        <linkflag value="--static -static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-sha=ON" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-musl-arm64-crypto" />
-      </entry> -->
-
-      <!-- <entry image="ubuntu-24.04-arm" container="alpine:3.22.6">
-        <compiler lang="c" name="gcc" />
-        <compiler lang="cxx" name="g++" />
-        <linkflag value="--static -static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-sha=ON -Denable-sha3=ON" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-musl-arm64-sha3" />
-      </entry> -->
 
       <entry image="windows-latest" platform="x64" toolset="v145" version="vs2026">
         <option name="msvc" value="--enable-avx2 --enable-sse41" />
@@ -2359,12 +2356,12 @@
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" toolset="v145" version="vs2026">
-        <option name="msvc" value="--enable-sha" />
-        <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-arm64-crypto" />
+        <option name="msvc" value="--enable-sha2 --enable-aes" />
+        <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-arm64-sha2" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" toolset="v145" version="vs2026">
-        <option name="msvc" value="--enable-sha --enable-sha3" />
+        <option name="msvc" value="--enable-sha2 --enable-sha3 --enable-aes" />
         <job name="msvc" configuration="StaticRelease" release="true" basename="bs-windows-arm64-sha3" />
       </entry>
 
@@ -2380,6 +2377,18 @@
         <compiler lang="cxx" name="g++" version="14" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
         <job name="cmake" config="release" link="static" release="true" basename="selector-linux-arm64" project="libbitcoin-system" program="selector" />
+      </entry>
+
+      <entry image="macos-latest" deployment_target="13.3">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <job name="cmake" config="release" link="static" release="true" basename="selector-macos-arm64" project="libbitcoin-system" program="selector" />
+      </entry>
+
+      <entry image="macos-26-intel" deployment_target="13.3">
+        <compiler lang="c" name="clang" />
+        <compiler lang="cxx" name="clang++" />
+        <job name="cmake" config="release" link="static" release="true" basename="selector-macos-x64" project="libbitcoin-system" program="selector" />
       </entry>
 
       <entry image="windows-latest" platform="x64" toolset="v145" version="vs2026">
@@ -2945,7 +2954,7 @@
     <axis group="optimizations">
       <applicable id="platform" name="arm64" />
       <entry name="none" />
-      <entry name="sha" />
+      <entry name="sha2" />
       <entry name="sha3" />
     </axis>
 
@@ -3949,7 +3958,49 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     </template>
 
     <template name="version-tag.yml.gsl" path="yml" outpath=".github/workflows" />
-    <template name="manual-release.yml.gsl" path="yml" outpath=".github/workflows" />
+    <template name="double-build.yml.gsl" path="yml" outpath=".github/workflows" />
+    <template name="manual-release.yml.gsl" path="yml" outpath=".github/workflows">
+      <file source="github/version4/%repository%/actions/build-binary/action.yml" destination=".github/actions/build-binary" optional="true" />
+      <file source="github/version4/%repository%/packaging/debian/control.in" destination=".github/packaging/debian" optional="true" />
+      <file source="github/version4/%repository%/packaging/debian/postinst.in" destination=".github/packaging/debian" optional="true" />
+      <file source="github/version4/%repository%/packaging/debian/prerm" destination=".github/packaging/debian" optional="true" />
+      <file source="github/version4/%repository%/packaging/docker/Dockerfile" destination=".github/packaging/docker" optional="true" />
+      <file source="github/version4/%repository%/packaging/docker/bs.cfg" destination=".github/packaging/docker" optional="true" />
+      <file source="github/version4/%repository%/packaging/docker/entrypoint.sh" destination=".github/packaging/docker" optional="true" />
+      <file source="github/version4/%repository%/packaging/fetch.sh" destination=".github/packaging" optional="true" />
+      <file source="github/version4/%repository%/packaging/homebrew/libbitcoin-server.rb.in" destination=".github/packaging/homebrew" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/.gitignore" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/LICENSE" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/Makefile" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/icon.svg" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/instructions.md" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/package.json" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/actions/index.ts" destination=".github/packaging/startos/startos/actions" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/backups.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/dependencies.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/i18n/dictionaries/default.ts" destination=".github/packaging/startos/startos/i18n/dictionaries" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/i18n/dictionaries/translations.ts" destination=".github/packaging/startos/startos/i18n/dictionaries" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/i18n/index.ts" destination=".github/packaging/startos/startos/i18n" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/index.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/init/index.ts" destination=".github/packaging/startos/startos/init" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/interfaces.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/main.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/manifest/i18n.ts" destination=".github/packaging/startos/startos/manifest" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/manifest/index.ts" destination=".github/packaging/startos/startos/manifest" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/sdk.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/utils.ts" destination=".github/packaging/startos/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/versions/current.ts" destination=".github/packaging/startos/startos/versions" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/startos/versions/index.ts" destination=".github/packaging/startos/startos/versions" optional="true" />
+      <file source="github/version4/%repository%/packaging/startos/tsconfig.json" destination=".github/packaging/startos" optional="true" />
+      <file source="github/version4/%repository%/packaging/umbrel/bitcoin-server/data/bs/bs.cfg" destination=".github/packaging/umbrel/bitcoin-server/data/bs" optional="true" />
+      <file source="github/version4/%repository%/packaging/umbrel/bitcoin-server/docker-compose.yml.in" destination=".github/packaging/umbrel/bitcoin-server" optional="true" />
+      <file source="github/version4/%repository%/packaging/umbrel/bitcoin-server/umbrel-app.yml.in" destination=".github/packaging/umbrel/bitcoin-server" optional="true" />
+      <file source="github/version4/%repository%/packaging/windows/bs.iss" destination=".github/packaging/windows" optional="true" />
+      <file source="github/version4/%repository%/packaging/winget/Libbitcoin.Server.installer.yaml.in" destination=".github/packaging/winget" optional="true" />
+      <file source="github/version4/%repository%/packaging/winget/Libbitcoin.Server.locale.en-US.yaml.in" destination=".github/packaging/winget" optional="true" />
+      <file source="github/version4/%repository%/packaging/winget/Libbitcoin.Server.yaml.in" destination=".github/packaging/winget" optional="true" />
+      <file source="github/version4/%repository%/workflows/package-release.yml" destination=".github/workflows" optional="true" />
+    </template>
 
     <!-- vscode -->
     <template name="code-workspace.gsl" path="vscode" outpath="builds/vscode" />
