@@ -130,6 +130,8 @@
         </define>
 
         <architecture option="aes"
+          march="armv8-a"
+          extension="aes"
           msvc_define="WITH_SHA"
           comment="Conditionally require arm aes intrinsics.">
           <program>
@@ -140,6 +142,8 @@
         </architecture>
 
         <architecture option="sha"
+          march="armv8-a"
+          extension="sha2"
           msvc_define="WITH_SHA"
           comment="Conditionally require arm sha256 intrinsics.">
           <program>
@@ -150,6 +154,8 @@
         </architecture>
 
         <architecture option="sha3"
+          march="armv8.2-a"
+          extension="sha3"
           msvc_define="WITH_SHA512"
           comment="Conditionally require arm sha512 intrinsics.">
           <program>
@@ -2214,7 +2220,7 @@
       <entry image="macos-latest" deployment_target="13.3">
         <compiler lang="c" name="clang" />
         <compiler lang="cxx" name="clang++" />
-        <flag value="-mcpu=apple-m1" />
+        <flag value="-mtune=apple-m1" />
         <option name="cmake" value="-Denable-sha3=ON -Denable-sha=ON -Denable-aes=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-macos-arm64" />
       </entry>
@@ -2274,18 +2280,18 @@
       <entry image="ubuntu-24.04-arm">
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
-        <flag value="-march=armv8-a+crypto -mtune=generic" />
+        <flag value="-mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-sha=ON" />
+        <option name="cmake" value="-Denable-sha=ON -Denable-aes=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-crypto" />
       </entry>
 
       <entry image="ubuntu-24.04-arm">
         <compiler lang="c" name="gcc" version="14" />
         <compiler lang="cxx" name="g++" version="14" />
-        <flag value="-march=armv8.2-a+crypto+sha3 -mtune=generic" />
+        <flag value="-mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-sha=ON -Denable-sha3=ON" />
+        <option name="cmake" value="-Denable-sha=ON -Denable-sha3=ON -Denable-aes=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha3" />
       </entry>
 

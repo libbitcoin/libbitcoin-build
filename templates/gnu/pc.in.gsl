@@ -87,6 +87,10 @@ function accumulate_flag_components(result, target, dependencies, repository,\
         endfor
     endnew
 
+    for my.target->compiler.architecture as _arch where defined(_arch.extension)
+        copy _arch to my.result
+    endfor
+
     for my.dependencies.dependency as _depend where !defined(_depend->pkg)
         copy _depend to my.result
     endfor
@@ -126,6 +130,12 @@ function components_to_cppflags(result, components, iprefix, ireplacement)
             endnew
         endif
     endfor
+
+    if (count(my.components.architecture) > 0)
+        new my.result.entry as _entry
+            _entry.value = "@arm_march@"
+        endnew
+    endif
 
     for my.components.dependency as _depend where !defined(_depend->pkg)
         new my.result.entry as _entry
