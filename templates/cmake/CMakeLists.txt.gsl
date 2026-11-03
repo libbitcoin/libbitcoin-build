@@ -959,6 +959,14 @@ $(my.indent)if ( WIN32 )
   $(my.indent)file( $(my.glob) $(my.variable) CONFIGURE_DEPENDS
     $(my.indent)"${CMAKE_CURRENT_SOURCE_DIR}/$(my.meta->cmake.rootpath)/$(_resources.path)/*.rc" )
   $(my.indent)target_sources( $(target_name(my.target)) PRIVATE ${$(my.variable)} )
+  $(my.indent)target_include_directories( $(target_name(my.target))
+    $(my.indent)PRIVATE
+      $(my.indent)$<TARGET_PROPERTY:$(target_name(my.target))-objects,INCLUDE_DIRECTORIES>
+  $(my.indent))
+  $(my.indent)target_compile_options( $(target_name(my.target))
+    $(my.indent)PRIVATE
+      $(my.indent)$<$<COMPILE_LANGUAGE:RC>:-c65001>
+  $(my.indent))
 $(my.indent)endif()
 .   endfor
 .endmacro # emit_target_resources
