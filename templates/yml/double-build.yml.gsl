@@ -110,6 +110,18 @@ function host_sdk(host)
     return ""
 endfunction
 
+# Clang toolchains emit host-dependent debug information, so both of their
+# builders run on x64.
+function builder_b_image(toolchain)
+    define my.toolchain = builder_b_image.toolchain
+
+    if (my.toolchain = "darwin") | (my.toolchain = "windows")
+        return "ubuntu-24.04"
+    endif
+
+    return "ubuntu-24.04-arm"
+endfunction
+
 function release_sdks(repository)
     define my.repository = release_sdks.repository
     define my.result = ""
@@ -653,16 +665,19 @@ jobs:
       fail-fast: false
 
       matrix:
-        runner: [ "ubuntu-24.04", "ubuntu-24.04-arm" ]
-        toolchain:
+        include:
 .   define my.toolchains = ""
 .   for my.repository->ci.entry as _entry
 .       for _entry.job as _job where is_defined_positive(_job, "release") & defined(_job.host)
 .           define my.toolchain = host_toolchain(_job.host)
 .           if !is_token(" $(my.toolchain) ", " $(my.toolchains) ")
 .               my.toolchains = join(my.toolchains, my.toolchain, " ")
-          - name: "$(my.toolchain)"
-            host: "$(_job.host)"
+          - runner: "ubuntu-24.04"
+            toolchain: { name: "$(my.toolchain)", host: "$(_job.host)" }
+.               if builder_b_image(my.toolchain) = "ubuntu-24.04-arm"
+          - runner: "ubuntu-24.04-arm"
+            toolchain: { name: "$(my.toolchain)", host: "$(_job.host)" }
+.               endif
 .           endif
 .       endfor
 .   endfor
@@ -738,11 +753,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        builder:
-          - name: "a"
-            image: "ubuntu-24.04"
-          - name: "b"
-            image: "ubuntu-24.04-arm"
+        builder: [ "a", "b" ]
 
         target:
 .   define my.first = 1
@@ -758,6 +769,7 @@ jobs:
           - basename: "$(_job.basename)"
             host: "$(_job.host)"
             toolchain: "$(host_toolchain(_job.host))"
+            images: { a: "ubuntu-24.04", b: "$(builder_b_image(host_toolchain(_job.host)))" }
 .           if !is_empty(host_sdk(_job.host))
             sdk: "$(host_sdk(_job.host))"
 .           endif
@@ -787,7 +799,7 @@ jobs:
 .   endfor
 
 
-    runs-on: ${{ matrix.builder.image }}
+    runs-on: ${{ matrix.target.images[matrix.builder] }}
 
     steps:
 .   emit_checkout("libbitcoin-server", "src")
@@ -890,12 +902,12 @@ jobs:
       - name: Upload build
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: double-${{ matrix.target.basename }}-${{ matrix.builder.name }}
+          name: double-${{ matrix.target.basename }}-${{ matrix.builder }}
           path: output
           retention-days: 7
 
       - name: Upload artifacts
-        if: ${{ matrix.builder.name == 'a' }}
+        if: ${{ matrix.builder == 'a' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.target.basename }}
@@ -904,7 +916,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload symbols
-        if: ${{ matrix.builder.name == 'a' }}
+        if: ${{ matrix.builder == 'a' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: symbols-${{ matrix.target.basename }}
