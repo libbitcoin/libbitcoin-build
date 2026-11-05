@@ -1931,17 +1931,17 @@
       </resources>
 
       <!-- Exposed knobs -->
-      <option name="embedded" type="with"
+      <option name="web" type="with"
         default="yes"
         comment="Compile web pages into the console application." />
 
       <dependency name="libbitcoin-server" private="true" />
 
       <compiler standard="20">
-        <define option="embedded"
+        <define option="web"
           comment="Compile web pages into the console application."
           type="private">
-          <symbol value="WITH_EMBEDDED" />
+          <symbol value="WITH_WEB" />
         </define>
 
         <flag id="Wall" />
