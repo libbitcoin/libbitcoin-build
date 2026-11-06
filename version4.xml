@@ -801,22 +801,9 @@
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
 
-      <!-- Exposed knobs -->
-      <option name="verbose" type="with"
-        default="no"
-        comment="Compile verbose logging." />
-
       <dependency name="libbitcoin-system" version="4.0.0" />
 
       <compiler standard="20">
-        <define option="verbose"
-          comment="Compile verbose logging."
-          type="public">
-          <symbol value="WITH_LOGV">
-            <substitute name="verbose" />
-          </symbol>
-        </define>
-
         <flag id="Wall" />
         <flag id="Wextra" />
         <!-- <flag id="Wpedantic" /> -->
