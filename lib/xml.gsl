@@ -247,10 +247,22 @@ function global.get_option(reference, target, repository, separator)
             abort "Target '$(my.target.name)' missing option '$(my.reference.option)'."
         endif
 
-        my.result = "$(my.option.type:lower)$(my.separator)$(my.option.name:lower)"
+        define my.name = (my.separator = "_") ?? \
+            string.replace(my.option.name, "-|_") ? my.option.name
+        my.result = "$(my.option.type:lower)$(my.separator)$(my.name:lower)"
     endif
 
     return my.result
+endfunction
+
+function global.option_condition(reference, target, repository)
+    define my.reference = option_condition.reference
+    define my.target = option_condition.target
+    define my.repository = option_condition.repository
+    define my.result = "$<BOOL:${$(get_option(my.reference, my.target, my.repository))}>"
+
+    return is_defined_positive(my.reference, "negate") ?? \
+        "$<NOT:$(my.result)>" ? my.result
 endfunction
 
 function global.target_dependency_list(result, target, repository, configuration, recurse)

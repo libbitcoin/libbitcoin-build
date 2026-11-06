@@ -100,31 +100,31 @@
         msvc="/p:Option-aes=true" />
 
       <option name="secp256k1" type="with"
-        default="no"
-        comment="Use bitcoin-core/secp256k1 library." />
+        default="yes"
+        comment="Use native secp256k1 interface, otherwise external library." />
 
       <option name="valgrind" type="with"
         default="no"
         comment="Use valgrind memcheck client requests." />
 
-      <option name="cuda" type="with"
+      <option name="cuda" type="with" local="true"
         default="yes"
         comment="Use cuda (gpu) batch signature verification (inert on macOS)."
         msvc="/p:Option-cuda=true" />
 
       <!-- Dependencies -->
 
-      <dependency name="secp256k1" version="0.8.0" option="secp256k1" />
+      <dependency name="secp256k1" version="0.8.0" option="secp256k1" negate="true" />
 
       <compiler standard="20">
         <define option="secp256k1"
-          comment="Use bitcoin-core/secp256k1 library."
+          comment="Use native secp256k1."
           type="private">
           <symbol value="WITH_SECP256K1" />
         </define>
 
-        <define option="secp256k1"
-          comment="Version of bitcoin-core/secp256k1 library."
+        <define option="secp256k1" negate="true"
+          comment="Version of external secp256k1 library."
           type="private">
           <symbol name="SECP256K1_VERSION" value="${secp256k1_VERSION}" />
         </define>
@@ -382,10 +382,30 @@
       <!--
       -->
 
+      <!-- Exposed knobs -->
+      <option name="performance-tests" type="with"
+        default="no"
+        comment="Compile performance tests." />
+
+      <option name="slow-tests" type="with"
+        default="no"
+        comment="Compile slow tests." />
 
       <dependency name="libbitcoin-system" private="true" />
 
       <compiler standard="20">
+        <define option="performance-tests"
+          comment="Compile performance tests."
+          type="private">
+          <symbol value="WITH_PERFORMANCE_TESTS" />
+        </define>
+
+        <define option="slow-tests"
+          comment="Compile slow tests."
+          type="private">
+          <symbol value="WITH_SLOW_TESTS" />
+        </define>
+
         <flag id="Wall" />
         <flag id="Wextra" />
         <!-- <flag id="Wpedantic" /> -->
@@ -504,14 +524,14 @@
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
-        <build name="secp256k1" />
+        <build name="libsecp256k1" />
 
         <compiler lang="c" name="clang" version="18" />
         <compiler lang="cxx" name="clang++" version="18" />
 
         <option name="gnu" value="--enable-isystem" />
-        <option name="gnu" value="--with-secp256k1" />
-        <option name="cmake" value="-Dwith-secp256k1=ON" />
+        <option name="gnu" value="--without-secp256k1" />
+        <option name="cmake" value="-Dwith-secp256k1=OFF" />
         <option name="presets" value="--build-skip-tests" />
 
         <job name="gnu" config="debug" link="dynamic" />
@@ -781,9 +801,22 @@
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
 
+      <!-- Exposed knobs -->
+      <option name="verbose" type="with"
+        default="no"
+        comment="Compile verbose logging." />
+
       <dependency name="libbitcoin-system" version="4.0.0" />
 
       <compiler standard="20">
+        <define option="verbose"
+          comment="Compile verbose logging."
+          type="public">
+          <symbol value="WITH_LOGV">
+            <substitute name="verbose" />
+          </symbol>
+        </define>
+
         <flag id="Wall" />
         <flag id="Wextra" />
         <!-- <flag id="Wpedantic" /> -->
@@ -1860,9 +1893,23 @@
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
+
+      <!-- Exposed knobs -->
+      <option name="self-tests" type="with"
+        default="no"
+        comment="Compile self tests." />
+
       <dependency name="libbitcoin-node" version="4.0.0" />
 
       <compiler standard="20">
+        <define option="self-tests"
+          comment="Compile self tests."
+          type="public">
+          <symbol value="WITH_SELF_TESTS">
+            <substitute name="self_tests" />
+          </symbol>
+        </define>
+
         <flag id="Wall" />
         <flag id="Wextra" />
         <!-- <flag id="Wpedantic" /> -->
@@ -1931,17 +1978,17 @@
       </resources>
 
       <!-- Exposed knobs -->
-      <option name="embedded" type="with"
+      <option name="web" type="with"
         default="yes"
         comment="Compile web pages into the console application." />
 
       <dependency name="libbitcoin-server" private="true" />
 
       <compiler standard="20">
-        <define option="embedded"
+        <define option="web"
           comment="Compile web pages into the console application."
           type="private">
-          <symbol value="WITH_EMBEDDED" />
+          <symbol value="WITH_WEB" />
         </define>
 
         <flag id="Wall" />
@@ -3193,18 +3240,12 @@
       <pkg />
     </dependency>
     <dependency name="secp256k1"
-      textname="libsecp256k1"
+      textname="bitcoin core libsecp256k1"
+      optionname="libsecp256k1"
       conditional="true"
-      comment="Build libsecp256k1 libraries."
+      comment="Build bitcoin core libsecp256k1 libraries."
       stage="external">
       <github owner="bitcoin-core" tag="v0.8.0" />
-      <nuget>
-        <resource canonical="secp256k1">
-          <package compiler="v145" name="secp256k1_vc145" version="0.8.0"
-            targets="build/native" />
-        </resource>
-      </nuget>
-      <build method="nuget" />
       <build method="gnu" filepath="." objpath="." parallel="true">
         <flag value="-w" />
         <option value="--disable-tests" />

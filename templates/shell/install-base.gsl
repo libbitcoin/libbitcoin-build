@@ -275,8 +275,16 @@ function build_hints(dependencies, meta, configuration, repository)
         endfor
 
         if (my.handled_build = 0)
-           abort "No build method recognized for dependency '$(_depend.name)'."
+            if !is_defined_positive(_depend, "conditional")
+                abort "No build method recognized for dependency '$(_depend.name)'."
+            endif
+
+            _depend.unbuildable = "true"
         endif
+    endfor
+
+    for my.dependencies.dependency as _depend where defined(_depend.unbuildable)
+        delete _depend
     endfor
 endfunction
 
@@ -288,8 +296,10 @@ function write_column_line(begin, end, align, pad, indent, prefix, suffix)
     define my.indent = write_column_line.indent ? ""
     define my.prefix = write_column_line.prefix ? ""
     define my.suffix = write_column_line.suffix ? ""
+    define my.width = (string.length(my.begin) < my.align) ?? \
+        my.align ? string.length(my.begin) + 1
 
-    return "$(my.indent)$(my.prefix)$(pad(my.begin, my.align, my.pad))$(my.end)$(my.suffix)"
+    return "$(my.indent)$(my.prefix)$(pad(my.begin, my.width, my.pad))$(my.end)$(my.suffix)"
 endfunction
 
 function indent_column(begin, end, column, indent, pad)
@@ -311,6 +321,14 @@ function fix_column(begin, end, column, prefix, suffix, pad)
     define my.pad = fix_column.pad ? " "
 
     return write_column_line(my.begin, my.end, my.column, my.pad, "", my.prefix, my.suffix)
+endfunction
+
+function is_exposed(option, dependency, repository)
+    define my.option = is_exposed.option
+    define my.dependency = is_exposed.dependency
+    define my.repository = is_exposed.repository
+
+    return !is_defined_positive(my.option, "local") | (my.dependency.name = my.repository.name)
 endfunction
 
 function is_applicable(option, dependency, repository)
