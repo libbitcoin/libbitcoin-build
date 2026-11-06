@@ -642,7 +642,7 @@ $(my.prefix)Recognized pass-through options:$(my.suffix)
 .               next
 .           endif
 .
-.           for _target.option as _option
+.           for _target.option as _option where !(name(_target) = "library") | is_exposed(_option, _depend, my.repository)
 .
 $(fix_column(option_flag(_option, my.meta), _option.comment, my.column, my.prefix, my.suffix))
 $(fix_column("", "  Default: $(option_flag_default(_option, my.meta))", my.column, my.prefix, my.suffix))

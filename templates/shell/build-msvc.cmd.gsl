@@ -335,7 +335,7 @@ if "!$(_depend.name:c)_TAG!" == "" (
 .       # Loop over options to synthesize consumable options and subsequent values
 .       define my.dep_repo = my.configuration->repository(.name = _depend.name)
 .       for my.dep_repo.library as _library
-.           for _library.option as _option where defined(_option.msvc)
+.           for _library.option as _option where defined(_option.msvc) & is_exposed(_option, _depend, my.repository)
 .               parse_target_option(_library, _option)
 .           endfor
 .       endfor
@@ -605,7 +605,7 @@ $(my.prefix)Script options:$(my.suffix)
 .       define my.deprepo = my.configuration->repository(.name = _depend.name)
 .
 .       for my.deprepo.library as _library
-.           for _library.option as _option where defined(_option.msvc)
+.           for _library.option as _option where defined(_option.msvc) & is_exposed(_option, _depend, my.repository)
 .               if is_defined_positive(_option, "default")
 .                   define my.negated = (_option.type = "enable") ?? "disable" ? "without"
 $(fix_column("--[$(_option.type)/$(my.negated)]-$(_option.name)", _option.comment, my.column, my.prefix, my.suffix))

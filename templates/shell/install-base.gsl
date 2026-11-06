@@ -323,6 +323,14 @@ function fix_column(begin, end, column, prefix, suffix, pad)
     return write_column_line(my.begin, my.end, my.column, my.pad, "", my.prefix, my.suffix)
 endfunction
 
+function is_exposed(option, dependency, repository)
+    define my.option = is_exposed.option
+    define my.dependency = is_exposed.dependency
+    define my.repository = is_exposed.repository
+
+    return !is_defined_positive(my.option, "local") | (my.dependency.name = my.repository.name)
+endfunction
+
 function is_applicable(option, dependency, repository)
     define my.option = is_applicable.option
     define my.dependency = is_applicable.dependency
