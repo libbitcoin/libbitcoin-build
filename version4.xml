@@ -1880,9 +1880,23 @@
 
       <sources path="src" recursive="true" />
       <headers path="include" recursive="true" root="true" />
+
+      <!-- Exposed knobs -->
+      <option name="self-tests" type="with"
+        default="no"
+        comment="Compile self tests." />
+
       <dependency name="libbitcoin-node" version="4.0.0" />
 
       <compiler standard="20">
+        <define option="self-tests"
+          comment="Compile self tests."
+          type="public">
+          <symbol value="WITH_SELF_TESTS">
+            <substitute name="self_tests" />
+          </symbol>
+        </define>
+
         <flag id="Wall" />
         <flag id="Wextra" />
         <!-- <flag id="Wpedantic" /> -->
