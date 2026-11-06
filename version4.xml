@@ -524,7 +524,7 @@
 
       <!-- clang -->
       <entry image="ubuntu-24.04">
-        <build name="secp256k1" />
+        <build name="libsecp256k1" />
 
         <compiler lang="c" name="clang" version="18" />
         <compiler lang="cxx" name="clang++" version="18" />
@@ -3227,9 +3227,10 @@
       <pkg />
     </dependency>
     <dependency name="secp256k1"
-      textname="libsecp256k1"
+      textname="bitcoin core libsecp256k1"
+      optionname="libsecp256k1"
       conditional="true"
-      comment="Build libsecp256k1 libraries."
+      comment="Build bitcoin core libsecp256k1 libraries."
       stage="external">
       <github owner="bitcoin-core" tag="v0.8.0" />
       <build method="gnu" filepath="." objpath="." parallel="true">
