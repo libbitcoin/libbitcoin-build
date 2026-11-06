@@ -2324,14 +2324,14 @@
       </entry>
 
       <entry>
-        <flag value="-mtune=generic" />
+        <flag value="-march=armv8-a+aes+sha2 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
         <option name="cmake" value="-Denable-sha2=ON -Denable-aes=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha2" host="aarch64-linux-gnu" />
       </entry>
 
       <entry>
-        <flag value="-mtune=generic" />
+        <flag value="-march=armv8.2-a+aes+sha2+sha3 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
         <option name="cmake" value="-Denable-sha2=ON -Denable-sha3=ON -Denable-aes=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha3" host="aarch64-linux-gnu" />
