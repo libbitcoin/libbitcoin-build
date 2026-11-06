@@ -292,7 +292,6 @@ repository_root_dir=`cd "${srcdir}/../.." && pwd`
 .           define my.encountered_architectures = 0
 .
 .           heading1("Check architecture.")
-.           emit_architecture_extensions(_u_archs, my.repository)
 .
 .           for _u_archs.architecture as _arch
 .               if (my.encountered_architectures > 0)
@@ -629,35 +628,6 @@ $(my.indent)])
 .       my.indent = indent_remove(my.indent, my.step)
 .   endif
 .endmacro # emit_flag
-.
-.macro emit_architecture_extensions(architectures, repository)
-.   define my.architectures = emit_architecture_extensions.architectures
-.   define my.repository = emit_architecture_extensions.repository
-.
-.   if (count(my.architectures.architecture, defined(count.extension)) > 0)
-arm_base=""
-arm_extensions=""
-.       for my.architectures.architecture as _arch where \
-            defined(_arch.extension) by _arch.march
-.           define my.target = my.repository->$(_arch->target.type)(\
-                is_target_element(this) & (this.name = _arch->target.name), this)
-.           define my.option = get_option(_arch, my.target, my.repository, "_")
-AS_IF([test "x${$(my.option)}" != "xno"],
-  [ arm_base="$(_arch.march)"; arm_extensions="${arm_extensions}+$(_arch.extension)"; ])
-.       endfor
-
-AS_IF([test "x${arm_extensions}" != "x"],
-  [
-    AS_CASE(["${CFLAGS} ${CXXFLAGS}"],
-      [*-march=*|*-mcpu=*],
-      [ AC_MSG_ERROR([Compiler flags -march or -mcpu conflict with enabled ARM extension options.]) ])
-    CFLAGS="${CFLAGS} -march=${arm_base}${arm_extensions}";
-    CXXFLAGS="${CXXFLAGS} -march=${arm_base}${arm_extensions}";
-    AC_SUBST([arm_march], ["-march=${arm_base}${arm_extensions}"])
-  ])
-
-.   endif
-.endmacro # emit_architecture_extensions
 .
 .macro emit_architecture(architecture, repository, configuration, meta)
 .   define my.architecture = emit_architecture.architecture

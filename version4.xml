@@ -29,62 +29,74 @@
       <!-- Exposed knobs -->
       <option name="shani" type="enable"
         default="no"
-        comment="Use Intel SHA Extensions."
+        comment="Add Intel SHA Extensions via compilation options."
+        hardware="Use Intel SHA Extensions."
         msvc="/p:Option-shani=true" />
 
       <option name="sha512" type="enable"
         default="no"
-        comment="Use Intel SHA512 Extensions (implies AVX2)."
+        comment="Add Intel SHA512 Extensions (implies AVX2) via compilation options."
+        hardware="Use Intel SHA512 Extensions (implies AVX2)."
         msvc="/p:Option-sha512=true" />
 
       <option name="aesni" type="enable"
         default="no"
-        comment="Use Intel AES-NI and PCLMULQDQ intrinsics."
+        comment="Add Intel AES-NI and PCLMULQDQ intrinsics via compilation options."
+        hardware="Use Intel AES-NI and PCLMULQDQ intrinsics."
         msvc="/p:Option-aesni=true" />
 
       <option name="vaes" type="enable"
         default="no"
-        comment="Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
+        comment="Add Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2) via compilation options."
+        hardware="Use Intel VAES and VPCLMULQDQ intrinsics (implies AES-NI and AVX2)."
         msvc="/p:Option-vaes=true" />
 
       <option name="avx512ifma" type="enable"
         default="no"
-        comment="Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
+        comment="Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options."
+        hardware="Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
         msvc="/p:Option-avx512ifma=true" />
 
       <option name="avx512" type="enable"
         default="no"
-        comment="Use Intel AVX512 intrinsics."
+        comment="Add Intel AVX512 intrinsics via compilation options."
+        hardware="Use Intel AVX512 intrinsics."
         msvc="/p:Option-avx512=true" />
 
       <option name="avxifma" type="enable"
         default="no"
-        comment="Use Intel AVX IFMA intrinsics (implies AVX2)."
+        comment="Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options."
+        hardware="Use Intel AVX IFMA intrinsics (implies AVX2)."
         msvc="/p:Option-avxifma=true" />
 
       <option name="avx2" type="enable"
         default="no"
-        comment="Use Intel AVX2 intrinsics."
+        comment="Add Intel AVX2 intrinsics via compilation options."
+        hardware="Use Intel AVX2 intrinsics."
         msvc="/p:Option-avx2=true" />
 
       <option name="sse41" type="enable"
         default="no"
-        comment="Use SSE4.1 hardware instructions."
+        comment="Add SSE4.1 hardware instructions via compilation options."
+        hardware="Use SSE4.1 hardware instructions."
         msvc="/p:Option-sse41=true" />
 
       <option name="sha2" type="enable"
         default="no"
-        comment="Use ARM SHA1/SHA256 Extensions."
+        comment="Check for ARM SHA1/SHA256 Extensions."
+        hardware="Use ARM SHA1/SHA256 Extensions."
         msvc="/p:Option-sha2=true" />
 
       <option name="sha3" type="enable"
         default="no"
-        comment="Use ARM SHA3 Extensions for SHA512."
+        comment="Check for ARM SHA3 Extensions for SHA512."
+        hardware="Use ARM SHA3 Extensions for SHA512."
         msvc="/p:Option-sha3=true" />
 
       <option name="aes" type="enable"
         default="no"
-        comment="Use ARM AES and PMULL Extensions."
+        comment="Check for ARM AES and PMULL Extensions."
+        hardware="Use ARM AES and PMULL Extensions."
         msvc="/p:Option-aes=true" />
 
       <option name="secp256k1" type="with"
@@ -95,7 +107,7 @@
         default="no"
         comment="Use valgrind memcheck client requests." />
 
-      <option name="cuda" type="enable"
+      <option name="cuda" type="with"
         default="yes"
         comment="Use cuda (gpu) batch signature verification (inert on macOS)."
         msvc="/p:Option-cuda=true" />
@@ -130,10 +142,10 @@
         </define>
 
         <architecture option="aes"
-          march="armv8-a"
-          extension="aes"
+          platform="arm64"
           msvc_define="WITH_AES"
           comment="Conditionally require arm aes intrinsics.">
+          <march mergeable="true" base="armv8-a" priority="1" suffix="aes" />
           <program>
             <include header="arm_neon.h" />
             <loc>uint8x16_t a = vdupq_n_u8(0);</loc>
@@ -142,10 +154,10 @@
         </architecture>
 
         <architecture option="sha2"
-          march="armv8-a"
-          extension="sha2"
+          platform="arm64"
           msvc_define="WITH_SHA2"
           comment="Conditionally require arm sha256 intrinsics.">
+          <march mergeable="true" base="armv8-a" priority="2" suffix="sha2" />
           <program>
             <include header="arm_neon.h" />
             <loc>uint32x4_t a = vdupq_n_u32(0);</loc>
@@ -154,10 +166,10 @@
         </architecture>
 
         <architecture option="sha3"
-          march="armv8.2-a"
-          extension="sha3"
+          platform="arm64"
           msvc_define="WITH_SHA3"
           comment="Conditionally require arm sha512 intrinsics.">
+          <march mergeable="true" base="armv8.2-a" priority="3" suffix="sha3" />
           <program>
             <include header="arm_neon.h" />
             <loc>uint64x2_t a = vdupq_n_u64(0);</loc>
@@ -166,6 +178,7 @@
         </architecture>
 
         <flag option="avx2" environmental="true"
+          platform="x64"
           msvc_arch="AVX2"
           comment="Conditionally require avx2 intrinsics."
           type="public"
@@ -183,6 +196,7 @@
         </flag>
 
         <flag option="avx512" environmental="true"
+          platform="x64"
           msvc_arch="AVX512"
           comment="Conditionally require avx512 intrinsics."
           type="public"
@@ -202,6 +216,7 @@
         </flag>
 
         <flag option="avx512ifma" environmental="true"
+          platform="x64"
           msvc_define="WITH_AVX512IFMA"
           comment="Conditionally require avx512 ifma intrinsics."
           type="public"
@@ -220,6 +235,7 @@
         </flag>
 
         <flag option="avxifma" environmental="true"
+          platform="x64"
           msvc_define="WITH_AVXIFMA"
           comment="Conditionally require avx ifma intrinsics."
           type="public"
@@ -237,6 +253,7 @@
         </flag>
 
         <flag option="shani" environmental="true"
+          platform="x64"
           msvc_define="WITH_SHANI"
           comment="Conditionally require sha native intrincis."
           type="public"
@@ -256,6 +273,7 @@
         </flag>
 
         <flag option="sha512" environmental="true"
+          platform="x64"
           msvc_define="WITH_SHA512"
           comment="Conditionally require sha512 native intrinsics."
           type="public"
@@ -274,6 +292,7 @@
         </flag>
 
         <flag option="sse41" environmental="true"
+          platform="x64"
           msvc_arch="AVX"
           comment="Conditionally require sse4.1 intrinsics."
           type="public"
@@ -291,6 +310,7 @@
         </flag>
 
         <flag option="aesni" environmental="true"
+          platform="x64"
           msvc_define="WITH_AESNI"
           comment="Conditionally require aes-ni and pclmulqdq intrinsics."
           type="public"
@@ -310,6 +330,7 @@
         </flag>
 
         <flag option="vaes" environmental="true"
+          platform="x64"
           msvc_define="WITH_VAES"
           comment="Conditionally require vaes and vpclmulqdq intrinsics."
           type="public"
