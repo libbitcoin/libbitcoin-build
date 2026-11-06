@@ -3895,8 +3895,28 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
         <job type="shell" name="presets" script="builds/cmake/install-presets.sh" />
         <job type="msvc" name="msvc" script="builds\msvc\build-msvc.cmd" />
 
-        <trigger value="pull_request" />
-        <trigger value="push" />
+        <trigger value="pull_request">
+          <include path="builds/cmake" />
+          <include path="builds/gnu" />
+          <include path="builds/msvc" />
+          <exclude file="builds/gnu/AUTHORS" />
+          <exclude file="builds/gnu/COPYING" />
+          <exclude file="builds/gnu/ChangeLog" />
+          <exclude file="builds/gnu/INSTALL" />
+          <exclude file="builds/gnu/NEWS" />
+          <exclude file="builds/gnu/README" />
+        </trigger>
+        <trigger value="push">
+          <include path="builds/cmake" />
+          <include path="builds/gnu" />
+          <include path="builds/msvc" />
+          <exclude file="builds/gnu/AUTHORS" />
+          <exclude file="builds/gnu/COPYING" />
+          <exclude file="builds/gnu/ChangeLog" />
+          <exclude file="builds/gnu/INSTALL" />
+          <exclude file="builds/gnu/NEWS" />
+          <exclude file="builds/gnu/README" />
+        </trigger>
         <trigger value="workflow_dispatch" />
 
         <error name="LastTest" logpath="Testing/Temporary/LastTest.log" />
@@ -3921,6 +3941,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     </template>
 
     <template name="version-tag.yml.gsl" path="yml" outpath=".github/workflows" />
+
     <template name="double-build.yml.gsl" path="yml" outpath=".github/workflows">
       <file source="github/version4/%repository%/actions/setup-guix/action.yml" destination=".github/actions/setup-guix" optional="true" />
       <file source="github/version4/%repository%/guix/build.sh" destination=".github/guix" optional="true" />
@@ -3933,6 +3954,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <file source="github/version4/%repository%/guix/patches/gcc-ssa-generation.patch" destination=".github/guix/patches" optional="true" />
       <file source="github/version4/%repository%/guix/patches/glibc-guix-prefix.patch" destination=".github/guix/patches" optional="true" />
     </template>
+
     <template name="manual-release.yml.gsl" path="yml" outpath=".github/workflows">
       <file source="github/version4/%repository%/actions/build-binary/action.yml" destination=".github/actions/build-binary" optional="true" />
       <file source="github/version4/%repository%/packaging/debian/control.in" destination=".github/packaging/debian" optional="true" />
