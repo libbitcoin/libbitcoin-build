@@ -382,7 +382,7 @@ AX_CXX_COMPILE_STDCXX([$(my.standard)], [noext], [mandatory])
 .   define my.name = defined(my.option.option) ?? my.option.option ? my.option.name
 .   define my.datatype = defined(my.option.data_type) ?? my.option.data_type ? "boolean"
 .   define my.optiontext = "--$(my.option.type)-$(my.name)"
-.   define my.option_var = "$(my.option.type)_$(my.name)"
+.   define my.option_var = "$(my.option.type)_$(string.replace(my.name, "-|_"))"
 .
 .   define my.helpuse = defined(my.option.example) ?? my.option.example ? ""
 .

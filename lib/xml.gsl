@@ -247,7 +247,9 @@ function global.get_option(reference, target, repository, separator)
             abort "Target '$(my.target.name)' missing option '$(my.reference.option)'."
         endif
 
-        my.result = "$(my.option.type:lower)$(my.separator)$(my.option.name:lower)"
+        define my.name = (my.separator = "_") ?? \
+            string.replace(my.option.name, "-|_") ? my.option.name
+        my.result = "$(my.option.type:lower)$(my.separator)$(my.name:lower)"
     endif
 
     return my.result

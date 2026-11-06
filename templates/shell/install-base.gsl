@@ -288,8 +288,10 @@ function write_column_line(begin, end, align, pad, indent, prefix, suffix)
     define my.indent = write_column_line.indent ? ""
     define my.prefix = write_column_line.prefix ? ""
     define my.suffix = write_column_line.suffix ? ""
+    define my.width = (string.length(my.begin) < my.align) ?? \
+        my.align ? string.length(my.begin) + 1
 
-    return "$(my.indent)$(my.prefix)$(pad(my.begin, my.align, my.pad))$(my.end)$(my.suffix)"
+    return "$(my.indent)$(my.prefix)$(pad(my.begin, my.width, my.pad))$(my.end)$(my.suffix)"
 endfunction
 
 function indent_column(begin, end, column, indent, pad)

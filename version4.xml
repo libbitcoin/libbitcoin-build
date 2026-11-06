@@ -382,10 +382,30 @@
       <!--
       -->
 
+      <!-- Exposed knobs -->
+      <option name="performance-tests" type="with"
+        default="no"
+        comment="Compile performance tests." />
+
+      <option name="slow-tests" type="with"
+        default="no"
+        comment="Compile slow tests." />
 
       <dependency name="libbitcoin-system" private="true" />
 
       <compiler standard="20">
+        <define option="performance-tests"
+          comment="Compile performance tests."
+          type="private">
+          <symbol value="WITH_PERFORMANCE_TESTS" />
+        </define>
+
+        <define option="slow-tests"
+          comment="Compile slow tests."
+          type="private">
+          <symbol value="WITH_SLOW_TESTS" />
+        </define>
+
         <flag id="Wall" />
         <flag id="Wextra" />
         <!-- <flag id="Wpedantic" /> -->
