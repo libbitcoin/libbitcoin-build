@@ -33,6 +33,51 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout repository [zeromq/gsl]
+        if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          path: 'gsl'
+          repository: 'zeromq/gsl'
+
+      - name: Prepare platform toolchain [macos]
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        run: |
+          brew install pcre
+
+      - name: Prepare platform toolchain [ubuntu]
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install libpcre3-dev
+
+      - name: Prepare platform toolchain [windows]
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Aquire gsl [macos]
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        run: |
+          pushd "gsl/src"
+          CPPFLAGS="-I/opt/homebrew/include ${CPPFLAGS}" make --silent
+          make install DESTDIR="${{ github.workspace }}/prefix"
+          popd
+
+      - name: Aquire gsl [ubuntu]
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          pushd "gsl/src"
+          make --silent
+          make install DESTDIR="${{ github.workspace }}/prefix"
+          popd
+
+      - name: Aquire gsl [windows]
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        shell: powershell
+        run: |
+          echo "${{ github.workspace }}\libbitcoin-build\bin\winx64" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+
       - name: Checkout repository [build]
         uses: actions/checkout@v6
         with:
@@ -88,57 +133,12 @@ jobs:
           repository: '${{ github.repository_owner }}/libbitcoin-server'
           ref: ${{ matrix.branch }}
 
-      - name: Checkout repository [zeromq/gsl]
-        if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-          path: 'gsl'
-          repository: 'zeromq/gsl'
-
-      - name: Prepare platform toolchain [macos]
-        if: ${{ startsWith(matrix.os, 'macos') }}
-        run: |
-          brew install pcre
-
-      - name: Prepare platform toolchain [ubuntu]
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install libpcre3-dev
-
-      - name: Prepare platform toolchain [windows]
-        if: ${{ startsWith(matrix.os, 'windows') }}
-        uses: microsoft/setup-msbuild@v3
-
-      - name: Aquire gsl [macos]
-        if: ${{ startsWith(matrix.os, 'macos') }}
-        run: |
-          pushd "gsl/src"
-          CPPFLAGS="-I/opt/homebrew/include ${CPPFLAGS}" make --silent
-          sudo make install
-          popd
-
-      - name: Aquire gsl [ubuntu]
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        run: |
-          pushd "gsl/src"
-          make --silent
-          sudo make install
-          popd
-
-      - name: Aquire gsl [windows]
-        if: ${{ startsWith(matrix.os, 'windows') }}
-        shell: powershell
-        run: |
-          echo "${{ github.workspace }}\libbitcoin-build\bin\winx64" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
-
       - name: Execute generation [bash]
         if: ${{ startsWith(matrix.shell, 'bash') }}
         shell: bash
         working-directory: ${{ github.workspace }}/libbitcoin-build
         run: >
-          ./${{ matrix.script }}
+          PATH="${PATH} ${{github.workspace }}/prefix/bin" ./${{ matrix.script }}
 
       - name: Execute generation [cmd]
         if: ${{ startsWith(matrix.shell, 'cmd') }}

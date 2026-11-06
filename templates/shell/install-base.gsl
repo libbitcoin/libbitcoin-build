@@ -394,4 +394,126 @@ function documentation_values(option)
     return "Values: $(my.values)"
 endfunction
 
+function is_hardware_option(option, target)
+    define my.option = is_hardware_option.option
+    define my.target = is_hardware_option.target
+
+    return defined(my.target->compiler) & \
+        (count(my.target->compiler., this.option = my.option.name, this) > 0)
+endfunction
+
+function get_hardware_element(option, target)
+    define my.option = get_hardware_element.option
+    define my.target = get_hardware_element.target
+
+    return my.target->compiler.(this.option = my.option.name, this)
+endfunction
+
+function compute_unique_hardware_platforms(result, configuration, repository, install)
+    define my.result = compute_unique_hardware_platforms.result
+    define my.configuration = compute_unique_hardware_platforms.configuration
+    define my.repository = compute_unique_hardware_platforms.repository
+    define my.install = compute_unique_hardware_platforms.install
+
+    for my.install.dependency as _depend
+        if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
+            next
+        endif
+
+        define my.deprepo = my.configuration->repository(this.name = _depend.name, this)
+
+        for my.deprepo. as _target
+            if !(name(_target) = "library") & !(_depend.name = my.repository.name)
+                next
+            endif
+
+            if !defined(_target->compiler)
+                next
+            endif
+
+            for _target->compiler. as _element
+                #if !( (name(_element) = "architecture" ) | (name(_element) = "flag") )
+                #    next
+                #endif
+
+                if defined(_element.option) & defined(_element.platform)
+                    if (count(my.result.platform, this.name = _element.platform, this) = 0)
+                        new my.result.platform as _platform
+                            _platform.name = _element.platform
+                        endnew
+                    endif
+                endif
+            endfor
+        endfor
+    endfor
+endfunction
+
+function has_platform_architecture(platform, configuration, repository, install)
+    define my.platform = has_platform_architecture.platform
+    define my.configuration = has_platform_architecture.configuration
+    define my.repository = has_platform_architecture.repository
+    define my.install = has_platform_architecture.install
+
+    for my.install.dependency as _depend
+        if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
+            next
+        endif
+
+        define my.deprepo = my.configuration->repository(.name = _depend.name)
+
+        for my.deprepo. as _target
+            if !(name(_target) = "library") & !(_depend.name = my.repository.name)
+                next
+            endif
+
+            if !defined(_target->compiler)
+                next
+            endif
+
+            if (count(_target->compiler.architecture, defined(this.option) & \
+                defined(this.platform) & (this.platform = my.platform), this) > 0)
+                return 1
+            endif
+        endfor
+    endfor
+
+    return 0
+endfunction
+
+function is_platform_architecture_mergeable(platform, configuration, repository, install)
+    define my.platform = is_platform_architecture_mergeable.platform
+    define my.configuration = is_platform_architecture_mergeable.configuration
+    define my.repository = is_platform_architecture_mergeable.repository
+    define my.install = is_platform_architecture_mergeable.install
+
+    for my.install.dependency as _depend
+        if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
+            next
+        endif
+
+        define my.deprepo = my.configuration->repository(.name = _depend.name)
+
+        for my.deprepo. as _target
+            if !(name(_target) = "library") & !(_depend.name = my.repository.name)
+                next
+            endif
+
+            if !defined(_target->compiler)
+                next
+            endif
+
+            for _target->compiler.architecture as _arch \
+                where defined(_arch.option) & \
+                    defined(_arch.platform) & (_arch.platform = my.platform)
+
+                if defined(_arch->march) & !is_defined_positive(_arch->march, "mergeable")
+                    return 0
+                endif
+            endfor
+        endfor
+    endfor
+
+    return 1
+endfunction
+
 .endtemplate
