@@ -293,9 +293,16 @@ function populate_unique_path(results, host)
     endif
 endfunction
 
-function populate_project_paths(results, repository)
+function populate_project_paths(results, meta, configuration, repository, trigger)
     define my.results = populate_project_paths.results
+    define my.meta = populate_project_paths.meta
+    define my.configuration = populate_project_paths.configuration
     define my.repository = populate_project_paths.repository
+    define my.trigger = populate_project_paths.trigger
+
+    for my.trigger.include as _include
+        populate_unique_path(my.results, _include)
+    endfor
 
     for my.repository. as _target where is_target_element(_target)
         for _target.sources as _sources
@@ -337,23 +344,26 @@ on:
       - '**'
 .       endif
 .       if ((_trigger.value = "pull_request") | (_trigger.value = "push"))
-    paths:
-      - 'builds/cmake/**'
-      - 'builds/gnu/**'
-      - 'builds/msvc/**'
 .           new project_paths as _paths
-.               populate_project_paths(_paths, my.repository)
-.
-.               for _paths.path as _path by _path.value
+.               populate_project_paths(_paths, my.meta, my.configuration, \
+                    my.repository, _trigger)
+.               if (count(_paths.path) > 0) | (count(_trigger.exclude) > 0)
+    paths:
+.                   for _paths.path as _path by _path.value
       - '$(_path.value)/**'
-.               endfor
+.                   endfor
+.               endif
 .           endnew
-      - '!builds/gnu/AUTHORS'
-      - '!builds/gnu/COPYING'
-      - '!builds/gnu/ChangeLog'
-      - '!builds/gnu/INSTALL'
-      - '!builds/gnu/NEWS'
-      - '!builds/gnu/README'
+.
+.           for _trigger.exclude as _exclude
+.               if defined(_exclude.path)
+      - '!$(_exclude.path)/**'
+.               endif
+.
+.               if defined(_exclude.file)
+      - '!$(_exclude.file)'
+.               endif
+.           endfor
 .       endif
 .   endfor
 
