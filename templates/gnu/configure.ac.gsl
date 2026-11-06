@@ -470,8 +470,9 @@ $(my.operation)($(my.predicate), [AC_SUBST([$(_sub.symbol)],[$(_sub.value)])])
 .
 .   if defined(my.define.option)
 .       define my.option = get_option(my.define, my.target, my.repository, "_")
+.       define my.test = is_defined_positive(my.define, "negate") ?? "=" ? "!="
 .
-AS_IF([test "x${$(my.option)}" != "xno"], [
+AS_IF([test "x${$(my.option)}" $(my.test) "xno"], [
 .   endif
 .
 .   for my.define.symbol as _symbol
@@ -692,8 +693,9 @@ $(my.indent)])
 .   if defined(my.dependency.option)
 .       define my.target = my.repository->$(my.dependency->context.type)(this.name = my.dependency->context.name, this)
 .       define my.optiontext = get_option(my.dependency, my.target, my.repository, "_")
+.       define my.test = is_defined_positive(my.dependency, "negate") ?? "=" ? "!="
 .
-AS_IF([test "x${$(my.optiontext)}" != "xno"],
+AS_IF([test "x${$(my.optiontext)}" $(my.test) "xno"],
   [
 .       my.indent = indent_add(my.indent, my.step)
 .   endif

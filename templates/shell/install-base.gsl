@@ -275,8 +275,16 @@ function build_hints(dependencies, meta, configuration, repository)
         endfor
 
         if (my.handled_build = 0)
-           abort "No build method recognized for dependency '$(_depend.name)'."
+            if !is_defined_positive(_depend, "conditional")
+                abort "No build method recognized for dependency '$(_depend.name)'."
+            endif
+
+            _depend.unbuildable = "true"
         endif
+    endfor
+
+    for my.dependencies.dependency as _depend where defined(_depend.unbuildable)
+        delete _depend
     endfor
 endfunction
 

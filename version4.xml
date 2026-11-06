@@ -100,8 +100,8 @@
         msvc="/p:Option-aes=true" />
 
       <option name="secp256k1" type="with"
-        default="no"
-        comment="Use bitcoin-core/secp256k1 library." />
+        default="yes"
+        comment="Use native secp256k1 interface, otherwise external library." />
 
       <option name="valgrind" type="with"
         default="no"
@@ -114,17 +114,17 @@
 
       <!-- Dependencies -->
 
-      <dependency name="secp256k1" version="0.8.0" option="secp256k1" />
+      <dependency name="secp256k1" version="0.8.0" option="secp256k1" negate="true" />
 
       <compiler standard="20">
         <define option="secp256k1"
-          comment="Use bitcoin-core/secp256k1 library."
+          comment="Use native secp256k1."
           type="private">
           <symbol value="WITH_SECP256K1" />
         </define>
 
-        <define option="secp256k1"
-          comment="Version of bitcoin-core/secp256k1 library."
+        <define option="secp256k1" negate="true"
+          comment="Version of external secp256k1 library."
           type="private">
           <symbol name="SECP256K1_VERSION" value="${secp256k1_VERSION}" />
         </define>
@@ -530,8 +530,8 @@
         <compiler lang="cxx" name="clang++" version="18" />
 
         <option name="gnu" value="--enable-isystem" />
-        <option name="gnu" value="--with-secp256k1" />
-        <option name="cmake" value="-Dwith-secp256k1=ON" />
+        <option name="gnu" value="--without-secp256k1" />
+        <option name="cmake" value="-Dwith-secp256k1=OFF" />
         <option name="presets" value="--build-skip-tests" />
 
         <job name="gnu" config="debug" link="dynamic" />
@@ -3232,13 +3232,6 @@
       comment="Build libsecp256k1 libraries."
       stage="external">
       <github owner="bitcoin-core" tag="v0.8.0" />
-      <nuget>
-        <resource canonical="secp256k1">
-          <package compiler="v145" name="secp256k1_vc145" version="0.8.0"
-            targets="build/native" />
-        </resource>
-      </nuget>
-      <build method="nuget" />
       <build method="gnu" filepath="." objpath="." parallel="true">
         <flag value="-w" />
         <option value="--disable-tests" />

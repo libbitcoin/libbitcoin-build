@@ -47,7 +47,7 @@
 
 .   if defined(my.dependency.option)
 .       my.indent = "  "
-if ( $(get_option(my.dependency, my.target, my.repository)) )
+if ( $(is_defined_positive(my.dependency, "negate") ?? "NOT " ? "")$(get_option(my.dependency, my.target, my.repository)) )
 .   endif
 .
 .   define my.has_components = (count(my.dependency.component) > 0)

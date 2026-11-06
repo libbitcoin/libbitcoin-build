@@ -255,6 +255,16 @@ function global.get_option(reference, target, repository, separator)
     return my.result
 endfunction
 
+function global.option_condition(reference, target, repository)
+    define my.reference = option_condition.reference
+    define my.target = option_condition.target
+    define my.repository = option_condition.repository
+    define my.result = "$<BOOL:${$(get_option(my.reference, my.target, my.repository))}>"
+
+    return is_defined_positive(my.reference, "negate") ?? \
+        "$<NOT:$(my.result)>" ? my.result
+endfunction
+
 function global.target_dependency_list(result, target, repository, configuration, recurse)
     define my.result = target_dependency_list.result
     define my.target = target_dependency_list.target

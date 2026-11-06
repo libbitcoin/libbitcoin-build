@@ -731,7 +731,7 @@ configure_file(
 .   define my.repository = emit_list_dependency.repository
 .   define my.indent = emit_list_dependency.indent
 .   define my.prefix = defined(my.dependency.option) ?? \
-        "$<$<BOOL:${$(get_option(my.dependency, my.target, my.repository))}>:" ? ""
+        "$<$(option_condition(my.dependency, my.target, my.repository)):" ? ""
 .   define my.suffix = defined(my.dependency.option) ?? \
         ">" ? ""
 .
@@ -1135,7 +1135,7 @@ $(my.indent)endif()
 .   define my.symbol = symbol(my.element)
 .
 .   if defined(my.element.option)
-$(my.indent)$<$<BOOL:${$(get_option(my.element, my.target, my.repository))}>:$(my.symbol)>
+$(my.indent)$<$(option_condition(my.element, my.target, my.repository)):$(my.symbol)>
 .   elsif defined(my.element.compiler)
 $(my.indent)$<$<CXX_COMPILER_ID:$(compiler_identifier(my.element))>:$(my.symbol)>
 .   elsif (count(my.element.context, defined(context.language)) = 1)
