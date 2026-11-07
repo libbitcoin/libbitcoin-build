@@ -154,27 +154,45 @@ echo "Computed tag: ${TAG}"
 # ------------------------------------------------------------------
 echo "=== Creating tag ==="
 
+TAG_EXISTS_LOCALLY=0
 if git rev-parse "${TAG}" >/dev/null 2>&1; then
-  echo "Error: Tag ${TAG} already exists." >&2
-  exit 1
+  echo "Tag ${TAG} already exists locally."
+  TAG_EXISTS_LOCALLY=1
 fi
 
 if [[ ${DRY_RUN} -eq 1 ]]; then
-  echo "[dry-run] Would create annotated tag: ${TAG}"
-  echo "[dry-run] Message: ${DESCRIPTION}"
+  if [[ ${TAG_EXISTS_LOCALLY} -eq 0 ]]; then
+    echo "[dry-run] Would create annotated tag: ${TAG}"
+    echo "[dry-run] Message: ${DESCRIPTION}"
+  else
+    echo "[dry-run] Tag ${TAG} already exists locally; would skip creation."
+  fi
   if [[ -n "${REMOTE}" ]]; then
-    echo "[dry-run] Would push: git push ${REMOTE} ${TAG}"
+    if git ls-remote --exit-code --tags "${REMOTE}" "refs/tags/${TAG}" >/dev/null 2>&1; then
+      echo "[dry-run] Tag ${TAG} already exists on remote '${REMOTE}'; would skip push."
+    else
+      echo "[dry-run] Would push: git push ${REMOTE} ${TAG}"
+    fi
   else
     echo "[dry-run] Would not push (no remote specified)"
   fi
   exit 0
 fi
 
-git tag -a "${TAG}" -m "${DESCRIPTION}"
+if [[ ${TAG_EXISTS_LOCALLY} -eq 0 ]]; then
+  git tag -a "${TAG}" -m "${DESCRIPTION}"
+  echo "Created annotated tag '${TAG}' locally."
+else
+  echo "Skipping local tag creation (already exists)."
+fi
 
 if [[ -n "${REMOTE}" ]]; then
-  git push "${REMOTE}" "${TAG}"
-  echo "Created tag '${TAG}' and pushed to remote '${REMOTE}'."
+  if git ls-remote --exit-code --tags "${REMOTE}" "refs/tags/${TAG}" >/dev/null 2>&1; then
+    echo "Tag '${TAG}' already exists on remote '${REMOTE}'; skipping push."
+  else
+    git push "${REMOTE}" "${TAG}"
+    echo "Pushed tag '${TAG}' to remote '${REMOTE}'."
+  fi
 else
-  echo "Created tag '${TAG}' locally (no push)."
+  echo "No remote specified; tag remains local only."
 fi
