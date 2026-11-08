@@ -215,6 +215,13 @@ AC_PROG_CC
 .       abort "Unsupported language '$(my.meta->autoconf.language)'."
 .   endif
 
+# Link POSIX threads on BSD.
+AS_CASE([${host_os}], [*bsd*],
+    [AX_PTHREAD([], [AC_MSG_ERROR([POSIX threads are required.])])
+     LIBS="${PTHREAD_LIBS} ${LIBS}"
+     CFLAGS="${CFLAGS} ${PTHREAD_CFLAGS}"
+     CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"])
+
 # Enable sed for substitution.
 AC_PROG_SED
 
