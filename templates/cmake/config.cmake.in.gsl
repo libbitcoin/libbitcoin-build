@@ -82,6 +82,10 @@ endfunction
 include( CMakeFindDependencyMacro )
 
 include( "${CMAKE_CURRENT_LIST_DIR}/$(my.target.name)-targets.cmake" )
+
+if ( CMAKE_SYSTEM_NAME MATCHES "BSD" )
+  find_dependency( Threads )
+endif()
 .
 .   for my.target.dependency as _dependency
 .       if defined(_dependency.option)
