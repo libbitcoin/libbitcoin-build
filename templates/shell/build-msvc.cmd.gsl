@@ -786,7 +786,7 @@ $(fix_column("", "  $(_option->hint.text)", my.column, my.prefix, my.suffix))
 
     set "COMPILER_ARG="
     if "!BUILD_COMPILER!" == "clang" (
-        set "COMPILER_ARG=/p:Option-clang=true "
+        set "COMPILER_ARG=/p:PlatformToolset=ClangCL "
     )
 
     call :push_directory "!BUILD_SRC_DIR!\\%PROJECT%\\%RELATIVE_PATH%\\!BUILD_VERSION!"
