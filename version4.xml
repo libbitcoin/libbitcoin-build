@@ -773,6 +773,70 @@
 
         <job name="gnu" config="release" link="static" gate="true" />
       </entry>
+
+      <!-- freebsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://download.freebsd.org/releases/amd64/15.1-RELEASE/base.txz" sha256="3768988b151c20f965679062b065c63a977d6bbb9f47fd83695ec2c40790c18f" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=FreeBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-freebsd15.1" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- openbsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/base79.tgz" sha256="923d2e03f06408d50d4848334398c6d04b5514dcac7917badfc178a0eef248de" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/comp79.tgz" sha256="21a67af20aebcabf85b09f4206fc95b4cae0a35d42b154b976f0159f457724f9" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=OpenBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-openbsd7.9" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- netbsd x86_64 (cross compiled, pkgsrc libstdc++ for std::format) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -stdlib=libstdc++ -nostdinc++ -isystem /tmp/sysroot/gcc14/include/c++ -isystem /tmp/sysroot/gcc14/include/c++/x86_64--netbsd -L/tmp/sysroot/gcc14/lib -fuse-ld=lld -Wno-unused-command-line-argument -lgcc_s" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/base.tar.xz" sha256="06bc97d2ea7cbb7fea55e8b5fff17e26b642ebe3ca6475202954658e229e303c" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/comp.tar.xz" sha256="e14cf9f6ea080d90a148918a4f73a3696c473c60a435985f4316a9033abc0b3e" />
+        <sysroot url="https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/x86_64/11.0_2026Q3/All/gcc14-14.3.0nb3.tgz" sha256="8fca3189af23c742b84641c8d861cf1bf485576265da132fd2ee7bb818e6bc50" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=NetBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-netbsd11.0" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- linux x86_64 musl (alpine container) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+
+        <option name="musl" value="--enable-isystem" />
+
+        <job name="musl" config="release" link="static" />
+      </entry>
     </ci>
   </repository>
 
@@ -1137,6 +1201,70 @@
 
         <job name="gnu" config="release" link="static" gate="true" />
       </entry>
+
+      <!-- freebsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://download.freebsd.org/releases/amd64/15.1-RELEASE/base.txz" sha256="3768988b151c20f965679062b065c63a977d6bbb9f47fd83695ec2c40790c18f" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=FreeBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-freebsd15.1" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- openbsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/base79.tgz" sha256="923d2e03f06408d50d4848334398c6d04b5514dcac7917badfc178a0eef248de" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/comp79.tgz" sha256="21a67af20aebcabf85b09f4206fc95b4cae0a35d42b154b976f0159f457724f9" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=OpenBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-openbsd7.9" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- netbsd x86_64 (cross compiled, pkgsrc libstdc++ for std::format) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -stdlib=libstdc++ -nostdinc++ -isystem /tmp/sysroot/gcc14/include/c++ -isystem /tmp/sysroot/gcc14/include/c++/x86_64--netbsd -L/tmp/sysroot/gcc14/lib -fuse-ld=lld -Wno-unused-command-line-argument -lgcc_s" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/base.tar.xz" sha256="06bc97d2ea7cbb7fea55e8b5fff17e26b642ebe3ca6475202954658e229e303c" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/comp.tar.xz" sha256="e14cf9f6ea080d90a148918a4f73a3696c473c60a435985f4316a9033abc0b3e" />
+        <sysroot url="https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/x86_64/11.0_2026Q3/All/gcc14-14.3.0nb3.tgz" sha256="8fca3189af23c742b84641c8d861cf1bf485576265da132fd2ee7bb818e6bc50" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=NetBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-netbsd11.0" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- linux x86_64 musl (alpine container) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+
+        <option name="musl" value="--enable-isystem" />
+
+        <job name="musl" config="release" link="static" />
+      </entry>
     </ci>
   </repository>
 
@@ -1496,6 +1624,70 @@
 
         <job name="gnu" config="release" link="static" gate="true" />
       </entry>
+
+      <!-- freebsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://download.freebsd.org/releases/amd64/15.1-RELEASE/base.txz" sha256="3768988b151c20f965679062b065c63a977d6bbb9f47fd83695ec2c40790c18f" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=FreeBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-freebsd15.1" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- openbsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/base79.tgz" sha256="923d2e03f06408d50d4848334398c6d04b5514dcac7917badfc178a0eef248de" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/comp79.tgz" sha256="21a67af20aebcabf85b09f4206fc95b4cae0a35d42b154b976f0159f457724f9" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=OpenBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-openbsd7.9" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- netbsd x86_64 (cross compiled, pkgsrc libstdc++ for std::format) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -stdlib=libstdc++ -nostdinc++ -isystem /tmp/sysroot/gcc14/include/c++ -isystem /tmp/sysroot/gcc14/include/c++/x86_64--netbsd -L/tmp/sysroot/gcc14/lib -fuse-ld=lld -Wno-unused-command-line-argument -lgcc_s" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/base.tar.xz" sha256="06bc97d2ea7cbb7fea55e8b5fff17e26b642ebe3ca6475202954658e229e303c" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/comp.tar.xz" sha256="e14cf9f6ea080d90a148918a4f73a3696c473c60a435985f4316a9033abc0b3e" />
+        <sysroot url="https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/x86_64/11.0_2026Q3/All/gcc14-14.3.0nb3.tgz" sha256="8fca3189af23c742b84641c8d861cf1bf485576265da132fd2ee7bb818e6bc50" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=NetBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-netbsd11.0" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- linux x86_64 musl (alpine container) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+
+        <option name="musl" value="--enable-isystem" />
+
+        <job name="musl" config="release" link="static" />
+      </entry>
     </ci>
   </repository>
 
@@ -1853,6 +2045,70 @@
         <option name="gnu" value="--build-skip-test-run" />
 
         <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- freebsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://download.freebsd.org/releases/amd64/15.1-RELEASE/base.txz" sha256="3768988b151c20f965679062b065c63a977d6bbb9f47fd83695ec2c40790c18f" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=FreeBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-freebsd15.1" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- openbsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/base79.tgz" sha256="923d2e03f06408d50d4848334398c6d04b5514dcac7917badfc178a0eef248de" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/comp79.tgz" sha256="21a67af20aebcabf85b09f4206fc95b4cae0a35d42b154b976f0159f457724f9" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=OpenBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-openbsd7.9" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- netbsd x86_64 (cross compiled, pkgsrc libstdc++ for std::format) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -stdlib=libstdc++ -nostdinc++ -isystem /tmp/sysroot/gcc14/include/c++ -isystem /tmp/sysroot/gcc14/include/c++/x86_64--netbsd -L/tmp/sysroot/gcc14/lib -fuse-ld=lld -Wno-unused-command-line-argument -lgcc_s" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/base.tar.xz" sha256="06bc97d2ea7cbb7fea55e8b5fff17e26b642ebe3ca6475202954658e229e303c" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/comp.tar.xz" sha256="e14cf9f6ea080d90a148918a4f73a3696c473c60a435985f4316a9033abc0b3e" />
+        <sysroot url="https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/x86_64/11.0_2026Q3/All/gcc14-14.3.0nb3.tgz" sha256="8fca3189af23c742b84641c8d861cf1bf485576265da132fd2ee7bb818e6bc50" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=NetBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-netbsd11.0" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- linux x86_64 musl (alpine container) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+
+        <option name="musl" value="--enable-isystem" />
+
+        <job name="musl" config="release" link="static" />
       </entry>
     </ci>
   </repository>
@@ -2403,6 +2659,70 @@
       <entry>
         <job name="cmake" config="release" link="static" release="true" basename="selector-windows-arm64" host="aarch64-pc-windows-msvc" project="libbitcoin-system" program="selector" />
       </entry>
+
+      <!-- freebsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://download.freebsd.org/releases/amd64/15.1-RELEASE/base.txz" sha256="3768988b151c20f965679062b065c63a977d6bbb9f47fd83695ec2c40790c18f" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=FreeBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-freebsd15.1" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- openbsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/base79.tgz" sha256="923d2e03f06408d50d4848334398c6d04b5514dcac7917badfc178a0eef248de" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/comp79.tgz" sha256="21a67af20aebcabf85b09f4206fc95b4cae0a35d42b154b976f0159f457724f9" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=OpenBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-openbsd7.9" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- netbsd x86_64 (cross compiled, pkgsrc libstdc++ for std::format) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -stdlib=libstdc++ -nostdinc++ -isystem /tmp/sysroot/gcc14/include/c++ -isystem /tmp/sysroot/gcc14/include/c++/x86_64--netbsd -L/tmp/sysroot/gcc14/lib -fuse-ld=lld -Wno-unused-command-line-argument -lgcc_s" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/base.tar.xz" sha256="06bc97d2ea7cbb7fea55e8b5fff17e26b642ebe3ca6475202954658e229e303c" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/comp.tar.xz" sha256="e14cf9f6ea080d90a148918a4f73a3696c473c60a435985f4316a9033abc0b3e" />
+        <sysroot url="https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/x86_64/11.0_2026Q3/All/gcc14-14.3.0nb3.tgz" sha256="8fca3189af23c742b84641c8d861cf1bf485576265da132fd2ee7bb818e6bc50" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=NetBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-netbsd11.0" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- linux x86_64 musl (alpine container) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+
+        <option name="musl" value="--enable-isystem" />
+
+        <job name="musl" config="release" link="static" />
+      </entry>
     </ci>
   </repository>
 
@@ -2799,6 +3119,70 @@
         <option name="gnu" value="--build-skip-test-run" />
 
         <job name="gnu" config="release" link="static" gate="true" />
+      </entry>
+
+      <!-- freebsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-freebsd15.1 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://download.freebsd.org/releases/amd64/15.1-RELEASE/base.txz" sha256="3768988b151c20f965679062b065c63a977d6bbb9f47fd83695ec2c40790c18f" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=FreeBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-freebsd15.1" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- openbsd x86_64 (cross compiled) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-openbsd7.9 --sysroot=/tmp/sysroot -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/base79.tgz" sha256="923d2e03f06408d50d4848334398c6d04b5514dcac7917badfc178a0eef248de" />
+        <sysroot url="https://cdn.openbsd.org/pub/OpenBSD/7.9/amd64/comp79.tgz" sha256="21a67af20aebcabf85b09f4206fc95b4cae0a35d42b154b976f0159f457724f9" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=OpenBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-openbsd7.9" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- netbsd x86_64 (cross compiled, pkgsrc libstdc++ for std::format) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="clang-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -fuse-ld=lld -Wno-unused-command-line-argument" />
+        <compiler lang="cxx" name="clang++-18 --target=x86_64-unknown-netbsd11.0 --sysroot=/tmp/sysroot -stdlib=libstdc++ -nostdinc++ -isystem /tmp/sysroot/gcc14/include/c++ -isystem /tmp/sysroot/gcc14/include/c++/x86_64--netbsd -L/tmp/sysroot/gcc14/lib -fuse-ld=lld -Wno-unused-command-line-argument -lgcc_s" />
+        <package name="lld-18" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/base.tar.xz" sha256="06bc97d2ea7cbb7fea55e8b5fff17e26b642ebe3ca6475202954658e229e303c" />
+        <sysroot url="https://cdn.netbsd.org/pub/NetBSD/NetBSD-11.0/amd64/binary/sets/comp.tar.xz" sha256="e14cf9f6ea080d90a148918a4f73a3696c473c60a435985f4316a9033abc0b3e" />
+        <sysroot url="https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/x86_64/11.0_2026Q3/All/gcc14-14.3.0nb3.tgz" sha256="8fca3189af23c742b84641c8d861cf1bf485576265da132fd2ee7bb818e6bc50" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--build-skip-test-run" />
+        <option name="cmake" value="--build-skip-test-run" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_NAME=NetBSD" />
+        <option name="cmake" value="-DCMAKE_SYSTEM_PROCESSOR=x86_64" />
+
+        <job name="gnu" config="release" link="static" host="x86_64-unknown-netbsd11.0" />
+        <job name="cmake" config="release" link="static" />
+      </entry>
+
+      <!-- linux x86_64 musl (alpine container) -->
+      <entry image="ubuntu-24.04">
+        <compiler lang="c" name="gcc" />
+        <compiler lang="cxx" name="g++" />
+
+        <option name="musl" value="--enable-isystem" />
+
+        <job name="musl" config="release" link="static" />
       </entry>
     </ci>
   </repository>
@@ -3965,6 +4349,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <template name="ci-expanded.yml.gsl" path="yml" outpath=".github/workflows">
       <workflow name="Expanded Continuous Integration">
         <job type="shell" name="gnu" script="builds/gnu/install-gnu.sh" />
+        <job type="shell" name="musl" script="builds/gnu/install-gnu.sh" container="alpine:3.24" />
         <job type="shell" name="cmake" script="builds/cmake/install-cmake.sh" />
         <job type="shell" name="presets" script="builds/cmake/install-presets.sh" />
         <job type="msvc" name="msvc" script="builds\msvc\build-msvc.cmd" />

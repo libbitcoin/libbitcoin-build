@@ -164,6 +164,23 @@ function flags(job, entry)
     return join(my.e_flags, my.j_flags, " ")
 endfunction
 
+function sysroots(entry)
+    define my.entry = sysroots.entry
+
+    my.result = ""
+    for my.entry.sysroot as _sysroot
+        require(_sysroot, "sysroot", "url")
+        require(_sysroot, "sysroot", "sha256")
+        if (string.length(my.result) > 0)
+            my.result = join(my.result, "$(_sysroot.url) $(_sysroot.sha256)", " ")
+        else
+            my.result = "$(_sysroot.url) $(_sysroot.sha256)"
+        endif
+    endfor
+
+    return my.result
+endfunction
+
 function exclusions(repository)
     define my.repository = exclusions.repository
 
@@ -597,12 +614,18 @@ jobs:
 .
 .   define my.cross = 0
 .   define my.cross_tests = 0
+.   define my.sysroot = 0
 .   for my.repository->ci.entry as _entry
 .       for _entry.job as _job where (_job.name = my.job.name) & \
           !is_defined_positive(_job, "release")
-.           if (defined(_job.host) | defined(_entry.host)) & \
-              (!defined(my.meta->workflow.restricted) | \
-              is_defined_positive(_job, "$(my.meta->workflow.restricted)"))
+.           if defined(my.meta->workflow.restricted) & \
+              !is_defined_positive(_job, "$(my.meta->workflow.restricted)")
+.               next
+.           endif
+.           if (count(_entry.sysroot) > 0)
+.               my.sysroot = 1
+.           endif
+.           if defined(_job.host) | defined(_entry.host)
 .               my.cross = 1
 .               if !is_token("--build-skip-test", \
                     accumulate_options(_entry, _job, my.meta))
@@ -682,6 +705,11 @@ jobs:
             host: "$(property_priority("host", _job, _entry))"
 .               endif
 .
+.               define my.sysroots = sysroots(_entry)
+.               if !(my.sysroots = "")
+            sysroot: "$(my.sysroots)"
+.               endif
+.
 .               for _buildset.build as _build
 .                   define my.value = ""
 .                   if ((count(_entry.build, count.name = _build.name) > 0) |\
@@ -698,6 +726,12 @@ jobs:
 .       endfor
 
     runs-on: ${{ matrix.image }}
+.   if defined(my.job.container)
+    container:
+      image: $(my.job.container)
+      volumes:
+        - ${{ github.workspace }}:${{ github.workspace }}
+.   endif
 
     env:
       CC: '${{ matrix.cc }}'
@@ -709,6 +743,13 @@ jobs:
 .   endif
 
     steps:
+.   if defined(my.job.container)
+      - name: Prepare toolchain [alpine]
+        shell: sh
+        run: |
+          apk add --no-cache bash git build-base autoconf automake libtool pkgconf linux-headers ${{ matrix.package || '' }}
+
+.   endif
       - name: Get branch name
         id: get-branch
         shell: bash
@@ -753,6 +794,7 @@ jobs:
 .       endif
 
 .   endfor
+.   if !defined(my.job.container)
 
       - name: Prepare toolchain [linux]
         if: ${{ startsWith(matrix.image, 'ubuntu') }}
@@ -778,6 +820,7 @@ jobs:
         if: ${{ startsWith(matrix.image, 'windows') }}
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
+.   endif
       - name: Environmental Computation
         shell: bash
         run: |
@@ -792,6 +835,23 @@ jobs:
 .       endif
 .
 .   require(my.job, "job", "script")
+.   if my.sysroot
+
+      - name: Prepare sysroot [cross]
+        if: ${{ matrix.sysroot }}
+        shell: bash
+        run: |
+          mkdir -p /tmp/sysroot
+          set -- ${{ matrix.sysroot }}
+          while [[ $# -gt 1 ]]; do
+            curl --fail --silent --show-error --location --output sysroot.archive "$1"
+            echo "$2  sysroot.archive" | sha256sum --check
+            tar -xf sysroot.archive -C /tmp/sysroot
+            rm sysroot.archive
+            shift 2
+          done
+          find /tmp/sysroot -name '*.la' -delete
+.   endif
 .   if my.cross
 
       - name: Verify emulation [cross]
