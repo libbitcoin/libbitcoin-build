@@ -11,7 +11,7 @@
   </ImportGroup>
 
   <PropertyGroup Label="Configuration">
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <PreferredToolArchitecture Condition="'$(PROCESSOR_ARCHITECTURE)' == 'AMD64'">x64</PreferredToolArchitecture>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
