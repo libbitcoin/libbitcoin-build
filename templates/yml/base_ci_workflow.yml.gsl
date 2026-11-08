@@ -182,21 +182,32 @@ function exclusions(repository)
     return my.result
 endfunction
 
-function accumulate_options(entry, job)
+function option_applies(option, meta)
+    define my.option = option_applies.option
+    define my.meta = option_applies.meta
+
+    return !defined(my.option.restricted) | \
+        (defined(my.meta->workflow.restricted) & \
+        (my.option.restricted = my.meta->workflow.restricted))
+endfunction
+
+function accumulate_options(entry, job, meta)
     define my.entry = accumulate_options.entry
     define my.job = accumulate_options.job
+    define my.meta = accumulate_options.meta
 
     define my.options = ""
 
     for my.entry.option as _option where \
-      !defined(_option.name) | (_option.name = my.job.name)
+      (!defined(_option.name) | (_option.name = my.job.name)) & \
+      option_applies(_option, my.meta)
         if (string.length(my.options) > 0)
             my.options = join(my.options, _option.value, " ")
         else
             my.options = _option.value
         endif
     endfor
-    for my.job.option as _option
+    for my.job.option as _option where option_applies(_option, my.meta)
         if (string.length(my.options) > 0)
             my.options = join(my.options, _option.value, " ")
         else
@@ -462,7 +473,7 @@ jobs:
             platform: "$(property_priority("platform", _job, _entry))"
             version: "$(property_priority("version", _job, _entry))"
             tests: "$(property_priority("tests", _job, _entry, "*"))"
-            options: "$(accumulate_options(_entry, _job))"
+            options: "$(accumulate_options(_entry, _job, my.meta))"
 .       endfor
 .   endfor
 .   if (count(my.repository.test) = 0)
@@ -593,10 +604,8 @@ jobs:
               (!defined(my.meta->workflow.restricted) | \
               is_defined_positive(_job, "$(my.meta->workflow.restricted)"))
 .               my.cross = 1
-.               if (count(_entry.option, count.value = "--build-skip-tests") + \
-                    count(_job.option, count.value = "--build-skip-tests") + \
-                    count(_entry.option, count.value = "--build-skip-test-run") + \
-                    count(_job.option, count.value = "--build-skip-test-run")) = 0
+.               if !is_token("--build-skip-test", \
+                    accumulate_options(_entry, _job, my.meta))
 .                   my.cross_tests = 1
 .               endif
 .           endif
@@ -683,7 +692,7 @@ jobs:
             $(_build.name): "$(my.value)"
 .               endfor
 .
-            options: "$(accumulate_options(_entry, _job))"
+            options: "$(accumulate_options(_entry, _job, my.meta))"
 .
 .           endfor
 .       endfor
@@ -838,7 +847,7 @@ jobs:
 .       define my.testname = my.repository->test.name
 
       - name: Execute tests [cross]
-        if: ${{ matrix.host }}
+        if: ${{ matrix.host && !contains(matrix.options, '--build-skip-test') }}
         shell: bash
         working-directory: '$(my.repository.name)/obj/builds/gnu'
         run: >

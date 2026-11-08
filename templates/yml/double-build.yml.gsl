@@ -249,7 +249,7 @@ jobs:
 
 .           endif
 .           my.first = 0
-.           define my.options = accumulate_options(_entry, _job)
+.           define my.options = accumulate_options(_entry, _job, my.meta)
 .           define my.cc = compiler(_job, _entry, "c")
 .           define my.cxx = compiler(_job, _entry, "cxx")
 .           define my.flags = flags(_job, _entry)
@@ -510,7 +510,7 @@ jobs:
           if-no-files-found: error
 .   endif
 .   if count_hosted_release_jobs(my.repository, 1) > 0
-.       emit_guix_jobs(my.repository)
+.       emit_guix_jobs(my.meta, my.repository)
 .   endif
 .   define my.native = (count_hosted_release_jobs(my.repository, 0) > 0) ?? "build" ? ""
 .   define my.hosted = (count_hosted_release_jobs(my.repository, 1) > 0) ?? "guix" ? ""
@@ -609,7 +609,8 @@ jobs:
 
 .endmacro # emit_checkout
 .
-.macro emit_guix_jobs(repository)
+.macro emit_guix_jobs(meta, repository)
+.   define my.meta = emit_guix_jobs.meta
 .   define my.repository = emit_guix_jobs.repository
 .   define my.sdks = release_sdks(my.repository)
 .   if !is_empty(my.sdks)
@@ -763,7 +764,7 @@ jobs:
 
 .           endif
 .           my.first = 0
-.           define my.options = accumulate_options(_entry, _job)
+.           define my.options = accumulate_options(_entry, _job, my.meta)
 .           define my.flags = flags(_job, _entry)
 .           define my.linkflags = element_property_concat("linkflag", "value", _entry)
           - basename: "$(_job.basename)"
