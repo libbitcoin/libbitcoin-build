@@ -850,6 +850,7 @@ jobs:
             rm sysroot.archive
             shift 2
           done
+          chmod -R u+rwX /tmp/sysroot
           find /tmp/sysroot -name '*.la' -delete
 .   endif
 .   if my.cross

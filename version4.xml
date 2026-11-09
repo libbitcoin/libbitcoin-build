@@ -611,7 +611,7 @@
         <option name="gnu" value="--with-valgrind" />
         <option name="gnu" value="--build-valgrind=secp256k1_ctime_tests" />
 
-        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -624,7 +624,7 @@
         <option name="gnu" value="--with-valgrind" />
         <option name="gnu" value="--build-valgrind=secp256k1_ctime_tests" />
 
-        <job name="gnu" config="debug" link="static" />
+        <job name="gnu" config="release" link="static" />
       </entry>
 
       <entry image="ubuntu-24.04">
@@ -3102,6 +3102,33 @@
         <job name="presets" preset="nix-gnu-debug-static" gate="true" />
         <job name="presets" preset="nix-gnu-release-shared" />
         <job name="presets" preset="nix-gnu-release-static" />
+      </entry>
+
+      <!-- constant time (valgrind reports secret dependent branches) -->
+      <entry image="ubuntu-24.04">
+
+        <compiler lang="c" name="gcc" version="14" />
+        <compiler lang="cxx" name="g++" version="14" />
+        <package name="valgrind" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--with-valgrind" />
+        <option name="gnu" value="--build-valgrind=ctime_tests" />
+
+        <job name="gnu" config="release" link="static" />
+      </entry>
+
+      <entry image="ubuntu-24.04">
+
+        <compiler lang="c" name="clang" version="18" />
+        <compiler lang="cxx" name="clang++" version="18" />
+        <package name="valgrind" />
+
+        <option name="gnu" value="--enable-isystem" />
+        <option name="gnu" value="--with-valgrind" />
+        <option name="gnu" value="--build-valgrind=ctime_tests" />
+
+        <job name="gnu" config="release" link="static" />
       </entry>
 
       <entry image="ubuntu-24.04">
