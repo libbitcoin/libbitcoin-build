@@ -240,6 +240,7 @@ main "$@"
 .macro define_utility_functions()
 .
 .   define_display_configure_options()
+.   define_remove_configure_option()
 
 .   define_error_functions()
 .endmacro # define_utility_functions
@@ -807,6 +808,24 @@ display_configure_options()
 }
 .endmacro # define_display_configure_options
 .
+.macro define_remove_configure_option()
+
+remove_configure_option()
+{
+    local PATTERN="$1"
+    local RETAINED=()
+    local OPTION
+
+    for OPTION in "${CONFIGURE_OPTIONS[@]}"; do
+        if [[ ${OPTION} != ${PATTERN} ]]; then
+            RETAINED=("${RETAINED[@]}" "${OPTION}")
+        fi
+    done
+
+    CONFIGURE_OPTIONS=("${RETAINED[@]}")
+}
+.endmacro # define_remove_configure_option
+.
 .macro define_build_initialize_path()
 
     # directory rationalization
@@ -1326,17 +1345,17 @@ $(my.indent)CONFIGURE_OPTIONS=("$@")
 .               abort "Expected hint_build value '$(_depend.hint_build)' not found for dependency '$(_depend.name)'."
 .           endif
 .
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--build-$(option_name(_depend))/}")
+$(my.indent)remove_configure_option "--build-$(option_name(_depend))"
 .       endfor
 .
 .       for _build_options.option as _option where is_defined_positive(_option, "sanitize")
 .           for _option.symbol as _symbol
 .               if defined(_symbol.long)
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#$(option_symbol("long", _symbol, _option, "true"))/}")
+$(my.indent)remove_configure_option "$(option_symbol("long", _symbol, _option, "true"))"
 .               endif
 .
 .               if defined(_symbol.short)
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#$(option_symbol("short", _symbol, _option, "true"))/}")
+$(my.indent)remove_configure_option "$(option_symbol("short", _symbol, _option, "true"))"
 .               endif
 .           endfor
 .       endfor
@@ -1370,7 +1389,7 @@ $(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#$(option_symbol("short",
                             (_cele.platform = _platform.name)
 .
 .                       define my.option = _target->option(.name = _cele.option)
-$(my.indent)CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/#--hardware-$(my.option.name)/}")
+$(my.indent)remove_configure_option "--hardware-$(my.option.name)"
 .                   endfor
 .               endfor
 .           endfor
@@ -1889,7 +1908,7 @@ $(my.indent)fi
 .   endfor
 
 $(my.indent)if [[ ${HARDWARE_PLATFORM_$(_platform.name:c,upper)} == "yes" ]]; then
-    $(my.indent)ARCHTUNE="${ARCHBASE}${ARCHSUFFIX}"
+    $(my.indent)ARCHTUNE="-march=${ARCHBASE}${ARCHSUFFIX}"
 $(my.indent)fi
 .
 .endmacro # define_architecture_options_mergeable

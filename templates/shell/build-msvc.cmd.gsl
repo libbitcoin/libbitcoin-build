@@ -280,27 +280,34 @@ if "!$(_depend.name:c)_TAG!" == "" (
 .
 .       if (my.active_build.method = "msbuild")
 .           define my.dep_repo = my.configuration->repository(.name = _depend.name)
-.           for my.dep_repo.library as _library
-.               define my.name = defined(_library.msvcproj) ?? \
-                    _library.msvcproj ? _library.name
-    call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)" "$(my.name)" "!REMAPPED_PARAMS!"
-.               error_trampoline("    ")
-.           endfor
-.           if last()
-.               for my.dep_repo.binary as _binary
-.               define my.name = defined(_binary.msvcproj) ?? \
-                    _binary.msvcproj ? _binary.name
+.           if !last()
+.               for my.dep_repo.library as _library
+.                   define my.name = defined(_library.msvcproj) ?? \
+                        _library.msvcproj ? _library.name
     call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)" "$(my.name)" "!REMAPPED_PARAMS!"
 .                   error_trampoline("    ")
 .               endfor
+.           else
+    set "TARGETS="
+.               for my.dep_repo.library as _library
+.                   define my.name = defined(_library.msvcproj) ?? \
+                        _library.msvcproj ? _library.name
+    set "TARGETS=!TARGETS!;$(my.name)"
+.               endfor
+.               for my.dep_repo.binary as _binary
+.                   define my.name = defined(_binary.msvcproj) ?? \
+                        _binary.msvcproj ? _binary.name
+    set "TARGETS=!TARGETS!;$(my.name)"
+.               endfor
     if not "!BUILD_SKIP_TESTS!" == "yes" (
 .               for my.dep_repo.test as _test
-.               define my.name = defined(_test.msvcproj) ?? \
-                    _test.msvcproj ? _test.name
-        call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)" "$(my.name)" "!REMAPPED_PARAMS!"
-.                   error_trampoline("        ")
+.                   define my.name = defined(_test.msvcproj) ?? \
+                        _test.msvcproj ? _test.name
+        set "TARGETS=!TARGETS!;$(my.name)"
 .               endfor
     )
+    call :build_msbuild "$(_depend.name)" "$(my.active_build.filepath)" "!TARGETS:~1!" "!REMAPPED_PARAMS!"
+.               error_trampoline("    ")
 .           endif
 .       else
 .           abort "Unrecognized build method '$(_build.method)'."
@@ -760,7 +767,7 @@ $(fix_column("", "  $(_option->hint.text)", my.column, my.prefix, my.suffix))
 
     if not "%TARGET%" == "" (
         if not "!BUILD_MODE!" == "" (
-            set "TARGET_ARG=/target:%TARGET%:!BUILD_MODE!"
+            set "TARGET_ARG=/target:!TARGET:;=:%BUILD_MODE%;!:!BUILD_MODE!"
         ) else (
             set "TARGET_ARG=/target:%TARGET%"
         )
@@ -779,7 +786,12 @@ $(fix_column("", "  $(_option->hint.text)", my.column, my.prefix, my.suffix))
 
     set "COMPILER_ARG="
     if "!BUILD_COMPILER!" == "clang" (
-        set "COMPILER_ARG=/p:Option-clang=true "
+        set "COMPILER_ARG=/p:PlatformToolset=ClangCL "
+    )
+
+    set "TOOLS_ARG="
+    if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
+        set "TOOLS_ARG=/p:PreferredToolArchitecture=x64 "
     )
 
     call :push_directory "!BUILD_SRC_DIR!\\%PROJECT%\\%RELATIVE_PATH%\\!BUILD_VERSION!"
@@ -788,10 +800,10 @@ $(fix_column("", "  $(_option->hint.text)", my.column, my.prefix, my.suffix))
     call :nuget_restore "%PROJECT%"
 .   error_trampoline("    ")
 
-    !MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!!COMPILER_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS! !ADDITIONAL_PARAMS!
+    !MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!!COMPILER_ARG!!TOOLS_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS! !ADDITIONAL_PARAMS!
 
     if %ERRORLEVEL% neq 0 (
-        call :msg_error "!MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!!COMPILER_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! /p:PreferredToolArchitecture=x64 %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS! !ADDITIONAL_PARAMS!"
+        call :msg_error "!MSBUILD_EXE! /verbosity:!MSBUILD_VERBOSE! !SYMBOLS_ARG!!COMPILER_ARG!!TOOLS_ARG!/p:Platform=!BUILD_PLATFORM! /p:Configuration=!BUILD_CONFIG! %TARGET_ARG% %PROJECT%.sln /p:PreBuildEventUseInBuild=false /p:PostBuildEventUseInBuild=false !UNHANDLED_ARGS! !ADDITIONAL_PARAMS!"
         call :pop_directory
         exit /b 1
     )
