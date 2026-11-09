@@ -271,7 +271,7 @@ endfunction
 .           define my.intended_prefix = my.meta->path.prefix
 .
 .           populate_files(_substitutions, _files, my.meta->discovery, \
-                my.target, my.absolute_root, my.intended_prefix)
+                my.target, my.absolute_root, my.intended_prefix, my.meta->web)
 .
 .   # ClCompile
   <ItemGroup>
@@ -292,6 +292,7 @@ endfunction
   <ItemGroup>
 .           new items as _items
 .               linearize_sources(_items, _files, _substitutions, my.meta->other)
+.               linearize_sources(_items, _files, _substitutions, my.meta->web)
 .               new _items.item as _packagesconfig
 .                   _packagesconfig.name = "packages.config"
 .               endnew

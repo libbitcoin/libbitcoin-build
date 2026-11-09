@@ -200,7 +200,7 @@ endfunction
 .           define my.intended_prefix = my.meta->path.prefix
 .
 .           populate_files(_substitutions, _files, my.meta->discovery, \
-                my.target, my.absolute_root, my.intended_prefix)
+                my.target, my.absolute_root, my.intended_prefix, my.meta->web)
 .
 .   # Filters
   <ItemGroup>
@@ -243,6 +243,7 @@ endfunction
 .   # None
 .           new items as _items
 .               accumulate_items(_items, _files, _substitutions, my.meta->other)
+.               accumulate_items(_items, _files, _substitutions, my.meta->web)
 .
 .               new _items.item as _item
 .                   _item.name = "packages.config"
