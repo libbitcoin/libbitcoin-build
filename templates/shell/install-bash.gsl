@@ -1908,7 +1908,7 @@ $(my.indent)fi
 .   endfor
 
 $(my.indent)if [[ ${HARDWARE_PLATFORM_$(_platform.name:c,upper)} == "yes" ]]; then
-    $(my.indent)ARCHTUNE="${ARCHBASE}${ARCHSUFFIX}"
+    $(my.indent)ARCHTUNE="-march=${ARCHBASE}${ARCHSUFFIX}"
 $(my.indent)fi
 .
 .endmacro # define_architecture_options_mergeable
