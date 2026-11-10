@@ -1,0 +1,853 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin project and import property sheets (.props)
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/xml-output.gsl"
+gsl from "../lib/msbuild.gsl"
+gsl from "../lib/msvc.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_projects(configuration)
+    define my.configuration = generate_projects.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+    require_msvc(my.configuration)
+
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+
+    for my.template.tools as _tools by _tools.set
+        define my.toolchain = my.configuration->toolchain(\
+            this.name = _tools.chain, this)
+
+        for my.configuration.repository as _repository
+            define my.base_path = path_append(my.configuration->templates.resultpath, \
+                path_append(_repository.name, \
+                    path_append(my.template.outpath, _tools.outpath)))
+
+            create_directory(my.base_path)
+
+            for _repository. as _target where is_target_element(_target)
+                generate_project_sheet(_target, _repository, \
+                    my.configuration, my.toolchain, my.base_path)
+            endfor
+
+            for _repository.library as _library where \
+                (_library.name = _repository.name)
+                generate_import_sheet(_library, _repository, \
+                    my.configuration, my.toolchain, my.base_path)
+            endfor
+
+            new dependencies as _dependencies
+                populate_cumulative_repository_dependencies(_dependencies, \
+                    _repository, my.configuration)
+
+                for _dependencies.dependency as _depend where \
+                    !(_depend.name = _repository.name)
+                    define my.subject = my.configuration->repository(\
+                        this.name = _depend.name, this)
+
+                    for my.subject.library as _library where \
+                        (_library.name = my.subject.name)
+                        generate_import_sheet(_library, my.subject, \
+                            my.configuration, my.toolchain, my.base_path)
+                    endfor
+                endfor
+
+                delete _dependencies
+            endnew
+        endfor
+    endfor
+endfunction
+
+function generate_project_sheet(target, repository, configuration, toolchain, path)
+    define my.target = generate_project_sheet.target
+    define my.repository = generate_project_sheet.repository
+    define my.configuration = generate_project_sheet.configuration
+    define my.toolchain = generate_project_sheet.toolchain
+    define my.path = generate_project_sheet.path
+
+    define my.project = target_name(my.target)
+    define my.output_path = path_append(my.path, my.project)
+
+    create_directory(my.output_path)
+
+    define my.out_file = path_append(my.output_path, "$(my.project).props")
+
+    notify(my.out_file)
+    output(my.out_file)
+
+    emit_project_sheet(my.target, my.repository, my.configuration, \
+        my.toolchain)
+
+    close
+endfunction
+
+function generate_import_sheet(library, repository, configuration, toolchain, path)
+    define my.library = generate_import_sheet.library
+    define my.repository = generate_import_sheet.repository
+    define my.configuration = generate_import_sheet.configuration
+    define my.toolchain = generate_import_sheet.toolchain
+    define my.path = generate_import_sheet.path
+
+    define my.out_file = path_append(my.path, \
+        "$(my.repository.name).import.props")
+
+    notify(my.out_file)
+    output(my.out_file)
+
+    emit_import_sheet(my.library, my.repository, my.configuration, \
+        my.toolchain)
+
+    close
+endfunction
+
+###############################################################################
+# Functions
+###############################################################################
+
+# The repository dependencies of a target, each after its own dependencies.
+function repository_dependencies(result, target, configuration)
+    define my.result = repository_dependencies.result
+    define my.target = repository_dependencies.target
+    define my.configuration = repository_dependencies.configuration
+
+    for my.target.dependency as _depend where \
+        defined(my.configuration->repository(this.name = _depend.name, this))
+        define my.dep_repository = my.configuration->repository(\
+            this.name = _depend.name, this)
+        define my.dep_library = my.dep_repository->library(\
+            this.name = _depend.name, this)
+
+        repository_dependencies(my.result, my.dep_library, my.configuration)
+
+        if !defined(my.result->dependency(this.name = _depend.name, this))
+            copy _depend to my.result
+        endif
+    endfor
+endfunction
+
+# The length of the longest dependency name.
+function dependency_width(dependencies)
+    define my.dependencies = dependency_width.dependencies
+    define my.value = 0
+
+    for my.dependencies.dependency as _depend
+        my.value = maximum(my.value, string.length(_depend.name))
+    endfor
+
+    return my.value
+endfunction
+
+# The directory of a repository, relative to an importing project.
+function repository_root(repository)
+    define my.repository = repository_root.repository
+    return "\$(ProjectDir)..\\..\\..\\..\\..\\$(my.repository.name)\\"
+endfunction
+
+# The directory of the repositories, relative to an importing project.
+function source_root()
+    return "\$(ProjectDir)..\\..\\..\\..\\..\\"
+endfunction
+
+# The output directory layout beneath bin and obj directories.
+function output_layout(config, linkage)
+    return "\$(PlatformName)\\$(my.config)\\\$(PlatformToolset)\\$(my.linkage)\\"
+endfunction
+
+# The msbuild condition that selects configurations of a debug/release group.
+function configuration_condition(config)
+    return "\$(Configuration.IndexOf('$(my.config)')) != -1"
+endfunction
+
+# The msbuild property that holds the linkage of a repository.
+function linkage_property(repository)
+    define my.repository = linkage_property.repository
+    return "\$(Linkage-$(my.repository.name))"
+endfunction
+
+# The msbuild condition that tests the linkage of a repository.
+function linkage_test(repository, linkage)
+    define my.repository = linkage_test.repository
+    return "'$(linkage_property(my.repository))' == '$(my.linkage)'"
+endfunction
+
+# The library directories of a repository for a debug/release group.
+function library_directories(library, repository, config)
+    define my.library = library_directories.library
+    define my.repository = library_directories.repository
+    define my.root = repository_root(my.repository)
+    define my.layout = output_layout(my.config, \
+        linkage_property(my.repository))
+
+    return "$(my.root)bin\\$(my.layout);$(my.root)obj\\$(target_name(my.library))\\$(my.layout)"
+endfunction
+
+# The directories of generated headers of a library, beneath a root.
+function generated_include_directories(library, root)
+    define my.library = generated_include_directories.library
+    define my.generated = 0
+    define my.value = ""
+
+    for my.library.configurable as _configurable where \
+        (_configurable.type = "headers")
+        my.generated = 1
+    endfor
+
+    if my.generated
+        for my.library.headers as _headers where \
+            !is_defined_positive(_headers, "private")
+            my.value = join(my.value, \
+                "$(my.root)build\\$(path(_headers.path))\\", ";")
+        endfor
+    endif
+
+    return my.value
+endfunction
+
+# The directories of headers of a library, beneath a root.
+function include_directories(library, root)
+    define my.library = include_directories.library
+    define my.value = generated_include_directories(my.library, my.root)
+
+    for my.library.headers as _headers where \
+        !is_defined_positive(_headers, "private")
+        my.value = join(my.value, "$(my.root)$(path(_headers.path))\\", ";")
+    endfor
+
+    return my.value
+endfunction
+
+# The msbuild property that holds an option.
+function option_property(name)
+    return "Option-$(my.name)"
+endfunction
+
+# The msbuild condition that tests an option.
+function option_test(name)
+    return "'\$($(option_property(my.name)))' == 'true'"
+endfunction
+
+# The msbuild condition that tests the option of a define.
+function define_test(define)
+    define my.define = define_test.define
+
+    if is_defined_positive(my.define, "negate")
+        return "'\$($(option_property(my.define.option)))' != 'true'"
+    endif
+
+    return option_test(my.define.option)
+endfunction
+
+# The msbuild default value of an option.
+function option_default(option)
+    define my.option = option_default.option
+    return is_defined_positive(my.option, "default") ?? "true" ? "false"
+endfunction
+
+# True if the option affects the consumers of the target.
+function is_public_option(target, name)
+    define my.target = is_public_option.target
+    define my.public = 0
+
+    for my.target.compiler as _compiler
+        for _compiler.flag as _flag where \
+            is_defined_value(_flag, "option", my.name)
+            my.public = 1
+        endfor
+
+        for _compiler.architecture as _architecture where \
+            is_defined_value(_architecture, "option", my.name)
+            my.public = 1
+        endfor
+
+        for _compiler.define as _define where \
+            is_defined_value(_define, "option", my.name)
+            if is_defined_value(_define, "type", "public")
+                my.public = 1
+            endif
+        endfor
+    endfor
+
+    return my.public
+endfunction
+
+# True if the option is emitted, given a limit to public options.
+function is_emitted_option(target, option, public)
+    define my.target = is_emitted_option.target
+    define my.option = is_emitted_option.option
+
+    if !my.public
+        return 1
+    endif
+
+    return is_public_option(my.target, my.option.name)
+endfunction
+
+# The count of emitted options of the target.
+function option_count(target, public)
+    define my.target = option_count.target
+    define my.value = 0
+
+    for my.target.option as _option where \
+        is_emitted_option(my.target, _option, my.public)
+        my.value += 1
+    endfor
+
+    return my.value
+endfunction
+
+# The length of the longest emitted option property name of the target.
+function option_width(target, public)
+    define my.target = option_width.target
+    define my.value = 0
+
+    for my.target.option as _option where \
+        is_emitted_option(my.target, _option, my.public)
+        my.value = maximum(my.value, \
+            string.length(option_property(_option.name)))
+    endfor
+
+    return my.value
+endfunction
+
+# The semicolon delimited symbols of a define.
+function define_symbols(define)
+    define my.define = define_symbols.define
+    define my.value = ""
+
+    for my.define.symbol as _symbol
+        my.value = join(my.value, symbol_text(_symbol), ";")
+    endfor
+
+    return my.value
+endfunction
+
+# True if the symbols of the define do not reference build system variables.
+function is_literal_define(define)
+    define my.define = is_literal_define.define
+    define my.literal = 1
+
+    if regexp.match("[$][{]", define_symbols(my.define))
+        my.literal = 0
+    endif
+
+    return my.literal
+endfunction
+
+# True if the define is emitted, given a limit to public defines.
+function is_emitted_define(define, public)
+    define my.define = is_emitted_define.define
+
+    if !is_literal_define(my.define)
+        return 0
+    endif
+
+    if !my.public
+        return 1
+    endif
+
+    return is_defined_value(my.define, "type", "public")
+endfunction
+
+# True if the flag selects an instruction set level of the platform.
+function is_arch_flag(flag, platform)
+    define my.flag = is_arch_flag.flag
+
+    if !defined(my.flag.option) | !defined(my.flag.msvc_arch)
+        return 0
+    endif
+
+    return is_defined_value(my.flag, "platform", my.platform)
+endfunction
+
+# The count of flags that select an instruction set level of the arch.
+function arch_flag_count(target, arch)
+    define my.target = arch_flag_count.target
+    define my.arch = arch_flag_count.arch
+    define my.value = 0
+
+    for my.target.compiler as _compiler
+        for _compiler.flag as _flag where \
+            is_arch_flag(_flag, my.arch.platform)
+            my.value += 1
+        endfor
+    endfor
+
+    return my.value
+endfunction
+
+# The msbuild condition under which options raise the arch to the level.
+function arch_level_condition(target, arch, level)
+    define my.target = arch_level_condition.target
+    define my.arch = arch_level_condition.arch
+    define my.level = arch_level_condition.level
+    define my.terms = ""
+    define my.count = 0
+    define my.higher = 0
+    define my.value = ""
+
+    for my.target.compiler as _compiler
+        for _compiler.flag as _flag where \
+            is_arch_flag(_flag, my.arch.platform)
+            if (_flag.msvc_arch = my.level.name)
+                my.terms = join(my.terms, option_test(_flag.option), " Or ")
+                my.count += 1
+            endif
+        endfor
+    endfor
+
+    if (my.count > 0)
+        my.value = (my.count > 1) ?? "($(my.terms))" ? my.terms
+
+        for my.arch.level as _level
+            if my.higher
+                my.value = "$(my.value) And '\$(Option-arch)' != '$(_level.value)'"
+            endif
+
+            if (_level.name = my.level.name)
+                my.higher = 1
+            endif
+        endfor
+    endif
+
+    return my.value
+endfunction
+
+# True if the flag is a compiler option of the platform.
+function is_platform_flag(flag, platform)
+    define my.flag = is_platform_flag.flag
+
+    if !defined(my.flag.option)
+        return 0
+    endif
+
+    return is_defined_value(my.flag, "platform", my.platform)
+endfunction
+
+# The count of optional compiler flags of the platform.
+function platform_flag_count(target, platform)
+    define my.target = platform_flag_count.target
+    define my.value = 0
+
+    for my.target.compiler as _compiler
+        for _compiler.flag as _flag where \
+            is_platform_flag(_flag, my.platform)
+            my.value += 1
+        endfor
+    endfor
+
+    return my.value
+endfunction
+
+# True if the architecture is optional for the platform.
+function is_platform_architecture(architecture, platform)
+    define my.architecture = is_platform_architecture.architecture
+
+    if !defined(my.architecture.option)
+        return 0
+    endif
+
+    return is_defined_value(my.architecture, "platform", my.platform)
+endfunction
+
+# The msbuild condition that tests for any architecture of the platform.
+function architecture_condition(target, platform)
+    define my.target = architecture_condition.target
+    define my.value = ""
+
+    for my.target.compiler as _compiler
+        for _compiler.architecture as _architecture where \
+            is_platform_architecture(_architecture, my.platform)
+            my.value = join(my.value, option_test(_architecture.option), " Or ")
+        endfor
+    endfor
+
+    return my.value
+endfunction
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_open(owner, toolchain)
+.   define my.owner = emit_open.owner
+.   define my.toolchain = emit_open.toolchain
+.
+<?xml version="1.0" encoding="utf-8"?>
+.
+.   copyleft(my.owner)
+.
+<Project DefaultTargets="Build" xmlns="$(my.toolchain->msbuild.schema)">
+.
+.endmacro # emit_open
+.
+.macro emit_project_sheet(target, repository, configuration, toolchain)
+.   define my.target = emit_project_sheet.target
+.   define my.repository = emit_project_sheet.repository
+.   define my.configuration = emit_project_sheet.configuration
+.   define my.toolchain = emit_project_sheet.toolchain
+.   define my.msvc = my.configuration->canonical->msvc
+.   define my.project = target_name(my.target)
+.
+.   emit_open(my.repository.name, my.toolchain)
+
+  <PropertyGroup>
+    <_PropertySheetDisplayName>$(my.project) Settings</_PropertySheetDisplayName>
+.   if (count(my.target.resources) > 0)
+    <GenerateManifest>false</GenerateManifest>
+.   endif
+  </PropertyGroup>
+
+  <ItemGroup Label="BuildOptionsExtension">
+    <PropertyPageSchema Condition="Exists('\$(MSBuildThisFileDirectory)$(my.project).xml')" Include="\$(MSBuildThisFileDirectory)$(my.project).xml" />
+  </ItemGroup>
+.   emit_project_definitions(my.target, my.repository, my.msvc)
+.   emit_clang_options(my.target, my.msvc)
+.   new dependencies as _dependencies
+.       repository_dependencies(_dependencies, my.target, my.configuration)
+.       emit_imports(_dependencies)
+.       emit_linkages(_dependencies)
+.       emit_option_defaults(my.target, 0)
+.       emit_arch_rules(my.target, my.msvc)
+.       emit_option_info(my.target, 0, "OptionInfo")
+.       emit_linkage_info(_dependencies)
+.       delete _dependencies
+.   endnew
+
+</Project>
+.
+.endmacro # emit_project_sheet
+.
+.macro emit_project_definitions(target, repository, msvc)
+.   define my.target = emit_project_definitions.target
+.   define my.repository = emit_project_definitions.repository
+.   define my.msvc = emit_project_definitions.msvc
+.   define my.kind = name(my.target)
+.
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <LanguageStandard>stdcpp$(my.target->compiler.standard)</LanguageStandard>
+.   if (my.kind = "library")
+.       define my.includes = include_directories(my.target, "\$(RepoRoot)")
+.       if !(my.includes = "")
+      <AdditionalIncludeDirectories>$(my.includes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+.       endif
+      <PreprocessorDefinitions Condition="'\$(ConfigurationType)' == 'DynamicLibrary'">$(my.target.symbol)_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'\$(ConfigurationType)' == 'StaticLibrary'">$(my.target.symbol)_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+.   endif
+.   emit_option_definitions(my.target, 0)
+    </ClCompile>
+.   if (count(my.target.resources) > 0)
+.       for my.repository.library as _library where \
+            (_library.name = my.repository.name)
+.           define my.includes = generated_include_directories(_library, \
+                "\$(RepoRoot)")
+.           if !(my.includes = "")
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(my.includes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+.           endif
+.       endfor
+.   endif
+.   if (my.kind = "test")
+.       define my.release = msvc_property(my.msvc, "release", "DebugOrRelease")
+    <PostBuildEvent Condition="'\$(DebugOrRelease)' == '$(my.release)'">
+      <Command>"\$(TargetPath)" --log_level=warning --run_test=* --show_progress=no --build_info=yes</Command>
+    </PostBuildEvent>
+.   endif
+  </ItemDefinitionGroup>
+.
+.endmacro # emit_project_definitions
+.
+.macro emit_option_definitions(target, public)
+.   define my.target = emit_option_definitions.target
+.   define my.public = emit_option_definitions.public
+.
+.   for my.target.compiler as _compiler
+.       for _compiler.flag as _flag where defined(_flag.option)
+.           if defined(_flag.msvc_define)
+.               define my.test = option_test(_flag.option)
+      <PreprocessorDefinitions Condition="$(my.test)">$(_flag.msvc_define);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+.           endif
+.       endfor
+.       for _compiler.architecture as _architecture where \
+            defined(_architecture.option)
+.           if defined(_architecture.msvc_define)
+.               define my.test = option_test(_architecture.option)
+      <PreprocessorDefinitions Condition="$(my.test)">$(_architecture.msvc_define);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+.           endif
+.       endfor
+.       for _compiler.define as _define where \
+            is_emitted_define(_define, my.public)
+.           define my.symbols = define_symbols(_define)
+.           if defined(_define.option)
+.               define my.test = define_test(_define)
+      <PreprocessorDefinitions Condition="$(my.test)">$(my.symbols);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+.           else
+      <PreprocessorDefinitions>$(my.symbols);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+.           endif
+.       endfor
+.   endfor
+.
+.endmacro # emit_option_definitions
+.
+.macro emit_clang_options(target, msvc)
+.   define my.target = emit_clang_options.target
+.   define my.msvc = emit_clang_options.msvc
+.   define my.clang = msvc_clang_condition()
+.
+.   for my.msvc.group as _group where defined(_group.platform)
+.       if msvc_platform_first(my.msvc, _group)
+.           define my.platform = msvc_platform_condition(my.msvc, \
+                _group.platform)
+.           define my.any = architecture_condition(my.target, _group.platform)
+.           if (platform_flag_count(my.target, _group.platform) > 0)
+
+  <ItemDefinitionGroup Condition="$(my.clang) And ($(my.platform))">
+    <ClCompile>
+.               for my.target.compiler as _compiler
+.                   for _compiler.flag as _flag where \
+                        is_platform_flag(_flag, _group.platform)
+.                       define my.test = option_test(_flag.option)
+.                       define my.symbols = symbol(_flag)
+      <AdditionalOptions Condition="$(my.test)">$(my.symbols) %(AdditionalOptions)</AdditionalOptions>
+.                   endfor
+.               endfor
+    </ClCompile>
+  </ItemDefinitionGroup>
+.           endif
+.           if !(my.any = "")
+
+  <ItemDefinitionGroup Condition="$(my.clang) And ($(my.platform))">
+    <ClCompile>
+.               for my.target.compiler as _compiler
+.                   for _compiler.architecture as _architecture where \
+                        is_platform_architecture(_architecture, _group.platform) \
+                        by _architecture->march.priority
+.                       define my.test = option_test(_architecture.option)
+      <ArmBase Condition="$(my.test)">$(_architecture->march.base)</ArmBase>
+.                   endfor
+.                   for _compiler.architecture as _architecture where \
+                        is_platform_architecture(_architecture, _group.platform) \
+                        by _architecture->march.priority
+.                       define my.test = option_test(_architecture.option)
+      <ArmExtensions Condition="$(my.test)">%(ArmExtensions)+$(_architecture->march.suffix)</ArmExtensions>
+.                   endfor
+.               endfor
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="$(my.clang) And ($(my.platform)) And ($(my.any))">
+    <ClCompile>
+      <AdditionalOptions>-march=%(ArmBase)%(ArmExtensions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+.           endif
+.       endif
+.   endfor
+.
+.endmacro # emit_clang_options
+.
+.macro emit_imports(dependencies)
+.   define my.dependencies = emit_imports.dependencies
+.
+.   if (count(my.dependencies.dependency) > 0)
+
+  <ImportGroup Label="PropertySheets">
+.       for my.dependencies.dependency as _depend
+    <Import Project="\$(SolutionDir)$(_depend.name).import.props" />
+.       endfor
+  </ImportGroup>
+.   endif
+.
+.endmacro # emit_imports
+.
+.macro emit_linkages(dependencies)
+.   define my.dependencies = emit_linkages.dependencies
+.
+.   if (count(my.dependencies.dependency) > 0)
+
+  <PropertyGroup>
+.       for my.dependencies.dependency as _depend
+    <Linkage-$(_depend.name)>\$(DefaultLinkage)</Linkage-$(_depend.name)>
+.       endfor
+  </PropertyGroup>
+.   endif
+.
+.endmacro # emit_linkages
+.
+.macro emit_option_defaults(target, public)
+.   define my.target = emit_option_defaults.target
+.   define my.public = emit_option_defaults.public
+.
+.   if (option_count(my.target, my.public) > 0)
+
+  <PropertyGroup>
+.       for my.target.option as _option where \
+            is_emitted_option(my.target, _option, my.public)
+.           define my.property = option_property(_option.name)
+.           define my.default = option_default(_option)
+    <$(my.property) Condition="'\$($(my.property))' == ''">$(my.default)</$(my.property)>
+.       endfor
+  </PropertyGroup>
+.   endif
+.
+.endmacro # emit_option_defaults
+.
+.macro emit_arch_rules(target, msvc)
+.   define my.target = emit_arch_rules.target
+.   define my.msvc = emit_arch_rules.msvc
+.
+.   for my.msvc.arch as _arch where (arch_flag_count(my.target, _arch) > 0)
+.       define my.platform = msvc_platform_condition(my.msvc, _arch.platform)
+
+  <PropertyGroup Condition="$(my.platform)">
+.       for _arch.level as _level
+.           define my.rule = arch_level_condition(my.target, _arch, _level)
+.           if !(my.rule = "")
+    <Option-arch Condition="$(my.rule)">$(_level.value)</Option-arch>
+.           endif
+.       endfor
+  </PropertyGroup>
+.   endfor
+.
+.endmacro # emit_arch_rules
+.
+.macro emit_option_info(target, public, title)
+.   define my.target = emit_option_info.target
+.   define my.public = emit_option_info.public
+.   define my.title = emit_option_info.title
+.
+.   if (option_count(my.target, my.public) > 0)
+.       define my.width = option_width(my.target, my.public)
+
+  <Target Name="$(my.title)" BeforeTargets="PrepareForBuild">
+.       for my.target.option as _option where \
+            is_emitted_option(my.target, _option, my.public)
+.           define my.property = option_property(_option.name)
+.           define my.label = pad(my.property, my.width, " ")
+    <Message Text="$(my.label) : \$($(my.property))" Importance="high"/>
+.       endfor
+  </Target>
+.   endif
+.
+.endmacro # emit_option_info
+.
+.macro emit_linkage_info(dependencies)
+.   define my.dependencies = emit_linkage_info.dependencies
+.
+.   if (count(my.dependencies.dependency) > 0)
+.       define my.width = dependency_width(my.dependencies)
+
+  <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
+.       for my.dependencies.dependency as _depend
+.           define my.label = pad(_depend.name, my.width, " ")
+    <Message Text="Linkage-$(my.label) : \$(Linkage-$(_depend.name))" Importance="high"/>
+.       endfor
+  </Target>
+.   endif
+.
+.endmacro # emit_linkage_info
+.
+.macro emit_import_sheet(library, repository, configuration, toolchain)
+.   define my.library = emit_import_sheet.library
+.   define my.repository = emit_import_sheet.repository
+.   define my.configuration = emit_import_sheet.configuration
+.   define my.toolchain = emit_import_sheet.toolchain
+.   define my.msvc = my.configuration->canonical->msvc
+.   define my.includes = include_directories(my.library, \
+        repository_root(my.repository))
+.   define my.static = join(\
+        linkage_test(my.repository, \
+            msvc_property(my.msvc, "static", "DefaultLinkage")), \
+        linkage_test(my.repository, \
+            msvc_property(my.msvc, "ltcg", "DefaultLinkage")), " Or ")
+.   define my.dynamic = msvc_property(my.msvc, "dynamic", "DefaultLinkage")
+.   define my.linkage = linkage_property(my.repository)
+.   define my.info = string.replace(my.repository.name, "-|_")
+.
+.   emit_open(my.repository.name, my.toolchain)
+
+  <PropertyGroup Label="Globals">
+    <_PropertySheetDisplayName>$(my.repository.name) Import Settings</_PropertySheetDisplayName>
+  </PropertyGroup>
+
+  <ItemGroup Label="BuildOptionsExtension">
+    <PropertyPageSchema Include="\$(MSBuildThisFileDirectory)$(my.repository.name).import.xml" />
+  </ItemGroup>
+.   emit_option_defaults(my.library, 1)
+.   emit_arch_rules(my.library, my.msvc)
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+.   if !(my.includes = "")
+      <AdditionalIncludeDirectories>$(my.includes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+.   endif
+      <PreprocessorDefinitions Condition="$(my.static)">$(my.library.symbol)_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+.   emit_option_definitions(my.library, 1)
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies Condition="'$(my.linkage)' != ''">$(target_name(my.library)).lib;%(AdditionalDependencies)</AdditionalDependencies>
+.   for my.msvc.group as _group
+.       for _group.property as _property where \
+            (_property.name = "DebugOrRelease")
+.           define my.condition = configuration_condition(_property.value)
+.           define my.directories = library_directories(my.library, \
+                my.repository, _property.value)
+      <AdditionalLibraryDirectories Condition="$(my.condition)">$(my.directories);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+.       endfor
+.   endfor
+.   for my.msvc.group as _group
+.       for _group.property as _property where \
+            (_property.name = "DebugOrRelease")
+.           define my.condition = join(\
+                linkage_test(my.repository, my.dynamic), \
+                configuration_condition(_property.value), " And ")
+.           define my.directory = "$(source_root())bin\\$(output_layout(_property.value, my.dynamic))"
+      <AdditionalLibraryDirectories Condition="$(my.condition)">$(my.directory);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+.       endfor
+.   endfor
+    </Link>
+  </ItemDefinitionGroup>
+.   emit_clang_options(my.library, my.msvc)
+.   emit_option_info(my.library, 1, "$(my.info)_OptionInfo")
+
+</Project>
+.
+.endmacro # emit_import_sheet
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_projects(configuration)
+
+.endtemplate

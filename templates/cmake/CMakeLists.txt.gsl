@@ -16,6 +16,7 @@ gsl from "../library/string.gsl"
 gsl from "../lib/cmake-output.gsl"
 gsl from "../lib/debug.gsl"
 gsl from "../lib/filesystem.gsl"
+gsl from "../lib/msvc.gsl"
 gsl from "../lib/output.gsl"
 gsl from "../lib/xml.gsl"
 
@@ -540,29 +541,7 @@ set( CMAKE_CXX_SCAN_FOR_MODULES OFF )
 
 set( repository_root_dir "${CMAKE_CURRENT_SOURCE_DIR}/../.." )
 
-if ( MSVC )
-  set( CMAKE_STATIC_LIBRARY_PREFIX "lib" )
-  set( CMAKE_SHARED_LIBRARY_PREFIX "lib" )
-
-  if ( BUILD_SHARED_LIBS )
-    message( FATAL_ERROR "Shared libraries are not supported with the MSVC frontend." )
-  endif()
-
-  add_compile_options(
-    /W4
-    /bigobj
-    /permissive-
-    /Zc:__cplusplus
-    /Zc:preprocessor
-    $<$<CXX_COMPILER_ID:Clang>:-Wno-unused-command-line-argument> )
-
-  add_compile_definitions(
-    UNICODE
-    _UNICODE
-    WIN32_LEAN_AND_MEAN
-    NOMINMAX
-    _WIN32_WINNT=0x0A00 )
-endif()
+.   emit_msvc_settings(my.configuration)
 
 # Link POSIX threads on BSD.
 if ( CMAKE_SYSTEM_NAME MATCHES "BSD" )
@@ -628,6 +607,147 @@ endif()
 .   emit_installation(my.repository, my.meta)
 .
 .endmacro # emit_CMakeLists
+.
+.macro emit_msvc_settings(configuration)
+.   define my.configuration = emit_msvc_settings.configuration
+.   require_msvc(my.configuration)
+.   define my.msvc = my.configuration->canonical->msvc
+.   define my.debug_dynamic = msvc_runtime(my.msvc, "debug", "dynamic")
+.   define my.debug_static = msvc_runtime(my.msvc, "debug", "static")
+.   define my.release_dynamic = msvc_runtime(my.msvc, "release", "dynamic")
+.   define my.release_static = msvc_runtime(my.msvc, "release", "static")
+.   define my.debug_flags = msvc_switches(my.msvc, "debug", "ClCompile")
+.   define my.release_flags = msvc_switches(my.msvc, "release", "ClCompile")
+.
+if ( MSVC )
+  set( CMAKE_STATIC_LIBRARY_PREFIX "lib" )
+  set( CMAKE_SHARED_LIBRARY_PREFIX "lib" )
+  set( CMAKE_IMPORT_LIBRARY_PREFIX "lib" )
+
+  if ( BUILD_SHARED_LIBS )
+    set( CMAKE_MSVC_RUNTIME_LIBRARY
+      "$<IF:$<CONFIG:Debug>,$(my.debug_dynamic),$(my.release_dynamic)>" )
+  else()
+    set( CMAKE_MSVC_RUNTIME_LIBRARY
+      "$<IF:$<CONFIG:Debug>,$(my.debug_static),$(my.release_static)>" )
+  endif()
+
+  set( CMAKE_C_FLAGS_DEBUG "$(my.debug_flags)" )
+  set( CMAKE_CXX_FLAGS_DEBUG "$(my.debug_flags)" )
+  set( CMAKE_C_FLAGS_RELEASE "$(my.release_flags)" )
+  set( CMAKE_CXX_FLAGS_RELEASE "$(my.release_flags)" )
+
+  add_compile_options(
+.   for my.msvc.group as _group where (_group.name = "common")
+.       for _group.setting as _setting where (_setting.tool = "ClCompile") & defined(_setting.switch)
+.           emit_msvc_item(_setting.switch, _setting, "", "    ")
+.       endfor
+.       for _group.option as _option where (_option.tool = "ClCompile")
+.           emit_msvc_item(_option.value, _option, "", "    ")
+.       endfor
+.   endfor
+  )
+
+  add_compile_definitions(
+.   for my.msvc.group as _group where (_group.name = "common")
+.       for _group.define as _define
+.           emit_msvc_item(_define.value, _define, "", "    ")
+.       endfor
+.   endfor
+.   for my.msvc.group as _group where (_group.name = "debug")
+.       for _group.define as _define
+.           emit_msvc_item(_define.value, _define, "Debug", "    ")
+.       endfor
+.   endfor
+.   for my.msvc.group as _group where (_group.name = "release")
+.       for _group.define as _define
+.           emit_msvc_item(_define.value, _define, "Release", "    ")
+.       endfor
+.   endfor
+  )
+
+  add_link_options(
+.   for my.msvc.group as _group where (_group.name = "common")
+.       for _group.setting as _setting where (_setting.tool = "Link") & defined(_setting.switch)
+.           emit_msvc_item(_setting.switch, _setting, "", "    ")
+.       endfor
+.       for _group.option as _option where (_option.tool = "Link")
+.           emit_msvc_item(_option.value, _option, "", "    ")
+.       endfor
+.   endfor
+.   for my.msvc.group as _group where (_group.name = "debug")
+.       for _group.setting as _setting where (_setting.tool = "Link") & defined(_setting.switch)
+.           emit_msvc_item(_setting.switch, _setting, "Debug", "    ")
+.       endfor
+.   endfor
+.   for my.msvc.group as _group where (_group.name = "release")
+.       for _group.setting as _setting where (_setting.tool = "Link") & defined(_setting.switch)
+.           emit_msvc_item(_setting.switch, _setting, "Release", "    ")
+.       endfor
+.   endfor
+  )
+endif()
+.endmacro # emit_msvc_settings
+.
+.macro emit_msvc_item(value, element, config, indent)
+.   define my.element = emit_msvc_item.element
+.   define my.value = emit_msvc_item.value
+.
+.   if is_msvc_clang(my.element)
+.       my.value = "$<$<CXX_COMPILER_ID:Clang>:$(my.value)>"
+.   endif
+.
+.   if !is_empty(my.config)
+.       my.value = "$<$<CONFIG:$(my.config)>:$(my.value)>"
+.   endif
+$(my.indent)$(my.value)
+.endmacro # emit_msvc_item
+.
+.macro emit_msvc_group_definitions(msvc, group, indent)
+.   define my.msvc = emit_msvc_group_definitions.msvc
+.
+.   for my.msvc.group as _group where (_group.name = my.group)
+.       for _group.define as _define
+$(my.indent)$(_define.value)
+.       endfor
+.   endfor
+.endmacro # emit_msvc_group_definitions
+.
+.macro emit_target_msvc_definitions(target, indent)
+.   define my.target = emit_target_msvc_definitions.target
+.   define my.msvc = configuration->canonical->msvc
+.
+.   if (name(my.target) = "library")
+.       require(my.target, "library", "symbol")
+
+$(my.indent)if ( MSVC )
+  $(my.indent)if ( BUILD_SHARED_LIBS )
+    $(my.indent)target_compile_definitions( $(target_name(my.target))
+      $(my.indent)PRIVATE
+        $(my.indent)$(my.target.symbol)_DLL
+.       emit_msvc_group_definitions(my.msvc, "dynamic", "        $(my.indent)")
+    $(my.indent))
+  $(my.indent)else()
+    $(my.indent)target_compile_definitions( $(target_name(my.target))
+      $(my.indent)PUBLIC
+        $(my.indent)$(my.target.symbol)_STATIC
+.       if (msvc_define_count(my.msvc, "static") > 0)
+      $(my.indent)PRIVATE
+.           emit_msvc_group_definitions(my.msvc, "static", "        $(my.indent)")
+.       endif
+    $(my.indent))
+  $(my.indent)endif()
+$(my.indent)endif()
+.   elsif (msvc_define_count(my.msvc, "console") > 0)
+
+$(my.indent)if ( MSVC )
+  $(my.indent)target_compile_definitions( $(target_name(my.target))
+    $(my.indent)PRIVATE
+.       emit_msvc_group_definitions(my.msvc, "console", "      $(my.indent)")
+  $(my.indent))
+$(my.indent)endif()
+.   endif
+.endmacro # emit_target_msvc_definitions
 .
 .macro emit_installation(repository, meta)
 .   define my.repository = emit_installation.repository
@@ -812,6 +932,14 @@ $(my.indent)add_test( NAME $(target_name(my.target))
   $(my.indent)--report_level=no
   $(my.indent)--build_info=yes
 $(my.indent))
+
+$(my.indent)if ( WIN32 AND BUILD_SHARED_LIBS )
+  $(my.indent)set_tests_properties( $(target_name(my.target))
+    $(my.indent)PROPERTIES
+      $(my.indent)ENVIRONMENT_MODIFICATION
+        $(my.indent)"PATH=path_list_prepend:$<JOIN:$<TARGET_RUNTIME_DLL_DIRS:$(target_name(my.target))>,\\;>"
+  $(my.indent))
+$(my.indent)endif()
 .
 .endmacro # emit_add_test
 .
@@ -856,16 +984,7 @@ $(my.indent)add_executable( $(target_name(my.target)) )
             my.target, my.repository, "NOT MSVC", my.indent)
 .   endif
 .
-.   if (name(my.target) = "library")
-.       require(my.target, "library", "symbol")
-
-$(my.indent)if ( MSVC )
-  $(my.indent)target_compile_definitions( $(target_name(my.target))
-    $(my.indent)PUBLIC
-      $(my.indent)$(my.target.symbol)_STATIC
-  $(my.indent))
-$(my.indent)endif()
-.   endif
+.   emit_target_msvc_definitions(my.target, my.indent)
 .
 .   emit_target_files(my.target, my.repository, my.meta, my.indent)
 .

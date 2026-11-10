@@ -236,6 +236,7 @@
 
         <flag option="avxifma" environmental="true"
           platform="x64"
+          msvc_arch="AVX2"
           msvc_define="WITH_AVXIFMA"
           comment="Conditionally require avx ifma intrinsics."
           type="public"
@@ -274,6 +275,7 @@
 
         <flag option="sha512" environmental="true"
           platform="x64"
+          msvc_arch="AVX2"
           msvc_define="WITH_SHA512"
           comment="Conditionally require sha512 native intrinsics."
           type="public"
@@ -331,6 +333,7 @@
 
         <flag option="vaes" environmental="true"
           platform="x64"
+          msvc_arch="AVX2"
           msvc_define="WITH_VAES"
           comment="Conditionally require vaes and vpclmulqdq intrinsics."
           type="public"
@@ -470,6 +473,8 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
+        <job name="msvc" configuration="DynamicDebug" />
       </entry>
 
       <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
@@ -484,6 +489,7 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
         <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
@@ -504,6 +510,8 @@
       <entry image="windows-latest">
         <job name="presets" preset="win-msvc-release-static" gate="true" />
         <job name="presets" preset="win-clangcl-release-static" gate="true" />
+        <job name="presets" preset="win-msvc-release-shared" />
+        <job name="presets" preset="win-clangcl-release-shared" />
       </entry>
 
       <!-- clang -->
@@ -988,6 +996,8 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
+        <job name="msvc" configuration="DynamicDebug" />
       </entry>
 
       <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
@@ -1002,6 +1012,7 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
         <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
@@ -1022,6 +1033,8 @@
       <entry image="windows-latest">
         <job name="presets" preset="win-msvc-release-static" gate="true" />
         <job name="presets" preset="win-clangcl-release-static" gate="true" />
+        <job name="presets" preset="win-msvc-release-shared" />
+        <job name="presets" preset="win-clangcl-release-shared" />
       </entry>
 
       <!-- clang -->
@@ -1437,6 +1450,8 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
+        <job name="msvc" configuration="DynamicDebug" />
       </entry>
 
       <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
@@ -1451,6 +1466,7 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
         <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
@@ -1471,6 +1487,8 @@
       <entry image="windows-latest">
         <job name="presets" preset="win-msvc-release-static" gate="true" />
         <job name="presets" preset="win-clangcl-release-static" gate="true" />
+        <job name="presets" preset="win-msvc-release-shared" />
+        <job name="presets" preset="win-clangcl-release-shared" />
       </entry>
 
       <!-- clang -->
@@ -1885,6 +1903,8 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
+        <job name="msvc" configuration="DynamicDebug" />
       </entry>
 
       <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
@@ -1899,6 +1919,7 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
         <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
@@ -1919,6 +1940,8 @@
       <entry image="windows-latest">
         <job name="presets" preset="win-msvc-release-static" gate="true" />
         <job name="presets" preset="win-clangcl-release-static" gate="true" />
+        <job name="presets" preset="win-msvc-release-shared" />
+        <job name="presets" preset="win-clangcl-release-shared" />
       </entry>
 
       <!-- clang -->
@@ -2407,6 +2430,8 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
+        <job name="msvc" configuration="DynamicDebug" />
       </entry>
 
       <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
@@ -2421,6 +2446,7 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
         <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
@@ -2441,6 +2467,8 @@
       <entry image="windows-latest">
         <job name="presets" preset="win-msvc-release-static" gate="true" />
         <job name="presets" preset="win-clangcl-release-static" gate="true" />
+        <job name="presets" preset="win-msvc-release-shared" />
+        <job name="presets" preset="win-clangcl-release-shared" />
       </entry>
 
       <!-- clang -->
@@ -3019,6 +3047,8 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <job name="msvc" configuration="StaticRelease" />
         <job name="msvc" configuration="StaticDebug" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
+        <job name="msvc" configuration="DynamicDebug" />
       </entry>
 
       <entry image="windows-2025-vs2026" platform="x64" version="vs2026" tests="*">
@@ -3033,6 +3063,7 @@
       <entry image="windows-latest" platform="x64" version="vs2026" tests="*">
         <option name="msvc" value="--build-compiler clang" />
         <job name="msvc" configuration="StaticRelease" gate="true" />
+        <job name="msvc" configuration="DynamicRelease" />
       </entry>
 
       <entry image="windows-11-vs2026-arm" platform="ARM64" version="vs2026" tests="*">
@@ -3053,6 +3084,8 @@
       <entry image="windows-latest">
         <job name="presets" preset="win-msvc-release-static" gate="true" />
         <job name="presets" preset="win-clangcl-release-static" gate="true" />
+        <job name="presets" preset="win-msvc-release-shared" />
+        <job name="presets" preset="win-clangcl-release-shared" />
       </entry>
 
       <!-- clang -->
@@ -3576,6 +3609,138 @@
           <symbol value="-no_fixup_chains" />
         </link>
      </compiler>
+
+     <!-- MSVC frontend (cl, clang-cl) settings, for msbuild and cmake. -->
+     <msvc>
+        <runtime config="debug" link="dynamic" value="MultiThreadedDebugDLL" />
+        <runtime config="debug" link="static" value="MultiThreadedDebug" />
+        <runtime config="release" link="dynamic" value="MultiThreadedDLL" />
+        <runtime config="release" link="static" value="MultiThreaded" />
+
+        <!-- Instruction set levels in ascending order. -->
+        <arch platform="x64" default="AVX2">
+          <level name="SSE" value="StreamingSIMDExtensions" />
+          <level name="SSE2" value="StreamingSIMDExtensions2" />
+          <level name="AVX" value="AdvancedVectorExtensions" />
+          <level name="AVX2" value="AdvancedVectorExtensions2" />
+          <level name="AVX512" value="AdvancedVectorExtensions512" />
+        </arch>
+
+        <group name="common" sheet="Common" display="Common Settings">
+          <property name="CharacterSet" value="Unicode" />
+          <property name="CodeAnalysisRuleSet" value="AllRules.ruleset" />
+          <property name="RunCodeAnalysis" value="false" />
+          <property name="PreferredToolArchitecture" value="x64" condition="'$(PROCESSOR_ARCHITECTURE)' == 'AMD64'" />
+          <define value="UNICODE" />
+          <define value="_UNICODE" />
+          <define value="WIN32_LEAN_AND_MEAN" />
+          <define value="NOMINMAX" />
+          <define value="_WIN32_WINNT=0x0A00" />
+          <setting tool="ClCompile" name="WarningLevel" value="Level4" switch="/W4" />
+          <setting tool="ClCompile" name="ExternalWarningLevel" value="Level4" />
+          <setting tool="ClCompile" name="ExternalWarningLevel" value="TurnOffAllWarnings" compiler="clang" />
+          <setting tool="ClCompile" name="ConformanceMode" value="true" switch="/permissive-" />
+          <setting tool="ClCompile" name="LanguageStandard_C" value="stdc11" />
+          <setting tool="ClCompile" name="EnforceTypeConversionRules" value="true" />
+          <setting tool="ClCompile" name="RuntimeTypeInfo" value="true" />
+          <setting tool="ClCompile" name="OpenMPSupport" value="false" />
+          <setting tool="ClCompile" name="EnableModules" value="false" />
+          <setting tool="ClCompile" name="CompileAsManaged" value="false" />
+          <setting tool="ClCompile" name="CompileAsWinRT" value="false" />
+          <setting tool="ClCompile" name="MultiProcessorCompilation" value="true" />
+          <setting tool="ClCompile" name="EnablePREfast" value="false" />
+          <option tool="ClCompile" value="/bigobj" />
+          <option tool="ClCompile" value="/Zc:__cplusplus" />
+          <option tool="ClCompile" value="/Zc:preprocessor" />
+          <option tool="ClCompile" value="-Wno-unused-command-line-argument" compiler="clang" />
+          <option tool="Link" value="/ignore:4099" />
+        </group>
+
+        <group name="debug" sheet="Debug" display="Debug Settings">
+          <property name="DebugOrRelease" value="Debug" />
+          <define value="_DEBUG" resource="true" />
+          <define value="_CRTDBG_MAP_ALLOC" />
+          <setting tool="ClCompile" name="Optimization" value="Disabled" switch="/Od" />
+          <setting tool="ClCompile" name="InlineFunctionExpansion" value="OnlyExplicitInline" switch="/Ob1" />
+          <setting tool="ClCompile" name="IntrinsicFunctions" value="true" switch="/Oi" />
+          <setting tool="ClCompile" name="FunctionLevelLinking" value="true" switch="/Gy" />
+          <setting tool="ClCompile" name="BasicRuntimeChecks" value="EnableFastChecks" switch="/RTC1" />
+          <setting tool="ClCompile" name="DebugInformationFormat" value="ProgramDatabase" switch="/Zi" />
+          <setting tool="Link" name="GenerateDebugInformation" value="true" switch="/DEBUG" />
+        </group>
+
+        <group name="release" sheet="Release" display="Release Settings">
+          <property name="DebugOrRelease" value="Release" />
+          <define value="NDEBUG" resource="true" />
+          <setting tool="ClCompile" name="Optimization" value="MaxSpeed" switch="/O2" />
+          <setting tool="ClCompile" name="InlineFunctionExpansion" value="AnySuitable" switch="/Ob2" />
+          <setting tool="ClCompile" name="IntrinsicFunctions" value="true" switch="/Oi" />
+          <setting tool="ClCompile" name="FavorSizeOrSpeed" value="Speed" switch="/Ot" />
+          <setting tool="ClCompile" name="OmitFramePointers" value="true" switch="/Oy" />
+          <setting tool="ClCompile" name="EnableFiberSafeOptimizations" value="true" switch="/GT" />
+          <setting tool="ClCompile" name="EnableParallelCodeGeneration" value="true" switch="/Qpar" />
+          <setting tool="ClCompile" name="FunctionLevelLinking" value="true" switch="/Gy" />
+          <setting tool="ClCompile" name="StringPooling" value="true" switch="/GF" />
+          <setting tool="ClCompile" name="BufferSecurityCheck" value="false" switch="/GS-" />
+          <setting tool="ClCompile" name="ControlFlowGuard" value="false" switch="/guard:cf-" />
+          <setting tool="ClCompile" name="DebugInformationFormat" value="ProgramDatabase" switch="/Zi" />
+          <setting tool="Link" name="GenerateDebugInformation" value="true" switch="/DEBUG" />
+          <setting tool="Link" name="OptimizeReferences" value="true" switch="/OPT:REF" />
+          <setting tool="Link" name="EnableCOMDATFolding" value="true" switch="/OPT:ICF" />
+        </group>
+
+        <group name="ltcg" sheet="Link" display="Link Time Code Generation Settings">
+          <property name="DefaultLinkage" value="ltcg" />
+          <setting tool="ClCompile" name="WholeProgramOptimization" value="true" />
+          <setting tool="Link" name="LinkTimeCodeGeneration" value="UseLinkTimeCodeGeneration" />
+          <setting tool="Lib" name="LinkTimeCodeGeneration" value="true" />
+        </group>
+
+        <group name="dynamic" sheet="DLL" display="Dynamic Library Settings">
+          <property name="DefaultLinkage" value="dynamic" />
+          <property name="TargetExt" value=".dll" />
+          <define value="_DLL" />
+          <define value="_WINDLL" />
+        </group>
+
+        <group name="static" sheet="LIB" display="Static Library Settings">
+          <property name="DefaultLinkage" value="static" />
+          <property name="TargetExt" value=".lib" />
+          <define value="_LIB" />
+        </group>
+
+        <group name="console" sheet="EXE" display="Console Application Settings">
+          <property name="IsExe" value="true" />
+          <define value="_CONSOLE" />
+          <setting tool="Link" name="SubSystem" value="Console" />
+        </group>
+
+        <group name="Win32" sheet="Win32" display="Win32 Settings" platform="x64">
+          <define value="WIN32" />
+          <define value="_WIN32" />
+          <setting tool="Link" name="TargetMachine" value="MachineX86" />
+          <option tool="Lib" value="/MACHINE:X86" />
+          <option tool="ClCompile" value="--target=i686-pc-windows-msvc" compiler="clang" />
+        </group>
+
+        <group name="x64" sheet="x64" display="x64 Settings" platform="x64">
+          <define value="WIN32" />
+          <define value="_WIN32" />
+          <define value="WIN64" />
+          <define value="_WIN64" />
+          <setting tool="Link" name="TargetMachine" value="MachineX64" />
+          <option tool="Lib" value="/MACHINE:X64" />
+        </group>
+
+        <group name="ARM64" sheet="ARM64" display="ARM64 Settings" platform="arm64">
+          <define value="WIN32" />
+          <define value="_WIN32" />
+          <define value="_ARM64" />
+          <setting tool="Link" name="TargetMachine" value="MachineARM64" />
+          <option tool="Lib" value="/MACHINE:ARM64" />
+          <option tool="ClCompile" value="--target=aarch64-pc-windows-msvc" compiler="clang" />
+        </group>
+     </msvc>
   </canonical>
 
   <registrar id="build">
@@ -4001,7 +4166,6 @@
       <property name="cacheVariables" type="object">
         <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
         <property name="CMAKE_INSTALL_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
-        <property name="CMAKE_MSVC_RUNTIME_LIBRARY" value="MultiThreaded$&lt;$&lt;CONFIG:Debug&gt;:Debug&gt;" />
       </property>
     </configuration>
     <configuration name="msvc" description="Factored msvc compiler settings." hidden="true">
@@ -4042,6 +4206,22 @@
         <property value="win-base" />
       </property>
     </configuration>
+    <configuration name="win-msvc-debug-shared" description="Debug build with msvc and shared linking." hidden="false" display="Windows/MSVC/Debug/Shared">
+      <property name="inherits" type="list">
+        <property value="shared" />
+        <property value="win-debug" />
+        <property value="msvc" />
+        <property value="win-base" />
+      </property>
+    </configuration>
+    <configuration name="win-msvc-release-shared" description="Release build with msvc and shared linking." hidden="false" display="Windows/MSVC/Release/Shared">
+      <property name="inherits" type="list">
+        <property value="shared" />
+        <property value="win-release" />
+        <property value="msvc" />
+        <property value="win-base" />
+      </property>
+    </configuration>
     <configuration name="win-clangcl-debug-static" description="Debug build with clang-cl and static linking." hidden="false" display="Windows/clang-cl/Debug/Static">
       <property name="inherits" type="list">
         <property value="static" />
@@ -4053,6 +4233,22 @@
     <configuration name="win-clangcl-release-static" description="Release build with clang-cl and static linking." hidden="false" display="Windows/clang-cl/Release/Static">
       <property name="inherits" type="list">
         <property value="static" />
+        <property value="win-release" />
+        <property value="clangcl" />
+        <property value="win-base" />
+      </property>
+    </configuration>
+    <configuration name="win-clangcl-debug-shared" description="Debug build with clang-cl and shared linking." hidden="false" display="Windows/clang-cl/Debug/Shared">
+      <property name="inherits" type="list">
+        <property value="shared" />
+        <property value="win-debug" />
+        <property value="clangcl" />
+        <property value="win-base" />
+      </property>
+    </configuration>
+    <configuration name="win-clangcl-release-shared" description="Release build with clang-cl and shared linking." hidden="false" display="Windows/clang-cl/Release/Shared">
+      <property name="inherits" type="list">
+        <property value="shared" />
         <property value="win-release" />
         <property value="clangcl" />
         <property value="win-base" />
@@ -4404,32 +4600,32 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <type name="c++" uuid="8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942" />
 
       <axis name="configuration">
-        <entry value="DynamicDebug">
+        <entry value="DynamicDebug" config="debug" link="dynamic">
           <library value="DebugDLL" />
           <binary value="DebugDEXE" />
           <test value="DebugDEXE" />
         </entry>
-        <entry value="DynamicRelease">
+        <entry value="DynamicRelease" config="release" link="dynamic">
           <library value="ReleaseDLL" />
           <binary value="ReleaseDEXE" />
           <test value="ReleaseDEXE" />
         </entry>
-        <entry value="LTCGDebug" hidden="true">
+        <entry value="LTCGDebug" hidden="true" config="debug" link="static" ltcg="true">
           <library value="DebugLTCG" />
           <binary value="DebugLEXE" />
           <test value="DebugLEXE" />
         </entry>
-        <entry value="LTCGRelease" hidden="true">
+        <entry value="LTCGRelease" hidden="true" config="release" link="static" ltcg="true">
           <library value="ReleaseLTCG" />
           <binary value="ReleaseLEXE" />
           <test value="ReleaseLEXE" />
         </entry>
-        <entry value="StaticDebug">
+        <entry value="StaticDebug" config="debug" link="static">
           <library value="DebugLIB" />
           <binary value="DebugSEXE" />
           <test value="DebugSEXE" />
         </entry>
-        <entry value="StaticRelease">
+        <entry value="StaticRelease" config="release" link="static">
           <library value="ReleaseLIB" />
           <binary value="ReleaseSEXE" />
           <test value="ReleaseSEXE" />
@@ -4812,6 +5008,21 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <file source="props/version4/nuget.config" destination="builds/msvc" />
     </template>
 
+    <template name="project.props.gsl"
+      path="msbuild"
+      outpath="builds/msvc">
+
+      <tools chain="msbuild" set="2026" outpath="vs2026" />
+    </template>
+
+    <template name="properties.props.gsl"
+      path="msbuild"
+      outpath="builds/msvc"
+      sheets="properties">
+
+      <tools chain="msbuild" set="2026" outpath="vs2026" />
+    </template>
+
     <template name="sln.gsl"
       path="msbuild"
       outpath="builds/msvc">
@@ -4819,38 +5030,11 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <tools chain="msbuild" set="2026" outpath="vs2026" />
 
       <file source="props/version4/build/build_base.bat" destination="builds/msvc/build" />
-      <file source="props/version4/base/Arm.props" destination="builds/msvc/properties" />
-      <file source="props/version4/base/Arm64.props" destination="builds/msvc/properties" />
-      <file source="props/version4/base/Common.props" destination="builds/msvc/properties" />
-      <file source="props/version4/base/Debug.props" destination="builds/msvc/properties" />
       <file source="props/version4/base/Git.props" destination="builds/msvc/properties" />
-      <file source="props/version4/base/Link.props" destination="builds/msvc/properties" />
       <file source="props/version4/base/Messages.props" destination="builds/msvc/properties" />
       <file source="props/version4/base/Output.props" destination="builds/msvc/properties" />
-      <file source="props/version4/base/Release.props" destination="builds/msvc/properties" />
-      <file source="props/version4/base/Win32.props" destination="builds/msvc/properties" />
-      <file source="props/version4/base/x64.props" destination="builds/msvc/properties" />
-      <file source="props/version4/library/DLL.props" destination="builds/msvc/properties" />
-      <file source="props/version4/library/DebugDLL.props" destination="builds/msvc/properties" />
-      <file source="props/version4/library/DebugLIB.props" destination="builds/msvc/properties" />
-      <file source="props/version4/library/DebugLTCG.props" destination="builds/msvc/properties" />
-      <file source="props/version4/library/LIB.props" destination="builds/msvc/properties" />
-      <file source="props/version4/library/LTCG.props" destination="builds/msvc/properties" />
-      <file source="props/version4/library/ReleaseDLL.props" destination="builds/msvc/properties" />
-      <file source="props/version4/library/ReleaseLIB.props" destination="builds/msvc/properties" />
-      <file source="props/version4/library/ReleaseLTCG.props" destination="builds/msvc/properties" />
-      <file source="props/version4/console/DebugDEXE.props" destination="builds/msvc/properties" />
-      <file source="props/version4/console/DebugLEXE.props" destination="builds/msvc/properties" />
-      <file source="props/version4/console/DebugSEXE.props" destination="builds/msvc/properties" />
-      <file source="props/version4/console/EXE.props" destination="builds/msvc/properties" />
-      <file source="props/version4/console/ReleaseDEXE.props" destination="builds/msvc/properties" />
-      <file source="props/version4/console/ReleaseLEXE.props" destination="builds/msvc/properties" />
-      <file source="props/version4/console/ReleaseSEXE.props" destination="builds/msvc/properties" />
-      <file source="props/version4/import/%repository_dependency%.import.props" destination="builds/msvc/vs2026" />
       <file source="props/version4/import/%repository_dependency%.import.xml" destination="builds/msvc/vs2026" />
-      <file source="props/version4/import/%repository%.import.props" destination="builds/msvc/vs2026" />
       <file source="props/version4/import/%repository%.import.xml" destination="builds/msvc/vs2026" />
-      <file source="props/version4/project/%repository%/%target%/%target%.props" destination="builds/msvc/vs2026/%target%" />
       <file source="props/version4/project/%repository%/%target%/%target%.xml" destination="builds/msvc/vs2026/%target%" optional="true" />
 
     </template>

@@ -1,0 +1,235 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL libbitcoin msvc frontend settings utilities in the 'global' scope.
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+###############################################################################
+# Functions
+###############################################################################
+
+# The canonical msvc element is required.
+function global.require_msvc(configuration)
+    define my.configuration = require_msvc.configuration
+
+    if !defined(my.configuration->canonical) | \
+        !defined(my.configuration->canonical->msvc)
+        abort "Configuration missing canonical msvc element."
+    endif
+endfunction
+
+# True if the element is limited to the clang-cl compiler.
+function global.is_msvc_clang(element)
+    define my.element = is_msvc_clang.element
+    return defined(my.element.compiler) & (my.element.compiler = "clang")
+endfunction
+
+# The runtime library name for the configuration and linkage.
+function global.msvc_runtime(msvc, config, link)
+    define my.msvc = msvc_runtime.msvc
+    define my.config = msvc_runtime.config
+    define my.link = msvc_runtime.link
+    define my.value = ""
+
+    for my.msvc.runtime as _runtime where \
+        (_runtime.config = my.config) & (_runtime.link = my.link)
+        my.value = _runtime.value
+    endfor
+
+    if (my.value = "")
+        abort "Missing msvc runtime for '$(my.config)' and '$(my.link)'."
+    endif
+
+    return my.value
+endfunction
+
+# The space delimited command line switches of a tool within a group.
+function global.msvc_switches(msvc, group, tool)
+    define my.msvc = msvc_switches.msvc
+    define my.group = msvc_switches.group
+    define my.tool = msvc_switches.tool
+    define my.value = ""
+
+    for my.msvc.group as _group where (_group.name = my.group)
+        for _group.setting as _setting where (_setting.tool = my.tool) & \
+            defined(_setting.switch) & !is_msvc_clang(_setting)
+            my.value = (my.value = "") ?? _setting.switch ? \
+                "$(my.value) $(_setting.switch)"
+        endfor
+        for _group.option as _option where (_option.tool = my.tool) & \
+            !is_msvc_clang(_option)
+            my.value = (my.value = "") ?? _option.value ? \
+                "$(my.value) $(_option.value)"
+        endfor
+    endfor
+
+    return my.value
+endfunction
+
+# The count of preprocessor definitions within a group.
+function global.msvc_define_count(msvc, group)
+    define my.msvc = msvc_define_count.msvc
+    define my.group = msvc_define_count.group
+    define my.value = 0
+
+    for my.msvc.group as _group where (_group.name = my.group)
+        my.value += count(_group.define)
+    endfor
+
+    return my.value
+endfunction
+
+# The msbuild condition that selects the clang-cl compiler.
+function global.msvc_clang_condition()
+    return "'\$(PlatformToolset)' == 'ClangCL'"
+endfunction
+
+# The property sheet name of a group.
+function global.msvc_sheet(msvc, group)
+    define my.msvc = msvc_sheet.msvc
+    define my.group = msvc_sheet.group
+    define my.value = ""
+
+    for my.msvc.group as _group where (_group.name = my.group)
+        my.value = _group.sheet
+    endfor
+
+    if (my.value = "")
+        abort "Missing msvc group '$(my.group)'."
+    endif
+
+    return my.value
+endfunction
+
+# The value of a named property of a group.
+function global.msvc_property(msvc, group, name)
+    define my.msvc = msvc_property.msvc
+    define my.group = msvc_property.group
+    define my.name = msvc_property.name
+    define my.value = ""
+
+    for my.msvc.group as _group where (_group.name = my.group)
+        for _group.property as _property where (_property.name = my.name)
+            my.value = _property.value
+        endfor
+    endfor
+
+    if (my.value = "")
+        abort "Missing msvc property '$(my.name)' in group '$(my.group)'."
+    endif
+
+    return my.value
+endfunction
+
+# The semicolon delimited preprocessor definitions of a tool within a group.
+function global.msvc_definitions(group, tool, clang)
+    define my.group = msvc_definitions.group
+    define my.tool = msvc_definitions.tool
+    define my.clang = msvc_definitions.clang
+    define my.value = ""
+
+    if !my.clang
+        for my.group.define as _define where (my.tool = "ClCompile") | \
+            ((my.tool = "ResourceCompile") & defined(_define.resource))
+            my.value = (my.value = "") ?? _define.value ? \
+                "$(my.value);$(_define.value)"
+        endfor
+    endif
+
+    return my.value
+endfunction
+
+# The space delimited additional options of a tool within a group.
+function global.msvc_options(group, tool, clang)
+    define my.group = msvc_options.group
+    define my.tool = msvc_options.tool
+    define my.clang = msvc_options.clang
+    define my.value = ""
+
+    for my.group.option as _option where (_option.tool = my.tool) & \
+        (is_msvc_clang(_option) = my.clang)
+        my.value = (my.value = "") ?? _option.value ? \
+            "$(my.value) $(_option.value)"
+    endfor
+
+    return my.value
+endfunction
+
+# The count of instruction set levels applicable to a group.
+function global.msvc_level_count(msvc, group)
+    define my.msvc = msvc_level_count.msvc
+    define my.group = msvc_level_count.group
+    define my.value = 0
+
+    for my.msvc.arch as _arch where defined(my.group.platform) & \
+        (_arch.platform = my.group.platform)
+        my.value += count(_arch.level)
+    endfor
+
+    return my.value
+endfunction
+
+# The count of item definitions of a tool within a group.
+function global.msvc_tool_count(msvc, group, tool, clang)
+    define my.msvc = msvc_tool_count.msvc
+    define my.group = msvc_tool_count.group
+    define my.tool = msvc_tool_count.tool
+    define my.clang = msvc_tool_count.clang
+    define my.value = 0
+
+    for my.group.setting as _setting where (_setting.tool = my.tool) & \
+        (is_msvc_clang(_setting) = my.clang)
+        my.value += 1
+    endfor
+
+    for my.group.option as _option where (_option.tool = my.tool) & \
+        (is_msvc_clang(_option) = my.clang)
+        my.value += 1
+    endfor
+
+    if !(msvc_definitions(my.group, my.tool, my.clang) = "")
+        my.value += 1
+    endif
+
+    if (my.tool = "ClCompile") & !my.clang
+        my.value += msvc_level_count(my.msvc, my.group)
+    endif
+
+    return my.value
+endfunction
+
+# The msbuild condition that selects the platforms of an architecture.
+function global.msvc_platform_condition(msvc, platform)
+    define my.msvc = msvc_platform_condition.msvc
+    define my.platform = msvc_platform_condition.platform
+    define my.value = ""
+
+    for my.msvc.group as _group where defined(_group.platform) & \
+        (_group.platform = my.platform)
+        my.value = join(my.value, "'\$(Platform)' == '$(_group.name)'", " Or ")
+    endfor
+
+    return my.value
+endfunction
+
+# True if the group is the first of the groups of its architecture.
+function global.msvc_platform_first(msvc, group)
+    define my.msvc = msvc_platform_first.msvc
+    define my.group = msvc_platform_first.group
+    define my.first = ""
+
+    for my.msvc.group as _group where defined(_group.platform) & \
+        (_group.platform = my.group.platform)
+        if (my.first = "")
+            my.first = _group.name
+        endif
+    endfor
+
+    return (my.first = my.group.name)
+endfunction
+
+.endtemplate
