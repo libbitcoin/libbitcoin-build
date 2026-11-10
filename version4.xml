@@ -2259,6 +2259,11 @@
 
     <completion name="data/bs" />
 
+    <ignore comment="web">
+      <ignore name="web/*/dist" comment="vite build output" />
+      <ignore name="web/*/node_modules" comment="npm packages" />
+    </ignore>
+
     <language id="c" />
     <language id="c++" />
 
@@ -2361,6 +2366,9 @@
       <resources path="builds/msvc" recursive="false" root="true">
         <msbuild filter="resource" />
       </resources>
+      <web path="web" recursive="true">
+        <msbuild filter="web" />
+      </web>
 
       <!-- Exposed knobs -->
       <option name="web" type="with"
@@ -4882,6 +4890,19 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <resource>
         <match suffix="\.rc" />
       </resource>
+
+      <web>
+        <match suffix="\.css" />
+        <match suffix="\.html" />
+        <match suffix="\.js" />
+        <match suffix="\.json" />
+        <match suffix="\.mjs" />
+        <match suffix="\.svg" />
+        <match suffix="\.ts" />
+        <match suffix="\.tsx" />
+        <exclude directory="dist" />
+        <exclude directory="node_modules" />
+      </web>
     </template>
 
     <template name="vcxproj.gsl"
@@ -4919,6 +4940,19 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <resource>
         <match suffix="\.rc" />
       </resource>
+
+      <web>
+        <match suffix="\.css" />
+        <match suffix="\.html" />
+        <match suffix="\.js" />
+        <match suffix="\.json" />
+        <match suffix="\.mjs" />
+        <match suffix="\.svg" />
+        <match suffix="\.ts" />
+        <match suffix="\.tsx" />
+        <exclude directory="dist" />
+        <exclude directory="node_modules" />
+      </web>
     </template>
 
     <!-- gnu -->
