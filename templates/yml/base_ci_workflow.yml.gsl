@@ -789,7 +789,7 @@ jobs:
         if: steps.checkout-$(_depend.name).outcome == 'failure'
         shell: bash
         run: |
-          rm -rf ${{ github.workspace }}/$(_depend.name)
+          rm -rf "${{ github.workspace }}/$(_depend.name)"
 .
 .       endif
 
