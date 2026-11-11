@@ -533,6 +533,7 @@ endfunction
 .       emit_imports(_dependencies)
 .       emit_linkages(_dependencies)
 .       emit_option_defaults(my.target, 0)
+.       emit_option_implications(my.target, 0)
 .       emit_arch_rules(my.target, my.msvc)
 .       emit_option_info(my.target, 0, "OptionInfo")
 .       emit_linkage_info(_dependencies)
@@ -720,6 +721,33 @@ endfunction
 .
 .endmacro # emit_option_defaults
 .
+.macro emit_option_implications(target, public)
+.   define my.target = emit_option_implications.target
+.   define my.public = emit_option_implications.public
+.   define my.count = 0
+.
+.   for my.target.option as _option where \
+        is_emitted_option(my.target, _option, my.public)
+.       for _option.implies as _implied
+.           for my.target.option as _other where \
+                (_other.name = _implied.option) & \
+                is_emitted_option(my.target, _other, my.public)
+.               if (my.count = 0)
+
+  <PropertyGroup>
+.               endif
+.               my.count += 1
+.               define my.property = option_property(_other.name)
+    <$(my.property) Condition="$(option_test(_option.name))">true</$(my.property)>
+.           endfor
+.       endfor
+.   endfor
+.   if (my.count > 0)
+  </PropertyGroup>
+.   endif
+.
+.endmacro # emit_option_implications
+.
 .macro emit_arch_rules(target, msvc)
 .   define my.target = emit_arch_rules.target
 .   define my.msvc = emit_arch_rules.msvc
@@ -802,6 +830,7 @@ endfunction
     <PropertyPageSchema Include="\$(MSBuildThisFileDirectory)$(my.repository.name).import.xml" />
   </ItemGroup>
 .   emit_option_defaults(my.library, 1)
+.   emit_option_implications(my.library, 1)
 .   emit_arch_rules(my.library, my.msvc)
 
   <ItemDefinitionGroup>

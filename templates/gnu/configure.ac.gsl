@@ -274,6 +274,21 @@ repository_root_dir=`cd "${srcdir}/../.." && pwd`
 .       endfor
 .   endfor
 .
+.   for my.repository. as _target where is_target_element(_target)
+.       for _target.option as _option where (count(_option.implies) > 0)
+.           define my.option_var = "$(_option.type)_$(string.replace(_option.name, "-|_"))"
+.           define my.implied = ""
+.           for _option.implies as _implied
+.               for _target.option as _other where (_other.name = _implied.option)
+.                   define my.other_var = "$(_other.type)_$(string.replace(_other.name, "-|_"))"
+.                   my.implied = (my.implied = "") ?? "$(my.other_var)=yes" ? "$(my.implied) $(my.other_var)=yes"
+.               endfor
+.           endfor
+
+AS_IF([test "x${$(my.option_var)}" != "xno"], [$(my.implied)])
+.       endfor
+.   endfor
+.
 .   new unique_flags as _flags
 .       accumulate_flags(_flags, my.repository, my.configuration, my.meta)
 .

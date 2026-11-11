@@ -223,7 +223,7 @@ endfunction
 .           for my.msvc.arch as _arch where defined(my.group.platform) & \
                 (_arch.platform = my.group.platform)
 .               for _arch.level as _level
-      <EnableEnhancedInstructionSet Condition="'\$(Option-arch)' == '$(_level.value)'">$(_level.value)</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'\$(PlatformToolset)' != 'ClangCL' And '\$(Option-arch)' == '$(_level.value)'">$(_level.value)</EnableEnhancedInstructionSet>
 .               endfor
 .           endfor
 .       endif

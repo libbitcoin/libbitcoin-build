@@ -1919,6 +1919,50 @@ $(my.indent)fi
 .   abort("<architecture> elements with mergeable='false' march elements unsupported.")
 .endmacro # define_architecture_options_nonmergeable
 .
+.macro define_hardware_implications(platforms, configuration, repository, install, indent)
+.   define my.platforms = define_hardware_implications.platforms
+.   define my.configuration = define_hardware_implications.configuration
+.   define my.repository = define_hardware_implications.repository
+.   define my.install = define_hardware_implications.install
+.   define my.indent = define_hardware_implications.indent
+.
+.   for my.platforms.platform as _platform
+.       for my.install.dependency as _depend
+.           if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
+.               next
+.           endif
+.
+.           define my.deprepo = my.configuration->repository(.name = _depend.name)
+.
+.           for my.deprepo. as _target
+.               if !(name(_target) = "library") & !(_depend.name = my.repository.name)
+.                   next
+.               endif
+.
+.               if !defined(_target->compiler)
+.                   next
+.               endif
+.
+.               for _target->compiler. as _cele \
+                    where defined(_cele.option) & \
+                        defined(_cele.platform) & \
+                        (_cele.platform = _platform.name)
+.                   define my.option = _target->option(.name = _cele.option)
+.                   if (count(my.option.implies) = 0)
+.                       next
+.                   endif
+
+$(my.indent)if [[ "${HARDWARE_$(my.option.name:c,upper)}" == "yes" ]]; then
+.                   for my.option.implies as _implied
+    $(my.indent)HARDWARE_$(_implied.option:c,upper)="yes"
+.                   endfor
+$(my.indent)fi
+.               endfor
+.           endfor
+.       endfor
+.   endfor
+.endmacro # define_hardware_implications
+.
 .macro define_platform_hardware_options(platforms, meta, configuration, repository, install, indent)
 .   define my.platforms = define_platform_hardware_options.platforms
 .   define my.meta = define_platform_hardware_options.meta
@@ -1926,6 +1970,9 @@ $(my.indent)fi
 .   define my.repository = define_platform_hardware_options.repository
 .   define my.install = define_platform_hardware_options.install
 .   define my.indent = define_platform_hardware_options.indent
+.
+.   define_hardware_implications(my.platforms, my.configuration, my.repository, \
+        my.install, my.indent)
 .
 .   for my.platforms.platform as _platform
 
