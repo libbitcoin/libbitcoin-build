@@ -29,9 +29,11 @@
       <!-- Exposed knobs -->
       <option name="shani" type="enable"
         default="no"
-        comment="Add Intel SHA Extensions via compilation options."
-        hardware="Use Intel SHA Extensions."
-        msvc="/p:Option-shani=true" />
+        comment="Add Intel SHA Extensions (implies AES-NI) via compilation options."
+        hardware="Use Intel SHA Extensions (implies AES-NI)."
+        msvc="/p:Option-shani=true">
+        <implies option="aesni" />
+      </option>
 
       <option name="sha512" type="enable"
         default="no"
@@ -53,27 +55,41 @@
 
       <option name="avx512ifma" type="enable"
         default="no"
-        comment="Add Intel AVX512 IFMA intrinsics (implies AVX512VL) via compilation options."
-        hardware="Use Intel AVX512 IFMA intrinsics (implies AVX512VL)."
-        msvc="/p:Option-avx512ifma=true" />
+        comment="Add Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI) via compilation options."
+        hardware="Use Intel AVX512 IFMA intrinsics (implies AVX512, SHA Extensions and AES-NI)."
+        msvc="/p:Option-avx512ifma=true">
+        <implies option="avx512" />
+        <implies option="avx2" />
+        <implies option="shani" />
+        <implies option="aesni" />
+      </option>
 
       <option name="avx512" type="enable"
         default="no"
-        comment="Add Intel AVX512 intrinsics via compilation options."
-        hardware="Use Intel AVX512 intrinsics."
-        msvc="/p:Option-avx512=true" />
+        comment="Add Intel AVX512 intrinsics (implies AVX2 and AES-NI) via compilation options."
+        hardware="Use Intel AVX512 intrinsics (implies AVX2 and AES-NI)."
+        msvc="/p:Option-avx512=true">
+        <implies option="avx2" />
+        <implies option="aesni" />
+      </option>
 
       <option name="avxifma" type="enable"
         default="no"
-        comment="Add Intel AVX IFMA intrinsics (implies AVX2) via compilation options."
-        hardware="Use Intel AVX IFMA intrinsics (implies AVX2)."
-        msvc="/p:Option-avxifma=true" />
+        comment="Add Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI) via compilation options."
+        hardware="Use Intel AVX IFMA intrinsics (implies AVX2, SHA Extensions and AES-NI)."
+        msvc="/p:Option-avxifma=true">
+        <implies option="avx2" />
+        <implies option="shani" />
+        <implies option="aesni" />
+      </option>
 
       <option name="avx2" type="enable"
         default="no"
-        comment="Add Intel AVX2 intrinsics via compilation options."
-        hardware="Use Intel AVX2 intrinsics."
-        msvc="/p:Option-avx2=true" />
+        comment="Add Intel AVX2 intrinsics (implies AES-NI) via compilation options."
+        hardware="Use Intel AVX2 intrinsics (implies AES-NI)."
+        msvc="/p:Option-avx2=true">
+        <implies option="aesni" />
+      </option>
 
       <option name="sse41" type="enable"
         default="no"
@@ -83,15 +99,20 @@
 
       <option name="sha2" type="enable"
         default="no"
-        comment="Check for ARM SHA1/SHA256 Extensions."
-        hardware="Use ARM SHA1/SHA256 Extensions."
-        msvc="/p:Option-sha2=true" />
+        comment="Check for ARM SHA1/SHA256 Extensions (implies AES)."
+        hardware="Use ARM SHA1/SHA256 Extensions (implies AES)."
+        msvc="/p:Option-sha2=true">
+        <implies option="aes" />
+      </option>
 
       <option name="sha3" type="enable"
         default="no"
-        comment="Check for ARM SHA3 Extensions for SHA512."
-        hardware="Use ARM SHA3 Extensions for SHA512."
-        msvc="/p:Option-sha3=true" />
+        comment="Check for ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES)."
+        hardware="Use ARM SHA3 Extensions for SHA512 (implies SHA1/SHA256 and AES)."
+        msvc="/p:Option-sha3=true">
+        <implies option="sha2" />
+        <implies option="aes" />
+      </option>
 
       <option name="aes" type="enable"
         default="no"
@@ -295,7 +316,7 @@
 
         <flag option="sse41" environmental="true"
           platform="x64"
-          msvc_arch="AVX"
+          msvc_define="WITH_SSE41"
           comment="Conditionally require sse4.1 intrinsics."
           type="public"
           substitute="sse41">

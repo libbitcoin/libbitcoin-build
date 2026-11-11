@@ -883,6 +883,9 @@ $(my.indent)$(my.prefix)$(qualified_target_name(my.dependency))$(my.suffix)
 .   for my.repository.binary as _binary
 .       emit_options(_binary)
 .   endfor
+.   for my.repository.library as _library
+.       emit_option_implications(_library)
+.   endfor
 .endmacro # emit_repository_options
 .
 .macro emit_options(context)
@@ -896,6 +899,21 @@ option( $(my.context.type:lower)-$(my.context.option:lower) "$(my.context.commen
 option( $(_option.type:lower)-$(_option.name:lower) "$(_option.comment)" $(option_default(_option)) )
 .   endfor
 .endmacro # emit_options
+.
+.macro emit_option_implications(context)
+.   define my.context = emit_option_implications.context
+.
+.   for my.context.option as _option where (count(_option.implies) > 0)
+
+if ( $(_option.type:lower)-$(_option.name:lower) )
+.       for _option.implies as _implied
+.           for my.context.option as _target where (_target.name = _implied.option)
+  set( $(_target.type:lower)-$(_target.name:lower) ON )
+.           endfor
+.       endfor
+endif()
+.   endfor
+.endmacro # emit_option_implications
 .
 .macro emit_shared_static_detection(dependencies)
 .   define my.dependencies = emit_shared_static_detection.dependencies
@@ -1226,7 +1244,7 @@ $(my.indent)if ( MSVC )
   $(my.indent)target_compile_options( $(my.target.name)
     $(my.indent)PUBLIC
 .               if (my.arches > 0)
-      $(my.indent)$<$<BOOL:${msvc_arch}>:/arch:${msvc_arch}>
+      $(my.indent)$<$<AND:$<NOT:$<CXX_COMPILER_ID:Clang>>,$<BOOL:${msvc_arch}>>:/arch:${msvc_arch}>
 .               endif
 .               for my.target->compiler.flag as _flag where defined(_flag.option)
       $(my.indent)$<$<CXX_COMPILER_ID:Clang>:$<$<BOOL:${$(get_option(_flag, my.target, my.repository))}>:$(symbol(_flag))>>
