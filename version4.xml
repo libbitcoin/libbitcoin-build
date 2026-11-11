@@ -2759,30 +2759,71 @@
       <!-- Guix builds every release record for its host: glibc 2.31, macOS 13.3 (floating point std::to_chars), Windows 10. -->
 
       <entry>
-        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <flag value="-march=x86-64 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-avx2=ON -Denable-sse41=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64" host="x86_64-linux-gnu" />
       </entry>
 
       <entry>
-        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <flag value="-march=x86-64 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
+        <option name="cmake" value="-Denable-sse41=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-sse41" host="x86_64-linux-gnu" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v2 -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-shani=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-shani" host="x86_64-linux-gnu" />
       </entry>
 
       <entry>
         <flag value="-march=x86-64-v3 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-avxifma=ON -Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
-        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avxifma" host="x86_64-linux-gnu" />
+        <option name="cmake" value="-Denable-avx2=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avx2" host="x86_64-linux-gnu" />
       </entry>
 
       <entry>
         <flag value="-march=x86-64-v3 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-avx512ifma=ON -Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
+        <option name="cmake" value="-Denable-avx2=ON -Denable-shani=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avx2-shani" host="x86_64-linux-gnu" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-avxifma=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avxifma" host="x86_64-linux-gnu" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-avx512=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avx512" host="x86_64-linux-gnu" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-avx512=ON -Denable-shani=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avx512-shani" host="x86_64-linux-gnu" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-avx512=ON -Denable-avxifma=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avx512-avxifma" host="x86_64-linux-gnu" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <linkflag value="-static-libstdc++ -static-libgcc" />
+        <option name="cmake" value="-Denable-avx512ifma=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-x64-avx512ifma" host="x86_64-linux-gnu" />
       </entry>
 
@@ -2795,46 +2836,149 @@
       <entry>
         <flag value="-march=armv8-a+aes+sha2 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-sha2=ON -Denable-aes=ON" />
+        <option name="cmake" value="-Denable-sha2=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha2" host="aarch64-linux-gnu" />
       </entry>
 
       <entry>
         <flag value="-march=armv8.2-a+aes+sha2+sha3 -mtune=generic" />
         <linkflag value="-static-libstdc++ -static-libgcc" />
-        <option name="cmake" value="-Denable-sha2=ON -Denable-sha3=ON -Denable-aes=ON" />
+        <option name="cmake" value="-Denable-sha3=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-linux-arm64-sha3" host="aarch64-linux-gnu" />
       </entry>
 
       <entry deployment_target="13.3">
-        <flag value="-march=x86-64-v3 -mtune=generic" />
-        <option name="cmake" value="-Denable-avx2=ON -Denable-sse41=ON -Denable-aesni=ON" />
+        <flag value="-march=x86-64 -mtune=generic" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-macos-x64" host="x86_64-apple-darwin" />
       </entry>
 
       <entry deployment_target="13.3">
-        <flag value="-mtune=apple-m1" />
-        <option name="cmake" value="-Denable-sha3=ON -Denable-sha2=ON -Denable-aes=ON" />
+        <flag value="-march=x86-64 -mtune=generic" />
+        <option name="cmake" value="-Denable-sse41=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-x64-sse41" host="x86_64-apple-darwin" />
+      </entry>
+
+      <entry deployment_target="13.3">
+        <flag value="-march=x86-64-v2 -mtune=generic" />
+        <option name="cmake" value="-Denable-shani=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-x64-shani" host="x86_64-apple-darwin" />
+      </entry>
+
+      <entry deployment_target="13.3">
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx2=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-x64-avx2" host="x86_64-apple-darwin" />
+      </entry>
+
+      <entry deployment_target="13.3">
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx2=ON -Denable-shani=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-x64-avx2-shani" host="x86_64-apple-darwin" />
+      </entry>
+
+      <entry deployment_target="13.3">
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <option name="cmake" value="-Denable-avxifma=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-x64-avxifma" host="x86_64-apple-darwin" />
+      </entry>
+
+      <entry deployment_target="13.3">
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx512=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-x64-avx512" host="x86_64-apple-darwin" />
+      </entry>
+
+      <entry deployment_target="13.3">
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx512=ON -Denable-shani=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-x64-avx512-shani" host="x86_64-apple-darwin" />
+      </entry>
+
+      <entry deployment_target="13.3">
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx512=ON -Denable-avxifma=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-x64-avx512-avxifma" host="x86_64-apple-darwin" />
+      </entry>
+
+      <entry deployment_target="13.3">
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx512ifma=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-x64-avx512ifma" host="x86_64-apple-darwin" />
+      </entry>
+
+      <entry deployment_target="13.3">
+        <flag value="-march=armv8-a -mtune=apple-m1" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-macos-arm64" host="arm64-apple-darwin" />
       </entry>
 
+      <entry deployment_target="13.3">
+        <flag value="-march=armv8-a+aes+sha2 -mtune=apple-m1" />
+        <option name="cmake" value="-Denable-sha2=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-arm64-sha2" host="arm64-apple-darwin" />
+      </entry>
+
+      <entry deployment_target="13.3">
+        <flag value="-march=armv8.2-a+aes+sha2+sha3 -mtune=apple-m1" />
+        <option name="cmake" value="-Denable-sha3=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-macos-arm64-sha3" host="arm64-apple-darwin" />
+      </entry>
+
       <entry>
-        <option name="cmake" value="-Denable-avx2=ON -Denable-sse41=ON" />
+        <flag value="-march=x86-64 -mtune=generic" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-windows-x64" host="x86_64-pc-windows-msvc" />
       </entry>
 
       <entry>
-        <option name="cmake" value="-Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
+        <flag value="-march=x86-64 -mtune=generic" />
+        <option name="cmake" value="-Denable-sse41=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-windows-x64-sse41" host="x86_64-pc-windows-msvc" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v2 -mtune=generic" />
+        <option name="cmake" value="-Denable-shani=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-windows-x64-shani" host="x86_64-pc-windows-msvc" />
       </entry>
 
       <entry>
-        <option name="cmake" value="-Denable-avxifma=ON -Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx2=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-windows-x64-avx2" host="x86_64-pc-windows-msvc" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx2=ON -Denable-shani=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-windows-x64-avx2-shani" host="x86_64-pc-windows-msvc" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v3 -mtune=generic" />
+        <option name="cmake" value="-Denable-avxifma=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-windows-x64-avxifma" host="x86_64-pc-windows-msvc" />
       </entry>
 
       <entry>
-        <option name="cmake" value="-Denable-avx512ifma=ON -Denable-shani=ON -Denable-avx2=ON -Denable-sse41=ON" />
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx512=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-windows-x64-avx512" host="x86_64-pc-windows-msvc" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx512=ON -Denable-shani=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-windows-x64-avx512-shani" host="x86_64-pc-windows-msvc" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx512=ON -Denable-avxifma=ON" />
+        <job name="cmake" config="release" link="static" release="true" basename="bs-windows-x64-avx512-avxifma" host="x86_64-pc-windows-msvc" />
+      </entry>
+
+      <entry>
+        <flag value="-march=x86-64-v4 -mtune=generic" />
+        <option name="cmake" value="-Denable-avx512ifma=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-windows-x64-avx512ifma" host="x86_64-pc-windows-msvc" />
       </entry>
 
@@ -2845,13 +2989,13 @@
 
       <entry>
         <flag value="-march=armv8-a+aes+sha2 -mtune=generic" />
-        <option name="cmake" value="-Denable-sha2=ON -Denable-aes=ON" />
+        <option name="cmake" value="-Denable-sha2=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-windows-arm64-sha2" host="aarch64-pc-windows-msvc" />
       </entry>
 
       <entry>
         <flag value="-march=armv8.2-a+aes+sha2+sha3 -mtune=generic" />
-        <option name="cmake" value="-Denable-sha2=ON -Denable-sha3=ON -Denable-aes=ON" />
+        <option name="cmake" value="-Denable-sha3=ON" />
         <job name="cmake" config="release" link="static" release="true" basename="bs-windows-arm64-sha3" host="aarch64-pc-windows-msvc" />
       </entry>
 
