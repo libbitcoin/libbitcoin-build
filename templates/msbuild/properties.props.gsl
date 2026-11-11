@@ -1,0 +1,294 @@
+.template 0
+###############################################################################
+# Copyright (c) 2014-2026 libbitcoin developers (see COPYING).
+#
+# GSL generate libbitcoin property sheets (.props)
+#
+# This is a code generator built using the iMatix GSL code generation
+# language. See https://github.com/imatix/gsl for details.
+###############################################################################
+
+# Note: expected context root libbitcoin-build/process directory
+[gsl].ignorecase = 0
+[gsl].shuffle = 0
+
+gsl from "../library/math.gsl"
+gsl from "../library/string.gsl"
+gsl from "../lib/xml.gsl"
+gsl from "../lib/debug.gsl"
+gsl from "../lib/filesystem.gsl"
+gsl from "../lib/output.gsl"
+gsl from "../lib/xml-output.gsl"
+gsl from "../lib/msbuild.gsl"
+gsl from "../lib/msvc.gsl"
+
+###############################################################################
+# Generation
+###############################################################################
+function generate_properties(configuration)
+    define my.configuration = generate_properties.configuration
+    require(my.configuration->templates, "templates", "resultpath")
+    require_msvc(my.configuration)
+
+    define my.template = my.configuration->templates->template(.name = "$(script)")
+
+    if !defined(my.template)
+        abort "Generator configuration missing."
+    endif
+
+    require(my.template, "template", "outpath")
+    require(my.template, "template", "sheets")
+
+    define my.msvc = my.configuration->canonical->msvc
+
+    for my.template.tools as _tools by _tools.set
+        define my.toolchain = my.configuration->toolchain(\
+            this.name = _tools.chain, this)
+
+        for my.configuration.repository as _repository
+            define my.output_path = path_append(my.configuration->templates.resultpath, \
+                path_append(_repository.name, \
+                    path_append(my.template.outpath, my.template.sheets)))
+
+            create_directory(my.output_path)
+
+            for my.msvc.group as _group
+                generate_group_sheet(_group, _repository, my.configuration, \
+                    my.toolchain, my.output_path)
+            endfor
+
+            for my.toolchain->msvc->axis(.name = "configuration").entry as _entry
+                generate_configuration_sheet(_entry, _entry->library.value, \
+                    0, _repository, my.configuration, my.toolchain, \
+                    my.output_path)
+
+                generate_configuration_sheet(_entry, _entry->binary.value, \
+                    1, _repository, my.configuration, my.toolchain, \
+                    my.output_path)
+
+                if !(_entry->test.value = _entry->binary.value)
+                    generate_configuration_sheet(_entry, _entry->test.value, \
+                        1, _repository, my.configuration, my.toolchain, \
+                        my.output_path)
+                endif
+            endfor
+        endfor
+    endfor
+endfunction
+
+function generate_group_sheet(group, repository, configuration, toolchain, path)
+    define my.group = generate_group_sheet.group
+    define my.repository = generate_group_sheet.repository
+    define my.configuration = generate_group_sheet.configuration
+    define my.toolchain = generate_group_sheet.toolchain
+    define my.path = generate_group_sheet.path
+
+    define my.out_file = path_append(my.path, "$(my.group.sheet).props")
+
+    notify(my.out_file)
+    output(my.out_file)
+
+    emit_group_sheet(my.group, my.repository, my.configuration, my.toolchain)
+
+    close
+endfunction
+
+function generate_configuration_sheet(entry, sheet, console, repository, configuration, toolchain, path)
+    define my.entry = generate_configuration_sheet.entry
+    define my.sheet = generate_configuration_sheet.sheet
+    define my.console = generate_configuration_sheet.console
+    define my.repository = generate_configuration_sheet.repository
+    define my.configuration = generate_configuration_sheet.configuration
+    define my.toolchain = generate_configuration_sheet.toolchain
+    define my.path = generate_configuration_sheet.path
+
+    define my.out_file = path_append(my.path, "$(my.sheet).props")
+
+    notify(my.out_file)
+    output(my.out_file)
+
+    emit_configuration_sheet(my.entry, my.sheet, my.console, my.repository, \
+        my.configuration, my.toolchain)
+
+    close
+endfunction
+
+###############################################################################
+# Generation
+###############################################################################
+.endtemplate
+.template 1
+.
+.macro emit_sheet_open(repository, toolchain)
+.   define my.repository = emit_sheet_open.repository
+.   define my.toolchain = emit_sheet_open.toolchain
+.
+<?xml version="1.0" encoding="utf-8"?>
+.
+.   copyleft(my.repository.name)
+.
+<Project DefaultTargets="Build" xmlns="$(my.toolchain->msbuild.schema)">
+.
+.endmacro # emit_sheet_open
+.
+.macro emit_group_sheet(group, repository, configuration, toolchain)
+.   define my.group = emit_group_sheet.group
+.   define my.repository = emit_group_sheet.repository
+.   define my.configuration = emit_group_sheet.configuration
+.   define my.toolchain = emit_group_sheet.toolchain
+.   define my.msvc = my.configuration->canonical->msvc
+.
+.   emit_sheet_open(my.repository, my.toolchain)
+
+.   if (my.group.name = "common")
+  <ImportGroup Label="PropertySheets">
+    <Import Project="\$(Platform).props" />
+  </ImportGroup>
+
+.   elsif (my.group.name = "debug") | (my.group.name = "release")
+.       define my.common = msvc_sheet(my.msvc, "common")
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(my.common).props" />
+  </ImportGroup>
+
+.   endif
+  <PropertyGroup>
+    <_PropertySheetDisplayName>$(my.group.display)</_PropertySheetDisplayName>
+.   for my.group.property as _property
+.       if defined(_property.condition)
+    <$(_property.name) Condition="$(_property.condition)">$(_property.value)</$(_property.name)>
+.       else
+    <$(_property.name)>$(_property.value)</$(_property.name)>
+.       endif
+.   endfor
+.   for my.msvc.arch as _arch where defined(my.group.platform) & \
+        (_arch.platform = my.group.platform)
+.       for _arch.level as _level where (_level.name = _arch.default)
+    <Option-arch Condition="'\$(Option-arch)' == ''">$(_level.value)</Option-arch>
+.       endfor
+.   endfor
+  </PropertyGroup>
+.   emit_item_definitions(my.group, my.msvc, 0)
+.   emit_item_definitions(my.group, my.msvc, 1)
+
+</Project>
+.
+.endmacro # emit_group_sheet
+.
+.macro emit_item_definitions(group, msvc, clang)
+.   define my.group = emit_item_definitions.group
+.   define my.msvc = emit_item_definitions.msvc
+.   define my.clang = emit_item_definitions.clang
+.   define my.count = \
+        msvc_tool_count(my.msvc, my.group, "ClCompile", my.clang) + \
+        msvc_tool_count(my.msvc, my.group, "ResourceCompile", my.clang) + \
+        msvc_tool_count(my.msvc, my.group, "Link", my.clang) + \
+        msvc_tool_count(my.msvc, my.group, "Lib", my.clang)
+.
+.   if (my.count > 0)
+
+.       if my.clang
+.           define my.condition = msvc_clang_condition()
+  <ItemDefinitionGroup Condition="$(my.condition)">
+.       else
+  <ItemDefinitionGroup>
+.       endif
+.       emit_tool_definitions(my.group, my.msvc, "ClCompile", my.clang)
+.       emit_tool_definitions(my.group, my.msvc, "ResourceCompile", my.clang)
+.       emit_tool_definitions(my.group, my.msvc, "Link", my.clang)
+.       emit_tool_definitions(my.group, my.msvc, "Lib", my.clang)
+  </ItemDefinitionGroup>
+.   endif
+.
+.endmacro # emit_item_definitions
+.
+.macro emit_tool_definitions(group, msvc, tool, clang)
+.   define my.group = emit_tool_definitions.group
+.   define my.msvc = emit_tool_definitions.msvc
+.   define my.tool = emit_tool_definitions.tool
+.   define my.clang = emit_tool_definitions.clang
+.
+.   if (msvc_tool_count(my.msvc, my.group, my.tool, my.clang) > 0)
+.       define my.definitions = msvc_definitions(my.group, my.tool, my.clang)
+.       define my.options = msvc_options(my.group, my.tool, my.clang)
+    <$(my.tool)>
+.       if !(my.definitions = "")
+      <PreprocessorDefinitions>$(my.definitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+.       endif
+.       for my.group.setting as _setting where (_setting.tool = my.tool) & \
+            (is_msvc_clang(_setting) = my.clang)
+      <$(_setting.name)>$(_setting.value)</$(_setting.name)>
+.       endfor
+.       if (my.tool = "ClCompile") & !my.clang
+.           for my.msvc.arch as _arch where defined(my.group.platform) & \
+                (_arch.platform = my.group.platform)
+.               for _arch.level as _level
+      <EnableEnhancedInstructionSet Condition="'\$(Option-arch)' == '$(_level.value)'">$(_level.value)</EnableEnhancedInstructionSet>
+.               endfor
+.           endfor
+.       endif
+.       if !(my.options = "")
+      <AdditionalOptions>$(my.options) %(AdditionalOptions)</AdditionalOptions>
+.       endif
+    </$(my.tool)>
+.   endif
+.
+.endmacro # emit_tool_definitions
+.
+.macro emit_configuration_sheet(entry, sheet, console, repository, configuration, toolchain)
+.   define my.entry = emit_configuration_sheet.entry
+.   define my.sheet = emit_configuration_sheet.sheet
+.   define my.console = emit_configuration_sheet.console
+.   define my.repository = emit_configuration_sheet.repository
+.   define my.configuration = emit_configuration_sheet.configuration
+.   define my.toolchain = emit_configuration_sheet.toolchain
+.   define my.msvc = my.configuration->canonical->msvc
+.   define my.ltcg = defined(my.entry.ltcg) & (my.entry.ltcg = "true")
+.   define my.runtime = msvc_runtime(my.msvc, my.entry.config, my.entry.link)
+.   define my.config_sheet = msvc_sheet(my.msvc, my.entry.config)
+.   define my.link_sheet = msvc_sheet(my.msvc, my.entry.link)
+.   define my.ltcg_sheet = msvc_sheet(my.msvc, "ltcg")
+.   define my.console_sheet = msvc_sheet(my.msvc, "console")
+.   define my.linkage = msvc_property(my.msvc, my.entry.link, "DefaultLinkage")
+.
+.   emit_sheet_open(my.repository, my.toolchain)
+
+  <PropertyGroup>
+    <_PropertySheetDisplayName>$(my.sheet) Settings</_PropertySheetDisplayName>
+.   if my.console & !my.ltcg
+    <DefaultLinkage>$(my.linkage)</DefaultLinkage>
+.   endif
+  </PropertyGroup>
+
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(my.config_sheet).props" />
+.   if !my.console
+    <Import Project="$(my.link_sheet).props" />
+.   endif
+.   if my.ltcg
+    <Import Project="$(my.ltcg_sheet).props" />
+.   endif
+.   if my.console
+    <Import Project="$(my.console_sheet).props" />
+.   endif
+  </ImportGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <RuntimeLibrary>$(my.runtime)</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+</Project>
+.
+.endmacro # emit_configuration_sheet
+.
+.endtemplate
+.template 0
+###############################################################################
+# Execution
+###############################################################################
+
+generate_properties(configuration)
+
+.endtemplate
