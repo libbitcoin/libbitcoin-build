@@ -4243,9 +4243,16 @@
   </registrar>
 
   <registrar id="presets">
-    <configuration name="nix-base" description="Factored base settings for non-windows *nix based platforms." hidden="true" inherits="">
+    <configuration name="base-pathing" description="Factored base settings for all platforms." hidden="true" inherits="">
       <property name="installDir" value="${sourceParentDir}/../../../prefix/${presetName}" />
       <property name="binaryDir" value="${sourceParentDir}/../obj/${presetName}" />
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
+        <property name="CMAKE_INSTALL_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
+        <property name="CMAKE_LIBRARY_PATH" value="${sourceParentDir}/../../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}" type="PATH" />
+      </property>
+    </configuration>
+    <configuration name="nix-base" description="Factored base settings for non-windows *nix based platforms." hidden="true" inherits="base-pathing">
       <property name="condition" type="object">
         <property name="type" value="inList" />
         <property name="string" value="${hostSystemName}" />
@@ -4254,36 +4261,73 @@
           <property value="Linux" />
         </property>
       </property>
-      <property name="cacheVariables" type="object">
-        <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
-        <property name="CMAKE_INSTALL_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
-        <property name="CMAKE_LIBRARY_PATH" value="${sourceParentDir}/../../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}" type="PATH" />
+    </configuration>
+     <configuration name="win-base" description="Factored base settings for windows platforms (msvc developer environment)." hidden="true" inherits="base-pathing">
+      <property name="generator" value="Ninja" />
+      <property name="condition" type="object">
+        <property name="type" value="equals" />
+        <property name="lhs" value="${hostSystemName}" />
+        <property name="rhs" value="Windows" />
       </property>
     </configuration>
-<configuration name="gnu-debug" description="Factored debug settings." hidden="true">
+
+    <!-- build configuration -->
+    <configuration name="config-debug" description="Factored debug settings." hidden="true">
       <property name="cacheVariables" type="object">
         <property name="CMAKE_BUILD_TYPE" value="Debug" />
+      </property>
+    </configuration>
+    <configuration name="config-release" description="Factored release settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_BUILD_TYPE" value="Release" />
+      </property>
+    </configuration>
+    <configuration name="gnu-debug" description="Factored gnu specific debug settings." hidden="true" inherits="config-debug">
+      <property name="cacheVariables" type="object">
         <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -Og -g1 --coverage -fprofile-update=atomic" />
         <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Og -g1 --coverage -fprofile-update=atomic" />
       </property>
     </configuration>
-    <configuration name="gnu-release" description="Factored release settings." hidden="true">
+    <configuration name="gnu-release" description="Factored gnu specific release settings." hidden="true" inherits="config-release">
       <property name="cacheVariables" type="object">
-        <property name="CMAKE_BUILD_TYPE" value="Release" />
         <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -O3" />
         <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -O3" />
       </property>
     </configuration>
-    <configuration name="static" description="Factored static linking settings." hidden="true">
+
+    <!-- build linking -->
+    <configuration name="link-static" description="Factored static linking settings." hidden="true">
       <property name="cacheVariables" type="object">
         <property name="BUILD_SHARED_LIBS" value="OFF" type="BOOL" />
       </property>
     </configuration>
-    <configuration name="shared" description="Factored shared/dynamic linking settings." hidden="true">
+    <configuration name="link-shared" description="Factored shared/dynamic linking settings." hidden="true">
       <property name="cacheVariables" type="object">
         <property name="BUILD_SHARED_LIBS" value="ON" type="BOOL" />
       </property>
-      </configuration>
+    </configuration>
+
+    <!-- compiler (currently windows only) -->
+    <configuration name="compiler-msvc" description="Factored msvc compiler settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_C_COMPILER" value="cl" />
+        <property name="CMAKE_CXX_COMPILER" value="cl" />
+      </property>
+    </configuration>
+    <configuration name="compiler-clangcl" description="Factored clang-cl compiler settings." hidden="true">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_C_COMPILER" value="clang-cl" />
+        <property name="CMAKE_CXX_COMPILER" value="clang-cl" />
+      </property>
+    </configuration>
+
+    <!-- optimization -->
+    <configuration name="optimization-host-native" description="Factored settings for march/mtune using for local execution." hidden="true" inherits="nix-base">
+      <property name="cacheVariables" type="object">
+        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -march=native -mtune=native" />
+        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -march=native -mtune=native" />
+      </property>
+    </configuration>
     <!--
     <configuration name="gnu-optimized-size" description="Factored size optimization settings." hidden="true">
       <property name="cacheVariables" type="object">
@@ -4291,140 +4335,141 @@
         <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -Os" />
       </property>
     </configuration>-->
+
+    <!-- nix resulting configurations -->
     <configuration name="nix-gnu-debug-static" description="Debug build with static linking." hidden="false" display="*nix/GNU/Debug/Static">
       <property name="inherits" type="list">
-        <property value="static" />
+        <property value="link-static" />
         <property value="gnu-debug" />
         <property value="nix-base" />
       </property>
     </configuration>
     <configuration name="nix-gnu-debug-shared" description="Debug build with shared linking." hidden="false" display="*nix/GNU/Debug/Shared">
       <property name="inherits" type="list">
-        <property value="shared" />
+        <property value="link-shared" />
         <property value="gnu-debug" />
         <property value="nix-base" />
       </property>
     </configuration>
     <configuration name="nix-gnu-release-static" description="Release build with static linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Static">
       <property name="inherits" type="list">
-        <property value="static" />
+        <property value="link-static" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
     </configuration>
     <configuration name="nix-gnu-release-shared" description="Release build with shared linking and standard optimizations." hidden="false" display="*nix/GNU/Release/Shared">
       <property name="inherits" type="list">
-        <property value="shared" />
+        <property value="link-shared" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="win-base" description="Factored base settings for windows platforms (msvc developer environment)." hidden="true">
-      <property name="generator" value="Ninja" />
-      <property name="installDir" value="${sourceParentDir}/../../../prefix/${presetName}" />
-      <property name="binaryDir" value="${sourceParentDir}/../obj/${presetName}" />
-      <property name="condition" type="object">
-        <property name="type" value="equals" />
-        <property name="lhs" value="${hostSystemName}" />
-        <property name="rhs" value="Windows" />
-      </property>
-      <property name="cacheVariables" type="object">
-        <property name="CMAKE_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
-        <property name="CMAKE_INSTALL_PREFIX_PATH" value="${sourceParentDir}/../../../prefix/${presetName}" type="PATH" />
+    <configuration name="nix-gnu-debug-static-native" description="Debug build with static linking for native architecture." hidden="false" display="*nix/GNU/Debug/Static">
+      <property name="inherits" type="list">
+        <property value="optimization-host-native" />
+        <property value="link-static" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="msvc" description="Factored msvc compiler settings." hidden="true">
-      <property name="cacheVariables" type="object">
-        <property name="CMAKE_C_COMPILER" value="cl" />
-        <property name="CMAKE_CXX_COMPILER" value="cl" />
+    <configuration name="nix-gnu-debug-shared-native" description="Debug build with shared linking for native architecture." hidden="false" display="*nix/GNU/Debug/Shared">
+      <property name="inherits" type="list">
+        <property value="optimization-host-native" />
+        <property value="link-shared" />
+        <property value="gnu-debug" />
+        <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="clangcl" description="Factored clang-cl compiler settings." hidden="true">
-      <property name="cacheVariables" type="object">
-        <property name="CMAKE_C_COMPILER" value="clang-cl" />
-        <property name="CMAKE_CXX_COMPILER" value="clang-cl" />
+    <configuration name="nix-gnu-release-static-native" description="Release build with static linking and standard optimizations for native architecture." hidden="false" display="*nix/GNU/Release/Static">
+      <property name="inherits" type="list">
+        <property value="optimization-host-native" />
+        <property value="link-static" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="win-debug" description="Factored windows debug settings." hidden="true">
-      <property name="cacheVariables" type="object">
-        <property name="CMAKE_BUILD_TYPE" value="Debug" />
+    <configuration name="nix-gnu-release-shared-native" description="Release build with shared linking and standard optimizations for native architecture." hidden="false" display="*nix/GNU/Release/Shared">
+      <property name="inherits" type="list">
+        <property value="optimization-host-native" />
+        <property value="link-shared" />
+        <property value="gnu-release" />
+        <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="win-release" description="Factored windows release settings." hidden="true">
-      <property name="cacheVariables" type="object">
-        <property name="CMAKE_BUILD_TYPE" value="Release" />
-      </property>
-    </configuration>
+
+    <!-- windows resulting configurations -->
     <configuration name="win-msvc-debug-static" description="Debug build with msvc and static linking." hidden="false" display="Windows/MSVC/Debug/Static">
       <property name="inherits" type="list">
-        <property value="static" />
-        <property value="win-debug" />
-        <property value="msvc" />
+        <property value="link-static" />
+        <property value="config-debug" />
+        <property value="compiler-msvc" />
         <property value="win-base" />
       </property>
     </configuration>
     <configuration name="win-msvc-release-static" description="Release build with msvc and static linking." hidden="false" display="Windows/MSVC/Release/Static">
       <property name="inherits" type="list">
-        <property value="static" />
-        <property value="win-release" />
-        <property value="msvc" />
+        <property value="link-static" />
+        <property value="config-release" />
+        <property value="compiler-msvc" />
         <property value="win-base" />
       </property>
     </configuration>
     <configuration name="win-msvc-debug-shared" description="Debug build with msvc and shared linking." hidden="false" display="Windows/MSVC/Debug/Shared">
       <property name="inherits" type="list">
-        <property value="shared" />
-        <property value="win-debug" />
-        <property value="msvc" />
+        <property value="link-shared" />
+        <property value="config-debug" />
+        <property value="compiler-msvc" />
         <property value="win-base" />
       </property>
     </configuration>
     <configuration name="win-msvc-release-shared" description="Release build with msvc and shared linking." hidden="false" display="Windows/MSVC/Release/Shared">
       <property name="inherits" type="list">
-        <property value="shared" />
-        <property value="win-release" />
-        <property value="msvc" />
+        <property value="link-shared" />
+        <property value="config-release" />
+        <property value="compiler-msvc" />
         <property value="win-base" />
       </property>
     </configuration>
     <configuration name="win-clangcl-debug-static" description="Debug build with clang-cl and static linking." hidden="false" display="Windows/clang-cl/Debug/Static">
       <property name="inherits" type="list">
-        <property value="static" />
-        <property value="win-debug" />
-        <property value="clangcl" />
+        <property value="link-static" />
+        <property value="config-debug" />
+        <property value="compiler-clangcl" />
         <property value="win-base" />
       </property>
     </configuration>
     <configuration name="win-clangcl-release-static" description="Release build with clang-cl and static linking." hidden="false" display="Windows/clang-cl/Release/Static">
       <property name="inherits" type="list">
-        <property value="static" />
-        <property value="win-release" />
-        <property value="clangcl" />
+        <property value="link-static" />
+        <property value="config-release" />
+        <property value="compiler-clangcl" />
         <property value="win-base" />
       </property>
     </configuration>
     <configuration name="win-clangcl-debug-shared" description="Debug build with clang-cl and shared linking." hidden="false" display="Windows/clang-cl/Debug/Shared">
       <property name="inherits" type="list">
-        <property value="shared" />
-        <property value="win-debug" />
-        <property value="clangcl" />
+        <property value="link-shared" />
+        <property value="config-debug" />
+        <property value="compiler-clangcl" />
         <property value="win-base" />
       </property>
     </configuration>
     <configuration name="win-clangcl-release-shared" description="Release build with clang-cl and shared linking." hidden="false" display="Windows/clang-cl/Release/Shared">
       <property name="inherits" type="list">
-        <property value="shared" />
-        <property value="win-release" />
-        <property value="clangcl" />
+        <property value="link-shared" />
+        <property value="config-release" />
+        <property value="compiler-clangcl" />
         <property value="win-base" />
       </property>
     </configuration>
+
     <!--
     <configuration name="nix-gnu-release-static-size" description="Release build with static linkin
 g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size">
       <property name="inherits" type="list">
         <property value="gnu-optimized-size" />
-        <property value="static" />
+        <property value="link-static" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
@@ -4433,7 +4478,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size">
       <property name="inherits" type="list">
         <property value="gnu-optimized-size" />
-        <property value="shared" />
+        <property value="link-shared" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
@@ -4442,7 +4487,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <configuration name="nix-gnu-release-static-size" description="Release build with static linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size/WithConsensus">
       <property name="inherits" type="list">
         <property value="gnu-optimized-size" />
-        <property value="static" />
+        <property value="link-static" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
@@ -4451,7 +4496,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <configuration name="nix-gnu-release-static-size" description="Release build with static linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/Size/WithoutConsensus">
       <property name="inherits" type="list">
         <property value="gnu-optimized-size" />
-        <property value="static" />
+        <property value="link-static" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
@@ -4460,7 +4505,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size/WithConsensus">
       <property name="inherits" type="list">
         <property value="gnu-optimized-size" />
-        <property value="shared" />
+        <property value="link-shared" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
@@ -4469,7 +4514,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
     <configuration name="nix-gnu-release-shared-size" description="Release build with shared linking and optimizations for size." hidden="false" display="*nix/GNU/Release/Shared/Size/WithoutConsensus">
       <property name="inherits" type="list">
         <property value="gnu-optimized-size" />
-        <property value="shared" />
+        <property value="link-shared" />
         <property value="gnu-release" />
         <property value="nix-base" />
       </property>
@@ -4833,6 +4878,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <column help="30" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
+      <hardware enabled="true" />
       <option id="build-src-dir" />
       <option id="build-obj-dir" />
       <option id="build-obj-dir-relative" />
@@ -4859,6 +4905,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <column help="29" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
+      <hardware enabled="true" />
       <option id="build-src-dir" />
       <option id="build-obj-dir" />
       <option id="build-obj-dir-relative" />
@@ -4889,6 +4936,7 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <column help="29" const="32" parse="32" />
       <source type="archive" />
       <source type="github" />
+      <hardware enabled="false" />
       <option id="build-preset" />
       <option id="build-src-dir" />
       <option id="build-limit" />
@@ -4898,7 +4946,6 @@ g and optimizations for size." hidden="false" display="*nix/GNU/Release/Static/S
       <option id="build-skip-test-run" />
       <option id="build-parallel" />
       <option id="build-use-local-src" />
-      <option id="hardware-optimized" />
       <option id="noninteractive" />
       <option id="verbose" />
       <option id="help" />
