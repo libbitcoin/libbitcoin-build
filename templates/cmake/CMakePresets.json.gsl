@@ -129,6 +129,11 @@ $(my.indent)"description": "$(my.config.description)",
 .   if defined(my.config.hidden)
 $(my.indent)"hidden": $(my.config.hidden),
 .   endif
+.   if defined(my.config.inherits)
+.       if (my.config.inherits <> "")
+$(my.indent)"inherits": [ "$(my.config.inherits)" ],
+.       endif
+.   endif
 .   for my.config.property as _property
 .       emit_property(_property, my.indent, !last() ?? "," ? " ", false)
 .   endfor

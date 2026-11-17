@@ -4323,9 +4323,9 @@
 
     <!-- optimization -->
     <configuration name="optimization-host-native" description="Factored settings for march/mtune using for local execution." hidden="true" inherits="nix-base">
-      <property name="cacheVariables" type="object">
-        <property name="CMAKE_C_FLAGS" value="$env{CMAKE_C_FLAGS} -march=native -mtune=native" />
-        <property name="CMAKE_CXX_FLAGS" value="$env{CMAKE_CXX_FLAGS} -march=native -mtune=native" />
+      <property name="environment" type="object">
+        <property name="CMAKE_C_FLAGS" value="$penv{CMAKE_C_FLAGS} -march=native -mtune=native" />
+        <property name="CMAKE_CXX_FLAGS" value="$penv{CMAKE_CXX_FLAGS} -march=native -mtune=native" />
       </property>
     </configuration>
     <!--
@@ -4365,7 +4365,7 @@
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-debug-static-native" description="Debug build with static linking for native architecture." hidden="false" display="*nix/GNU/Debug/Static">
+    <configuration name="nix-gnu-debug-static-native" description="Debug build with static linking for native architecture." hidden="false" display="*nix/GNU/Debug/Static/Native">
       <property name="inherits" type="list">
         <property value="optimization-host-native" />
         <property value="link-static" />
@@ -4373,7 +4373,7 @@
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-debug-shared-native" description="Debug build with shared linking for native architecture." hidden="false" display="*nix/GNU/Debug/Shared">
+    <configuration name="nix-gnu-debug-shared-native" description="Debug build with shared linking for native architecture." hidden="false" display="*nix/GNU/Debug/Shared/Native">
       <property name="inherits" type="list">
         <property value="optimization-host-native" />
         <property value="link-shared" />
@@ -4381,7 +4381,7 @@
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-release-static-native" description="Release build with static linking and standard optimizations for native architecture." hidden="false" display="*nix/GNU/Release/Static">
+    <configuration name="nix-gnu-release-static-native" description="Release build with static linking and standard optimizations for native architecture." hidden="false" display="*nix/GNU/Release/Static/Native">
       <property name="inherits" type="list">
         <property value="optimization-host-native" />
         <property value="link-static" />
@@ -4389,7 +4389,7 @@
         <property value="nix-base" />
       </property>
     </configuration>
-    <configuration name="nix-gnu-release-shared-native" description="Release build with shared linking and standard optimizations for native architecture." hidden="false" display="*nix/GNU/Release/Shared">
+    <configuration name="nix-gnu-release-shared-native" description="Release build with shared linking and standard optimizations for native architecture." hidden="false" display="*nix/GNU/Release/Shared/Native">
       <property name="inherits" type="list">
         <property value="optimization-host-native" />
         <property value="link-shared" />
