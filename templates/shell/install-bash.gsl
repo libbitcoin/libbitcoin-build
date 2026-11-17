@@ -589,45 +589,47 @@ $(fix_column("", "  $(_option->hint.text)", my.column, my.prefix, my.suffix))
 .       endfor
 .   endnew
 .
-.   new platforms as _platforms
-.       compute_unique_hardware_platforms(_platforms, my.configuration, my.repository, \
-            my.install)
+.   if defined(my.meta->hardware) & is_defined_positive(my.meta->hardware, "enabled")
+.       new platforms as _platforms
+.           compute_unique_hardware_platforms(_platforms, my.configuration, my.repository, \
+                my.install)
 .
-.        for _platforms.platform as _platform
+.           for _platforms.platform as _platform
 .
 $(my.prefix)$(my.suffix)
 $(my.prefix)Hardware configuration options for $(_platform.name):$(my.suffix)
 .
-.           for my.install.dependency as _depend
-.               if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
-.                   next
-.               endif
-.
-.               define my.deprepo = my.configuration->repository(.name = _depend.name)
-.
-.               for my.deprepo. as _target
-.                   if !(name(_target) = "library") & \
-                      !(_depend.name = my.repository.name)
+.               for my.install.dependency as _depend
+.                   if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
 .                       next
 .                   endif
 .
-.                   if !defined(_target->compiler)
-.                       next
-.                   endif
+.                   define my.deprepo = my.configuration->repository(.name = _depend.name)
 .
-.                   for _target->compiler. as _cele \
-                        where defined(_cele.option) & \
-                            defined(_cele.platform) & \
-                            (_cele.platform = _platform.name)
+.                   for my.deprepo. as _target
+.                       if !(name(_target) = "library") & \
+                          !(_depend.name = my.repository.name)
+.                           next
+.                       endif
 .
-.                       define my.option = _target->option(.name = _cele.option)
+.                       if !defined(_target->compiler)
+.                           next
+.                       endif
+.
+.                       for _target->compiler. as _cele \
+                            where defined(_cele.option) & \
+                                defined(_cele.platform) & \
+                                (_cele.platform = _platform.name)
+.
+.                           define my.option = _target->option(.name = _cele.option)
 .
 $(fix_column(option_flag_hardware(my.option, my.meta), my.option.hardware, my.column, my.prefix, my.suffix))
+.                       endfor
 .                   endfor
 .               endfor
 .           endfor
-.       endfor
-.   endnew
+.       endnew
+.   endif
 .
 $(my.prefix)$(my.suffix)
 $(my.prefix)Recognized pass-through options:$(my.suffix)
@@ -1283,40 +1285,42 @@ $(my.c_indent)case ${OPTION} in
 $(indent_column("(--build-$(option_name(_depend)))", "BUILD_$(option_name(_depend))=\"yes\";;", my.column, my.o_indent))
 .   endfor
 .
-.   new platforms as _platforms
-.       compute_unique_hardware_platforms(_platforms, my.configuration, my.repository, \
-            my.install)
+.   if defined(my.meta->hardware) & is_defined_positive(my.meta->hardware, "enabled")
+.       new platforms as _platforms
+.           compute_unique_hardware_platforms(_platforms, my.configuration, my.repository, \
+                my.install)
 .
-.       for _platforms.platform as _platform
-.           for my.install.dependency as _depend
-.               if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
-.                   next
-.               endif
-.
-.               define my.deprepo = my.configuration->repository(.name = _depend.name)
-.
-.               for my.deprepo. as _target
-.                   if !(name(_target) = "library") & \
-                      !(_depend.name = my.repository.name)
+.           for _platforms.platform as _platform
+.               for my.install.dependency as _depend
+.                   if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
 .                       next
 .                   endif
 .
-.                   if !defined(_target->compiler)
-.                       next
-.                   endif
+.                   define my.deprepo = my.configuration->repository(.name = _depend.name)
 .
-.                   for _target->compiler. as _cele \
-                        where defined(_cele.option) & \
-                            defined(_cele.platform) & \
-                            (_cele.platform = _platform.name)
+.                   for my.deprepo. as _target
+.                       if !(name(_target) = "library") & \
+                          !(_depend.name = my.repository.name)
+.                           next
+.                       endif
 .
-.                       define my.option = _target->option(.name = _cele.option)
+.                       if !defined(_target->compiler)
+.                           next
+.                       endif
+.
+.                       for _target->compiler. as _cele \
+                            where defined(_cele.option) & \
+                                defined(_cele.platform) & \
+                                (_cele.platform = _platform.name)
+.
+.                           define my.option = _target->option(.name = _cele.option)
 $(indent_column("($(option_flag_hardware(my.option, my.meta)))", "HARDWARE_$(my.option.name:c,upper)=\"yes\";;", my.column, my.o_indent))
+.                       endfor
 .                   endfor
 .               endfor
 .           endfor
-.       endfor
-.   endnew
+.       endnew
+.   endif
 .
 .   new options as _build_options
 .       canonicalize(_build_options, my.meta, my.configuration->registrar(id = "build-options"), "option", "id")
@@ -1361,40 +1365,42 @@ $(my.indent)remove_configure_option "$(option_symbol("short", _symbol, _option, 
 .       endfor
 .   endnew
 .
-.   new platforms as _platforms
-.       compute_unique_hardware_platforms(_platforms, my.configuration, my.repository, \
-            my.install)
+.   if defined(my.meta->hardware) & is_defined_positive(my.meta->hardware, "enabled")
+.       new platforms as _platforms
+.           compute_unique_hardware_platforms(_platforms, my.configuration, my.repository, \
+                my.install)
 .
-.       for _platforms.platform as _platform
-.           for my.install.dependency as _depend
-.               if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
-.                   next
-.               endif
-.
-.               define my.deprepo = my.configuration->repository(.name = _depend.name)
-.
-.               for my.deprepo. as _target
-.                   if !(name(_target) = "library") & \
-                      !(_depend.name = my.repository.name)
+.           for _platforms.platform as _platform
+.               for my.install.dependency as _depend
+.                   if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
 .                       next
 .                   endif
 .
-.                   if !defined(_target->compiler)
-.                       next
-.                   endif
+.                   define my.deprepo = my.configuration->repository(.name = _depend.name)
 .
-.                   for _target->compiler. as _cele \
-                        where defined(_cele.option) & \
-                            defined(_cele.platform) & \
-                            (_cele.platform = _platform.name)
+.                   for my.deprepo. as _target
+.                       if !(name(_target) = "library") & \
+                          !(_depend.name = my.repository.name)
+.                           next
+.                       endif
 .
-.                       define my.option = _target->option(.name = _cele.option)
+.                       if !defined(_target->compiler)
+.                           next
+.                       endif
+.
+.                       for _target->compiler. as _cele \
+                            where defined(_cele.option) & \
+                                defined(_cele.platform) & \
+                                (_cele.platform = _platform.name)
+.
+.                           define my.option = _target->option(.name = _cele.option)
 $(my.indent)remove_configure_option "--hardware-$(my.option.name)"
+.                       endfor
 .                   endfor
 .               endfor
 .           endfor
-.       endfor
-.   endnew
+.       endnew
+.   endif
 .
 .   define my.canonical = my.meta->build(is_defined_positive(build, "canonical"))
 .
@@ -1694,17 +1700,19 @@ $(my.indent)msg_verbose "*** SANITIZED: ${CONFIGURE_OPTIONS[*]}"
         msg_verbose "MACOSX_DEPLOYMENT_TARGET using defined value '${MACOSX_DEPLOYMENT_TARGET}'"
     fi
 
+.   if defined(my.meta->hardware) & is_defined_positive(my.meta->hardware, "enabled")
     # HARDWARE_OPTIMIZED
     if [[ "${HARDWARE_OPTIMIZED}" == "yes" ]]; then
         ARCHTUNE="-march=native -mtune=native"
     fi
 .
-.   new platforms as _platforms
-.       compute_unique_hardware_platforms(_platforms, my.configuration, my.repository, \
-            my.install)
-.       define_platform_hardware_options(_platforms, my.meta, my.configuration, \
-            my.repository, my.install, "    ")
-.   endnew
+.       new platforms as _platforms
+.           compute_unique_hardware_platforms(_platforms, my.configuration, my.repository, \
+                my.install)
+.           define_platform_hardware_options(_platforms, my.meta, my.configuration, \
+                my.repository, my.install, "    ")
+.       endnew
+.   endif
 .
 .#   for my.install.dependency as _depend
 .#       if (count_matches_name(my.configuration, "repository", _depend.name) = 0)
