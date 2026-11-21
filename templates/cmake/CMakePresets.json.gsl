@@ -94,7 +94,7 @@ endfunction
     ],
     "buildPresets": [
         {
-            "name": "nix-target-list",
+            "name": "target-list",
             "hidden": true,
             "targets": [
 .   for my.presets.target as _target
@@ -106,7 +106,7 @@ endfunction
         {
             "name": "$(_config.name)",
             "displayName": "$(_config.display)",
-            "inherits": [ "nix-target-list" ],
+            "inherits": [ "target-list" ],
             "configurePreset": "$(_config.name)"
         }$(last() ?? "" ? ",")
 .   endfor
