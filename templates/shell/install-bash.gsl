@@ -460,6 +460,12 @@ $(column_variables("BUILD_SKIP_TEST_RUN", my.column, my.prefix, my.suffix))
 .   if defined(my.meta->option(option.id = "build-valgrind"))
 $(column_variables("BUILD_VALGRIND", my.column, my.prefix, my.suffix))
 .   endif
+.   if defined(my.meta->option(option.id = "build-web"))
+$(column_variables("BUILD_WEB", my.column, my.prefix, my.suffix))
+.   endif
+.   if defined(my.meta->option(option.id = "build-smoke"))
+$(column_variables("BUILD_SMOKE", my.column, my.prefix, my.suffix))
+.   endif
 $(column_variables("PARALLEL", my.column, my.prefix, my.suffix))
 $(column_variables("PREFIX", my.column, my.prefix, my.suffix))
 $(column_variables("DISPLAY_VERBOSE", my.column, my.prefix, my.suffix))
@@ -1040,6 +1046,33 @@ test_gnu()
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             msg_error "Encountered valgrind error, please see report above."
+            exit ${RESULT}
+        fi
+    fi
+
+    if [[ "${BUILD_WEB}" == "yes" && "${BUILD_SKIP_TEST_RUN}" != "yes" && "${PROJECT}" == "$(my.repository.name)" ]]; then
+        msg "Testing ${PROJECT} embedded web pages"
+        push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+        python3 tools/generate_embedded_pages.py && git diff --exit-code -- console/embedded
+
+        RESULT=$?
+        pop_directory
+        if [[ ${RESULT} -ne 0 ]]; then
+            msg_error "Embedded web pages failed tests or differ from those committed."
+            exit ${RESULT}
+        fi
+    fi
+
+    if [[ "${BUILD_SMOKE}" == "yes" && "${BUILD_SKIP_TEST_RUN}" != "yes" && "${PROJECT}" == "$(my.repository.name)" ]]; then
+        msg "Smoke testing ${PROJECT} nodes"
+        local BS="\$(pwd)/console/bs"
+        push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+        python3 tools/sync_networks.py "${BS}"
+
+        RESULT=$?
+        pop_directory
+        if [[ ${RESULT} -ne 0 ]]; then
+            msg_error "Encountered node smoke test failure, please see report above."
             exit ${RESULT}
         fi
     fi
