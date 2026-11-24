@@ -555,6 +555,14 @@ jobs:
 .       endif
 .   endfor
 
+      - name: Register warning matcher
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/warning-matcher.json" << 'EOF'
+          {"problemMatcher":[{"owner":"gcc-warning","severity":"warning","pattern":[{"regexp":"^([^\\\\s:(][^:(]*):(\\\\d+):(\\\\d+):\\\\s+warning:\\\\s+(.*?)(?:\\\\s+\\\\[(-W[^\\\\]]+)\\\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]},{"owner":"msvc-warning","severity":"warning","pattern":[{"regexp":"^\\\\s*(?:\\\\d+>)?([^\\\\s(][^(]*)\\\\((\\\\d+)(?:,(\\\\d+))?\\\\)\\\\s*:\\\\s+warning\\\\s+(C\\\\d+)\\\\s*:\\\\s*(.*?)(?:\\\\s+\\\\[[^\\\\]]+\\\\])?$","file":1,"line":2,"column":3,"code":4,"message":5}]},{"owner":"clang-cl-warning","severity":"warning","pattern":[{"regexp":"^\\\\s*(?:\\\\d+>)?([^\\\\s(][^(]*)\\\\((\\\\d+)(?:,(\\\\d+))?\\\\)\\\\s*:\\\\s+warning:\\\\s+(.*?)(?:\\\\s+\\\\[(-W[^\\\\]]+)\\\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]}]}
+          EOF
+          echo "::add-matcher::$RUNNER_TEMP/warning-matcher.json"
+
       - name: Force clean nuget package repository
         shell: cmd
         working-directory: '$(my.repository.name)'
@@ -892,6 +900,14 @@ jobs:
             ./emulation
           fi
 .   endif
+
+      - name: Register warning matcher
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/warning-matcher.json" << 'EOF'
+          {"problemMatcher":[{"owner":"gcc-warning","severity":"warning","pattern":[{"regexp":"^([^\\\\s:(][^:(]*):(\\\\d+):(\\\\d+):\\\\s+warning:\\\\s+(.*?)(?:\\\\s+\\\\[(-W[^\\\\]]+)\\\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]},{"owner":"msvc-warning","severity":"warning","pattern":[{"regexp":"^\\\\s*(?:\\\\d+>)?([^\\\\s(][^(]*)\\\\((\\\\d+)(?:,(\\\\d+))?\\\\)\\\\s*:\\\\s+warning\\\\s+(C\\\\d+)\\\\s*:\\\\s*(.*?)(?:\\\\s+\\\\[[^\\\\]]+\\\\])?$","file":1,"line":2,"column":3,"code":4,"message":5}]},{"owner":"clang-cl-warning","severity":"warning","pattern":[{"regexp":"^\\\\s*(?:\\\\d+>)?([^\\\\s(][^(]*)\\\\((\\\\d+)(?:,(\\\\d+))?\\\\)\\\\s*:\\\\s+warning:\\\\s+(.*?)(?:\\\\s+\\\\[(-W[^\\\\]]+)\\\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]}]}
+          EOF
+          echo "::add-matcher::$RUNNER_TEMP/warning-matcher.json"
 
       - name: Execute installation
         shell: bash
