@@ -445,6 +445,52 @@ jobs:
 .       endfor
 .   endnew
 .
+.   define my.needs = ""
+.   for my.meta->workflow.job as _job
+.       my.needs = join(my.needs, _job.name, ", ")
+.   endfor
+.   define my.upload = my.configuration->registrar(this.id = "actions", this)->action(this.id = "upload", this)
+.   require(my.upload, "action", "name")
+.   require(my.upload, "action", "intended")
+.   require(my.upload, "action", "sha")
+
+  warnings:
+    needs: [ $(my.needs) ]
+    if: ${{ !cancelled() && (github.event_name != 'pull_request' || github.event.action != 'closed') }}
+    continue-on-error: true
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      checks: read
+
+    steps:
+      - name: Count compiler warnings
+        id: count
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SUITE=\$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}" --jq .check_suite_id)
+          RUNS=\$(gh api --paginate "repos/${{ github.repository }}/check-suites/${SUITE}/check-runs?per_page=100" --jq '.check_runs[] | select(.output.annotations_count > 0) | .id')
+          COUNT=0
+          for RUN in ${RUNS}; do
+            FOUND=\$(gh api --paginate "repos/${{ github.repository }}/check-runs/${RUN}/annotations?per_page=100" --jq '[.[] | select(.annotation_level == "warning" and .path != ".github")] | length' | awk '{ sum += $1 } END { print sum + 0 }')
+            COUNT=\$((COUNT + FOUND))
+          done
+          echo "Compiler warnings: ${COUNT}" | tee -a "$GITHUB_STEP_SUMMARY"
+          mkdir -p warnings
+          echo "${COUNT}" > warnings/count
+          echo "count=${COUNT}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload warning count
+        if: steps.count.outputs.count != '0'
+        uses: $(my.upload.name)@$(my.upload.sha) # $(my.upload.intended)
+        with:
+          name: warnings-${{ steps.count.outputs.count }}
+          path: warnings/count
+          retention-days: 90
+.
 .endmacro # emit_CMakeLists
 .
 .macro define_ci_job_msvc(job, meta, dependencies, configuration, repository)
